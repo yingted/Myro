@@ -1,0 +1,71 @@
+' Scribbler robot demonstration code
+' Copyright 2005, Element Products, Inc.
+'
+'  {$STAMP BS2}
+'  {$PBASIC 2.5}
+
+
+
+#DEFINE Verbose = 0
+
+
+' I/O Declarations
+
+LightRight    PIN 0
+LightCenter   PIN 1
+LightLeft     PIN 2
+LineEnable    PIN 3
+LineRight     PIN 4
+LineLeft      PIN 5
+ObsRx         PIN 6
+Stall         PIN 7
+
+LedRight      PIN 8
+LedCenter     PIN 9
+LedLeft       PIN 10
+Speaker       PIN 11
+MotorRight    PIN 12
+MotorLeft     PIN 13
+ObsTxRight    PIN 14
+ObsTxLeft     PIN 15
+
+
+' I/O Initialization
+
+HIGH LightRight
+HIGH LightCenter
+HIGH LightLeft
+LOW LineEnable
+LOW LedRight
+LOW LedCenter
+LOW LedLeft
+LOW Speaker
+LOW MotorRight
+LOW MotorLeft
+LOW ObsTxRight
+LOW ObsTxLeft
+
+
+
+' Global Variables
+
+motor_r VAR Word
+motor_l VAR Word
+
+inCmd VAR Byte
+index VAR Byte
+temp VAR Byte
+freq VAR Byte
+
+BAUD CON 84    '  9600
+'BAUD CON 6    '  38400
+'BAUD CON 0    '  500000
+
+OUTPIN CON 16
+INPIN CON 16
+
+BEGIN:
+  SERIN INPIN, BAUD, 10000, BEGIN, [STR inCmd\1]
+  SEROUT OUTPIN, BAUD, [InCmd]              ' echo command to tell we are done
+  GOTO BEGIN
+
