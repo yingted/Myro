@@ -4,10 +4,7 @@
 '  {$STAMP BS2}
 '  {$PBASIC 2.5}
 
-
-
 #DEFINE Verbose = 0
-
 
 ' I/O Declarations
 
@@ -29,7 +26,6 @@ MotorLeft     PIN 13
 ObsTxRight    PIN 14
 ObsTxLeft     PIN 15
 
-
 ' I/O Initialization
 
 HIGH LightRight
@@ -44,8 +40,6 @@ LOW MotorRight
 LOW MotorLeft
 LOW ObsTxRight
 LOW ObsTxLeft
-
-
 
 ' Global Variables
 
@@ -66,6 +60,6 @@ INPIN CON 16
 
 BEGIN:
   SERIN INPIN, BAUD, 10000, BEGIN, [STR inCmd\1]
-  SEROUT OUTPIN, BAUD, [InCmd]              ' echo command to tell we are done
+  SEROUT OUTPIN, BAUD, [InCmd + 1]       ' return value to test
   GOTO BEGIN
 

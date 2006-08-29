@@ -5,7 +5,7 @@ import time
 import serial
 from numpy import *
 
-ser = serial.Serial(5, timeout=5)  
+ser = serial.Serial(0, timeout=5)  # DSB: had to change from 5 to 0 to work
 ser.baudrate = 9600
 print ser
 
@@ -16,7 +16,7 @@ def test():
     data = "a"
     ser.write(data)
     buf = ser.read(1)
-    if (buf != data):
+    if (buf != data):            # DSB: how to turn off echo?
         print "ERROR: Mismatch"
     buf = ser.read(1)    
     if (buf != data):
@@ -30,7 +30,7 @@ if __name__ == '__main__':
         if (len(sys.argv) == 2):
             outfile = sys.argv[1]
 
-        print "About to start test."
+        print "Starting test..."
         a = []
         for i in range(0,10000):
             before = time.clock()

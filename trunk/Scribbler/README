@@ -1,0 +1,5 @@
+You'll need the following packages to run this:
+
+win32all
+numpy
+pyserial
