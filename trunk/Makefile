@@ -9,5 +9,6 @@ clean:
 	rm -f myro.zip
 
 install:
+	python -c 'import compileall; compileall.compile_dir("myro")'
 	cp -r myro $(site)
 
