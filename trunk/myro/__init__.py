@@ -18,8 +18,8 @@ class Robot(object):
         """
         Base robot class.
         """
-        self.devices = []
-
+        pass
+    
     def translate(self, amount):
         raise AttributeError, "this method needs to be written"
 
@@ -59,42 +59,53 @@ class SimScribbler(Scribbler):
         Scribbler.__init__(self, id)
         globalspath, filename = posixpath.split(myro.globals.__file__)
         myro.globals._myropath, directory = posixpath.split(globalspath)
-        self.sim = myro.simulator.INIT(
+        self._simulator = myro.simulator.INIT(
             posixpath.join(myro.globals._myropath, "worlds", "MyroWorld"))
-        for port in self.sim.ports:
+        for port in self._simulator.ports:
             print "Simulator starting listener on port", port, "..."
-            thread = myro.simulator.Thread(self.sim, port)
+            thread = myro.simulator.Thread(self._simulator, port)
             thread.start()
         # start the client(s):
         from myro.robot.symbolic import TCPRobot
-        self.client = []
-        for port in self.sim.ports:
-            self.client.append(TCPRobot("localhost", port))
+        self._clients = []
+        for port in self._simulator.ports:
+            self._clients.append(TCPRobot("localhost", port))
         myro.globals._robot = self
-        myro.globals._simulator = self.sim
+        myro.globals._simulator = self._simulator
         atexit.register(_cleanup) # FIX: hack to get _cleanup called before Tk exitfunc, which hangs
     def translate(self, amount):
-        return self.client[0].translate(amount)
+        return self._clients[0].translate(amount)
     def rotate(self, amount):
-        return self.client[0].rotate(amount)
+        return self._clients[0].rotate(amount)
     def move(self, translate, rotate):
-        return self.client[0].move(translate, rotate)
+        return self._clients[0].move(translate, rotate)
     def forward(self, amount):
-        return self.client[0].translate(amount)
+        return self._clients[0].translate(amount)
     def backward(self, amount):
-        return self.client[0].translate(-amount)
+        return self._clients[0].translate(-amount)
     def left(self, amount):
-        return self.client[0].rotate(amount)
+        return self._clients[0].rotate(amount)
     def right(self, amount):
-        return self.client[0].rotate(-amount)
+        return self._clients[0].rotate(-amount)
     def stop(self):
-        return self.client[0].move(0, 0)
+        return self._clients[0].move(0, 0)
     def quit(self):
-        return self.client[0].move("quit")
+        return self._clients[0].move("quit")
+    def readLight(self, pos):
+        self._clients[0].update()
+        return self._clients[0].light[0].value[pos]
+    def readIR(self, pos):
+        self._clients[0].update()
+        return self._clients[0].ir[0].value[pos]
+    def update(self):
+        return self._clients[0].update()
+    def beep(self):
+        print chr(7)
 
 # functions:
 def _cleanup():
     if myro.globals._robot != None:
+        #myro.globals._robot.stop() # causes hang?!
         myro.globals._robot.quit()
     if myro.globals._simulator != None:
        myro.globals._simulator.destroy()

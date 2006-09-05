@@ -10,7 +10,7 @@ __version__ = "$Revision$"
 
 import socket, threading, random, time
 from myro.robot import Robot
-from myro.robot.device import Device, GripperDevice
+from myro.robot.device import * # Device, GripperDevice, SensorValue
 try:
 	import cPickle as pickle
 except:

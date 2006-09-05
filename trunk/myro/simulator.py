@@ -949,7 +949,7 @@ class SimRobot:
         self.friction = 1.0
         # -1: don't automatically turn display on when subscribing:
         self.display = {"body": 1, "boundingBox": 0, "gripper": -1, "camera": 0, "sonar": 0,
-                        "light": -1, "lightBlocked": 0, "trail": -1, "ir": -1, "bumper": 1}
+                        "light": -1, "lightBlocked": 0, "trail": -1, "ir": 0, "bumper": 1}
         self.stall = 0
         self.energy = 10000.0
         self.maxEnergyCostPerStep = 1.0
@@ -1813,10 +1813,10 @@ class TkMyro(TkRobot):
                      sx, sy)
             self.simulator.drawPolygon(xy, fill=self.color, tag="robot-%s" % self.name, outline="black")
             # --------------------------------------------------------------------------
-            # Parts: wheel, wheel, battery
-            bx = [[ .10, .10, -.10, -.10], [ .10, .10, -.10, -.10], [.05, .05, -.10, -.10], [.16, .17, .18, .17], [.16, .17, .18, .17]]
-            by = [[ .18, .16, .16, .18], [ -.18, -.16, -.16, -.18], [.14, -.14, -.14, .14], [.13, .135, .115, .11], [-.13, -.135, -.115, -.11]]
-            colors = ["black", "black", "gray", "yellow", "yellow"]
+            # Parts: wheel, wheel, light, light
+            bx = [[ .10, .10, -.10, -.10], [ .10, .10, -.10, -.10], [.16, .17, .18, .17],   [.16, .17, .18, .17]]
+            by = [[ .18, .16, .16, .18], [ -.18, -.16, -.16, -.18], [.13, .135, .115, .11], [-.13, -.135, -.115, -.11]]
+            colors = ["black", "black", "yellow", "yellow"]
             for i in range(len(bx)):
                 xy = map(lambda x, y: (self._gx + x * cos_a90 - y * sin_a90,
                                        self._gy + x * sin_a90 + y * cos_a90),
@@ -1883,8 +1883,8 @@ class TkMyro(TkRobot):
 class MyroIR(RangeSensor):
     def __init__(self):
         RangeSensor.__init__(self,
-                             "ir", geometry = (( 0.175, 0.13, 45 * PIOVER180),
-                                               ( 0.175,-0.13,-45 * PIOVER180)),
+                             "ir", geometry = (( 0.175, 0.13, 0),
+                                               ( 0.175,-0.13, 0)),
                              arc = 5 * PIOVER180, maxRange = 0.5, noise = 0.0)
         self.groups = {'all': range(2),
                        'front': (0, 1),
@@ -1925,13 +1925,19 @@ class MyroBumper(RangeSensor):
         
 class MyroLightSensors(LightSensor):
     def __init__(self):
-        LightSensor.__init__(self, ((.18, .13, 0), (.18, -.13, 0)),
+        LightSensor.__init__(self,
+                             ((.18,-0.13, 20 * PIOVER180),
+                              (.18,  0.0, 0),
+                              (.18,  0.13, 20 * PIOVER180),
+                              ),
                              noise=0.0) 
-        self.groups = {"front-all": (0, 1),
-                       "all": (0, 1),
-                       "front": (0, 1),
+        self.groups = {"front-all": (0, 1, 2),
+                       "all": (0, 1, 2),
+                       "front": (0, 1, 2),
                        "front-left": (0, ),
                        "front-right": (1, ),
+                       'center-front': (2,),
+                       'front-center': (2,),
                        'left' : (0,), 
                        'right' : (1,), 
                        'left-front' : (0,), 

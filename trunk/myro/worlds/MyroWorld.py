@@ -12,6 +12,7 @@ def INIT():
     sim = TkSimulator((585,596), (33,545), 173.983100)
     # x1, y1, x2, y2 in meters:
     sim.addBox(0, 0, 3, 3)
+    sim.addLight(.5, .5, .5)
     sim.addRobot(60000, TkMyro("BlueMyro",
                                2.69, 2.68, 2.03,
                                ((.20, .20, -.10, -.10),
