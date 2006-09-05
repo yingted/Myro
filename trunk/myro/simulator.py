@@ -10,7 +10,10 @@ def INIT(filename):
     modulefile = path.pop() # module name
     module = modulefile.split(".")[0]
     search = os.path.join(*path)
-    search = search.replace(":", ":" + os.path.sep)
+    if ":" in search:
+        search = search.replace(":", ":" + os.path.sep)
+    else:
+        search = os.path.sep + search
     oldpath = sys.path[:] # copy
     sys.path.insert(0, search)
     print "Attempting to import '%s'..." % module
