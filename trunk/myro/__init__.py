@@ -115,5 +115,5 @@ if not myro.globals._setup:
     myro.globals._setup = 1
     atexit.register(_cleanup)
     # Ok, now we're ready!
-    print "Myro, (c) 2006 Institute for Personal Robots in Education"
-    print "Version %s, ready!" % (__VERSION__)
+    print >> sys.stderr, "Myro, (c) 2006 Institute for Personal Robots in Education"
+    print >> sys.stderr, "Version %s, ready!" % (__VERSION__)
