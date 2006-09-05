@@ -1,5 +1,58 @@
-You'll need the following packages to run this:
 
-win32all
-numpy
-pyserial
+Pinger
+
+ - Client and server to test bluetooth latency to scribbler
+
+ - Files
+    - pinger.py
+    - pinger.bs2
+
+ - Additional Packages
+    - numpy
+    - pyserial
+    - win32all (if on windows)
+
+
+Python/Scribbler
+ 
+ - Interacts with the scribbler robot from Python. The python script
+   polls the scribbler for its sensor values and sets the motor and
+   speaker parameters.
+
+ - Files
+    - scribbler_server.bs2
+    - scribbler.py
+    - demos.py
+
+ - Additional Packages
+    - pyserial
+    - win32all (if on windows)
+ 
+ - Instructions
+
+    - Install scribbler_server.bs2 on the robot 
+    - Make sure PySerial (and win32all if on windows) is installed
+    - Run one of the demos in demos.py
+
+ - Issues
+   
+    - Scribbler automatically echoes packets so right now we echo
+      packets *twice*. This can be fixed but I wanted to make sure why
+      the packets where being echoed automatically first.  My
+      suspicion is that its due to the pins being normally used for
+      programming.
+
+    - The bluetooth adapter changes which COM port often (e.g. after
+      reboot) so you have to keep track and change the adapter in the
+      python script.
+
+
+ - Troubleshooting
+
+    - Make sure the baud rates are the same in the python script, the
+      basic program, and the bluetooth adapter if you are using that.
+
+    - Make sure the AT commands are disabled when you use the
+      bluetooth adapter with the scribbler.
+
+    - Make sure the bluetooth passkey is correct

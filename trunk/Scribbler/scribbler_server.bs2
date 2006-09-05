@@ -1,0 +1,224 @@
+' Scribbler robot demonstration code
+' Copyright 2005, Element Products, Inc.
+'
+'  {$STAMP BS2}
+'  {$PBASIC 2.5}
+
+
+
+#DEFINE Verbose = 0
+
+
+' I/O Declarations
+
+LightRight    PIN 0
+LightCenter   PIN 1
+LightLeft     PIN 2
+LineEnable    PIN 3
+LineRight     PIN 4
+LineLeft      PIN 5
+ObsRx         PIN 6
+Stall         PIN 7
+
+LedRight      PIN 8
+LedCenter     PIN 9
+LedLeft       PIN 10
+Speaker       PIN 11
+MotorRight    PIN 12
+MotorLeft     PIN 13
+ObsTxRight    PIN 14
+ObsTxLeft     PIN 15
+
+
+' I/O Initialization
+
+HIGH LightRight
+HIGH LightCenter
+HIGH LightLeft
+LOW LineEnable
+LOW LedRight
+LOW LedCenter
+LOW LedLeft
+LOW Speaker
+LOW MotorRight
+LOW MotorLeft
+LOW ObsTxRight
+LOW ObsTxLeft
+
+
+
+' Global Variables
+
+motor_r VAR Word
+motor_l VAR Word
+
+inCmd VAR Byte
+index VAR Byte
+temp VAR Byte
+freq VAR Byte
+
+'BAUD CON 84  '9600
+BAUD CON 6  '38400
+
+OUTPIN CON 16
+INPIN CON 16
+
+GET_INPUT        CON 1
+GET_OPEN_LEFT     CON 2
+GET_OPEN_RIGHT    CON 3
+GET_STALL        CON 4
+GET_LIGHT_LEFT   CON 5
+GET_LIGHT_CENTER CON 6
+GET_LIGHT_RIGHT  CON 7
+GET_LINE_RIGHT   CON 8
+GET_LINE_LEFT    CON 9
+
+SET_MOTORS_OFF     CON 20
+SET_MOTORS         CON 21
+SET_LED_LEFT_ON    CON 22
+SET_LED_LEFT_OFF   CON 23
+SET_LED_CENTER_ON  CON 24
+SET_LED_CENTER_OFF CON 25
+SET_LED_RIGHT_ON   CON 26
+SET_LED_RIGHT_OFF  CON 27
+SET_SPEAKER        CON 28
+
+'SLEEP 1
+
+'TOP2:
+'  LedCenter = 1
+'  SEROUT OUTPIN, BAUD, ["hello", CR, 10]
+'  SLEEP 1
+'  'SERIN INPIN, BAUD, 10000, TOP, [STR inCmd\1]
+'  LedCenter = 0
+'  SLEEP 1
+'  GOTO TOP2
+
+BEGIN:
+  'SEROUT 16, BAUD, 10, ["Choose 1 2 3", " ", CR]
+  'LedCenter = 0
+  SERIN INPIN, BAUD, 10000, BEGIN, [STR inCmd\1]
+  'LedCenter = 1
+  'PAUSE 1000
+  LOOKDOWN inCmd, = [GET_INPUT, GET_LINE_RIGHT, GET_LINE_LEFT, GET_LIGHT_LEFT, GET_LIGHT_CENTER, GET_LIGHT_RIGHT,  GET_OPEN_LEFT, GET_OPEN_RIGHT, GET_STALL, SET_MOTORS_OFF, SET_MOTORS, SET_SPEAKER, SET_LED_LEFT_ON, SET_LED_LEFT_OFF, SET_LED_CENTER_ON, SET_LED_CENTER_OFF, SET_LED_RIGHT_ON, SET_LED_RIGHT_OFF], INDEX
+  BRANCH INDEX,     [GetInput,  GetLineRight,   GetLineLeft,   GetLightLeft,   GetLightCenter,   GetLightRight,    GetObsLeft,   GetObsRight,    GetStall,  MotorsOff,      Motors,     SetSpeaker,  OnLeftLED,       OffLeftLED,       OnCenterLED,       OffCenterLED,       OnRightLED,       OffRightLED]
+TOP:
+  SEROUT OUTPIN, BAUD, [InCmd]              ' echo command to tell we are done
+  GOTO BEGIN
+
+
+GetInput:
+     SEROUT OUTPIN, BAUD, [INL]
+     GOTO TOP
+
+
+GetLineRight:
+     HIGH LineEnable
+     PAUSE 2
+     SEROUT OUTPIN, BAUD, [LineRight]
+     LOW LineEnable
+     GOTO TOP
+
+GetLineLeft:
+     HIGH LineEnable
+     PAUSE 2
+     SEROUT OUTPIN, BAUD, [LineLeft]
+     GOTO TOP
+
+GetLightLeft:
+     HIGH LightLeft
+     PAUSE 3
+     RCTIME LightLeft, 1, temp
+     SEROUT OUTPIN, BAUD, [temp]
+     GOTO TOP
+
+GetLightCenter:
+     HIGH LightCenter
+     PAUSE 3
+     RCTIME LightCenter, 1, temp
+     SEROUT OUTPIN, BAUD, [temp]
+     GOTO TOP
+
+GetLightRight:
+     HIGH LightRight
+     PAUSE 3
+     RCTIME LightRight, 1, temp
+     SEROUT OUTPIN, BAUD, [temp]
+     GOTO TOP
+
+GetObsRight:
+     FREQOUT ObsTxRight, 1, 40500
+     temp = ObsRX
+     LOW ObsTxRight
+     SEROUT OUTPIN, BAUD, [temp]
+     GOTO TOP
+
+GetObsLeft:
+     FREQOUT ObsTxLeft, 1, 40500
+     temp = ObsRX
+     LOW ObsTxLeft
+     SEROUT OUTPIN, BAUD, [temp]
+     GOTO TOP
+
+GetStall:
+     IF (stall = 0) THEN  SEROUT OUTPIN, BAUD, [0] ELSE SEROUT OUTPIN, BAUD, [1]
+     GOTO TOP
+
+MotorsOff:
+     LOW MotorRight
+     LOW MotorLeft
+     GOTO TOP
+
+SetSpeaker:
+     SERIN INPIN, BAUD, 10000, TOP, [STR freq\1]
+     SEROUT OUTPIN, BAUD, [freq]
+     motor_r = freq
+     SERIN INPIN, BAUD, 10000, TOP, [STR freq\1]
+     SEROUT OUTPIN, BAUD, [freq]
+     motor_r = (motor_r << 8) | freq
+
+     SERIN INPIN, BAUD, 10000, TOP, [STR freq\1]
+     SEROUT OUTPIN, BAUD, [freq]
+     motor_l = freq
+     SERIN INPIN, BAUD, 10000, TOP, [STR freq\1]
+     SEROUT OUTPIN, BAUD, [freq]
+     motor_l = (motor_l << 8) | freq
+
+
+     FREQOUT Speaker, motor_r, motor_l
+     GOTO TOP
+
+Motors:
+     SERIN INPIN, BAUD, 10000, TOP, [STR temp\1]
+     SEROUT OUTPIN, BAUD, [temp]
+      motor_r = (temp + 100) * 10
+     SERIN INPIN, BAUD, 10000, TOP, [STR temp\1]
+     SEROUT OUTPIN, BAUD, [temp]
+     motor_l = (temp + 100) * 10
+     PULSOUT MotorRight, motor_r
+     PULSOUT MotorLeft, motor_l
+     GOTO TOP
+
+OnLeftLED:
+     LedLeft = 1
+     GOTO TOP
+
+OffLeftLED:
+     LedLeft = 0
+     GOTO TOP
+
+OnCenterLED:
+     LedCenter = 1
+     GOTO TOP
+
+OffCenterLED:
+     LedCenter = 0
+     GOTO TOP
+
+OnRightLED:
+     LedRight = 1
+     GOTO TOP
+
+OffRightLED:
+     LedRight = 0
+     GOTO TOP
