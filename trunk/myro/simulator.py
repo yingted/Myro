@@ -1,21 +1,19 @@
-#!/usr/bin/env python
-
 """
-A simple symbloic simulator for symbolic worlds
-like the VacuumCleanerWorld (after Russell and Norvig).
+A simple simulator.
 """
  
-import SocketServer, socket, sys, threading, time, string
+import SocketServer, socket, sys, threading, time, os
 import myro.globals
 
 def INIT(filename):
-    path = filename.split("/")
+    path = filename.split(os.path.sep)
     modulefile = path.pop() # module name
     module = modulefile.split(".")[0]
-    search = string.join(path, "/")
+    search = os.path.join(*path)
+    search = search.replace(":", ":" + os.path.sep)
     oldpath = sys.path[:] # copy
     sys.path.insert(0, search)
-    print "Attempting to import '%s'..." % module 
+    print "Attempting to import '%s'..." % module
     exec("import " + module + " as userspace")
     reload(userspace)
     print "Loaded '%s'!" % userspace.__file__
