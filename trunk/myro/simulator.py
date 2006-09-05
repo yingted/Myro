@@ -6,6 +6,7 @@ like the VacuumCleanerWorld (after Russell and Norvig).
 """
  
 import SocketServer, socket, sys, threading, time, string
+import myro.globals
 
 def INIT(filename):
     path = filename.split("/")
@@ -72,18 +73,15 @@ class Thread(threading.Thread):
         self.gui.destroy()
 
 import Tkinter, time, math, random
+import myro.globals
 try:
     import cPickle as pickle
 except:
     import pickle
-# try to share a tk interpreter, if one is available:
-try:
-    import pyrobot.system.share as share
-except:
-    # else, define a new one:
-    share = None
-PIOVER180 = math.pi / 180.0
-PIOVER2   = math.pi /2
+
+PIOVER180 = myro.globals.PIOVER180
+PIOVER2   = myro.globals.PIOVER2
+
 class Segment:
     def __init__(self, start, end, id = None, partOf = None):
         self.start = start
@@ -637,14 +635,15 @@ class Simulator:
 class TkSimulator(Tkinter.Toplevel, Simulator):
     def __init__(self, dimensions, offsets, scale, root = None, run = 1):
         if root == None:
-            if share and share.gui:
-                root = share.gui
+            if myro.globals._gui:
+                root = myro.globals._gui
             else:
                 root = Tkinter.Tk()
                 root.withdraw()
         Tkinter.Toplevel.__init__(self, root)
         Simulator.__init__(self, dimensions, offsets, scale)
         self.root = root
+        myro.globals._gui = root
         self.wm_title("Pyrobot Simulator")
         self.protocol('WM_DELETE_WINDOW',self.destroy)
         self.frame = Tkinter.Frame(self)
