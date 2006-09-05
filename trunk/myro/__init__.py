@@ -6,7 +6,7 @@ Distributed under a Shared Source License
 """
 
 __REVISION__ = "$Revision$"
-__BUILD__    = "$Build: 5 $"
+__BUILD__    = "$Build: 6 $"
 __VERSION__  = "0.1." + __BUILD__.split()[1]
 __AUTHOR__   = "Doug Blank <dblank@brynmawr.edu>"
 
@@ -117,3 +117,36 @@ if not myro.globals._setup:
     # Ok, now we're ready!
     print >> sys.stderr, "Myro, (c) 2006 Institute for Personal Robots in Education"
     print >> sys.stderr, "Version %s, ready!" % (__VERSION__)
+
+## Non-object interface:
+
+def initialize(id):
+    myro.globals._robot = Scribbler(id)
+def simulator(id):
+    myro.globals._robot = SimScribbler(id)
+def translate(amount):
+    return myro.globals._robot.translate(amount)
+def rotate(amount):
+    return myro.globals._robot.rotate(amount)
+def move(translate, rotate):
+    return myro.globals._robot.move(rotate, translate)
+def forward(amount):
+    return myro.globals._robot.forward(amount)
+def backward(amount):
+    return myro.globals._robot.backward(amount)
+def left(amount):
+    return myro.globals._robot.left(amount)
+def right(amount):
+    return myro.globals._robot.right(amount)
+def stop():
+    return myro.globals._robot.stop()
+def quit():
+    return myro.globals._robot.quit()
+def readLight(pos):
+    return myro.globals._robot.readLight(pos)
+def readIR(pos):
+    return myro.globals._robot.readIR(pos)
+def update():
+    return myro.globals._robot.update()
+def beep():
+    return myro.globals._robot.beep()
