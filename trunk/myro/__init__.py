@@ -99,7 +99,7 @@ class SimScribbler(Scribbler):
         return self._clients[0].ir[0].value[pos]
     def update(self):
         return self._clients[0].update()
-    def beep(self):
+    def beep(self, frequency, duration):
         print chr(7)
 
 # functions:
@@ -148,5 +148,5 @@ def readIR(pos):
     return myro.globals._robot.readIR(pos)
 def update():
     return myro.globals._robot.update()
-def beep():
-    return myro.globals._robot.beep()
+def beep(frequency, duration):
+    return myro.globals._robot.beep(frequency, duration)
