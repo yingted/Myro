@@ -205,7 +205,7 @@ class Simulator:
         self.offset_y = offset_y
         self._width, self._height = width, height
         self.lightAboveWalls = 0
-        # connections to pyrobot:
+        # connections to myro:
         self.ports = []
         self.assoc = {}
         self.done = 0
@@ -644,7 +644,7 @@ class TkSimulator(Tkinter.Toplevel, Simulator):
         Simulator.__init__(self, dimensions, offsets, scale)
         self.root = root
         myro.globals._gui = root
-        self.wm_title("Pyrobot Simulator")
+        self.wm_title("Myro Simulator")
         self.protocol('WM_DELETE_WINDOW',self.destroy)
         self.frame = Tkinter.Frame(self)
         self.frame.pack(side = 'bottom', expand = "yes", anchor = "n",

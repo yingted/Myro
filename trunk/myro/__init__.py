@@ -117,11 +117,6 @@ class Robot(object):
                 file = file + '.py'
             if file_exists(file):
                 return self.startDevices( loadINIT(file, self), **args )
-            elif file_exists(os.getenv('PYROBOT') + \
-                                    '/plugins/devices/' + file): 
-                return self.startDevices( loadINIT(os.getenv('PYROBOT') + \
-                                                   '/plugins/devices/'+ \
-                                                   file, self), **args)
             else:
                 print 'Device file not found: ' + file
                 return []
