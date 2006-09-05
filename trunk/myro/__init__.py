@@ -10,7 +10,7 @@ __BUILD__    = "$Build: 5 $"
 __VERSION__  = "0.1." + __BUILD__.split()[1]
 __AUTHOR__   = "Doug Blank <dblank@brynmawr.edu>"
 
-import sys, atexit, posixpath, time
+import sys, atexit, time, os
 import myro.globals
 
 class Robot(object):
@@ -57,10 +57,10 @@ class SimScribbler(Scribbler):
     def __init__(self, id):
         import myro.simulator
         Scribbler.__init__(self, id)
-        globalspath, filename = posixpath.split(myro.globals.__file__)
-        myro.globals._myropath, directory = posixpath.split(globalspath)
+        globalspath, filename = os.path.split(myro.globals.__file__)
+        myro.globals._myropath, directory = os.path.split(globalspath)
         self._simulator = myro.simulator.INIT(
-            posixpath.join(myro.globals._myropath, "worlds", "MyroWorld"))
+            os.path.join(myro.globals._myropath, "worlds", "MyroWorld"))
         for port in self._simulator.ports:
             print "Simulator starting listener on port", port, "..."
             thread = myro.simulator.Thread(self._simulator, port)
