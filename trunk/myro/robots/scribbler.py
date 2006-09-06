@@ -1,14 +1,7 @@
-import serial
-import time
+import serial, time
+from myro import Robot
 
-BACKWARD=0
-BACKWARDSLOW=50
-STOP=100
-FORWARDSLOW=150
-FORWARD=200
-
-class Scribbler:
-    
+class Scribbler(Robot):
     GET_INPUT=1
     GET_OPEN_LEFT=2
     GET_OPEN_RIGHT=3
@@ -30,34 +23,83 @@ class Scribbler:
     SET_SPEAKER=28
 
     def __init__(self, serialport, baudrate = 38400):
-        self.ser = serial.Serial(serialport, timeout=30)
+        self.debug = 0
+        self.lastTranslate = 0
+        self.lastRotate    = 0
+        self.ser = serial.Serial(serialport, timeout=.5)
         self.ser.baudrate = baudrate
         self.ser.flushInput()
         self.ser.flushOutput()
         time.sleep(1)
+        self.start()
 
-    def init(self):
+    def start(self):
         self.set_motors_off()
         self.set_led_right_on()
         self.set_led_center_on()
         self.set_led_left_on()
-        self.set_speaker(1600, 160)
-        self.set_speaker(800, 100)
-        self.set_speaker(1200, 160)
+        self.beep(1600, 1.6)
+        self.beep(800, 1)
+        self.beep(1200, 1.6)
+
+    def beep(self, frequency, duration):
+        self.set_speaker(int(frequency), int(duration * 100))
 
     def translate(self, amount):
-        power = (amount + 1.0) * 100.0 # scale between 0,200
-        # need to keep track of these to blend
-        self.set_motor(power, power)
+        self.lastTranslate = amount
+        self.adjustSpeed()
 
     def rotate(self, amount):
-        power = (amount + 1.0) * 100.0 # scale between 0,200
-        # -1 to right
-        # +1 to left
+        self.lastRotate = amount
+        self.adjustSpeed()
 
-    def close(self):
-        print "Closing serial"
+    def move(self, translate, rotate):
+        self.lastTranslate = translate
+        self.lastRotate = rotate
+        self.adjustSpeed()
+
+    def quit(self):
         self.ser.close()
+
+    def setLED(self, position, value):
+        if position == "center":
+            if position: return self.set_led_center_on()
+            else:        return self.set_led_center_off()
+        elif position == "left":
+            if position: return self.set_led_left_on()
+            else:        return self.set_led_left_off()
+        elif position == "right":
+            if position: return self.set_led_right_on()
+            else:        return self.set_led_right_off()
+        else:
+            raise AttributeError, "no such LED: '%s'" % position
+
+    def readLight(self, position):
+        if position == 0:
+            return self.get_light_left()
+        elif position == 1:
+            return self.get_light_right()
+        elif position == 2:
+            return self.get_light_center()
+        else:
+            raise AttributeError, "no such light sensor: '%s'" % position
+
+    def readIR(self, position):
+        if position == 0:
+            return self.get_open_left()
+        elif position == 1:
+            return self.get_open_right()
+        else:
+            raise AttributeError, "no such IR sensor: '%s'" % position
+
+####################### Private
+
+    def adjustSpeed(self):
+        left  = min(max(self.lastTranslate - self.lastRotate, -1), 1)
+        right  = min(max(self.lastTranslate + self.lastRotate, -1), 1)
+        leftPower = (left + 1.0) * 100.0
+        rightPower = (right + 1.0) * 100.0
+        self.set_motors(leftPower, rightPower)
 
     def read(self):
         c = self.ser.read(1)
@@ -68,23 +110,24 @@ class Scribbler:
 
     def check(self, cmd):
         c = self.read()
-        if (cmd != c):
-            pass
+        if (cmd != c) and self.debug: print "   failed check!"
         
     def write(self, num):
-        self.ser.write(chr(num))
+        self.ser.write(chr(int(num)))
         c = self.read()
         if (num != c):
-            self.ser.flushinput() # flush buffer
-        #        time.sleep(0.005)
+            if self.debug: print "   failed write check!"
+            self.ser.flushInput() # flush buffer
 
     def set(self, value, subvalues = []):
+        if self.debug: print "set():", value, subvalues
         self.write(value)
         for v in subvalues:
+            time.sleep(0.05)
             self.set(v)
         return self.check(value)
 
-    def set_motor(self, motor_right, motor_left):
+    def set_motors(self, motor_right, motor_left):
         return self.set(Scribbler.SET_MOTORS, [motor_right, motor_left])
     
     def set_speaker(self, frequency, duration):

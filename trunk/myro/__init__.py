@@ -6,7 +6,7 @@ Distributed under a Shared Source License
 """
 
 __REVISION__ = "$Revision$"
-__BUILD__    = "$Build: 7 $"
+__BUILD__    = "$Build: 8 $"
 __VERSION__  = "0.1." + __BUILD__.split()[1]
 __AUTHOR__   = "Doug Blank <dblank@brynmawr.edu>"
 
@@ -29,29 +29,39 @@ class Robot(object):
     def move(self, translate, rotate):
         raise AttributeError, "this method needs to be written"
 
-    def forward(self, amount):
-        raise AttributeError, "this method needs to be written"
-
-    def backward(self, amount):
-        raise AttributeError, "this method needs to be written"
-
-    def left(self, amount):
-        raise AttributeError, "this method needs to be written"
-
-    def right(self, amount):
-        raise AttributeError, "this method needs to be written"
-
     def quit(self):
         raise AttributeError, "this method needs to be written"
 
-    def stop(self):
+    def beep(self, frequency, duration):
         raise AttributeError, "this method needs to be written"
 
-class Scribbler(Robot):
-    def __init__(self, id):
-        Robot.__init__(self)
-        self.id = id
-    # add Bluetooth/Serial interface stuff here
+    def readLight(self, position):
+        raise AttributeError, "this method needs to be written"
+
+    def readIR(self, position):
+        raise AttributeError, "this method needs to be written"
+
+    def setLED(self, position, value):
+        raise AttributeError, "this method needs to be written"
+
+### The rest of these methods are just rearrangements of the above
+
+    def forward(self, amount):
+        return self.translate(amount)
+
+    def backward(self, amount):
+        return self.translate(-amount)
+
+    def left(self, amount):
+        return self.rotate(amount)
+    
+    def right(self, amount):
+        return self.rotate(-amount)
+
+    def stop(self):
+        return self.move(0, 0)
+
+from myro.robot.scribbler import Scribbler
 
 class SimScribbler(Scribbler):
     def __init__(self, id):
@@ -79,16 +89,6 @@ class SimScribbler(Scribbler):
         return self._clients[0].rotate(amount)
     def move(self, translate, rotate):
         return self._clients[0].move(translate, rotate)
-    def forward(self, amount):
-        return self._clients[0].translate(amount)
-    def backward(self, amount):
-        return self._clients[0].translate(-amount)
-    def left(self, amount):
-        return self._clients[0].rotate(amount)
-    def right(self, amount):
-        return self._clients[0].rotate(-amount)
-    def stop(self):
-        return self._clients[0].move(0, 0)
     def quit(self):
         return self._clients[0].move("quit")
     def readLight(self, pos):
@@ -150,3 +150,5 @@ def update():
     return myro.globals._robot.update()
 def beep(frequency, duration):
     return myro.globals._robot.beep(frequency, duration)
+def setLED(position, value):
+    return myro.globals._robot.setLED(position, value)
