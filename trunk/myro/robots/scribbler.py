@@ -1,3 +1,13 @@
+"""
+Myro Base Classes.
+(c) 2006, Institute for Personal Robots in Education
+http://roboteducation.org/
+Distributed under a Shared Source License
+"""
+
+__REVISION__ = "$Revision$"
+__AUTHOR__   = "Keith"
+
 import serial, time
 from myro import Robot
 
@@ -31,9 +41,9 @@ class Scribbler(Robot):
         self.ser.flushInput()
         self.ser.flushOutput()
         time.sleep(1)
-        self.start()
+        self.restart()
 
-    def start(self):
+    def restart(self):
         self.set_motors_off()
         self.set_led_right_on()
         self.set_led_center_on()
@@ -63,13 +73,13 @@ class Scribbler(Robot):
 
     def setLED(self, position, value):
         if position == "center":
-            if position: return self.set_led_center_on()
+            if value: return self.set_led_center_on()
             else:        return self.set_led_center_off()
         elif position == "left":
-            if position: return self.set_led_left_on()
+            if value: return self.set_led_left_on()
             else:        return self.set_led_left_off()
         elif position == "right":
-            if position: return self.set_led_right_on()
+            if value: return self.set_led_right_on()
             else:        return self.set_led_right_off()
         else:
             raise AttributeError, "no such LED: '%s'" % position
@@ -91,6 +101,10 @@ class Scribbler(Robot):
             return self.get_open_right()
         else:
             raise AttributeError, "no such IR sensor: '%s'" % position
+
+    def update(self):
+        # store all data in a structure?
+        pass
 
 ####################### Private
 

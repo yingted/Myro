@@ -6,7 +6,7 @@ Distributed under a Shared Source License
 """
 
 __REVISION__ = "$Revision$"
-__BUILD__    = "$Build: 9 $"
+__BUILD__    = "$Build: 10 $"
 __VERSION__  = "0.1." + __BUILD__.split()[1]
 __AUTHOR__   = "Doug Blank <dblank@brynmawr.edu>"
 
@@ -44,6 +44,12 @@ class Robot(object):
     def setLED(self, position, value):
         raise AttributeError, "this method needs to be written"
 
+    def restart(self):
+        raise AttributeError, "this method needs to be written"
+
+    def update(self):
+        raise AttributeError, "this method needs to be written"
+
 ### The rest of these methods are just rearrangements of the above
 
     def forward(self, amount):
@@ -60,6 +66,11 @@ class Robot(object):
 
     def stop(self):
         return self.move(0, 0)
+
+    def motors(self, left, right):
+        trans = (right + left) / 2.0
+        rotate = (right - left) / 2.0
+        return self.move(trans, rotate)
 
 from myro.robot.scribbler import Scribbler
 
@@ -101,7 +112,11 @@ class SimScribbler(Scribbler):
         return self._clients[0].update()
     def beep(self, frequency, duration):
         print chr(7)
-
+    def setLED(self, position, value):
+        pass
+    def restart(self):
+        pass
+    
 # functions:
 def _cleanup():
     if myro.globals._robot != None:
@@ -152,3 +167,7 @@ def beep(frequency, duration):
     return myro.globals._robot.beep(frequency, duration)
 def setLED(position, value):
     return myro.globals._robot.setLED(position, value)
+def motors(left, right):
+    return myro.globals._robot.motors(left, right)
+def restart():
+    return myro.globals._robot.restart()
