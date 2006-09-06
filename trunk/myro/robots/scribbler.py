@@ -38,12 +38,12 @@ class Scribbler(Robot):
         self.set_led_right_on()
         self.set_led_center_on()
         self.set_led_left_on()
-        self.beep(1600, 1.6)
-        self.beep(800, 1)
-        self.beep(1200, 1.6)
+        self.beep(1600, .16)
+        self.beep(800, .1)
+        self.beep(1200, .16)
 
     def beep(self, frequency, duration):
-        self.set_speaker(int(frequency), int(duration * 100))
+        self.set_speaker(int(frequency), int(duration * 1000))
 
     def translate(self, amount):
         self.lastTranslate = amount
