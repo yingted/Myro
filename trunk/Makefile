@@ -21,3 +21,7 @@ clean:
 install: compile
 	cp -r myro $(site)
 
+
+test:
+	echo $(zipfile)
+	echo $(site)
