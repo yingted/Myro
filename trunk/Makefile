@@ -12,7 +12,7 @@ build: zip
 	cp myro.zip ../html/myro/$(zipfile)
 	cp myro.zip ../html/myro/myro.zip
 	ls -al ../html/myro/
-	../html/myro/index.py > ../html/myro/index.html
+	cd ../html/myro/; ./index.py > index.html
 
 clean:
 	rm -f `find | grep "~$$"`
