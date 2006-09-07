@@ -85,7 +85,7 @@ class Scribbler:
         c = self.read_num()
         if (x != c):
             logging.error("Bad echo for " +  str(x) + " " + str(c))
-            self.ser.flushinput() # flush buffer
+            self.ser.flushInput() # flush buffer
 #        time.sleep(0.005)
         
     def set_motors_off(self):
