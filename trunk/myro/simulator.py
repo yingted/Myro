@@ -108,12 +108,12 @@ class Segment:
             return self.slope == other.slope
     # return the point at which two segments would intersect if they extended
     # far enough
-    def intersection(self, other):
+    def intersection(self, other, thisBounded = 1, otherBounded = 1):
         if self.parallel(other):
             # the segments may intersect, but we don't care
             return None
         elif self.vertical:
-            return other.intersection(self)
+            return other.intersection(self, otherBounded, thisBounded)
         elif other.vertical:
             return (other.start[0],
                     self.yintercept + other.start[0] * self.slope)
@@ -136,24 +136,25 @@ class Segment:
             return point[0] == self.start[0]
         else:
             return (point[0] * self.slope + self.yintercept == point[1])
-    def intersects(self, other):
+    def intersects(self, other, thisBounded = 1, otherBounded = 1):
         if self.parallel(other):
             # they can "intersect" if they are collinear and overlap
             if not (self.in_bbox(other.start) or self.in_bbox(other.end)):
                 return None
             elif self.vertical:
                 if self.start[0] == other.start[0]:
-                    return self.intersection(other)
+                    return self.intersection(other, thisBounded, otherBounded)
                 else:
                     return None
             else:
                 if self.yintercept == other.yintercept:
-                    return self.intersection(other)
+                    return self.intersection(other, thisBounded, otherBounded)
                 else:
                     return None
         else:
-            i = self.intersection(other)
-            if self.in_bbox(i) and other.in_bbox(i):
+            i = self.intersection(other, thisBounded, otherBounded)
+            if (((thisBounded and self.in_bbox(i)) or not thisBounded) and
+                ((otherBounded and other.in_bbox(i)) or not otherBounded)):
                 return i
             else:
                 return None
@@ -597,7 +598,7 @@ class Simulator:
                 for d in self.assoc[sockname[1]].devices:
                     if d.type == message[1]:
                         if int(message[2]) == index:
-                            if message[1] in ["sonar", "laser", "light", "bulb", "ir", "bumper"]:
+                            if message[1] in ["sonar", "laser", "light", "bulb", "ir", "bumper", "floor"]:
                                 retval = d.geometry, d.arc, d.maxRange
                             elif message[1] == "camera":
                                 retval = d.width, d.height
@@ -607,7 +608,7 @@ class Simulator:
                 for d in self.assoc[sockname[1]].devices:
                     if d.type == message[1]:
                         if int(message[2]) == index:
-                            if message[1] in ["sonar", "laser", "light", "ir", "bumper"]:
+                            if message[1] in ["sonar", "laser", "light", "ir", "bumper", "floor"]:
                                 retval = d.groups
                         index += 1
             elif message[0] == "s": # "s_sonar_0" subscribe
@@ -616,7 +617,7 @@ class Simulator:
                 self.properties.append("%s_%s" % (message[1], message[2]))
                 self.assoc[sockname[1]].subscribed = 1
                 retval = "ok"
-            elif message[0] in ["sonar", "laser", "light", "camera", "gripper", "ir", "bumper"]: # sonar_0, light_0...
+            elif message[0] in ["sonar", "laser", "floor", "light", "camera", "gripper", "ir", "bumper"]: # sonar_0, light_0...
                 index = 0
                 for d in self.assoc[sockname[1]].devices:
                     if d.type == message[0]:
@@ -669,6 +670,7 @@ class TkSimulator(Tkinter.Toplevel, Simulator):
             ['ir', lambda: self.toggle("ir")],
             ['bumper', lambda: self.toggle("bumper")],
             ['light', lambda: self.toggle("light")],                     
+            ['floor', lambda: self.toggle("floor")],                     
             ['lightBlocked', lambda: self.toggle("lightBlocked")], 
             ]
              ),
@@ -836,6 +838,7 @@ class TkSimulator(Tkinter.Toplevel, Simulator):
             self.resetPath(t)
     def redraw(self):
         self.remove('all')
+        # redraw shapes on floor:
         for shape in self.shapes:
             if shape[0] == "box":
                 name, (ulx, uly, lrx, lry), ops = shape
@@ -988,14 +991,14 @@ class SimRobot:
             self.radius = 0.0
         self.builtinDevices = []
         self.color = color
-        self.colorParts = {"ir": "pink", "sonar": "gray", "bumper": "black", "trail": color}
+        self.colorParts = {"ir": "pink", "sonar": "gray", "bumper": "black", "trail": color, "floor": "green"}
         self.devices = []
         self.simulator = None # will be set when added to simulator
         self.vx, self.vy, self.va = (0.0, 0.0, 0.0) # meters / second, rads / second
         self.friction = 1.0
         # -1: don't automatically turn display on when subscribing:
         self.display = {"body": 1, "boundingBox": 0, "gripper": -1, "camera": 0, "sonar": 0,
-                        "light": -1, "lightBlocked": 0, "trail": -1, "ir": 0, "bumper": 1}
+                        "light": -1, "lightBlocked": 0, "trail": -1, "ir": 0, "bumper": 1, "floor": -1}
         self.stall = 0
         self.energy = 10000.0
         self.maxEnergyCostPerStep = 1.0
@@ -1199,21 +1202,34 @@ class SimRobot:
                 d.scan[4] = d.isMoving()
             elif d.type == "ptz": pass
             elif d.type == "floor":
-                x, y = self._gx, self._gy # location of robot
-                # FIX: offset by geometry of floor sensor
-                d = 2 # radius, in canvas units
-                for shape in self.simulator.shapes:
-                    name, args, nargs = shape
-                    if name == "line":
-                        # compute closest distance between x,y and line
-                        x1, y1, x2, y2 = args
-                        seg1 = Segment((x1, y1), (x2, y2))
-                        angle = seg1.angle()
-                        m = angle + PIOVER2
-                        b = y - (m * x) # y-intercept
-                        seg2 = Segment((x, y), (0, b))
-                        intersect = seg1.intersects(seg2)
-                        #print intersect
+                d.scan = [0] * len(d.geometry)
+                pos = 0
+                for geom in d.geometry:
+                    d_x, d_y, d_a = geom
+                    x = self._gx + (d_x * cos_a90 - d_y * sin_a90)
+                    y = self._gy + (d_x * sin_a90 + d_y * cos_a90)
+                    for shape in self.simulator.shapes:
+                        name, args, nargs = shape
+                        if name == "line":
+                            # compute closest distance between x,y and line
+                            x1, y1, x2, y2 = args
+                            seg1 = Segment((x1, y1), (x2, y2))
+                            angle = seg1.angle()
+                            slope = angle - math.pi/3 # FIX: i'm not sure why pi/3 ?!
+                            b = y - (slope * x) # y-intercept
+                            seg2 = Segment((x, y), (0, b))
+                            intersect1 = seg1.intersects(seg2, otherBounded = 0)
+                            if intersect1 != None:
+                                x3, y3 = intersect1
+                                dist = Segment((x, y), (x3, y3)).length()
+                                if "width" in nargs:
+                                    width = nargs["width"]/2.0
+                                else:
+                                    width = .1/2.0 # radius, in meters
+                                if dist <= width:
+                                    d.scan[pos] = 1
+                                    break
+                    pos += 1
             elif d.type == "camera":
                 x, y = self._gx, self._gy # camera location
                 stepAngle = d.zoom / float(d.width - 1)
@@ -2011,7 +2027,7 @@ class MyroLightSensors(LightSensor):
                        'back' : [],
                        'back-all' : []}
 
-class MyroFloorSensors(LightSensor):
+class MyroFloorSensors:
     def __init__(self, geometry = [(0,0,0)], noise = 0.0):
         self.type = "floor"
         self.active = 1

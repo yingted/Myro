@@ -43,6 +43,15 @@ colorUnCode = {1: colorMap["red"],
 	       12: colorMap["purple"],
 	       }
 
+class FloorSimDevice(Device):
+	def __init__(self, name, index, robot, geometry, groups):
+		Device.__init__(self, "floor")
+		self._dev = robot
+		self.index = index
+		self._geometry = geometry
+		self.groups = groups
+		self.startDevice()
+
 class PositionSimDevice(Device):
 	def __init__(self, robot):
 		Device.__init__(self, "position")
@@ -297,6 +306,12 @@ class Simbot(Robot):
 			geometry = self.move("g_%s_%d" % (name, index))
 			groups = self.move("r_%s_%d" % (name, index))
 			return {name: LightSimDevice(name, index, self, geometry, groups)}
+		elif name == "floor":
+			self.properties.append("%s_%d" % (name, index))
+			self.move("s_%s_%d" % (name, index))
+			geometry = self.move("g_%s_%d" % (name, index))
+			groups = self.move("r_%s_%d" % (name, index))
+			return {name: FloorSimDevice(name, index, self, geometry, groups)}
 		else:
 			self.properties.append("%s_%d" % (name, index))
 			self.move("s_%s_%d" % (name, index))
