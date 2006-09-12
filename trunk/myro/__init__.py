@@ -74,10 +74,9 @@ class Robot(object):
 
 from myro.robot.scribbler import Scribbler
 
-class SimScribbler(Scribbler):
+class SimScribbler(Robot):
     def __init__(self, id):
         import myro.simulator
-        Scribbler.__init__(self, id)
         globalspath, filename = os.path.split(myro.globals.__file__)
         myro.globals._myropath, directory = os.path.split(globalspath)
         self._simulator = myro.simulator.INIT(

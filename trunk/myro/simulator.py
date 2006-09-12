@@ -10,9 +10,10 @@ def INIT(filename):
     modulefile = path.pop() # module name
     module = modulefile.split(".")[0]
     search = os.path.join(*path)
-    if ":" in search:
+    # FIX: this can't be the best way to deal with relative/absolute paths:
+    if ":" in search: # DOS
         search = search.replace(":", ":" + os.path.sep)
-    else:
+    elif filename[0] == os.path.sep: # UNIX
         search = os.path.sep + search
     oldpath = sys.path[:] # copy
     sys.path.insert(0, search)
@@ -217,6 +218,7 @@ class Simulator:
         self.display = {"wireframe": 0}
         self.running = 0
         self.stop = 0 # use to stop the sim
+        self.mode = "view"
     def resetPaths(self): pass
     def resetPath(self, pos): pass
     def update_idletasks(self): pass
@@ -247,16 +249,11 @@ class Simulator:
         self.world.append(seg)
 
     def addShape(self, name, *args, **nargs):
-        # addShape("box", x, y, x, y, color)
-        # addShape("polygon", points, fill = "black", outline = "purple")
-        # addshape("line", (x1, y1), (x2, y2), fill = "purple", width?)
-        # addshape("oval", (x1, y1), (x2, y2), fill = "purple", outline="yellow")
-        if len(nargs) == 0:
-            temp = list(args)
-            temp.insert(0, name)
-            self.shapes.append(temp)
-        else:
-            self.shapes.append( (name, args, nargs) )
+        # addShape("box", x, y, x, y, fill="black")
+        # addShape("polygon", *points, fill = "black", outline = "purple")
+        # addShape("line", x1, y1, x2, y2, fill = "purple", width?)
+        # addShape("oval", x1, y1, x2, y2, fill = "purple", outline="yellow")
+        self.shapes.append( (name, args, nargs) )
         self.redraw()
 
     def addBox(self, ulx, uly, lrx, lry, color="white", wallcolor="black"):
@@ -676,7 +673,9 @@ class TkSimulator(Tkinter.Toplevel, Simulator):
             ]
              ),
             ('Options', [['lights visible above walls',
-                          lambda: self.toggleOption("lightAboveWalls")]]),
+                          lambda: self.toggleOption("lightAboveWalls")],
+                         ['draw mode', lambda: self.setMode('draw')],
+                         ['view mode', lambda: self.setMode('view')]]),
             ]
         for entry in menu:
             self.mBar.tk_menuBar(self.makeMenu(self.mBar, entry[0], entry[1]))
@@ -686,6 +685,8 @@ class TkSimulator(Tkinter.Toplevel, Simulator):
             self.after(100, self.step)
         else:
             self.running = 0
+    def setMode(self, mode):
+        self.mode = mode
     def toggleOption(self, key):
         if key == "lightAboveWalls":
             self.lightAboveWalls = not self.lightAboveWalls
@@ -737,19 +738,37 @@ class TkSimulator(Tkinter.Toplevel, Simulator):
     def dispatch_event(self, event, type):
         if self.lastEventRobot:
             return self.lastEventRobot.mouse_event(event, type, self.lastEventRobot)
-        # else let's get a robot
-        widget = event.widget
-        x = widget.canvasx(event.x)
-        y = widget.canvasy(event.y)
-        d = 5 # overlap, in canvas units
-        items = widget.find_overlapping(x-d, y-d, x+d, y+d)
-        for item in items:
-            tags = self.canvas.gettags(item)
-            for tag in tags:
-                if "robot-" in tag:
-                    robot = self.robotsByName[tag[6:]]
-                    self.lastEventRobot = robot
-                    return robot.mouse_event(event, type, robot)
+        if self.mode == "draw":  # draw line to follow
+            widget = event.widget
+            x = widget.canvasx(event.x)
+            y = widget.canvasy(event.y)
+            if type == "down":
+                x -= self.offset_x
+                y -= self.offset_y
+                x, y = map(lambda v: float(v) / self.scale, (x, -y))
+                self._drawX = x
+                self._drawY = y
+            elif type == "up":
+                x -= self.offset_x
+                y -= self.offset_y
+                x, y = map(lambda v: float(v) / self.scale, (x, -y))
+                self.addShape("line", x, y, self._drawX, self._drawY, fill="black", width=.1)
+                self.redraw()
+        elif self.mode == "view":  # else let's get a robot
+            widget = event.widget
+            x = widget.canvasx(event.x)
+            y = widget.canvasy(event.y)
+            d = 5 # overlap, in canvas units
+            items = widget.find_overlapping(x-d, y-d, x+d, y+d)
+            for item in items:
+                tags = self.canvas.gettags(item)
+                for tag in tags:
+                    if "robot-" in tag:
+                        robot = self.robotsByName[tag[6:]]
+                        self.lastEventRobot = robot
+                        return robot.mouse_event(event, type, robot)
+        else:
+            raise AttributeError, "unknown mode: '%s'" % self.mode
     def addMouseBindings(self):
         self.canvas.bind("<B1-Motion>", func=lambda event=self:self.dispatch_event(event, "motion"))
         self.canvas.bind("<Button-1>",  func=lambda event=self:self.dispatch_event(event, "down"))
@@ -819,7 +838,11 @@ class TkSimulator(Tkinter.Toplevel, Simulator):
         self.remove('all')
         for shape in self.shapes:
             if shape[0] == "box":
-                name, ulx, uly, lrx, lry, fill = shape
+                name, (ulx, uly, lrx, lry), ops = shape
+                if "fill" in ops:
+                    fill = ops["fill"]
+                else:
+                    fill = "black"
                 outline = "black"
                 if self.display["wireframe"]:
                     if fill != "white":
@@ -835,11 +858,32 @@ class TkSimulator(Tkinter.Toplevel, Simulator):
                 xys = [(self.scale_x(x), self.scale_y(y)) for (x, y) in points]
                 self.canvas.create_polygon(xys, tag="line", **nargs)
             elif shape[0] == "line":
-                name, ((x1, y1), (x2, y2)), nargs = shape
-                x1, y1, x2, y2 = self.scale_x(x1), self.scale_y(y1), self.scale_x(x2), self.scale_y(y2)
-                self.canvas.create_line(x1, y1, x2, y2, tag="line", **nargs)
+                name, (x1, y1, x2, y2), nargs = shape
+                if "width" in nargs.keys():
+                    width = nargs["width"]/2.0
+                    del nargs["width"]
+                else:
+                    width = .1/2.0 # minimum width of a line
+                seg = Segment((x1, y1), (x2, y2))
+                angle = seg.angle()
+                a90 = angle + math.pi/4 # perpendicular and rotated for screen
+                cos_a90 = math.cos(a90)
+                sin_a90 = math.sin(a90)
+                # Corners of "line":
+                xys = ((self.scale_x(x1 + width * cos_a90 - width * sin_a90),
+                        self.scale_y(y1 + width * sin_a90 + width * cos_a90)),
+                       (self.scale_x(x1 + -width * cos_a90 - -width * sin_a90),
+                        self.scale_y(y1 + -width * sin_a90 + -width * cos_a90)),
+                       (self.scale_x(x2 + -width * cos_a90 - -width * sin_a90),
+                        self.scale_y(y2 + -width * sin_a90 + -width * cos_a90)),
+                       (self.scale_x(x2 + width * cos_a90 - width * sin_a90),
+                        self.scale_y(y2 + width * sin_a90 + width * cos_a90)))                       
+                self.canvas.create_polygon(xys, tag="line", **nargs)
+                #For just a regular line:
+                #self.canvas.create_line(self.scale_x(x1), self.scale_y(y1), self.scale_x(x2), self.scale_y(y2),
+                #                        tag="line", **nargs)
             elif shape[0] == "oval":
-                name, ((x1, y1), (x2, y2)), nargs = shape
+                name, (x1, y1, x2, y2), nargs = shape
                 x1, y1, x2, y2 = self.scale_x(x1), self.scale_y(y1), self.scale_x(x2), self.scale_y(y2)
                 self.canvas.create_oval(x1, y1, x2, y2, tag="line", **nargs)
         if not self.display["wireframe"]:
@@ -875,11 +919,12 @@ class TkSimulator(Tkinter.Toplevel, Simulator):
         print "Window: size=(%d,%d), offset=(%d,%d), scale=%f" % (self.winfo_width(), self.winfo_height(), self.offset_x, self.offset_y, self.scale)
         for robot in self.robots:
             print "   %s: pose = (%.2f, %.2f, %.2f)" % (robot.name, robot._gx, robot._gy, robot._ga % (2 * math.pi))
-        
+        for shape in self.shapes:
+            name, args, nargs = shape
+            print "   self.addShape(%s, %s, %s)" % (name, args, nargs)
     def addBox(self, ulx, uly, lrx, lry, color="white", wallcolor="black"):
         Simulator.addBox(self, ulx, uly, lrx, lry, color, wallcolor)
-        self.shapes.append( ("box", ulx, uly, lrx, lry, color) )
-        self.redraw()
+        self.addShape("box", ulx, uly, lrx, lry, fill=color)
     def addWall(self, x1, y1, x2, y2, color="black"):
         seg = Segment((x1, y1), (x2, y2), partOf="wall")
         seg.color = color
@@ -1153,6 +1198,22 @@ class SimRobot:
                 d.scan[3] = d.isOpened()
                 d.scan[4] = d.isMoving()
             elif d.type == "ptz": pass
+            elif d.type == "floor":
+                x, y = self._gx, self._gy # location of robot
+                # FIX: offset by geometry of floor sensor
+                d = 2 # radius, in canvas units
+                for shape in self.simulator.shapes:
+                    name, args, nargs = shape
+                    if name == "line":
+                        # compute closest distance between x,y and line
+                        x1, y1, x2, y2 = args
+                        seg1 = Segment((x1, y1), (x2, y2))
+                        angle = seg1.angle()
+                        m = angle + PIOVER2
+                        b = y - (m * x) # y-intercept
+                        seg2 = Segment((x, y), (0, b))
+                        intersect = seg1.intersects(seg2)
+                        #print intersect
             elif d.type == "camera":
                 x, y = self._gx, self._gy # camera location
                 stepAngle = d.zoom / float(d.width - 1)
@@ -1949,3 +2010,16 @@ class MyroLightSensors(LightSensor):
                        'back-left' : [], 
                        'back' : [],
                        'back-all' : []}
+
+class MyroFloorSensors(LightSensor):
+    def __init__(self, geometry = [(0,0,0)], noise = 0.0):
+        self.type = "floor"
+        self.active = 1
+        self.geometry = geometry
+        self.arc = None
+        self.maxRange = 10.0
+        self.noise = noise
+        self.groups = {"all": (0,)}
+        self.scan = [0] * len(geometry) # for data
+        self.rgb = [[0,0,0] for g in geometry]
+
