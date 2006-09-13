@@ -760,7 +760,7 @@ class TkSimulator(Tkinter.Toplevel, Simulator):
                 x -= self.offset_x
                 y -= self.offset_y
                 x, y = map(lambda v: float(v) / self.scale, (x, -y))
-                self.addShape("line", x, y, self._drawX, self._drawY, fill="black", width=.1)
+                self.addShape("line", x, y, self._drawX, self._drawY, fill="black", width=.03)
                 self.redraw()
         elif self.mode == "view":  # else let's get a robot
             widget = event.widget
@@ -872,7 +872,7 @@ class TkSimulator(Tkinter.Toplevel, Simulator):
                     width = nargs["width"]/2.0
                     del nargs["width"]
                 else:
-                    width = .1/2.0 # minimum width of a line
+                    width = .03/2.0 # minimum width of a line
                 seg = Segment((x1, y1), (x2, y2))
                 angle = seg.angle()
                 a90 = angle + math.pi/4 # perpendicular and rotated for screen
@@ -930,7 +930,7 @@ class TkSimulator(Tkinter.Toplevel, Simulator):
             print "   %s: pose = (%.2f, %.2f, %.2f)" % (robot.name, robot._gx, robot._gy, robot._ga % (2 * math.pi))
         for shape in self.shapes:
             name, args, nargs = shape
-            print "   self.addShape(%s, %s, %s)" % (name, args, nargs)
+            print "   self.addShape('%s', %s, %s)" % (name, args, nargs)
     def addBox(self, ulx, uly, lrx, lry, color="white", wallcolor="black"):
         Simulator.addBox(self, ulx, uly, lrx, lry, color, wallcolor)
         self.addShape("box", ulx, uly, lrx, lry, fill=color)
@@ -1252,7 +1252,7 @@ class SimRobot:
                                 if "width" in nargs:
                                     width = nargs["width"]/2.0
                                 else:
-                                    width = .1/2.0 # radius, in meters
+                                    width = .03/2.0 # radius, in meters
                                 if dist <= width:
                                     d.scan[pos] = 1
                                     self.drawRay("line", x, y, x3, y3, self.colorParts[d.type])
@@ -1897,7 +1897,7 @@ class Pioneer4FrontLightSensors(LightSensor):
 class TkMyro(TkRobot):
     def __init__(self, *args, **kwargs):
         TkRobot.__init__(self, *args, **kwargs)
-        self.radius = 0.25
+        self.radius = 0.09
 
     def draw(self):
         """
@@ -1908,8 +1908,12 @@ class TkMyro(TkRobot):
         self._last_pose = (self._gx, self._gy, self._ga)
         self.simulator.remove("robot-%s" % self.name)
         # Body Polygon, by x and y lists:
-        sx = [ .20, .20,-.10,-.10]
-        sy = [ .15,-.15,-.15, .15] 
+        #sx = [ .09, .09,-.09,-.09]
+        #sy = [ .08,-.08,-.08, .08] 
+        sx = [ 0.05, 0.05, 0.07, 0.07, 0.09, 0.09, 0.07, 0.07, 0.05, 0.05,
+               -0.05, -0.05, -0.07, -0.08, -0.09, -0.09, -0.08, -0.07, -0.05, -0.05]
+        sy = [ 0.06, 0.08, 0.07, 0.06, 0.06, -0.06, -0.06, -0.07, -0.08, -0.06,
+               -0.06, -0.08, -0.07, -0.06, -0.05, 0.05, 0.06, 0.07, 0.08, 0.06]  
         s_x = self.simulator.scale_x
         s_y = self.simulator.scale_y
         a90 = self._ga + PIOVER2 # angle is 90 degrees off for graphics
@@ -1920,10 +1924,13 @@ class TkMyro(TkRobot):
                                    self._gy + x * sin_a90 + y * cos_a90),
                      sx, sy)
             self.simulator.drawPolygon(xy, fill=self.color, tag="robot-%s" % self.name, outline="black")
+            self.simulator.drawOval(self._gx - .007, self._gy - .007,
+                                    self._gx + .007, self._gy + .007,
+                                    fill="black", outline="black", tag="robot-%s" % self.name)
             # --------------------------------------------------------------------------
             # Parts: wheel, wheel, light, light
-            bx = [[ .10, .10, -.10, -.10], [ .10, .10, -.10, -.10], [.16, .17, .18, .17],   [.16, .17, .18, .17]]
-            by = [[ .18, .16, .16, .18], [ -.18, -.16, -.16, -.18], [.13, .135, .115, .11], [-.13, -.135, -.115, -.11]]
+            bx = [[ .04, .04, -.04, -.04], [ .04, .04, -.04, -.04], [.06, .08, .08, .06],   [.06, .08, .08, .06]]
+            by = [[ .08, .07, .07, .08], [ -.08, -.07, -.07, -.08], [.02, .03, .03, .02], [-.02, -.03, -.03, -.02]]
             colors = ["black", "black", "yellow", "yellow"]
             for i in range(len(bx)):
                 xy = map(lambda x, y: (self._gx + x * cos_a90 - y * sin_a90,
@@ -1991,9 +1998,9 @@ class TkMyro(TkRobot):
 class MyroIR(RangeSensor):
     def __init__(self):
         RangeSensor.__init__(self,
-                             "ir", geometry = (( 0.175, 0.13, 0),
-                                               ( 0.175,-0.13, 0)),
-                             arc = 5 * PIOVER180, maxRange = 0.5, noise = 0.0)
+                             "ir", geometry = (( 0.09, 0.05, 0),
+                                               ( 0.09,-0.05, 0)),
+                             arc = 5 * PIOVER180, maxRange = 0.10, noise = 0.0)
         self.groups = {'all': range(2),
                        'front': (0, 1),
                        'front-left' : (0, ),
@@ -2034,9 +2041,9 @@ class MyroBumper(RangeSensor):
 class MyroLightSensors(LightSensor):
     def __init__(self):
         LightSensor.__init__(self,
-                             ((.18,-0.13, 20 * PIOVER180),
-                              (.18,  0.0, 0),
-                              (.18,  0.13, 20 * PIOVER180),
+                             ((.06,-0.02, 20 * PIOVER180),
+                              (.07,  0.0, 0),
+                              (.07,  0.02, 20 * PIOVER180),
                               ),
                              noise=0.0) 
         self.groups = {"front-all": (0, 1, 2),
@@ -2058,7 +2065,7 @@ class MyroLightSensors(LightSensor):
                        'back-all' : []}
 
 class MyroLineSensors:
-    def __init__(self, geometry = [(0.1,0.1,0), (0.1,-0.1,0)], noise = 0.0):
+    def __init__(self, geometry = [(0.05,0.005,0), (0.05,-0.005,0)], noise = 0.0):
         self.type = "line"
         self.active = 1
         self.geometry = geometry
