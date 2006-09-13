@@ -43,15 +43,6 @@ colorUnCode = {1: colorMap["red"],
 	       12: colorMap["purple"],
 	       }
 
-class FloorSimDevice(Device):
-	def __init__(self, name, index, robot, geometry, groups):
-		Device.__init__(self, "floor")
-		self._dev = robot
-		self.index = index
-		self._geometry = geometry
-		self.groups = groups
-		self.startDevice()
-
 class PositionSimDevice(Device):
 	def __init__(self, robot):
 		Device.__init__(self, "position")
@@ -131,6 +122,39 @@ class RangeSimDevice(Device):
 					     self._geometry[1]),        # arc rads
 					    noise=self._noise[pos]
 					    )
+		return value
+
+class LineSimDevice(Device):
+	def __init__(self, name, index, robot, geometry, groups):
+		Device.__init__(self, name)
+		self._geometry = geometry # [(x, y, z), ]
+		self.groups = groups
+		self.startDevice()
+		self._dev = robot
+		self.index = index
+		self.maxvalueraw = 1.0
+		self.rawunits = "M"
+		self.units = "RAW"
+		self.count = len(self)
+		self._noise = [0.0] * self.count
+		self._data = [0] * len(geometry)
+	def updateDevice(self):
+		if self.active == 0: return
+		newData = self._dev.move("line_%d" % 0) # get all of the data
+		for i in range(len(newData)):
+			self._data[i] = newData[i]
+	def __len__(self):
+		return len(self._geometry)
+	def getSensorValue(self, pos):
+		v = self._data[pos]
+		value = SensorValue(self, v, pos,
+				    (self._geometry[pos][0], # x in meters
+				     self._geometry[pos][1], # y
+				     0.03,                    # z
+				     self._geometry[pos][2], # th
+				     0.0),        # arc rads
+				    noise=self._noise[pos]
+				    )
 		return value
 
 class LightSimDevice(RangeSimDevice):
@@ -306,12 +330,12 @@ class Simbot(Robot):
 			geometry = self.move("g_%s_%d" % (name, index))
 			groups = self.move("r_%s_%d" % (name, index))
 			return {name: LightSimDevice(name, index, self, geometry, groups)}
-		elif name == "floor":
+		elif name == "line":
 			self.properties.append("%s_%d" % (name, index))
 			self.move("s_%s_%d" % (name, index))
 			geometry = self.move("g_%s_%d" % (name, index))
 			groups = self.move("r_%s_%d" % (name, index))
-			return {name: FloorSimDevice(name, index, self, geometry, groups)}
+			return {name: LineSimDevice(name, index, self, geometry, groups)}
 		else:
 			self.properties.append("%s_%d" % (name, index))
 			self.move("s_%s_%d" % (name, index))

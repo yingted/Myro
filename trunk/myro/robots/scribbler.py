@@ -102,6 +102,14 @@ class Scribbler(Robot):
         else:
             raise AttributeError, "no such IR sensor: '%s'" % position
 
+    def readLine(self, position):
+        if position == 0:
+            return self.get_line_left()
+        elif position == 1:
+            return self.get_line_right()
+        else:
+            raise AttributeError, "no such IR sensor: '%s'" % position
+
     def update(self):
         # store all data in a structure?
         pass

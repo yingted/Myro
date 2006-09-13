@@ -41,6 +41,9 @@ class Robot(object):
     def readIR(self, position):
         raise AttributeError, "this method needs to be written"
 
+    def readLine(self, position):
+        raise AttributeError, "this method needs to be written"
+
     def setLED(self, position, value):
         raise AttributeError, "this method needs to be written"
 
@@ -107,6 +110,9 @@ class SimScribbler(Robot):
     def readIR(self, pos):
         self._clients[0].update()
         return self._clients[0].ir[0].value[pos]
+    def readLine(self, pos):
+        self._clients[0].update()
+        return self._clients[0].line[0].value[pos]
     def update(self):
         return self._clients[0].update()
     def beep(self, frequency, duration):
@@ -160,6 +166,8 @@ def readLight(pos):
     return myro.globals._robot.readLight(pos)
 def readIR(pos):
     return myro.globals._robot.readIR(pos)
+def readLine(pos):
+    return myro.globals._robot.readLine(pos)
 def update():
     return myro.globals._robot.update()
 def beep(frequency, duration):

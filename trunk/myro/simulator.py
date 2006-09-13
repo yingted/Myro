@@ -94,6 +94,9 @@ class Segment:
         if not self.vertical:
             self.slope = (self.end[1] - self.start[1])/(self.end[0] - self.start[0])
             self.yintercept = self.start[1] - self.start[0] * self.slope
+    def setAngle(self, angle):
+        """ Keep first point, set second based on angle. """
+        pass
     def length(self):
         return math.sqrt((self.start[0] - self.end[0])**2 +
                          (self.start[1] - self.end[1])**2)
@@ -598,17 +601,19 @@ class Simulator:
                 for d in self.assoc[sockname[1]].devices:
                     if d.type == message[1]:
                         if int(message[2]) == index:
-                            if message[1] in ["sonar", "laser", "light", "bulb", "ir", "bumper", "floor"]:
+                            if message[1] in ["sonar", "laser", "light", "bulb", "ir", "bumper"]:
                                 retval = d.geometry, d.arc, d.maxRange
                             elif message[1] == "camera":
                                 retval = d.width, d.height
+                            elif message[1] == "line":
+                                retval = d.geometry
                         index += 1
-            elif message[0] == "r": # "r_sonar_0" groups_sensor_id
+            elif message[0] == "r": # "r_sonar_0" groups_sensor_id; get group names
                 index = 0
                 for d in self.assoc[sockname[1]].devices:
                     if d.type == message[1]:
                         if int(message[2]) == index:
-                            if message[1] in ["sonar", "laser", "light", "ir", "bumper", "floor"]:
+                            if message[1] in ["sonar", "laser", "light", "ir", "bumper", "line"]:
                                 retval = d.groups
                         index += 1
             elif message[0] == "s": # "s_sonar_0" subscribe
@@ -617,7 +622,7 @@ class Simulator:
                 self.properties.append("%s_%s" % (message[1], message[2]))
                 self.assoc[sockname[1]].subscribed = 1
                 retval = "ok"
-            elif message[0] in ["sonar", "laser", "floor", "light", "camera", "gripper", "ir", "bumper"]: # sonar_0, light_0...
+            elif message[0] in ["sonar", "laser", "line", "light", "camera", "gripper", "ir", "bumper"]: # sonar_0, light_0...
                 index = 0
                 for d in self.assoc[sockname[1]].devices:
                     if d.type == message[0]:
@@ -670,7 +675,8 @@ class TkSimulator(Tkinter.Toplevel, Simulator):
             ['ir', lambda: self.toggle("ir")],
             ['bumper', lambda: self.toggle("bumper")],
             ['light', lambda: self.toggle("light")],                     
-            ['floor', lambda: self.toggle("floor")],                     
+            ['line', lambda: self.toggle("line")],                     
+            ['lineTooFar', lambda: self.toggle("lineTooFar")],                     
             ['lightBlocked', lambda: self.toggle("lightBlocked")], 
             ]
              ),
@@ -991,14 +997,15 @@ class SimRobot:
             self.radius = 0.0
         self.builtinDevices = []
         self.color = color
-        self.colorParts = {"ir": "pink", "sonar": "gray", "bumper": "black", "trail": color, "floor": "green"}
+        self.colorParts = {"ir": "pink", "sonar": "gray", "bumper": "black", "trail": color, "line": "green"}
         self.devices = []
         self.simulator = None # will be set when added to simulator
         self.vx, self.vy, self.va = (0.0, 0.0, 0.0) # meters / second, rads / second
         self.friction = 1.0
         # -1: don't automatically turn display on when subscribing:
         self.display = {"body": 1, "boundingBox": 0, "gripper": -1, "camera": 0, "sonar": 0,
-                        "light": -1, "lightBlocked": 0, "trail": -1, "ir": 0, "bumper": 1, "floor": -1}
+                        "light": -1, "lightBlocked": 0, "trail": -1, "ir": 0, "bumper": 1,
+                        "line": 0, "lineTooFar": 0}
         self.stall = 0
         self.energy = 10000.0
         self.maxEnergyCostPerStep = 1.0
@@ -1201,7 +1208,7 @@ class SimRobot:
                 d.scan[3] = d.isOpened()
                 d.scan[4] = d.isMoving()
             elif d.type == "ptz": pass
-            elif d.type == "floor":
+            elif d.type == "line":
                 d.scan = [0] * len(d.geometry)
                 pos = 0
                 for geom in d.geometry:
@@ -1212,23 +1219,46 @@ class SimRobot:
                         name, args, nargs = shape
                         if name == "line":
                             # compute closest distance between x,y and line
+                            # first, the line segment we are considering:
                             x1, y1, x2, y2 = args
                             seg1 = Segment((x1, y1), (x2, y2))
+                            b1 = seg1.yintercept
+                            self.drawRay("lineTooFar", x1, y1, 0, b1, "blue") # extended
                             angle = seg1.angle()
-                            slope = angle - math.pi/3 # FIX: i'm not sure why pi/3 ?!
-                            b = y - (slope * x) # y-intercept
-                            seg2 = Segment((x, y), (0, b))
-                            intersect1 = seg1.intersects(seg2, otherBounded = 0)
+                            ### perpendiculars to line segment:
+                            r90 = angle + math.pi/4 # perpendicular and rotated for screen
+                            cos_r90 = math.cos(r90)
+                            sin_r90 = math.sin(r90)
+                            width = 1.0
+                            x3,y3,x4,y4 = (x1 + width * cos_r90 - width * sin_r90,
+                                           y1 + width * sin_r90 + width * cos_r90,
+                                           x1 + -width * cos_r90 - -width * sin_r90,
+                                           y1 + -width * sin_r90 + -width * cos_r90)
+                            self.drawRay("lineTooFar", x3, y3, x4, y4, "orange")
+                            seg2 = Segment((x3,y3), (x4, y4))
+                            b2 = seg2.yintercept
+                            angle2 = seg2.angle()
+                            ### perpendicular through robot:
+                            #b3 = y - (angle2 * x)
+                            # FIX: how do you get a line from slope and point?
+                            # I'm using b2 because I can't compute b3!
+                            seg3 = Segment((x, y), (0, b2))
+                            self.drawRay("lineTooFar", x, y, 0, b2, "green")
+                            intersect1 = seg1.intersects(seg3, otherBounded = 0)
                             if intersect1 != None:
                                 x3, y3 = intersect1
-                                dist = Segment((x, y), (x3, y3)).length()
+                                seg4 = Segment((x, y), (x3, y3))
+                                dist = seg4.length()
                                 if "width" in nargs:
                                     width = nargs["width"]/2.0
                                 else:
                                     width = .1/2.0 # radius, in meters
                                 if dist <= width:
                                     d.scan[pos] = 1
+                                    self.drawRay("line", x, y, x3, y3, self.colorParts[d.type])
                                     break
+                                else:
+                                     self.drawRay("lineTooFar", x, y, x3, y3, "red")
                     pos += 1
             elif d.type == "camera":
                 x, y = self._gx, self._gy # camera location
@@ -2027,15 +2057,14 @@ class MyroLightSensors(LightSensor):
                        'back' : [],
                        'back-all' : []}
 
-class MyroFloorSensors:
-    def __init__(self, geometry = [(0,0,0)], noise = 0.0):
-        self.type = "floor"
+class MyroLineSensors:
+    def __init__(self, geometry = [(0.1,0.1,0), (0.1,-0.1,0)], noise = 0.0):
+        self.type = "line"
         self.active = 1
         self.geometry = geometry
         self.arc = None
         self.maxRange = 10.0
         self.noise = noise
-        self.groups = {"all": (0,)}
+        self.groups = {"all": range(len(geometry))}
         self.scan = [0] * len(geometry) # for data
         self.rgb = [[0,0,0] for g in geometry]
-
