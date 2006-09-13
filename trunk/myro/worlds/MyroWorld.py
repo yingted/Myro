@@ -17,13 +17,15 @@ def INIT():
                                1.69, 1.68, 2.03,
                                ((.09, .09,-.09,-.09),
                                 (.08,-.08,-.08, .08)), "blue"))
-    #sim.addLine(x, y, x, y, thickness, color)
     for i in range(len(sim.robots)):
         #sim.robots[i].addDevice(BulbDevice(-.10, 0))
         sim.robots[i].addDevice(MyroIR()) # infrared
         #sim.robots[i].addDevice(MyroBumper()) # bumpers
         sim.robots[i].addDevice(MyroLightSensors()) # light sensors 
         sim.robots[i].addDevice(MyroLineSensors()) # downward-facing sensor
+    sim.addRobot(None, TkPuck("Puck1", 1.52, 0.62, 0,
+                              ((.05, .05, -.05, -.05),
+                               (.05, -.05, -.05, .05)), "red"))
     # lines to follow:
     sim.addShape('line', 0.31939309860289899, 1.7424667934891489, 1.1888520892441, 1.7247227324556547, fill='black')
     sim.addShape('line', 0.2377704178488248, 0.70976244133977551, 0.3477835962564, 1.7318203568690522, fill= 'black')
