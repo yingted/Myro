@@ -6,7 +6,7 @@ Distributed under a Shared Source License
 """
 
 __REVISION__ = "$Revision$"
-__BUILD__    = "$Build: 2 $"
+__BUILD__    = "$Build: 3 $"
 __VERSION__  = "0.2." + __BUILD__.split()[1]
 __AUTHOR__   = "Doug Blank <dblank@brynmawr.edu>"
 
@@ -136,14 +136,18 @@ if not myro.globals._setup:
     atexit.register(_cleanup)
     # Ok, now we're ready!
     print >> sys.stderr, "Myro, (c) 2006 Institute for Personal Robots in Education"
-    print >> sys.stderr, "Version %s, ready!" % (__VERSION__)
+    print >> sys.stderr, "Version %s, Revision %s, ready!" % (__VERSION__, __REVISION__.split()[1])
 
 ## Non-object interface:
 
 def initialize(id):
+    global robot
     myro.globals._robot = Scribbler(id)
+    robot = myro.globals._robot
 def simulator(id):
+    global robot
     myro.globals._robot = SimScribbler(id)
+    robot = myro.globals._robot
 def translate(amount):
     return myro.globals._robot.translate(amount)
 def rotate(amount):

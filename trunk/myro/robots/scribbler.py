@@ -108,7 +108,7 @@ class Scribbler(Robot):
         elif position == 1:
             return self.get_line_right()
         else:
-            raise AttributeError, "no such IR sensor: '%s'" % position
+            raise AttributeError, "no such line sensor: '%s'" % position
 
     def update(self):
         # store all data in a structure?
@@ -149,7 +149,7 @@ class Scribbler(Robot):
             self.set(v)
         return self.check(value)
 
-    def set_motors(self, motor_right, motor_left):
+    def set_motors(self, motor_left, motor_right):
         return self.set(Scribbler.SET_MOTORS, [motor_right, motor_left])
     
     def set_speaker(self, frequency, duration):
