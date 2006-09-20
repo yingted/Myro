@@ -1,0 +1,21 @@
+#VRML V1.0 ascii
+WWWInline {
+name "scribbler castor-1.wrl"
+bboxSize 0.000000 0.000000 0.000000
+bboxCenter 0.000000 0.000000 0.000000
+}
+WWWInline {
+name "scribbler wheel-2.wrl"
+bboxSize 0.000000 0.000000 0.000000
+bboxCenter 0.000000 0.000000 0.000000
+}
+WWWInline {
+name "scribbler wheel-1.wrl"
+bboxSize 0.000000 0.000000 0.000000
+bboxCenter 0.000000 0.000000 0.000000
+}
+WWWInline {
+name "scribbler body-1.wrl"
+bboxSize 0.000000 0.000000 0.000000
+bboxCenter 0.000000 0.000000 0.000000
+}
