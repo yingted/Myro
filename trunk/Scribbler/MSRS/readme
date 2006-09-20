@@ -1,0 +1,10 @@
+Microsoft Robotics Studio (September release) Scribbler services
+
+Put the Scribbler and Scribbler Services directories under:
+C:/Microsoft Robotics Studio (September)/samples
+
+Open Scribbler.csproj and compile with F6
+
+Open ScribblerServices.csproj and compile+run with F5
+
+email me: baxelrod@cc.gatech.edu if you have problems.
