@@ -6,7 +6,7 @@ Distributed under a Shared Source License
 """
 
 __REVISION__ = "$Revision$"
-__AUTHOR__   = "Keith"
+__AUTHOR__   = "Keith and Doug"
 
 import serial, time
 from myro import Robot
@@ -31,6 +31,7 @@ class Scribbler(Robot):
     SET_LED_RIGHT_ON=26
     SET_LED_RIGHT_OFF=27
     SET_SPEAKER=28
+    SET_SPEAKER_2=29
 
     def __init__(self, serialport, baudrate = 38400):
         self.debug = 0
@@ -53,7 +54,13 @@ class Scribbler(Robot):
         self.beep(1200, .16)
 
     def beep(self, frequency, duration):
-        self.set_speaker(int(frequency), int(duration * 1000))
+        if type(frequency) in [float, int]:
+            self.set_speaker(int(frequency), int(duration * 1000))
+        else:
+            # assumes a list of frequencies, max two
+            freg1 = int(frequency[0])
+            freg2 = int(frequency[0])
+            self.set_speaker_2(freq1, freq2, int(duration * 1000))
 
     def translate(self, amount):
         self.lastTranslate = amount
@@ -110,8 +117,12 @@ class Scribbler(Robot):
         else:
             raise AttributeError, "no such line sensor: '%s'" % position
 
+    def readStall(self):
+        return self.get_stall()
+
     def update(self):
-        # store all data in a structure?
+        # FIX: store all data in a structure, remove updates from above read's
+        # and return cached version
         pass
 
 ####################### Private
@@ -157,6 +168,14 @@ class Scribbler(Robot):
                                                 duration % 256,
                                                 frequency >> 8,
                                                 frequency % 256])
+
+    def set_speaker_2(self, freq1, freq2, duration):
+        return self.set(Scribbler.SET_SPEAKER_2, [duration >> 8,
+                                                  duration % 256,
+                                                  freq1 >> 8,
+                                                  freq1 % 256,
+                                                  freq2 >> 8,
+                                                  freq2 % 256])
     
     def set_motors_off(self):
         return self.set(Scribbler.SET_MOTORS_OFF)

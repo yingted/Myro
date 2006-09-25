@@ -4,10 +4,7 @@
 '  {$STAMP BS2}
 '  {$PBASIC 2.5}
 
-
-
 #DEFINE Verbose = 0
-
 
 ' I/O Declarations
 
@@ -29,7 +26,6 @@ MotorLeft     PIN 13
 ObsTxRight    PIN 14
 ObsTxLeft     PIN 15
 
-
 ' I/O Initialization
 
 HIGH LightRight
@@ -45,33 +41,32 @@ LOW MotorLeft
 LOW ObsTxRight
 LOW ObsTxLeft
 
-
-
 ' Global Variables
 
 motor_r VAR Word
 motor_l VAR Word
+var3    VAR Word
 
-inCmd VAR Byte
-index VAR Byte
-temp VAR Byte
-freq VAR Byte
+inCmd   VAR Byte
+index   VAR Byte
+temp    VAR Byte
+freq    VAR Byte
 
-'BAUD CON 84  '9600
-BAUD CON 6  '38400
+'BAUD              CON 84  '9600
+BAUD               CON 6  '38400
 
-OUTPIN CON 16
-INPIN CON 16
+OUTPIN             CON 16
+INPIN              CON 16
 
-GET_INPUT        CON 1
-GET_OPEN_LEFT     CON 2
-GET_OPEN_RIGHT    CON 3
-GET_STALL        CON 4
-GET_LIGHT_LEFT   CON 5
-GET_LIGHT_CENTER CON 6
-GET_LIGHT_RIGHT  CON 7
-GET_LINE_RIGHT   CON 8
-GET_LINE_LEFT    CON 9
+GET_INPUT          CON 1
+GET_OPEN_LEFT      CON 2
+GET_OPEN_RIGHT     CON 3
+GET_STALL          CON 4
+GET_LIGHT_LEFT     CON 5
+GET_LIGHT_CENTER   CON 6
+GET_LIGHT_RIGHT    CON 7
+GET_LINE_RIGHT     CON 8
+GET_LINE_LEFT      CON 9
 
 SET_MOTORS_OFF     CON 20
 SET_MOTORS         CON 21
@@ -82,6 +77,7 @@ SET_LED_CENTER_OFF CON 25
 SET_LED_RIGHT_ON   CON 26
 SET_LED_RIGHT_OFF  CON 27
 SET_SPEAKER        CON 28
+SET_SPEAKER_2      CON 29
 
 'SLEEP 1
 
@@ -100,8 +96,8 @@ BEGIN:
   SERIN INPIN, BAUD, 10000, BEGIN, [STR inCmd\1]
   'LedCenter = 1
   'PAUSE 1000
-  LOOKDOWN inCmd, = [GET_INPUT, GET_LINE_RIGHT, GET_LINE_LEFT, GET_LIGHT_LEFT, GET_LIGHT_CENTER, GET_LIGHT_RIGHT,  GET_OPEN_LEFT, GET_OPEN_RIGHT, GET_STALL, SET_MOTORS_OFF, SET_MOTORS, SET_SPEAKER, SET_LED_LEFT_ON, SET_LED_LEFT_OFF, SET_LED_CENTER_ON, SET_LED_CENTER_OFF, SET_LED_RIGHT_ON, SET_LED_RIGHT_OFF], INDEX
-  BRANCH INDEX,     [GetInput,  GetLineRight,   GetLineLeft,   GetLightLeft,   GetLightCenter,   GetLightRight,    GetObsLeft,   GetObsRight,    GetStall,  MotorsOff,      Motors,     SetSpeaker,  OnLeftLED,       OffLeftLED,       OnCenterLED,       OffCenterLED,       OnRightLED,       OffRightLED]
+  LOOKDOWN inCmd, = [GET_INPUT, GET_LINE_RIGHT, GET_LINE_LEFT, GET_LIGHT_LEFT, GET_LIGHT_CENTER, GET_LIGHT_RIGHT,  GET_OPEN_LEFT, GET_OPEN_RIGHT, GET_STALL, SET_MOTORS_OFF, SET_MOTORS, SET_SPEAKER, SET_SPEAKER_2, SET_LED_LEFT_ON, SET_LED_LEFT_OFF, SET_LED_CENTER_ON, SET_LED_CENTER_OFF, SET_LED_RIGHT_ON, SET_LED_RIGHT_OFF], INDEX
+  BRANCH INDEX,     [GetInput,  GetLineRight,   GetLineLeft,   GetLightLeft,   GetLightCenter,   GetLightRight,    GetObsLeft,   GetObsRight,    GetStall,  MotorsOff,      Motors,     SetSpeaker,  SetSpeaker2, OnLeftLED,       OffLeftLED,       OnCenterLED,       OffCenterLED,       OnRightLED,       OffRightLED]
 TOP:
   SEROUT OUTPIN, BAUD, [InCmd]              ' echo command to tell we are done
   GOTO BEGIN
@@ -184,8 +180,32 @@ SetSpeaker:
      SEROUT OUTPIN, BAUD, [freq]
      motor_l = (motor_l << 8) | freq
 
-
      FREQOUT Speaker, motor_r, motor_l
+     GOTO TOP
+
+SetSpeaker2:
+     SERIN INPIN, BAUD, 10000, TOP, [STR freq\1]
+     SEROUT OUTPIN, BAUD, [freq]
+     motor_r = freq
+     SERIN INPIN, BAUD, 10000, TOP, [STR freq\1]
+     SEROUT OUTPIN, BAUD, [freq]
+     motor_r = (motor_r << 8) | freq
+
+     SERIN INPIN, BAUD, 10000, TOP, [STR freq\1]
+     SEROUT OUTPIN, BAUD, [freq]
+     motor_l = freq
+     SERIN INPIN, BAUD, 10000, TOP, [STR freq\1]
+     SEROUT OUTPIN, BAUD, [freq]
+     motor_l = (motor_l << 8) | freq
+
+     SERIN INPIN, BAUD, 10000, TOP, [STR freq\1]
+     SEROUT OUTPIN, BAUD, [freq]
+     var3 = freq
+     SERIN INPIN, BAUD, 10000, TOP, [STR freq\1]
+     SEROUT OUTPIN, BAUD, [freq]
+     var3 = (var3 << 8) | freq
+
+     FREQOUT Speaker, motor_r, motor_l, var3
      GOTO TOP
 
 Motors:

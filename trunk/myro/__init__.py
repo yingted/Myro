@@ -44,6 +44,9 @@ class Robot(object):
     def readLine(self, position):
         raise AttributeError, "this method needs to be written"
 
+    def readStall(self):
+        raise AttributeError, "this method needs to be written"
+
     def setLED(self, position, value):
         raise AttributeError, "this method needs to be written"
 
@@ -61,10 +64,10 @@ class Robot(object):
     def backward(self, amount):
         return self.translate(-amount)
 
-    def left(self, amount):
+    def turnLeft(self, amount):
         return self.rotate(amount)
     
-    def right(self, amount):
+    def turnRight(self, amount):
         return self.rotate(-amount)
 
     def stop(self):
@@ -158,9 +161,9 @@ def forward(amount):
     return myro.globals._robot.forward(amount)
 def backward(amount):
     return myro.globals._robot.backward(amount)
-def left(amount):
+def turnLeft(amount):
     return myro.globals._robot.left(amount)
-def right(amount):
+def turnRight(amount):
     return myro.globals._robot.right(amount)
 def stop():
     return myro.globals._robot.stop()
@@ -172,6 +175,8 @@ def readIR(pos):
     return myro.globals._robot.readIR(pos)
 def readLine(pos):
     return myro.globals._robot.readLine(pos)
+def readStall():
+    return myro.globals._robot.readStall()
 def update():
     return myro.globals._robot.update()
 def beep(frequency, duration):
