@@ -157,7 +157,7 @@ GetObsLeft:
      GOTO TOP
 
 GetStall:
-     IF (stall = 0) THEN  SEROUT OUTPIN, BAUD, [0] ELSE SEROUT OUTPIN, BAUD, [1]
+     IF (Stall = 0) THEN  SEROUT OUTPIN, BAUD, [0] ELSE SEROUT OUTPIN, BAUD, [1]
      GOTO TOP
 
 MotorsOff:

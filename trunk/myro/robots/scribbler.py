@@ -58,8 +58,8 @@ class Scribbler(Robot):
             self.set_speaker(int(frequency), int(duration * 1000))
         else:
             # assumes a list of frequencies, max two
-            freg1 = int(frequency[0])
-            freg2 = int(frequency[0])
+            freq1 = int(frequency[0])
+            freq2 = int(frequency[1])
             self.set_speaker_2(freq1, freq2, int(duration * 1000))
 
     def translate(self, amount):
