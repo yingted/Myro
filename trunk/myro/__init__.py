@@ -6,7 +6,7 @@ Distributed under a Shared Source License
 """
 
 __REVISION__ = "$Revision$"
-__BUILD__    = "$Build: 4 $"
+__BUILD__    = "$Build: 6 $"
 __VERSION__  = "0.2." + __BUILD__.split()[1]
 __AUTHOR__   = "Doug Blank <dblank@brynmawr.edu>"
 
@@ -116,6 +116,9 @@ class SimScribbler(Robot):
     def readLine(self, pos):
         self._clients[0].update()
         return self._clients[0].line[0].value[pos]
+    def readStall(self):
+        self._clients[0].update()
+        return self._clients[0].stall
     def update(self):
         return self._clients[0].update()
     def beep(self, frequency, duration):
