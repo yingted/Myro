@@ -220,6 +220,10 @@ def turnRight(amount):
     return myro.globals._robot.right(amount)
 def stop():
     return myro.globals._robot.stop()
+def open():
+    return myro.globals._robot.open()
+def close():
+    return myro.globals._robot.close()
 def quit():
     return myro.globals._robot.quit()
 def read(sensor, *pos):
