@@ -161,43 +161,49 @@ class Scribbler(Robot):
         rightPower = (right + 1.0) * 100.0
         self.set_motors(leftPower, rightPower)
 
-    def read(self):
+    def _read(self):
         c = self.ser.read(1)
         x = -1
         if (c != ""):
             x = ord(c)            
         return x
 
-    def check(self, cmd):
-        c = self.read()
+    def _check(self, cmd):
+        c = self._read()
         if (cmd != c) and self.debug: print "   failed check!"
         
-    def write(self, num):
+    def _write(self, num):
         self.ser.write(chr(int(num)))
-        c = self.read()
+        c = self._read()
         if (num != c):
             if self.debug: print "   failed write check!"
             self.ser.flushInput() # flush buffer
 
-    def set(self, value, subvalues = []):
+    def _set(self, value, subvalues = []):
         if self.debug: print "set():", value, subvalues
-        self.write(value)
+        self._write(value)
         for v in subvalues:
             time.sleep(0.05)
-            self.set(v)
-        return self.check(value)
+            self._set(v)
+        return self._check(value)
+
+    def _get(self, value):
+        self._write(value)
+        retval = self._read()
+        self._check(value)
+        return retval
 
     def set_motors(self, motor_left, motor_right):
-        return self.set(Scribbler.SET_MOTORS, [motor_right, motor_left])
+        return self._set(Scribbler.SET_MOTORS, [motor_right, motor_left])
     
     def set_speaker(self, frequency, duration):
-        return self.set(Scribbler.SET_SPEAKER, [duration >> 8,
+        return self._set(Scribbler.SET_SPEAKER, [duration >> 8,
                                                 duration % 256,
                                                 frequency >> 8,
                                                 frequency % 256])
 
     def set_speaker_2(self, freq1, freq2, duration):
-        return self.set(Scribbler.SET_SPEAKER_2, [duration >> 8,
+        return self._set(Scribbler.SET_SPEAKER_2, [duration >> 8,
                                                   duration % 256,
                                                   freq1 >> 8,
                                                   freq1 % 256,
@@ -205,53 +211,47 @@ class Scribbler(Robot):
                                                   freq2 % 256])
     
     def set_motors_off(self):
-        return self.set(Scribbler.SET_MOTORS_OFF)
+        return self._set(Scribbler.SET_MOTORS_OFF)
         
     def set_led_left_on(self):
-        return self.set(Scribbler.SET_LED_LEFT_ON)
+        return self._set(Scribbler.SET_LED_LEFT_ON)
     
     def set_led_left_off(self):
-        return self.set(Scribbler.SET_LED_LEFT_OFF)
+        return self._set(Scribbler.SET_LED_LEFT_OFF)
 
     def set_led_center_on(self):
-        return self.set(Scribbler.SET_LED_CENTER_ON)
+        return self._set(Scribbler.SET_LED_CENTER_ON)
 
     def set_led_center_off(self):
-        return self.set(Scribbler.SET_LED_CENTER_OFF)
+        return self._set(Scribbler.SET_LED_CENTER_OFF)
 
     def set_led_right_on(self):
-        return self.set(Scribbler.SET_LED_RIGHT_ON)
+        return self._set(Scribbler.SET_LED_RIGHT_ON)
 
     def set_led_right_off(self):
-        return self.set(Scribbler.SET_LED_RIGHT_OFF)
-        
-    def get(self, value):
-        self.write(value)
-        retval = self.read()
-        self.check(value)
-        return retval
-        
+        return self._set(Scribbler.SET_LED_RIGHT_OFF)
+                
     def get_open_left(self):
-        return self.get(Scribbler.GET_OPEN_LEFT)
+        return self._get(Scribbler.GET_OPEN_LEFT)
 
     def get_open_right(self):
-        return self.get(Scribbler.GET_OPEN_RIGHT)
+        return self._get(Scribbler.GET_OPEN_RIGHT)
 
     def get_stall(self):
-        return self.get(Scribbler.GET_STALL)
+        return self._get(Scribbler.GET_STALL)
 
     def get_light_left(self):
-        return self.get(Scribbler.GET_LIGHT_LEFT)
+        return self._get(Scribbler.GET_LIGHT_LEFT)
 
     def get_light_center(self):
-        return self.get(Scribbler.GET_LIGHT_CENTER)
+        return self._get(Scribbler.GET_LIGHT_CENTER)
 
     def get_light_right(self):
-        return self.get(Scribbler.GET_LIGHT_RIGHT)
+        return self._get(Scribbler.GET_LIGHT_RIGHT)
 
     def get_line_right(self):
-        return self.get(Scribbler.GET_LINE_RIGHT)
+        return self._get(Scribbler.GET_LINE_RIGHT)
 
     def get_line_left(self):
-        return self.get(Scribbler.GET_LINE_LEFT)
+        return self._get(Scribbler.GET_LINE_LEFT)
 

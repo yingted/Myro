@@ -6,7 +6,7 @@ Distributed under a Shared Source License
 """
 
 __REVISION__ = "$Revision$"
-__BUILD__    = "$Build: 0 $"
+__BUILD__    = "$Build: 1 $"
 __VERSION__  = "0.3." + __BUILD__.split()[1]
 __AUTHOR__   = "Doug Blank <dblank@brynmawr.edu>"
 
@@ -58,18 +58,34 @@ class Robot(object):
 
 ### The rest of these methods are just rearrangements of the above
 
-    def read(self, sensor, position = None):
+    def read(self, sensor, *positions):
         sensor = sensor.lower()
-        if sensor == "light":
-            return self.readLight(position)
-        elif sensor == "ir":
-            return self.readIR(position)
-        elif sensor == "line":
-            return self.readLine(position)
-        elif sensor == "stall":
+        if sensor == "stall":
             return self.readStall()
         else:
-            raise ("invalid sensor name: '%s'" % sensor)
+            retvals = []
+            if len(positions) == 0:
+                if sensor == "light":
+                    positions = range(3)
+                elif sensor == "ir":
+                    positions = range(2)
+                elif sensor == "line":
+                    positions = range(2)
+                else:
+                    raise ("invalid sensor name: '%s'" % sensor)
+            for position in positions:
+                if sensor == "light":
+                    retvals.append(self.readLight(position))
+                elif sensor == "ir":
+                    retvals.append(self.readIR(position))
+                elif sensor == "line":
+                    retvals.append(self.readLine(position))
+                else:
+                    raise ("invalid sensor name: '%s'" % sensor)
+            if len(retvals) == 1:
+                return retvals[0]
+            else:
+                return retvals
 
     def set(self, item, position, value):
         item = item.lower()
@@ -206,8 +222,8 @@ def stop():
     return myro.globals._robot.stop()
 def quit():
     return myro.globals._robot.quit()
-def read(sensor, pos = None):
-    return myro.globals._robot.read(sensor, pos)
+def read(sensor, *pos):
+    return myro.globals._robot.read(sensor, *pos)
 def readLight(pos):
     return myro.globals._robot.readLight(pos)
 def readIR(pos):
