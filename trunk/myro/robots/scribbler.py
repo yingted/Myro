@@ -37,30 +37,32 @@ class Scribbler(Robot):
         self.debug = 0
         self.lastTranslate = 0
         self.lastRotate    = 0
-        self.ser = serial.Serial(serialport, timeout=.5)
-        self.ser.baudrate = baudrate
-        self.ser.flushInput()
-        self.ser.flushOutput()
+        self.serialPort = serialport
+        self.baudRate = baudrate
+        self.open()
         time.sleep(1)
         self.restart()
-
+    def open(self):
+        self.ser = serial.Serial(self.serialPort, timeout=.5)
+        self.ser.baudrate = self.baudRate
+        self.ser.flushInput()
+        self.ser.flushOutput()
+    def close(self):
+        self.ser.close()
     def restart(self):
         self.set_motors_off()
         self.set_led_right_on()
         self.set_led_center_on()
         self.set_led_left_on()
-        self.beep(1600, .16)
-        self.beep(800, .1)
-        self.beep(1200, .16)
+        self.beep(.16, 1600)
+        self.beep(.10, 800)
+        self.beep(.16, 1200)
 
-    def beep(self, frequency, duration):
-        if type(frequency) in [float, int]:
+    def beep(self, duration, frequency, frequency2 = None):
+        if frequency2 == None:
             self.set_speaker(int(frequency), int(duration * 1000))
         else:
-            # assumes a list of frequencies, max two
-            freq1 = int(frequency[0])
-            freq2 = int(frequency[1])
-            self.set_speaker_2(freq1, freq2, int(duration * 1000))
+            self.set_speaker_2(int(frequency), int(frequency2), int(duration * 1000))
 
     def translate(self, amount):
         self.lastTranslate = amount
@@ -79,27 +81,52 @@ class Scribbler(Robot):
         self.ser.close()
 
     def setLED(self, position, value):
-        if position == "center":
-            if value: return self.set_led_center_on()
-            else:        return self.set_led_center_off()
-        elif position == "left":
-            if value: return self.set_led_left_on()
-            else:        return self.set_led_left_off()
-        elif position == "right":
-            if value: return self.set_led_right_on()
-            else:        return self.set_led_right_off()
+        if type(position) in [int, float]:
+            if position == 2:
+                if value: return self.set_led_center_on()
+                else:        return self.set_led_center_off()
+            elif position == 0:
+                if value: return self.set_led_left_on()
+                else:        return self.set_led_left_off()
+            elif position == 1:
+                if value: return self.set_led_right_on()
+                else:        return self.set_led_right_off()
+            else:
+                raise AttributeError, "no such LED: '%s'" % position
         else:
-            raise AttributeError, "no such LED: '%s'" % position
+            position = position.lower()
+            if position == "center":
+                if value: return self.set_led_center_on()
+                else:        return self.set_led_center_off()
+            elif position == "left":
+                if value: return self.set_led_left_on()
+                else:        return self.set_led_left_off()
+            elif position == "right":
+                if value: return self.set_led_right_on()
+                else:        return self.set_led_right_off()
+            else:
+                raise AttributeError, "no such LED: '%s'" % position
 
     def readLight(self, position):
-        if position == 0:
-            return self.get_light_left()
-        elif position == 1:
-            return self.get_light_right()
-        elif position == 2:
-            return self.get_light_center()
+        if type(position) in [float, int]:
+            if position == 0:
+                return self.get_light_left()
+            elif position == 1:
+                return self.get_light_right()
+            elif position == 2:
+                return self.get_light_center()
+            else:
+                raise AttributeError, "no such light sensor: '%s'" % position
         else:
-            raise AttributeError, "no such light sensor: '%s'" % position
+            position = position.lower()
+            if position == "center":
+                return self.get_light_center()
+            elif position == "left":
+                return self.get_light_left()
+            elif position == "right":
+                return self.get_light_right()
+            else:
+                raise AttributeError, "no such light sensor: '%s'" % position
 
     def readIR(self, position):
         if position == 0:

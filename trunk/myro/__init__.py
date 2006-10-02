@@ -6,8 +6,8 @@ Distributed under a Shared Source License
 """
 
 __REVISION__ = "$Revision$"
-__BUILD__    = "$Build: 6 $"
-__VERSION__  = "0.2." + __BUILD__.split()[1]
+__BUILD__    = "$Build: 0 $"
+__VERSION__  = "0.3." + __BUILD__.split()[1]
 __AUTHOR__   = "Doug Blank <dblank@brynmawr.edu>"
 
 import sys, atexit, time, os
@@ -32,7 +32,7 @@ class Robot(object):
     def quit(self):
         raise AttributeError, "this method needs to be written"
 
-    def beep(self, frequency, duration):
+    def beep(self, duration, frequency, frequency2 = None):
         raise AttributeError, "this method needs to be written"
 
     def readLight(self, position):
@@ -57,6 +57,38 @@ class Robot(object):
         raise AttributeError, "this method needs to be written"
 
 ### The rest of these methods are just rearrangements of the above
+
+    def read(self, sensor, position = None):
+        sensor = sensor.lower()
+        if sensor == "light":
+            return self.readLight(position)
+        elif sensor == "ir":
+            return self.readIR(position)
+        elif sensor == "line":
+            return self.readLine(position)
+        elif sensor == "stall":
+            return self.readStall()
+        else:
+            raise ("invalid sensor name: '%s'" % sensor)
+
+    def set(self, item, position, value):
+        item = item.lower()
+        if item == "led":
+            return self.setLED(position, value)
+        else:
+            raise ("invalid item name: '%s'" % item)
+
+    def turn(self, direction, value = .8):
+        if type(direction) in [float, int]:
+            return self.rotate(direction)
+        else:
+            direction = direction.lower()
+            if direction == "left":
+                return self.turnLeft(value)
+            elif direction == "right":
+                return self.turnRight(value)
+            elif direction == "straight":
+                return self.rotate(0)
 
     def forward(self, amount):
         return self.translate(amount)
@@ -121,7 +153,7 @@ class SimScribbler(Robot):
         return self._clients[0].stall
     def update(self):
         return self._clients[0].update()
-    def beep(self, frequency, duration):
+    def beep(self, duration, frequency, frequency2 = None):
         print chr(7)
     def setLED(self, position, value):
         pass
@@ -164,6 +196,8 @@ def forward(amount):
     return myro.globals._robot.forward(amount)
 def backward(amount):
     return myro.globals._robot.backward(amount)
+def turn(direction, amount = .8):
+    return myro.globals._robot.turn(direction, amount)
 def turnLeft(amount):
     return myro.globals._robot.left(amount)
 def turnRight(amount):
@@ -172,6 +206,8 @@ def stop():
     return myro.globals._robot.stop()
 def quit():
     return myro.globals._robot.quit()
+def read(sensor, pos = None):
+    return myro.globals._robot.read(sensor, pos)
 def readLight(pos):
     return myro.globals._robot.readLight(pos)
 def readIR(pos):
@@ -182,8 +218,10 @@ def readStall():
     return myro.globals._robot.readStall()
 def update():
     return myro.globals._robot.update()
-def beep(frequency, duration):
-    return myro.globals._robot.beep(frequency, duration)
+def beep(self, duration, frequency, frequency2 = None):
+    return myro.globals._robot.beep(duration, frequency, frequency2)
+def set(item, position, value):
+    return myro.globals._robot.set(item, position, value)
 def setLED(position, value):
     return myro.globals._robot.setLED(position, value)
 def motors(left, right):
