@@ -103,7 +103,7 @@ class Robot(object):
                 return self.turnLeft(value)
             elif direction == "right":
                 return self.turnRight(value)
-            elif direction == "straight":
+            elif direction in ["straight", "center"]:
                 return self.rotate(0)
 
     def forward(self, amount):
