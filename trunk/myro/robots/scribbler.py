@@ -11,6 +11,16 @@ __AUTHOR__   = "Keith and Doug"
 import serial, time
 from myro import Robot
 
+def isTrue(value):
+    """
+    Returns True if value is something we consider to be "on".
+    Otherwise, return False.
+    """
+    if type(value) == str:
+        return (value.lower() == "on")
+    elif value: return True
+    return False
+
 class Scribbler(Robot):
     GET_INPUT=1
     GET_OPEN_LEFT=2
@@ -83,27 +93,27 @@ class Scribbler(Robot):
     def setLED(self, position, value):
         if type(position) in [int, float]:
             if position == 2:
-                if value: return self.set_led_center_on()
-                else:        return self.set_led_center_off()
+                if isTrue(value): return self.set_led_center_on()
+                else:             return self.set_led_center_off()
             elif position == 0:
-                if value: return self.set_led_left_on()
-                else:        return self.set_led_left_off()
+                if isTrue(value): return self.set_led_left_on()
+                else:             return self.set_led_left_off()
             elif position == 1:
-                if value: return self.set_led_right_on()
-                else:        return self.set_led_right_off()
+                if isTrue(value): return self.set_led_right_on()
+                else:             return self.set_led_right_off()
             else:
                 raise AttributeError, "no such LED: '%s'" % position
         else:
             position = position.lower()
             if position == "center":
-                if value: return self.set_led_center_on()
-                else:        return self.set_led_center_off()
+                if isTrue(value): return self.set_led_center_on()
+                else:             return self.set_led_center_off()
             elif position == "left":
-                if value: return self.set_led_left_on()
-                else:        return self.set_led_left_off()
+                if isTrue(value): return self.set_led_left_on()
+                else:             return self.set_led_left_off()
             elif position == "right":
-                if value: return self.set_led_right_on()
-                else:        return self.set_led_right_off()
+                if isTrue(value): return self.set_led_right_on()
+                else:             return self.set_led_right_off()
             else:
                 raise AttributeError, "no such LED: '%s'" % position
 
