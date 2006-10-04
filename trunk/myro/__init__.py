@@ -248,3 +248,39 @@ def motors(left, right):
     return myro.globals._robot.motors(left, right)
 def restart():
     return myro.globals._robot.restart()
+
+# --------------------------------------------------------
+# Error handler:
+import traceback
+try:
+    import Tkinter
+except:
+    Tkinter = None
+
+class HelpWindow(Tkinter.Toplevel): 
+    def __init__(self):
+        root = None
+        Tkinter.Toplevel.__init__(self, root)
+        root.withdraw()
+        self.frame = Tkinter.Frame(self)
+        self.frame.pack(side = 'bottom', expand = "yes", anchor = "n",
+                        fill = 'both')
+
+def _myroExceptionHandler(type, value, tb):
+    if Tkinter == None:
+        lines = traceback.format_exception(type, value, tb)
+        print "---------------------Traceback lines-----------------------"
+        for line in lines:
+            print line.rstrip()
+        print "-----------------------------------------------------------"
+    else: # Tkinter
+        # make a window
+        #win = HelpWindow()
+        lines = traceback.format_exception(type, value, tb)
+        print "---------------------Traceback lines-----------------------"
+        for line in lines:
+            print line.rstrip()
+        print "-----------------------------------------------------------"
+            
+sys.excepthook = _myroExceptionHandler
+# --------------------------------------------------------
