@@ -75,6 +75,7 @@ class Thread(threading.Thread):
         self.gui.destroy()
 
 import Tkinter, time, math, random
+
 import myro.globals
 try:
     import cPickle as pickle

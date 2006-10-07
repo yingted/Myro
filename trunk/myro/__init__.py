@@ -135,6 +135,8 @@ class SimScribbler(Robot):
         myro.globals._myropath, directory = os.path.split(globalspath)
         self._simulator = myro.simulator.INIT(
             os.path.join(myro.globals._myropath, "worlds", "MyroWorld"))
+        if (tkSnack):
+            tkSnack.initializeSnack(myro.globals._gui)
         for port in self._simulator.ports:
             print "Simulator starting listener on port", port, "..."
             thread = myro.simulator.Thread(self._simulator, port)
@@ -170,6 +172,13 @@ class SimScribbler(Robot):
     def update(self):
         return self._clients[0].update()
     def beep(self, duration, frequency, frequency2 = None):
+        if (tkSnack):
+            snd = tkSnack.Sound()
+            filt = tkSnack.Filter('generator', frequency, 30000,
+                                  0.0, 'sine', int(11500*duration))
+            snd.stop()
+            snd.play(filter=filt, blocking=1)
+
         print chr(7)
     def setLED(self, position, value):
         pass
@@ -256,6 +265,11 @@ try:
     import Tkinter
 except:
     Tkinter = None
+
+try:
+    import tkSnack
+except:
+    tkSnack = None
 
 class HelpWindow(Tkinter.Toplevel): 
     def __init__(self):
