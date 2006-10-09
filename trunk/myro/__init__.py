@@ -6,12 +6,36 @@ Distributed under a Shared Source License
 """
 
 __REVISION__ = "$Revision$"
-__BUILD__    = "$Build: 1 $"
+__BUILD__    = "$Build: 2 $"
 __VERSION__  = "0.3." + __BUILD__.split()[1]
 __AUTHOR__   = "Doug Blank <dblank@brynmawr.edu>"
 
-import sys, atexit, time, os
+import sys, atexit, time, os, random
 import myro.globals
+
+def wait(seconds):
+    """
+    Wrapper for time.sleep() so that we may later overload.
+    """
+    return time.sleep(seconds)
+
+def currentTime():
+    """
+    Returns current time in seconds since 
+    """
+    return time.time()
+
+def flipCoin():
+    """
+    Randomly returns "heads" or "tails".
+    """
+    return ("heads", "tails")[random.randrange(2)]
+
+def randomNumber():
+    """
+    Returns a number between 0 (inclusive) and 1 (exclusive).
+    """
+    return random.random()
 
 class Robot(object):
     def __init__(self):
