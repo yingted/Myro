@@ -22,7 +22,7 @@ class Chat:
         self.client.auth(jid.getNode(),self.masterPassword)
         print "Registering '%s'..." % self.name
         self.register(self.name, self.password)
-        self.close()
+        self.client.disconnect()
         self.open()
 
     def register(self, name, password):
