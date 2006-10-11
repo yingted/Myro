@@ -82,7 +82,12 @@ class Chat:
 	Open a connection to the server.
 	"""
         print "Authenticating password for '%s'..." % self.name
-        self.client.auth(self.name, self.password)
+        try:
+            self.client.auth(self.name, self.password)
+        except IOError:
+            self.client = xmpp.Client(self.server, debug=self.debug)
+            self.client.connect()
+            self.client.auth(self.name, self.password)
         print "Registering message handler..."
         self.client.RegisterHandler('message', self.messageCB) 
         self.client.sendInitPresence()
