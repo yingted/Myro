@@ -1,5 +1,13 @@
 """
-Code to allow users to chat with each other.
+Module that supports robot-to-robot communication via IM.
+
+This module uses the jabber protocol for allowing
+robot-to-robot communication. You can run your own
+server and use that, as long as it supports
+open registration of new users.
+
+See the Myro Technical Guide for more details at:
+http://blog.roboteducation.org/wiki/
 """
 
 import xmpp, threading, time
@@ -8,17 +16,29 @@ __version__ = "$Revision$"
 __author__  = "Doug Blank <dblank@cs.brynmawr.edu>"
 
 class Chat:
-    def __init__(self, name, password, server = None, debug = []):
-	""" Constructs a connection for communicating to the IM server. """
+    def __init__(self, name, password, debug = []):
+	"""
+        Constructs a connection for communicating to an IM server.
+
+        name: can be "laura" to login into the default IM server,
+        or can be "laura@yourserver.edu" to connect to the server
+        running at "yourserver.edu".
+
+        password: any password of your choosing. First time use
+        will require the password to match the username on subsequent
+        use.
+
+        debug: can be [] for no debugging information, or can be
+        ['always'] to get see all of the debugging information.
+        """
         self.lock = threading.Lock()
         self.messages = []
         # Start a thread up in here
-        self.name = name
         self.password = password
-	if server == None:
-	    self.server = "blog.roboteducation.org"
+	if "@" not in name:
+	    self.name, self.server = name, "blog.roboteducation.org"
 	else:
-            self.server = server
+            self.name, self.server = name.split("@")
 	self.debug = debug
         self.client = xmpp.Client(self.server, debug=self.debug)
         print "Making connection to server..."
