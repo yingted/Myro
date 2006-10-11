@@ -24,8 +24,16 @@ class RemoteRobot:
         self.chat = Chat("randomname", "password", debug)
 
     def _eval(self, item, *args, **kwargs):
-        # FIX: build arg and keyword strings
-        self.chat.send(self.name, ("command %d " % self.commandID) + item + "(%s)" % args)
+        commandArgs = ""
+        for a in args:
+            if commandArgs != "":
+                commandArgs += ", "
+            commandArgs += str(a)
+        for a in kwargs.keys():
+            if commandArgs != "":
+                commandArgs += ", "
+            commandArgs += a + "=" + str(kwargs[a])
+        self.chat.send(self.name, ("command %d " % self.commandID) + item + "(" + commandArgs + ")")
         self.commandID += 1
 
     def __getattr__(self, item):
