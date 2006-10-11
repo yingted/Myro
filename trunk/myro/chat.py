@@ -15,6 +15,51 @@ import xmpp, threading, time
 __version__ = "$Revision$"
 __author__  = "Doug Blank <dblank@cs.brynmawr.edu>"
 
+class RemoteRobot:
+    def __init__(self, name, password, debug = []):
+        self.commandID = 0
+        self.name = name
+        self.password = password
+        self.returnValues = {}
+        self.chat = Chat("randomname", "password", debug)
+
+    def _eval(self, item, *args, **kwargs):
+        # FIX: build arg and keyword strings
+        self.chat.send(self.name, ("command %d " % self.commandID) + item + "(%s)" % args)
+        self.commandID += 1
+
+    def __getattr__(self, item):
+        def getArgs(*args, **kwargs):
+            return self._eval(item, *args, **kwargs)
+        return getArgs
+
+class LocalRobot:
+    def __init__(self, robot, name, password, debug = []):
+        self.commandID = 0
+        self.chat = Chat(name, password, debug)
+        self.robot = robot
+
+    def process(self):
+        messages = self.chat.receive()
+        for m in messages:
+            message = m.getBody()
+            if message.startswith("command "):
+                text, id, command = message.split(" ", 2)
+                print "self.robot." + command
+                retval = eval("self.robot." + command)
+                #self.returnValues[id] = retval
+            elif message.startswith("robot."):
+                # For user IM messages
+                print "self." + command
+                retval = eval("self.robot." + command)
+                self.chat.send(m.getFrom().getNode(), str(retval))
+
+    def run(self):
+        while 1:
+            self.process()
+            time.sleep(1)
+        
+
 class Chat:
     def __init__(self, name, password, debug = []):
 	"""
