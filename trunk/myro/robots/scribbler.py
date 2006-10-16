@@ -87,9 +87,6 @@ class Scribbler(Robot):
         self.lastRotate = rotate
         self.adjustSpeed()
 
-    def quit(self):
-        self.ser.close()
-
     def setLED(self, position, value):
         if type(position) in [int, float]:
             if position == 2:

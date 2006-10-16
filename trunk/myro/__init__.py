@@ -6,9 +6,9 @@ Distributed under a Shared Source License
 """
 
 __REVISION__ = "$Revision$"
-__BUILD__    = "$Build: 5 $"
+__BUILD__    = "$Build: 6 $"
 __VERSION__  = "0.3." + __BUILD__.split()[1]
-__AUTHOR__   = "Doug Blank <dblank@brynmawr.edu>"
+__AUTHOR__   = "Doug Blank <dblank@cs.brynmawr.edu>"
 
 import sys, atexit, time, os, random
 import myro.globals
@@ -51,9 +51,6 @@ class Robot(object):
         raise AttributeError, "this method needs to be written"
 
     def move(self, translate, rotate):
-        raise AttributeError, "this method needs to be written"
-
-    def quit(self):
         raise AttributeError, "this method needs to be written"
 
     def beep(self, duration, frequency, frequency2 = None):
@@ -179,8 +176,6 @@ class SimScribbler(Robot):
         return self._clients[0].rotate(amount)
     def move(self, translate, rotate):
         return self._clients[0].move(translate, rotate)
-    def quit(self):
-        return self._clients[0].move("quit")
     def readLight(self, pos):
         self._clients[0].update()
         return self._clients[0].light[0].value[pos]
@@ -213,7 +208,7 @@ class SimScribbler(Robot):
 def _cleanup():
     if myro.globals._robot != None:
         #myro.globals._robot.stop() # causes hang?!
-        myro.globals._robot.quit()
+        myro.globals._robot.close()
     if myro.globals._simulator != None:
        myro.globals._simulator.destroy()
 
@@ -253,12 +248,10 @@ def turnRight(amount):
     return myro.globals._robot.right(amount)
 def stop():
     return myro.globals._robot.stop()
-def open():
+def openConnection():
     return myro.globals._robot.open()
-def close():
+def closeConnection():
     return myro.globals._robot.close()
-def quit():
-    return myro.globals._robot.quit()
 def read(sensor, *pos):
     return myro.globals._robot.read(sensor, *pos)
 def readLight(pos):
