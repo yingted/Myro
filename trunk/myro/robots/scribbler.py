@@ -9,6 +9,7 @@ __REVISION__ = "$Revision$"
 __AUTHOR__   = "Keith and Doug"
 
 import serial, time
+import signal
 from myro import Robot
 
 def isTrue(value):
@@ -51,14 +52,22 @@ class Scribbler(Robot):
         self.baudRate = baudrate
         self.open()
         time.sleep(1)
+        signal.signal(signal.SIGINT, lambda *args: self.quit())
         self.restart()
+        
     def open(self):
         self.ser = serial.Serial(self.serialPort, timeout=5)
         self.ser.baudrate = self.baudRate
         self.ser.flushInput()
         self.ser.flushOutput()
+
+    def quit(self):
+        self.stop()
+        self.close()
+
     def close(self):
         self.ser.close()
+        
     def restart(self):
         self.set_motors_off()
         self.set_led_right_on()

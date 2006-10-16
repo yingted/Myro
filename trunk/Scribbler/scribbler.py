@@ -3,6 +3,7 @@ import time
 import logging
 import sys
 import thread
+import signal
 from threading import *
 
 
@@ -51,6 +52,7 @@ class Scribbler:
         self.ser.flushInput()
         self.ser.flushOutput()
         time.sleep(1)
+        # Set the signal handler
 
     def init(self):
         self.set_motors_off()

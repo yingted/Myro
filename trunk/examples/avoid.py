@@ -36,4 +36,3 @@ def brain():
     # end of brain
 
 brain()
-robot.close()
