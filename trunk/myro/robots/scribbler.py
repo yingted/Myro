@@ -44,7 +44,7 @@ class Scribbler(Robot):
     SET_SPEAKER_2=29
 
     def __init__(self, serialport, baudrate = 38400):
-        self.debug = 0
+        self.debug = 1
         self.lastTranslate = 0
         self.lastRotate    = 0
         self.serialPort = serialport
@@ -53,7 +53,7 @@ class Scribbler(Robot):
         time.sleep(1)
         self.restart()
     def open(self):
-        self.ser = serial.Serial(self.serialPort, timeout=.5)
+        self.ser = serial.Serial(self.serialPort, timeout=5)
         self.ser.baudrate = self.baudRate
         self.ser.flushInput()
         self.ser.flushOutput()
@@ -170,6 +170,11 @@ class Scribbler(Robot):
 
     def _read(self):
         c = self.ser.read(1)
+        if self.debug:
+            if (c != ""):
+                print "_read(): ", ord(c)
+            else:
+                print "_read(): "
         x = -1
         if (c != ""):
             x = ord(c)            
@@ -190,8 +195,9 @@ class Scribbler(Robot):
         if self.debug: print "set():", value, subvalues
         self._write(value)
         for v in subvalues:
-            time.sleep(0.05)
-            self._set(v)
+            #time.sleep(0.05)
+            #self._set(v)
+            self._write(v)
         return self._check(value)
 
     def _get(self, value):

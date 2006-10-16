@@ -14,12 +14,12 @@
 from myro import *
 
 # First connect to the robot...
-comPort = "com4"
+comPort = "com7"
 print "Connecting to robot over", comPort, "...",
-#robot = Scribbler(comPort)
-robot = SimScribbler("ID1212")
+robot = Scribbler(comPort)
+#robot = SimScribbler("ID1212")
 print "connected!"
-time.sleep(2)
+time.sleep(1)
 
 def brain():
 
@@ -33,7 +33,7 @@ def brain():
         else:
             robot.move(0.5, 0.0)
         
-
     # end of brain
 
 brain()
+robot.close()

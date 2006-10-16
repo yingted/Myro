@@ -79,6 +79,7 @@ SET_LED_RIGHT_OFF  CON 27
 SET_SPEAKER        CON 28
 SET_SPEAKER_2      CON 29
 
+TIMEOUT            CON 10000 ' in ms
 'SLEEP 1
 
 'TOP2:
@@ -90,10 +91,15 @@ SET_SPEAKER_2      CON 29
 '  SLEEP 1
 '  GOTO TOP2
 
+INIT:
+  ' If we want to stop the robot after a long time with no contact
+  ' uncomment the below line
+  'GOTO MotorsOff ' Will then jump to BEGIN -- mmm spaghetti
+
 BEGIN:
   'SEROUT 16, BAUD, 10, ["Choose 1 2 3", " ", CR]
   'LedCenter = 0
-  SERIN INPIN, BAUD, 10000, BEGIN, [STR inCmd\1]
+  SERIN INPIN, BAUD, TIMEOUT, INIT, [STR inCmd\1]
   'LedCenter = 1
   'PAUSE 1000
   LOOKDOWN inCmd, = [GET_INPUT, GET_LINE_RIGHT, GET_LINE_LEFT, GET_LIGHT_LEFT, GET_LIGHT_CENTER, GET_LIGHT_RIGHT,  GET_OPEN_LEFT, GET_OPEN_RIGHT, GET_STALL, SET_MOTORS_OFF, SET_MOTORS, SET_SPEAKER, SET_SPEAKER_2, SET_LED_LEFT_ON, SET_LED_LEFT_OFF, SET_LED_CENTER_ON, SET_LED_CENTER_OFF, SET_LED_RIGHT_ON, SET_LED_RIGHT_OFF], INDEX
@@ -161,59 +167,61 @@ GetStall:
      GOTO TOP
 
 MotorsOff:
-     LOW MotorRight
-     LOW MotorLeft
+     motor_r = 2000
+     motor_l = 2000
+     PULSOUT MotorRight, motor_r
+     PULSOUT MotorLeft, motor_l
      GOTO TOP
 
 SetSpeaker:
-     SERIN INPIN, BAUD, 10000, TOP, [STR freq\1]
-     SEROUT OUTPIN, BAUD, [freq]
+     SERIN INPIN, BAUD, TIMEOUT, INIT, [STR freq\1]
+     'SEROUT OUTPIN, BAUD, [freq]
      motor_r = freq
-     SERIN INPIN, BAUD, 10000, TOP, [STR freq\1]
-     SEROUT OUTPIN, BAUD, [freq]
+     SERIN INPIN, BAUD, TIMEOUT, INIT, [STR freq\1]
+     'SEROUT OUTPIN, BAUD, [freq]
      motor_r = (motor_r << 8) | freq
 
-     SERIN INPIN, BAUD, 10000, TOP, [STR freq\1]
-     SEROUT OUTPIN, BAUD, [freq]
+     SERIN INPIN, BAUD, TIMEOUT, INIT, [STR freq\1]
+     'SEROUT OUTPIN, BAUD, [freq]
      motor_l = freq
-     SERIN INPIN, BAUD, 10000, TOP, [STR freq\1]
-     SEROUT OUTPIN, BAUD, [freq]
+     SERIN INPIN, BAUD, TIMEOUT, INIT, [STR freq\1]
+     'SEROUT OUTPIN, BAUD, [freq]
      motor_l = (motor_l << 8) | freq
 
      FREQOUT Speaker, motor_r, motor_l
      GOTO TOP
 
 SetSpeaker2:
-     SERIN INPIN, BAUD, 10000, TOP, [STR freq\1]
-     SEROUT OUTPIN, BAUD, [freq]
+     SERIN INPIN, BAUD, TIMEOUT, INIT, [STR freq\1]
+     'SEROUT OUTPIN, BAUD, [freq]
      motor_r = freq
-     SERIN INPIN, BAUD, 10000, TOP, [STR freq\1]
-     SEROUT OUTPIN, BAUD, [freq]
+     SERIN INPIN, BAUD, TIMEOUT, INIT, [STR freq\1]
+     'SEROUT OUTPIN, BAUD, [freq]
      motor_r = (motor_r << 8) | freq
 
-     SERIN INPIN, BAUD, 10000, TOP, [STR freq\1]
-     SEROUT OUTPIN, BAUD, [freq]
+     SERIN INPIN, BAUD, TIMEOUT, INIT, [STR freq\1]
+     'SEROUT OUTPIN, BAUD, [freq]
      motor_l = freq
-     SERIN INPIN, BAUD, 10000, TOP, [STR freq\1]
-     SEROUT OUTPIN, BAUD, [freq]
+     SERIN INPIN, BAUD, TIMEOUT, INIT, [STR freq\1]
+     'SEROUT OUTPIN, BAUD, [freq]
      motor_l = (motor_l << 8) | freq
 
-     SERIN INPIN, BAUD, 10000, TOP, [STR freq\1]
-     SEROUT OUTPIN, BAUD, [freq]
+     SERIN INPIN, BAUD, TIMEOUT, INIT, [STR freq\1]
+     'SEROUT OUTPIN, BAUD, [freq]
      var3 = freq
-     SERIN INPIN, BAUD, 10000, TOP, [STR freq\1]
-     SEROUT OUTPIN, BAUD, [freq]
+     SERIN INPIN, BAUD, TIMEOUT, INIT, [STR freq\1]
+     'SEROUT OUTPIN, BAUD, [freq]
      var3 = (var3 << 8) | freq
 
      FREQOUT Speaker, motor_r, motor_l, var3
      GOTO TOP
 
 Motors:
-     SERIN INPIN, BAUD, 10000, TOP, [STR temp\1]
-     SEROUT OUTPIN, BAUD, [temp]
+     SERIN INPIN, BAUD, TIMEOUT, INIT, [STR temp\1]
+     'SEROUT OUTPIN, BAUD, [temp]
       motor_r = (temp + 100) * 10
-     SERIN INPIN, BAUD, 10000, TOP, [STR temp\1]
-     SEROUT OUTPIN, BAUD, [temp]
+     SERIN INPIN, BAUD, TIMEOUT, INIT, [STR temp\1]
+     'SEROUT OUTPIN, BAUD, [temp]
      motor_l = (temp + 100) * 10
      PULSOUT MotorRight, motor_r
      PULSOUT MotorLeft, motor_l
