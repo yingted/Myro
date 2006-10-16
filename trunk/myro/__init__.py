@@ -6,12 +6,16 @@ Distributed under a Shared Source License
 """
 
 __REVISION__ = "$Revision$"
-__BUILD__    = "$Build: 6 $"
+__BUILD__    = "$Build: 7 $"
 __VERSION__  = "0.3." + __BUILD__.split()[1]
 __AUTHOR__   = "Doug Blank <dblank@cs.brynmawr.edu>"
 
 import sys, atexit, time, os, random
 import myro.globals
+try:
+    import tkSnack
+except:
+    tkSnack = None
 
 def wait(seconds):
     """
@@ -190,6 +194,10 @@ class SimScribbler(Robot):
         return self._clients[0].stall
     def update(self):
         return self._clients[0].update()
+    def close(self):
+        pass
+    def open(self):
+	pass
     def beep(self, duration, frequency, frequency2 = None):
         if (tkSnack):
             snd = tkSnack.Sound()
@@ -197,8 +205,8 @@ class SimScribbler(Robot):
                                   0.0, 'sine', int(11500*duration))
             snd.stop()
             snd.play(filter=filt, blocking=1)
-
-        print chr(7)
+	else:
+	    print chr(7)
     def setLED(self, position, value):
         pass
     def restart(self):
@@ -207,7 +215,6 @@ class SimScribbler(Robot):
 # functions:
 def _cleanup():
     if myro.globals._robot != None:
-        #myro.globals._robot.stop() # causes hang?!
         myro.globals._robot.close()
     if myro.globals._simulator != None:
        myro.globals._simulator.destroy()
@@ -277,16 +284,12 @@ def restart():
 
 # --------------------------------------------------------
 # Error handler:
+# --------------------------------------------------------
 import traceback
 try:
     import Tkinter
 except:
     Tkinter = None
-
-try:
-    import tkSnack
-except:
-    tkSnack = None
 
 class HelpWindow(Tkinter.Toplevel): 
     def __init__(self):
@@ -300,18 +303,25 @@ class HelpWindow(Tkinter.Toplevel):
 def _myroExceptionHandler(type, value, tb):
     if Tkinter == None:
         lines = traceback.format_exception(type, value, tb)
-        print "---------------------Traceback lines-----------------------"
+        print "Myro Traceback: -------------------------------------------"
         for line in lines:
             print line.rstrip()
-        print "-----------------------------------------------------------"
     else: # Tkinter
         # make a window
         #win = HelpWindow()
         lines = traceback.format_exception(type, value, tb)
-        print "---------------------Traceback lines-----------------------"
+        print "Myro Traceback: -------------------------------------------"
         for line in lines:
             print line.rstrip()
-        print "-----------------------------------------------------------"
-            
 sys.excepthook = _myroExceptionHandler
+# --------------------------------------------------------
+# Control-C signal handler:
+# --------------------------------------------------------
+import signal
+def _interruptHandler(signum, frame):
+    if myro.globals._robot != None:
+        print "Stopping robot..."
+        myro.globals._robot.stop()
+    raise KeyboardInterrupt
+signal.signal(signal.SIGINT, _interruptHandler)
 # --------------------------------------------------------

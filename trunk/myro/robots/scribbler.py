@@ -9,7 +9,6 @@ __REVISION__ = "$Revision$"
 __AUTHOR__   = "Keith and Doug"
 
 import serial, time
-import signal
 from myro import Robot
 
 def isTrue(value):
@@ -52,7 +51,6 @@ class Scribbler(Robot):
         self.baudRate = baudrate
         self.open()
         time.sleep(1)
-        signal.signal(signal.SIGINT, lambda *args: self.quit())
         self.restart()
         
     def open(self):
