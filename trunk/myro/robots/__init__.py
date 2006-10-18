@@ -214,6 +214,18 @@ class Robot:
 
     # Need to define these in subclassed robots:
 
+    def getName(self):
+        """Return the name of the robot"""
+        pass
+
+    def setName(self, newName):
+        """
+        Change the name of the robot
+
+        newName - the new name of the robot
+        """
+        pass
+
     def connect(self):
         """Connects the robot object to the server or simulator. """
         pass

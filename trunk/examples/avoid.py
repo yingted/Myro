@@ -14,9 +14,9 @@
 from myro import *
 
 # First connect to the robot...
-comPort = "com7"
-print "Connecting to robot over", comPort, "...",
-robot = Scribbler(comPort)
+name = "Scribby"
+print "Connecting to", name
+robot = Scribbler(name)
 #robot = SimScribbler("ID1212")
 print "connected!"
 time.sleep(1)

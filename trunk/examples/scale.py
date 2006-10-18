@@ -5,26 +5,32 @@
 #
 
 from myro import *
+import time
 
 # First connect to the robot...
-comPort = "com7"
-print "Connecting to robot over", comPort, "...",
-robot = Scribbler(comPort)
+print "Connecting to robot Scribby ..."
+robot = Scribbler("Scribby")
+#robot = Scribbler("com1")
 #robot = SimScribbler("ID1212")
-print "connected!"
 time.sleep(1)
 
 def brain():    
    
-    #robot.beep(0.75, 262)    # C4
-    #robot.beep(0.5, 294)    # D4
-    #robot.beep(0.75, 330)    # E4
-    #robot.beep(0.5, 349)    # F4
-    #robot.beep(0.75, 392)    # G4
-    #robot.beep(0.5, 440)    # A4
-    #robot.beep(0.75, 494)    # B4
-    robot.beep(0.5, 523)    # C5
+    robot.beep(0.2, 262)    # C4
+    robot.beep(0.2, 294)    # D4
+    robot.beep(0.2, 330)    # E4
+    robot.beep(0.2, 349)    # F4
+    robot.beep(0.2, 392)    # G4
+    robot.beep(0.2, 440)    # A4
+    robot.beep(0.2, 494)    # B4
+    robot.beep(0.2, 523)    # C5
     # end of brain
 
-brain()
+print robot.getName()
+robot.setName("Scribby")
+print robot.getName()
+
+before = time.clock()
+#brain()
+print(time.clock() - before)
 robot.close()

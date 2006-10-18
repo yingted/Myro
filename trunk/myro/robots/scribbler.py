@@ -8,7 +8,7 @@ Distributed under a Shared Source License
 __REVISION__ = "$Revision$"
 __AUTHOR__   = "Keith and Doug"
 
-import serial, time
+import serial, time, string
 from myro import Robot
 
 def isTrue(value):
@@ -31,6 +31,7 @@ class Scribbler(Robot):
     GET_LIGHT_RIGHT=7
     GET_LINE_RIGHT=8
     GET_LINE_LEFT=9
+    GET_NAME=10
     
     SET_MOTORS_OFF=20
     SET_MOTORS=21
@@ -42,9 +43,13 @@ class Scribbler(Robot):
     SET_LED_RIGHT_OFF=27
     SET_SPEAKER=28
     SET_SPEAKER_2=29
+    SET_NAME=30
 
+    PACKET_LENGTH=9
+    NAME_LENGTH=8
+    
     def __init__(self, serialport, baudrate = 38400):
-        self.debug = 1
+        self.debug = 0
         self.lastTranslate = 0
         self.lastRotate    = 0
         self.serialPort = serialport
@@ -52,13 +57,37 @@ class Scribbler(Robot):
         self.open()
         time.sleep(1)
         self.restart()
-        
-    def open(self):
-        self.ser = serial.Serial(self.serialPort, timeout=5)
-        self.ser.baudrate = self.baudRate
-        self.ser.flushInput()
-        self.ser.flushOutput()
 
+    def search_for_robot(self):
+        for x in range(0,20):
+            port = "com" + str(x)
+            if (self.debug):
+                print "trying on port", port, "for",self.serialPort
+            try:
+                self.ser = serial.Serial(port, timeout=.5)
+                self.ser.baudrate = self.baudRate
+                self.ser.flushOutput()
+                self.ser.flushInput()
+
+                name = self.getName().strip(chr(0)).lower()
+                if (name == self.serialPort.strip().lower()):
+                    print "Found", self.serialPort
+                    self.ser.timeout=10
+                    return
+            except:
+                pass
+
+        print "Couldn't find the scribbler or device named", self.serialPort
+    
+    def open(self):
+        try:
+            self.ser = serial.Serial(self.serialPort, timeout = 10)
+            self.ser.baudrate = self.baudRate
+            self.ser.flushOutput()
+            self.ser.flushInput()
+        except:
+            self.search_for_robot()
+            
     def quit(self):
         self.stop()
         self.close()
@@ -80,6 +109,12 @@ class Scribbler(Robot):
             self.set_speaker(int(frequency), int(duration * 1000))
         else:
             self.set_speaker_2(int(frequency), int(frequency2), int(duration * 1000))
+
+    def getName(self):
+        return self.get_name()
+
+    def setName(self, str):
+        return self.set_name(str)
 
     def translate(self, amount):
         self.lastTranslate = amount
@@ -189,7 +224,7 @@ class Scribbler(Robot):
 
     def _check(self, cmd):
         c = self._read()
-        if (cmd != c) and self.debug: print "   failed check!"
+        if (cmd != c) and self.debug: print "   failed check!", cmd, c
         
     def _write(self, num):
         self.ser.write(chr(int(num)))
@@ -198,23 +233,46 @@ class Scribbler(Robot):
             if self.debug: print "   failed write check!"
             self.ser.flushInput() # flush buffer
 
+    def _write_long(self, rawdata):        
+        t = map(lambda x: chr(int(x)), rawdata)
+        for x in range(len(t), Scribbler.PACKET_LENGTH):
+            t.append(chr(int(0)))
+        data = string.join(t, '')
+        if self.debug:
+            print "write", len(data), "bytes: ",
+            print map(lambda x:  ord(x), data)
+        
+        self.ser.write(data)      # write 7 packets
+        c = self.ser.read(Scribbler.PACKET_LENGTH)      # read the echo packet
+        if self.debug:
+            print "read ", len(c), "bytes: ",
+            print map(lambda x:  ord(x), c)
+
+        # do a sanity check on the first byte of the echo
+        if (data[0] != c[0]):
+            if self.debug: print "   failed write check!", data, c
+            self.ser.flushInput() # flush buffer
+
     def _set(self, value, subvalues = []):
-        if self.debug: print "set():", value, subvalues
-        self._write(value)
-        for v in subvalues:
-            #time.sleep(0.05)
-            #self._set(v)
-            self._write(v)
+        rawdata = [value]
+        rawdata.extend(subvalues)
+        if self.debug: print "new set():", rawdata
+        self._write_long(rawdata)
         return self._check(value)
 
     def _get(self, value):
-        self._write(value)
+        self._write_long([value])
         retval = self._read()
         self._check(value)
         return retval
 
+    def set_name(self, name):
+        name_raw = map(lambda x:  ord(x), name)
+        return self._set(Scribbler.SET_NAME, name_raw)
+
     def set_motors(self, motor_left, motor_right):
         return self._set(Scribbler.SET_MOTORS, [motor_right, motor_left])
+
     
     def set_speaker(self, frequency, duration):
         return self._set(Scribbler.SET_SPEAKER, [duration >> 8,
@@ -274,4 +332,11 @@ class Scribbler(Robot):
 
     def get_line_left(self):
         return self._get(Scribbler.GET_LINE_LEFT)
+
+    def get_name(self):
+        self._write_long([Scribbler.GET_NAME])
+        c = self.ser.read(Scribbler.NAME_LENGTH)        
+        self._check(Scribbler.GET_NAME)
+        return c
+
 
