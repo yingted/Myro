@@ -44,6 +44,8 @@ class Scribbler(Robot):
     SET_SPEAKER=28
     SET_SPEAKER_2=29
     SET_NAME=30
+    SET_LED_ALL_ON=31
+    SET_LED_ALL_OFF=32
 
     PACKET_LENGTH=9
     NAME_LENGTH=8
@@ -88,13 +90,9 @@ class Scribbler(Robot):
         except:
             self.search_for_robot()
             
-    def quit(self):
-        self.stop()
-        self.close()
-
     def close(self):
         self.ser.close()
-        
+
     def restart(self):
         self.set_motors_off()
         self.set_led_right_on()
@@ -153,6 +151,9 @@ class Scribbler(Robot):
             elif position == "right":
                 if isTrue(value): return self.set_led_right_on()
                 else:             return self.set_led_right_off()
+            elif position == "all":
+                if isTrue(value): return self.set_led_all_on()
+                else:             return self.set_led_all_off()
             else:
                 raise AttributeError, "no such LED: '%s'" % position
 
@@ -302,6 +303,12 @@ class Scribbler(Robot):
 
     def set_led_center_off(self):
         return self._set(Scribbler.SET_LED_CENTER_OFF)
+
+    def set_led_all_on(self):
+        return self._set(Scribbler.SET_LED_ALL_ON)
+
+    def set_led_all_off(self):
+        return self._set(Scribbler.SET_LED_ALL_OFF)
 
     def set_led_right_on(self):
         return self._set(Scribbler.SET_LED_RIGHT_ON)

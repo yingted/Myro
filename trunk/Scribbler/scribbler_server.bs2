@@ -70,6 +70,8 @@ SET_LED_RIGHT_OFF  CON 27
 SET_SPEAKER        CON 28
 SET_SPEAKER_2      CON 29
 SET_NAME           CON 30
+SET_LED_ALL_ON     CON 31
+SET_LED_ALL_OFF    CON 32
 
 TIMEOUT            CON 10000 ' in ms
 PACKET_LENGTH      CON 9
@@ -94,8 +96,8 @@ INIT:
 
 BEGIN:
   SERIN INPIN, BAUD, TIMEOUT, INIT, [STR inCmd\PACKET_LENGTH]
-  LOOKDOWN inCmd(0), = [GET_INPUT, GET_LINE_RIGHT, GET_LINE_LEFT, GET_LIGHT_LEFT, GET_LIGHT_CENTER, GET_LIGHT_RIGHT,  GET_OPEN_LEFT, GET_OPEN_RIGHT, GET_STALL, GET_NAME, SET_MOTORS_OFF, SET_MOTORS, SET_SPEAKER, SET_SPEAKER_2, SET_LED_LEFT_ON, SET_LED_LEFT_OFF, SET_LED_CENTER_ON, SET_LED_CENTER_OFF, SET_LED_RIGHT_ON, SET_LED_RIGHT_OFF, SET_NAME], temp
-  BRANCH temp,        [GetInput,  GetLineRight,   GetLineLeft,   GetLightLeft,   GetLightCenter,   GetLightRight,    GetObsLeft,    GetObsRight,    GetStall,  GetName,  MotorsOff,      Motors,     SetSpeaker,  SetSpeaker2,   OnLeftLED,       OffLeftLED,       OnCenterLED,       OffCenterLED,       OnRightLED,       OffRightLED,       SetName ]
+  LOOKDOWN inCmd(0), = [GET_INPUT, GET_LINE_RIGHT, GET_LINE_LEFT, GET_LIGHT_LEFT, GET_LIGHT_CENTER, GET_LIGHT_RIGHT,  GET_OPEN_LEFT, GET_OPEN_RIGHT, GET_STALL, GET_NAME, SET_MOTORS_OFF, SET_MOTORS, SET_SPEAKER, SET_SPEAKER_2, SET_LED_LEFT_ON, SET_LED_LEFT_OFF, SET_LED_CENTER_ON, SET_LED_CENTER_OFF, SET_LED_RIGHT_ON, SET_LED_RIGHT_OFF, SET_NAME, SET_LED_ALL_ON, SET_LED_ALL_OFF], temp
+  BRANCH temp,        [GetInput,  GetLineRight,   GetLineLeft,   GetLightLeft,   GetLightCenter,   GetLightRight,    GetObsLeft,    GetObsRight,    GetStall,  GetName,  MotorsOff,      Motors,     SetSpeaker,  SetSpeaker2,   OnLeftLED,       OffLeftLED,       OnCenterLED,       OffCenterLED,       OnRightLED,       OffRightLED,       SetName, OnAllLED, OffAllLED]
 TOP:
   SEROUT OUTPIN, BAUD, [STR inCmd\1]              ' echo command to tell we are done
   GOTO BEGIN
@@ -230,4 +232,16 @@ OnRightLED:
 
 OffRightLED:
      LedRight = 0
+     GOTO TOP
+
+OnAllLED:
+     LedLeft = 1
+     LedRight = 1
+     LedCenter = 1
+     GOTO TOP
+
+OffAllLED:
+     LedLeft = 0
+     LedRight = 0
+     LedCenter = 0
      GOTO TOP
