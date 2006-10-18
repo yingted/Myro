@@ -31,6 +31,6 @@ robot.setName("Scribby")
 print robot.getName()
 
 before = time.clock()
-#brain()
+brain()
 print(time.clock() - before)
 robot.close()
