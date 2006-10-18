@@ -75,12 +75,6 @@ class Robot(object):
     def setLED(self, position, value):
         raise AttributeError, "this method needs to be written"
 
-    def restart(self):
-        raise AttributeError, "this method needs to be written"
-
-    def update(self):
-        raise AttributeError, "this method needs to be written"
-
 ### The rest of these methods are just rearrangements of the above
 
     def read(self, sensor, *positions):
@@ -151,6 +145,15 @@ class Robot(object):
         rotate = (right - left) / 2.0
         return self.move(trans, rotate)
 
+    def restart(self):
+        pass
+    def close(self):
+        pass
+    def open(self):
+	pass
+    def update(self):
+        pass
+
 from myro.robot.scribbler import Scribbler
 
 class SimScribbler(Robot):
@@ -194,10 +197,6 @@ class SimScribbler(Robot):
         return self._clients[0].stall
     def update(self):
         return self._clients[0].update()
-    def close(self):
-        pass
-    def open(self):
-	pass
     def beep(self, duration, frequency, frequency2 = None):
         if (tkSnack):
             snd = tkSnack.Sound()
@@ -209,12 +208,12 @@ class SimScribbler(Robot):
 	    print chr(7)
     def setLED(self, position, value):
         pass
-    def restart(self):
-        pass
     
 # functions:
 def _cleanup():
     if myro.globals._robot != None:
+        myro.globals._robot.stop() # hangs?
+	time.sleep(.5)
         myro.globals._robot.close()
     if myro.globals._simulator != None:
        myro.globals._simulator.destroy()
