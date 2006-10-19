@@ -42,11 +42,13 @@ def randomNumber():
     return random.random()
 
 class Robot(object):
+    app = None
+    joy = None
+    
     def __init__(self):
         """
         Base robot class.
         """
-        pass
     
     def translate(self, amount):
         raise AttributeError, "this method needs to be written"
@@ -85,6 +87,20 @@ class Robot(object):
         raise AttributeError, "this method needs to be written"
 
 ### The rest of these methods are just rearrangements of the above
+
+    def joystick(self):
+        import Tkinter
+        from myro.joystick import Joystick
+        if self.joy == None:
+            self.app = Tkinter.Tk()
+            self.app.withdraw()
+            self.joy = Joystick(parent = self.app, robot = self)
+        else:
+            self.joy.deiconify()
+        #try:
+        #    self.app.mainloop()
+        #except:
+        #    pass
 
     def read(self, sensor, *positions):
         sensor = sensor.lower()
