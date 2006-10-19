@@ -319,6 +319,8 @@ def motors(left, right):
     return myro.globals._robot.motors(left, right)
 def restart():
     return myro.globals._robot.restart()
+def joystick():
+    return myro.globals._robot.joystick()
 
 # --------------------------------------------------------
 # Error handler:
