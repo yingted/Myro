@@ -91,12 +91,20 @@ class Robot(object):
     def joystick(self):
         import Tkinter
         from myro.joystick import Joystick
+	try:
+	    import idlelib
+	except:
+	    idlelib = None
         if self.joy == None:
             self.app = Tkinter.Tk()
             self.app.withdraw()
             self.joy = Joystick(parent = self.app, robot = self)
         else:
             self.joy.deiconify()
+	#if idlelib != None:
+	if "PyShell" not in dir(idlelib): # "subprocess"
+            self.joy._running = 1
+	    self.joy.mainloop()
         #try:
         #    self.app.mainloop()
         #except:

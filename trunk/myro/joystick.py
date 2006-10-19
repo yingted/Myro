@@ -5,7 +5,9 @@ class Joystick(Tkinter.Toplevel):
    def __init__(self, parent = None, robot = None):
       Tkinter.Toplevel.__init__(self, parent)
       self.debug = 0
+      self._running = 0
       self.robot = robot
+      self.parent = parent
       self.wm_title('Joystick')
       self.protocol('WM_DELETE_WINDOW',self.destroy)
       self.frame = Tkinter.Frame(self)
@@ -114,6 +116,8 @@ class Joystick(Tkinter.Toplevel):
    def destroy(self):
       """Hides the device view window."""
       self.withdraw()
+      if self._running:
+          self.parent.quit()
 
 if __name__ == '__main__':
    app = Tkinter.Tk()

@@ -109,7 +109,7 @@ class Scribbler(Robot):
         self.beep(.10, 800)
         self.beep(.10, 1200)
 	name = self.readName()
-        print "Hello, from %s!" % name
+        print "Hello, I'm %s!" % name
 
     def beep(self, duration, frequency, frequency2 = None):
         if frequency2 == None:
