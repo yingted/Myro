@@ -72,7 +72,16 @@ class Robot(object):
     def readStall(self):
         raise AttributeError, "this method needs to be written"
 
+    def readAll(self):
+        raise AttributeError, "this method needs to be written"
+
     def setLED(self, position, value):
+        raise AttributeError, "this method needs to be written"
+
+    def setName(self, name):
+        raise AttributeError, "this method needs to be written"
+
+    def setVolume(self, value):
         raise AttributeError, "this method needs to be written"
 
 ### The rest of these methods are just rearrangements of the above
@@ -85,11 +94,13 @@ class Robot(object):
             retvals = []
             if len(positions) == 0:
                 if sensor == "light":
-                    positions = range(3)
+                    return self.readLight("all")
                 elif sensor == "ir":
-                    positions = range(2)
+                    return self.readIR("all")
                 elif sensor == "line":
-                    positions = range(2)
+                    return self.readLine("all")
+                elif sensor == "all":
+                    return self.readAll()
                 else:
                     raise ("invalid sensor name: '%s'" % sensor)
             for position in positions:
@@ -106,12 +117,16 @@ class Robot(object):
             else:
                 return retvals
 
-    def set(self, item, position, value):
+    def set(self, item, position, value = None):
         item = item.lower()
         if item == "led":
             return self.setLED(position, value)
+        elif item == "name":
+            return self.setName(position)
+        elif item == "volume":
+            return self.setVolume(position)
         else:
-            raise ("invalid item name: '%s'" % item)
+            raise ("invalid set item name: '%s'" % item)
 
     def turn(self, direction, value = .8):
         if type(direction) in [float, int]:
@@ -268,14 +283,22 @@ def readLine(pos):
     return myro.globals._robot.readLine(pos)
 def readStall():
     return myro.globals._robot.readStall()
+def readAll():
+    return myro.globals._robot.readAll()
+def readName():
+    return myro.globals._robot.readName()
 def update():
     return myro.globals._robot.update()
 def beep(self, duration, frequency, frequency2 = None):
     return myro.globals._robot.beep(duration, frequency, frequency2)
-def set(item, position, value):
+def set(item, position, value = None):
     return myro.globals._robot.set(item, position, value)
 def setLED(position, value):
     return myro.globals._robot.setLED(position, value)
+def setName(name):
+    return myro.globals._robot.setName(name)
+def setVolume(value):
+    return myro.globals._robot.setVolume(value)
 def motors(left, right):
     return myro.globals._robot.motors(left, right)
 def restart():

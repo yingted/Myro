@@ -10,6 +10,7 @@ __AUTHOR__   = "Keith and Doug"
 
 import serial, time, string
 from myro import Robot
+import myro.globals
 
 def isTrue(value):
     """
@@ -46,6 +47,12 @@ class Scribbler(Robot):
     SET_NAME=30
     SET_LED_ALL_ON=31
     SET_LED_ALL_OFF=32
+    GET_LIGHT_ALL=33
+    GET_IR_ALL=34
+    GET_LINE_ALL=35
+    GET_ALL=36
+    SET_LOUD=37
+    SET_QUIET=38
 
     PACKET_LENGTH=9
     NAME_LENGTH=8
@@ -57,50 +64,52 @@ class Scribbler(Robot):
         self.serialPort = serialport
         self.baudRate = baudrate
         self.open()
-        time.sleep(1)
         self.restart()
+        myro.globals._robot = self
 
-    def search_for_robot(self):
-        for x in range(0,20):
+    def search(self):
+        for x in range(20):
             port = "com" + str(x)
-            if (self.debug):
+            if (self.debug or 1):
                 print "trying on port", port, "for",self.serialPort
             try:
                 self.ser = serial.Serial(port, timeout=.5)
                 self.ser.baudrate = self.baudRate
                 self.ser.flushOutput()
                 self.ser.flushInput()
-
-                name = self.getName().strip(chr(0)).lower()
+                time.sleep(.5)
+                name = self.readName().lower()
                 if (name == self.serialPort.strip().lower()):
                     print "Found", self.serialPort
                     self.ser.timeout=10
                     return
             except:
                 pass
-
         print "Couldn't find the scribbler or device named", self.serialPort
     
     def open(self):
-        try:
+        if myro.globals._robot != None:
+            self.ser = myro.globals._robot.ser
+        else:
             self.ser = serial.Serial(self.serialPort, timeout = 10)
             self.ser.baudrate = self.baudRate
-            self.ser.flushOutput()
+	    self.ser.flushOutput()
             self.ser.flushInput()
-        except:
-            self.search_for_robot()
-            
+            # time.sleep(.5)
+
     def close(self):
         self.ser.close()
 
     def restart(self):
         self.set_motors_off()
-        self.set_led_right_on()
+        self.set_led_right_off()
         self.set_led_center_on()
-        self.set_led_left_on()
-        self.beep(.16, 1600)
+        self.set_led_left_off()
+        self.beep(.10, 1600)
         self.beep(.10, 800)
-        self.beep(.16, 1200)
+        self.beep(.10, 1200)
+	name = self.readName()
+        print "Hello, from %s!" % name
 
     def beep(self, duration, frequency, frequency2 = None):
         if frequency2 == None:
@@ -108,11 +117,17 @@ class Scribbler(Robot):
         else:
             self.set_speaker_2(int(frequency), int(frequency2), int(duration * 1000))
 
-    def getName(self):
-        return self.get_name()
+    def readName(self):
+        return self.get_name().strip(chr(0))
+
+    def readAll(self):
+	""" IrLeft, IrRight, LightLeft/2, LightCenter/2, LightRight/2, LineLeft, LineRight, Stall """
+	retval = self.get_all() # returned as bytes
+        return {"light": [retval[2] << 8 | retval[3], retval[4] << 8 | retval[5], retval[6] << 8 | retval[7]],
+		"ir": [retval[0], retval[1]], "line": [retval[8], retval[9]], "stall": retval[10]}
 
     def setName(self, str):
-        return self.set_name(str)
+        return self.set_name(str[:8].strip())
 
     def translate(self, amount):
         self.lastTranslate = amount
@@ -127,15 +142,19 @@ class Scribbler(Robot):
         self.lastRotate = rotate
         self.adjustSpeed()
 
+    def setVolume(self, value):
+        if isTrue(value): return self.set_loud()
+	else:             return self.set_quiet()
+
     def setLED(self, position, value):
         if type(position) in [int, float]:
-            if position == 2:
-                if isTrue(value): return self.set_led_center_on()
-                else:             return self.set_led_center_off()
-            elif position == 0:
+            if position == 0:
                 if isTrue(value): return self.set_led_left_on()
                 else:             return self.set_led_left_off()
             elif position == 1:
+                if isTrue(value): return self.set_led_center_on()
+                else:             return self.set_led_center_off()
+            elif position == 2:
                 if isTrue(value): return self.set_led_right_on()
                 else:             return self.set_led_right_off()
             else:
@@ -162,9 +181,9 @@ class Scribbler(Robot):
             if position == 0:
                 return self.get_light_left()
             elif position == 1:
-                return self.get_light_right()
-            elif position == 2:
                 return self.get_light_center()
+            elif position == 2:
+                return self.get_light_right()
             else:
                 raise AttributeError, "no such light sensor: '%s'" % position
         else:
@@ -175,24 +194,48 @@ class Scribbler(Robot):
                 return self.get_light_left()
             elif position == "right":
                 return self.get_light_right()
+            elif position == "all":
+                return self.get_light_all()
             else:
                 raise AttributeError, "no such light sensor: '%s'" % position
 
     def readIR(self, position):
-        if position == 0:
-            return self.get_open_left()
-        elif position == 1:
-            return self.get_open_right()
-        else:
-            raise AttributeError, "no such IR sensor: '%s'" % position
+        if type(position) in [float, int]:
+            if position == 0:
+                return self.get_open_left()
+            elif position == 1:
+                return self.get_open_right()
+            else:
+                raise AttributeError, "no such IR sensor: '%s'" % position
+	else:
+            position = position.lower()
+            if position == "left":
+                return self.get_ir_left()
+            elif position == "right":
+                return self.get_ir_right()
+            elif position == "all":
+                return self.get_ir_all()
+            else:
+                raise AttributeError, "no such IR sensor: '%s'" % position
 
     def readLine(self, position):
-        if position == 0:
-            return self.get_line_left()
-        elif position == 1:
-            return self.get_line_right()
-        else:
-            raise AttributeError, "no such line sensor: '%s'" % position
+        if type(position) in [float, int]:
+            if position == 0:
+                return self.get_line_left()
+            elif position == 1:
+                return self.get_line_right()
+            else:
+                raise AttributeError, "no such line sensor: '%s'" % position
+	else:
+            position = position.lower()
+            if position == "left":
+                return self.get_line_left()
+            elif position == "right":
+                return self.get_line_right()
+            elif position == "all":
+                return self.get_line_all()
+            else:
+                raise AttributeError, "no such line sensor: '%s'" % position
 
     def readStall(self):
         return self.get_stall()
@@ -211,17 +254,20 @@ class Scribbler(Robot):
         rightPower = (right + 1.0) * 100.0
         self.set_motors(leftPower, rightPower)
 
-    def _read(self):
-        c = self.ser.read(1)
+    def _read(self, bytes = 1):
+        c = self.ser.read(bytes)
         if self.debug:
             if (c != ""):
                 print "_read(): ", ord(c)
             else:
                 print "_read(): "
-        x = -1
-        if (c != ""):
-            x = ord(c)            
-        return x
+        if bytes == 1:
+            x = -1
+            if (c != ""):
+                x = ord(c)            
+            return x
+	else:
+	    return map(ord, c)
 
     def _check(self, cmd):
         c = self._read()
@@ -261,11 +307,17 @@ class Scribbler(Robot):
         self._write_long(rawdata)
         return self._check(value)
 
-    def _get(self, value):
+    def _get(self, value, bytes = 1, mode = "byte"):
         self._write_long([value])
-        retval = self._read()
+        retval = self._read(bytes)
         self._check(value)
-        return retval
+	if mode == "byte":
+            return retval
+	elif mode == "word":
+	    newRetval = []
+	    for p in range(0,len(retval),2):
+	        newRetval.append(retval[p] << 8 | retval[p + 1])
+	    return newRetval
 
     def set_name(self, name):
         name_raw = map(lambda x:  ord(x), name)
@@ -316,23 +368,35 @@ class Scribbler(Robot):
     def set_led_right_off(self):
         return self._set(Scribbler.SET_LED_RIGHT_OFF)
                 
+    def set_loud(self):
+        return self._set(Scribbler.SET_LOUD)
+                
+    def set_quiet(self):
+        return self._set(Scribbler.SET_QUIET)
+                
     def get_open_left(self):
         return self._get(Scribbler.GET_OPEN_LEFT)
 
     def get_open_right(self):
         return self._get(Scribbler.GET_OPEN_RIGHT)
 
+    def get_ir_all(self):
+        return self._get(Scribbler.GET_IR_ALL, 2)
+
     def get_stall(self):
         return self._get(Scribbler.GET_STALL)
 
     def get_light_left(self):
-        return self._get(Scribbler.GET_LIGHT_LEFT)
+        return self._get(Scribbler.GET_LIGHT_LEFT, 2, "word")
 
     def get_light_center(self):
-        return self._get(Scribbler.GET_LIGHT_CENTER)
+        return self._get(Scribbler.GET_LIGHT_CENTER, 2, "word")
 
     def get_light_right(self):
-        return self._get(Scribbler.GET_LIGHT_RIGHT)
+        return self._get(Scribbler.GET_LIGHT_RIGHT, 2, "word")
+
+    def get_light_all(self):
+        return self._get(Scribbler.GET_LIGHT_ALL, 6, "word")
 
     def get_line_right(self):
         return self._get(Scribbler.GET_LINE_RIGHT)
@@ -340,10 +404,14 @@ class Scribbler(Robot):
     def get_line_left(self):
         return self._get(Scribbler.GET_LINE_LEFT)
 
+    def get_line_all(self):
+        return self._get(Scribbler.GET_LINE_ALL, 2)
+
+    def get_all(self):
+        return self._get(Scribbler.GET_ALL, 11)
+
     def get_name(self):
         self._write_long([Scribbler.GET_NAME])
         c = self.ser.read(Scribbler.NAME_LENGTH)        
         self._check(Scribbler.GET_NAME)
         return c
-
-
