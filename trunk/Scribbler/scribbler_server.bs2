@@ -4,8 +4,6 @@
 '  {$STAMP BS2}
 '  {$PBASIC 2.5}
 
-#DEFINE Verbose = 0
-
 DATA          "Scribby"
 
 ' I/O Declarations
@@ -72,8 +70,14 @@ SET_SPEAKER_2      CON 29
 SET_NAME           CON 30
 SET_LED_ALL_ON     CON 31
 SET_LED_ALL_OFF    CON 32
+GET_LIGHT_ALL      CON 33
+GET_IR_ALL         CON 34
+GET_LINE_ALL       CON 35
+GET_ALL            CON 36
+SET_LOUD           CON 37
+SET_QUIET          CON 38
 
-TIMEOUT            CON 10000 ' in ms
+TIMEOUT            CON 1000 ' in ms
 PACKET_LENGTH      CON 9
 NAME_LENGTH        CON 8
 
@@ -86,22 +90,32 @@ var3    VAR Word
 name    VAR Byte(NAME_LENGTH)
 inCmd   VAR Byte(PACKET_LENGTH)
 temp    VAR Byte
+temp2   VAR Byte
+quiet   VAR Byte
 
 inCmd(PACKET_LENGTH-1) = 0
+quiet = 0
 
 INIT:
-  ' If we want to stop the robot after a long time with no contact
-  ' uncomment the below line
-  'GOTO MotorsOff ' Will then jump to BEGIN -- mmm spaghetti
+  ' Used to flash the middle LED with short timeout:
+  IF (LedCenter = 1) THEN LedCenter = 0 ELSE LedCenter = 1
 
 BEGIN:
   SERIN INPIN, BAUD, TIMEOUT, INIT, [STR inCmd\PACKET_LENGTH]
-  LOOKDOWN inCmd(0), = [GET_INPUT, GET_LINE_RIGHT, GET_LINE_LEFT, GET_LIGHT_LEFT, GET_LIGHT_CENTER, GET_LIGHT_RIGHT,  GET_OPEN_LEFT, GET_OPEN_RIGHT, GET_STALL, GET_NAME, SET_MOTORS_OFF, SET_MOTORS, SET_SPEAKER, SET_SPEAKER_2, SET_LED_LEFT_ON, SET_LED_LEFT_OFF, SET_LED_CENTER_ON, SET_LED_CENTER_OFF, SET_LED_RIGHT_ON, SET_LED_RIGHT_OFF, SET_NAME, SET_LED_ALL_ON, SET_LED_ALL_OFF], temp
-  BRANCH temp,        [GetInput,  GetLineRight,   GetLineLeft,   GetLightLeft,   GetLightCenter,   GetLightRight,    GetObsLeft,    GetObsRight,    GetStall,  GetName,  MotorsOff,      Motors,     SetSpeaker,  SetSpeaker2,   OnLeftLED,       OffLeftLED,       OnCenterLED,       OffCenterLED,       OnRightLED,       OffRightLED,       SetName, OnAllLED, OffAllLED]
+  LOOKDOWN inCmd(0), = [GET_INPUT, GET_LINE_RIGHT, GET_LINE_LEFT, GET_LIGHT_LEFT, GET_LIGHT_CENTER, GET_LIGHT_RIGHT,  GET_OPEN_LEFT, GET_OPEN_RIGHT, GET_STALL, GET_NAME, SET_MOTORS_OFF, SET_MOTORS, SET_SPEAKER, SET_SPEAKER_2, SET_LED_LEFT_ON, SET_LED_LEFT_OFF, SET_LED_CENTER_ON, SET_LED_CENTER_OFF, SET_LED_RIGHT_ON, SET_LED_RIGHT_OFF, SET_NAME, SET_LED_ALL_ON, SET_LED_ALL_OFF, GET_LIGHT_ALL, GET_IR_ALL, GET_LINE_ALL, GET_ALL, SET_LOUD, SET_QUIET], temp
+  BRANCH temp,         [GetInput,  GetLineRight,   GetLineLeft,   GetLightLeft,   GetLightCenter,   GetLightRight,    GetObsLeft,    GetObsRight,    GetStall,  GetName,  MotorsOff,      Motors,     SetSpeaker,  SetSpeaker2,   OnLeftLED,       OffLeftLED,       OnCenterLED,       OffCenterLED,       OnRightLED,       OffRightLED,       SetName,  OnAllLED,       OffAllLED,       GetLightAll,   GetIRAll,   GetLineAll,   GetAll,  SetLoud,  SetQuiet]
 TOP:
   SEROUT OUTPIN, BAUD, [STR inCmd\1]              ' echo command to tell we are done
+  IF (LedCenter = 1) THEN LedCenter = 0 ELSE LedCenter = 1
   GOTO BEGIN
 
+SetQuiet:
+   quiet = 1
+   GOTO TOP
+
+SetLoud:
+   quiet = 0
+   GOTO TOP
 
 GetInput:
      SEROUT OUTPIN, BAUD, [INL]
@@ -120,25 +134,42 @@ GetLineLeft:
      SEROUT OUTPIN, BAUD, [LineLeft]
      GOTO TOP
 
+GetLineAll:
+     HIGH LineEnable
+     PAUSE 2
+     SEROUT OUTPIN, BAUD, [LineLeft, LineRight]
+     GOTO TOP
+
 GetLightLeft:
      HIGH LightLeft
      PAUSE 3
-     RCTIME LightLeft, 1, temp
-     SEROUT OUTPIN, BAUD, [temp]
+     RCTIME LightLeft, 1, var3
+     SEROUT OUTPIN, BAUD, [var3.HIGHBYTE, var3.LOWBYTE]
      GOTO TOP
 
 GetLightCenter:
      HIGH LightCenter
      PAUSE 3
-     RCTIME LightCenter, 1, temp
-     SEROUT OUTPIN, BAUD, [temp]
+     RCTIME LightCenter, 1, var3
+     SEROUT OUTPIN, BAUD, [var3.HIGHBYTE, var3.LOWBYTE]
      GOTO TOP
 
 GetLightRight:
      HIGH LightRight
      PAUSE 3
-     RCTIME LightRight, 1, temp
-     SEROUT OUTPIN, BAUD, [temp]
+     RCTIME LightRight, 1, var3
+     SEROUT OUTPIN, BAUD, [var3.HIGHBYTE, var3.LOWBYTE]
+     GOTO TOP
+
+GetLightAll:
+     HIGH LightLeft
+     HIGH LightCenter
+     HIGH LightRight
+     PAUSE 3
+     RCTIME LightLeft, 1, var3
+     RCTIME LightCenter, 1, motor_l
+     RCTIME LightRight, 1, motor_r
+     SEROUT OUTPIN, BAUD, [var3.HIGHBYTE, var3.LOWBYTE, motor_l.HIGHBYTE, motor_l.LOWBYTE, motor_r.HIGHBYTE, motor_r.LOWBYTE]
      GOTO TOP
 
 GetObsRight:
@@ -153,6 +184,46 @@ GetObsLeft:
      temp = ObsRX
      LOW ObsTxLeft
      SEROUT OUTPIN, BAUD, [temp]
+     GOTO TOP
+
+GetIRAll:
+     FREQOUT ObsTxLeft, 1, 40500
+     temp = ObsRX
+     LOW ObsTxLeft
+
+     FREQOUT ObsTxRight, 1, 40500
+     temp2 = ObsRX
+     LOW ObsTxRight
+
+     SEROUT OUTPIN, BAUD, [temp, temp2]
+     GOTO TOP
+
+GetAll:
+     'IR
+     FREQOUT ObsTxLeft, 1, 40500
+     temp = ObsRX
+     LOW ObsTxLeft
+
+     FREQOUT ObsTxRight, 1, 40500
+     temp2 = ObsRX
+     LOW ObsTxRight
+
+     'Light
+     HIGH LightLeft
+     HIGH LightCenter
+     HIGH LightRight
+     PAUSE 3
+     RCTIME LightLeft, 1, var3
+     RCTIME LightCenter, 1, motor_l
+     RCTIME LightRight, 1, motor_r
+
+     'Line
+     HIGH LineEnable
+     PAUSE 2
+
+     SEROUT OUTPIN, BAUD, [temp, temp2, var3.HIGHBYTE, var3.LOWBYTE,
+                           motor_l.HIGHBYTE, motor_l.LOWBYTE, motor_r.HIGHBYTE, motor_r.LOWBYTE,
+                           LineLeft, LineRight, Stall]
      GOTO TOP
 
 GetStall:
@@ -171,7 +242,6 @@ SetName:
      FOR temp = 0 TO NAME_LENGTH - 1
         WRITE temp, inCmd(1 + temp)
      NEXT
-
      GOTO TOP
 
 MotorsOff:
@@ -186,8 +256,11 @@ SetSpeaker:
      motor_r = (motor_r << 8) | inCmd(2)
      motor_l = inCmd(3)
      motor_l = (motor_l << 8) | inCmd(4)
-
-     FREQOUT Speaker, motor_r, motor_l
+     IF (quiet = 1) THEN
+      FREQOUT Speaker, motor_r, $00
+     ELSE
+      FREQOUT Speaker, motor_r, motor_l
+     ENDIF
      GOTO TOP
 
 SetSpeaker2:
@@ -200,7 +273,11 @@ SetSpeaker2:
      var3 = inCmd(5)
      var3 = (var3 << 8) | inCmd(6)
 
-     FREQOUT Speaker, motor_r, motor_l, var3
+     IF (quiet = 1) THEN
+      FREQOUT Speaker, motor_r, $00
+     else
+      FREQOUT Speaker, motor_r, motor_l, var3
+     Endif
      GOTO TOP
 
 Motors:

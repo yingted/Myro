@@ -15,21 +15,24 @@ for line in freqFile:
 freqFile.close()
 print "done!"
 
-print "Reading a song...",
-songFile = open("song.txt", "r")
-song = []
-for line in songFile:
-    name, dur = line.split()
-    song.append( (name, float(dur) * .2) )
-    # FIX: long tones cause problems
-    # 1 whole note should be .545 seconds
-songFile.close()
-print "done!"
+def readSong(filename):
+    print ("Reading in song file '%s'..." % filename),
+    songFile = open(filename, "r")
+    song = []
+    for line in songFile:
+        name, dur = line.split()
+        song.append( (name.upper(), float(dur)) )
+    songFile.close()
+    print "done!"
+    return song
 
-def play(song):
+def play(filename, wholeNoteDuration = .545):
     """ Plays a song (list of note names, durations) """
+    # 1 whole note should be .545 seconds for normal
+    song = readSong(filename)
     for (name, dur) in song:
-        print name, freq[name], dur
-        robot.beep(freq[name], min(dur, .5))
+        print name, dur
+        robot.beep(dur * wholeNoteDuration, freq[name])
 
-print "Enter: 'play(song)' to play it"
+print """>>> play("song.txt") ## wholeNoteDuration = .545 is normal tempo"""
+play("song.txt")
