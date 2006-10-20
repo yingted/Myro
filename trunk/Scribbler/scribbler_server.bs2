@@ -275,9 +275,9 @@ SetSpeaker2:
 
      IF (quiet = 1) THEN
       FREQOUT Speaker, motor_r, $00
-     else
+     ELSE
       FREQOUT Speaker, motor_r, motor_l, var3
-     Endif
+     ENDIF
      GOTO TOP
 
 Motors:
