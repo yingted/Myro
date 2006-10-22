@@ -1,11 +1,13 @@
 # Myro globals and constants
 
 # globals:
-_simulator = None
-_myropath = None
-_robot = None
-_gui = None
-_setup = 0
+simulator = None
+myropath  = None
+robot     = None
+gui       = None
+setup     = 0
+mediaFolder = ""
+askData = {}
 
 # constants:
 import math

@@ -247,6 +247,9 @@ class Simulator:
     def update(self):
         pass
 
+    def quit(self):
+        self.done = 1
+        
     def addWall(self, x1, y1, x2, y2, color="black"):
         seg = Segment((x1, y1), (x2, y2), len(self.world) + 1, "wall")
         seg.color = color
@@ -640,15 +643,12 @@ class Simulator:
 class TkSimulator(Tkinter.Toplevel, Simulator):
     def __init__(self, dimensions, offsets, scale, root = None, run = 1):
         if root == None:
-            if myro.globals._gui:
-                root = myro.globals._gui
-            else:
-                root = Tkinter.Tk()
-                root.withdraw()
-        Tkinter.Toplevel.__init__(self, root)
+            if myro.globals.gui == None:
+                myro.globals.gui = Tkinter.Tk()
+                myro.globals.gui.withdraw()
+        Tkinter.Toplevel.__init__(self, myro.globals.gui)
         Simulator.__init__(self, dimensions, offsets, scale)
         self.root = root
-        myro.globals._gui = root
         self.wm_title("Myro Simulator")
         self.protocol('WM_DELETE_WINDOW',self.destroy)
         self.frame = Tkinter.Frame(self)
@@ -739,7 +739,8 @@ class TkSimulator(Tkinter.Toplevel, Simulator):
             self.withdraw()
         self.done = 1 # stop processing requests, if handling
         self.quit = 1 # stop accept/bind toplevel
-        self.root.quit() # kill the gui
+        if "quit" in dir(self.root):
+            self.root.quit() # kill the gui
         try: # FIX: hack to allow myro main thread to hide this window
             self.withdraw()
         except:

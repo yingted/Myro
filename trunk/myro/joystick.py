@@ -117,7 +117,10 @@ class Joystick(Tkinter.Toplevel):
       """Hides the device view window."""
       self.withdraw()
       if self._running:
-          self.parent.quit()
+         if "quit" in dir(self.parent):
+            self.parent.quit()
+         if "destroy" in dir(self.parent):
+            self.parent.destroy()
 
 if __name__ == '__main__':
    app = Tkinter.Tk()

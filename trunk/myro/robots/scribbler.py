@@ -9,7 +9,7 @@ __REVISION__ = "$Revision$"
 __AUTHOR__   = "Keith and Doug"
 
 import serial, time, string
-from myro import Robot
+from myro import Robot, askForPort
 import myro.globals
 
 def isTrue(value):
@@ -57,15 +57,17 @@ class Scribbler(Robot):
     PACKET_LENGTH=9
     NAME_LENGTH=8
     
-    def __init__(self, serialport, baudrate = 38400):
+    def __init__(self, serialport = None, baudrate = 38400):
         self.debug = 0
         self.lastTranslate = 0
         self.lastRotate    = 0
+        if serialport == None:
+            serialport = askForPort()
         self.serialPort = serialport
         self.baudRate = baudrate
         self.open()
         self.restart()
-        myro.globals._robot = self
+        myro.globals.robot = self
 
     def search(self):
         for x in range(20):
@@ -78,7 +80,7 @@ class Scribbler(Robot):
                 self.ser.flushOutput()
                 self.ser.flushInput()
                 time.sleep(.5)
-                name = self.readName().lower()
+                name = self.getName().lower()
                 if (name == self.serialPort.strip().lower()):
                     print "Found", self.serialPort
                     self.ser.timeout=10
@@ -88,14 +90,20 @@ class Scribbler(Robot):
         print "Couldn't find the scribbler or device named", self.serialPort
     
     def open(self):
-        if myro.globals._robot != None:
-            self.ser = myro.globals._robot.ser
+        if myro.globals.robot != None:
+            self.ser = myro.globals.robot.ser
+            self.ser.open()
         else:
-            self.ser = serial.Serial(self.serialPort, timeout = 10)
+            while 1:
+                try:
+                    self.ser = serial.Serial(self.serialPort, timeout = 10)
+                    break
+                except:
+                    print "Waiting on port..."
+                    time.sleep(1)
             self.ser.baudrate = self.baudRate
-	    self.ser.flushOutput()
+            self.ser.flushOutput()
             self.ser.flushInput()
-            # time.sleep(.5)
 
     def close(self):
         self.ser.close()
@@ -108,7 +116,7 @@ class Scribbler(Robot):
         self.beep(.10, 1600)
         self.beep(.10, 800)
         self.beep(.10, 1200)
-	name = self.readName()
+	name = self.getName()
         print "Hello, I'm %s!" % name
 
     def beep(self, duration, frequency, frequency2 = None):
@@ -117,10 +125,10 @@ class Scribbler(Robot):
         else:
             self.set_speaker_2(int(frequency), int(frequency2), int(duration * 1000))
 
-    def readName(self):
+    def getName(self):
         return self.get_name().strip(chr(0))
 
-    def readAll(self):
+    def getAll(self):
 	""" IrLeft, IrRight, LightLeft/2, LightCenter/2, LightRight/2, LineLeft, LineRight, Stall """
 	retval = self.get_all() # returned as bytes
         return {"light": [retval[2] << 8 | retval[3], retval[4] << 8 | retval[5], retval[6] << 8 | retval[7]],
@@ -176,7 +184,7 @@ class Scribbler(Robot):
             else:
                 raise AttributeError, "no such LED: '%s'" % position
 
-    def readLight(self, position):
+    def getLight(self, position):
         if type(position) in [float, int]:
             if position == 0:
                 return self.get_light_left()
@@ -199,7 +207,7 @@ class Scribbler(Robot):
             else:
                 raise AttributeError, "no such light sensor: '%s'" % position
 
-    def readIR(self, position):
+    def getIR(self, position):
         if type(position) in [float, int]:
             if position == 0:
                 return self.get_open_left()
@@ -218,7 +226,7 @@ class Scribbler(Robot):
             else:
                 raise AttributeError, "no such IR sensor: '%s'" % position
 
-    def readLine(self, position):
+    def getLine(self, position):
         if type(position) in [float, int]:
             if position == 0:
                 return self.get_line_left()
@@ -237,11 +245,11 @@ class Scribbler(Robot):
             else:
                 raise AttributeError, "no such line sensor: '%s'" % position
 
-    def readStall(self):
+    def getStall(self):
         return self.get_stall()
 
     def update(self):
-        # FIX: store all data in a structure, remove updates from above read's
+        # FIX: store all data in a structure, remove updates from above get's
         # and return cached version
         pass
 

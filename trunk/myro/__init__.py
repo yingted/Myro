@@ -12,10 +12,19 @@ __AUTHOR__   = "Doug Blank <dblank@cs.brynmawr.edu>"
 
 import sys, atexit, time, os, random
 import myro.globals
+from myro.media import *
+try:
+    import Tkinter
+except:
+    Tkinter = None
 try:
     import tkSnack
 except:
     tkSnack = None
+if Tkinter != None:
+    from myro.widgets import AskDialog
+    myro.globals.gui = Tkinter.Tk()
+    myro.globals.gui.withdraw()
 
 def wait(seconds):
     """
@@ -41,6 +50,80 @@ def randomNumber():
     """
     return random.random()
 
+def pickAFolder():
+    folder = tkFileDialog.askdirectory()
+    if folder == '':
+        folder = myro.globals.mediaFolder
+    return folder
+	
+def pickAColor():
+    color = tkColorChooser.askcolor()
+    newColor = Color(color[0][0], color[0][1], color[0][2])
+    return newColor
+
+def askForPort(forceAsk = 0, forceConsole = 0, useCache = 1):
+    return ask({"Port": ""}, "Communication Port", forceAsk, forceConsole,
+               useCache)["Port"]
+
+def ask(data, title = None, forceAsk = 0, forceConsole = 0, useCache = 1):
+    """ Given a dictionary return dictionary with answers. """
+    if useCache:
+        # get data, if in cache:
+        needToAsk = 0
+        for question in data.keys():
+            if question in myro.globals.askData.keys():
+                data[question] = myro.globals.askData[question]
+            else:
+                needToAsk = 1
+    else:
+        needToAsk = 1
+    # if I got it all, and don't need to ask, return
+    # else, ask it all:
+    if needToAsk or forceAsk: 
+        if Tkinter == None or forceConsole:
+            askConsole(data, title)
+        else:
+            data = askGUI(data, title)
+            if data["ok"] == 0:
+                raise KeyboardInterrupt
+        # cache data in globals:
+        for text in data.keys():
+            myro.globals.askData[text] = data[text]
+    return data
+
+def askGUI(qlist, title = "Information Request"):
+   d = AskDialog(myro.globals.gui, title, qlist)
+   d.top.bind("<Return>", lambda event: d.OkPressed())
+   ok = d.Show()
+   if ok:
+      retval = {"ok": 1}
+      for name in qlist.keys():
+          retval[name] = d.textbox[name].get()
+      d.DialogCleanup()
+      return retval
+   else:
+      d.DialogCleanup()
+      return {"ok" : 0}
+
+def askConsole(data, title = "Information Request"):
+    print "+-----------------------------------------------------------------+"
+    print "|" + title.center(65) + "|"
+    print "+-----------------------------------------------------------------+"
+    print "| Please enter the following information. Default values are in   |"
+    print "| brackets. To accept default values, just press enter. I'll just |"
+    print "| ask this question once this session.                            |"
+    print "------------------------------------------------------------------"
+    for key in data.keys():
+        retval = raw_input("   " + key + (" [%s]" % data[key])+ ": ")
+        retval.strip() # remove any spaces on either side
+        if retval != "":
+            data[key] = retval
+    return data
+
+def pickAFile():
+    path = tkFileDialog.askopenfilename(parent=myro.globals.gui)
+    return path
+
 class Robot(object):
     app = None
     joy = None
@@ -62,19 +145,19 @@ class Robot(object):
     def beep(self, duration, frequency, frequency2 = None):
         raise AttributeError, "this method needs to be written"
 
-    def readLight(self, position):
+    def getLight(self, position):
         raise AttributeError, "this method needs to be written"
 
-    def readIR(self, position):
+    def getIR(self, position):
         raise AttributeError, "this method needs to be written"
 
-    def readLine(self, position):
+    def getLine(self, position):
         raise AttributeError, "this method needs to be written"
 
-    def readStall(self):
+    def getStall(self):
         raise AttributeError, "this method needs to be written"
 
-    def readAll(self):
+    def getAll(self):
         raise AttributeError, "this method needs to be written"
 
     def setLED(self, position, value):
@@ -89,15 +172,12 @@ class Robot(object):
 ### The rest of these methods are just rearrangements of the above
 
     def joystick(self):
-        import Tkinter
         from myro.joystick import Joystick
 	try:
 	    import idlelib
 	except:
 	    idlelib = None
         if self.joy == None:
-            self.app = Tkinter.Tk()
-            self.app.withdraw()
             self.joy = Joystick(parent = self.app, robot = self)
         else:
             self.joy.deiconify()
@@ -110,30 +190,30 @@ class Robot(object):
         #except:
         #    pass
 
-    def read(self, sensor, *positions):
+    def get(self, sensor, *positions):
         sensor = sensor.lower()
         if sensor == "stall":
-            return self.readStall()
+            return self.getStall()
         else:
             retvals = []
             if len(positions) == 0:
                 if sensor == "light":
-                    return self.readLight("all")
+                    return self.getLight("all")
                 elif sensor == "ir":
-                    return self.readIR("all")
+                    return self.getIR("all")
                 elif sensor == "line":
-                    return self.readLine("all")
+                    return self.getLine("all")
                 elif sensor == "all":
-                    return self.readAll()
+                    return self.getAll()
                 else:
                     raise ("invalid sensor name: '%s'" % sensor)
             for position in positions:
                 if sensor == "light":
-                    retvals.append(self.readLight(position))
+                    retvals.append(self.getLight(position))
                 elif sensor == "ir":
-                    retvals.append(self.readIR(position))
+                    retvals.append(self.getIR(position))
                 elif sensor == "line":
-                    retvals.append(self.readLine(position))
+                    retvals.append(self.getLine(position))
                 else:
                     raise ("invalid sensor name: '%s'" % sensor)
             if len(retvals) == 1:
@@ -193,17 +273,31 @@ class Robot(object):
     def update(self):
         pass
 
+    def playSong(self, song, wholeNoteDuration = .545):
+        """ Plays a song (list of note names, durations) """
+        # 1 whole note should be .545 seconds for normal
+        for tuple in song:
+            self.playNote(tuple)
+
+    def playNote(self, tuple):
+        if len(tuple) == 2:
+            (freq, dur) = tuple
+            self.beep(dur * wholeNoteDuration, freq)
+        elif len(tuple) == 3:
+            (freq1, freq2, dur) = tuple
+            self.beep(dur * wholeNoteDuration, freq1, freq2)
+
 from myro.robot.scribbler import Scribbler
 
 class SimScribbler(Robot):
-    def __init__(self, id):
+    def __init__(self, id = None):
         import myro.simulator
         globalspath, filename = os.path.split(myro.globals.__file__)
-        myro.globals._myropath, directory = os.path.split(globalspath)
+        myro.globals.myropath, directory = os.path.split(globalspath)
         self._simulator = myro.simulator.INIT(
-            os.path.join(myro.globals._myropath, "worlds", "MyroWorld"))
+            os.path.join(myro.globals.myropath, "worlds", "MyroWorld"))
         if (tkSnack):
-            tkSnack.initializeSnack(myro.globals._gui)
+            tkSnack.initializeSnack(myro.globals.gui)
         for port in self._simulator.ports:
             print "Simulator starting listener on port", port, "..."
             thread = myro.simulator.Thread(self._simulator, port)
@@ -213,25 +307,26 @@ class SimScribbler(Robot):
         self._clients = []
         for port in self._simulator.ports:
             self._clients.append(TCPRobot("localhost", port))
-        myro.globals._robot = self
-        myro.globals._simulator = self._simulator
-        atexit.register(_cleanup) # FIX: hack to get _cleanup called before Tk exitfunc, which hangs
+        myro.globals.robot = self
+        myro.globals.simulator = self._simulator
+        # FIX: hack to get _cleanup called before Tk exitfunc, which hangs
+        atexit.register(_cleanup) 
     def translate(self, amount):
         return self._clients[0].translate(amount)
     def rotate(self, amount):
         return self._clients[0].rotate(amount)
     def move(self, translate, rotate):
         return self._clients[0].move(translate, rotate)
-    def readLight(self, pos):
+    def getLight(self, pos):
         self._clients[0].update()
         return self._clients[0].light[0].value[pos]
-    def readIR(self, pos):
+    def getIR(self, pos):
         self._clients[0].update()
         return self._clients[0].ir[0].value[pos]
-    def readLine(self, pos):
+    def getLine(self, pos):
         self._clients[0].update()
         return self._clients[0].line[0].value[pos]
-    def readStall(self):
+    def getStall(self):
         self._clients[0].update()
         return self._clients[0].stall
     def update(self):
@@ -250,16 +345,16 @@ class SimScribbler(Robot):
     
 # functions:
 def _cleanup():
-    if myro.globals._robot != None:
-        myro.globals._robot.stop() # hangs?
+    if myro.globals.robot != None:
+        myro.globals.robot.stop() # hangs?
 	time.sleep(.5)
-        myro.globals._robot.close()
-    if myro.globals._simulator != None:
-       myro.globals._simulator.destroy()
+        myro.globals.robot.close()
+    if myro.globals.simulator != None:
+       myro.globals.simulator.destroy()
 
 # Get ready for user prompt; set up environment:
-if not myro.globals._setup:
-    myro.globals._setup = 1
+if not myro.globals.setup:
+    myro.globals.setup = 1
     atexit.register(_cleanup)
     # Ok, now we're ready!
     print >> sys.stderr, "Myro, (c) 2006 Institute for Personal Robots in Education"
@@ -267,87 +362,73 @@ if not myro.globals._setup:
 
 ## Non-object interface:
 
-def initialize(id):
+def initialize(id = None):
     global robot
-    myro.globals._robot = Scribbler(id)
-    robot = myro.globals._robot
-def simulator(id):
+    myro.globals.robot = Scribbler(id)
+    robot = myro.globals.robot
+def simulator(id = None):
     global robot
-    myro.globals._robot = SimScribbler(id)
-    robot = myro.globals._robot
+    myro.globals.robot = SimScribbler(id)
+    robot = myro.globals.robot
 def translate(amount):
-    return myro.globals._robot.translate(amount)
+    return myro.globals.robot.translate(amount)
 def rotate(amount):
-    return myro.globals._robot.rotate(amount)
+    return myro.globals.robot.rotate(amount)
 def move(translate, rotate):
-    return myro.globals._robot.move(rotate, translate)
+    return myro.globals.robot.move(rotate, translate)
 def forward(amount):
-    return myro.globals._robot.forward(amount)
+    return myro.globals.robot.forward(amount)
 def backward(amount):
-    return myro.globals._robot.backward(amount)
+    return myro.globals.robot.backward(amount)
 def turn(direction, amount = .8):
-    return myro.globals._robot.turn(direction, amount)
+    return myro.globals.robot.turn(direction, amount)
 def turnLeft(amount):
-    return myro.globals._robot.left(amount)
+    return myro.globals.robot.left(amount)
 def turnRight(amount):
-    return myro.globals._robot.right(amount)
+    return myro.globals.robot.right(amount)
 def stop():
-    return myro.globals._robot.stop()
+    return myro.globals.robot.stop()
 def openConnection():
-    return myro.globals._robot.open()
+    return myro.globals.robot.open()
 def closeConnection():
-    return myro.globals._robot.close()
-def read(sensor, *pos):
-    return myro.globals._robot.read(sensor, *pos)
-def readLight(pos):
-    return myro.globals._robot.readLight(pos)
-def readIR(pos):
-    return myro.globals._robot.readIR(pos)
-def readLine(pos):
-    return myro.globals._robot.readLine(pos)
-def readStall():
-    return myro.globals._robot.readStall()
-def readAll():
-    return myro.globals._robot.readAll()
-def readName():
-    return myro.globals._robot.readName()
+    return myro.globals.robot.close()
+def get(sensor, *pos):
+    return myro.globals.robot.get(sensor, *pos)
+def getLight(pos):
+    return myro.globals.robot.getLight(pos)
+def getIR(pos):
+    return myro.globals.robot.getIR(pos)
+def getLine(pos):
+    return myro.globals.robot.getLine(pos)
+def getStall():
+    return myro.globals.robot.getStall()
+def getAll():
+    return myro.globals.robot.getAll()
+def getName():
+    return myro.globals.robot.getName()
 def update():
-    return myro.globals._robot.update()
+    return myro.globals.robot.update()
 def beep(self, duration, frequency, frequency2 = None):
-    return myro.globals._robot.beep(duration, frequency, frequency2)
+    return myro.globals.robot.beep(duration, frequency, frequency2)
 def set(item, position, value = None):
-    return myro.globals._robot.set(item, position, value)
+    return myro.globals.robot.set(item, position, value)
 def setLED(position, value):
-    return myro.globals._robot.setLED(position, value)
+    return myro.globals.robot.setLED(position, value)
 def setName(name):
-    return myro.globals._robot.setName(name)
+    return myro.globals.robot.setName(name)
 def setVolume(value):
-    return myro.globals._robot.setVolume(value)
+    return myro.globals.robot.setVolume(value)
 def motors(left, right):
-    return myro.globals._robot.motors(left, right)
+    return myro.globals.robot.motors(left, right)
 def restart():
-    return myro.globals._robot.restart()
+    return myro.globals.robot.restart()
 def joystick():
-    return myro.globals._robot.joystick()
+    return myro.globals.robot.joystick()
 
 # --------------------------------------------------------
 # Error handler:
 # --------------------------------------------------------
 import traceback
-try:
-    import Tkinter
-except:
-    Tkinter = None
-
-class HelpWindow(Tkinter.Toplevel): 
-    def __init__(self):
-        root = None
-        Tkinter.Toplevel.__init__(self, root)
-        root.withdraw()
-        self.frame = Tkinter.Frame(self)
-        self.frame.pack(side = 'bottom', expand = "yes", anchor = "n",
-                        fill = 'both')
-
 def _myroExceptionHandler(type, value, tb):
     if Tkinter == None:
         lines = traceback.format_exception(type, value, tb)
@@ -367,9 +448,9 @@ sys.excepthook = _myroExceptionHandler
 # --------------------------------------------------------
 import signal
 def _interruptHandler(signum, frame):
-    if myro.globals._robot != None:
+    if myro.globals.robot != None:
         print "Stopping robot..."
-        myro.globals._robot.stop()
+        myro.globals.robot.stop()
     raise KeyboardInterrupt
 signal.signal(signal.SIGINT, _interruptHandler)
 # --------------------------------------------------------
