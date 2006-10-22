@@ -287,6 +287,27 @@ def _getDuration(v, line, text):
                                (v, line, text))
     return float(v)
 
+def saveSong(song, filename, append = 1):
+    if append:
+        mode = "w+"
+    else:
+        mode = "w"
+    fp = open(filename, mode) # will append it if it exists
+    if type(song) in [list]:
+        for tup in song:
+            if len(tup) == 2:
+                f, d = tup
+                fp.write("%s %s\n" % (getNoteFromFrequency(f), d))
+            elif len(tup) == 3:
+                f1, f2, d = tup
+                fp.write("%s %s %s\n" % (getNoteFromFrequency(f),
+                                         getNoteFromFrequency(f), d))
+    else: # string
+        lines = song.split(";")
+        for line in lines:
+            fp.write(line + "\n")
+    fp.close()
+
 def makeSong(text):
     song = []
     songData = text.split(";")
