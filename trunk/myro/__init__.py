@@ -15,6 +15,8 @@ import myro.globals
 from myro.media import *
 try:
     import Tkinter
+    import tkFileDialog
+    import tkColorChooser
 except:
     Tkinter = None
 try:
@@ -59,6 +61,10 @@ def pickAFolder():
         folder = myro.globals.mediaFolder
     return folder
 	
+def pickAFile():
+    path = tkFileDialog.askopenfilename(parent=myro.globals.gui)
+    return path
+
 def pickAColor():
     color = tkColorChooser.askcolor()
     newColor = Color(color[0][0], color[0][1], color[0][2])
@@ -122,10 +128,6 @@ def askConsole(data, title = "Information Request"):
         if retval != "":
             data[key] = retval
     return data
-
-def pickAFile():
-    path = tkFileDialog.askopenfilename(parent=myro.globals.gui)
-    return path
 
 class Robot(object):
     app = None
