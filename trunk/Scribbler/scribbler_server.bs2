@@ -96,6 +96,11 @@ quiet   VAR Byte
 inCmd(PACKET_LENGTH-1) = 0
 quiet = 0
 
+' turn off LEDs
+LedCenter = 0
+LedRight  = 0
+LedLeft   = 0
+
 INIT:
   ' Used to flash the middle LED with short timeout:
   IF (LedCenter = 1) THEN LedCenter = 0 ELSE LedCenter = 1
