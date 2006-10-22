@@ -48,7 +48,8 @@ f .25
 You may leave blank lines, and comments should begin with a #
 sign.
 
-getSong(filename): returns a list of tuples: [(freq1, [freq2], wholepart), ...]
+s = readSong(filename): returns a list of tuples: [(freq1, [freq2], wholepart), ...]
+robot.playSong(s): plays a song on the robot
 """
 
 __VERSION__ = "$Revision$ "
@@ -282,36 +283,51 @@ def _getDuration(v, line, text):
         try:
             return eval(v + ".")
         except:
-            raise ValueError, "invalid duration value '%s' on line %d: %s" % (v, line, text)
+            raise ValueError, ("invalid duration value '%s' on line %d: %s" %
+                               (v, line, text))
     return float(v)
 
+def makeSong(text):
+    song = []
+    songData = text.split(";")
+    lineNumber = 1
+    for line in songData:
+        _parseSongLine(song, line, lineNumber, "text")
+        lineNumber += 1
+    return song
+        
 def readSong(filename = None):
     if filename == None: return []
-    print ("Reading song file '%s'..." % filename),
     songFile = open(filename, "r")
     song = []
     lineNumber = 1
     for line in songFile:
-        name1 = name2 = None
-        lineList = line.split()
-        if len(lineList) == 0: # blank line, skip
-            pass
-        elif lineList[0][0] == "#": # first word, first char is #, then skip comment
-            pass
-        elif len(lineList) == 2:
-            name1, dur = line.split()
-            song.append( (_getFrequency(name1, lineNumber, line), _getDuration(dur, lineNumber, line)))
-        elif len(lineList) == 3:
-            name1, name2, dur = line.split()
-            song.append( (_getFrequency(name1, lineNumber, line),
-                          _getFrequency(name2, lineNumber, line),
-                          _getDuration(dur, lineNumber, line)) )
-        else:
-            raise ValueError, ("song format error in file '%s' at line %d: %s" % filename, lineNumber, line)
+        _parseSongLine(song, line, lineNumber, filename)
         lineNumber += 1
     songFile.close()
-    print "done!"
     return song
+
+def _parseSongLine(song, line, lineNumber, filename):
+    name1 = name2 = None
+    lineList = line.split()
+    if len(lineList) == 0:
+        # blank line, skip
+        pass
+    elif lineList[0][0] == "#":
+        # first word, first char is #, then skip comment
+        pass
+    elif len(lineList) == 2:
+        name1, dur = line.split()
+        song.append( (_getFrequency(name1, lineNumber, line),
+                      _getDuration(dur, lineNumber, line)))
+    elif len(lineList) == 3:
+        name1, name2, dur = line.split()
+        song.append( (_getFrequency(name1, lineNumber, line),
+                      _getFrequency(name2, lineNumber, line),
+                      _getDuration(dur, lineNumber, line)) )
+    else:
+        raise ValueError, ("song format error in '%s' at line %d: %s" %
+                           (filename, lineNumber, line))
 
 class Song:
     def __init__(self, robot, filename = None):
