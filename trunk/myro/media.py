@@ -170,6 +170,10 @@ _frequency = {
     'g'       :      784,
     'ab'      :      830.6,
     'g#'      :      830.6,
+    'a'      :      880,
+    'a#'     :      932.3,
+    'bb'     :      932.3,
+    'b'      :      987.8,
     #------------------------------------
     'c6'      :      523.3,
     'c#6'     :      554.4,
@@ -184,7 +188,6 @@ _frequency = {
     'g6'      :      784,
     'ab6'     :      830.6,
     'g#6'     :      830.6,
-    'a#7'     :      864.7,
     'a6'      :      880,
     'a#6'     :      932.3,
     'bb6'     :      932.3,
@@ -203,6 +206,7 @@ _frequency = {
     'ab7'     :     1661.2,
     'g#7'     :     1661.2,
     'a7'      :     1760,
+    'a#7'     :     1864.7,
     'bb7'     :     1864.7,
     'b7'      :     1975.5,
     'c8'      :     2093,
@@ -255,7 +259,7 @@ _frequency = {
 def _getFrequency(s, line, text):
     """ Takes a string that is a note name, or a frequency. Returns """
     if len(s) > 0 and s[0].isalpha(): 
-        if s in _frequency:
+        if s.lower() in _frequency:
             return _frequency[s.lower()]
         else:
             raise ValueError, "invalid note name/frequency '%s' on line %d: %s" % (s, line, text)
@@ -296,7 +300,7 @@ def readSong(filename = None):
             pass
         elif len(lineList) == 2:
             name1, dur = line.split()
-            song.append( _getFrequency(name1, lineNumber, line), _getDuration(dur, lineNumber, line))
+            song.append( (_getFrequency(name1, lineNumber, line), _getDuration(dur, lineNumber, line)))
         elif len(lineList) == 3:
             name1, name2, dur = line.split()
             song.append( (_getFrequency(name1, lineNumber, line),

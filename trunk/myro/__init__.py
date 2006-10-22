@@ -279,7 +279,7 @@ class Robot(object):
         for tuple in song:
             self.playNote(tuple)
 
-    def playNote(self, tuple):
+    def playNote(self, tuple, wholeNoteDuration = .545):
         if len(tuple) == 2:
             (freq, dur) = tuple
             self.beep(dur * wholeNoteDuration, freq)
