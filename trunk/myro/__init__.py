@@ -6,8 +6,8 @@ Distributed under a Shared Source License
 """
 
 __REVISION__ = "$Revision$"
-__BUILD__    = "$Build: 2 $"
-__VERSION__  = "0.4." + __BUILD__.split()[1]
+__BUILD__    = "$Build: 0 $"
+__VERSION__  = "0.5." + __BUILD__.split()[1]
 __AUTHOR__   = "Doug Blank <dblank@cs.brynmawr.edu>"
 
 import sys, atexit, time, os, random
