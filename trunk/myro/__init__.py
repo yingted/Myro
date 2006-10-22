@@ -23,8 +23,11 @@ except:
     tkSnack = None
 if Tkinter != None:
     from myro.widgets import AskDialog
-    myro.globals.gui = Tkinter.Tk()
-    myro.globals.gui.withdraw()
+    try:
+        myro.globals.gui = Tkinter.Tk()
+        myro.globals.gui.withdraw()
+    except:
+        Tkinter = None
 
 def wait(seconds):
     """
