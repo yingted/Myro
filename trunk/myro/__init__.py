@@ -74,8 +74,15 @@ def askForPort(forceAsk = 0, forceConsole = 0, useCache = 1):
     return ask({"Port": ""}, "Communication Port", forceAsk, forceConsole,
                useCache)["Port"]
 
-def ask(data, title = None, forceAsk = 0, forceConsole = 0, useCache = 1):
+def ask(data, title = "Information Request", forceAsk = 0, forceConsole = 0, useCache = 1):
     """ Given a dictionary return dictionary with answers. """
+    if type(data) in [str]:
+        data = {data:""}
+    if type(data) in [list, tuple]:
+        newData = {}
+        for item in data:
+            newData[item] = ""
+        data = newData
     if useCache:
         # get data, if in cache:
         needToAsk = 0
