@@ -17,7 +17,7 @@ NOTENAMES are case-insensitive strings laid out like:
 
 C C#/Db D D#/Eb E F F#/Gb G G#/Ab A A#/Bb B C
 
-with the octave number following, from 0 (low) to 10 (high).
+with the octave number following, from 0 (low) to 9 (high).
 
 The middle octave on a keyboard is number 4, so a keyboard
 goes from C0 through C9, with 8 complete octaves. There are 
