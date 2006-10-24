@@ -9,7 +9,7 @@ __REVISION__ = "$Revision$"
 __AUTHOR__   = "Keith and Doug"
 
 import serial, time, string
-from myro import Robot, askForPort
+from myro import Robot, ask
 import myro.globals
 
 def isTrue(value):
@@ -62,7 +62,7 @@ class Scribbler(Robot):
         self.lastTranslate = 0
         self.lastRotate    = 0
         if serialport == None:
-            serialport = askForPort()
+            serialport = ask("Port")
         self.serialPort = serialport
         self.baudRate = baudrate
         self.open()
