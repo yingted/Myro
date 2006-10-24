@@ -104,11 +104,11 @@ _frequency = {
               "gb2":   92.50,
               "g2":   98.00,
               "g#2":   103.80,
-              "ab2", 103.80,
+              "ab2": 103.80,
               "a2":   110.00,
-              "a#2",  116.50,
+              "a#2":  116.50,
               "bb2":   116.50,
-              "b2",   123.471,
+              "b2":   123.471,
               "c3":   130.8,
               "c#3":   138.6,
               "db3":   138.6,
@@ -261,7 +261,7 @@ def getNoteFromFrequency(frequency):
     """ Return closest note name based on a given frequency. """
     diff = 100000
     diffNote = None
-    for key in _frequency.keys():
+    for key in sorted(_frequency.keys()):
         if abs(_frequency[key] - frequency) < diff:
             diff = abs(_frequency[key] - frequency)
             diffNote = key

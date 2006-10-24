@@ -70,11 +70,13 @@ def pickAColor():
     newColor = Color(color[0][0], color[0][1], color[0][2])
     return newColor
 
-def askForPort(forceAsk = 0, forceConsole = 0, useCache = 1):
-    return ask({"Port": ""}, "Communication Port", forceAsk, forceConsole,
-               useCache)["Port"]
+def ask(item):
+    retval = _ask(item)
+    if len(retval.keys()) == 2: # ok, and item
+        return retval[item]
+    else: return retval
 
-def ask(data, title = "Information Request", forceAsk = 0, forceConsole = 0, useCache = 1):
+def _ask(data, title = "Information Request", forceAsk = 0, forceConsole = 0, useCache = 1):
     """ Given a dictionary return dictionary with answers. """
     if type(data) in [str]:
         data = {data:""}
