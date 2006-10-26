@@ -286,8 +286,8 @@ def song2text(song):
             text += "%s %s; " % (getNoteFromFrequency(f), d)
         elif len(tup) == 3:
             f1, f2, d = tup
-            text += "%s %s %s; " % (getNoteFromFrequency(f),
-                                    getNoteFromFrequency(f), d)
+            text += "%s %s %s; " % (getNoteFromFrequency(f1),
+                                    getNoteFromFrequency(f2), d)
     return text
 
 def saveSong(song, filename, append = 1):
@@ -321,7 +321,9 @@ def makeSong(text):
         _parseSongLine(song, line, lineNumber, "text")
         lineNumber += 1
     return song
-        
+
+text2song = makeSong # alias, for symmetry since we have song2text
+
 def readSong(filename = None):
     """ Read a song file. Returns a song list """
     if filename == None: return []

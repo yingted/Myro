@@ -59,8 +59,9 @@ class Scribbler(Robot):
     
     def __init__(self, serialport = None, baudrate = 38400):
         self.debug = 0
-        self.lastTranslate = 0
-        self.lastRotate    = 0
+        self._lastTranslate = 0
+        self._lastRotate    = 0
+        self._volume = 0
         if serialport == None:
             serialport = ask("Port")
         self.serialPort = serialport
@@ -96,7 +97,7 @@ class Scribbler(Robot):
         else:
             while 1:
                 try:
-                    self.ser = serial.Serial(self.serialPort, timeout = 10)
+                    self.ser = serial.Serial(self.serialPort, timeout = 2) # does this need to be 10?
                     break
                 except:
                     print "Waiting on port..."
@@ -109,158 +110,152 @@ class Scribbler(Robot):
         self.ser.close()
 
     def restart(self):
-        self.set_motors_off()
-        self.set_led_right_off()
-        self.set_led_center_on()
-        self.set_led_left_off()
+        self.stop()
+        self.set("led", "all", "off")
         self.beep(.10, 1600)
         self.beep(.10, 800)
         self.beep(.10, 1200)
-	name = self.getName()
+	name = self.get("name")
         print "Hello, I'm %s!" % name
 
     def beep(self, duration, frequency, frequency2 = None):
         if frequency2 == None:
-            self.set_speaker(int(frequency), int(duration * 1000))
+            self._set_speaker(int(frequency), int(duration * 1000))
         else:
-            self.set_speaker_2(int(frequency), int(frequency2), int(duration * 1000))
+            self._set_speaker_2(int(frequency), int(frequency2), int(duration * 1000))
 
-    def getName(self):
-        return self.get_name().strip(chr(0))
+    def get(self, sensor, *position):
+        sensor = sensor.lower()
+        if sensor == "stall":
+            return self._get(Scribbler.GET_STALL)
+        elif sensor == "startsong":
+            #TODO
+            return "tada"
+        elif sensor == "name":
+            self._write_long([Scribbler.GET_NAME])
+            c = self.ser.read(Scribbler.NAME_LENGTH)        
+            self._check(Scribbler.GET_NAME)
+            return c
+        elif sensor == "volume":
+            return self._volume
+        else:
+            retvals = []
+            if len(positions) == 0:
+                if sensor == "light":
+                    return self._get(Scribbler.GET_LIGHT_ALL, 6, "word")
+                elif sensor == "ir":
+                    return self._get(Scribbler.GET_IR_ALL, 2)
+                elif sensor == "line":
+                    return self._get(Scribbler.GET_LINE_ALL, 2)
+                elif sensor == "all":
+                    retval = self._get(Scribbler.GET_ALL, 11) # returned as bytes
+                    return {"light": [retval[2] << 8 | retval[3], retval[4] << 8 | retval[5], retval[6] << 8 | retval[7]],
+                            "ir": [retval[0], retval[1]], "line": [retval[8], retval[9]], "stall": retval[10]}
+                else:
+                    raise ("invalid sensor name: '%s'" % sensor)
+            for position in positions:
+                if sensor == "light":
+                    if pos in [0, "left"]:
+                        retvals.append(self._get(Scribbler.GET_LIGHT_LEFT, 2, "word"))
+                    elif pos in [1, "middle", "center"]:
+                        retvals.append(self._get(Scribbler.GET_LIGHT_CENTER, 2, "word"))
+                    elif pos in [2, "right"]:
+                        retvals.append(self._get(Scribbler.GET_LIGHT_RIGHT, 2, "word"))
+                elif sensor == "ir":
+                    if pos in [0, "left"]:
+                        retvals.append(self._get(Scribbler.GET_OPEN_LEFT))
+                    elif pos in [1, "right"]:
+                        retvals.append(self._get(Scribbler.GET_OPEN_RIGHT))
+                elif sensor == "line":
+                    if pos in [0, "left"]:
+                        retvals.append(self._get(Scribbler.GET_LINE_LEFT))
+                    elif pos in [1, "right"]:
+                        retvals.append(self._get(Scribbler.GET_LINE_RIGHT))
+                else:
+                    raise ("invalid sensor name: '%s'" % sensor)
+            if len(retvals) == 1:
+                return retvals[0]
+            else:
+                return retvals
 
-    def getAll(self):
-	""" IrLeft, IrRight, LightLeft/2, LightCenter/2, LightRight/2, LineLeft, LineRight, Stall """
-	retval = self.get_all() # returned as bytes
-        return {"light": [retval[2] << 8 | retval[3], retval[4] << 8 | retval[5], retval[6] << 8 | retval[7]],
-		"ir": [retval[0], retval[1]], "line": [retval[8], retval[9]], "stall": retval[10]}
+    def set(self, item, position, value = None):
+        item = item.lower()
+        if item == "led":
+            if type(position) in [int, float]:
+                if position == 0:
+                    if isTrue(value): return self._set(Scribbler.SET_LED_LEFT_ON)
+                    else:             return self._set(Scribbler.SET_LED_LEFT_OFF)
+                elif position == 1:
+                    if isTrue(value): return self._set(Scribbler.SET_LED_CENTER_ON)
+                    else:             return self._set(Scribbler.SET_LED_CENTER_OFF)
+                elif position == 2:
+                    if isTrue(value): return self._set(Scribbler.SET_LED_RIGHT_ON)
+                    else:             return self._set(Scribbler.SET_LED_CENTER_OFF)
+                else:
+                    raise AttributeError, "no such LED: '%s'" % position
+            else:
+                position = position.lower()
+                if position == "center":
+                    if isTrue(value): return self._set(Scribbler.SET_LED_CENTER_ON)
+                    else:             return self._set(Scribbler.SET_LED_CENTER_OF)
+                elif position == "left":
+                    if isTrue(value): return self._set(Scribbler.SET_LED_LEFT_ON)
+                    else:             return self._set(Scribbler.SET_LED_LEFT_OFF)
+                elif position == "right":
+                    if isTrue(value): return self._set(Scribbler.SET_LED_RIGHT_ON)
+                    else:             return self._set(Scribbler.SET_LED_RIGHT_OFF)
+                elif position == "all":
+                    if isTrue(value): return self._set(Scribbler.SET_LED_ALL_ON)
+                    else:             return self._set(Scribbler.SET_LED_ALL_OFF)
+                else:
+                    raise AttributeError, "no such LED: '%s'" % position
+            return "ok"
+        elif item == "name":
+            name = position[:8].strip()
+            name_raw = map(lambda x:  ord(x), name)
+            self._set(Scribbler.SET_NAME, name_raw)
+            return "ok"
+        elif item == "volume":
+            if isTrue(position):
+                self._volume = 1
+                return self._set(Scribbler.SET_LOUD)
+            else:
+                self._volume = 0
+                return self._set(Scribbler.SET_QUIET)
+            return "ok"
+        elif item == "startsong":
+            self.startsong = position
+            return "ok"
+        else:
+            raise ("invalid set item name: '%s'" % item)
 
-    def setName(self, str):
-        return self.set_name(str[:8].strip())
+    def stop(self):
+        return self._set(Scribbler.SET_MOTORS_OFF)
 
     def translate(self, amount):
-        self.lastTranslate = amount
-        self.adjustSpeed()
+        self._lastTranslate = amount
+        self._adjustSpeed()
 
     def rotate(self, amount):
-        self.lastRotate = amount
-        self.adjustSpeed()
+        self._lastRotate = amount
+        self._adjustSpeed()
 
     def move(self, translate, rotate):
-        self.lastTranslate = translate
-        self.lastRotate = rotate
-        self.adjustSpeed()
-
-    def setVolume(self, value):
-        if isTrue(value): return self.set_loud()
-	else:             return self.set_quiet()
-
-    def setLED(self, position, value):
-        if type(position) in [int, float]:
-            if position == 0:
-                if isTrue(value): return self.set_led_left_on()
-                else:             return self.set_led_left_off()
-            elif position == 1:
-                if isTrue(value): return self.set_led_center_on()
-                else:             return self.set_led_center_off()
-            elif position == 2:
-                if isTrue(value): return self.set_led_right_on()
-                else:             return self.set_led_right_off()
-            else:
-                raise AttributeError, "no such LED: '%s'" % position
-        else:
-            position = position.lower()
-            if position == "center":
-                if isTrue(value): return self.set_led_center_on()
-                else:             return self.set_led_center_off()
-            elif position == "left":
-                if isTrue(value): return self.set_led_left_on()
-                else:             return self.set_led_left_off()
-            elif position == "right":
-                if isTrue(value): return self.set_led_right_on()
-                else:             return self.set_led_right_off()
-            elif position == "all":
-                if isTrue(value): return self.set_led_all_on()
-                else:             return self.set_led_all_off()
-            else:
-                raise AttributeError, "no such LED: '%s'" % position
-
-    def getLight(self, position):
-        if type(position) in [float, int]:
-            if position == 0:
-                return self.get_light_left()
-            elif position == 1:
-                return self.get_light_center()
-            elif position == 2:
-                return self.get_light_right()
-            else:
-                raise AttributeError, "no such light sensor: '%s'" % position
-        else:
-            position = position.lower()
-            if position == "center":
-                return self.get_light_center()
-            elif position == "left":
-                return self.get_light_left()
-            elif position == "right":
-                return self.get_light_right()
-            elif position == "all":
-                return self.get_light_all()
-            else:
-                raise AttributeError, "no such light sensor: '%s'" % position
-
-    def getIR(self, position):
-        if type(position) in [float, int]:
-            if position == 0:
-                return self.get_open_left()
-            elif position == 1:
-                return self.get_open_right()
-            else:
-                raise AttributeError, "no such IR sensor: '%s'" % position
-	else:
-            position = position.lower()
-            if position == "left":
-                return self.get_ir_left()
-            elif position == "right":
-                return self.get_ir_right()
-            elif position == "all":
-                return self.get_ir_all()
-            else:
-                raise AttributeError, "no such IR sensor: '%s'" % position
-
-    def getLine(self, position):
-        if type(position) in [float, int]:
-            if position == 0:
-                return self.get_line_left()
-            elif position == 1:
-                return self.get_line_right()
-            else:
-                raise AttributeError, "no such line sensor: '%s'" % position
-	else:
-            position = position.lower()
-            if position == "left":
-                return self.get_line_left()
-            elif position == "right":
-                return self.get_line_right()
-            elif position == "all":
-                return self.get_line_all()
-            else:
-                raise AttributeError, "no such line sensor: '%s'" % position
-
-    def getStall(self):
-        return self.get_stall()
+        self._lastTranslate = translate
+        self._lastRotate = rotate
+        self._adjustSpeed()
 
     def update(self):
-        # FIX: store all data in a structure, remove updates from above get's
-        # and return cached version
         pass
 
 ####################### Private
 
-    def adjustSpeed(self):
-        left  = min(max(self.lastTranslate - self.lastRotate, -1), 1)
-        right  = min(max(self.lastTranslate + self.lastRotate, -1), 1)
+    def _adjustSpeed(self):
+        left  = min(max(self._lastTranslate - self._lastRotate, -1), 1)
+        right  = min(max(self._lastTranslate + self._lastRotate, -1), 1)
         leftPower = (left + 1.0) * 100.0
         rightPower = (right + 1.0) * 100.0
-        self.set_motors(leftPower, rightPower)
+        self._set_motors(leftPower, rightPower)
 
     def _read(self, bytes = 1):
         c = self.ser.read(bytes)
@@ -327,21 +322,16 @@ class Scribbler(Robot):
 	        newRetval.append(retval[p] << 8 | retval[p + 1])
 	    return newRetval
 
-    def set_name(self, name):
-        name_raw = map(lambda x:  ord(x), name)
-        return self._set(Scribbler.SET_NAME, name_raw)
-
-    def set_motors(self, motor_left, motor_right):
+    def _set_motors(self, motor_left, motor_right):
         return self._set(Scribbler.SET_MOTORS, [motor_right, motor_left])
 
-    
-    def set_speaker(self, frequency, duration):
+    def _set_speaker(self, frequency, duration):
         return self._set(Scribbler.SET_SPEAKER, [duration >> 8,
                                                 duration % 256,
                                                 frequency >> 8,
                                                 frequency % 256])
 
-    def set_speaker_2(self, freq1, freq2, duration):
+    def _set_speaker_2(self, freq1, freq2, duration):
         return self._set(Scribbler.SET_SPEAKER_2, [duration >> 8,
                                                   duration % 256,
                                                   freq1 >> 8,
@@ -349,77 +339,3 @@ class Scribbler(Robot):
                                                   freq2 >> 8,
                                                   freq2 % 256])
     
-    def set_motors_off(self):
-        return self._set(Scribbler.SET_MOTORS_OFF)
-        
-    def set_led_left_on(self):
-        return self._set(Scribbler.SET_LED_LEFT_ON)
-    
-    def set_led_left_off(self):
-        return self._set(Scribbler.SET_LED_LEFT_OFF)
-
-    def set_led_center_on(self):
-        return self._set(Scribbler.SET_LED_CENTER_ON)
-
-    def set_led_center_off(self):
-        return self._set(Scribbler.SET_LED_CENTER_OFF)
-
-    def set_led_all_on(self):
-        return self._set(Scribbler.SET_LED_ALL_ON)
-
-    def set_led_all_off(self):
-        return self._set(Scribbler.SET_LED_ALL_OFF)
-
-    def set_led_right_on(self):
-        return self._set(Scribbler.SET_LED_RIGHT_ON)
-
-    def set_led_right_off(self):
-        return self._set(Scribbler.SET_LED_RIGHT_OFF)
-                
-    def set_loud(self):
-        return self._set(Scribbler.SET_LOUD)
-                
-    def set_quiet(self):
-        return self._set(Scribbler.SET_QUIET)
-                
-    def get_open_left(self):
-        return self._get(Scribbler.GET_OPEN_LEFT)
-
-    def get_open_right(self):
-        return self._get(Scribbler.GET_OPEN_RIGHT)
-
-    def get_ir_all(self):
-        return self._get(Scribbler.GET_IR_ALL, 2)
-
-    def get_stall(self):
-        return self._get(Scribbler.GET_STALL)
-
-    def get_light_left(self):
-        return self._get(Scribbler.GET_LIGHT_LEFT, 2, "word")
-
-    def get_light_center(self):
-        return self._get(Scribbler.GET_LIGHT_CENTER, 2, "word")
-
-    def get_light_right(self):
-        return self._get(Scribbler.GET_LIGHT_RIGHT, 2, "word")
-
-    def get_light_all(self):
-        return self._get(Scribbler.GET_LIGHT_ALL, 6, "word")
-
-    def get_line_right(self):
-        return self._get(Scribbler.GET_LINE_RIGHT)
-
-    def get_line_left(self):
-        return self._get(Scribbler.GET_LINE_LEFT)
-
-    def get_line_all(self):
-        return self._get(Scribbler.GET_LINE_ALL, 2)
-
-    def get_all(self):
-        return self._get(Scribbler.GET_ALL, 11)
-
-    def get_name(self):
-        self._write_long([Scribbler.GET_NAME])
-        c = self.ser.read(Scribbler.NAME_LENGTH)        
-        self._check(Scribbler.GET_NAME)
-        return c

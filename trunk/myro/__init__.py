@@ -141,7 +141,6 @@ def askConsole(data, title = "Information Request"):
 class Robot(object):
     app = None
     joy = None
-    
     def __init__(self):
         """
         Base robot class.
@@ -156,34 +155,40 @@ class Robot(object):
     def move(self, translate, rotate):
         raise AttributeError, "this method needs to be written"
 
-    def beep(self, duration, frequency, frequency2 = None):
+    def beep(self, duration, frequency1, frequency2 = None):
         raise AttributeError, "this method needs to be written"
 
-    def getLight(self, position):
-        raise AttributeError, "this method needs to be written"
-
-    def getIR(self, position):
-        raise AttributeError, "this method needs to be written"
-
-    def getLine(self, position):
-        raise AttributeError, "this method needs to be written"
-
-    def getStall(self):
-        raise AttributeError, "this method needs to be written"
-
-    def getAll(self):
-        raise AttributeError, "this method needs to be written"
-
-    def setLED(self, position, value):
-        raise AttributeError, "this method needs to be written"
-
-    def setName(self, name):
-        raise AttributeError, "this method needs to be written"
-
-    def setVolume(self, value):
+    def update(self):
         raise AttributeError, "this method needs to be written"
 
 ### The rest of these methods are just rearrangements of the above
+
+    def getLight(self, position = None):
+        return self.get("light", position)
+
+    def getIR(self, position = None):
+        return self.get("ir", position)
+
+    def getLine(self, position = None):
+        return self.get("line", position)
+
+    def getStall(self):
+        return self.get("stall")
+
+    def getAll(self):
+        return self.get("all")
+
+    def setLED(self, position, value):
+        return self.set("led", position, value)
+        
+    def setName(self, name):
+        return self.set("name", name)
+
+    def setVolume(self, value):
+        return self.set("volume", value)
+
+    def setStartSong(self, songName):
+        return self.set("startsong", songName)
 
     def joystick(self):
         from myro.joystick import Joystick
@@ -195,56 +200,9 @@ class Robot(object):
             self.joy = Joystick(parent = self.app, robot = self)
         else:
             self.joy.deiconify()
-	#if idlelib != None:
-	if "PyShell" not in dir(idlelib): # "subprocess"
+	if idlelib != None and "PyShell" not in dir(idlelib): # "subprocess"
             self.joy._running = 1
 	    self.joy.mainloop()
-        #try:
-        #    self.app.mainloop()
-        #except:
-        #    pass
-
-    def get(self, sensor, *positions):
-        sensor = sensor.lower()
-        if sensor == "stall":
-            return self.getStall()
-        else:
-            retvals = []
-            if len(positions) == 0:
-                if sensor == "light":
-                    return self.getLight("all")
-                elif sensor == "ir":
-                    return self.getIR("all")
-                elif sensor == "line":
-                    return self.getLine("all")
-                elif sensor == "all":
-                    return self.getAll()
-                else:
-                    raise ("invalid sensor name: '%s'" % sensor)
-            for position in positions:
-                if sensor == "light":
-                    retvals.append(self.getLight(position))
-                elif sensor == "ir":
-                    retvals.append(self.getIR(position))
-                elif sensor == "line":
-                    retvals.append(self.getLine(position))
-                else:
-                    raise ("invalid sensor name: '%s'" % sensor)
-            if len(retvals) == 1:
-                return retvals[0]
-            else:
-                return retvals
-
-    def set(self, item, position, value = None):
-        item = item.lower()
-        if item == "led":
-            return self.setLED(position, value)
-        elif item == "name":
-            return self.setName(position)
-        elif item == "volume":
-            return self.setVolume(position)
-        else:
-            raise ("invalid set item name: '%s'" % item)
 
     def turn(self, direction, value = .8):
         if type(direction) in [float, int]:
@@ -284,9 +242,6 @@ class Robot(object):
         pass
     def open(self):
 	pass
-    def update(self):
-        pass
-
     def playSong(self, song, wholeNoteDuration = .545):
         """ Plays a song (list of note names, durations) """
         # 1 whole note should be .545 seconds for normal
@@ -324,39 +279,100 @@ class SimScribbler(Robot):
         myro.globals.robot = self
         myro.globals.simulator = self._simulator
         # FIX: hack to get _cleanup called before Tk exitfunc, which hangs
-        atexit.register(_cleanup) 
+        atexit.register(_cleanup)
+        self.volume = 1
+        self.name = "Scribby"
+        self.startsong = "tada"
     def translate(self, amount):
         return self._clients[0].translate(amount)
     def rotate(self, amount):
         return self._clients[0].rotate(amount)
     def move(self, translate, rotate):
         return self._clients[0].move(translate, rotate)
-    def getLight(self, pos):
-        self._clients[0].update()
-        return self._clients[0].light[0].value[pos]
-    def getIR(self, pos):
-        self._clients[0].update()
-        return self._clients[0].ir[0].value[pos]
-    def getLine(self, pos):
-        self._clients[0].update()
-        return self._clients[0].line[0].value[pos]
-    def getStall(self):
-        self._clients[0].update()
-        return self._clients[0].stall
-    def update(self):
-        return self._clients[0].update()
-    def beep(self, duration, frequency, frequency2 = None):
+    def beep(self, duration, frequency1, frequency2 = None):
         if (tkSnack):
-            snd = tkSnack.Sound()
-            filt = tkSnack.Filter('generator', frequency, 30000,
-                                  0.0, 'sine', int(11500*duration))
-            snd.stop()
-            snd.play(filter=filt, blocking=1)
+            snd1 = tkSnack.Sound()
+            filt1 = tkSnack.Filter('generator', frequency1, 30000,
+                                   0.0, 'sine', int(11500*duration))
+            if frequency2 != None:
+                snd2 = tkSnack.Sound()
+                filt2 = tkSnack.Filter('generator', frequency2, 30000,
+                                       0.0, 'sine', int(11500*duration))
+                map2 = tkSnack.Filter('map', 1.0)
+                snd2.stop()
+                # blocking is choppy; sleep below
+                snd2.play(filter=filt2, blocking=0) 
+            snd1.stop()
+            # blocking is choppy; sleep below
+            map1 = tkSnack.Filter('map', 1.0)
+            snd1.play(filter=filt1, blocking=0)
+            start = time.time()
+            while time.time() - start < duration:
+                myro.globals.gui.update()
+                time.sleep(.001)
 	else:
 	    print chr(7)
-    def setLED(self, position, value):
-        pass
-    
+            time.sleep(duration)
+        time.sleep(.1) # simulated delay, like real robot
+    def update(self):
+        return self._clients[0].update()
+    def get(self, sensor, *positions):
+        self._clients[0].update()
+        sensor = sensor.lower()
+        if sensor == "stall":
+            return self._clients[0].stall
+        elif sensor == "startsong":
+            return self.startsong
+        elif sensor == "name":
+            return self.name
+        elif sensor == "volume":
+            return self.volume
+        else:
+            retvals = []
+            if len(positions) == 0:
+                if sensor == "light":
+                    return self.get("light", [0, 1, 2])
+                elif sensor == "ir":
+                    return self.get("ir", [0, 1])
+                elif sensor == "line":
+                    return self.get("line", [0, 1])
+                elif sensor == "all":
+                    return {"light": self.get("light"),
+                            "ir": self.get("ir"),
+                            "line": self.get("line"),
+                            "stall": self.get("stall")}
+                else:
+                    raise ("invalid sensor name: '%s'" % sensor)
+            for position in positions:
+                if sensor == "light":
+                    retvals.append(self._clients[0].light[0].value[pos])
+                elif sensor == "ir":
+                    retvals.append(self._clients[0].ir[0].value[pos])
+                elif sensor == "line":
+                    retvals.append(self._clients[0].line[0].value[pos])
+                else:
+                    raise ("invalid sensor name: '%s'" % sensor)
+            if len(retvals) == 1:
+                return retvals[0]
+            else:
+                return retvals
+
+    def set(self, item, position, value = None):
+        item = item.lower()
+        if item == "led":
+            return "ok"
+        elif item == "name":
+            self.name = position
+            return "ok"
+        elif item == "volume":
+            self.volume = position
+            return "ok"
+        elif item == "startsong":
+            self.startsong = position
+            return "ok"
+        else:
+            raise ("invalid set item name: '%s'" % item)
+
 # functions:
 def _cleanup():
     if myro.globals.robot != None:
@@ -409,36 +425,45 @@ def closeConnection():
 def get(sensor, *pos):
     return myro.globals.robot.get(sensor, *pos)
 def getLight(pos):
-    return myro.globals.robot.getLight(pos)
+    return myro.globals.robot.get("light", pos)
 def getIR(pos):
-    return myro.globals.robot.getIR(pos)
+    return myro.globals.robot.get("ir", pos)
 def getLine(pos):
-    return myro.globals.robot.getLine(pos)
+    return myro.globals.robot.get("line", pos)
 def getStall():
-    return myro.globals.robot.getStall()
+    return myro.globals.robot.get("stall")
 def getAll():
-    return myro.globals.robot.getAll()
+    return myro.globals.robot.get("all")
 def getName():
-    return myro.globals.robot.getName()
+    return myro.globals.robot.get("name")
+def getStartSong():
+    return myro.globals.robot.get("startsong")
+def getVolume():
+    return myro.globals.robot.get("volume")
 def update():
     return myro.globals.robot.update()
-def beep(self, duration, frequency, frequency2 = None):
-    return myro.globals.robot.beep(duration, frequency, frequency2)
+def beep(self, duration, frequency1, frequency2 = None):
+    return myro.globals.robot.beep(duration, frequency1, frequency2)
 def set(item, position, value = None):
     return myro.globals.robot.set(item, position, value)
 def setLED(position, value):
-    return myro.globals.robot.setLED(position, value)
+    return myro.globals.robot.set("led", position, value)
 def setName(name):
-    return myro.globals.robot.setName(name)
+    return myro.globals.robot.set("name", name)
 def setVolume(value):
-    return myro.globals.robot.setVolume(value)
+    return myro.globals.robot.set("volume", value)
+def setStartSong(songName):
+    return myro.globals.robot.set("startsong", songName)
 def motors(left, right):
     return myro.globals.robot.motors(left, right)
 def restart():
     return myro.globals.robot.restart()
 def joystick():
     return myro.globals.robot.joystick()
-
+def playSong(song, wholeNoteDuration = .545):
+    return myro.globals.robot.playSong(song, wholeNoteDuration)
+def playNote(tuple, wholeNoteDuration = .545):
+    return myro.globals.robot.playSong(tuple, wholeNoteDuration)
 # --------------------------------------------------------
 # Error handler:
 # --------------------------------------------------------
