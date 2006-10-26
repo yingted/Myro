@@ -139,8 +139,8 @@ def askConsole(data, title = "Information Request"):
     return data
 
 class Robot(object):
-    app = None
-    joy = None
+    _app = None
+    _joy = None
     def __init__(self):
         """
         Base robot class.
@@ -196,13 +196,13 @@ class Robot(object):
 	    import idlelib
 	except:
 	    idlelib = None
-        if self.joy == None:
-            self.joy = Joystick(parent = self.app, robot = self)
+        if self._joy == None:
+            self._joy = Joystick(parent = self._app, robot = self)
         else:
-            self.joy.deiconify()
+            self._joy.deiconify()
 	if idlelib != None and "PyShell" not in dir(idlelib): # "subprocess"
-            self.joy._running = 1
-	    self.joy.mainloop()
+            self._joy._running = 1
+	    self._joy.mainloop()
 
     def turn(self, direction, value = .8):
         if type(direction) in [float, int]:
@@ -331,11 +331,11 @@ class SimScribbler(Robot):
             retvals = []
             if len(positions) == 0:
                 if sensor == "light":
-                    return self.get("light", [0, 1, 2])
+                    return self.get("light", 0, 1, 2)
                 elif sensor == "ir":
-                    return self.get("ir", [0, 1])
+                    return self.get("ir", 0, 1)
                 elif sensor == "line":
-                    return self.get("line", [0, 1])
+                    return self.get("line", 0, 1)
                 elif sensor == "all":
                     return {"light": self.get("light"),
                             "ir": self.get("ir"),
@@ -344,12 +344,13 @@ class SimScribbler(Robot):
                 else:
                     raise ("invalid sensor name: '%s'" % sensor)
             for position in positions:
+                position = int(position)
                 if sensor == "light":
-                    retvals.append(self._clients[0].light[0].value[pos])
+                    retvals.append(self._clients[0].light[0].value[position])
                 elif sensor == "ir":
-                    retvals.append(self._clients[0].ir[0].value[pos])
+                    retvals.append(self._clients[0].ir[0].value[position])
                 elif sensor == "line":
-                    retvals.append(self._clients[0].line[0].value[pos])
+                    retvals.append(self._clients[0].line[0].value[position])
                 else:
                     raise ("invalid sensor name: '%s'" % sensor)
             if len(retvals) == 1:
