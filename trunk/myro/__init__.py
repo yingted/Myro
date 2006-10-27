@@ -163,17 +163,20 @@ class Robot(object):
 
 ### The rest of these methods are just rearrangements of the above
 
-    def getLight(self, position = None):
+    def getLight(self, *position):
         return self.get("light", position)
 
-    def getIR(self, position = None):
+    def getIR(self, *position):
         return self.get("ir", position)
 
-    def getLine(self, position = None):
+    def getLine(self, *position):
         return self.get("line", position)
 
     def getStall(self):
         return self.get("stall")
+
+    def getName(self):
+        return self.get("name")
 
     def getAll(self):
         return self.get("all")
@@ -316,7 +319,7 @@ class SimScribbler(Robot):
         time.sleep(.1) # simulated delay, like real robot
     def update(self):
         return self._clients[0].update()
-    def get(self, sensor, *positions):
+    def get(self, sensor = "all", *positions):
         self._clients[0].update()
         sensor = sensor.lower()
         if sensor == "stall":
@@ -423,13 +426,13 @@ def openConnection():
     return myro.globals.robot.open()
 def closeConnection():
     return myro.globals.robot.close()
-def get(sensor, *pos):
+def get(sensor = "all", *pos):
     return myro.globals.robot.get(sensor, *pos)
-def getLight(pos):
+def getLight(*pos):
     return myro.globals.robot.get("light", pos)
-def getIR(pos):
+def getIR(*pos):
     return myro.globals.robot.get("ir", pos)
-def getLine(pos):
+def getLine(*pos):
     return myro.globals.robot.get("line", pos)
 def getStall():
     return myro.globals.robot.get("stall")

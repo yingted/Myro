@@ -124,7 +124,7 @@ class Scribbler(Robot):
         else:
             self._set_speaker_2(int(frequency), int(frequency2), int(duration * 1000))
 
-    def get(self, sensor, *position):
+    def get(self, sensor = "all", *position):
         sensor = sensor.lower()
         if sensor == "stall":
             return self._get(Scribbler.GET_STALL)
@@ -135,12 +135,13 @@ class Scribbler(Robot):
             self._write_long([Scribbler.GET_NAME])
             c = self.ser.read(Scribbler.NAME_LENGTH)        
             self._check(Scribbler.GET_NAME)
+            c = c.replace("\x00", "")
             return c
         elif sensor == "volume":
             return self._volume
         else:
             retvals = []
-            if len(positions) == 0:
+            if len(position) == 0:
                 if sensor == "light":
                     return self._get(Scribbler.GET_LIGHT_ALL, 6, "word")
                 elif sensor == "ir":
@@ -153,7 +154,7 @@ class Scribbler(Robot):
                             "ir": [retval[0], retval[1]], "line": [retval[8], retval[9]], "stall": retval[10]}
                 else:
                     raise ("invalid sensor name: '%s'" % sensor)
-            for position in positions:
+            for pos in position:
                 if sensor == "light":
                     if pos in [0, "left"]:
                         retvals.append(self._get(Scribbler.GET_LIGHT_LEFT, 2, "word"))
