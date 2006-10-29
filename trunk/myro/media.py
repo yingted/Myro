@@ -309,6 +309,7 @@ def saveSong(song, filename, append = 1):
                 fp.write("%s %s %s\n" % (getNoteFromFrequency(f),
                                          getNoteFromFrequency(f), d))
     else: # string
+        song = song.replace("\n", ";")
         lines = song.split(";")
         for line in lines:
             fp.write(line + "\n")
@@ -317,6 +318,7 @@ def saveSong(song, filename, append = 1):
 def makeSong(text):
     """ Given a text string format of a song, return a song list """
     song = []
+    text = text.replace("\n", ";")
     songData = text.split(";")
     lineNumber = 1
     for line in songData:
