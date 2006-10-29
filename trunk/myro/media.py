@@ -160,7 +160,7 @@ _frequency = {
               "a#5":   932.3,
               "bb5":   932.3,
               "b5":   987.8,
-              # --------------------
+              # -------------------- default octave
               "c":   523.3,
               "c#":   554.4,
               "db":   554.4,
@@ -171,7 +171,7 @@ _frequency = {
               "f":   698.5,
               "f#":   740.0,
               "gb":   740.0,
-              "g5":   784.0,
+              "g":   784.0,
               "g#":   830.6,
               "ab":   830.6,
               "a":   880.0,
@@ -335,7 +335,9 @@ def readSong(filename = None):
     song = []
     lineNumber = 1
     for line in songFile:
-        _parseSongLine(song, line, lineNumber, filename)
+        notes = line.split(";")
+        for n in notes:
+            _parseSongLine(song, n, lineNumber, filename)
         lineNumber += 1
     songFile.close()
     return song
