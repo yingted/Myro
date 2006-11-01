@@ -1,79 +1,71 @@
-' Scribbler robot demonstration code
-' Copyright 2005, Element Products, Inc.
+' Scribbler robot server code
+' IPRE (http://www.roboteducation.org/)
+' For use with Myro and MSRS
 '
 '  {$STAMP BS2}
 '  {$PBASIC 2.5}
 
+'''''''''''''''''''''''''''''''''''''''
+' Default Robot Name
+'   Gets set on reprogram
+'''''''''''''''''''''''''''''''''''''''
 DATA          "Scribby"
 
-' I/O Declarations
-LightRight    PIN 0
-LightCenter   PIN 1
-LightLeft     PIN 2
-LineEnable    PIN 3
-LineRight     PIN 4
-LineLeft      PIN 5
-ObsRx         PIN 6
-Stall         PIN 7
 
-LedRight      PIN 8
-LedCenter     PIN 9
-LedLeft       PIN 10
-Speaker       PIN 11
-MotorRight    PIN 12
-MotorLeft     PIN 13
-ObsTxRight    PIN 14
-ObsTxLeft     PIN 15
-
-' I/O Initialization
-
-HIGH LightRight
-HIGH LightCenter
-HIGH LightLeft
-LOW LineEnable
-LOW LedRight
-LOW LedCenter
-LOW LedLeft
-LOW Speaker
-LOW MotorRight
-LOW MotorLeft
-LOW ObsTxRight
-LOW ObsTxLeft
-
-'BAUD              CON 84  '9600
-BAUD               CON 6  '38400
-
-OUTPIN             CON 16
-INPIN              CON 16
-
-GET_INPUT          CON 1
-GET_OPEN_LEFT      CON 2
+''''''''''''''''''''''''''''''''''''''''''''''''''''
+' IPRE Scribbler API
+'
+' Overview:
+'   Messages to robot are a constant 9 bytes long.  Messages from robot are
+'   variable length depending on the message type.  See below for details.
+'
+'   When the robot sees no data on its serial port for TIMEOUT length of time,
+'   it sends its name preceded by "IPRE".  This allows the PC to find it and
+'   connect.
+'
+'   All "SET" messages have a return type of "GET_ALL_BINARY".
+'
+' Messages TO robot:
+'   The first byte is the message type
+'   The next bytes are the command data (if any)
+'   The rest of the message is filled with null characters up until a total of 9 bytes.
+'
+' Messages FROM robot:
+'   The first bytes are the message data
+'   The last byte is the message type
+'     If the message is a GET type message, just the requested data is sent
+'     If the message is a SET type message, the binary state of the robot is sent
+'
+''''''''''''''''''''''''''''''''''''''''''''''''''''
+GET_STATE          CON 1  ' Response: inPins outPins 1, Notes: inPins is the state of all the input pins (0-7), and outPins is the state of all the output pins (8-15) as defined in the I/O Pin Declarations.
+GET_OPEN_LEFT      CON 2  ' Response: leftIR 2, Notes: leftIR is 1 when there is no obstacle to the left of robot
 GET_OPEN_RIGHT     CON 3
-GET_STALL          CON 4
-GET_LIGHT_LEFT     CON 5
+GET_STALL          CON 4  ' Response: stall 3
+GET_LIGHT_LEFT     CON 5  ' Response: HighByte LowByte 5
 GET_LIGHT_CENTER   CON 6
 GET_LIGHT_RIGHT    CON 7
-GET_LINE_RIGHT     CON 8
+GET_LINE_RIGHT     CON 8  ' Response: lineRight 8
 GET_LINE_LEFT      CON 9
-GET_NAME           CON 10
+GET_NAME           CON 10 ' Response: char1 char2 char3 char4 char5 char6 char7 char8 10
+GET_LIGHT_ALL      CON 33 ' Response: LeftHighyte LeftLowByte CenterHighByte CenterLowByte RightHighByte RightLowByte 33
+GET_IR_ALL         CON 34 ' Response: LeftIR RightIR 34
+GET_LINE_ALL       CON 35 ' Response: LineLeft LineRight 35
+GET_ALL            CON 36 ' Response: leftIR rightIR LeftLightHighyte LeftLightLowByte CenterLightHighByte CenterLightLowByte RightLightHighByte RightLightLowByte LineLeft LineRight Stall 36
+GET_ALL_BINARY     CON 39 ' Response: BinaryData 39, Notes: where the individual bits of BinaryData are: 0x000 IRLeft IRRight Stall LineLeft LineRight
 
-SET_MOTORS_OFF     CON 20
-SET_MOTORS         CON 21
+SET_MOTORS_OFF     CON 20 ' Format: 20 0 0 0 0 0 0 0 0
+SET_MOTORS         CON 21 ' Format: 21 rightmotor leftmotor 0 0 0 0 0 0, Notes: 0 = full speed backwards, 100 = stop, 200 = full speed forward
 SET_LED_LEFT_ON    CON 22
 SET_LED_LEFT_OFF   CON 23
 SET_LED_CENTER_ON  CON 24
 SET_LED_CENTER_OFF CON 25
 SET_LED_RIGHT_ON   CON 26
 SET_LED_RIGHT_OFF  CON 27
-SET_SPEAKER        CON 28
-SET_SPEAKER_2      CON 29
-SET_NAME           CON 30
+SET_SPEAKER        CON 28 ' Format: 28 DurationHighByte DurationLowByte FreqHighByte FreqLowByte
+SET_SPEAKER_2      CON 29 ' Format: 29 DurationHighByte DurationLowByte Freq1HighByte Freq1LowByte Freq2HighByte Freq2LowByte
+SET_NAME           CON 30 ' Format: 30 char1 char2 char3 char4 char5 char6 char7 char8
 SET_LED_ALL_ON     CON 31
 SET_LED_ALL_OFF    CON 32
-GET_LIGHT_ALL      CON 33
-GET_IR_ALL         CON 34
-GET_LINE_ALL       CON 35
-GET_ALL            CON 36
 SET_LOUD           CON 37
 SET_QUIET          CON 38
 
@@ -81,10 +73,55 @@ TIMEOUT            CON 1000 ' in ms
 PACKET_LENGTH      CON 9
 NAME_LENGTH        CON 8
 
-' Global Variables
+'BAUD              CON 84  '9600 baud
+BAUD               CON 6  '38400 baud
 
-motor_r VAR Word
-motor_l VAR Word
+
+''''''''''''''''''''''''''''''''''''''''''
+' I/O Pin Declarations
+'    Constant for the Scribbler robot
+''''''''''''''''''''''''''''''''''''''''''
+LightRightPin    PIN 0
+LightCenterPin   PIN 1
+LightLeftPin     PIN 2
+LineEnablePin    PIN 3
+LineRightPin     PIN 4
+LineLeftPin      PIN 5
+ObsRxPin         PIN 6
+StallPin         PIN 7
+LedRightPin      PIN 8
+LedCenterPin     PIN 9
+LedLeftPin       PIN 10
+SpeakerPin       PIN 11
+MotorRightPin    PIN 12
+MotorLeftPin     PIN 13
+ObsTxRightPin    PIN 14
+ObsTxLeftPin     PIN 15
+SerialPin        CON 16
+
+
+''''''''''''''''''''''''''
+' I/O Initialization
+''''''''''''''''''''''''''
+HIGH LightRightPin
+HIGH LightCenterPin
+HIGH LightLeftPin
+HIGH LineEnablePin
+LOW LedRightPin
+LOW LedCenterPin
+LOW LedLeftPin
+LOW SpeakerPin
+LOW MotorRightPin
+LOW MotorLeftPin
+LOW ObsTxRightPin
+LOW ObsTxLeftPin
+
+
+'''''''''''''''''''''''''
+' Global Variables
+'''''''''''''''''''''''''
+var1    VAR Word
+var2    VAR Word
 var3    VAR Word
 
 name    VAR Byte(NAME_LENGTH)
@@ -93,153 +130,202 @@ temp    VAR Byte
 temp2   VAR Byte
 quiet   VAR Byte
 
+
+
+''''''''''''''''''''''''''
+' Variable Initialization
+''''''''''''''''''''''''''
+
 inCmd(PACKET_LENGTH-1) = 0
 quiet = 0
 
-' turn off LEDs
-LedCenter = 0
-LedRight  = 0
-LedLeft   = 0
+FOR temp = 0 TO NAME_LENGTH - 1
+  READ temp, name(temp)
+NEXT
 
+'Turn on chirp
+PAUSE 50
+HIGH LedLeftPin
+FREQOUT SpeakerPin, 40, 780
+LOW LedLeftPin
+HIGH LedCenterPin
+FREQOUT SpeakerPin, 40, 850
+LOW LedCenterPin
+HIGH LedRightPin
+FREQOUT SpeakerPin, 40, 1000
+LOW LedRightPin
+
+
+'''''''''''''''''''''''
+' Main loop
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+'This is what gets called when the robot has no commumications with PC
 INIT:
   ' Used to flash the middle LED with short timeout:
-  IF (LedCenter = 1) THEN LedCenter = 0 ELSE LedCenter = 1
+  IF (LedCenterPin = 1) THEN LedCenterPin = 0 ELSE LedCenterPin = 1
+
+  ' Send characteristic string and name
+  SEROUT SerialPin, BAUD, ["IPRE", STR name, 0]
 
 BEGIN:
-  SERIN INPIN, BAUD, TIMEOUT, INIT, [STR inCmd\PACKET_LENGTH]
-  LOOKDOWN inCmd(0), = [GET_INPUT, GET_LINE_RIGHT, GET_LINE_LEFT, GET_LIGHT_LEFT, GET_LIGHT_CENTER, GET_LIGHT_RIGHT,  GET_OPEN_LEFT, GET_OPEN_RIGHT, GET_STALL, GET_NAME, SET_MOTORS_OFF, SET_MOTORS, SET_SPEAKER, SET_SPEAKER_2, SET_LED_LEFT_ON, SET_LED_LEFT_OFF, SET_LED_CENTER_ON, SET_LED_CENTER_OFF, SET_LED_RIGHT_ON, SET_LED_RIGHT_OFF, SET_NAME, SET_LED_ALL_ON, SET_LED_ALL_OFF, GET_LIGHT_ALL, GET_IR_ALL, GET_LINE_ALL, GET_ALL, SET_LOUD, SET_QUIET], temp
-  BRANCH temp,         [GetInput,  GetLineRight,   GetLineLeft,   GetLightLeft,   GetLightCenter,   GetLightRight,    GetObsLeft,    GetObsRight,    GetStall,  GetName,  MotorsOff,      Motors,     SetSpeaker,  SetSpeaker2,   OnLeftLED,       OffLeftLED,       OnCenterLED,       OffCenterLED,       OnRightLED,       OffRightLED,       SetName,  OnAllLED,       OffAllLED,       GetLightAll,   GetIRAll,   GetLineAll,   GetAll,  SetLoud,  SetQuiet]
+  SERIN SerialPin, BAUD, TIMEOUT, INIT, [STR inCmd\PACKET_LENGTH]
+  LOOKDOWN inCmd(0), = [GET_STATE, GET_LINE_RIGHT, GET_LINE_LEFT, GET_LIGHT_LEFT, GET_LIGHT_CENTER, GET_LIGHT_RIGHT,  GET_OPEN_LEFT, GET_OPEN_RIGHT, GET_Stall, GET_NAME, SET_MOTORS_OFF, SET_MOTORS, SET_Speaker, SET_Speaker_2, SET_LED_LEFT_ON, SET_LED_LEFT_OFF, SET_LED_CENTER_ON, SET_LED_CENTER_OFF, SET_LED_RIGHT_ON, SET_LED_RIGHT_OFF, SET_NAME, SET_LED_ALL_ON, SET_LED_ALL_OFF, GET_LIGHT_ALL, GET_IR_ALL, GET_LINE_ALL, GET_ALL, SET_LOUD, SET_QUIET, GET_ALL_BINARY], temp
+  BRANCH temp,         [GetState,  GetLineRight,   GetLineLeft,   GetLightLeft,   GetLightCenter,   GetLightRight,    GetObsLeft,    GetObsRight,    GetStall,  GetName,  MotorsOff,      Motors,     SetSpeaker,  SetSpeaker2,   OnLeftLED,       OffLeftLED,       OnCenterLED,       OffCenterLED,       OnRightLED,       OffRightLED,       SetName,  OnAllLED,       OffAllLED,       GetLightAll,   GetIRAll,   GetLineAll,   GetAll,  SetLoud,  SetQuiet,  GetAllBinary]
 TOP:
-  SEROUT OUTPIN, BAUD, [STR inCmd\1]              ' echo command to tell we are done
-  IF (LedCenter = 1) THEN LedCenter = 0 ELSE LedCenter = 1
-  GOTO BEGIN
+  SEROUT SerialPin, BAUD, [inCmd(0)]              ' echo command to tell we are done
+  IF (LedCenterPin = 1) THEN LedCenterPin = 0 ELSE LedCenterPin = 1
+GOTO BEGIN
+
+
+'''''''''''''''''''''''
+' Subroutines
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 SetQuiet:
    quiet = 1
-   GOTO TOP
+   GOTO GetAllBinary
 
 SetLoud:
    quiet = 0
-   GOTO TOP
+   GOTO GetAllBinary
 
-GetInput:
-     SEROUT OUTPIN, BAUD, [INL]
+GetState:
+     SEROUT SerialPin, BAUD, [INL, OUTH]
      GOTO TOP
 
 GetLineRight:
-     HIGH LineEnable
-     PAUSE 2
-     SEROUT OUTPIN, BAUD, [LineRight]
-     LOW LineEnable
+     SEROUT SerialPin, BAUD, [LineRightPin]
      GOTO TOP
 
 GetLineLeft:
-     HIGH LineEnable
-     PAUSE 2
-     SEROUT OUTPIN, BAUD, [LineLeft]
+     SEROUT SerialPin, BAUD, [LineLeftPin]
      GOTO TOP
 
 GetLineAll:
-     HIGH LineEnable
-     PAUSE 2
-     SEROUT OUTPIN, BAUD, [LineLeft, LineRight]
+     SEROUT SerialPin, BAUD, [LineLeftPin, LineRightPin]
      GOTO TOP
 
 GetLightLeft:
-     HIGH LightLeft
+     HIGH LightLeftPin
      PAUSE 3
-     RCTIME LightLeft, 1, var3
-     SEROUT OUTPIN, BAUD, [var3.HIGHBYTE, var3.LOWBYTE]
+     RCTIME LightLeftPin, 1, var3
+     SEROUT SerialPin, BAUD, [var3.HIGHBYTE, var3.LOWBYTE]
      GOTO TOP
 
 GetLightCenter:
-     HIGH LightCenter
+     HIGH LightCenterPin
      PAUSE 3
-     RCTIME LightCenter, 1, var3
-     SEROUT OUTPIN, BAUD, [var3.HIGHBYTE, var3.LOWBYTE]
+     RCTIME LightCenterPin, 1, var3
+     SEROUT SerialPin, BAUD, [var3.HIGHBYTE, var3.LOWBYTE]
      GOTO TOP
 
 GetLightRight:
-     HIGH LightRight
+     HIGH LightRightPin
      PAUSE 3
-     RCTIME LightRight, 1, var3
-     SEROUT OUTPIN, BAUD, [var3.HIGHBYTE, var3.LOWBYTE]
+     RCTIME LightRightPin, 1, var3
+     SEROUT SerialPin, BAUD, [var3.HIGHBYTE, var3.LOWBYTE]
      GOTO TOP
 
 GetLightAll:
-     HIGH LightLeft
-     HIGH LightCenter
-     HIGH LightRight
+     HIGH LightLeftPin
+     HIGH LightCenterPin
+     HIGH LightRightPin
      PAUSE 3
-     RCTIME LightLeft, 1, var3
-     RCTIME LightCenter, 1, motor_l
-     RCTIME LightRight, 1, motor_r
-     SEROUT OUTPIN, BAUD, [var3.HIGHBYTE, var3.LOWBYTE, motor_l.HIGHBYTE, motor_l.LOWBYTE, motor_r.HIGHBYTE, motor_r.LOWBYTE]
+     RCTIME LightLeftPin, 1, var3
+     RCTIME LightCenterPin, 1, var2
+     RCTIME LightRightPin, 1, var1
+     SEROUT SerialPin, BAUD, [var3.HIGHBYTE, var3.LOWBYTE, var2.HIGHBYTE, var2.LOWBYTE, var1.HIGHBYTE, var1.LOWBYTE]
      GOTO TOP
 
 GetObsRight:
-     FREQOUT ObsTxRight, 1, 40500
-     temp = ObsRX
-     LOW ObsTxRight
-     SEROUT OUTPIN, BAUD, [temp]
+     FREQOUT ObsTxRightPin, 1, 40500
+     temp = ObsRxPin
+     LOW ObsTxRightPin
+     SEROUT SerialPin, BAUD, [temp]
      GOTO TOP
 
 GetObsLeft:
-     FREQOUT ObsTxLeft, 1, 40500
-     temp = ObsRX
-     LOW ObsTxLeft
-     SEROUT OUTPIN, BAUD, [temp]
+     FREQOUT ObsTxLeftPin, 1, 40500
+     temp = ObsRxPin
+     LOW ObsTxLeftPin
+     SEROUT SerialPin, BAUD, [temp]
      GOTO TOP
 
 GetIRAll:
-     FREQOUT ObsTxLeft, 1, 40500
-     temp = ObsRX
-     LOW ObsTxLeft
+     FREQOUT ObsTxLeftPin, 1, 40500
+     temp = ObsRxPin
+     LOW ObsTxLeftPin
 
-     FREQOUT ObsTxRight, 1, 40500
-     temp2 = ObsRX
-     LOW ObsTxRight
+     FREQOUT ObsTxRightPin, 1, 40500
+     temp2 = ObsRxPin
+     LOW ObsTxRightPin
 
-     SEROUT OUTPIN, BAUD, [temp, temp2]
+     SEROUT SerialPin, BAUD, [temp, temp2]
      GOTO TOP
 
 GetAll:
      'IR
-     FREQOUT ObsTxLeft, 1, 40500
-     temp = ObsRX
-     LOW ObsTxLeft
+     FREQOUT ObsTxLeftPin, 1, 40500
+     temp = ObsRxPin
+     LOW ObsTxLeftPin
 
-     FREQOUT ObsTxRight, 1, 40500
-     temp2 = ObsRX
-     LOW ObsTxRight
+     FREQOUT ObsTxRightPin, 1, 40500
+     temp2 = ObsRxPin
+     LOW ObsTxRightPin
 
      'Light
-     HIGH LightLeft
-     HIGH LightCenter
-     HIGH LightRight
+     HIGH LightLeftPin
+     HIGH LightCenterPin
+     HIGH LightRightPin
      PAUSE 3
-     RCTIME LightLeft, 1, var3
-     RCTIME LightCenter, 1, motor_l
-     RCTIME LightRight, 1, motor_r
+     RCTIME LightLeftPin, 1, var3
+     RCTIME LightCenterPin, 1, var2
+     RCTIME LightRightPin, 1, var1
 
      'Line
-     HIGH LineEnable
-     PAUSE 2
-
-     SEROUT OUTPIN, BAUD, [temp, temp2, var3.HIGHBYTE, var3.LOWBYTE,
-                           motor_l.HIGHBYTE, motor_l.LOWBYTE, motor_r.HIGHBYTE, motor_r.LOWBYTE,
-                           LineLeft, LineRight, Stall]
+     SEROUT SerialPin, BAUD, [temp, temp2, var3.HIGHBYTE, var3.LOWBYTE,
+                           var2.HIGHBYTE, var2.LOWBYTE, var1.HIGHBYTE, var1.LOWBYTE,
+                           LineLeftPin, LineRightPin, StallPin]
      GOTO TOP
 
+
+'0x000 IRLeft IRRight Stall LineLeft LineRight
+GetAllBinary:
+
+  temp = 0
+
+  FREQOUT ObsTxLeftPin, 1, 40500
+  temp2 = ObsRxPin
+  LOW ObsTxLeftPin
+
+  temp = (temp2 & 1) << 4
+
+  FREQOUT ObsTxRightPin, 1, 40500
+  temp2 = ObsRxPin
+  LOW ObsTxRightPin
+
+  temp = temp | ((temp2 & 1) << 3)
+
+  temp = temp | (StallPin << 2)
+
+  temp = temp | (LineLeftPin << 1)
+
+  temp = temp | LineRightPin
+
+  SEROUT SerialPin, BAUD, [temp]
+GOTO TOP
+
+
 GetStall:
-     IF (Stall = 0) THEN  SEROUT OUTPIN, BAUD, [0] ELSE SEROUT OUTPIN, BAUD, [1]
+     SEROUT SerialPin, BAUD, [StallPin]
      GOTO TOP
 
 GetName:
      FOR temp = 0 TO NAME_LENGTH - 1
         READ temp, name(temp)
      NEXT
-     SEROUT OUTPIN, BAUD, [STR name\NAME_LENGTH]
+     SEROUT SerialPin, BAUD, [STR name\NAME_LENGTH]
 
      GOTO TOP
 
@@ -247,83 +333,82 @@ SetName:
      FOR temp = 0 TO NAME_LENGTH - 1
         WRITE temp, inCmd(1 + temp)
      NEXT
-     GOTO TOP
+     GOTO GetAllBinary
 
 MotorsOff:
-     motor_r = 2000
-     motor_l = 2000
-     PULSOUT MotorRight, motor_r
-     PULSOUT MotorLeft, motor_l
-     GOTO TOP
+     PULSOUT MotorRightPin, 2000
+     PULSOUT MotorLeftPin, 2000
+     GOTO GetAllBinary
 
+     'FREQOUT Pin, Duration, Freq1, Freq2
 SetSpeaker:
-     motor_r = inCmd(1)
-     motor_r = (motor_r << 8) | inCmd(2)
-     motor_l = inCmd(3)
-     motor_l = (motor_l << 8) | inCmd(4)
+     var1 = inCmd(1)
+     var1 = (var1 << 8) | inCmd(2)
+     var2 = inCmd(3)
+     var2 = (var2 << 8) | inCmd(4)
      IF (quiet = 1) THEN
-      FREQOUT Speaker, motor_r, $00
+      FREQOUT SpeakerPin, var1, $00
      ELSE
-      FREQOUT Speaker, motor_r, motor_l
+      FREQOUT SpeakerPin, var1, var2
      ENDIF
-     GOTO TOP
+     GOTO GetAllBinary
 
 SetSpeaker2:
-     motor_r = inCmd(1)
-     motor_r = (motor_r << 8) | inCmd(2)
+     var1 = inCmd(1)
+     var1 = (var1 << 8) | inCmd(2)
 
-     motor_l = inCmd(3)
-     motor_l = (motor_l << 8) | inCmd(4)
+     var2 = inCmd(3)
+     var2 = (var2 << 8) | inCmd(4)
 
      var3 = inCmd(5)
      var3 = (var3 << 8) | inCmd(6)
 
      IF (quiet = 1) THEN
-      FREQOUT Speaker, motor_r, $00
+      FREQOUT SpeakerPin, var1, $00
      ELSE
-      FREQOUT Speaker, motor_r, motor_l, var3
+      FREQOUT SpeakerPin, var1, var2, var3
      ENDIF
-     GOTO TOP
+     GOTO GetAllBinary
 
 Motors:
-     motor_r = (inCmd(1) + 100) * 10
-     motor_l = (inCmd(2) + 100) * 10
-     PULSOUT MotorRight, motor_r
-     PULSOUT MotorLeft, motor_l
-     GOTO TOP
+     var1 = (inCmd(1) + 100) * 10
+     var2 = (inCmd(2) + 100) * 10
+     PULSOUT MotorRightPin, var1
+     PULSOUT MotorLeftPin, var2
+     GOTO GetAllBinary
 
 OnLeftLED:
-     LedLeft = 1
-     GOTO TOP
+     LedLeftPin = 1
+     GOTO GetAllBinary
 
 OffLeftLED:
-     LedLeft = 0
-     GOTO TOP
+     LedLeftPin = 0
+     GOTO GetAllBinary
 
 OnCenterLED:
-     LedCenter = 1
-     GOTO TOP
+     LedCenterPin = 1
+     GOTO GetAllBinary
 
 OffCenterLED:
-     LedCenter = 0
-     GOTO TOP
+     LedCenterPin = 0
+     GOTO GetAllBinary
 
 OnRightLED:
-     LedRight = 1
-     GOTO TOP
+     LedRightPin = 1
+     GOTO GetAllBinary
 
 OffRightLED:
-     LedRight = 0
-     GOTO TOP
+     LedRightPin = 0
+     GOTO GetAllBinary
 
 OnAllLED:
-     LedLeft = 1
-     LedRight = 1
-     LedCenter = 1
-     GOTO TOP
+     LedLeftPin = 1
+     LedRightPin = 1
+     LedCenterPin = 1
+     GOTO GetAllBinary
 
 OffAllLED:
-     LedLeft = 0
-     LedRight = 0
-     LedCenter = 0
-     GOTO TOP
+     LedLeftPin = 0
+     LedRightPin = 0
+     LedCenterPin = 0
+     GOTO GetAllBinary
