@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Manifest 
+    xmlns="http://schemas.microsoft.com/xw/2004/10/manifest.html"
+    xmlns:dssp="http://schemas.microsoft.com/xw/2004/10/dssp.html"
+    xmlns:drive="http://schemas.microsoft.com/robotics/2006/05/drive.html" 
+    >
+	<!-- Start the Scribbler with the generic drive configuration. -->
+	<!-- Useful in Robotics Tutorials 3 & 4                  -->
+  <CreateServiceList>
+
+	  <!--Start Scribbler Base Service -->
+	  <ServiceRecordType>
+		  <dssp:Contract>http://www.roboteducation.org/scribblerbase.html</dssp:Contract>
+	  </ServiceRecordType>
+	  
+    <!--Start the Generic (hardware agnostic) drive service-->
+    <ServiceRecordType>
+      <dssp:Contract>http://schemas.microsoft.com/robotics/2006/05/drive.html</dssp:Contract>
+      <dssp:PartnerList>
+        <!--Initial state partner-->
+        <dssp:Partner>
+		  <!-- This loads platform information for the Drive Service -->
+			<!--<dssp:Service>http://localhost/mountpoint/samples/Config/IPRE.Scribbler.Vehicle.Drive.Config.xml</dssp:Service>-->
+			<dssp:Service>IPRE.Scribbler.Vehicle.Drive.Config.xml</dssp:Service>
+			<dssp:Name>dssp:StateService</dssp:Name>
+        </dssp:Partner>
+        <dssp:Partner>
+          <dssp:Name>drive:BumperService</dssp:Name>
+        </dssp:Partner>
+        <dssp:Partner>
+          <dssp:Name>drive:LeftMotor</dssp:Name>
+        </dssp:Partner>
+        <dssp:Partner>
+          <dssp:Name>drive:RightMotor</dssp:Name>
+        </dssp:Partner>
+      </dssp:PartnerList>
+    </ServiceRecordType>
+
+    <!--The following section creates the services that the generic drive requires as partners -->
+
+    <ServiceRecordType>
+      <dssp:Contract>http://www.roboteducation.org/scribblerbumper.html</dssp:Contract>
+    </ServiceRecordType>
+
+    <ServiceRecordType>
+      <dssp:Contract>http://www.roboteducation.org/scribblermotor.html</dssp:Contract>
+      <Name>drive:LeftMotor</Name>
+    </ServiceRecordType>
+
+    <ServiceRecordType>
+      <dssp:Contract>http://www.roboteducation.org/scribblermotor.html</dssp:Contract>
+      <Name>drive:RightMotor</Name>
+    </ServiceRecordType>
+
+  </CreateServiceList>
+
+</Manifest>

@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Manifest 
+    xmlns="http://schemas.microsoft.com/xw/2004/10/manifest.html"
+    xmlns:dssp="http://schemas.microsoft.com/xw/2004/10/dssp.html"
+    >
+	
+  <!-- Start the Scribbler with a motor and touch sensors. -->
+  <!-- Useful in Robotics Tutorials 1 & 2                  -->
+  <CreateServiceList>
+
+    <!--Start Scribbler Base Service -->
+    <ServiceRecordType>
+      <dssp:Contract>http://www.roboteducation.org/scribblerbase.html</dssp:Contract>
+    </ServiceRecordType>
+
+    <!-- Start the Scribbler Bumper Service -->
+    <ServiceRecordType>
+      <dssp:Contract>http://www.roboteducation.org/scribblerbumper.html</dssp:Contract>
+    </ServiceRecordType>
+    
+    <!-- Start the Scribbler Motor Service -->
+    <ServiceRecordType>
+      <dssp:Contract>http://www.roboteducation.org/scribblermotor.html</dssp:Contract>
+    </ServiceRecordType>
+
+  </CreateServiceList>
+
+</Manifest>

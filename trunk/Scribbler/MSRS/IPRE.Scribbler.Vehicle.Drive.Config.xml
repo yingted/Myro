@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<DriveDifferentialTwoWheelState 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+	xmlns="http://schemas.microsoft.com/robotics/2006/05/drive.html">
+<!--
+DriveDifferentialTwoWheel configuration file for Scribbler.
+Do not run this manifest directly.  
+See: IPRE.Scribbler.Vehicle.manifest.xml
+-->
+  <LeftWheel>
+    <MotorState xmlns="http://schemas.microsoft.com/robotics/2006/05/motor.html">
+      <Name>Left Motor</Name>
+    </MotorState>
+    <Radius xmlns="http://schemas.microsoft.com/robotics/2006/05/motor.html">0.03937</Radius>
+  </LeftWheel>
+	
+  <RightWheel>
+    <MotorState xmlns="http://schemas.microsoft.com/robotics/2006/05/motor.html">
+      <Name>Right Motor</Name>
+    </MotorState>
+    <Radius xmlns="http://schemas.microsoft.com/robotics/2006/05/motor.html">0.03937</Radius>
+  </RightWheel>
+	
+  <DistanceBetweenWheels>0.14605</DistanceBetweenWheels>
+  <IsEnabled>true</IsEnabled>
+</DriveDifferentialTwoWheelState>
