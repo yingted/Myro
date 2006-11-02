@@ -61,7 +61,7 @@ namespace IPRE.ScribblerHeartBeat
                 _state.Connected = false;
                 _state.whichLED = 0; //left LED
                 _state.LEDState = false;
-                _state.PauseTime = 1000; //1 second
+                _state.PauseTime = 500; //half second
             }
 
             // Listen on the main port for requests and call the appropriate handler.
@@ -80,7 +80,7 @@ namespace IPRE.ScribblerHeartBeat
 
         void TimerHandler(DateTime signal)
         {
-            brick.LEDMessage heartBeat = new brick.LEDMessage();
+            brick.SetLedBody heartBeat = new brick.SetLedBody();
             heartBeat.LED = _state.whichLED;
             
             _state.LEDState = !_state.LEDState; //flip LED

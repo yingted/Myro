@@ -31,22 +31,22 @@ namespace IPRE.ScribblerBase
         Get, 
         Replace,
         SetMotor,
-        Ping,
         SetLED,
         PlayTone,
+        SetName,
+        //ConfigureSensor,
         SelectiveSubscribe, //IMPORTANT: Because SelectiveSubscribe inherits from Subscribe, it must go on top.
         Subscribe>
     {
     }
 
-    /// <summary>
-    /// internal port
-    /// </summary>
-    internal class ScribblerDataPort : PortSet<
-        ScribblerCommand, 
-        SensorNotification, 
-        Exception> 
+    public class SendScribblerCommand : Submit<ScribblerCommand, PortSet<ScribblerResponse, Fault>>
     {
+        public SendScribblerCommand() { }
+        public SendScribblerCommand(ScribblerCommand cmd)
+        {
+            this.Body = cmd;
+        }
     }
 
     /// <summary>
@@ -63,7 +63,12 @@ namespace IPRE.ScribblerBase
     /// <summary>
     /// a motor command
     /// </summary>
-    public class SetMotor : Update<SetMotorData, PortSet<DefaultUpdateResponseType, Fault>> { }
+    public class SetMotor : Update<SetMotorBody, PortSet<DefaultUpdateResponseType, Fault>> { }
+
+    ///// <summary>
+    ///// configures 1 light sensor for subscriptions
+    ///// </summary>
+    //public class ConfigureSensor : Update<ConfigureSensorBody, PortSet<DefaultUpdateResponseType, Fault>> { }
 
     /// <summary>
     /// general subscription
@@ -77,20 +82,18 @@ namespace IPRE.ScribblerBase
     /// </summary>
     public class SelectiveSubscribe : Subscribe<MySubscribeRequestType, PortSet<SubscribeResponseType, Fault>> { }
 
-
     /// <summary>
     /// sends an LED message to Scribbler
     /// </summary>
-    public class SetLED : Update<LEDMessage, PortSet<DefaultUpdateResponseType, Fault>> { }
-
-    /// <summary>
-    /// Pings Scribbler
-    /// </summary>
-    public class Ping : Update<PingMessage, PortSet<DefaultUpdateResponseType, Fault>> { }
+    public class SetLED : Update<SetLedBody, PortSet<DefaultUpdateResponseType, Fault>> { }
 
     /// <summary>
     /// Plays a tone on the scribbler
     /// </summary>
-    public class PlayTone : Update<PlayToneMessage, PortSet<DefaultUpdateResponseType, Fault>> { }
+    public class PlayTone : Update<PlayToneBody, PortSet<DefaultUpdateResponseType, Fault>> { }
 
+    /// <summary>
+    /// Plays a tone on the scribbler
+    /// </summary>
+    public class SetName : Update<SetNameBody, PortSet<DefaultUpdateResponseType, Fault>> { }
 }

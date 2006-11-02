@@ -63,7 +63,7 @@ namespace IPRE.ScribblerBackupMonitor
             {
                 _state = new ScribblerBackupMonitorState();
 
-                _state.PauseDuration = 800; //ms
+                _state.PauseDuration = 700; //ms
                 _state.PlayDuration = 800; //ms
                 _state.Frequency1 =  1000; //Hz
                 _state.Frequency2 = 0;
@@ -139,7 +139,7 @@ namespace IPRE.ScribblerBackupMonitor
         {
             beeping = true;
 
-            brick.PlayToneMessage tone = new IPRE.ScribblerBase.Proxy.PlayToneMessage();
+            brick.PlayToneBody tone = new brick.PlayToneBody();
             tone.Duration = _state.PlayDuration;
             tone.Frequency1 = _state.Frequency1;
             tone.Frequency2 = _state.Frequency2;

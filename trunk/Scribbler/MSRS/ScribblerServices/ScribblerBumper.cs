@@ -34,10 +34,9 @@ namespace IPRE.ScribblerBumper
     [PermissionSet(SecurityAction.PermitOnly, Name="Execution")]
     public class ScribblerBumper : DsspServiceBase
     {
-        [InitialStatePartner(Optional = true)]
         private bumper.ContactSensorArrayState _state;
 
-        [ServicePort("ScribblerBumper", AllowMultipleInstances = true)]
+        [ServicePort("ScribblerBumper", AllowMultipleInstances = false)]
         private bumper.ContactSensorArrayOperations _mainPort = new bumper.ContactSensorArrayOperations();
 
         [Partner("ScribblerBase", Contract = brick.Contract.Identifier, CreationPolicy = PartnerCreationPolicy.UseExistingOrCreate, Optional = false)]
@@ -69,15 +68,13 @@ namespace IPRE.ScribblerBumper
                 _state.Sensors = new List<bumper.ContactSensor>();
 
                 bumper.ContactSensor leftBumper = new bumper.ContactSensor();
-                leftBumper.Name = "IRLeft";
+                leftBumper.Name = "FrontLeftIR";  //note: name must contain 'front' for tutorial3
 
                 bumper.ContactSensor rightBumper = new bumper.ContactSensor();
-                rightBumper.Name = "IRRight";
+                rightBumper.Name = "FrontRightIR";
 
                 _state.Sensors.Add(leftBumper);
                 _state.Sensors.Add(rightBumper);
-
-                SaveState(_state);
             }
 
             // Listen on the main port for requests and call the appropriate handler.
@@ -108,10 +105,8 @@ namespace IPRE.ScribblerBumper
             //NOTE: this name must match the scribbler sensor name.
             request.Sensors = new List<string>();
 
-            foreach (bumper.ContactSensor entry in _state.Sensors)
-            {
-                request.Sensors.Add(entry.Name);
-            }
+            request.Sensors.Add("IRLeft");
+            request.Sensors.Add("IRRight");
 
             //Subscribe to the ScribblerBase and wait for a response
             Activate(
@@ -121,7 +116,7 @@ namespace IPRE.ScribblerBumper
                         //update our state with subscription status
                         _subscribed = true;
 
-                        LogInfo("Bumper subscription success");
+                        LogInfo("ScribblerBumper subscription success");
 
                         //Subscription was successful, start listening for sensor change notifications
                         Activate(
@@ -130,7 +125,7 @@ namespace IPRE.ScribblerBumper
                     },
                     delegate(soap.Fault F)
                     {
-                        LogError("Bumper subscription failed");
+                        LogError("ScribblerBumper subscription failed");
                     }
                 )
             );
@@ -147,7 +142,7 @@ namespace IPRE.ScribblerBumper
                 bool newval = true;
                 if (sensor.Name.ToUpper().Contains("LEFT"))
                 {
-                    newval = !notify.Body.IRLeft;                  //NOTE: inverting logic here
+                    newval = !notify.Body.IRLeft;                   //NOTE: inverting logic here
                 }
                 else if (sensor.Name.ToUpper().Contains("RIGHT"))
                 {
@@ -193,6 +188,46 @@ namespace IPRE.ScribblerBumper
             replace.ResponsePort.Post(DefaultReplaceResponseType.Instance);
             yield break;
         }
+
+
+        /// <summary>
+        /// Subscribe Handler
+        /// </summary>
+        /// <param name="subscribe"></param>
+        /// <returns></returns>
+        [ServiceHandler(ServiceHandlerBehavior.Exclusive)]
+        public IEnumerator<ITask> SubscribeHandler(bumper.Subscribe subscribe)
+        {
+            yield return Arbiter.Choice(
+                SubscribeHelper(_subMgrPort, subscribe.Body, subscribe.ResponsePort),
+                delegate(SuccessResult success)
+                {
+                    _subMgrPort.Post(new submgr.Submit(
+                        subscribe.Body.Subscriber, DsspActions.ReplaceRequest, _state, null));
+                },
+                null
+            );
+        }
+
+        /// <summary>
+        /// ReliableSubscribe Handler
+        /// </summary>
+        /// <param name="subscribe"></param>
+        /// <returns></returns>
+        [ServiceHandler(ServiceHandlerBehavior.Exclusive)]
+        public IEnumerator<ITask> ReliableSubscribeHandler(bumper.ReliableSubscribe subscribe)
+        {
+            yield return Arbiter.Choice(
+                SubscribeHelper(_subMgrPort, subscribe.Body, subscribe.ResponsePort),
+                delegate(SuccessResult success)
+                {
+                    _subMgrPort.Post(new submgr.Submit(
+                        subscribe.Body.Subscriber, DsspActions.ReplaceRequest, _state, null));
+                },
+                null
+            );
+        }
+
     }
 
     public static class Contract

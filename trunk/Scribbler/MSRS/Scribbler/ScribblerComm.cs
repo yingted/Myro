@@ -6,25 +6,47 @@
 //-----------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
+
 using System.Text;
-using System.IO.Ports;
-using Microsoft.Ccr.Core;
 using System.IO;
+using System.IO.Ports;
 using System.Diagnostics;
-using Microsoft.Dss.ServiceModel.DsspServiceBase;
+using System.Globalization;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
+
+using Microsoft.Ccr.Core;
+using Microsoft.Dss.ServiceModel.DsspServiceBase;
 
 
 namespace IPRE.ScribblerBase
 {
-    internal class ScribblerComm
+    internal class ScribblerCom
     {
-        byte[] buffer;
+        private const int outMessageSize = 9;
 
-        SerialPort serialPort = null;
+        private SerialPort _serialPort = null;
 
-        internal ScribblerDataPort ScribblerComInboundPort = null;
+        private const int _baudRate = 38400;
+
+        private ScribblerHelper helper = new ScribblerHelper();
+
+        /// <summary>
+        /// after this number of milliseconds without seeing data, the scribbler will send its 'find me' message
+        /// </summary>
+        private const int noCommsTimeout = 1000;
+        
+        /// <summary>
+        /// the scribbler's 'find me' message must contain this string
+        /// </summary>
+        private const string characteristicString = "IPRE";
+
+        //internal ScribblerDataPort ScribblerComInboundPort = null;
+
+
+        //these are just to transfer back to the main scribbler service
+        public string foundRobotName;
+        public int openedComPort;
 
         /// <summary>
         /// Open a serial port.
@@ -32,177 +54,402 @@ namespace IPRE.ScribblerBase
         /// <param name="comPort"></param>
         /// <param name="baudRate"></param>
         /// <returns>A Ccr Port for receiving serial port data</returns>
-        internal ScribblerDataPort Open(int comPort, int baudRate)
+        internal bool Open(int comPort)
         {
-            if (serialPort != null)
+            if (_serialPort != null)
                 Close();
 
-            if (buffer == null)
-                buffer = new byte[128];
+            //debug
+            //Console.WriteLine("Open: " + comPort);
 
-            Console.WriteLine("Opening COM port: " + comPort + " with baud rate: " + baudRate);
-
-            serialPort = new SerialPort("COM" + comPort.ToString(System.Globalization.NumberFormatInfo.InvariantInfo), baudRate);
-            serialPort.Encoding = Encoding.Default;
-            serialPort.Parity = Parity.None;
-            serialPort.DataBits = 8;
-            serialPort.StopBits = StopBits.One;
-            //serialPort.WriteTimeout = 2000;
-            serialPort.DataReceived += new SerialDataReceivedEventHandler(serialPort_DataReceived);
-            serialPort.ErrorReceived += new SerialErrorReceivedEventHandler(serialPort_ErrorReceived);
-            
-            ScribblerComInboundPort = new ScribblerDataPort();
-            
+            _serialPort = new SerialPort("COM" + comPort.ToString(System.Globalization.NumberFormatInfo.InvariantInfo), _baudRate);
+            _serialPort.Encoding = Encoding.Default;
+            _serialPort.Parity = Parity.None;
+            _serialPort.DataBits = 8;
+            _serialPort.StopBits = StopBits.One;
+            _serialPort.WriteTimeout = 2000;
             try
             {
-                serialPort.Open();
+                string name = TrySerialPort(_serialPort.PortName);
+                if (name != null)
+                {
+                    _serialPort.Open();
+                    foundRobotName = name;
+                    openedComPort = comPort;
+                }
+                else
+                    return false;
             }
             catch
             {
                 Console.WriteLine("Invalid Serial Port.");
-                throw new IOException();
+                return false;
             }
-            return ScribblerComInboundPort;
+            return true;
         }
 
+
+        /// <summary>
+        /// Attempt to read our data from a serial port.
+        /// </summary>
+        /// <param name="spName">Serial port name</param>
+        /// <returns>name of robot attached to port</returns>
+        private string TrySerialPort(string spName)
+        {
+            //DEBUG
+            //Console.WriteLine("TrySerialPort: " + spName);
+
+            SerialPort p = null;
+            string robotname = null;
+
+            try
+            {
+                p = new SerialPort(spName, _baudRate, Parity.None, 8, StopBits.One);
+                p.Handshake = Handshake.None;
+                p.Encoding = Encoding.ASCII;
+                p.Open();
+
+                string s = p.ReadExisting();
+
+                if (s.Length == 0)
+                {
+                    System.Threading.Thread.Sleep((int)(noCommsTimeout * 1.5));
+                    s = p.ReadExisting(); //try again
+                }
+
+                if (s.Length == 0)
+                {
+                    return null;
+                }
+
+                // we are receiving data.
+                
+                int index = s.IndexOf(characteristicString);
+                int end = -1;
+                if (index >= 0)
+                    end = s.IndexOf("\0", index);
+                bool invalidData = UnrecognizedData(s);
+
+                //not a Scribbler robot
+                if (invalidData || (index < 0) || (end <= index) )
+                {
+                    return null;
+                }
+
+                robotname = s.Substring(index + characteristicString.Length, end - index - characteristicString.Length);
+                Console.WriteLine("TrySerialPort found: " + robotname);
+            }
+            catch { }
+            finally
+            {
+                if (p != null && p.IsOpen)
+                    p.Close();
+                p.Dispose();
+            }
+
+            return robotname;
+        }
+
+
+        /// <summary>
+        /// Attempt to find and open a Scribbler on any serial port.
+        /// <returns>True if a robot unit was found</returns>
+        /// </summary>
+        public bool FindRobot(string robotname)
+        {
+            //debug
+            //Console.WriteLine("FindRobot: " + robotname);
+
+            //if there are multiple robots connected, add to list and prompt user
+            //item0 = COM port name
+            //item1 = robot name
+            List<Tuple<String, String>> foundRobots = new List<Tuple<string, string>>();
+
+            foreach (string spName in SerialPort.GetPortNames())
+            {
+                string spName2 = spName;
+
+                if (spName.Contains("?"))
+                {
+                    spName2 = spName.Substring(0, spName.Length - 1);
+                    Console.WriteLine("Fixing name: "+ spName + " -> " + spName2);
+                }
+
+                Console.Write("Checking for robot on " + spName2 + ".  ");
+
+                string tempName = TrySerialPort(spName2);
+
+                if (tempName != null)
+                {
+                    Console.Write("Found robot \"" + tempName + "\"\n");
+
+                    if (tempName == robotname)
+                    {
+                        return Open(int.Parse(spName2.Substring(3, spName2.Length - 3)));
+                    }
+                    else
+                    {
+                        Tuple<String, String> pair = new Tuple<string, string>(spName2, tempName);
+                        foundRobots.Add(pair);
+                    }
+                }
+                else
+                    Console.Write("\n");
+            }
+
+            //only one robot found. so connect
+            if (foundRobots.Count == 1)
+            {
+                return Open(int.Parse(foundRobots[0].Item0.Substring(3, foundRobots[0].Item0.Length - 3)));
+            }
+            //many robots found. prompt user to connect
+            else if (foundRobots.Count > 0)
+            {
+                bool selected = false;
+                while (!selected)
+                {
+                    Console.Write("Which robot would you like to connect to:");
+                    string connect = Console.ReadLine();
+                    connect = connect.ToLower();
+
+                    foreach (Tuple<string, string> tup in foundRobots)
+                    {
+                        if (connect == tup.Item1.ToLower())
+                            return Open(int.Parse(tup.Item0.Substring(3, tup.Item0.Length - 3)));
+                        try
+                        {
+                            int portNum = int.Parse(tup.Item0.Substring(3, tup.Item0.Length - 3));
+                            return Open(portNum);
+                        }
+                        catch { }
+                    }
+                }
+            }
+
+            //no robots found
+            return false;
+        }
+
+        
         void serialPort_ErrorReceived(object sender, SerialErrorReceivedEventArgs e)
         {
-            throw new IOException();
+            Console.WriteLine("serialPort_ErrorReceived: "+e);
+            //throw new IOException();
         }
 
-        public bool SendCommand(ScribblerCommand cmd)
+
+        /// <summary>
+        /// DO NOT USE THIS COMMAND DIRECTLY.
+        /// In Scribbler.cs, post a message to _scribblerComPort
+        /// </summary>
+        /// <param name="cmd"></param>
+        /// <returns></returns>
+        internal ScribblerResponse SendCommand(ScribblerCommand cmd)
         {
-            if (buffer != null && cmd.Data != null)
+            ScribblerResponse echo = null;
+            ScribblerResponse response = null;
+            byte[] buffer = new byte[outMessageSize];
+
+            if (buffer != null)
             {
+
                 int ix = 0;
 
-                //Add packet length start byte
-                buffer[ix++] = (byte)(cmd.Data.Length+1);
+                //buffer = cmd.ToByteArray();
+
+                buffer[ix++] = cmd.CommandType;
 
                 if (cmd.Data != null && cmd.Data.Length > 0)
                     foreach (byte b in cmd.Data)
                         buffer[ix++] = b;
 
-                // null terminate as stop byte for scribbler
-                buffer[ix] = 0;
+                //fill to standard size
+                while (ix < outMessageSize)
+                    buffer[ix++] = 0;
+
+                //DEBUG
+                //Console.Write("\nSent: ");
+                //foreach (byte b in buffer)
+                //{
+                //    if (b != 0)
+                //        Console.Write(b + " ");
+                //    else
+                //        Console.Write("` ");
+                //}
+                //Console.Write("\n");
+                //DEBUG
+
+                // When requesting a response, clear the inbound buffer 
+                if (_serialPort.BytesToRead > 0)
+                    _serialPort.DiscardInBuffer();
 
                 try
                 {
-                    serialPort.Write(buffer, 0, ix+1);
+                    _serialPort.Write(buffer, 0, ix);
                 }
                 catch
                 {
-                    throw new IOException();
+                    Console.WriteLine("Serial Port Timeout.  Turn on Scribbler.");
+                    //throw new IOException();
                 }
 
-                return true;
+                echo = GetEcho(buffer);
+                response = GetCommandResponse(helper.ReturnSize((ScribblerHelper.Commands)cmd.CommandType));
             }
-            return false;
+            return response;
         }
 
+       
+        
         /// <summary>
-        /// Serial Port data event handler
+        /// Read Serial Port for echo
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        void serialPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
+        /// <param name="outBuff">The outbound message to match</param>
+        /// <returns>ScribblerResponse</returns>
+        private ScribblerResponse GetEcho(byte[] outBuff)
         {
-            if (e.EventType == SerialData.Chars)
+            byte[] inBuff = new byte[outMessageSize];
+            ScribblerResponse response = null;
+            int ixOutBuff = 0;
+            try
             {
-                try
+                while (ixOutBuff < outMessageSize)
                 {
-                    while (serialPort.BytesToRead >= 2)
+                    byte[] temp = new byte[1];
+                    _serialPort.Read(temp, 0, 1); //get 1 byte
+                    if (temp[0] == outBuff[ixOutBuff])
                     {
-                        int messageLength = serialPort.ReadByte();
-
-                        while ((messageLength > 5 || messageLength == 0) && serialPort.BytesToRead > 0)
-                            messageLength = serialPort.ReadByte();
-
-                        if (messageLength >= 2)
-                        {
-                            byte[] data = new byte[messageLength];
-
-                            serialPort.Read(data, 0, messageLength);
-
-                            //debug
-                            foreach (byte b in data)
-                            {
-                                if (b != 0)
-                                    Console.Write(b + " ");
-                                else
-                                    Console.Write("` ");
-                            }
-                            Console.Write("\n");
-
-                            if (ScribblerHelper.IsSensorResponse(data[0]))
-                            {
-                                SensorNotification sensorMsg = new SensorNotification(data[0], data[1]);
-
-                                ScribblerComInboundPort.Post(sensorMsg);
-                            }
-                            else
-                            {
-                                ScribblerCommand echo = new ScribblerCommand();
-                                echo.Data = data;
-                                ScribblerComInboundPort.Post(echo);
-                            }
-
-                        }
-
+                        inBuff[ixOutBuff] = temp[0];
+                        ixOutBuff++;
                     }
                 }
-                catch (ArgumentException ex)
+
+                response = new ScribblerResponse();
+                response.Data = (byte[])inBuff.Clone();
+
+                //DEBUG
+                //Console.Write("Echo: ");
+                //foreach (byte b in response.Data)
+                //{
+                //    if (b != 0)
+                //        Console.Write(b + " ");
+                //    else
+                //        Console.Write("` ");
+                //}
+                //Console.Write("\n");
+                //DEBUG
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("GetCommandResponse Exception: " + ex);
+            }
+            return response;
+        }
+
+
+        /// <summary>
+        /// Read Serial Port for a number of bytes and put into ScribblerResponse
+        /// </summary>
+        /// <param name="nBytes">number of bytes to read (includes the command type byte)</param>
+        /// <returns>ScribblerResponse</returns>
+        private ScribblerResponse GetCommandResponse(int nBytes)
+        {
+            byte[] inBuff = new byte[nBytes];
+            ScribblerResponse response = null;
+            int read = 0;
+            try
+            {
+                while (read < nBytes)
                 {
-                    if (ex.Message == "Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.")
+                    
+                    int canread;
+                    while ((canread = _serialPort.BytesToRead) == 0) ; //spin
+                    int needtoread = nBytes - read;
+                    if (canread > needtoread)
                     {
-                        Exception invalidBaudRate = new IOException();
-                        System.Diagnostics.Debug.WriteLine("Invalid Baud Rate");
-                        ScribblerComInboundPort.Post(invalidBaudRate);
+                        _serialPort.Read(inBuff, read, needtoread);
+                        read += needtoread;
                     }
                     else
                     {
-                        Console.WriteLine("Error reading from the serial port in ComBase(): {0}", ex.Message);
-                        System.Diagnostics.Debug.WriteLine("Error reading from the serial port in ComBase(): {0}", ex.Message);
-                        ScribblerComInboundPort.Post(ex);
+                        _serialPort.Read(inBuff, read, canread);
+                        read += canread;
                     }
+                    //DEBUG
+                    //foreach (byte b in inBuff)
+                    //{
+                    //    if (b != 0)
+                    //        Console.Write(b + " ");
+                    //    else
+                    //        Console.Write("` ");
+                    //}
+                    //Console.Write("\n");
+                    //DEBUG
                 }
-                catch (TimeoutException ex)
-                {
-                    ScribblerComInboundPort.Post(ex);
-                    // Ignore timeouts for now.
-                }
-                catch (IOException ex)
-                {
-                    Console.WriteLine("Error reading from the serial port in CommBase(): {0}", ex.Message);
-                    ScribblerComInboundPort.Post(ex);
 
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Error reading from the serial port in CommBase(): {0}", ex.Message);
-                    ScribblerComInboundPort.Post(ex);
-                }
+                response = new ScribblerResponse(nBytes-1);
+                response.CommandType = inBuff[inBuff.Length-1];
+                for (int i = 0; i < inBuff.Length - 1; i++)
+                    response.Data[i] = inBuff[i];
+
+                //DEBUG
+                //Console.Write("Got: ");
+                //foreach (byte b in response.Data)
+                //{
+                //    if (b != 0)
+                //        Console.Write(b + " ");
+                //    else
+                //        Console.Write("` ");
+                //}
+                //Console.Write("\n");
+                //DEBUG
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine("GetCommandResponse Exception: " + ex);
+            }
+            return response;
         }
 
+   
 
         /// <summary>
         /// Close the connection to a serial port.
         /// </summary>
-        private void Close()
+        public void Close()
         {
-            if (serialPort != null)
+            if (_serialPort != null)
             {
-                if (serialPort.IsOpen)
-                {
-                    serialPort.DataReceived -= new SerialDataReceivedEventHandler(serialPort_DataReceived);
-                    serialPort.Close();
-                }
-
-                serialPort = null;
-                ScribblerComInboundPort = null;
+                if (_serialPort.IsOpen)
+                    _serialPort.Close();
+                _serialPort = null;
             }
         }
+
+
+
+        /// <summary>
+        /// Search serial port data for binary characters.  
+        /// Unrecognized data indicates that we are 
+        /// operating in binary mode or receiving data at 
+        /// the wrong baud rate.
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        private static bool UnrecognizedData(string data)
+        {
+            foreach (char c in data)
+            {
+                if ((c < 32 || c > 126) && (c != 0))
+                {
+                    Console.WriteLine("unrecognized: " + c);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+     
 
 
     }

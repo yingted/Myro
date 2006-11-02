@@ -23,99 +23,138 @@ namespace IPRE.ScribblerBase
         /// </summary>
         public enum Commands
         {
-            GET_INPUT = 1,
-            GET_OPEN_LEFT = 2,
-            GET_OPEN_RIGHT = 3,
-            GET_STALL = 4,
-            GET_LIGHT_LEFT = 5,
-            GET_LIGHT_CENTER = 6,
-            GET_LIGHT_RIGHT = 7,
-            GET_LINE_RIGHT = 8,
-            GET_LINE_LEFT = 9,
-            GET_ALL_BINARY = 10,
+            GET_STATE           = 1,
+            GET_OPEN_LEFT       = 2,
+            GET_OPEN_RIGHT      = 3,
+            GET_STALL           = 4,
+            GET_LIGHT_LEFT      = 5,
+            GET_LIGHT_CENTER    = 6,
+            GET_LIGHT_RIGHT     = 7,
+            GET_LINE_RIGHT      = 8,
+            GET_LINE_LEFT       = 9,
+            GET_NAME            = 10,
+            GET_LIGHT_ALL       = 33,
+            GET_IR_ALL          = 34,
+            GET_LINE_ALL        = 35,
+            GET_ALL             = 36,
+            GET_ALL_BINARY      = 39,
 
-            GET_OPEN_LEFT_RESPONSE = 11,
-            GET_OPEN_RIGHT_RESPONSE = 12,
-            GET_STALL_RESPONSE = 13,
-            GET_LIGHT_LEFT_RESPONSE = 14,
-            GET_LIGHT_CENTER_RESPONSE = 15,
-            GET_LIGHT_RIGHT_RESPONSE = 16,
-            GET_LINE_RIGHT_RESPONSE = 17,
-            GET_LINE_LEFT_RESPONSE = 18,
-            GET_ALL_BINARY_RESPONSE = 19,
-
-            SET_MOTORS_OFF = 20,
-            SET_MOTORS = 21, // 21 RightMotorSpeed LeftMotorSpeed    (units: 1 = full speed backwards, 100 = stopped, 200 = full speed forward)
-            SET_LED_LEFT_ON = 22,
-            SET_LED_LEFT_OFF = 23,
-            SET_LED_CENTER_ON = 24,
-            SET_LED_CENTER_OFF = 25,
-            SET_LED_RIGHT_ON = 26,
-            SET_LED_RIGHT_OFF = 27,
-            SET_SPEAKER = 28, // 28 duration frequency1 [frequency2]   (duration units is 10x ms, freqency x 6 + 250 = Hz 250->2000) set freq2 to 0 for none
+            SET_MOTORS_OFF      = 20,
+            SET_MOTORS          = 21, // 21 RightMotorSpeed LeftMotorSpeed    (units: 0 = full speed backwards, 100 = stopped, 200 = full speed forward)
+            SET_LED_LEFT_ON     = 22,
+            SET_LED_LEFT_OFF    = 23,
+            SET_LED_CENTER_ON   = 24,
+            SET_LED_CENTER_OFF  = 25,
+            SET_LED_RIGHT_ON    = 26,
+            SET_LED_RIGHT_OFF   = 27,
+            SET_SPEAKER         = 28,
+            SET_SPEAKER_2       = 29,
+            SET_NAME            = 30,
+            SET_LED_ALL_ON      = 31,
+            SET_LED_ALL_OFF     = 32,
+            SET_LOUD            = 37,
+            SET_QUIET           = 38,
         }
 
         /// <summary>
-        /// tests whether incoming message from scribbler is a sensor state update, or just an echo
+        /// Gives the number of bytes a message should have when coming back from scribbler.
+        /// This includes the command type byte.
         /// </summary>
-        public static bool IsSensorResponse(byte test)
+        /// <param name="cmd"></param>
+        /// <returns></returns>
+        public int ReturnSize(Commands cmd)
         {
-            switch ((Commands)test)
+            switch (cmd)
             {
-                case Commands.GET_OPEN_LEFT_RESPONSE:
-                case Commands.GET_OPEN_RIGHT_RESPONSE:
-                case Commands.GET_STALL_RESPONSE:
-                case Commands.GET_LIGHT_LEFT_RESPONSE:
-                case Commands.GET_LIGHT_CENTER_RESPONSE:
-                case Commands.GET_LIGHT_RIGHT_RESPONSE:
-                case Commands.GET_LINE_RIGHT_RESPONSE:
-                case Commands.GET_LINE_LEFT_RESPONSE:
-                case Commands.GET_ALL_BINARY_RESPONSE:
-                    return true;
+                case Commands.GET_STATE:
+                    return 3;
+                    break;
+                case Commands.GET_OPEN_LEFT:
+                    return 2;
+                    break;
+                case Commands.GET_OPEN_RIGHT:
+                    return 2;
+                    break;
+                case Commands.GET_STALL:
+                    return 2;
+                    break;
+                case Commands.GET_LIGHT_LEFT:
+                    return 3;
+                    break;
+                case Commands.GET_LIGHT_CENTER:
+                    return 3;
+                    break;
+                case Commands.GET_LIGHT_RIGHT:
+                    return 3;
+                    break;
+                case Commands.GET_LINE_RIGHT:
+                    return 2;
+                    break;
+                case Commands.GET_LINE_LEFT:
+                    return 2;
+                    break;
+                case Commands.GET_NAME:
+                    return 9;
+                    break;
+                case Commands.GET_LIGHT_ALL:
+                    return 7;
+                    break;
+                case Commands.GET_IR_ALL:
+                    return 3;
+                    break;
+                case Commands.GET_LINE_ALL:
+                    return 3;
+                    break;
+                case Commands.GET_ALL:
+                    return 12;
+                    break;
+                case Commands.GET_ALL_BINARY:
+                case Commands.SET_MOTORS_OFF:
+                case Commands.SET_MOTORS:
+                case Commands.SET_LED_LEFT_ON:
+                case Commands.SET_LED_LEFT_OFF:
+                case Commands.SET_LED_CENTER_ON:
+                case Commands.SET_LED_CENTER_OFF:
+                case Commands.SET_LED_RIGHT_ON:
+                case Commands.SET_LED_RIGHT_OFF:
+                case Commands.SET_SPEAKER:
+                case Commands.SET_SPEAKER_2:
+                case Commands.SET_NAME:
+                case Commands.SET_LED_ALL_ON:
+                case Commands.SET_LED_ALL_OFF:
+                case Commands.SET_LOUD:
+                case Commands.SET_QUIET:
+                    return 2;
                     break;
                 default:
-                    return false;
+                    Console.WriteLine("Command missmatch");
+                    return 1;
                     break;
             }
         }
 
-        /// <summary>
-        /// returns the sensor type in form of string
-        /// </summary>
-        public static string SensorType(byte test)
+
+        public struct GetStatusDecomp
         {
-            switch ((Commands)test)
+            //ins
+            public bool LineLeft;
+            public bool LineRight;
+            public bool Stall;
+
+            //outs
+            public bool LedLeft;
+            public bool LedCenter;
+            public bool LedRight;
+
+            public GetStatusDecomp(byte ins, byte outs)
             {
-                case Commands.GET_OPEN_LEFT_RESPONSE:
-                    return "IRLeft";
-                    break;
-                case Commands.GET_OPEN_RIGHT_RESPONSE:
-                    return "IRRight";
-                    break;
-                case Commands.GET_STALL_RESPONSE:
-                    return "Stall";
-                    break;
-                case Commands.GET_LIGHT_LEFT_RESPONSE:
-                    return "LightLeft";
-                    break;
-                case Commands.GET_LIGHT_CENTER_RESPONSE:
-                    return "LightCenter";
-                    break;
-                case Commands.GET_LIGHT_RIGHT_RESPONSE:
-                    return "LightRight";
-                    break;
-                case Commands.GET_LINE_RIGHT_RESPONSE:
-                    return "LineRight";
-                    break;
-                case Commands.GET_LINE_LEFT_RESPONSE:
-                    return "LineLeft";
-                    break;
-                case Commands.GET_ALL_BINARY_RESPONSE:
-                    return "AllBinary";
-                    break;
-                default:
-                    return "None";
-                    break;
+                LineRight = (ins & 0x10) > 0;
+                LineLeft = (ins & 0x20) > 0;
+                Stall = (ins & 0x80) > 0;
+
+                LedRight = (outs & 0x01) > 0;
+                LedCenter = (outs & 0x02) > 0;
+                LedLeft = (outs & 0x04) > 0;
             }
         }
 
@@ -132,7 +171,7 @@ namespace IPRE.ScribblerBase
             public bool LineLeft;
             public bool LineRight;
 
-            public AllBinaryDecomp(int b)
+            public AllBinaryDecomp(byte b)
             {
                 this.IRLeft = (b & 0x10) > 0;
                 this.IRRight = (b & 0x08) > 0;

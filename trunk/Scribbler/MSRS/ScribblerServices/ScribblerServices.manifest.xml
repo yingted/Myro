@@ -4,6 +4,9 @@
     xmlns:dssp="http://schemas.microsoft.com/xw/2004/10/dssp.html"
 	xmlns:drive="http://schemas.microsoft.com/robotics/2006/05/drive.html" 
     >
+	
+	<!-- Starts all the scribbler services for testing -->
+	
     <CreateServiceList>
 
 		<!--Start Dashboard-->
@@ -16,20 +19,25 @@
 			<dssp:Contract>http://www.roboteducation.org/scribblerbase.html</dssp:Contract>
 		</ServiceRecordType>
 
-		<!--Start Scribbler Bumper -->
+		<!--Start Scribbler Bumper service -->
 		<ServiceRecordType>
 			<dssp:Contract>http://www.roboteducation.org/scribblerbumper.html</dssp:Contract>
 		</ServiceRecordType>
 
-		<!--Start Scribbler Heart Beat -->
+		<!--Start Scribbler Light Sensors service -->
 		<ServiceRecordType>
-			<dssp:Contract>http://www.roboteducation.org/scribblerheartbeat.html</dssp:Contract>
+			<dssp:Contract>http://www.roboteducation.org/scribblerlightsensor.html</dssp:Contract>
 		</ServiceRecordType>
 
-		<!--Start Scribbler Backup Monitor -->
-		<ServiceRecordType>
+		<!--Start Scribbler Heart Beat service -->
+        <!--<ServiceRecordType>
+			<dssp:Contract>http://www.roboteducation.org/scribblerheartbeat.html</dssp:Contract>
+		</ServiceRecordType>-->
+
+         <!--Start Scribbler Backup Monitor service -->
+		<!--<ServiceRecordType>
 			<dssp:Contract>http://www.roboteducation.org/scribblerbackupmonitor.html</dssp:Contract>
-		</ServiceRecordType>
+		</ServiceRecordType>-->
 		
 		<!--Start the generic (hardware agnostic) drive service-->
 		<ServiceRecordType>
@@ -37,7 +45,7 @@
 			<dssp:PartnerList>
 				<!--Initial Drive Configuration File -->
 				<dssp:Partner>
-					<dssp:Service>http://localhost/mountpoint/ScribblerServices/RoboticsTutorial4.LegoNXT.Drive.Config.xml</dssp:Service>
+					<dssp:Service>http://localhost/mountpoint/samples/Config/IPRE.Scribbler.Vehicle.Drive.Config.xml</dssp:Service>
 					<dssp:Name>dssp:StateService</dssp:Name>
 				</dssp:Partner>
 

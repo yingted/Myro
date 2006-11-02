@@ -23,9 +23,22 @@ namespace IPRE.ScribblerBase
     [DataContract()]
     public class ScribblerState
     {
+        /// <summary>
+        /// Name of robot.
+        /// <remarks>Up to 8 characters</remarks>
+        /// </summary>
+        [DataMember]
+        public string RobotName;
+
+        /// <summary>
+        /// The presence of no obstacle about 10 inches in the front left of robot
+        /// </summary>
         [DataMember]
         public bool IRLeft;
 
+        /// <summary>
+        /// The presence of no obstacle about 10 inches in the front right of robot
+        /// </summary>
         [DataMember]
         public bool IRRight;
 
@@ -47,9 +60,30 @@ namespace IPRE.ScribblerBase
         [DataMember]
         public int LightCenter;
 
+        //[DataMember]
+        //public SensorConfig LightLeftConfig;
+
+        //[DataMember]
+        //public SensorConfig LightRightConfig;
+
+        //[DataMember]
+        //public SensorConfig LightCenterConfig;
+
+        /// <summary>
+        /// Speed of left motor.
+        /// 0 = Full speed backwards
+        /// 100 = stopped
+        /// 200 = full speed forwards
+        /// </summary>
         [DataMember]
         public int MotorLeft;
 
+        /// <summary>
+        /// Speed of right motor.
+        /// 0 = Full speed backwards
+        /// 100 = stopped
+        /// 200 = full speed forwards
+        /// </summary>
         [DataMember]
         public int MotorRight;
 
@@ -61,7 +95,41 @@ namespace IPRE.ScribblerBase
        
         [DataMember]
         public bool LEDCenter;
+
+        /// <summary>
+        /// Whether or not service is connected to the physical robot through a COM port
+        /// </summary>
+        [DataMember]
+        public bool Connected;
+
+        /// <summary>
+        /// Which COM port robot is connected to if any.
+        /// <remarks>Setting this less than or equal to 0 will force the service to scan 
+        /// all COM ports for available robots.</remarks>
+        /// </summary>
+        [DataMember]
+        public int ComPort;
     }
+
+    ///// <summary>
+    ///// Configure a light sensor subscription
+    ///// NOTE: affects all subscriptions for this sensor
+    ///// </summary>
+    //[DataContract()]
+    //public class SensorConfig
+    //{
+    //    /// <summary>
+    //    /// when true, subscribers will be notified when sensor reading 
+    //    /// is greater than the threshold
+    //    /// </summary>
+    //    public bool GreaterThan;
+
+    //    /// <summary>
+    //    /// subscribers will be notified when the current sensor reading is either 
+    //    /// above or below this threshold, according to <code>GreaterThan</code>
+    //    /// </summary>
+    //    public int Threshold;
+    //}
 
     /// <summary>
     /// Custom subscriptions
@@ -75,6 +143,23 @@ namespace IPRE.ScribblerBase
         public List<string> Sensors;
     }
 
+    ///// <summary>
+    ///// configures a light sensor
+    ///// </summary>
+    //[DataContract()]
+    //public class ConfigureSensorBody
+    //{
+    //    /// <summary>
+    //    /// which sensor.  Left, Right, or Center.
+    //    /// </summary>
+    //    public string Sensor;
+
+    //    /// <summary>
+    //    /// When you want to be notified
+    //    /// </summary>
+    //    public SensorConfig Configuration;
+    //}
+
 
     /// <summary>
     /// An array of bytes to send to Scribbler
@@ -82,7 +167,15 @@ namespace IPRE.ScribblerBase
     [DataContract]
     public class ScribblerCommand
     {
+        private byte   _commandType;
         private byte[] _data;
+
+        [DataMember]
+        public byte CommandType
+        {
+            get { return _commandType; }
+            set { _commandType = value; }
+        }
 
         [DataMember]
         public byte[] Data
@@ -91,62 +184,133 @@ namespace IPRE.ScribblerBase
             set { _data = value; }
         }
 
+        /// <summary>
+        /// Standard constructor
+        /// </summary>
         public ScribblerCommand()
         { }
+
+        /// <summary>
+        /// For "get" commands and simple "set" commands
+        /// </summary>
+        /// <param name="command"></param>
         public ScribblerCommand(byte command)
         {
-            _data = new byte[1];
-            _data[0] = command;
+            _data = new byte[8];
+            _commandType = command;
         }
-        public ScribblerCommand(byte command, byte data1)
-        {
-            _data = new byte[2];
-            _data[0] = command;
-            _data[1] = data1;
-        }
+
+        /// <summary>
+        /// For setMotors
+        /// </summary>
+        /// <param name="command"></param>
+        /// <param name="data1"></param>
+        /// <param name="data2"></param>
         public ScribblerCommand(byte command, byte data1, byte data2)
         {
-            _data = new byte[3];
-            _data[0] = command;
-            _data[1] = data1;
-            _data[2] = data2;
+            _data = new byte[8];
+            _commandType = command;
+            _data[0] = data1;
+            _data[1] = data2;
         }
-        public ScribblerCommand(byte command, byte data1, byte data2, byte data3)
-        {
-            _data = new byte[4];
-            _data[0] = command;
-            _data[1] = data1;
-            _data[2] = data2;
-            _data[3] = data3;
-        }
-    }
 
+        /// <summary>
+        /// For setName
+        /// </summary>
+        /// <param name="command"></param>
+        /// <param name="data"></param>
+        public ScribblerCommand(byte command, string data)
+        {
+            _data = new byte[8];
+            _commandType = command;
+            int length = Math.Min(data.Length, 8);
+            char[] tmp = data.ToCharArray(0, length);
+            for (int i = 0; i < length; i++)
+                _data[i] = (byte)tmp[i];
+            for (int i = length; i < 8; i++)
+                _data[i] = 0;
+        }
+
+        /// <summary>
+        /// for speaker commands
+        /// </summary>
+        /// <param name="command"></param>
+        /// <param name="duration"></param>
+        /// <param name="frequency1"></param>
+        /// <param name="frequency2"></param>
+        public ScribblerCommand(byte command, int duration, int frequency1, int frequency2)
+        {
+            _data = new byte[8];
+            _commandType = command;
+
+            _data[0] = (byte)(duration >> 8);
+            _data[1] = (byte)duration;
+
+            _data[2] = (byte)(frequency1 >> 8);
+            _data[3] = (byte)frequency1;
+
+            _data[4] = (byte)(frequency2 >> 8);
+            _data[5] = (byte)frequency2;
+        }
+
+        //public byte[] ToByteArray()
+        //{
+        //    byte[] output = new byte[9];
+        //    output[0] = _commandType;
+        //    for (int i = 0; i < 8; i++)
+        //        output[i+1] = _data[i];
+        //    return output;
+        //}
+    }
 
     /// <summary>
-    /// A 2 byte array sensor response from scribbler
+    /// response from scribbler
     /// </summary>
     [DataContract()]
-    public class SensorNotification
+    public class ScribblerResponse : ScribblerCommand
     {
-        [DataMember]
-        public int Sensor;
+        public ScribblerResponse()
+        { }
 
-        [DataMember]
-        public int Status;
-
-        public SensorNotification() { }
-        public SensorNotification(int sensor, int status)
+        public ScribblerResponse(int length)
         {
-            this.Sensor = sensor;
-            this.Status = status;
+            base.Data = new byte[length];
+        }
+
+        public ScribblerResponse(byte[] indata)
+        {
+            base.CommandType = indata[indata.Length - 1];
+            base.Data = new byte[indata.Length - 1];
+            for (int i = 0; i < indata.Length - 1; i++)
+                base.Data[i] = indata[i];
         }
     }
+
+    ///// <summary>
+    ///// A 2 byte array sensor response from scribbler
+    ///// </summary>
+    //[DataContract()]
+    //public class SensorNotification
+    //{
+    //    [DataMember]
+    //    public int Sensor;
+
+    //    [DataMember]
+    //    public int Status;
+
+    //    public SensorNotification() { }
+    //    public SensorNotification(int sensor, int status)
+    //    {
+    //        this.Sensor = sensor;
+    //        this.Status = status;
+    //    }
+    //}
 
     /// <summary>
     /// motor command data
     /// </summary>
     [DataContract()]
-    public class SetMotorData
+    public class SetMotorBody
     {
         /// <summary>
         /// should contain "LEFT" or "RIGHT"
@@ -162,10 +326,11 @@ namespace IPRE.ScribblerBase
     }
 
     [DataContract]
-    public class LEDMessage
+    public class SetLedBody
     {
         /// <summary>
-        /// which LED to set (0, 1, 2)
+        /// which LED to set (0, 1, 2).  3 for all.
+        /// <remarks>0 = left, 1 = center (note: center LED is used for message indication on scribbler), 2 = right</remarks>
         /// </summary>
         [DataMember]
         public int LED;
@@ -177,12 +342,16 @@ namespace IPRE.ScribblerBase
         public bool State;
     }
 
-    [DataContract]
-    public class PingMessage
-    { }
 
     [DataContract]
-    public class PlayToneMessage
+    public class SetNameBody
+    {
+        public string NewName;
+    }
+
+
+    [DataContract]
+    public class PlayToneBody
     {
         /// <summary>
         /// units: ms
@@ -201,6 +370,17 @@ namespace IPRE.ScribblerBase
         /// </summary>
         [DataMember]
         public int Frequency2;
+
+        public PlayToneBody()
+        {
+        }
+
+        public PlayToneBody(int duration, int freq1, int freq2)
+        {
+            Duration = duration;
+            Frequency1 = freq1;
+            Frequency2 = freq2;
+        }
     }
 
 }

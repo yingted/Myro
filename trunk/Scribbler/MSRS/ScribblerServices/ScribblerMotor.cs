@@ -33,8 +33,7 @@ namespace IPRE.ScribblerMotor
     [PermissionSet(SecurityAction.PermitOnly, Name="Execution")]
     public class ScribblerMotor : DsspServiceBase
     {
-
-        private motor.MotorState _state = new motor.MotorState();
+        private motor.MotorState _state = null;
 
         [ServicePort("ScribblerMotor", AllowMultipleInstances = true)]
         private motor.MotorOperations _mainPort = new motor.MotorOperations();
@@ -57,6 +56,14 @@ namespace IPRE.ScribblerMotor
         /// </summary>
         protected override void Start()
         {
+            if (_state == null)
+            {
+                _state = new motor.MotorState();
+                _state.Name = "LeftMotor";       
+                //NOTE: name must contain either 'left' or 'right'
+                //default name is 'left' for use in Tutorial 2
+                //name should really be loaded by manifest
+            }
 
             // Listen on the main port for requests and call the appropriate handler.
             ActivateDsspOperationHandlers();
@@ -92,11 +99,9 @@ namespace IPRE.ScribblerMotor
             revPow *= 100;
             revPow += 100;
             int power = (int)Math.Round(revPow);
-            if (power == 0)
-                power = 1;
 
             //send hardware specific motor data
-            brick.SetMotorData motordata = new brick.SetMotorData();
+            brick.SetMotorBody motordata = new brick.SetMotorBody();
             motordata.Motor = _state.Name;
             motordata.Speed = power;
 

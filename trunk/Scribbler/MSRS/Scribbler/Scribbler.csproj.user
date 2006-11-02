@@ -1,17 +1,17 @@
 ﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <ReferencePath>C:\Microsoft Robotics Studio (September 2006)\bin;C:\Microsoft Robotics Studio (September 2006)\bin\services</ReferencePath>
+    <ReferencePath>C:\Microsoft Robotics Studio (October 2006)\bin;C:\Microsoft Robotics Studio (October 2006)\bin\services</ReferencePath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <StartWorkingDirectory>C:\Microsoft Robotics Studio (September 2006)\</StartWorkingDirectory>
+    <StartWorkingDirectory>C:\Microsoft Robotics Studio (October 2006)\</StartWorkingDirectory>
     <StartAction>Program</StartAction>
-    <StartProgram>C:\Microsoft Robotics Studio (September 2006)\bin\DssHost.exe</StartProgram>
-    <StartArguments>-port:50000 -tcpport:50001 -manifest:"Samples/Scribbler/Scribbler.manifest.xml"</StartArguments>
+    <StartProgram>C:\Microsoft Robotics Studio (October 2006)\bin\DssHost.exe</StartProgram>
+    <StartArguments>-port:50000 -tcpport:50001 -manifest:"Samples/Platforms/IPRE/Scribbler/Scribbler.manifest.xml"</StartArguments>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <StartWorkingDirectory>C:\Microsoft Robotics Studio (September 2006)\</StartWorkingDirectory>
+    <StartWorkingDirectory>C:\Microsoft Robotics Studio (October 2006)\</StartWorkingDirectory>
     <StartAction>Program</StartAction>
-    <StartProgram>C:\Microsoft Robotics Studio (September 2006)\bin\DssHost.exe</StartProgram>
-    <StartArguments>-port:50000 -tcpport:50001 -manifest:"Samples/Scribbler/Scribbler.manifest.xml"</StartArguments>
+    <StartProgram>C:\Microsoft Robotics Studio (October 2006)\bin\DssHost.exe</StartProgram>
+    <StartArguments>-port:50000 -tcpport:50001 -manifest:"Samples/Platforms/IPRE/Scribbler/Scribbler.manifest.xml"</StartArguments>
   </PropertyGroup>
 </Project>
