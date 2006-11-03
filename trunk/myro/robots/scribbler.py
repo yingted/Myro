@@ -63,7 +63,7 @@ class Scribbler(Robot):
         self._lastRotate    = 0
         self._volume = 0
         if serialport == None:
-            serialport = ask("Port")
+            serialport = ask("Port", useCache = 1)
 	# Deal with requirement that Windows "COM#" names where # >= 9 needs to
 	# be in the format "\\.\COM#"
 	if type(serialport) == str and serialport.startswith("com"):

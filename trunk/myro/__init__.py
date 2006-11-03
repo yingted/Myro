@@ -70,8 +70,8 @@ def pickAColor():
     newColor = Color(color[0][0], color[0][1], color[0][2])
     return newColor
 
-def ask(item):
-    retval = _ask(item)
+def ask(item, useCache = 0):
+    retval = _ask(item, useCache = useCache)
     if len(retval.keys()) == 2: # ok, and item
         return retval[item]
     else: return retval
