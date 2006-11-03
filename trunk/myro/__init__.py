@@ -417,9 +417,9 @@ def backward(amount):
 def turn(direction, amount = .8):
     return myro.globals.robot.turn(direction, amount)
 def turnLeft(amount):
-    return myro.globals.robot.left(amount)
+    return myro.globals.robot.turnLeft(amount)
 def turnRight(amount):
-    return myro.globals.robot.right(amount)
+    return myro.globals.robot.turnRight(amount)
 def stop():
     return myro.globals.robot.stop()
 def openConnection():
@@ -467,7 +467,7 @@ def joystick():
 def playSong(song, wholeNoteDuration = .545):
     return myro.globals.robot.playSong(song, wholeNoteDuration)
 def playNote(tuple, wholeNoteDuration = .545):
-    return myro.globals.robot.playSong(tuple, wholeNoteDuration)
+    return myro.globals.robot.playNote(tuple, wholeNoteDuration)
 # --------------------------------------------------------
 # Error handler:
 # --------------------------------------------------------
