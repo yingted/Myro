@@ -64,6 +64,12 @@ class Scribbler(Robot):
         self._volume = 0
         if serialport == None:
             serialport = ask("Port")
+	# Deal with requirement that Windows "COM#" names where # >= 9 needs to
+	# be in the format "\\.\COM#"
+	if type(serialport) == str and serialport.startswith("com"):
+	    portnum = int(serialport[3:])
+	    if portnum >= 9:
+	        serialport = r'\\.\COM%d' % (portnum + 1)
         self.serialPort = serialport
         self.baudRate = baudrate
         self.open()
