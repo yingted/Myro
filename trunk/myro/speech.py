@@ -1,8 +1,6 @@
 import myro.globals
 
 class TTSEngine:
-    def __init__(self, name = None):
-        self.name = name
     def Speak(self, message, async = 1):
         print message
     def stop(self):
@@ -10,7 +8,7 @@ class TTSEngine:
     def setVoice(self, name):
         pass
     def getVoice(self):
-        return self.name
+        return None
     def getVoices(sel):
         return []
 
@@ -18,9 +16,8 @@ class WindowsTTSEngine(TTSEngine):
     def __init__(self, name = None):
         import pyTTS
         self.tts = pyTTS.Create()
-        TTSEngine.__init__(self, name)
-        if self.name != None:
-            self.setVoice(self.name)
+        if name != None:
+            self.setVoice(name)
 
     def speak(self, message, async = 1):
         self.tts.Speak(message, async) # 0 is default, 1 is async
@@ -30,6 +27,9 @@ class WindowsTTSEngine(TTSEngine):
 
     def getVoices(self):
         return self.tts.GetVoiceNames()
+
+    def getVoice(self):
+        return self.tts.GetVoice()
 
     def stop(self):
         self.tts.Stop()
@@ -47,7 +47,7 @@ def stopSpeaking():
 def setVoice(name):
     myro.globals.tts.setVoice(name)
 def getVoice():
-    return myro.globals.tts.name
+    return myro.globals.tts.getVoice()
 def getVoices():
     return myro.globals.tts.getVoices()
 def playSpeech(filename):
