@@ -29,7 +29,7 @@ class WindowsTTSEngine(TTSEngine):
         self.tts.SetVoiceByName(name) # For example, 'MSMary'
 
     def getVoices(self):
-        return pyTTS.sapi.Base.GetVoices()
+        return self.tts.GetVoiceNames()
 
     def stop(self):
         self.tts.Stop()
