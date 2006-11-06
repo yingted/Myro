@@ -1,11 +1,5 @@
 import myro.globals
 
-if myro.globals.tts != None:
-    try:
-        myro.globals.tts = WindowsTTSEngine()
-    except:
-        myro.globals.tts = TTSEngine()
-    
 class TTSEngine:
     def __init__(self, name = None):
         self.name = name
@@ -60,3 +54,10 @@ def playSpeech(filename):
     myro.globals.tts.playSpeech(filename)
 def saveSpeech(message, filename):
     myro.globals.tts.saveSpeech(message, filename)
+
+if myro.globals.tts == None:
+    try:
+        myro.globals.tts = WindowsTTSEngine()
+    except:
+        myro.globals.tts = TTSEngine()
+    

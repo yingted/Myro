@@ -13,6 +13,7 @@ __AUTHOR__   = "Doug Blank <dblank@cs.brynmawr.edu>"
 import sys, atexit, time, os, random
 import myro.globals
 from myro.media import *
+from myro.speech import *
 try:
     import Tkinter
     import tkFileDialog

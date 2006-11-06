@@ -5,6 +5,7 @@ simulator = None
 myropath  = None
 robot     = None
 gui       = None
+tts       = None
 setup     = 0
 mediaFolder = ""
 askData = {}
