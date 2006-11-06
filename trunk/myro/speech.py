@@ -1,26 +1,33 @@
 import myro.globals
 
 class TTSEngine:
-    def Speak(self, message, async = 1):
-        print message
+    def __init__(self, name = None, echo = 1):
+	self.name = name
+	self.echo = echo 
+    def speak(self, message, async = 1):
+	if self.echo:
+            print message
     def stop(self):
         pass
     def setVoice(self, name):
         pass
     def getVoice(self):
-        return None
+        return self.name
     def getVoices(sel):
         return []
 
 class WindowsTTSEngine(TTSEngine):
-    def __init__(self, name = None):
+    def __init__(self, name = None, echo = 1):
         import pyTTS
         self.tts = pyTTS.Create()
         if name != None:
             self.setVoice(name)
+	self.echo = echo
 
     def speak(self, message, async = 1):
         self.tts.Speak(message, async) # 0 is default, 1 is async
+	if self.echo:
+	    print message
 
     def setVoice(self, name):
         self.tts.SetVoiceByName(name) # For example, 'MSMary'
