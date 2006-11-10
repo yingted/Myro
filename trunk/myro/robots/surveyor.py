@@ -42,21 +42,9 @@ def bin2dec(binNum):
         pos -= 1
     return retval
 
-def hex2dec(hexNum):
-    v, h = hexNum.split('x')
-    values = {"0": 0, "1": 1, "2": 2, "3": 3, "4": 4,
-              "5": 5, "6": 6, "7": 7, "8": 8, "9": 9,
-              "A": 10, "B": 11, "C": 12, "D": 13,
-              "E": 14, "F": 15}
-    pos = len(h) - 1
-    retval = 0
-    for b in h:
-        retval += values[b.upper()] * (16 ** pos)
-        pos -= 1
-    return retval
-
 def encode(num):
-    return chr(bin2dec(dec2bin(num)))
+    if num >= 0: return chr(num)
+    else:        return chr(bin2dec(dec2bin(num)))
 
 def isTrue(value):
     """
@@ -70,6 +58,7 @@ def isTrue(value):
 
 class Surveyor(Robot):
     def __init__(self, serialport = None, baudrate = 115200):
+        Robot.__init__(self)
         self.debug = 0
         self._lastTranslate = 0
         self._lastRotate    = 0

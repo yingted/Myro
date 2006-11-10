@@ -6,7 +6,7 @@ Distributed under a Shared Source License
 """
 
 __REVISION__ = "$Revision$"
-__BUILD__    = "$Build: 6 $"
+__BUILD__    = "$Build: 7 $"
 __VERSION__  = "0.5." + __BUILD__.split()[1]
 __AUTHOR__   = "Doug Blank <dblank@cs.brynmawr.edu>"
 
@@ -22,6 +22,7 @@ except:
     Tkinter = None
 try:
     import tkSnack
+    tkSnack.initializeSnack(myro.globals.gui)
 except:
     tkSnack = None
 if Tkinter != None:
@@ -146,6 +147,20 @@ class Robot(object):
         """
         Base robot class.
         """
+        self.services = {}
+        if tkSnack:
+            self.addService("computer.audio", "type", "tksnack")
+        if Tkinter:
+            self.addService("computer.graphics", "type", "tkinter")
+        if myro.globals.tts:
+            self.addService("computer.text-to-speech", "type", str(myro.globals.tts))
+
+    def addService(self, name, attribute, value):
+        if name not in self.services.keys():
+            self.services[name] = {}
+        if attribute not in self.services[name]:
+            self.services[name][attribute] = []
+        self.services[name][attribute].append(value)
     
     def translate(self, amount):
         raise AttributeError, "this method needs to be written"
@@ -157,7 +172,34 @@ class Robot(object):
         raise AttributeError, "this method needs to be written"
 
     def beep(self, duration, frequency1, frequency2 = None):
-        raise AttributeError, "this method needs to be written"
+        if (tkSnack):
+            snd1 = tkSnack.Sound()
+            filt1 = tkSnack.Filter('generator', frequency1, 30000,
+                                   0.0, 'sine', int(11500*duration))
+            if frequency2 != None:
+                snd2 = tkSnack.Sound()
+                filt2 = tkSnack.Filter('generator', frequency2, 30000,
+                                       0.0, 'sine', int(11500*duration))
+                map2 = tkSnack.Filter('map', 1.0)
+                snd2.stop()
+                # blocking is choppy; sleep below
+                snd2.play(filter=filt2, blocking=0) 
+            snd1.stop()
+            # blocking is choppy; sleep below
+            map1 = tkSnack.Filter('map', 1.0)
+            snd1.play(filter=filt1, blocking=0)
+            start = time.time()
+            while time.time() - start < duration:
+                myro.globals.gui.update()
+                time.sleep(.001)
+        elif Tkinter:
+	    print "beep!"
+            myro.globals.gui.bell()            
+            time.sleep(duration)
+	else:
+	    print "beep!", chr(7)
+            time.sleep(duration)
+        time.sleep(.1) # simulated delay, like real robot
 
     def update(self):
         raise AttributeError, "this method needs to be written"
@@ -261,16 +303,16 @@ class Robot(object):
             self.beep(dur * wholeNoteDuration, freq1, freq2)
 
 from myro.robot.scribbler import Scribbler
+from myro.robot.surveyor import Surveyor
 
 class SimScribbler(Robot):
     def __init__(self, id = None):
+        Robot.__init__(self)
         import myro.simulator
         globalspath, filename = os.path.split(myro.globals.__file__)
         myro.globals.myropath, directory = os.path.split(globalspath)
         self._simulator = myro.simulator.INIT(
             os.path.join(myro.globals.myropath, "worlds", "MyroWorld"))
-        if (tkSnack):
-            tkSnack.initializeSnack(myro.globals.gui)
         for port in self._simulator.ports:
             print "Simulator starting listener on port", port, "..."
             thread = myro.simulator.Thread(self._simulator, port)
@@ -293,31 +335,6 @@ class SimScribbler(Robot):
         return self._clients[0].rotate(amount)
     def move(self, translate, rotate):
         return self._clients[0].move(translate, rotate)
-    def beep(self, duration, frequency1, frequency2 = None):
-        if (tkSnack):
-            snd1 = tkSnack.Sound()
-            filt1 = tkSnack.Filter('generator', frequency1, 30000,
-                                   0.0, 'sine', int(11500*duration))
-            if frequency2 != None:
-                snd2 = tkSnack.Sound()
-                filt2 = tkSnack.Filter('generator', frequency2, 30000,
-                                       0.0, 'sine', int(11500*duration))
-                map2 = tkSnack.Filter('map', 1.0)
-                snd2.stop()
-                # blocking is choppy; sleep below
-                snd2.play(filter=filt2, blocking=0) 
-            snd1.stop()
-            # blocking is choppy; sleep below
-            map1 = tkSnack.Filter('map', 1.0)
-            snd1.play(filter=filt1, blocking=0)
-            start = time.time()
-            while time.time() - start < duration:
-                myro.globals.gui.update()
-                time.sleep(.001)
-	else:
-	    print chr(7)
-            time.sleep(duration)
-        time.sleep(.1) # simulated delay, like real robot
     def update(self):
         return self._clients[0].update()
     def get(self, sensor = "all", *positions):
@@ -378,6 +395,16 @@ class SimScribbler(Robot):
         else:
             raise ("invalid set item name: '%s'" % item)
 
+class Computer(Robot):
+    def __init__(self):
+        Robot.__init__(self)
+        if tkSnack:
+            self.addService("audio", "type", "tksnack")
+    def move(self, translate, rotate):
+        print "move(%f, %f)" % (translate, rotate)
+
+computer = Computer()
+
 # functions:
 def _cleanup():
     if myro.globals.robot != None:
@@ -393,9 +420,10 @@ if not myro.globals.setup:
     atexit.register(_cleanup)
     # Ok, now we're ready!
     print >> sys.stderr, "Myro, (c) 2006 Institute for Personal Robots in Education"
+    print >> sys.stderr, "[See http://www.roboteducation.org/ for more information]"
     print >> sys.stderr, "Version %s, Revision %s, ready!" % (__VERSION__, __REVISION__.split()[1])
 
-## Non-object interface:
+## Functional interface:
 
 def initialize(id = None):
     global robot

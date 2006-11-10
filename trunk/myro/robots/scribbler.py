@@ -58,6 +58,13 @@ class Scribbler(Robot):
     NAME_LENGTH=8
     
     def __init__(self, serialport = None, baudrate = 38400):
+        Robot.__init__(self)
+        self.addService("audio", "onboard")
+        self.addService("sensor.stall", "digital")
+        self.addService("sensor.ir", "digital")
+        self.addService("sensor.light", "analog")
+        self.addService("sensor.line", "digital")
+        self.addService("movement", "continuous", "2d")
         self.debug = 0
         self._lastTranslate = 0
         self._lastRotate    = 0
