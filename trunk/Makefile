@@ -5,7 +5,7 @@ compile: clean
 	python -c 'import compileall; compileall.compile_dir("myro")'
 
 zip: clean
-	zip -r myro.zip myro -x myro/CVS/ myro/*/CVS/ myro/CVS/* myro/*/CVS/*
+	zip -r myro.zip *.py myro -x myro/CVS/ myro/*/CVS/ myro/CVS/* myro/*/CVS/*
 
 build: zip
 	mkdir -p ../html/myro/
@@ -18,6 +18,7 @@ build: zip
 clean:
 	rm -f `find | grep "~$$"`
 	rm -f `find | grep "\.pyc$$"`
+	rm -f `find | grep "^\.\#"`
 	rm -f myro.zip
 
 install: compile
