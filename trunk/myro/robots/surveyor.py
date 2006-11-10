@@ -56,7 +56,7 @@ def hex2dec(hexNum):
     return retval
 
 def encode(num):
-    return chr(hex2dec(hex(bin2dec(dec2bin(num)))))
+    return chr(bin2dec(dec2bin(num)))
 
 def isTrue(value):
     """
@@ -104,7 +104,7 @@ class Surveyor(Robot):
             self.ser.flushOutput()
             self.ser.flushInput()
             self._write("F") # turn off failsafe
-            self._check("#F")
+            self._write("m") # wander mode, non-autonomous movement
 
     def close(self):
         self.ser.close()
@@ -247,11 +247,32 @@ class Surveyor(Robot):
         rightPower = right * 100.0
         self._set_motors(leftPower, rightPower)
 
-    def _check(self, cmd):
-        pass
-        
     def _write(self, message):
         self.ser.write(message + "\n")
+        data = None
+        if message[0] == 'S':
+            header = self.ser.read(9)
+            data   = self.ser.read(160)
+            newline   = self.ser.read(1)
+            retval = [0 for x in range(80)]
+            for i in range(len(retval)):
+                retval[i] = int(data[i * 2:i * 2 + 2])/63.0
+            return retval
+        elif message[0] == 'I':
+            header = self.ser.read(10)
+            resolution = header[5] # 1, 3, 5
+            length = (ord(header[6]) * 256 ** 0 +
+                      ord(header[7]) * 256 ** 1 +
+                      ord(header[8]) * 256 ** 2 +
+                      ord(header[9]) * 256 ** 3)
+            data   = self.ser.read(length)
+            return data
+        else:
+            ack = self.ser.read(2)
+            if ack != "#" + message[0]:
+                print "check error:", message, ack
+                return 0
+            return 1
 
     def _set(self, value, subvalues = []):
         rawdata = [value]
@@ -275,7 +296,4 @@ class Surveyor(Robot):
     def _set_motors(self, motor_left, motor_right):
         ml = int(min(max(motor_left, -100), 100))
         mr = int(min(max(motor_right, -100), 100))
-        print "set motors", ml, mr
         self._write("M" + encode(ml) + encode(mr) + chr(0))
-        self._check("#M")
-
