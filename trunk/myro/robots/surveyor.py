@@ -12,6 +12,12 @@ import serial, time, string
 from myro import Robot, ask
 import myro.globals
 
+def ascii(vec):
+    retval = ""
+    for v in vec:
+        retval += "0123456789#"[int(v * 10)]
+    return retval
+
 def dec2bin(num, bits = 8):
     neg = 0
     if num < 0: # two's complement
@@ -73,6 +79,7 @@ class Surveyor(Robot):
 	        serialport = r'\\.\COM%d' % (portnum + 1)
         self.serialPort = serialport
         self.baudRate = baudrate
+        self.id = None
         self.open()
         self.restart()
         myro.globals.robot = self
@@ -92,8 +99,10 @@ class Surveyor(Robot):
             self.ser.baudrate = self.baudRate
             self.ser.flushOutput()
             self.ser.flushInput()
-            self._write("F") # turn off failsafe
-            self._write("m") # wander mode, non-autonomous movement
+        self._write("F") # turn off failsafe
+        self._write("m") # samples ground for scans
+        self._write("5") # stop
+        self.setCameraResolution((80, 64))
 
     def close(self):
         self.ser.close()
@@ -104,54 +113,27 @@ class Surveyor(Robot):
 
     def get(self, sensor = "all", *position):
         sensor = sensor.lower()
-        if sensor == "stall":
-            return self._get(Scribbler.GET_STALL)
-        elif sensor == "startsong":
-            #TODO
-            return "tada"
-        elif sensor == "name":
-            self._write_long([Scribbler.GET_NAME])
-            c = self.ser.read(Scribbler.NAME_LENGTH)        
-            self._check(Scribbler.GET_NAME)
-            c = c.replace("\x00", "")
-            return c
-        elif sensor == "volume":
-            return self._volume
+        if sensor == "name":
+            return self.name
+        elif sensor == "version":
+            return self.getVersion()
+        elif sensor == "cameraresolution":
+            return self.cameraResolution
         else:
             retvals = []
             if len(position) == 0:
-                if sensor == "light":
-                    return self._get(Scribbler.GET_LIGHT_ALL, 6, "word")
-                elif sensor == "ir":
-                    return self._get(Scribbler.GET_IR_ALL, 2)
-                elif sensor == "line":
-                    return self._get(Scribbler.GET_LINE_ALL, 2)
-                elif sensor == "all":
-                    retval = self._get(Scribbler.GET_ALL, 11) # returned as bytes
-                    return {"light": [retval[2] << 8 | retval[3], retval[4] << 8 | retval[5], retval[6] << 8 | retval[7]],
-                            "ir": [retval[0], retval[1]], "line": [retval[8], retval[9]], "stall": retval[10]}
+                if sensor == "scan":
+                    return self._write("S")
+                elif sensor == "cameraimage":
+                    return self._write("I")
                 else:
                     raise ("invalid sensor name: '%s'" % sensor)
-            for pos in position:
-                if sensor == "light":
-                    if pos in [0, "left"]:
-                        retvals.append(self._get(Scribbler.GET_LIGHT_LEFT, 2, "word"))
-                    elif pos in [1, "middle", "center"]:
-                        retvals.append(self._get(Scribbler.GET_LIGHT_CENTER, 2, "word"))
-                    elif pos in [2, "right"]:
-                        retvals.append(self._get(Scribbler.GET_LIGHT_RIGHT, 2, "word"))
-                elif sensor == "ir":
-                    if pos in [0, "left"]:
-                        retvals.append(self._get(Scribbler.GET_OPEN_LEFT))
-                    elif pos in [1, "right"]:
-                        retvals.append(self._get(Scribbler.GET_OPEN_RIGHT))
-                elif sensor == "line":
-                    if pos in [0, "left"]:
-                        retvals.append(self._get(Scribbler.GET_LINE_LEFT))
-                    elif pos in [1, "right"]:
-                        retvals.append(self._get(Scribbler.GET_LINE_RIGHT))
-                else:
-                    raise ("invalid sensor name: '%s'" % sensor)
+            if sensor == "scan":
+                data = self._write("S")
+                for pos in position:
+                    retvals.append(data[pos])
+            else:
+                raise ("invalid sensor name: '%s'" % sensor)
             if len(retvals) == 1:
                 return retvals[0]
             else:
@@ -159,57 +141,18 @@ class Surveyor(Robot):
 
     def set(self, item, position, value = None):
         item = item.lower()
-        if item == "led":
-            if type(position) in [int, float]:
-                if position == 0:
-                    if isTrue(value): return self._set(Scribbler.SET_LED_LEFT_ON)
-                    else:             return self._set(Scribbler.SET_LED_LEFT_OFF)
-                elif position == 1:
-                    if isTrue(value): return self._set(Scribbler.SET_LED_CENTER_ON)
-                    else:             return self._set(Scribbler.SET_LED_CENTER_OFF)
-                elif position == 2:
-                    if isTrue(value): return self._set(Scribbler.SET_LED_RIGHT_ON)
-                    else:             return self._set(Scribbler.SET_LED_CENTER_OFF)
-                else:
-                    raise AttributeError, "no such LED: '%s'" % position
-            else:
-                position = position.lower()
-                if position == "center":
-                    if isTrue(value): return self._set(Scribbler.SET_LED_CENTER_ON)
-                    else:             return self._set(Scribbler.SET_LED_CENTER_OF)
-                elif position == "left":
-                    if isTrue(value): return self._set(Scribbler.SET_LED_LEFT_ON)
-                    else:             return self._set(Scribbler.SET_LED_LEFT_OFF)
-                elif position == "right":
-                    if isTrue(value): return self._set(Scribbler.SET_LED_RIGHT_ON)
-                    else:             return self._set(Scribbler.SET_LED_RIGHT_OFF)
-                elif position == "all":
-                    if isTrue(value): return self._set(Scribbler.SET_LED_ALL_ON)
-                    else:             return self._set(Scribbler.SET_LED_ALL_OFF)
-                else:
-                    raise AttributeError, "no such LED: '%s'" % position
-            return "ok"
-        elif item == "name":
+        if item == "name":
             name = position[:8].strip()
-            name_raw = map(lambda x:  ord(x), name)
-            self._set(Scribbler.SET_NAME, name_raw)
+            self.name = name
             return "ok"
-        elif item == "volume":
-            if isTrue(position):
-                self._volume = 1
-                return self._set(Scribbler.SET_LOUD)
-            else:
-                self._volume = 0
-                return self._set(Scribbler.SET_QUIET)
-            return "ok"
-        elif item == "startsong":
-            self.startsong = position
+        elif item == "cameraresolution":
+            self.setCameraResolution(position)
             return "ok"
         else:
             raise ("invalid set item name: '%s'" % item)
 
     def stop(self):
-        return self.move(0, 0)
+        return self._write("5") # stop
 
     def translate(self, amount):
         self._lastTranslate = amount
@@ -226,6 +169,38 @@ class Surveyor(Robot):
 
     def update(self):
         pass
+
+    def getVersion(self):
+        return self._write("V")
+
+    def setCameraResolution(self, mode = (80, 64)): 
+        if mode == (80, 64):
+            self._write("a")
+        elif mode == (160,128):
+            self._write("b")
+        elif mode == (320,240):
+            self._write("c")
+        else:
+            raise AttributeError, ("invalid camera resolution:" + mode)
+        self.cameraResolution = mode
+        return "ok"
+
+    def setSwarmMode(self, mode):
+        if mode:
+            self._write("r") # swarm mode
+        else:
+            self._write("m") # reset ground, non-autonomous movement
+        self.swarmMode = mode
+
+    def sampleGroundColor(self):
+        self._write("m") # samples background for obstacle detection
+        return "ok"
+
+    def getScan(self):
+        return self._write("S")
+
+    def getCameraImage(self):
+        return self._write("I")
 
 ####################### Private
 
@@ -247,6 +222,9 @@ class Surveyor(Robot):
             for i in range(len(retval)):
                 retval[i] = int(data[i * 2:i * 2 + 2])/63.0
             return retval
+        elif message[0] in ['r', 'R']:
+            header = self.ser.readline()
+            self.id = header[3] + header[4]
         elif message[0] == 'I':
             header = self.ser.read(10)
             resolution = header[5] # 1, 3, 5
@@ -256,10 +234,12 @@ class Surveyor(Robot):
                       ord(header[9]) * 256 ** 3)
             data   = self.ser.read(length)
             return data
+        elif message[0] == 'V':
+            return self.ser.readline()[12:].strip()
         else:
             ack = self.ser.read(2)
             if ack != "#" + message[0]:
-                print "check error:", message, ack
+                print "error:", message, ack
                 return 0
             return 1
 
