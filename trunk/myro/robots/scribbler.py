@@ -59,12 +59,12 @@ class Scribbler(Robot):
     
     def __init__(self, serialport = None, baudrate = 38400):
         Robot.__init__(self)
-        self.addService("audio", "onboard")
-        self.addService("sensor.stall", "digital")
-        self.addService("sensor.ir", "digital")
-        self.addService("sensor.light", "analog")
-        self.addService("sensor.line", "digital")
-        self.addService("movement", "continuous", "2d")
+        self.addService("audio", "type", "onboard")
+        self.addService("sensor.stall", "type", "digital")
+        self.addService("sensor.ir", "type", "digital")
+        self.addService("sensor.light", "type", "analog")
+        self.addService("sensor.line", "type", "digital")
+        self.addService("movement", "type", "2d")
         self.debug = 0
         self._lastTranslate = 0
         self._lastRotate    = 0
