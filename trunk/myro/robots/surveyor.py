@@ -97,12 +97,12 @@ class Surveyor(Robot):
                     print "Waiting on port..."
                     time.sleep(1)
             self.ser.baudrate = self.baudRate
-            self.ser.flushOutput()
-            self.ser.flushInput()
-        self._write("F") # turn off failsafe
-        self._write("m") # samples ground for scans
-        self._write("5") # stop
-        self.setCameraResolution((80, 64))
+        self.ser.flushOutput()
+        self.ser.flushInput()
+        self.stop() 
+        self._send("F") # turn off failsafe
+        self._send("m") # disable automovement, samples ground for scans
+        self.setCameraResolution((160,128)) # this resolution allows scans
 
     def close(self):
         self.ser.close()
@@ -123,13 +123,13 @@ class Surveyor(Robot):
             retvals = []
             if len(position) == 0:
                 if sensor == "scan":
-                    return self._write("S")
+                    return self._send("S")
                 elif sensor == "cameraimage":
-                    return self._write("I")
+                    return self._send("I")
                 else:
                     raise ("invalid sensor name: '%s'" % sensor)
             if sensor == "scan":
-                data = self._write("S")
+                data = self._send("S")
                 for pos in position:
                     retvals.append(data[pos])
             else:
@@ -152,7 +152,9 @@ class Surveyor(Robot):
             raise ("invalid set item name: '%s'" % item)
 
     def stop(self):
-        return self._write("5") # stop
+        self._lastTranslate = 0
+        self._lastRotate = 0
+        self._send("5") # stop; faster than move(0,0)
 
     def translate(self, amount):
         self._lastTranslate = amount
@@ -171,15 +173,15 @@ class Surveyor(Robot):
         pass
 
     def getVersion(self):
-        return self._write("V")
+        return self._send("V")
 
     def setCameraResolution(self, mode = (80, 64)): 
         if mode == (80, 64):
-            self._write("a")
+            self._send("a")
         elif mode == (160,128):
-            self._write("b")
+            self._send("b")
         elif mode == (320,240):
-            self._write("c")
+            self._send("c")
         else:
             raise AttributeError, ("invalid camera resolution:" + mode)
         self.cameraResolution = mode
@@ -187,20 +189,20 @@ class Surveyor(Robot):
 
     def setSwarmMode(self, mode):
         if mode:
-            self._write("r") # swarm mode
+            self._send("r") # swarm mode
         else:
-            self._write("m") # reset ground, non-autonomous movement
+            self._send("m") # reset ground, non-autonomous movement
         self.swarmMode = mode
 
     def sampleGroundColor(self):
-        self._write("m") # samples background for obstacle detection
+        self._send("m") # samples background for obstacle detection
         return "ok"
 
     def getScan(self):
-        return self._write("S")
+        return self._send("S")
 
     def getCameraImage(self):
-        return self._write("I")
+        return self._send("I")
 
 ####################### Private
 
@@ -211,7 +213,7 @@ class Surveyor(Robot):
         rightPower = right * 100.0
         self._set_motors(leftPower, rightPower)
 
-    def _write(self, message):
+    def _send(self, message):
         self.ser.write(message + "\n")
         data = None
         if message[0] == 'S':
@@ -243,26 +245,7 @@ class Surveyor(Robot):
                 return 0
             return 1
 
-    def _set(self, value, subvalues = []):
-        rawdata = [value]
-        rawdata.extend(subvalues)
-        if self.debug: print "new set():", rawdata
-        self._write_long(rawdata)
-        return self._check(value)
-
-    def _get(self, value, bytes = 1, mode = "byte"):
-        self._write_long([value])
-        retval = self._read(bytes)
-        self._check(value)
-	if mode == "byte":
-            return retval
-	elif mode == "word":
-	    newRetval = []
-	    for p in range(0,len(retval),2):
-	        newRetval.append(retval[p] << 8 | retval[p + 1])
-	    return newRetval
-
     def _set_motors(self, motor_left, motor_right):
         ml = int(min(max(motor_left, -100), 100))
         mr = int(min(max(motor_right, -100), 100))
-        self._write("M" + encode(ml) + encode(mr) + chr(0))
+        self._send("M" + encode(ml) + encode(mr) + chr(0))
