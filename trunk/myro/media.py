@@ -57,6 +57,7 @@ __VERSION__ = "$Revision$ "
 __AUTHOR__  = "Doug Blank <dblank@cs.brynmawr.edu>"
 
 _frequency = {
+              "rest":     0,
               "pause":    0,
               "a0":   27.50,
               "a#0":   29.14,

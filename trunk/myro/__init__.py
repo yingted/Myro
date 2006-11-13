@@ -20,11 +20,6 @@ try:
     import tkColorChooser
 except:
     Tkinter = None
-try:
-    import tkSnack
-    tkSnack.initializeSnack(myro.globals.gui)
-except:
-    tkSnack = None
 if Tkinter != None:
     from myro.widgets import AskDialog
     try:
@@ -32,6 +27,11 @@ if Tkinter != None:
         myro.globals.gui.withdraw()
     except:
         Tkinter = None
+try:
+    import tkSnack
+    tkSnack.initializeSnack(myro.globals.gui)
+except:
+    tkSnack = None
 
 def wait(seconds):
     """
