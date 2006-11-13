@@ -11,6 +11,9 @@ __AUTHOR__   = "Doug"
 import serial, time, string
 from myro import Robot, ask
 import myro.globals
+import StringIO
+import ImageTk, Tkinter
+from PIL import Image
 
 def ascii(vec):
     retval = ""
@@ -79,10 +82,17 @@ class Surveyor(Robot):
 	        serialport = r'\\.\COM%d' % (portnum + 1)
         self.serialPort = serialport
         self.baudRate = baudrate
+        self.canvas = None
+        self.window = None
         self.id = None
-        self.open()
         self.restart()
         myro.globals.robot = self
+
+    def watch(self):
+        self.window = Tkinter.Toplevel(myro.globals.gui)
+        self.window.wm_title("SRV-1 View (%dx%d)" % self.resolution)
+        self.canvas = Tkinter.Canvas(self.window, width = 160, height = 128)
+        self.canvas.pack(fill="both", expand="y")
 
     def open(self):
         if myro.globals.robot != None:
@@ -102,13 +112,13 @@ class Surveyor(Robot):
         self.stop() 
         self._send("F") # turn off failsafe
         self._send("m") # disable automovement, samples ground for scans
-        self.setCameraResolution((160,128)) # this resolution allows scans
+        self.setResolution((160,128)) # this resolution allows scans
 
     def close(self):
         self.ser.close()
 
     def restart(self):
-        self.stop()
+        self.open()
         print "Hello, I'm Surveyor!"
 
     def get(self, sensor = "all", *position):
@@ -116,20 +126,35 @@ class Surveyor(Robot):
         if sensor == "name":
             return self.name
         elif sensor == "version":
-            return self.getVersion()
-        elif sensor == "cameraresolution":
-            return self.cameraResolution
+            return self._send("V")
+        elif sensor == "resolution":
+            return self.resolution
         else:
             retvals = []
             if len(position) == 0:
                 if sensor == "scan":
-                    return self._send("S")
-                elif sensor == "cameraimage":
-                    return self._send("I")
+                    retval = self._send("S")
+                    if self.canvas != None:
+                        self.canvas.delete("scan")
+                        c = 0
+                        for s in retval:
+                            self.canvas.create_line(c, self.resolution[1],
+                                                    c, self.resolution[1] - s * self.resolution[1],
+                                                    fill="yellow", tag="scan")
+                            c += 2
+                    return retval
+                elif sensor == "image":
+                    return self.getImage()
+                elif sensor == "ir":
+                    return self._send("B")
                 else:
                     raise ("invalid sensor name: '%s'" % sensor)
             if sensor == "scan":
                 data = self._send("S")
+                for pos in position:
+                    retvals.append(data[pos])
+            elif sensor == "ir":
+                data = self._send("B")
                 for pos in position:
                     retvals.append(data[pos])
             else:
@@ -145,8 +170,8 @@ class Surveyor(Robot):
             name = position[:8].strip()
             self.name = name
             return "ok"
-        elif item == "cameraresolution":
-            self.setCameraResolution(position)
+        elif item == "resolution":
+            self.setResolution(position)
             return "ok"
         else:
             raise ("invalid set item name: '%s'" % item)
@@ -172,19 +197,16 @@ class Surveyor(Robot):
     def update(self):
         pass
 
-    def getVersion(self):
-        return self._send("V")
-
-    def setCameraResolution(self, mode = (80, 64)): 
+    def setResolution(self, mode = (160, 128)): 
         if mode == (80, 64):
-            self._send("a")
+            self._send("a") # no scans available in this mode
         elif mode == (160,128):
             self._send("b")
         elif mode == (320,240):
-            self._send("c")
+            self._send("c") # no scans available in this mode
         else:
-            raise AttributeError, ("invalid camera resolution:" + mode)
-        self.cameraResolution = mode
+            raise AttributeError, ("invalid camera resolution:" + str(mode))
+        self.resolution = mode
         return "ok"
 
     def setSwarmMode(self, mode):
@@ -198,11 +220,20 @@ class Surveyor(Robot):
         self._send("m") # samples background for obstacle detection
         return "ok"
 
-    def getScan(self):
-        return self._send("S")
+    def getScan(self, *position): # because this isn't in Robot class
+        return self.get("scan", *position)
 
-    def getCameraImage(self):
-        return self._send("I")
+    def getImage(self): # because this isn't in Robot class
+        i = self._send("I")
+        if self.canvas != None:
+            try:
+                fileThing = StringIO.StringIO(i)
+                self.im = Image.open(fileThing)
+                self.image = ImageTk.PhotoImage(self.im)
+                self.canvas.create_image(80, 64, image = self.image)
+            except:
+                pass
+        return i
 
 ####################### Private
 
@@ -227,21 +258,38 @@ class Surveyor(Robot):
         elif message[0] in ['r', 'R']:
             header = self.ser.readline()
             self.id = header[3] + header[4]
+        elif message[0] == 'B':
+            try:
+                header = self.ser.read(13)
+                data = self.ser.readline()
+                retval = {"front": int(data[0:8].strip(), 16)/255.0,
+                          "left": int(data[8:16].strip(), 16)/255.0,
+                          "back": int(data[16:24].strip(), 16)/255.0,
+                          "right": int(data[24:32].strip(), 16)/255.0}
+            except:
+                retval = None
+            return retval
         elif message[0] == 'I':
-            header = self.ser.read(10)
-            resolution = header[5] # 1, 3, 5
-            length = (ord(header[6]) * 256 ** 0 +
-                      ord(header[7]) * 256 ** 1 +
-                      ord(header[8]) * 256 ** 2 +
-                      ord(header[9]) * 256 ** 3)
-            data   = self.ser.read(length)
+            try:
+                header = self.ser.read(10)
+                resolution = header[5] # 1, 3, 5
+                length = (ord(header[6]) * 256 ** 0 +
+                          ord(header[7]) * 256 ** 1 +
+                          ord(header[8]) * 256 ** 2 +
+                          ord(header[9]) * 256 ** 3)
+                data   = self.ser.read(length)
+                if len(data) != length:
+                    raise ValueError, "invalid image data"
+            except:
+                print "camera image error"
+                data = None
             return data
         elif message[0] == 'V':
             return self.ser.readline()[12:].strip()
         else:
             ack = self.ser.read(2)
             if ack != "#" + message[0]:
-                print "error:", message, ack
+                print "error reading data:", message, ack
                 return 0
             return 1
 

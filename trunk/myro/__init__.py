@@ -6,7 +6,7 @@ Distributed under a Shared Source License
 """
 
 __REVISION__ = "$Revision$"
-__BUILD__    = "$Build: 7 $"
+__BUILD__    = "$Build: 8 $"
 __VERSION__  = "0.5." + __BUILD__.split()[1]
 __AUTHOR__   = "Doug Blank <dblank@cs.brynmawr.edu>"
 
@@ -206,14 +206,17 @@ class Robot(object):
 
 ### The rest of these methods are just rearrangements of the above
 
+    def getVersion(self):
+        return self.get("version")
+
     def getLight(self, *position):
-        return self.get("light", position)
+        return self.get("light", *position)
 
     def getIR(self, *position):
-        return self.get("ir", position)
+        return self.get("ir", *position)
 
     def getLine(self, *position):
-        return self.get("line", position)
+        return self.get("line", *position)
 
     def getStall(self):
         return self.get("stall")
@@ -457,12 +460,14 @@ def closeConnection():
     return myro.globals.robot.close()
 def get(sensor = "all", *pos):
     return myro.globals.robot.get(sensor, *pos)
+def getVersion():
+    return myro.globals.robot.get("version")
 def getLight(*pos):
-    return myro.globals.robot.get("light", pos)
+    return myro.globals.robot.get("light", *pos)
 def getIR(*pos):
-    return myro.globals.robot.get("ir", pos)
+    return myro.globals.robot.get("ir", *pos)
 def getLine(*pos):
-    return myro.globals.robot.get("line", pos)
+    return myro.globals.robot.get("line", *pos)
 def getStall():
     return myro.globals.robot.get("stall")
 def getAll():

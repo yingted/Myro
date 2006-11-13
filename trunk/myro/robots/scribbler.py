@@ -142,8 +142,11 @@ class Scribbler(Robot):
         if sensor == "stall":
             return self._get(Scribbler.GET_STALL)
         elif sensor == "startsong":
-            #TODO
+            #TODO: need to get this from flash memory
             return "tada"
+        elif sensor == "version":
+            #TODO: just return this version for now; get from flash
+            return __REVISION__.split()[1]
         elif sensor == "name":
             self._write_long([Scribbler.GET_NAME])
             c = self.ser.read(Scribbler.NAME_LENGTH)        
