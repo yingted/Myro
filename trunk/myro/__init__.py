@@ -148,11 +148,11 @@ class Robot(object):
         Base robot class.
         """
         self.services = {}
-        if tkSnack:
+        if tkSnack != None:
             self.addService("computer.audio", "type", "tksnack")
-        if Tkinter:
+        if Tkinter != None:
             self.addService("computer.graphics", "type", "tkinter")
-        if myro.globals.tts:
+        if myro.globals.tts != None:
             self.addService("computer.text-to-speech", "type", str(myro.globals.tts))
 
     def addService(self, name, attribute, value):
@@ -172,7 +172,7 @@ class Robot(object):
         raise AttributeError, "this method needs to be written"
 
     def beep(self, duration, frequency1, frequency2 = None):
-        if (tkSnack):
+        if tkSnack != None:
             snd1 = tkSnack.Sound()
             filt1 = tkSnack.Filter('generator', frequency1, 30000,
                                    0.0, 'sine', int(11500*duration))
@@ -192,8 +192,7 @@ class Robot(object):
             while time.time() - start < duration:
                 myro.globals.gui.update()
                 time.sleep(.001)
-        elif Tkinter:
-	    print "beep!"
+        elif Tkinter != None:
             myro.globals.gui.bell()            
             time.sleep(duration)
 	else:

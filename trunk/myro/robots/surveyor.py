@@ -248,12 +248,15 @@ class Surveyor(Robot):
         self.ser.write(message + "\n")
         data = None
         if message[0] == 'S':
-            header = self.ser.read(9)
-            data   = self.ser.read(160)
-            newline   = self.ser.read(1)
-            retval = [0 for x in range(80)]
-            for i in range(len(retval)):
-                retval[i] = int(data[i * 2:i * 2 + 2])/63.0
+            try:
+                header = self.ser.read(9)
+                data   = self.ser.read(160)
+                newline   = self.ser.read(1)
+                retval = [0 for x in range(80)]
+                for i in range(len(retval)):
+                    retval[i] = int(data[i * 2:i * 2 + 2])/63.0
+            except:
+                retval = None
             return retval
         elif message[0] in ['r', 'R']:
             header = self.ser.readline()

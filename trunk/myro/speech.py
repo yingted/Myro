@@ -66,5 +66,5 @@ if myro.globals.tts == None:
     try:
         myro.globals.tts = WindowsTTSEngine()
     except:
-        myro.globals.tts = TTSEngine()
+        myro.globals.tts = None
     
