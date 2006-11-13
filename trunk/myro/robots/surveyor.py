@@ -12,8 +12,13 @@ import serial, time, string
 from myro import Robot, ask
 import myro.globals
 import StringIO
-import ImageTk, Tkinter
-from PIL import Image
+import Tkinter
+try:
+    import ImageTk
+    from PIL import Image
+except:
+    ImageTk = None
+    Image = None
 
 def ascii(vec):
     retval = ""
@@ -225,7 +230,7 @@ class Surveyor(Robot):
 
     def getImage(self): # because this isn't in Robot class
         i = self._send("I")
-        if self.canvas != None:
+        if self.canvas != None and ImageTk != None and Image != None:
             try:
                 fileThing = StringIO.StringIO(i)
                 self.im = Image.open(fileThing)
