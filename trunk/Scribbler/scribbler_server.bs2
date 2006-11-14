@@ -19,16 +19,16 @@ DATA          "Scribby"
 '   Messages to robot are a constant 9 bytes long.  Messages from robot are
 '   variable length depending on the message type.  See below for details.
 '
-'   When the robot sees no data on its serial port for TIMEOUT length of time,
-'   it sends its name preceded by "IPRE".  This allows the PC to find it and
-'   connect.
+'   On startup, the robot repeatedly sends its name preceded by "IPRE" every
+'   'TIMEOUT' milliseconds.  This allows the PC to find it and connect.  After
+'   the scribbler receives a command, this name broadcasting stops.
 '
 '   All "SET" messages have a return type of "GET_ALL_BINARY".
 '
 ' Messages TO robot:
 '   The first byte is the message type
 '   The next bytes are the command data (if any)
-'   The rest of the message is filled with null characters up until a total of 9 bytes.
+'   The rest of the message is filled with null characters until a total of 9 bytes.
 '
 ' Messages FROM robot:
 '   The first bytes are the message data
@@ -37,6 +37,9 @@ DATA          "Scribby"
 '     If the message is a SET type message, the binary state of the robot is sent
 '
 ''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+' NOTE: be carefull, message numbers are out of order!
+
 GET_STATE          CON 1  ' Response: inPins outPins 1, Notes: inPins is the state of all the input pins (0-7), and outPins is the state of all the output pins (8-15) as defined in the I/O Pin Declarations.
 GET_OPEN_LEFT      CON 2  ' Response: leftIR 2, Notes: leftIR is 1 when there is no obstacle to the left of robot
 GET_OPEN_RIGHT     CON 3
@@ -68,8 +71,11 @@ SET_LED_ALL_ON     CON 31
 SET_LED_ALL_OFF    CON 32
 SET_LOUD           CON 37
 SET_QUIET          CON 38
+SET_LED_ALL        CON 40 ' Format: 40 LeftLEDstate CenterLEDstate RightLEDstate 0 0 0 0 0
 
-TIMEOUT            CON 1000 ' in ms
+SOFT_RESET         CON 41 ' Format: 41 0 0 0 0 0 0 0 0, Notes: Performs a software reset of robot.  (turns name broadcast back on)
+
+TIMEOUT            CON 1000 ' in ms.  How often to broadcast name
 PACKET_LENGTH      CON 9
 NAME_LENGTH        CON 8
 
@@ -100,6 +106,31 @@ ObsTxLeftPin     PIN 15
 SerialPin        CON 16
 
 
+'''''''''''''''''''''''''''''
+' Global Variables
+'''''''''''''''''''''''''''''
+name     VAR Byte(NAME_LENGTH)
+inCmd    VAR Byte(PACKET_LENGTH)
+quiet    VAR Bit
+sendName VAR Bit
+
+
+'''''''''''''''''''''''''''''
+' Temp Variables
+'''''''''''''''''''''''''''''
+var1    VAR Word
+var2    VAR Word
+var3    VAR Word
+temp    VAR Byte
+temp2   VAR Byte
+
+
+'''''''''''''''''''''''''''''''''''
+' Software reset start location
+'''''''''''''''''''''''''''''''''''
+SoftwareReset:
+
+
 ''''''''''''''''''''''''''
 ' I/O Initialization
 ''''''''''''''''''''''''''
@@ -117,33 +148,21 @@ LOW ObsTxRightPin
 LOW ObsTxLeftPin
 
 
-'''''''''''''''''''''''''
-' Global Variables
-'''''''''''''''''''''''''
-var1    VAR Word
-var2    VAR Word
-var3    VAR Word
-
-name    VAR Byte(NAME_LENGTH)
-inCmd   VAR Byte(PACKET_LENGTH)
-temp    VAR Byte
-temp2   VAR Byte
-quiet   VAR Byte
-
-
-
-''''''''''''''''''''''''''
+''''''''''''''''''''''''''''''
 ' Variable Initialization
-''''''''''''''''''''''''''
-
+''''''''''''''''''''''''''''''
 inCmd(PACKET_LENGTH-1) = 0
 quiet = 0
+sendName = 1
 
 FOR temp = 0 TO NAME_LENGTH - 1
   READ temp, name(temp)
 NEXT
 
-'Turn on chirp
+
+''''''''''''''''''''''''''''''
+' Turn on chirp
+''''''''''''''''''''''''''''''
 PAUSE 50
 HIGH LedLeftPin
 FREQOUT SpeakerPin, 40, 780
@@ -166,15 +185,16 @@ INIT:
   IF (LedCenterPin = 1) THEN LedCenterPin = 0 ELSE LedCenterPin = 1
 
   ' Send characteristic string and name
-  SEROUT SerialPin, BAUD, ["IPRE", STR name, 0]
+  IF (sendName = 1) THEN SEROUT SerialPin, BAUD, ["IPRE", STR name, 0]
 
 BEGIN:
   SERIN SerialPin, BAUD, TIMEOUT, INIT, [STR inCmd\PACKET_LENGTH]
-  LOOKDOWN inCmd(0), = [GET_STATE, GET_LINE_RIGHT, GET_LINE_LEFT, GET_LIGHT_LEFT, GET_LIGHT_CENTER, GET_LIGHT_RIGHT,  GET_OPEN_LEFT, GET_OPEN_RIGHT, GET_Stall, GET_NAME, SET_MOTORS_OFF, SET_MOTORS, SET_Speaker, SET_Speaker_2, SET_LED_LEFT_ON, SET_LED_LEFT_OFF, SET_LED_CENTER_ON, SET_LED_CENTER_OFF, SET_LED_RIGHT_ON, SET_LED_RIGHT_OFF, SET_NAME, SET_LED_ALL_ON, SET_LED_ALL_OFF, GET_LIGHT_ALL, GET_IR_ALL, GET_LINE_ALL, GET_ALL, SET_LOUD, SET_QUIET, GET_ALL_BINARY], temp
-  BRANCH temp,         [GetState,  GetLineRight,   GetLineLeft,   GetLightLeft,   GetLightCenter,   GetLightRight,    GetObsLeft,    GetObsRight,    GetStall,  GetName,  MotorsOff,      Motors,     SetSpeaker,  SetSpeaker2,   OnLeftLED,       OffLeftLED,       OnCenterLED,       OffCenterLED,       OnRightLED,       OffRightLED,       SetName,  OnAllLED,       OffAllLED,       GetLightAll,   GetIRAll,   GetLineAll,   GetAll,  SetLoud,  SetQuiet,  GetAllBinary]
+  LOOKDOWN inCmd(0), = [GET_STATE, GET_LINE_RIGHT, GET_LINE_LEFT, GET_LIGHT_LEFT, GET_LIGHT_CENTER, GET_LIGHT_RIGHT,  GET_OPEN_LEFT, GET_OPEN_RIGHT, GET_Stall, GET_NAME, SET_MOTORS_OFF, SET_MOTORS, SET_Speaker, SET_Speaker_2, SET_LED_LEFT_ON, SET_LED_LEFT_OFF, SET_LED_CENTER_ON, SET_LED_CENTER_OFF, SET_LED_RIGHT_ON, SET_LED_RIGHT_OFF, SET_NAME, SET_LED_ALL_ON, SET_LED_ALL_OFF, GET_LIGHT_ALL, GET_IR_ALL, GET_LINE_ALL, GET_ALL, SET_LOUD, SET_QUIET, GET_ALL_BINARY, SOFT_RESET,    SET_LED_ALL], temp
+  BRANCH temp,         [GetState,  GetLineRight,   GetLineLeft,   GetLightLeft,   GetLightCenter,   GetLightRight,    GetObsLeft,    GetObsRight,    GetStall,  GetName,  MotorsOff,      Motors,     SetSpeaker,  SetSpeaker2,   OnLeftLED,       OffLeftLED,       OnCenterLED,       OffCenterLED,       OnRightLED,       OffRightLED,       SetName,  OnAllLED,       OffAllLED,       GetLightAll,   GetIRAll,   GetLineAll,   GetAll,  SetLoud,  SetQuiet,  GetAllBinary,   SoftwareReset, SetLedAll]
 TOP:
   SEROUT SerialPin, BAUD, [inCmd(0)]              ' echo command to tell we are done
   IF (LedCenterPin = 1) THEN LedCenterPin = 0 ELSE LedCenterPin = 1
+  sendName = 0
 GOTO BEGIN
 
 
@@ -412,3 +432,9 @@ OffAllLED:
      LedRightPin = 0
      LedCenterPin = 0
      GOTO GetAllBinary
+
+SetLedAll:
+  LedLeftPin = inCmd(1) & %00000001
+  LedCenterPin = inCmd(2) & %00000001
+  LedRightPin = inCmd(3) & %00000001
+  GOTO GetAllBinary
