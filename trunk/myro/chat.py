@@ -7,21 +7,25 @@ server and use that, as long as it supports
 open registration of new users.
 
 See the Myro Technical Guide for more details at:
-http://blog.roboteducation.org/wiki/
+http://wiki.roboteducation.org/
 """
 
-import xmpp, threading, time
+import threading, time, random, pickle
+try:
+    import xmpp
+except:
+    xmpp = None
 
 __version__ = "$Revision$"
 __author__  = "Doug Blank <dblank@cs.brynmawr.edu>"
 
 class RemoteRobot:
     def __init__(self, name, password, debug = []):
-        self.commandID = 0
         self.name = name
         self.password = password
         self.returnValues = {}
-        self.chat = Chat("randomname", "password", debug)
+        self.chat = Chat("control-%04d" % random.randint(1,1000),
+                         "password", debug)
 
     def _eval(self, item, *args, **kwargs):
         commandArgs = ""
@@ -33,8 +37,17 @@ class RemoteRobot:
             if commandArgs != "":
                 commandArgs += ", "
             commandArgs += a + "=" + str(kwargs[a])
-        self.chat.send(self.name, ("command %d " % self.commandID) + item + "(" + commandArgs + ")")
-        self.commandID += 1
+        self.chat.send(self.name.lower(), "robot." + item + "(" + commandArgs + ")")
+        retval = self.chat.receive()
+        while len(retval) == 0:
+            retval = self.chat.receive()
+        values = []
+        for _from, s in retval:
+            values.append(pickle.loads(s))
+        if len(values) == 1:
+            return values[0]
+        else:
+            return values
 
     def __getattr__(self, item):
         def getArgs(*args, **kwargs):
@@ -43,24 +56,19 @@ class RemoteRobot:
 
 class LocalRobot:
     def __init__(self, robot, name, password, debug = []):
-        self.commandID = 0
         self.chat = Chat(name, password, debug)
         self.robot = robot
 
     def process(self):
         messages = self.chat.receive()
-        for m in messages:
-            message = m.getBody()
-            if message.startswith("command "):
-                text, id, command = message.split(" ", 2)
-                print "self.robot." + command
-                retval = eval("self.robot." + command)
-                #self.returnValues[id] = retval
-            elif message.startswith("robot."):
+        for _from, m in messages:
+            if message.startswith("robot."):
                 # For user IM messages
                 print "self." + command
                 retval = eval("self.robot." + command)
-                self.chat.send(m.getFrom().getNode(), str(retval))
+                self.chat.send(_from, repr(retval))
+            else:
+                print _from + ":", message
 
     def run(self):
         while 1:
@@ -89,7 +97,7 @@ class Chat:
         # Start a thread up in here
         self.password = password
 	if "@" not in name:
-	    self.name, self.server = name, "blog.roboteducation.org"
+	    self.name, self.server = name, "myro.roboteducation.org"
 	else:
             self.name, self.server = name.split("@")
 	self.debug = debug
@@ -97,13 +105,13 @@ class Chat:
         print "Making connection to server..."
         self.client.connect()
         print "Registering '%s'..." % self.name
-        self.register(self.name, self.password)
+        self.register(self.name.lower(), self.password)
         self.open()
 
     def register(self, name, password):
 	""" Register a username/password. """
         xmpp.features.register(self.client, self.server,
-                               {"username": name,
+                               {"username": name.lower(),
                                 "password": password})
 
     def messageCB(self, conn, msg):
@@ -121,7 +129,12 @@ class Chat:
         retval = self.messages
         self.messages = []
         self.lock.release()
-        return retval
+        retvalList = []
+        for m in retval:
+            fromName = str(m.getFrom().node + "@" + m.getFrom().getDomain())
+            message = str(m.getBody())
+            retvalList.append( (fromName, message) )
+        return retvalList
 
     def send(self, to, message):
 	""" 
@@ -136,11 +149,11 @@ class Chat:
 	"""
         print "Authenticating password for '%s'..." % self.name
         try:
-            self.client.auth(self.name, self.password)
+            self.client.auth(self.name.lower(), self.password)
         except IOError:
             self.client = xmpp.Client(self.server, debug=self.debug)
             self.client.connect()
-            self.client.auth(self.name, self.password)
+            self.client.auth(self.name.lower(), self.password)
         print "Registering message handler..."
         self.client.RegisterHandler('message', self.messageCB) 
         self.client.sendInitPresence()

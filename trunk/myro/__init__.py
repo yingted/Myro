@@ -1,7 +1,7 @@
 """
 Myro Base Classes.
 (c) 2006, Institute for Personal Robots in Education
-http://roboteducation.org/
+http://www.roboteducation.org/
 Distributed under a Shared Source License
 """
 
@@ -14,6 +14,7 @@ import sys, atexit, time, os, random
 import myro.globals
 from myro.media import *
 from myro.speech import *
+from myro.chat import *
 try:
     import Tkinter
     import tkFileDialog
@@ -130,8 +131,7 @@ def askConsole(data, title = "Information Request"):
     print "|" + title.center(65) + "|"
     print "+-----------------------------------------------------------------+"
     print "| Please enter the following information. Default values are in   |"
-    print "| brackets. To accept default values, just press enter. I'll just |"
-    print "| ask this question once this session.                            |"
+    print "| brackets. To accept default values, just press enter.           |"
     print "------------------------------------------------------------------"
     for key in data.keys():
         retval = raw_input("   " + key + (" [%s]" % data[key])+ ": ")
@@ -154,6 +154,19 @@ class Robot(object):
             self.addService("computer.graphics", "type", "tkinter")
         if myro.globals.tts != None:
             self.addService("computer.text-to-speech", "type", str(myro.globals.tts))
+
+    def initializeRemoteControl(self, password):
+        self.chat = Chat(self.name, password)
+
+    def processRemoteControl(self):
+        messages = self.chat.receive()
+        for _from, message in messages:
+            if message.startswith("robot."):
+                # For user IM messages
+                print ">>> self." + message[6:]
+                retval = eval("self." + message[6:])
+                name, domain = _from.split("@")
+                self.chat.send(name, pickle.dumps(retval))
 
     def addService(self, name, attribute, value):
         if name not in self.services.keys():
