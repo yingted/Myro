@@ -9,11 +9,13 @@
 ' Default Robot Name
 '   Gets set on reprogram
 '''''''''''''''''''''''''''''''''''''''
-DATA          "Scribby"
-
+nameData DATA          "Scribby"
+ipreData DATA          "00000000"
 
 ''''''''''''''''''''''''''''''''''''''''''''''''''''
 ' IPRE Scribbler API
+'
+' Version information is at bottom of file.
 '
 ' Overview:
 '   Messages to robot are a constant 9 bytes long.  Messages from robot are
@@ -38,7 +40,7 @@ DATA          "Scribby"
 '
 ''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-' NOTE: be carefull, message numbers are out of order!
+' NOTE: be careful, message numbers are out of order!
 
 GET_STATE          CON 1  ' Response: inPins outPins 1, Notes: inPins is the state of all the input pins (0-7), and outPins is the state of all the output pins (8-15) as defined in the I/O Pin Declarations.
 GET_OPEN_LEFT      CON 2  ' Response: leftIR 2, Notes: leftIR is 1 when there is no obstacle to the left of robot
@@ -55,6 +57,8 @@ GET_IR_ALL         CON 34 ' Response: LeftIR RightIR 34
 GET_LINE_ALL       CON 35 ' Response: LineLeft LineRight 35
 GET_ALL            CON 36 ' Response: leftIR rightIR LeftLightHighyte LeftLightLowByte CenterLightHighByte CenterLightLowByte RightLightHighByte RightLightLowByte LineLeft LineRight Stall 36
 GET_ALL_BINARY     CON 39 ' Response: BinaryData 39, Notes: where the individual bits of BinaryData are: 0x000 IRLeft IRRight Stall LineLeft LineRight
+GET_INFO           CON 42 ' Response: "information on version robot, etc"
+GET_DATA           CON 44 ' Response: data from flash memory
 
 SET_MOTORS_OFF     CON 20 ' Format: 20 0 0 0 0 0 0 0 0
 SET_MOTORS         CON 21 ' Format: 21 rightmotor leftmotor 0 0 0 0 0 0, Notes: 0 = full speed backwards, 100 = stop, 200 = full speed forward
@@ -72,10 +76,12 @@ SET_LED_ALL_OFF    CON 32
 SET_LOUD           CON 37
 SET_QUIET          CON 38
 SET_LED_ALL        CON 40 ' Format: 40 LeftLEDstate CenterLEDstate RightLEDstate 0 0 0 0 0
+SET_DATA           CON 43 ' Set 8 bytes of data in flash memory
+SET_ECHO_MODE      CON 45 ' Set the echo mode on or off; if off, no echo is made after command
 
 SOFT_RESET         CON 41 ' Format: 41 0 0 0 0 0 0 0 0, Notes: Performs a software reset of robot.  (turns name broadcast back on)
 
-TIMEOUT            CON 1000 ' in ms.  How often to broadcast name
+TIMEOUT            CON 1000 ' in ms.  How often to broadcast name (if sendName) or flash lights
 PACKET_LENGTH      CON 9
 NAME_LENGTH        CON 8
 
@@ -113,6 +119,7 @@ name     VAR Byte(NAME_LENGTH)
 inCmd    VAR Byte(PACKET_LENGTH)
 quiet    VAR Bit
 sendName VAR Bit
+echoMode VAR Bit
 
 
 '''''''''''''''''''''''''''''
@@ -154,8 +161,9 @@ LOW ObsTxLeftPin
 inCmd(PACKET_LENGTH-1) = 0
 quiet = 0
 sendName = 1
+echoMode = 1
 
-FOR temp = 0 TO NAME_LENGTH - 1
+FOR temp = nameData TO nameData + (NAME_LENGTH - 1)
   READ temp, name(temp)
 NEXT
 
@@ -189,10 +197,12 @@ INIT:
 
 BEGIN:
   SERIN SerialPin, BAUD, TIMEOUT, INIT, [STR inCmd\PACKET_LENGTH]
-  LOOKDOWN inCmd(0), = [GET_STATE, GET_LINE_RIGHT, GET_LINE_LEFT, GET_LIGHT_LEFT, GET_LIGHT_CENTER, GET_LIGHT_RIGHT,  GET_OPEN_LEFT, GET_OPEN_RIGHT, GET_Stall, GET_NAME, SET_MOTORS_OFF, SET_MOTORS, SET_Speaker, SET_Speaker_2, SET_LED_LEFT_ON, SET_LED_LEFT_OFF, SET_LED_CENTER_ON, SET_LED_CENTER_OFF, SET_LED_RIGHT_ON, SET_LED_RIGHT_OFF, SET_NAME, SET_LED_ALL_ON, SET_LED_ALL_OFF, GET_LIGHT_ALL, GET_IR_ALL, GET_LINE_ALL, GET_ALL, SET_LOUD, SET_QUIET, GET_ALL_BINARY, SOFT_RESET,    SET_LED_ALL], temp
-  BRANCH temp,         [GetState,  GetLineRight,   GetLineLeft,   GetLightLeft,   GetLightCenter,   GetLightRight,    GetObsLeft,    GetObsRight,    GetStall,  GetName,  MotorsOff,      Motors,     SetSpeaker,  SetSpeaker2,   OnLeftLED,       OffLeftLED,       OnCenterLED,       OffCenterLED,       OnRightLED,       OffRightLED,       SetName,  OnAllLED,       OffAllLED,       GetLightAll,   GetIRAll,   GetLineAll,   GetAll,  SetLoud,  SetQuiet,  GetAllBinary,   SoftwareReset, SetLedAll]
+  LOOKDOWN inCmd(0), = [GET_STATE, GET_LINE_RIGHT, GET_LINE_LEFT, GET_LIGHT_LEFT, GET_LIGHT_CENTER, GET_LIGHT_RIGHT,  GET_OPEN_LEFT, GET_OPEN_RIGHT, GET_Stall, GET_NAME, SET_MOTORS_OFF, SET_MOTORS, SET_Speaker, SET_Speaker_2, SET_LED_LEFT_ON, SET_LED_LEFT_OFF, SET_LED_CENTER_ON, SET_LED_CENTER_OFF, SET_LED_RIGHT_ON, SET_LED_RIGHT_OFF, SET_NAME, SET_LED_ALL_ON, SET_LED_ALL_OFF, GET_LIGHT_ALL, GET_IR_ALL, GET_LINE_ALL, GET_ALL, SET_LOUD, SET_QUIET, GET_ALL_BINARY, SOFT_RESET,    SET_LED_ALL, GET_INFO, GET_DATA, SET_DATA, SET_ECHO_MODE], temp
+  BRANCH temp,         [GetState,  GetLineRight,   GetLineLeft,   GetLightLeft,   GetLightCenter,   GetLightRight,    GetObsLeft,    GetObsRight,    GetStall,  GetName,  MotorsOff,      Motors,     SetSpeaker,  SetSpeaker2,   OnLeftLED,       OffLeftLED,       OnCenterLED,       OffCenterLED,       OnRightLED,       OffRightLED,       SetName,  OnAllLED,       OffAllLED,       GetLightAll,   GetIRAll,   GetLineAll,   GetAll,  SetLoud,  SetQuiet,  GetAllBinary,   SoftwareReset, SetLedAll,   GetInfo,  GetData,  SetData,  SetEchoMode]
 TOP:
-  SEROUT SerialPin, BAUD, [inCmd(0)]              ' echo command to tell we are done
+  IF (echoMode) Then
+    SEROUT SerialPin, BAUD, [inCmd(0)]              ' echo command to tell we are done
+  ENDIF
   IF (LedCenterPin = 1) THEN LedCenterPin = 0 ELSE LedCenterPin = 1
   sendName = 0
 GOTO BEGIN
@@ -334,7 +344,7 @@ GetAllBinary:
   temp = temp | LineRightPin
 
   SEROUT SerialPin, BAUD, [temp]
-GOTO TOP
+  GOTO TOP
 
 
 GetStall:
@@ -342,15 +352,14 @@ GetStall:
      GOTO TOP
 
 GetName:
-     FOR temp = 0 TO NAME_LENGTH - 1
+     FOR temp = nameData TO nameData + (NAME_LENGTH - 1)
         READ temp, name(temp)
      NEXT
      SEROUT SerialPin, BAUD, [STR name\NAME_LENGTH]
-
      GOTO TOP
 
 SetName:
-     FOR temp = 0 TO NAME_LENGTH - 1
+     FOR temp = nameData TO nameData + (NAME_LENGTH - 1)
         WRITE temp, inCmd(1 + temp)
      NEXT
      GOTO GetAllBinary
@@ -438,3 +447,24 @@ SetLedAll:
   LedCenterPin = inCmd(2) & %00000001
   LedRightPin = inCmd(3) & %00000001
   GOTO GetAllBinary
+
+GetData:
+  FOR temp = ipreData TO ipreData + (NAME_LENGTH - 1)
+    READ temp, inCmd(temp)
+  NEXT
+  SEROUT SerialPin, BAUD, [STR inCmd\NAME_LENGTH]
+  GOTO TOP
+
+SetData:
+  FOR temp = ipreData TO ipreData + (NAME_LENGTH - 1)
+     WRITE temp, inCmd(1 + temp)
+  NEXT
+  GOTO GetAllBinary
+
+SetEchoMode:
+  echoMode = inCmd(1) & %00000001
+  GOTO GetAllBinary
+
+GetInfo:
+  SEROUT SerialPin, BAUD, ["API:1.0,Robot:Scribbler,Mode:Serial\n"]
+  GOTO TOP
