@@ -20,9 +20,8 @@ __version__ = "$Revision$"
 __author__  = "Doug Blank <dblank@cs.brynmawr.edu>"
 
 class RemoteRobot:
-    def __init__(self, name, password, debug = []):
+    def __init__(self, name, debug = []):
         self.name = name
-        self.password = password
         self.returnValues = {}
         self.chat = Chat("control-%04d" % random.randint(1,1000),
                          "password", debug)
