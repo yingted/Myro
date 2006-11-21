@@ -363,7 +363,7 @@ class Scribbler(Robot):
     def _set(self, *values):
         self._write(values)
         self._read(Scribbler.PACKET_LENGTH) # read echo
-        self._read(1) # single bit sensors
+        self._read(11) # single bit sensors
 
     def _get(self, value, bytes = 1, mode = "byte"):
         self._write([value])
