@@ -81,16 +81,17 @@ class Surveyor(Robot):
             serialport = ask("Port", useCache = 1)
 	# Deal with requirement that Windows "COM#" names where # >= 9 needs to
 	# be in the format "\\.\COM#"
-	if type(serialport) == str and serialport.startswith("com"):
-	    portnum = int(serialport[3:])
-	    if portnum >= 9:
-	        serialport = r'\\.\COM%d' % (portnum + 1)
+        if type(serialport) == str and serialport.startswith("com"):
+            portnum = int(serialport[3:])
+            if portnum >= 9:
+                serialport = r'\\.\COM%d' % (portnum + 1)
         self.serialPort = serialport
         self.baudRate = baudrate
         self.canvas = None
         self.window = None
         self.id = None
-        self.restart()
+        self.name = "SRV-1"
+        self.open()
         myro.globals.robot = self
 
     def watch(self):
@@ -100,31 +101,39 @@ class Surveyor(Robot):
         self.canvas.pack(fill="both", expand="y")
 
     def open(self):
-        if myro.globals.robot != None:
-            self.ser = myro.globals.robot.ser
-            self.ser.open()
-        else:
-            while 1:
+        try:
+            myro.globals.robot.ser.close()
+        except:
+            pass
+        while 1:
+            try:
+                self.ser = serial.Serial(self.serialPort, timeout = 2) 
+                break
+            except:
+                print "Waiting on port..."
                 try:
-                    self.ser = serial.Serial(self.serialPort, timeout = 2) # does this need to be 10?
-                    break
+                    self.ser.close()
                 except:
-                    print "Waiting on port..."
-                    time.sleep(1)
-            self.ser.baudrate = self.baudRate
+                    pass
+                try:
+                    del self.ser
+                except:
+                    pass
+                time.sleep(1)
+        self.ser.baudrate = self.baudRate
         self.ser.flushOutput()
         self.ser.flushInput()
         self.stop() 
         self._send("F") # turn off failsafe
         self._send("m") # disable automovement, samples ground for scans
         self.setResolution((160,128)) # this resolution allows scans
+        self.restart()
 
     def close(self):
         self.ser.close()
 
     def restart(self):
-        self.open()
-        print "Hello, I'm Surveyor!"
+        print "Hello, I'm %s!" % self.name
 
     def get(self, sensor = "all", *position):
         sensor = sensor.lower()
@@ -172,7 +181,7 @@ class Surveyor(Robot):
     def set(self, item, position, value = None):
         item = item.lower()
         if item == "name":
-            name = position[:8].strip()
+            name = position.strip()
             self.name = name
             return "ok"
         elif item == "resolution":
