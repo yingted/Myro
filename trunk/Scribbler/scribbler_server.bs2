@@ -12,7 +12,7 @@
 '   Gets set on reprogram
 '''''''''''''''''''''''''''''''''''''''
 nameData DATA          "Scribby "
-ipreData DATA          "00000000"
+ipreData DATA          0,0,0,0,0,0,0,0
 
 ''''''''''''''''''''''''''''''''''''''''''''''''''''
 ' IPRE Scribbler API
