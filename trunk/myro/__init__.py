@@ -6,11 +6,11 @@ Distributed under a Shared Source License
 """
 
 __REVISION__ = "$Revision$"
-__BUILD__    = "$Build: 10 $"
-__VERSION__  = "0.5." + __BUILD__.split()[1]
+__BUILD__    = "$Build: 0 $"
+__VERSION__  = "0.6." + __BUILD__.split()[1]
 __AUTHOR__   = "Doug Blank <dblank@cs.brynmawr.edu>"
 
-import sys, atexit, time, os, random
+import sys, atexit, time, random
 import myro.globals
 from myro.media import *
 from myro.speech import *
@@ -22,7 +22,7 @@ try:
 except:
     Tkinter = None
 if Tkinter != None:
-    from myro.widgets import AskDialog
+    from myro.widgets import AskDialog as _AskDialog
     try:
         myro.globals.gui = Tkinter.Tk()
         myro.globals.gui.withdraw()
@@ -102,9 +102,9 @@ def _ask(data, title = "Information Request", forceAsk = 0, forceConsole = 0, us
     # else, ask it all:
     if needToAsk or forceAsk: 
         if Tkinter == None or forceConsole:
-            askConsole(data, title)
+            _askConsole(data, title)
         else:
-            data = askGUI(data, title)
+            data = _askGUI(data, title)
             if data["ok"] == 0:
                 raise KeyboardInterrupt
         # cache data in globals:
@@ -112,8 +112,8 @@ def _ask(data, title = "Information Request", forceAsk = 0, forceConsole = 0, us
             myro.globals.askData[text] = data[text]
     return data
 
-def askGUI(qlist, title = "Information Request"):
-   d = AskDialog(myro.globals.gui, title, qlist)
+def _askGUI(qlist, title = "Information Request"):
+   d = _AskDialog(myro.globals.gui, title, qlist)
    d.top.bind("<Return>", lambda event: d.OkPressed())
    ok = d.Show()
    if ok:
@@ -126,7 +126,7 @@ def askGUI(qlist, title = "Information Request"):
       d.DialogCleanup()
       return {"ok" : 0}
 
-def askConsole(data, title = "Information Request"):
+def _askConsole(data, title = "Information Request"):
     print "+-----------------------------------------------------------------+"
     print "|" + title.center(65) + "|"
     print "+-----------------------------------------------------------------+"
@@ -251,7 +251,7 @@ class Robot(object):
     def setStartSong(self, songName):
         return self.set("startsong", songName)
 
-    def joystick(self):
+    def joyStick(self):
         from myro.joystick import Joystick
 	try:
 	    import idlelib
@@ -320,96 +320,6 @@ class Robot(object):
 from myro.robot.scribbler import Scribbler
 from myro.robot.surveyor import Surveyor
 
-class SimScribbler(Robot):
-    def __init__(self, id = None):
-        Robot.__init__(self)
-        import myro.simulator
-        globalspath, filename = os.path.split(myro.globals.__file__)
-        myro.globals.myropath, directory = os.path.split(globalspath)
-        self._simulator = myro.simulator.INIT(
-            os.path.join(myro.globals.myropath, "worlds", "MyroWorld"))
-        for port in self._simulator.ports:
-            print "Simulator starting listener on port", port, "..."
-            thread = myro.simulator.Thread(self._simulator, port)
-            thread.start()
-        # start the client(s):
-        from myro.robot.symbolic import TCPRobot
-        self._clients = []
-        for port in self._simulator.ports:
-            self._clients.append(TCPRobot("localhost", port))
-        myro.globals.robot = self
-        myro.globals.simulator = self._simulator
-        # FIX: hack to get _cleanup called before Tk exitfunc, which hangs
-        atexit.register(_cleanup)
-        self.volume = 1
-        self.name = "Scribby"
-        self.startsong = "tada"
-    def translate(self, amount):
-        return self._clients[0].translate(amount)
-    def rotate(self, amount):
-        return self._clients[0].rotate(amount)
-    def move(self, translate, rotate):
-        return self._clients[0].move(translate, rotate)
-    def update(self):
-        return self._clients[0].update()
-    def get(self, sensor = "all", *positions):
-        self._clients[0].update()
-        sensor = sensor.lower()
-        if sensor == "stall":
-            return self._clients[0].stall
-        elif sensor == "startsong":
-            return self.startsong
-        elif sensor == "name":
-            return self.name
-        elif sensor == "volume":
-            return self.volume
-        else:
-            retvals = []
-            if len(positions) == 0:
-                if sensor == "light":
-                    return self.get("light", 0, 1, 2)
-                elif sensor == "ir":
-                    return self.get("ir", 0, 1)
-                elif sensor == "line":
-                    return self.get("line", 0, 1)
-                elif sensor == "all":
-                    return {"light": self.get("light"),
-                            "ir": self.get("ir"),
-                            "line": self.get("line"),
-                            "stall": self.get("stall")}
-                else:
-                    raise ("invalid sensor name: '%s'" % sensor)
-            for position in positions:
-                position = int(position)
-                if sensor == "light":
-                    retvals.append(self._clients[0].light[0].value[position])
-                elif sensor == "ir":
-                    retvals.append(self._clients[0].ir[0].value[position])
-                elif sensor == "line":
-                    retvals.append(self._clients[0].line[0].value[position])
-                else:
-                    raise ("invalid sensor name: '%s'" % sensor)
-            if len(retvals) == 1:
-                return retvals[0]
-            else:
-                return retvals
-
-    def set(self, item, position, value = None):
-        item = item.lower()
-        if item == "led":
-            return "ok"
-        elif item == "name":
-            self.name = position
-            return "ok"
-        elif item == "volume":
-            self.volume = position
-            return "ok"
-        elif item == "startsong":
-            self.startsong = position
-            return "ok"
-        else:
-            raise ("invalid set item name: '%s'" % item)
-
 class Computer(Robot):
     def __init__(self):
         Robot.__init__(self)
@@ -419,6 +329,7 @@ class Computer(Robot):
         print "move(%f, %f)" % (translate, rotate)
 
 computer = Computer()
+robot    = None
 
 # functions:
 def _cleanup():
@@ -442,12 +353,10 @@ if not myro.globals.setup:
 
 def initialize(id = None):
     global robot
-    myro.globals.robot = Scribbler(id)
-    robot = myro.globals.robot
+    robot = Scribbler(id)
 def simulator(id = None):
     global robot
-    myro.globals.robot = SimScribbler(id)
-    robot = myro.globals.robot
+    robot = SimScribbler(id)
 def translate(amount):
     return myro.globals.robot.translate(amount)
 def rotate(amount):
@@ -492,7 +401,7 @@ def getVolume():
     return myro.globals.robot.get("volume")
 def update():
     return myro.globals.robot.update()
-def beep(self, duration, frequency1, frequency2 = None):
+def beep(duration, frequency1, frequency2 = None):
     return myro.globals.robot.beep(duration, frequency1, frequency2)
 def set(item, position, value = None):
     return myro.globals.robot.set(item, position, value)
@@ -508,12 +417,12 @@ def motors(left, right):
     return myro.globals.robot.motors(left, right)
 def restart():
     return myro.globals.robot.restart()
-def joystick():
-    return myro.globals.robot.joystick()
+def joyStick():
+    return myro.globals.robot.joyStick()
 def playSong(song, wholeNoteDuration = .545):
     return myro.globals.robot.playSong(song, wholeNoteDuration)
-def playNote(tuple, wholeNoteDuration = .545):
-    return myro.globals.robot.playNote(tuple, wholeNoteDuration)
+def playNote(tup, wholeNoteDuration = .545):
+    return myro.globals.robot.playNote(tup, wholeNoteDuration)
 # --------------------------------------------------------
 # Error handler:
 # --------------------------------------------------------
@@ -533,7 +442,7 @@ def _myroExceptionHandler(type, value, tb):
             print line.rstrip()
 sys.excepthook = _myroExceptionHandler
 # --------------------------------------------------------
-# Control-C signal handler:
+# Control-C signal handler: 
 # --------------------------------------------------------
 import signal
 def _interruptHandler(signum, frame):
