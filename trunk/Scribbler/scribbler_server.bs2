@@ -8,8 +8,10 @@
 '''''''''''''''''''''''''''''''''''''''
 ' Default Robot Name
 '   Gets set on reprogram
+' Default Data - application uses
+'   Gets set on reprogram
 '''''''''''''''''''''''''''''''''''''''
-nameData DATA          "Scribby"
+nameData DATA          "Scribby "
 ipreData DATA          "00000000"
 
 ''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -163,8 +165,8 @@ quiet = 0
 sendName = 1
 echoMode = 1
 
-FOR temp = nameData TO nameData + (NAME_LENGTH - 1)
-  READ temp, name(temp)
+FOR temp = 0 TO (NAME_LENGTH - 1)
+  READ temp + nameData, name(temp)
 NEXT
 
 
@@ -200,9 +202,8 @@ BEGIN:
   LOOKDOWN inCmd(0), = [GET_STATE, GET_LINE_RIGHT, GET_LINE_LEFT, GET_LIGHT_LEFT, GET_LIGHT_CENTER, GET_LIGHT_RIGHT,  GET_OPEN_LEFT, GET_OPEN_RIGHT, GET_Stall, GET_NAME, SET_MOTORS_OFF, SET_MOTORS, SET_Speaker, SET_Speaker_2, SET_LED_LEFT_ON, SET_LED_LEFT_OFF, SET_LED_CENTER_ON, SET_LED_CENTER_OFF, SET_LED_RIGHT_ON, SET_LED_RIGHT_OFF, SET_NAME, SET_LED_ALL_ON, SET_LED_ALL_OFF, GET_LIGHT_ALL, GET_IR_ALL, GET_LINE_ALL, GET_ALL, SET_LOUD, SET_QUIET, GET_ALL_BINARY, SOFT_RESET,    SET_LED_ALL, GET_INFO, GET_DATA, SET_DATA, SET_ECHO_MODE], temp
   BRANCH temp,         [GetState,  GetLineRight,   GetLineLeft,   GetLightLeft,   GetLightCenter,   GetLightRight,    GetObsLeft,    GetObsRight,    GetStall,  GetName,  MotorsOff,      Motors,     SetSpeaker,  SetSpeaker2,   OnLeftLED,       OffLeftLED,       OnCenterLED,       OffCenterLED,       OnRightLED,       OffRightLED,       SetName,  OnAllLED,       OffAllLED,       GetLightAll,   GetIRAll,   GetLineAll,   GetAll,  SetLoud,  SetQuiet,  GetAllBinary,   SoftwareReset, SetLedAll,   GetInfo,  GetData,  SetData,  SetEchoMode]
 TOP:
-  IF (echoMode) Then
-    SEROUT SerialPin, BAUD, [inCmd(0)]              ' echo command to tell we are done
-  ENDIF
+  ' echo command to tell we are done
+  IF (echoMode = 1)     THEN SEROUT SerialPin, BAUD, [inCmd(0)]
   IF (LedCenterPin = 1) THEN LedCenterPin = 0 ELSE LedCenterPin = 1
   sendName = 0
 GOTO BEGIN
@@ -352,15 +353,15 @@ GetStall:
      GOTO TOP
 
 GetName:
-     FOR temp = nameData TO nameData + (NAME_LENGTH - 1)
-        READ temp, name(temp)
+     FOR temp = 0 TO (NAME_LENGTH - 1)
+        READ temp + nameData, name(temp)
      NEXT
      SEROUT SerialPin, BAUD, [STR name\NAME_LENGTH]
      GOTO TOP
 
 SetName:
-     FOR temp = nameData TO nameData + (NAME_LENGTH - 1)
-        WRITE temp, inCmd(1 + temp)
+     FOR temp = 0 TO (NAME_LENGTH - 1)
+        WRITE temp + nameData, inCmd(1 + temp)
      NEXT
      GOTO GetAllBinary
 
@@ -449,15 +450,15 @@ SetLedAll:
   GOTO GetAllBinary
 
 GetData:
-  FOR temp = ipreData TO ipreData + (NAME_LENGTH - 1)
-    READ temp, inCmd(temp)
+  FOR temp = 0 TO (NAME_LENGTH - 1)
+    READ temp + ipreData, inCmd(temp)
   NEXT
   SEROUT SerialPin, BAUD, [STR inCmd\NAME_LENGTH]
   GOTO TOP
 
 SetData:
-  FOR temp = ipreData TO ipreData + (NAME_LENGTH - 1)
-     WRITE temp, inCmd(1 + temp)
+  FOR temp = 0 TO (NAME_LENGTH - 1)
+     WRITE temp + ipreData, inCmd(1 + temp)
   NEXT
   GOTO GetAllBinary
 
@@ -466,5 +467,5 @@ SetEchoMode:
   GOTO GetAllBinary
 
 GetInfo:
-  SEROUT SerialPin, BAUD, ["API:1.0,Robot:Scribbler,Mode:Serial\n"]
+  SEROUT SerialPin, BAUD, ["API:0.1,Robot:Scribbler,Mode:Serial", LF]
   GOTO TOP
