@@ -27,7 +27,7 @@ ipreData DATA          "00000000"
 '   'TIMEOUT' milliseconds.  This allows the PC to find it and connect.  After
 '   the scribbler receives a command, this name broadcasting stops.
 '
-'   All "SET" messages have a return type of "GET_ALL_BINARY".
+'   All "SET" messages have a return type of "GET_ALL".
 '
 ' Messages TO robot:
 '   The first byte is the message type
@@ -195,7 +195,7 @@ INIT:
   IF (LedCenterPin = 1) THEN LedCenterPin = 0 ELSE LedCenterPin = 1
 
   ' Send characteristic string and name
-  IF (sendName = 1) THEN SEROUT SerialPin, BAUD, ["IPRE", STR name, 0]
+  IF (sendName = 1) THEN SEROUT SerialPin, BAUD, ["IPRE", STR name\NAME_LENGTH, 0]
 
 BEGIN:
   SERIN SerialPin, BAUD, TIMEOUT, INIT, [STR inCmd\PACKET_LENGTH]
@@ -215,11 +215,11 @@ GOTO BEGIN
 
 SetQuiet:
    quiet = 1
-   GOTO GetAllBinary
+   GOTO GetAll
 
 SetLoud:
    quiet = 0
-   GOTO GetAllBinary
+   GOTO GetAll
 
 GetState:
      SEROUT SerialPin, BAUD, [INL, OUTH]
@@ -363,12 +363,12 @@ SetName:
      FOR temp = 0 TO (NAME_LENGTH - 1)
         WRITE temp + nameData, inCmd(1 + temp)
      NEXT
-     GOTO GetAllBinary
+     GOTO GetAll
 
 MotorsOff:
      PULSOUT MotorRightPin, 2000
      PULSOUT MotorLeftPin, 2000
-     GOTO GetAllBinary
+     GOTO GetAll
 
      'FREQOUT Pin, Duration, Freq1, Freq2
 SetSpeaker:
@@ -381,7 +381,7 @@ SetSpeaker:
      ELSE
       FREQOUT SpeakerPin, var1, var2
      ENDIF
-     GOTO GetAllBinary
+     GOTO GetAll
 
 SetSpeaker2:
      var1 = inCmd(1)
@@ -398,56 +398,56 @@ SetSpeaker2:
      ELSE
       FREQOUT SpeakerPin, var1, var2, var3
      ENDIF
-     GOTO GetAllBinary
+     GOTO GetAll
 
 Motors:
      var1 = (inCmd(1) + 100) * 10
      var2 = (inCmd(2) + 100) * 10
      PULSOUT MotorRightPin, var1
      PULSOUT MotorLeftPin, var2
-     GOTO GetAllBinary
+     GOTO GetAll
 
 OnLeftLED:
      LedLeftPin = 1
-     GOTO GetAllBinary
+     GOTO GetAll
 
 OffLeftLED:
      LedLeftPin = 0
-     GOTO GetAllBinary
+     GOTO GetAll
 
 OnCenterLED:
      LedCenterPin = 1
-     GOTO GetAllBinary
+     GOTO GetAll
 
 OffCenterLED:
      LedCenterPin = 0
-     GOTO GetAllBinary
+     GOTO GetAll
 
 OnRightLED:
      LedRightPin = 1
-     GOTO GetAllBinary
+     GOTO GetAll
 
 OffRightLED:
      LedRightPin = 0
-     GOTO GetAllBinary
+     GOTO GetAll
 
 OnAllLED:
      LedLeftPin = 1
      LedRightPin = 1
      LedCenterPin = 1
-     GOTO GetAllBinary
+     GOTO GetAll
 
 OffAllLED:
      LedLeftPin = 0
      LedRightPin = 0
      LedCenterPin = 0
-     GOTO GetAllBinary
+     GOTO GetAll
 
 SetLedAll:
   LedLeftPin = inCmd(1) & %00000001
   LedCenterPin = inCmd(2) & %00000001
   LedRightPin = inCmd(3) & %00000001
-  GOTO GetAllBinary
+  GOTO GetAll
 
 GetData:
   FOR temp = 0 TO (NAME_LENGTH - 1)
