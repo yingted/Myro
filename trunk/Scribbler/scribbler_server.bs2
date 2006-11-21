@@ -467,5 +467,5 @@ SetEchoMode:
   GOTO GetAll
 
 GetInfo:
-  SEROUT SerialPin, BAUD, ["API:0.1,Robot:Scribbler,Mode:Serial", LF]
+  SEROUT SerialPin, BAUD, ["API:1.0,Robot:Scribbler,Mode:Serial", LF]
   GOTO TOP
