@@ -85,7 +85,6 @@ class Scribbler(Robot):
         self.serialPort = serialport
         self.baudRate = baudrate
         self.open()
-        self.restart()
         myro.globals.robot = self
 
     def search(self):
@@ -128,6 +127,7 @@ class Scribbler(Robot):
                     pass
                 time.sleep(1)
         self.ser.baudrate = self.baudRate
+        self.restart()
 
     def close(self):
         self.ser.close()
