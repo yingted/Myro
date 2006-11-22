@@ -23,44 +23,47 @@ def isTrue(value):
     return False
 
 class Scribbler(Robot):
-    GET_STATE          =  1
-    GET_OPEN_LEFT      =  2  
-    GET_OPEN_RIGHT     =  3
-    GET_STALL          =  4  
-    GET_LIGHT_LEFT     =  5  
-    GET_LIGHT_CENTER   =  6
-    GET_LIGHT_RIGHT    =  7
-    GET_LINE_RIGHT     =  8  
-    GET_LINE_LEFT      =  9
-    GET_NAME           = 10 
-    GET_LIGHT_ALL      = 33 
-    GET_IR_ALL         = 34 
-    GET_LINE_ALL       = 35 
-    GET_ALL            = 36 
-    GET_ALL_BINARY     = 39 
-    GET_INFO           = 42 
-    GET_DATA           = 44 
-    SET_MOTORS_OFF     = 20 
-    SET_MOTORS         = 21 
-    SET_LED_LEFT_ON    = 22
-    SET_LED_LEFT_OFF   = 23
-    SET_LED_CENTER_ON  = 24
-    SET_LED_CENTER_OFF = 25
-    SET_LED_RIGHT_ON   = 26
-    SET_LED_RIGHT_OFF  = 27
-    SET_SPEAKER        = 28 
-    SET_SPEAKER_2      = 29 
-    SET_NAME           = 30 
-    SET_LED_ALL_ON     = 31
-    SET_LED_ALL_OFF    = 32
-    SET_LOUD           = 37
-    SET_QUIET          = 38
-    SET_LED_ALL        = 40 
-    SET_DATA           = 43 
-    SET_ECHO_MODE      = 45 
-    SOFT_RESET         = 41 
-    PACKET_LENGTH      =  9
-    NAME_LENGTH        =  8
+    SOFT_RESET        = 33  
+
+    GET_ALL           = 65  
+    GET_ALL_BINARY    = 66  
+    GET_LIGHT_LEFT    = 67  
+    GET_LIGHT_CENTER  = 68  
+    GET_LIGHT_RIGHT   = 69  
+    GET_LIGHT_ALL     = 70  
+    GET_IR_LEFT       = 71  
+    GET_IR_RIGHT      = 72  
+    GET_IR_ALL        = 73  
+    GET_LINE_LEFT     = 74  
+    GET_LINE_RIGHT    = 75  
+    GET_LINE_ALL      = 76  
+    GET_STATE         = 77  
+    GET_NAME          = 78  
+    GET_STALL         = 79  
+    GET_INFO          = 80  
+    GET_DATA          = 81  
+
+    SET_DATA          = 97  
+    SET_ECHO_MODE     = 98  
+    SET_LED_LEFT_ON   = 99
+    SET_LED_LEFT_OFF  = 100
+    SET_LED_CENTER_ON = 101
+    SET_LED_CENTER_OFF= 102
+    SET_LED_RIGHT_ON  = 103
+    SET_LED_RIGHT_OFF = 104
+    SET_LED_ALL_ON    = 105
+    SET_LED_ALL_OFF   = 106
+    SET_LED_ALL       = 107 
+    SET_MOTORS_OFF    = 108 
+    SET_MOTORS        = 109 
+    SET_NAME          = 110 
+    SET_LOUD          = 111
+    SET_QUIET         = 112
+    SET_SPEAKER       = 113 
+    SET_SPEAKER_2     = 114
+
+    PACKET_LENGTH     =  9
+    NAME_LENGTH       =  8
     
     def __init__(self, serialport = None, baudrate = 38400):
         Robot.__init__(self)
