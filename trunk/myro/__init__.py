@@ -10,7 +10,7 @@ __BUILD__    = "$Build: 0 $"
 __VERSION__  = "0.6." + __BUILD__.split()[1]
 __AUTHOR__   = "Doug Blank <dblank@cs.brynmawr.edu>"
 
-import sys, atexit, time, random
+import sys, atexit, time, random, pickle
 import myro.globals
 from myro.media import *
 from myro.speech import *
@@ -140,6 +140,36 @@ def _askConsole(data, title = "Information Request"):
             data[key] = retval
     return data
 
+
+class BackgroundThread(threading.Thread):
+    """
+    A thread class for running things in the background.
+    """
+    def __init__(self, function, pause = 0.01):
+        """
+        Constructor, setting initial variables
+        """
+        self.function = function
+        self._stopevent = threading.Event()
+        self._sleepperiod = pause
+        threading.Thread.__init__(self, name="MyroThread")
+        
+    def run(self):
+        """
+        overload of threading.thread.run()
+        main control loop
+        """
+        while not self._stopevent.isSet():
+            self.function()
+            self._stopevent.wait(self._sleepperiod)
+
+    def join(self,timeout=None):
+        """
+        Stop the thread
+        """
+        self._stopevent.set()
+        threading.Thread.join(self, timeout)
+
 class Robot(object):
     _app = None
     _joy = None
@@ -158,15 +188,25 @@ class Robot(object):
     def initializeRemoteControl(self, password):
         self.chat = Chat(self.name, password)
 
+    def processRemoteControlLoop(self, threaded = 1):
+        if threaded:
+            self.thread = BackgroundThread(self.processRemoteControl, 1) # seconds
+            self.thread.start()
+        else:
+            while 1:
+                self.processRemoteControl()
+
     def processRemoteControl(self):
         messages = self.chat.receive()
+        print "process", messages
         for _from, message in messages:
             if message.startswith("robot."):
                 # For user IM messages
                 print ">>> self." + message[6:]
                 retval = eval("self." + message[6:])
                 name, domain = _from.split("@")
-                self.chat.send(name, pickle.dumps(retval))
+                print "sending:", pickle.dumps(retval)
+                self.chat.send(name.lower(), pickle.dumps(retval))
 
     def addService(self, name, attribute, value):
         if name not in self.services.keys():
@@ -319,6 +359,7 @@ class Robot(object):
 
 from myro.robot.scribbler import Scribbler
 from myro.robot.surveyor import Surveyor
+from myro.robot.simulator import SimScribbler
 
 class Computer(Robot):
     def __init__(self):

@@ -83,8 +83,8 @@ class Surveyor(Robot):
 	# be in the format "\\.\COM#"
         if type(serialport) == str and serialport.startswith("com"):
             portnum = int(serialport[3:])
-            if portnum >= 9:
-                serialport = r'\\.\COM%d' % (portnum + 1)
+            if portnum >= 10:
+                serialport = r'\\.\COM%d' % (portnum)
         self.serialPort = serialport
         self.baudRate = baudrate
         self.canvas = None
@@ -109,14 +109,20 @@ class Surveyor(Robot):
             try:
                 self.ser = serial.Serial(self.serialPort, timeout = 2) 
                 break
+            except KeyboardInterrupt:
+                raise
             except:
                 print "Waiting on port..."
                 try:
                     self.ser.close()
+                except KeyboardInterrupt:
+                    raise
                 except:
                     pass
                 try:
                     del self.ser
+                except KeyboardInterrupt:
+                    raise
                 except:
                     pass
                 time.sleep(1)
@@ -156,6 +162,7 @@ class Surveyor(Robot):
                                                     c, self.resolution[1] - s * self.resolution[1],
                                                     fill="yellow", tag="scan")
                             c += 2
+                        #print "", # hack to force IDLE to update
                     return retval
                 elif sensor == "image":
                     return self.getImage()
@@ -245,6 +252,9 @@ class Surveyor(Robot):
                 self.im = Image.open(fileThing)
                 self.image = ImageTk.PhotoImage(self.im)
                 self.canvas.create_image(80, 64, image = self.image)
+                #print "", # hack to get IDLE to update
+            except KeyboardInterrupt:
+                raise
             except:
                 pass
         return i
@@ -269,6 +279,8 @@ class Surveyor(Robot):
                 retval = [0 for x in range(80)]
                 for i in range(len(retval)):
                     retval[i] = int(data[i * 2:i * 2 + 2])/63.0
+            except KeyboardInterrupt:
+                raise
             except:
                 retval = None
             return retval
@@ -283,6 +295,8 @@ class Surveyor(Robot):
                           "left": int(data[8:16].strip(), 16)/255.0,
                           "back": int(data[16:24].strip(), 16)/255.0,
                           "right": int(data[24:32].strip(), 16)/255.0}
+            except KeyboardInterrupt:
+                raise
             except:
                 retval = None
             return retval
@@ -297,6 +311,8 @@ class Surveyor(Robot):
                 data   = self.ser.read(length)
                 if len(data) != length:
                     raise ValueError, "invalid image data"
+            except KeyboardInterrupt:
+                raise
             except:
                 print "camera image error"
                 data = None

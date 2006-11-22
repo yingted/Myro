@@ -80,8 +80,8 @@ class Scribbler(Robot):
         # be in the format "\\.\COM#"
         if type(serialport) == str and serialport.startswith("com"):
             portnum = int(serialport[3:])
-            if portnum >= 9:
-                serialport = r'\\.\COM%d' % (portnum + 1)
+            if portnum >= 10:
+                serialport = r'\\.\COM%d' % (portnum)
         self.serialPort = serialport
         self.baudRate = baudrate
         self.open()

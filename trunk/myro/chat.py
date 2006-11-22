@@ -10,21 +10,33 @@ See the Myro Technical Guide for more details at:
 http://wiki.roboteducation.org/
 """
 
-import threading, time, random, pickle
-try:
-    import xmpp
-except:
-    xmpp = None
+import threading, time, random, pickle, sys
 
 __version__ = "$Revision$"
 __author__  = "Doug Blank <dblank@cs.brynmawr.edu>"
+
+class FakeFile:
+    """ To trick stderr into not printing warnings from xmpp. """
+    def write(self, *args, **keys):
+        pass
+try:
+    temp = sys.stderr        # save the stderr
+    sys.stderr = FakeFile()  # replace with fake
+    import xmpp              # import xmpp
+    sys.stderr = temp        # replace stderr
+    temp = None              # clean up
+    del temp
+except:
+    xmpp = None
 
 class RemoteRobot:
     def __init__(self, name, debug = []):
         self.name = name
         self.returnValues = {}
-        self.chat = Chat("control-%04d" % random.randint(1,1000),
+        self.chat = Chat("control-%05d" % random.randint(1,10000),
                          "password", debug)
+    def __repr__(self):
+        return "<myro.robot.chat.RemoteRobot object>"
 
     def _eval(self, item, *args, **kwargs):
         commandArgs = ""
@@ -39,10 +51,13 @@ class RemoteRobot:
         self.chat.send(self.name.lower(), "robot." + item + "(" + commandArgs + ")")
         retval = self.chat.receive()
         while len(retval) == 0:
+            print "waiting to receive from remote robot..."
             retval = self.chat.receive()
         values = []
         for _from, s in retval:
+            print "return:", s
             values.append(pickle.loads(s))
+        print "returning!", values
         if len(values) == 1:
             return values[0]
         else:
@@ -65,7 +80,7 @@ class LocalRobot:
                 # For user IM messages
                 print "self." + command
                 retval = eval("self.robot." + command)
-                self.chat.send(_from, repr(retval))
+                self.chat.send(_from.lower(), repr(retval))
             else:
                 print _from + ":", message
 
@@ -140,7 +155,7 @@ class Chat:
 	Send a message to a named recipient. They must be logged in.
 	"""
         self.client.send(
-           xmpp.protocol.Message(to + "@" + self.server, message))
+           xmpp.protocol.Message(to.lower() + "@" + self.server, message))
 
     def open(self):
 	"""
