@@ -12,6 +12,7 @@ build: zip
 	cp myro.zip ../html/myro/$(zipfile)
 	cp myro.zip ../html/myro/myro.zip
 	cp packages/scribbler.exe ../html/myro/scribbler.exe
+	cp Scribbler/ScribblerAPI.html ../html/myro/docs/
 	ls -al ../html/myro/
 	cd ../html/myro/; ./index.py > index.html
 
