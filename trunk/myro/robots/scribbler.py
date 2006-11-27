@@ -9,7 +9,7 @@ __REVISION__ = "$Revision$"
 __AUTHOR__   = "Keith and Doug"
 
 import serial, time, string
-from myro import Robot, ask
+from myro import Robot, ask, askQuestion
 import myro.globals
 
 def isTrue(value):
@@ -91,44 +91,61 @@ class Scribbler(Robot):
         myro.globals.robot = self
 
     def search(self):
-        for x in range(20):
+        answer = askQuestion(title="Search for " + self.serialPort,
+                             question="Press the red resest button on the robot\nPress OK when ready to search",
+                             answers = ["OK", "Cancel"])
+        if answer != "OK":
+            raise KeyboardInterrupt
+        for x in range(1, 21):
             port = "com" + str(x)
-            print "trying on port", port, "for",self.serialPort
+            print "Searching on port", port, "for", self.serialPort
             try:
-                self.ser = serial.Serial(port, timeout=.5)
-                self.ser.baudrate = self.baudRate
-                self.ser.flushOutput()
-                self.ser.flushInput()
-                time.sleep(.5)
-                name = self.getName().lower()
-                if (name == self.serialPort.strip().lower()):
-                    print "Found", self.serialPort
-                    self.ser.timeout=10
+                self.ser = serial.Serial(port, timeout=.1)
+            except serial.SerialException:
+                continue
+            self.ser.baudrate = self.baudRate
+            # assume that it has been running for at least a second!
+            time.sleep(1)
+            lines = self.ser.readlines()
+            lines = ''.join(lines)
+            if ("IPRE" in lines):
+                position = lines.index("IPRE")
+                name = lines[position+4:position+9+4]
+                name = name.replace("\x00", "")
+                name = name.strip()
+                print "Found robot named", name, "on port", port
+                if name == self.serialPort:
+                    self.serialPort = port
+                    askQuestion("You can use \"%s\" from now on, like this:\n   Scribbler(\"%s\")" %
+                                (self.serialPort, self.serialPort), answers=["Ok"])
                     return
-            except:
-                pass
-        print "Couldn't find the scribbler or device named", self.serialPort
+                else:
+                    self.ser.close()
+        raise ValueError, ("Couldn't find the scribbler named " + self.serialPort)
     
     def open(self):
         try:
             myro.globals.robot.ser.close()
         except:
             pass
-        while 1:
-            try:
-                self.ser = serial.Serial(self.serialPort, timeout = 2) 
-                break
-            except:
-                print "Waiting on port..."
+        if not (self.serialPort.startswith("com") or self.serialPort.startswith("/dev/")):
+            self.search()
+        else:
+            while 1:
                 try:
-                    self.ser.close()
+                    self.ser = serial.Serial(self.serialPort, timeout = 2) 
+                    break
                 except:
-                    pass
-                try:
-                    del self.ser
-                except:
-                    pass
-                time.sleep(1)
+                    print "Waiting on port...", self.serialPort
+                    try:
+                        self.ser.close()
+                    except:
+                        pass
+                    try:
+                        del self.ser
+                    except:
+                        pass
+                    time.sleep(1)
         self.ser.baudrate = self.baudRate
         self.restart()
 
@@ -139,16 +156,14 @@ class Scribbler(Robot):
         print "Waking robot from sleep..."
         self.setEchoMode(0) # send command to get out of broadcast; turn off echo
         time.sleep(.25)               # give it some time
-        self.ser.flushInput()         # flush "IPREScribby"...
-        time.sleep(1.25)              # give it time to see if another IPRE show up
         while 1:
-            self.setEchoMode(0) # send command to get out of broadcast; turn off echo
-            time.sleep(.25)               # give it some time
             self.ser.flushInput()         # flush "IPREScribby"...
             time.sleep(1.25)              # give it time to see if another IPRE show up
             if self.ser.inWaiting() == 0: # if none, then we are out of here!
                 break
             print "Waking robot from sleep..."
+            self.setEchoMode(0) # send command to get out of broadcast; turn off echo
+            time.sleep(.25)               # give it some time
         self.ser.flushInput()
         self.ser.flushOutput()
         self.stop()

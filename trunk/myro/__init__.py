@@ -19,6 +19,7 @@ try:
     import Tkinter
     import tkFileDialog
     import tkColorChooser
+    import Dialog
 except:
     Tkinter = None
 if Tkinter != None:
@@ -57,6 +58,13 @@ def randomNumber():
     Returns a number between 0 (inclusive) and 1 (exclusive).
     """
     return random.random()
+
+def askQuestion(question, answers = ["Yes", "No"], title = "Myro Question",
+                default = 0, bitmap=Dialog.DIALOG_ICON):
+    """ Displays a question and returns answer. """
+    d = Dialog.Dialog(title=title, default=default, bitmap=bitmap,
+                      text=question, strings=answers)
+    return answers[int(d.num)]
 
 def pickAFolder():
     folder = tkFileDialog.askdirectory()
