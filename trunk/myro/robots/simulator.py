@@ -8,7 +8,7 @@ Distributed under a Shared Source License
 __REVISION__ = "$Revision$"
 __AUTHOR__   = "Doug Blank"
 
-import os, atexit
+import os, atexit, time
 from myro import Robot
 import myro.globals
 

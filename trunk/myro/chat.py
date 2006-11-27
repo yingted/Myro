@@ -51,13 +51,11 @@ class RemoteRobot:
         self.chat.send(self.name.lower(), "robot." + item + "(" + commandArgs + ")")
         retval = self.chat.receive()
         while len(retval) == 0:
-            print "waiting to receive from remote robot..."
+            #print "waiting to receive from remote robot..."
             retval = self.chat.receive()
         values = []
         for _from, s in retval:
-            print "return:", s
             values.append(pickle.loads(s))
-        print "returning!", values
         if len(values) == 1:
             return values[0]
         else:
