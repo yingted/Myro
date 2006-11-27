@@ -9,6 +9,7 @@ __REVISION__ = "$Revision$"
 __AUTHOR__   = "Keith and Doug"
 
 import serial, time, string
+# from threading import Lock
 from myro import Robot, ask, askQuestion
 import myro.globals
 
@@ -77,6 +78,7 @@ class Scribbler(Robot):
         self._lastTranslate = 0
         self._lastRotate    = 0
         self._volume = 0
+        #self.lock = Lock()
         if serialport == None:
             serialport = ask("Port", useCache = 1)
         # Deal with requirement that Windows "COM#" names where # >= 9 needs to
@@ -100,7 +102,7 @@ class Scribbler(Robot):
             port = "com" + str(x)
             print "Searching on port", port, "for", self.serialPort
             try:
-                self.ser = serial.Serial(port, timeout=.1)
+                self.ser = serial.Serial(port, timeout=.5)
             except serial.SerialException:
                 continue
             self.ser.baudrate = self.baudRate
@@ -113,9 +115,10 @@ class Scribbler(Robot):
                 name = lines[position+4:position+9+4]
                 name = name.replace("\x00", "")
                 name = name.strip()
-                print "Found robot named", name, "on port", port
+                print "   Found robot named", name, "on port", port, "!"
                 if name == self.serialPort:
                     self.serialPort = port
+                    self.ser.timeout = 2.0
                     askQuestion("You can use \"%s\" from now on, like this:\n   Scribbler(\"%s\")" %
                                 (self.serialPort, self.serialPort), answers=["Ok"])
                     return
@@ -158,6 +161,7 @@ class Scribbler(Robot):
         time.sleep(.25)               # give it some time
         while 1:
             self.ser.flushInput()         # flush "IPREScribby"...
+            self.ser.flushOutput()
             time.sleep(1.25)              # give it time to see if another IPRE show up
             if self.ser.inWaiting() == 0: # if none, then we are out of here!
                 break
@@ -366,9 +370,9 @@ class Scribbler(Robot):
             x = -1
             if (c != ""):
                 x = ord(c)            
-        elif self.debug:
-            print "timeout!"
-            return x
+            elif self.debug:
+                print "timeout!"
+                return x
         else:
             return map(ord, c)
 
@@ -379,25 +383,29 @@ class Scribbler(Robot):
         self.ser.write(data)      # write packets
 
     def _set(self, *values):
+        #self.lock.acquire()
         self._write(values)
         self._read(Scribbler.PACKET_LENGTH) # read echo
         self._read(11) # single bit sensors
+        self.ser.flushInput()
+        #self.lock.release()
 
     def _get(self, value, bytes = 1, mode = "byte"):
+        #self.lock.acquire()
         self._write([value])
         self._read(Scribbler.PACKET_LENGTH) # read the echo
         if mode == "byte":
             retval = self._read(bytes)
-            return retval
         elif mode == "word":
-            retval = self._read(bytes)
-            newRetval = []
-            for p in range(0,len(retval),2):
-                newRetval.append(retval[p] << 8 | retval[p + 1])
-            return newRetval
+            retvalBytes = self._read(bytes)
+            retval = []
+            for p in range(0,len(retvalBytes),2):
+                retval.append(retvalBytes[p] << 8 | retvalBytes[p + 1])
         elif mode == "line": # until hit \n newline
             retval = self.ser.readline()
-            return retval
+        self.ser.flushInput()
+        #self.lock.release()
+        return retval
 
     def _set_speaker(self, frequency, duration):
         return self._set(Scribbler.SET_SPEAKER, 
