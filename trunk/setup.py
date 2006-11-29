@@ -1,4 +1,5 @@
 # setup.py
+
 from distutils.core import setup
 import sys
 import myro
@@ -8,6 +9,7 @@ import myro
 
 # patch distutils if it can't cope with the "classifiers" or
 # "download_url" keywords
+
 if sys.version < '2.2.3':
     from distutils.dist import DistributionMetadata
     DistributionMetadata.classifiers = None
@@ -19,7 +21,7 @@ setup(
     version= myro.__VERSION__,
     author="Doug Blank",
     author_email="dblank@cs.brynmawr.edu",
-    url="http://www.roboteducation.org/",
+    url="http://myro.roboteducation.org/",
     packages=['myro', 'myro.robot', 'myro.worlds', 'myro.globals'],
     license="Shared Source",
     long_description="Tools for exploring robotics in education",
@@ -33,3 +35,4 @@ setup(
         'Topic :: Software Development :: Libraries',
     ],
 )
+
