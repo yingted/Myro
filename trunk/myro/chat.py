@@ -19,15 +19,15 @@ class FakeFile:
     """ To trick stderr into not printing warnings from xmpp. """
     def write(self, *args, **keys):
         pass
+temp = sys.stderr        # save the stderr
+sys.stderr = FakeFile()  # replace with fake
 try:
-    temp = sys.stderr        # save the stderr
-    sys.stderr = FakeFile()  # replace with fake
     import xmpp              # import xmpp
-    sys.stderr = temp        # replace stderr
-    temp = None              # clean up
-    del temp
 except:
     xmpp = None
+sys.stderr = temp        # replace stderr
+temp = None              # clean up
+del temp
 
 class RemoteRobot:
     def __init__(self, name, debug = []):
