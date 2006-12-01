@@ -278,7 +278,7 @@ class Surveyor(Robot):
                 newline   = self.ser.read(1)
                 retval = [0 for x in range(80)]
                 for i in range(len(retval)):
-                    retval[i] = int(data[i * 2:i * 2 + 2])/63.0
+                    retval[i] = int(data[i * 2:i * 2 + 2].strip(), 16)/64.0
             except KeyboardInterrupt:
                 raise
             except:
