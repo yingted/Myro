@@ -48,23 +48,43 @@ class WindowsTTSEngine(TTSEngine):
         self.tts.SpeakToWave(filename, message)
             
 def speak(message, async = 1):
-    myro.globals.tts.speak(message, async)
+    if myro.globals.tts != None:
+        myro.globals.tts.speak(message, async)
+    else:
+        print "Text-to-speech is not loaded"
 def stopSpeaking():
-    myro.globals.tts.stop()
+    if myro.globals.tts != None:
+        myro.globals.tts.stop()
+    else:
+        print "Text-to-speech is not loaded"
 def setVoice(name):
-    myro.globals.tts.setVoice(name)
+    if myro.globals.tts != None:
+        myro.globals.tts.setVoice(name)
+    else:
+        print "Text-to-speech is not loaded"
 def getVoice():
-    return myro.globals.tts.getVoice()
+    if myro.globals.tts != None:
+        return myro.globals.tts.getVoice()
+    else:
+        print "Text-to-speech is not loaded"
 def getVoices():
-    return myro.globals.tts.getVoices()
+    if myro.globals.tts != None:
+        return myro.globals.tts.getVoices()
+    else:
+        print "Text-to-speech is not loaded"
 def playSpeech(filename):
-    myro.globals.tts.playSpeech(filename)
+    if myro.globals.tts != None:
+        myro.globals.tts.playSpeech(filename)
+    else:
+        print "Text-to-speech is not loaded"
 def saveSpeech(message, filename):
-    myro.globals.tts.saveSpeech(message, filename)
+    if myro.globals.tts != None:
+        myro.globals.tts.saveSpeech(message, filename)
+    else:
+        print "Text-to-speech is not loaded"
 
-if myro.globals.tts == None:
-    try:
-        myro.globals.tts = WindowsTTSEngine()
-    except:
-        myro.globals.tts = None
+try:
+    myro.globals.tts = WindowsTTSEngine()
+except:
+    myro.globals.tts = None
     
