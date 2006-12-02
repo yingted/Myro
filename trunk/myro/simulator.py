@@ -658,7 +658,7 @@ class TkSimulator(Tkinter.Toplevel, Simulator):
         self.canvas.pack(expand="yes", fill="both", side="top", anchor="n")
         self.addMouseBindings()
         self.mBar = Tkinter.Frame(self, relief=Tkinter.RAISED, borderwidth=2)
-        self.mBar.pack(fill=Tkinter.X)
+        self.mBar.pack(fill=Tkinter.X, expand="no")
         self.lastEventRobot = None
         self.menuButtons = {}
         menu = [
@@ -725,7 +725,7 @@ class TkSimulator(Tkinter.Toplevel, Simulator):
         """ Assumes self.menuButtons exists """
         menu = Tkinter.Menubutton(bar,text=name,underline=0)
         self.menuButtons[name] = menu
-        menu.pack(side=Tkinter.LEFT,padx="2m")
+        menu.pack(side=Tkinter.LEFT,padx="2m", expand="no")
         menu.filemenu = Tkinter.Menu(menu)
         for cmd in commands:
             if cmd:

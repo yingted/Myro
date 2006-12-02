@@ -9,7 +9,7 @@ from myro.simulator import *
 
 def INIT():
     # (width, height), (offset x, offset y), scale:
-    sim = TkSimulator((589,656), (10,592), 281.784423)
+    sim = TkSimulator((425,423), (5,420), 208.005558)
     # x1, y1, x2, y2 in meters:
     sim.addBox(0, 0, 2, 2)
     sim.addLight(.25, .25, .25)
