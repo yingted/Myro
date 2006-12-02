@@ -103,8 +103,6 @@ class Surveyor(Robot):
     def open(self):
         try:
             myro.globals.robot.ser.close()
-        except KeyboardInterrupt:
-            raise
         except:
             pass
         while 1:
@@ -158,13 +156,17 @@ class Surveyor(Robot):
                     retval = self._send("S")
                     if self.canvas != None:
                         self.canvas.delete("scan")
-                        c = 0
-                        for s in retval:
-                            self.canvas.create_line(c, self.resolution[1],
-                                                    c, self.resolution[1] - s * self.resolution[1],
+                        for c in range(len(retval) - 1):
+                            s1 = retval[c]
+                            s2 = retval[c + 1]
+                            pos = c * 2
+                            self.canvas.create_line(pos    , self.resolution[1] - s1 * self.resolution[1],
+                                                    pos + 2, self.resolution[1] - s2 * self.resolution[1],
                                                     fill="yellow", tag="scan")
-                            c += 2
-                        #print "", # hack to force IDLE to update
+                            self.canvas.create_line(pos    , self.resolution[1] - s1 * self.resolution[1] - 1,
+                                                    pos + 2, self.resolution[1] - s2 * self.resolution[1] - 1,
+                                                    fill="black", tag="scan")
+                        # force IDLE to update
                     return retval
                 elif sensor == "image":
                     return self.getImage()
@@ -280,7 +282,7 @@ class Surveyor(Robot):
                 newline   = self.ser.read(1)
                 retval = [0 for x in range(80)]
                 for i in range(len(retval)):
-                    retval[i] = int(data[i * 2:i * 2 + 2])/63.0
+                    retval[i] = int(data[i * 2:i * 2 + 2].strip(), 16)/64.0
             except KeyboardInterrupt:
                 raise
             except:

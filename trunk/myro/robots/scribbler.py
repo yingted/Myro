@@ -129,8 +129,6 @@ class Scribbler(Robot):
     def open(self):
         try:
             myro.globals.robot.ser.close()
-        except KeyboardInterrupt:
-            raise
         except:
             pass
         if not (self.serialPort.startswith("com") or self.serialPort.startswith("/dev/")):
@@ -140,20 +138,14 @@ class Scribbler(Robot):
                 try:
                     self.ser = serial.Serial(self.serialPort, timeout = 2) 
                     break
-                except KeyboardInterrupt:
-                    raise
                 except:
                     print "Waiting on port...", self.serialPort
                     try:
                         self.ser.close()
-                    except KeyboardInterrupt:
-                        raise
                     except:
                         pass
                     try:
                         del self.ser
-                    except KeyboardInterrupt:
-                        raise
                     except:
                         pass
                     time.sleep(1)
