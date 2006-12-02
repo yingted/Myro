@@ -302,6 +302,7 @@ class Simulator:
         self.time += (self.timeslice / 1000.0)
         i = 0
         for r in self.robots:
+            r.lock.acquire()
             resetVelocities = 0
             if r.stall:
                 resetVelocities = 1
@@ -314,6 +315,7 @@ class Simulator:
                 r.vy = ovy
                 r.va = ova
             self.addTrail(i, self.stepCount % self.maxTrailSize, r)
+            r.lock.release()
             i += 1
         for r in self.needToMove:
             r.step(self.timeslice, movePucks = 0)
@@ -983,6 +985,7 @@ class SimRobot:
             name = name.replace(" ", "_")
         self.name = name
         self.type = "robot"
+        self.lock = threading.Lock()
         # set them here manually: (afterwards, use setPose)
         self.proposePosition = 0 # used to check for obstacles before moving
         self.stepScalar = 1.0 # normally = 1.0
@@ -1088,16 +1091,22 @@ class SimRobot:
             # noise: --------------------------------------------------------------
             # FIXME: add gaussian(noiseRotate)
     def move(self, vx, va):
+        self.lock.aquire()
         self.vx = vx
         self.va = va
+        self.lock.release()
         return "ok"
 
     def rotate(self, va):
+        self.lock.aquire()
         self.va = va
+        self.lock.release()
         return "ok"
 
     def translate(self, vx):
+        self.lock.aquire()
         self.vx = vx
+        self.lock.release()
         return "ok"
 
     def getPose(self):
