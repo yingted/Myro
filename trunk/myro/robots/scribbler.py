@@ -103,6 +103,8 @@ class Scribbler(Robot):
             print "Searching on port", port, "for", self.serialPort
             try:
                 self.ser = serial.Serial(port, timeout=.5)
+            except KeyboardInterrupt:
+                raise
             except serial.SerialException:
                 continue
             self.ser.baudrate = self.baudRate
