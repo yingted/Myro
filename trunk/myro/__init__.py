@@ -15,6 +15,7 @@ import myro.globals
 from myro.media import *
 from myro.speech import *
 from myro.chat import *
+
 try:
     import Tkinter
     import tkFileDialog
@@ -23,6 +24,7 @@ try:
 except:
     Tkinter = None
 if Tkinter != None:
+    from myro.graphics import *
     from myro.widgets import AskDialog as _AskDialog
     try:
         myro.globals.gui = Tkinter.Tk()
