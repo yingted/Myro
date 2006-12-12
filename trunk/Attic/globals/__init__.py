@@ -20,3 +20,4 @@ DEG90RADS    = 0.5 * math.pi
 COSDEG90RADS = math.cos(DEG90RADS) / 1000.0
 SINDEG90RADS = math.sin(DEG90RADS) / 1000.0
 
+del math
