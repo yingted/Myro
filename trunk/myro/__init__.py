@@ -24,7 +24,7 @@ try:
 except:
     Tkinter = None
 if Tkinter != None:
-    from myro.graphics import *
+    #from myro.graphics import *
     from myro.widgets import AskDialog as _AskDialog
     try:
         myro.globals.gui = Tkinter.Tk()
