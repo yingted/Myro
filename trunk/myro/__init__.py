@@ -372,13 +372,52 @@ from myro.robot.surveyor import Surveyor
 from myro.robot.simulator import SimScribbler
 
 class Computer(Robot):
+    """ An interface to computer devices. """
     def __init__(self):
+        """ Constructs a computer object. """
         Robot.__init__(self)
         if tkSnack:
             self.addService("audio", "type", "tksnack")
     def move(self, translate, rotate):
+        """ Moves the robot translate, rotate velocities. """
         print "move(%f, %f)" % (translate, rotate)
-
+    def speak(self, message, async = 1):
+        """ Speaks a text message. """
+        if myro.globals.tts != None:
+            myro.globals.tts.speak(message, async)
+        else:
+            print "Text-to-speech is not loaded"
+    def stopSpeaking(self):
+        if myro.globals.tts != None:
+            myro.globals.tts.stop()
+        else:
+            print "Text-to-speech is not loaded"
+    def setVoice(self, name):
+        if myro.globals.tts != None:
+            myro.globals.tts.setVoice(name)
+        else:
+            print "Text-to-speech is not loaded"
+    def getVoice(self):
+        if myro.globals.tts != None:
+            return myro.globals.tts.getVoice()
+        else:
+            print "Text-to-speech is not loaded"
+    def getVoices(self):
+        if myro.globals.tts != None:
+            return myro.globals.tts.getVoices()
+        else:
+            print "Text-to-speech is not loaded"
+    def playSpeech(self, filename):
+        if myro.globals.tts != None:
+            myro.globals.tts.playSpeech(filename)
+        else:
+            print "Text-to-speech is not loaded"
+    def saveSpeech(self, message, filename):
+        if myro.globals.tts != None:
+            myro.globals.tts.saveSpeech(message, filename)
+        else:
+            print "Text-to-speech is not loaded"
+            
 computer = Computer()
 robot    = None
 
