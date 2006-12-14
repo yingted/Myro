@@ -6,7 +6,7 @@ Distributed under a Shared Source License
 """
 
 __REVISION__ = "$Revision$"
-__BUILD__    = "$Build: 0 $"
+__BUILD__    = "$Build: 1 $"
 __VERSION__  = "0.8." + __BUILD__.split()[1]
 __AUTHOR__   = "Doug Blank <dblank@cs.brynmawr.edu>"
 
@@ -399,12 +399,12 @@ class Computer(Robot):
             print "Text-to-speech is not loaded"
     def getVoice(self):
         if myro.globals.tts != None:
-            return myro.globals.tts.getVoice()
+            return str(myro.globals.tts.getVoice())
         else:
             print "Text-to-speech is not loaded"
     def getVoices(self):
         if myro.globals.tts != None:
-            return myro.globals.tts.getVoices()
+            return map(str, myro.globals.tts.getVoices())
         else:
             print "Text-to-speech is not loaded"
     def playSpeech(self, filename):

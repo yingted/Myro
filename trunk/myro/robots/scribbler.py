@@ -13,6 +13,15 @@ import serial, time, string
 from myro import Robot, ask, askQuestion
 import myro.globals
 
+def _commport(s):
+    if type(s) != int: return 1
+    if type(s) == str:
+        s = s.replace('\\', "")
+        s = s.replace('.', "")
+        if s.lower().startswith("com"): return 1
+        if s.startswith("/dev/"): return 1
+    return 0
+
 def isTrue(value):
     """
     Returns True if value is something we consider to be "on".
@@ -135,7 +144,7 @@ class Scribbler(Robot):
             raise
         except:
             pass
-        if not (self.serialPort.startswith("com") or self.serialPort.startswith("/dev/")):
+        if not _commport(self.serialPort):
             self.search()
         else:
             while 1:
