@@ -10,7 +10,7 @@ __AUTHOR__   = "Keith and Doug"
 
 import serial, time, string
 # from threading import Lock
-from myro import Robot, ask, askQuestion, _updateIDLE
+from myro import Robot, ask, askQuestion, _update_gui
 import myro.globvars
 
 def _commport(s):
@@ -303,7 +303,7 @@ class Scribbler(Robot):
         else:             return self._set(Scribbler.SET_ECHO_MODE, 0)
 
     def set(self, item, position, value = None):
-        _updateIDLE()
+        _update_gui()
         item = item.lower()
         if item == "led":
             if type(position) in [int, float]:
@@ -397,7 +397,7 @@ class Scribbler(Robot):
             return map(ord, c)
 
     def _write(self, rawdata):
-        _updateIDLE()
+        _update_gui()
         t = map(lambda x: chr(int(x)), rawdata)
         data = string.join(t, '') + (chr(0) * (Scribbler.PACKET_LENGTH - len(t)))[:9]
         if self.debug: print "_write:", data, len(data)

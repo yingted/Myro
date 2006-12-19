@@ -9,7 +9,7 @@ __REVISION__ = "$Revision$"
 __AUTHOR__   = "Doug Blank"
 
 import os, atexit, time
-from myro import Robot
+from myro import Robot, _update_gui
 import myro.globvars
 
 def _cleanup(): # copy from myro/__init__.py
@@ -45,14 +45,19 @@ class SimScribbler(Robot):
         self.name = "Scribby"
         self.startsong = "tada"
     def translate(self, amount):
+        _update_gui()
         return self._clients[0].translate(amount)
     def rotate(self, amount):
+        _update_gui()
         return self._clients[0].rotate(amount)
     def move(self, translate, rotate):
+        _update_gui()
         return self._clients[0].move(translate, rotate)
     def update(self):
+        _update_gui()
         return self._clients[0].update()
     def get(self, sensor = "all", *positions):
+        _update_gui()
         self._clients[0].update()
         sensor = sensor.lower()
         if sensor == "stall":
@@ -95,6 +100,7 @@ class SimScribbler(Robot):
                 return retvals
 
     def set(self, item, position, value = None):
+        _update_gui()
         item = item.lower()
         if item == "led":
             return None

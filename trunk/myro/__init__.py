@@ -37,6 +37,22 @@ try:
 except:
     tkSnack = None
 
+######################## Try to make IDLE interruptable when no subprocesses
+try:
+    import idlelib
+    shell = idlelib.PyShell.flist.pyshell
+    root = idlelib.PyShell.root
+    def _update_gui():
+        root.update()
+        if shell.canceled:
+            raise KeyboardInterrupt
+except: # idlelib not in namespace: running in subprocess
+    def _update_gui():
+        # subprocess responds to keyboard interruption
+        pass
+if "idlelib" in dir():
+    del idlelib
+########################
 def wait(seconds):
     """
     Wrapper for time.sleep() so that we may later overload.
@@ -121,11 +137,6 @@ def _ask(data, title = "Information Request", forceAsk = 0, forceConsole = 0, us
         for text in data.keys():
             myro.globvars.askData[text] = data[text]
     return data
-
-def _updateIDLE():
-    """ Updates IDLE window which forces a CONTROL+C check """
-    if "PyShell" in globals().keys():
-        globals()["PyShell"].flist.pyshell.write("")
 
 def _askGUI(qlist, title = "Information Request"):
    d = _AskDialog(myro.globvars.gui, title, qlist)
