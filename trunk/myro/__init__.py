@@ -38,21 +38,25 @@ except:
     tkSnack = None
 
 ######################## Try to make IDLE interruptable when no subprocesses
-try:
-    import idlelib
-    shell = idlelib.PyShell.flist.pyshell
-    root = idlelib.PyShell.root
-    def _update_gui():
-        root.update()
-        if shell.canceled:
-            raise KeyboardInterrupt
-except: # idlelib not in namespace: running in subprocess
-    def _update_gui():
-        # subprocess responds to keyboard interruption
-        pass
-if "idlelib" in dir():
-    del idlelib
+#try:
+#    import idlelib
+#    shell = idlelib.PyShell.flist.pyshell
+#    root = idlelib.PyShell.root
+#    def _update_gui():
+#        root.update()
+#        if shell.canceled:
+#            raise KeyboardInterrupt
+#except: # idlelib not in namespace: running in subprocess
+#    def _update_gui():
+#        # subprocess responds to keyboard interruption
+#        pass
+#if "idlelib" in dir():
+#    del idlelib
 ########################
+def _update_gui():
+    # subprocess responds to keyboard interruption
+    pass
+
 def wait(seconds):
     """
     Wrapper for time.sleep() so that we may later overload.

@@ -10,7 +10,7 @@ __version__ = "$Revision$"
 
 import socket, threading, random, time
 from myro.robot import Robot
-from myro import _updateIDLE
+from myro import _update_gui
 from myro.robot.device import * # Device, GripperDevice, SensorValue
 try:
 	import cPickle as pickle
@@ -384,7 +384,7 @@ class TCPRobot(Simbot):
 		self.init(startDevices)
 
 	def move(self, message, other = None):
-                _updateIDLE()
+                _update_gui()
 		self.lock.acquire()
 		if type(message) in [type(1), type(1.)] and type(other) in [type(1), type(1.)]:
 			message = "m_%.2f_%.2f" % (message, other)
