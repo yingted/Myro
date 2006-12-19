@@ -10,24 +10,24 @@ __AUTHOR__   = "Doug Blank"
 
 import os, atexit, time
 from myro import Robot
-import myro.globals
+import myro.globvars
 
 def _cleanup(): # copy from myro/__init__.py
-    if myro.globals.robot != None:
-        myro.globals.robot.stop() # hangs?
+    if myro.globvars.robot != None:
+        myro.globvars.robot.stop() # hangs?
 	time.sleep(.5)
-        myro.globals.robot.close()
-    if myro.globals.simulator != None:
-       myro.globals.simulator.destroy()
+        myro.globvars.robot.close()
+    if myro.globvars.simulator != None:
+       myro.globvars.simulator.destroy()
 
 class SimScribbler(Robot):
     def __init__(self, id = None):
         Robot.__init__(self)
         import myro.simulator
-        globalspath, filename = os.path.split(myro.globals.__file__)
-        myro.globals.myropath, directory = os.path.split(globalspath)
+        globalspath, filename = os.path.split(myro.globvars.__file__)
+        myro.globvars.myropath, directory = os.path.split(globalspath)
         self._simulator = myro.simulator.INIT(
-            os.path.join(myro.globals.myropath, "worlds", "MyroWorld"))
+            os.path.join(myro.globvars.myropath, "worlds", "MyroWorld"))
         for port in self._simulator.ports:
             print "Simulator starting listener on port", port, "..."
             thread = myro.simulator.Thread(self._simulator, port)
@@ -37,8 +37,8 @@ class SimScribbler(Robot):
         self._clients = []
         for port in self._simulator.ports:
             self._clients.append(TCPRobot("localhost", port))
-        myro.globals.robot = self
-        myro.globals.simulator = self._simulator
+        myro.globvars.robot = self
+        myro.globvars.simulator = self._simulator
         # FIX: hack to get _cleanup called before Tk exitfunc, which hangs
         atexit.register(_cleanup)
         self.volume = 1

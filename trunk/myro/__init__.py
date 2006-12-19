@@ -6,12 +6,12 @@ Distributed under a Shared Source License
 """
 
 __REVISION__ = "$Revision$"
-__BUILD__    = "$Build: 1 $"
+__BUILD__    = "$Build: 2 $"
 __VERSION__  = "0.8." + __BUILD__.split()[1]
 __AUTHOR__   = "Doug Blank <dblank@cs.brynmawr.edu>"
 
 import sys, atexit, time, random, pickle
-import myro.globals
+import myro.globvars
 from myro.media import *
 from myro.speech import *
 from myro.chat import *
@@ -27,13 +27,13 @@ if Tkinter != None:
     #from myro.graphics import *
     from myro.widgets import AskDialog as _AskDialog
     try:
-        myro.globals.gui = Tkinter.Tk()
-        myro.globals.gui.withdraw()
+        myro.globvars.gui = Tkinter.Tk()
+        myro.globvars.gui.withdraw()
     except:
         Tkinter = None
 try:
     import tkSnack
-    tkSnack.initializeSnack(myro.globals.gui)
+    tkSnack.initializeSnack(myro.globvars.gui)
 except:
     tkSnack = None
 
@@ -71,11 +71,11 @@ def askQuestion(question, answers = ["Yes", "No"], title = "Myro Question",
 def pickAFolder():
     folder = tkFileDialog.askdirectory()
     if folder == '':
-        folder = myro.globals.mediaFolder
+        folder = myro.globvars.mediaFolder
     return folder
 	
 def pickAFile():
-    path = tkFileDialog.askopenfilename(parent=myro.globals.gui)
+    path = tkFileDialog.askopenfilename(parent=myro.globvars.gui)
     return path
 
 def pickAColor():
@@ -102,8 +102,8 @@ def _ask(data, title = "Information Request", forceAsk = 0, forceConsole = 0, us
         # get data, if in cache:
         needToAsk = 0
         for question in data.keys():
-            if question in myro.globals.askData.keys():
-                data[question] = myro.globals.askData[question]
+            if question in myro.globvars.askData.keys():
+                data[question] = myro.globvars.askData[question]
             else:
                 needToAsk = 1
     else:
@@ -119,11 +119,16 @@ def _ask(data, title = "Information Request", forceAsk = 0, forceConsole = 0, us
                 raise KeyboardInterrupt
         # cache data in globals:
         for text in data.keys():
-            myro.globals.askData[text] = data[text]
+            myro.globvars.askData[text] = data[text]
     return data
 
+def _updateIDLE():
+    """ Updates IDLE window which forces a CONTROL+C check """
+    if "PyShell" in globals().keys():
+        globals()["PyShell"].flist.pyshell.write("")
+
 def _askGUI(qlist, title = "Information Request"):
-   d = _AskDialog(myro.globals.gui, title, qlist)
+   d = _AskDialog(myro.globvars.gui, title, qlist)
    d.top.bind("<Return>", lambda event: d.OkPressed())
    ok = d.Show()
    if ok:
@@ -192,8 +197,8 @@ class Robot(object):
             self.addService("computer.audio", "type", "tksnack")
         if Tkinter != None:
             self.addService("computer.graphics", "type", "tkinter")
-        if myro.globals.tts != None:
-            self.addService("computer.text-to-speech", "type", str(myro.globals.tts))
+        if myro.globvars.tts != None:
+            self.addService("computer.text-to-speech", "type", str(myro.globvars.tts))
 
     def initializeRemoteControl(self, password):
         self.chat = Chat(self.name, password)
@@ -253,10 +258,10 @@ class Robot(object):
             snd1.play(filter=filt1, blocking=0)
             start = time.time()
             while time.time() - start < duration:
-                myro.globals.gui.update()
+                myro.globvars.gui.update()
                 time.sleep(.001)
         elif Tkinter != None:
-            myro.globals.gui.bell()            
+            myro.globvars.gui.bell()            
             time.sleep(duration)
 	else:
 	    print "beep!", chr(7)
@@ -383,38 +388,38 @@ class Computer(Robot):
         print "move(%f, %f)" % (translate, rotate)
     def speak(self, message, async = 1):
         """ Speaks a text message. """
-        if myro.globals.tts != None:
-            myro.globals.tts.speak(message, async)
+        if myro.globvars.tts != None:
+            myro.globvars.tts.speak(message, async)
         else:
             print "Text-to-speech is not loaded"
     def stopSpeaking(self):
-        if myro.globals.tts != None:
-            myro.globals.tts.stop()
+        if myro.globvars.tts != None:
+            myro.globvars.tts.stop()
         else:
             print "Text-to-speech is not loaded"
     def setVoice(self, name):
-        if myro.globals.tts != None:
-            myro.globals.tts.setVoice(name)
+        if myro.globvars.tts != None:
+            myro.globvars.tts.setVoice(name)
         else:
             print "Text-to-speech is not loaded"
     def getVoice(self):
-        if myro.globals.tts != None:
-            return str(myro.globals.tts.getVoice())
+        if myro.globvars.tts != None:
+            return str(myro.globvars.tts.getVoice())
         else:
             print "Text-to-speech is not loaded"
     def getVoices(self):
-        if myro.globals.tts != None:
-            return map(str, myro.globals.tts.getVoices())
+        if myro.globvars.tts != None:
+            return map(str, myro.globvars.tts.getVoices())
         else:
             print "Text-to-speech is not loaded"
     def playSpeech(self, filename):
-        if myro.globals.tts != None:
-            myro.globals.tts.playSpeech(filename)
+        if myro.globvars.tts != None:
+            myro.globvars.tts.playSpeech(filename)
         else:
             print "Text-to-speech is not loaded"
     def saveSpeech(self, message, filename):
-        if myro.globals.tts != None:
-            myro.globals.tts.saveSpeech(message, filename)
+        if myro.globvars.tts != None:
+            myro.globvars.tts.saveSpeech(message, filename)
         else:
             print "Text-to-speech is not loaded"
             
@@ -423,16 +428,16 @@ robot    = None
 
 # functions:
 def _cleanup():
-    if myro.globals.robot != None:
-        myro.globals.robot.stop() # hangs?
+    if myro.globvars.robot != None:
+        myro.globvars.robot.stop() # hangs?
 	time.sleep(.5)
-        myro.globals.robot.close()
-    if myro.globals.simulator != None:
-       myro.globals.simulator.destroy()
+        myro.globvars.robot.close()
+    if myro.globvars.simulator != None:
+       myro.globvars.simulator.destroy()
 
 # Get ready for user prompt; set up environment:
-if not myro.globals.setup:
-    myro.globals.setup = 1
+if not myro.globvars.setup:
+    myro.globvars.setup = 1
     atexit.register(_cleanup)
     # Ok, now we're ready!
     print >> sys.stderr, "Myro, (c) 2006 Institute for Personal Robots in Education"
@@ -448,71 +453,71 @@ def simulator(id = None):
     global robot
     robot = SimScribbler(id)
 def translate(amount):
-    return myro.globals.robot.translate(amount)
+    return myro.globvars.robot.translate(amount)
 def rotate(amount):
-    return myro.globals.robot.rotate(amount)
+    return myro.globvars.robot.rotate(amount)
 def move(translate, rotate):
-    return myro.globals.robot.move(rotate, translate)
+    return myro.globvars.robot.move(rotate, translate)
 def forward(amount):
-    return myro.globals.robot.forward(amount)
+    return myro.globvars.robot.forward(amount)
 def backward(amount):
-    return myro.globals.robot.backward(amount)
+    return myro.globvars.robot.backward(amount)
 def turn(direction, amount = .8):
-    return myro.globals.robot.turn(direction, amount)
+    return myro.globvars.robot.turn(direction, amount)
 def turnLeft(amount):
-    return myro.globals.robot.turnLeft(amount)
+    return myro.globvars.robot.turnLeft(amount)
 def turnRight(amount):
-    return myro.globals.robot.turnRight(amount)
+    return myro.globvars.robot.turnRight(amount)
 def stop():
-    return myro.globals.robot.stop()
+    return myro.globvars.robot.stop()
 def openConnection():
-    return myro.globals.robot.open()
+    return myro.globvars.robot.open()
 def closeConnection():
-    return myro.globals.robot.close()
+    return myro.globvars.robot.close()
 def get(sensor = "all", *pos):
-    return myro.globals.robot.get(sensor, *pos)
+    return myro.globvars.robot.get(sensor, *pos)
 def getVersion():
-    return myro.globals.robot.get("version")
+    return myro.globvars.robot.get("version")
 def getLight(*pos):
-    return myro.globals.robot.get("light", *pos)
+    return myro.globvars.robot.get("light", *pos)
 def getIR(*pos):
-    return myro.globals.robot.get("ir", *pos)
+    return myro.globvars.robot.get("ir", *pos)
 def getLine(*pos):
-    return myro.globals.robot.get("line", *pos)
+    return myro.globvars.robot.get("line", *pos)
 def getStall():
-    return myro.globals.robot.get("stall")
+    return myro.globvars.robot.get("stall")
 def getAll():
-    return myro.globals.robot.get("all")
+    return myro.globvars.robot.get("all")
 def getName():
-    return myro.globals.robot.get("name")
+    return myro.globvars.robot.get("name")
 def getStartSong():
-    return myro.globals.robot.get("startsong")
+    return myro.globvars.robot.get("startsong")
 def getVolume():
-    return myro.globals.robot.get("volume")
+    return myro.globvars.robot.get("volume")
 def update():
-    return myro.globals.robot.update()
+    return myro.globvars.robot.update()
 def beep(duration, frequency1, frequency2 = None):
-    return myro.globals.robot.beep(duration, frequency1, frequency2)
+    return myro.globvars.robot.beep(duration, frequency1, frequency2)
 def set(item, position, value = None):
-    return myro.globals.robot.set(item, position, value)
+    return myro.globvars.robot.set(item, position, value)
 def setLED(position, value):
-    return myro.globals.robot.set("led", position, value)
+    return myro.globvars.robot.set("led", position, value)
 def setName(name):
-    return myro.globals.robot.set("name", name)
+    return myro.globvars.robot.set("name", name)
 def setVolume(value):
-    return myro.globals.robot.set("volume", value)
+    return myro.globvars.robot.set("volume", value)
 def setStartSong(songName):
-    return myro.globals.robot.set("startsong", songName)
+    return myro.globvars.robot.set("startsong", songName)
 def motors(left, right):
-    return myro.globals.robot.motors(left, right)
+    return myro.globvars.robot.motors(left, right)
 def restart():
-    return myro.globals.robot.restart()
+    return myro.globvars.robot.restart()
 def joyStick():
-    return myro.globals.robot.joyStick()
+    return myro.globvars.robot.joyStick()
 def playSong(song, wholeNoteDuration = .545):
-    return myro.globals.robot.playSong(song, wholeNoteDuration)
+    return myro.globvars.robot.playSong(song, wholeNoteDuration)
 def playNote(tup, wholeNoteDuration = .545):
-    return myro.globals.robot.playNote(tup, wholeNoteDuration)
+    return myro.globvars.robot.playNote(tup, wholeNoteDuration)
 # --------------------------------------------------------
 # Error handler:
 # --------------------------------------------------------
@@ -536,9 +541,9 @@ sys.excepthook = _myroExceptionHandler
 # --------------------------------------------------------
 import signal
 def _interruptHandler(signum, frame):
-    if myro.globals.robot != None:
+    if myro.globvars.robot != None:
         print "Stopping robot..."
-        myro.globals.robot.stop()
+        myro.globvars.robot.stop()
     raise KeyboardInterrupt
 signal.signal(signal.SIGINT, _interruptHandler)
 # --------------------------------------------------------

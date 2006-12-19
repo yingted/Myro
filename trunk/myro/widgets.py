@@ -37,7 +37,7 @@ class StatusBar(Tkinter.Frame):
 
 class HelpWindow(Tkinter.Toplevel): 
     def __init__(self):
-        Tkinter.Toplevel.__init__(self, myro.globals.gui)
+        Tkinter.Toplevel.__init__(self, myro.globvars.gui)
         root.withdraw()
         self.frame = Tkinter.Frame(self)
         self.frame.pack(side = 'bottom', expand = "yes", anchor = "n",

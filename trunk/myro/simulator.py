@@ -3,7 +3,7 @@ A simple simulator.
 """
  
 import SocketServer, socket, sys, threading, time, os
-import myro.globals
+import myro.globvars
 
 def INIT(filename):
     path = filename.split(os.path.sep)
@@ -76,14 +76,14 @@ class Thread(threading.Thread):
 
 import Tkinter, time, math, random
 
-import myro.globals
+import myro.globvars
 try:
     import cPickle as pickle
 except:
     import pickle
 
-PIOVER180 = myro.globals.PIOVER180
-PIOVER2   = myro.globals.PIOVER2
+PIOVER180 = myro.globvars.PIOVER180
+PIOVER2   = myro.globvars.PIOVER2
 
 class Segment:
     def __init__(self, start, end, id = None, partOf = None):
@@ -647,10 +647,10 @@ class Simulator:
 class TkSimulator(Tkinter.Toplevel, Simulator):
     def __init__(self, dimensions, offsets, scale, root = None, run = 1):
         if root == None:
-            if myro.globals.gui == None:
-                myro.globals.gui = Tkinter.Tk()
-                myro.globals.gui.withdraw()
-        Tkinter.Toplevel.__init__(self, myro.globals.gui)
+            if myro.globvars.gui == None:
+                myro.globvars.gui = Tkinter.Tk()
+                myro.globvars.gui.withdraw()
+        Tkinter.Toplevel.__init__(self, myro.globvars.gui)
         Simulator.__init__(self, dimensions, offsets, scale)
         self.root = root
         self.wm_title("Myro Simulator")

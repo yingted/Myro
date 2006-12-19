@@ -10,8 +10,8 @@ __AUTHOR__   = "Keith and Doug"
 
 import serial, time, string
 # from threading import Lock
-from myro import Robot, ask, askQuestion
-import myro.globals
+from myro import Robot, ask, askQuestion, _updateIDLE
+import myro.globvars
 
 def _commport(s):
     if type(s) != int: return 1
@@ -99,7 +99,7 @@ class Scribbler(Robot):
         self.serialPort = serialport
         self.baudRate = baudrate
         self.open()
-        myro.globals.robot = self
+        myro.globvars.robot = self
 
     def search(self):
         answer = askQuestion(title="Search for " + self.serialPort,
@@ -139,7 +139,7 @@ class Scribbler(Robot):
     
     def open(self):
         try:
-            myro.globals.robot.ser.close()
+            myro.globvars.robot.ser.close()
         except KeyboardInterrupt:
             raise
         except:
@@ -303,6 +303,7 @@ class Scribbler(Robot):
         else:             return self._set(Scribbler.SET_ECHO_MODE, 0)
 
     def set(self, item, position, value = None):
+        _updateIDLE()
         item = item.lower()
         if item == "led":
             if type(position) in [int, float]:
@@ -396,6 +397,7 @@ class Scribbler(Robot):
             return map(ord, c)
 
     def _write(self, rawdata):
+        _updateIDLE()
         t = map(lambda x: chr(int(x)), rawdata)
         data = string.join(t, '') + (chr(0) * (Scribbler.PACKET_LENGTH - len(t)))[:9]
         if self.debug: print "_write:", data, len(data)

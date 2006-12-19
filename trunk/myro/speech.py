@@ -1,4 +1,4 @@
-import myro.globals
+import myro.globvars
 
 class TTSEngine:
     def __init__(self, name = None, echo = 1):
@@ -33,7 +33,7 @@ class WindowsTTSEngine(TTSEngine):
         self.tts.SetVoiceByName(name) # For example, 'MSMary'
 
     def getVoices(self):
-        return self.tts.GetVoiceNames()
+        return map(str, self.tts.GetVoiceNames())
 
     def getVoice(self):
         return self.tts.GetVoice()
@@ -48,43 +48,43 @@ class WindowsTTSEngine(TTSEngine):
         self.tts.SpeakToWave(filename, message)
             
 def speak(message, async = 1):
-    if myro.globals.tts != None:
-        myro.globals.tts.speak(message, async)
+    if myro.globvars.tts != None:
+        myro.globvars.tts.speak(message, async)
     else:
         print "Text-to-speech is not loaded"
 def stopSpeaking():
-    if myro.globals.tts != None:
-        myro.globals.tts.stop()
+    if myro.globvars.tts != None:
+        myro.globvars.tts.stop()
     else:
         print "Text-to-speech is not loaded"
 def setVoice(name):
-    if myro.globals.tts != None:
-        myro.globals.tts.setVoice(name)
+    if myro.globvars.tts != None:
+        myro.globvars.tts.setVoice(name)
     else:
         print "Text-to-speech is not loaded"
 def getVoice():
-    if myro.globals.tts != None:
-        return myro.globals.tts.getVoice()
+    if myro.globvars.tts != None:
+        return myro.globvars.tts.getVoice()
     else:
         print "Text-to-speech is not loaded"
 def getVoices():
-    if myro.globals.tts != None:
-        return myro.globals.tts.getVoices()
+    if myro.globvars.tts != None:
+        return myro.globvars.tts.getVoices()
     else:
         print "Text-to-speech is not loaded"
 def playSpeech(filename):
-    if myro.globals.tts != None:
-        myro.globals.tts.playSpeech(filename)
+    if myro.globvars.tts != None:
+        myro.globvars.tts.playSpeech(filename)
     else:
         print "Text-to-speech is not loaded"
 def saveSpeech(message, filename):
-    if myro.globals.tts != None:
-        myro.globals.tts.saveSpeech(message, filename)
+    if myro.globvars.tts != None:
+        myro.globvars.tts.saveSpeech(message, filename)
     else:
         print "Text-to-speech is not loaded"
 
 try:
-    myro.globals.tts = WindowsTTSEngine()
+    myro.globvars.tts = WindowsTTSEngine()
 except:
-    myro.globals.tts = None
+    myro.globvars.tts = None
     

@@ -10,7 +10,7 @@ __AUTHOR__   = "Doug"
 
 import serial, time, string
 from myro import Robot, ask
-import myro.globals
+import myro.globvars
 import StringIO
 import Tkinter
 try:
@@ -92,17 +92,17 @@ class Surveyor(Robot):
         self.id = None
         self.name = "SRV-1"
         self.open()
-        myro.globals.robot = self
+        myro.globvars.robot = self
 
     def watch(self):
-        self.window = Tkinter.Toplevel(myro.globals.gui)
+        self.window = Tkinter.Toplevel(myro.globvars.gui)
         self.window.wm_title("SRV-1 View (%dx%d)" % self.resolution)
         self.canvas = Tkinter.Canvas(self.window, width = 160, height = 128)
         self.canvas.pack(fill="both", expand="y")
 
     def open(self):
         try:
-            myro.globals.robot.ser.close()
+            myro.globvars.robot.ser.close()
         except:
             pass
         while 1:
