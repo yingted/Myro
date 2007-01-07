@@ -1,8 +1,9 @@
 # setup.py
 
 from distutils.core import setup
+from distutils.file_util import copy_file
 import sys
-import myro
+from myro import __VERSION__
 
 #windows installer:
 # python setup.py bdist_wininst
@@ -18,11 +19,13 @@ if sys.version < '2.2.3':
 setup(
     name="myro",
     description="My Robot Python Exploration Library",
-    version= myro.__VERSION__,
+    version= __VERSION__,
     author="Doug Blank",
     author_email="dblank@cs.brynmawr.edu",
     url="http://myro.roboteducation.org/",
-    packages=['myro', 'myro.robot', 'myro.worlds', 'myro.globals'],
+    packages=['myro', 'myro.robot', 'myro.worlds', 'myro.globvars'],
+    package_dir={'idlelib': 'misc'},
+    package_data={'idlelib': ['config-extensions.def']},
     license="Shared Source",
     long_description="Tools for exploring robotics in education",
     classifiers = [
@@ -36,3 +39,8 @@ setup(
     ],
 )
 
+import idlelib, os
+path = idlelib.__file__.split(os.sep)[:-1]
+path = os.sep.join(path)
+copy_file("misc/ScriptBinding.py", path)
+copy_file("misc/config-extensions.def", path)
