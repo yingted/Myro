@@ -8,8 +8,8 @@ Distributed under a Shared Source License
 __REVISION__ = "$Revision$"
 __AUTHOR__   = "Doug Blank"
 
-import os, atexit, time
-from myro import Robot, _update_gui
+import os, atexit, time, thread, threading
+from myro import Robot
 import myro.globvars
 
 def _cleanup(): # copy from myro/__init__.py
@@ -30,8 +30,8 @@ class SimScribbler(Robot):
             os.path.join(myro.globvars.myropath, "worlds", "MyroWorld"))
         for port in self._simulator.ports:
             print "Simulator starting listener on port", port, "..."
-            thread = myro.simulator.Thread(self._simulator, port)
-            thread.start()
+            t = myro.simulator.Thread(self._simulator, port)
+            t.start()
         # start the client(s):
         from myro.robot.symbolic import TCPRobot
         self._clients = []
@@ -44,20 +44,20 @@ class SimScribbler(Robot):
         self.volume = 1
         self.name = "Scribby"
         self.startsong = "tada"
+        self.lock = threading.Lock()
+        thread.start_new_thread(myro.globvars.simulator.mainloop, ())
     def translate(self, amount):
-        _update_gui()
         return self._clients[0].translate(amount)
     def rotate(self, amount):
-        _update_gui()
         return self._clients[0].rotate(amount)
     def move(self, translate, rotate):
-        _update_gui()
-        return self._clients[0].move(translate, rotate)
+        self.lock.acquire()
+        retval = self._clients[0].move(translate, rotate)
+        self.lock.release()
+        return retval
     def update(self):
-        _update_gui()
         return self._clients[0].update()
     def get(self, sensor = "all", *positions):
-        _update_gui()
         self._clients[0].update()
         sensor = sensor.lower()
         if sensor == "stall":
@@ -100,7 +100,6 @@ class SimScribbler(Robot):
                 return retvals
 
     def set(self, item, position, value = None):
-        _update_gui()
         item = item.lower()
         if item == "led":
             return None

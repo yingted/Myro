@@ -71,7 +71,7 @@ class SimulationDevice(Device):
 	def setPose(self, name, x = 0, y = 0, thr = 0):
 		self._dev.move("a_%s_%f_%f_%f" % (name, x, y, thr))
 		self._dev.localize(0,0,0)
-		return "ok"
+		return None
 	def getPose(self, name):
 		retval = self._dev.move("c_%s" % (name, ))
 		return retval
@@ -278,7 +278,7 @@ class Simbot(Robot):
 		if other != None: return # rotate,translate command ignored
 		if message == "quit" or message == "exit" or message == "end" or message == "disconnect":
 			self.simulator.process(message, self.port, 0)
-			return "ok"
+			return None
 		else:
 			retval = self.simulator.process(message, self.port, 0)
 		return retval
@@ -385,31 +385,44 @@ class TCPRobot(Simbot):
 
 	def move(self, message, other = None):
                 _update_gui()
-		self.lock.acquire()
-		if type(message) in [type(1), type(1.)] and type(other) in [type(1), type(1.)]:
-			message = "m_%.2f_%.2f" % (message, other)
-			other = None
-		exp = None
-		if self.socket == 0: return "not connected"
-		if other != None: return # rotate,translate command ignored
-		if message == "quit" or message == "exit" or message == "end" or message == "disconnect":
-			self.socket.sendto(message, self.addr)
-			self.socket.close()
-			self.socket = 0
-			self.lock.release()
-			return "ok"
-		else:
-			self.socket.sendto(message, self.addr)
-			try:
-				retval, addr = self.socket.recvfrom(self.BUFSIZE)
-			except:
-				retval = ""
-			retval = retval.strip()
-			try:
-				exp = pickle.loads( retval )
-			except:
-				exp = retval
-		self.lock.release()
+                self.interruptRequest = 0
+                exp = None
+                try:
+                    self.lock.acquire()
+                    if type(message) in [type(1), type(1.)] and type(other) in [type(1), type(1.)]:
+                            message = "m_%.2f_%.2f" % (message, other)
+                            other = None
+                    if self.socket == 0:
+                        exp = None # not connected
+                    if other != None:
+                        exp = None # rotate,translate command ignored
+                    if message == "quit" or message == "exit" or message == "end" or message == "disconnect":
+                            self.socket.sendto(message, self.addr)
+                            self.socket.close()
+                            self.socket = 0
+                            exp = None
+                    else:
+                            self.socket.sendto(message, self.addr)
+                            retval = ""
+                            try:
+                                    retval, addr = self.socket.recvfrom(self.BUFSIZE)
+                            except KeyboardInterrupt:
+                                    self.interruptRequest = 1
+                            except:
+                                    retval = ""
+                            retval = retval.strip()
+                            try:
+                                    exp = pickle.loads( retval )
+                            except KeyboardInterrupt:
+                                    self.interruptRequest = 1
+                            except:
+                                    exp = retval
+                except KeyboardInterrupt:
+                    self.interruptRequest = 1
+                self.lock.release()
+                if self.interruptRequest == 1:
+                    self.move(0,0)
+                    raise KeyboardInterrupt
 		return exp
 
 	def disconnect(self):

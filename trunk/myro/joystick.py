@@ -57,7 +57,9 @@ class Joystick(Tkinter.Toplevel):
       if self.debug:
          print self.translate, self.rotate
       if self.robot != None:
+         self.robot.lock.acquire()
          self.robot.move(self.translate, self.rotate)
+         self.robot.lock.release()
 
    def canvas_clicked_up(self, event):
       self.canvas.delete("lines")

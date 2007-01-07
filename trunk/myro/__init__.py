@@ -6,11 +6,12 @@ Distributed under a Shared Source License
 """
 
 __REVISION__ = "$Revision$"
-__BUILD__    = "$Build: 2 $"
-__VERSION__  = "0.8." + __BUILD__.split()[1]
+__BUILD__    = "$Build: 0 $"
+__VERSION__  = "1.0." + __BUILD__.split()[1]
 __AUTHOR__   = "Doug Blank <dblank@cs.brynmawr.edu>"
 
-import sys, atexit, time, random, pickle
+from idlelib import PyShell
+import sys, atexit, time, random, pickle, thread
 import myro.globvars
 from myro.media import *
 from myro.speech import *
@@ -37,25 +38,10 @@ try:
 except:
     tkSnack = None
 
-######################## Try to make IDLE interruptable when no subprocesses
-#try:
-#    import idlelib
-#    shell = idlelib.PyShell.flist.pyshell
-#    root = idlelib.PyShell.root
-#    def _update_gui():
-#        root.update()
-#        if shell.canceled:
-#            raise KeyboardInterrupt
-#except: # idlelib not in namespace: running in subprocess
-#    def _update_gui():
-#        # subprocess responds to keyboard interruption
-#        pass
-#if "idlelib" in dir():
-#    del idlelib
-########################
 def _update_gui():
-    # subprocess responds to keyboard interruption
-    pass
+    if "flist" in dir(PyShell):
+        PyShell.flist.pyshell.write("")
+        #PyShell.flist.pyshell.update()
 
 def wait(seconds):
     """
@@ -105,9 +91,12 @@ def pickAColor():
 
 def ask(item, useCache = 0):
     retval = _ask(item, useCache = useCache)
-    if len(retval.keys()) == 2: # ok, and item
+    if len(retval.keys()) == 1:
         return retval[item]
-    else: return retval
+    if len(retval.keys()) == 2 and "ok" in retval.keys():
+        return retval[item]
+    else:
+        return retval
 
 def _ask(data, title = "Information Request", forceAsk = 0, forceConsole = 0, useCache = 1):
     """ Given a dictionary return dictionary with answers. """
@@ -329,11 +318,9 @@ class Robot(object):
 	    idlelib = None
         if self._joy == None:
             self._joy = Joystick(parent = self._app, robot = self)
+            thread.start_new_thread(self._joy.mainloop, ())
         else:
             self._joy.deiconify()
-	if idlelib != None and "PyShell" not in dir(idlelib): # "subprocess"
-            self._joy._running = 1
-	    self._joy.mainloop()
 
     def turn(self, direction, value = .8):
         if type(direction) in [float, int]:
@@ -439,7 +426,6 @@ class Computer(Robot):
             print "Text-to-speech is not loaded"
             
 computer = Computer()
-robot    = None
 
 # functions:
 def _cleanup():
@@ -461,104 +447,121 @@ if not myro.globvars.setup:
 
 ## Functional interface:
 
+def requestStop():
+    if myro.globvars.robot:
+        myro.globvars.robot.requestStop = 1
 def initialize(id = None):
-    global robot
-    robot = Scribbler(id)
+    myro.globvars.robot = Scribbler(id)
 def simulator(id = None):
-    global robot
-    robot = SimScribbler(id)
+    myro.globvars.robot = SimScribbler(id)
 def translate(amount):
-    return myro.globvars.robot.translate(amount)
+    if myro.globvars.robot:
+        return myro.globvars.robot.translate(amount)
 def rotate(amount):
-    return myro.globvars.robot.rotate(amount)
+    if myro.globvars.robot:
+        return myro.globvars.robot.rotate(amount)
 def move(translate, rotate):
-    return myro.globvars.robot.move(rotate, translate)
+    if myro.globvars.robot:
+        return myro.globvars.robot.move(translate, rotate)
 def forward(amount):
-    return myro.globvars.robot.forward(amount)
+    if myro.globvars.robot:
+        return myro.globvars.robot.forward(amount)
 def backward(amount):
-    return myro.globvars.robot.backward(amount)
+    if myro.globvars.robot:
+        return myro.globvars.robot.backward(amount)
 def turn(direction, amount = .8):
-    return myro.globvars.robot.turn(direction, amount)
+    if myro.globvars.robot:
+        return myro.globvars.robot.turn(direction, amount)
 def turnLeft(amount):
-    return myro.globvars.robot.turnLeft(amount)
+    if myro.globvars.robot:
+        return myro.globvars.robot.turnLeft(amount)
 def turnRight(amount):
-    return myro.globvars.robot.turnRight(amount)
+    if myro.globvars.robot:
+        return myro.globvars.robot.turnRight(amount)
 def stop():
-    return myro.globvars.robot.stop()
+    if myro.globvars.robot:
+        return myro.globvars.robot.stop()
 def openConnection():
-    return myro.globvars.robot.open()
+    if myro.globvars.robot:
+        return myro.globvars.robot.open()
 def closeConnection():
-    return myro.globvars.robot.close()
+    if myro.globvars.robot:
+        return myro.globvars.robot.close()
 def get(sensor = "all", *pos):
-    return myro.globvars.robot.get(sensor, *pos)
+    if myro.globvars.robot:
+        return myro.globvars.robot.get(sensor, *pos)
 def getVersion():
-    return myro.globvars.robot.get("version")
+    if myro.globvars.robot:
+        return myro.globvars.robot.get("version")
 def getLight(*pos):
-    return myro.globvars.robot.get("light", *pos)
+    if myro.globvars.robot:
+        return myro.globvars.robot.get("light", *pos)
 def getIR(*pos):
-    return myro.globvars.robot.get("ir", *pos)
+    if myro.globvars.robot:
+        return myro.globvars.robot.get("ir", *pos)
 def getLine(*pos):
-    return myro.globvars.robot.get("line", *pos)
+    if myro.globvars.robot:
+        return myro.globvars.robot.get("line", *pos)
 def getStall():
-    return myro.globvars.robot.get("stall")
+    if myro.globvars.robot:
+        return myro.globvars.robot.get("stall")
 def getAll():
-    return myro.globvars.robot.get("all")
+    if myro.globvars.robot:
+        return myro.globvars.robot.get("all")
 def getName():
-    return myro.globvars.robot.get("name")
+    if myro.globvars.robot:
+        return myro.globvars.robot.get("name")
 def getStartSong():
-    return myro.globvars.robot.get("startsong")
+    if myro.globvars.robot:
+        return myro.globvars.robot.get("startsong")
 def getVolume():
-    return myro.globvars.robot.get("volume")
+    if myro.globvars.robot:
+        return myro.globvars.robot.get("volume")
 def update():
-    return myro.globvars.robot.update()
+    if myro.globvars.robot:
+        return myro.globvars.robot.update()
 def beep(duration, frequency1, frequency2 = None):
-    return myro.globvars.robot.beep(duration, frequency1, frequency2)
+    if myro.globvars.robot:
+        return myro.globvars.robot.beep(duration, frequency1, frequency2)
 def set(item, position, value = None):
-    return myro.globvars.robot.set(item, position, value)
+    if myro.globvars.robot:
+        return myro.globvars.robot.set(item, position, value)
 def setLED(position, value):
-    return myro.globvars.robot.set("led", position, value)
+    if myro.globvars.robot:
+        return myro.globvars.robot.set("led", position, value)
 def setName(name):
-    return myro.globvars.robot.set("name", name)
+    if myro.globvars.robot:
+        return myro.globvars.robot.set("name", name)
 def setVolume(value):
-    return myro.globvars.robot.set("volume", value)
+    if myro.globvars.robot:
+        return myro.globvars.robot.set("volume", value)
 def setStartSong(songName):
-    return myro.globvars.robot.set("startsong", songName)
+    if myro.globvars.robot:
+        return myro.globvars.robot.set("startsong", songName)
 def motors(left, right):
-    return myro.globvars.robot.motors(left, right)
+    if myro.globvars.robot:
+        return myro.globvars.robot.motors(left, right)
 def restart():
-    return myro.globvars.robot.restart()
+    if myro.globvars.robot:
+        return myro.globvars.robot.restart()
 def joyStick():
-    return myro.globvars.robot.joyStick()
+    if myro.globvars.robot:
+        return myro.globvars.robot.joyStick()
 def playSong(song, wholeNoteDuration = .545):
-    return myro.globvars.robot.playSong(song, wholeNoteDuration)
+    if myro.globvars.robot:
+        return myro.globvars.robot.playSong(song, wholeNoteDuration)
 def playNote(tup, wholeNoteDuration = .545):
-    return myro.globvars.robot.playNote(tup, wholeNoteDuration)
+    if myro.globvars.robot:
+        return myro.globvars.robot.playNote(tup, wholeNoteDuration)
 # --------------------------------------------------------
 # Error handler:
 # --------------------------------------------------------
 import traceback
-def _myroExceptionHandler(type, value, tb):
-    if Tkinter == None:
-        lines = traceback.format_exception(type, value, tb)
-        print "Myro Traceback: -------------------------------------------"
-        for line in lines:
-            print line.rstrip()
-    else: # Tkinter
-        # make a window
-        #win = HelpWindow()
-        lines = traceback.format_exception(type, value, tb)
-        print "Myro Traceback: -------------------------------------------"
-        for line in lines:
-            print line.rstrip()
+def _myroExceptionHandler(etype, value, tb):
+    # make a window
+    #win = HelpWindow()
+    lines = traceback.format_exception(etype, value, tb)
+    print >> sys.stderr, "Myro is stopping: -------------------------------------------"
+    for line in lines:
+        print >> sys.stderr, line.rstrip()
 sys.excepthook = _myroExceptionHandler
-# --------------------------------------------------------
-# Control-C signal handler: 
-# --------------------------------------------------------
-import signal
-def _interruptHandler(signum, frame):
-    if myro.globvars.robot != None:
-        print "Stopping robot..."
-        myro.globvars.robot.stop()
-    raise KeyboardInterrupt
-signal.signal(signal.SIGINT, _interruptHandler)
-# --------------------------------------------------------

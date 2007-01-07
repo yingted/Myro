@@ -9,7 +9,7 @@ __REVISION__ = "$Revision$"
 __AUTHOR__   = "Keith and Doug"
 
 import serial, time, string
-# from threading import Lock
+from threading import Lock
 from myro import Robot, ask, askQuestion, _update_gui
 import myro.globvars
 
@@ -77,6 +77,7 @@ class Scribbler(Robot):
     
     def __init__(self, serialport = None, baudrate = 38400):
         Robot.__init__(self)
+        self.requestStop = 0
         self.addService("audio", "type", "onboard")
         self.addService("sensor.stall", "type", "digital")
         self.addService("sensor.ir", "type", "digital")
@@ -87,7 +88,7 @@ class Scribbler(Robot):
         self._lastTranslate = 0
         self._lastRotate    = 0
         self._volume = 0
-        #self.lock = Lock()
+        self.lock = Lock()
         if serialport == None:
             serialport = ask("Port", useCache = 1)
         # Deal with requirement that Windows "COM#" names where # >= 9 needs to
@@ -385,7 +386,7 @@ class Scribbler(Robot):
     def _read(self, bytes = 1):
         c = self.ser.read(bytes)
         if self.debug: print "_read:", c, len(c)
-        time.sleep(0.001) # HACK! THIS SEEMS TO NEED TO BE HERE!
+        time.sleep(0.01) # HACK! THIS SEEMS TO NEED TO BE HERE!
         if bytes == 1:
             x = -1
             if (c != ""):
@@ -401,6 +402,7 @@ class Scribbler(Robot):
         t = map(lambda x: chr(int(x)), rawdata)
         data = string.join(t, '') + (chr(0) * (Scribbler.PACKET_LENGTH - len(t)))[:9]
         if self.debug: print "_write:", data, len(data)
+        time.sleep(0.01) # HACK! THIS SEEMS TO NEED TO BE HERE!
         self.ser.write(data)      # write packets
 
     def _set(self, *values):
@@ -409,6 +411,10 @@ class Scribbler(Robot):
         self._read(Scribbler.PACKET_LENGTH) # read echo
         self._read(11) # single bit sensors
         self.ser.flushInput()
+        if self.requestStop:
+            self.requestStop = 0
+            self.stop()
+            raise KeyboardInterrupt
         #self.lock.release()
 
     def _get(self, value, bytes = 1, mode = "byte"):

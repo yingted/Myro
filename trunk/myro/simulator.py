@@ -62,7 +62,11 @@ class Thread(threading.Thread):
     def __init__(self, gui, port):
         threading.Thread.__init__(self)
         self.gui = gui
-        self.server = Server(('', port),  Handler, gui)
+        try:
+            self.server = Server(('', port),  Handler, gui)
+        except:
+            print "Simulator seems to be already running."
+            return
         try:
             self.server.socket.settimeout(1) # checks to see if need to quit
             #self.server.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -71,7 +75,10 @@ class Thread(threading.Thread):
 
     def run(self):
         while not self.gui.quit:
-            self.server.handle_request()
+            if "server" in dir(self):
+                self.server.handle_request()
+            else:
+                self.gui.quit = 1
         self.gui.destroy()
 
 import Tkinter, time, math, random
@@ -401,19 +408,19 @@ class Simulator:
         retval = 'error'
         if request == 'reset':
             self.reset()
-            retval = "ok"
+            retval = None
         elif request.count('connectionNum'):
             connectionNum, port = request.split(":")
             retval = self.ports.index( int(port) )
         elif request == 'end' or request == 'exit':
-            retval = "ok"
+            retval = None
             self.done = 1
         elif request == 'quit':
-            retval = "ok"
+            retval = None
             self.done = 1
             self.quit = 1
         elif request == "disconnect":
-            retval = "ok"
+            retval = None
         elif request == 'properties':
             retval = self.properties
         elif request == 'supportedFeatures':
@@ -422,16 +429,16 @@ class Simulator:
             retval = self.assoc[sockname[1]].builtinDevices
         elif request == 'forward':
             self.assoc[sockname[1]].move(0.3, 0.0)
-            retval = "ok"
+            retval = None
         elif request == 'left':
             self.assoc[sockname[1]].move(0.0, 0.3)
-            retval = "ok"
+            retval = None
         elif request == 'right':
             self.assoc[sockname[1]].move(0.0, -0.3)
-            retval = "ok"
+            retval = None
         elif request == 'back':
             self.assoc[sockname[1]].move(-0.3, 0.0)
-            retval = "ok"
+            retval = None
         elif request == 'name':
             retval = self.assoc[sockname[1]].name
         elif request == 'x':
@@ -454,7 +461,7 @@ class Simulator:
             except:
                 try:
                     exec request[1:]
-                    retval = "ok"
+                    retval = None
                 except:
                     retval = "error"
         else:
@@ -477,13 +484,13 @@ class Simulator:
                     r = self.robotsByName[name]
                     r.setPose(x, y, thr, 1)#handofgod
                     r.localize(0, 0, 0)
-                    return "ok"
+                    return None
                 elif name.isdigit():
                     pos = int(name)
                     r = self.robots[pos]
                     r.setPose(x, y, thr, 1)#handofgod
                     r.localize(0, 0, 0)
-                    return "ok"
+                    return None
                 return "error: no such robot position '%s'" % name
             elif message[0] == "b": # "b_x_y_th" localize
                 localization, x, y, thr = None, None, None, None
@@ -521,7 +528,7 @@ class Simulator:
                 except: pass
                 self.assoc[sockname[1]].bulb.brightness = val
                 self.redraw()
-                retval = "ok"
+                retval = None
             elif message[0] == "i": # "i_name_index_property_val"
                 try:
                     code, dtype, index, property, val = message
@@ -534,7 +541,7 @@ class Simulator:
                         device.__dict__[property] = int(val)
                     elif type(oldval) == float:
                         device.__dict__[property] = float(val)
-                    retval = "ok"
+                    retval = None
                 except: pass
             elif message[0] == "j": # "j_index_p_t_z" ptz[index].setPose(p, t, z)
                 code, index, p, t, z = [None] * 5
@@ -571,7 +578,7 @@ class Simulator:
                     val = float(message[1])
                 except: pass                
                 self.assoc[sockname[1]].stepScalar = val
-                retval = "ok"
+                retval = None
             elif message[0] == "o": # "o_v" rotate:value
                 val = 0
                 try:
@@ -629,7 +636,7 @@ class Simulator:
                     self.assoc[sockname[1]].display[message[1]] = 1
                 self.properties.append("%s_%s" % (message[1], message[2]))
                 self.assoc[sockname[1]].subscribed = 1
-                retval = "ok"
+                retval = None
             elif message[0] in ["sonar", "laser", "line", "light", "camera", "gripper", "ir", "bumper"]: # sonar_0, light_0...
                 index = 0
                 for d in self.assoc[sockname[1]].devices:
@@ -1095,15 +1102,15 @@ class SimRobot:
     def move(self, vx, va):
         self.vx = vx
         self.va = va
-        return "ok"
+        return None
 
     def rotate(self, va):
         self.va = va
-        return "ok"
+        return None
 
     def translate(self, vx):
         self.vx = vx
-        return "ok"
+        return None
 
     def getPose(self):
         """ Returns global coordinates. """
@@ -1717,11 +1724,11 @@ class Gripper:
     def close(self):
         self.state = "close"
         self.velocity = -0.01
-        return "ok"
+        return None
     def deploy(self):
         self.state = "deploy"
         self.velocity = 0.01
-        return "ok"
+        return None
     def store(self):
         self.state = "store"
         self.velocity = -0.01
@@ -1732,11 +1739,11 @@ class Gripper:
     def open(self):
         self.state = "open"
         self.velocity = 0.01
-        return "ok"
+        return None
     def stop(self):
         self.state = "stop"
         self.velocity = 0.0
-        return "ok"
+        return None
     def moveWhere(self):
         armPosition = self.armPosition
         velocity = self.velocity
@@ -1770,7 +1777,7 @@ class PTZ:
             self.camera.zoom = z * PIOVER180
         self.camera.startAngle = self.camera.pan + self.camera.zoom/2
         self.camera.stopAngle = self.camera.pan - self.camera.zoom/2
-        return "ok"
+        return None
     def getPose(self):
         return self.camera.pan / PIOVER180, 0, self.camera.zoom / PIOVER180
 
