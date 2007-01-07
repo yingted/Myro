@@ -226,7 +226,6 @@ class Scribbler(Robot):
         elif sensor == "volume":
             return self._volume
         else:
-            retvals = []
             if len(position) == 0:
                 if sensor == "light":
                     return self._get(Scribbler.GET_LIGHT_ALL, 6, "word")
@@ -240,27 +239,33 @@ class Scribbler(Robot):
                             "ir": [retval[0], retval[1]], "line": [retval[8], retval[9]], "stall": retval[10]}
                 else:
                     raise ("invalid sensor name: '%s'" % sensor)
+            retvals = []
             for pos in position:
                 if sensor == "light":
+                    values = self._get(Scribbler.GET_LIGHT_ALL, 6, "word")
                     if pos in [0, "left"]:
-                        retvals.append(self._get(Scribbler.GET_LIGHT_LEFT, 2, "word"))
+                        retvals.append(values[0])
                     elif pos in [1, "middle", "center"]:
-                        retvals.append(self._get(Scribbler.GET_LIGHT_CENTER, 2, "word"))
+                        retvals.append(values[1])
                     elif pos in [2, "right"]:
-                        retvals.append(self._get(Scribbler.GET_LIGHT_RIGHT, 2, "word"))
+                        retvals.append(values[2])
                 elif sensor == "ir":
+                    values = self._get(Scribbler.GET_IR_ALL, 2)
                     if pos in [0, "left"]:
-                        retvals.append(self._get(Scribbler.GET_OPEN_LEFT))
+                        retvals.append(values[0])
                     elif pos in [1, "right"]:
-                        retvals.append(self._get(Scribbler.GET_OPEN_RIGHT))
+                        retvals.append(values[1])
                 elif sensor == "line":
+                    values = self._get(Scribbler.GET_LINE_ALL, 2)
                     if pos in [0, "left"]:
-                        retvals.append(self._get(Scribbler.GET_LINE_LEFT))
+                        retvals.append(values[0])
                     elif pos in [1, "right"]:
-                        retvals.append(self._get(Scribbler.GET_LINE_RIGHT))
+                        retvals.append(values[1])
                 else:
                     raise ("invalid sensor name: '%s'" % sensor)
-            if len(retvals) == 1:
+            if len(retvals) == 0:
+                return None
+            elif len(retvals) == 1:
                 return retvals[0]
             else:
                 return retvals
