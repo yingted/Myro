@@ -18,9 +18,9 @@ if sys.version < '2.2.3':
 
 setup(
     name="myro",
-    description="My Robot Python Exploration Library",
+    description="My Robot Python Exploration Library, from the IPRE",
     version= __VERSION__,
-    author="Doug Blank",
+    author="Doug Blank, and the IPRE",
     author_email="dblank@cs.brynmawr.edu",
     url="http://myro.roboteducation.org/",
     packages=['myro', 'myro.robot', 'myro.worlds', 'myro.globvars'],
