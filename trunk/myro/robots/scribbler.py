@@ -361,6 +361,8 @@ class Scribbler(Robot):
             raise ("invalid set item name: '%s'" % item)
 
     def stop(self):
+        self._lastTranslate = 0
+        self._lastRotate = 0
         return self._set(Scribbler.SET_MOTORS_OFF)
 
     def translate(self, amount):
@@ -375,6 +377,11 @@ class Scribbler(Robot):
         self._lastTranslate = translate
         self._lastRotate = rotate
         self._adjustSpeed()
+
+    def getLastSensors(self):
+        retval = self._lastSensors
+        return {"light": [retval[2] << 8 | retval[3], retval[4] << 8 | retval[5], retval[6] << 8 | retval[7]],
+                "ir": [retval[0], retval[1]], "line": [retval[8], retval[9]], "stall": retval[10]}
 
     def update(self):
         pass
@@ -414,7 +421,7 @@ class Scribbler(Robot):
         #self.lock.acquire()
         self._write(values)
         self._read(Scribbler.PACKET_LENGTH) # read echo
-        self._read(11) # single bit sensors
+        self._lastSensors = self._read(11) # single bit sensors
         self.ser.flushInput()
         if self.requestStop:
             self.requestStop = 0

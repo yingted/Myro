@@ -1,12 +1,13 @@
-import Tkinter
+import Tkinter, time
 
 class Joystick(Tkinter.Toplevel):
 
-   def __init__(self, parent = None, robot = None):
+   def __init__(self, parent = None, robot = None, showSensors = 0):
       Tkinter.Toplevel.__init__(self, parent)
       self.debug = 0
       self._running = 0
       self.robot = robot
+      self.showSensors = showSensors
       self.parent = parent
       self.wm_title('Joystick')
       self.protocol('WM_DELETE_WINDOW',self.destroy)
@@ -23,6 +24,11 @@ class Joystick(Tkinter.Toplevel):
                                    width = 220,
                                    height = 220,
                                    bg = 'white')
+      self.widgets = {}
+      if self.showSensors:
+         newFrame = Tkinter.Frame(self, relief=Tkinter.RAISED, borderwidth=2)
+         self.addWidgets(newFrame, ("Light", 3), ("Line", 2), ("IR", 2), ("Stall", 1))
+         newFrame.pack(side="bottom", fill="both", expand="y")
       self.initHandlers()
       self.canvas.pack(side=Tkinter.BOTTOM)
 
@@ -34,6 +40,57 @@ class Joystick(Tkinter.Toplevel):
       self.translate = 0.0
       self.rotate = 0.0
       self.threshold = 0.10
+      self.delay = 0.05 # in seconds
+      self.running = 0
+
+   def destroy(self):
+       self.running = 0
+       Tkinter.Toplevel.destroy(self)
+
+   def addWidgets(self, window, *items):
+      for name, size in items:
+         text = name + ":"
+         frame = Tkinter.Frame(window)
+         self.widgets[name + ".label"] = Tkinter.Label(frame, text=text, width=10)
+         self.widgets[name + ".label"].pack(side="left")
+         for i in range(size):
+            self.widgets["%s%d.entry" % (name, i)] = Tkinter.Entry(frame, bg="white", width = 10)
+            self.widgets["%s%d.entry" % (name, i)].insert(0, "")
+            self.widgets["%s%d.entry" % (name, i)].pack(side="right", fill="both", expand="y")
+         frame.pack(side="bottom", fill="both", expand="y")
+
+   def updateWidget(self, name, pos, value):
+      """Updates the device view window."""
+      if self.showSensors: return
+      try:
+         self.widgets["%s%d.entry" % (name, pos)].delete(0,'end')
+         self.widgets["%s%d.entry" % (name, pos)].insert(0,value)
+      except: pass
+
+   def minorloop(self, delay = None): # in milliseconds
+       """
+       As opposed to mainloop. This is a simple loop that works
+       in IDLE.
+       """
+       self.running = 1
+       while self.running:
+           if self.robot and self.showSensors:
+               data = self.robot.getLastSensors()
+               light = data.get("light", [0, 0, 0])
+               line = data.get("line", [0, 0])
+               ir = data.get("ir", [0, 0])
+               stall = data.get("stall", [0])
+               for i in light:
+                  self.updateWidget("Light", i, light[i])
+               for i in line:
+                  self.updateWidget("Line", i, line[i])
+               for i in light:
+                  self.updateWidget("IR", i, ir[i])
+               for i in light:
+                  self.updateWidget("Stall", i, stall[i])
+           self.update()
+           start = time.time()
+           time.sleep(self.delay)
 
    def initHandlers(self):
       self.canvas.bind("<ButtonRelease-1>", self.canvas_clicked_up)
@@ -114,15 +171,6 @@ class Joystick(Tkinter.Toplevel):
       if abs(trans) < self.threshold:
          trans = 0.0
       return (trans, rot)
-
-   def destroy(self):
-      """Hides the device view window."""
-      self.withdraw()
-      if self._running:
-         if "quit" in dir(self.parent):
-            self.parent.quit()
-         if "destroy" in dir(self.parent):
-            self.parent.destroy()
 
 if __name__ == '__main__':
    app = Tkinter.Tk()

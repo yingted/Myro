@@ -45,7 +45,18 @@ class SimScribbler(Robot):
         self.name = "Scribby"
         self.startsong = "tada"
         self.lock = threading.Lock()
-        thread.start_new_thread(myro.globvars.simulator.mainloop, ())
+        self.delay = 0.1
+        thread.start_new_thread(self._simulator.mainloop, ())
+    def minorloop(self):
+       """
+       As opposed to mainloop. This is a simple loop that works
+       in IDLE.
+       """
+       self.running = 1
+       while self.running:
+           self._simulator.update()
+           start = time.time()
+           time.sleep(self.delay)
     def translate(self, amount):
         return self._clients[0].translate(amount)
     def rotate(self, amount):

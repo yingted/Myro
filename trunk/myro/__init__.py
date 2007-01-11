@@ -11,7 +11,7 @@ __VERSION__  = "1.0." + __BUILD__.split()[1]
 __AUTHOR__   = "Doug Blank <dblank@cs.brynmawr.edu>"
 
 from idlelib import PyShell
-import sys, atexit, time, random, pickle, thread
+import sys, atexit, time, random, pickle, threading
 import myro.globvars
 from myro.media import *
 from myro.speech import *
@@ -272,27 +272,38 @@ class Robot(object):
             time.sleep(duration)
         time.sleep(.1) # simulated delay, like real robot
 
+    def getLastSensors(self):
+        """ Returns last sensor readings as dictionary """
+        return {}
+
     def update(self):
+        """ Update the robot """
         raise AttributeError, "this method needs to be written"
 
 ### The rest of these methods are just rearrangements of the above
 
     def getVersion(self):
+        """ Returns robot version information. """
         return self.get("version")
 
     def getLight(self, *position):
+        """ Return the light readings. """
         return self.get("light", *position)
 
     def getIR(self, *position):
+        """ Returns the infrared readings. """
         return self.get("ir", *position)
 
     def getLine(self, *position):
+        """ Returns the line sensor readings. """
         return self.get("line", *position)
 
     def getStall(self):
+        """ Returns the stall reading. """
         return self.get("stall")
 
     def getName(self):
+        """ Returns the robot's name. """
         return self.get("name")
 
     def getAll(self):
@@ -310,17 +321,12 @@ class Robot(object):
     def setStartSong(self, songName):
         return self.set("startsong", songName)
 
-    def joyStick(self):
+    def joyStick(self, showSensors = 0):
         from myro.joystick import Joystick
-	try:
-	    import idlelib
-	except:
-	    idlelib = None
-        if self._joy == None:
-            self._joy = Joystick(parent = self._app, robot = self)
-            thread.start_new_thread(self._joy.mainloop, ())
-        else:
-            self._joy.deiconify()
+        self._joy = Joystick(parent = self._app, robot = self, showSensors = showSensors)
+        self._joy.minorloop()
+        # this will not work, must be in same thread:
+        #thread.start_new_thread(self._joy.minorloop, ())
 
     def turn(self, direction, value = .8):
         if type(direction) in [float, int]:
@@ -383,6 +389,7 @@ class Computer(Robot):
     def __init__(self):
         """ Constructs a computer object. """
         Robot.__init__(self)
+        self.lock = threading.Lock()
         if tkSnack:
             self.addService("audio", "type", "tksnack")
     def move(self, translate, rotate):
@@ -450,6 +457,8 @@ if not myro.globvars.setup:
 def requestStop():
     if myro.globvars.robot:
         myro.globvars.robot.requestStop = 1
+    else:
+        raise AttributeError, "need to initialize robot"
 def initialize(id = None):
     myro.globvars.robot = Scribbler(id)
 def simulator(id = None):
@@ -457,102 +466,168 @@ def simulator(id = None):
 def translate(amount):
     if myro.globvars.robot:
         return myro.globvars.robot.translate(amount)
+    else:
+        raise AttributeError, "need to initialize robot"
 def rotate(amount):
     if myro.globvars.robot:
         return myro.globvars.robot.rotate(amount)
+    else:
+        raise AttributeError, "need to initialize robot"
 def move(translate, rotate):
     if myro.globvars.robot:
         return myro.globvars.robot.move(translate, rotate)
+    else:
+        raise AttributeError, "need to initialize robot"
 def forward(amount):
     if myro.globvars.robot:
         return myro.globvars.robot.forward(amount)
+    else:
+        raise AttributeError, "need to initialize robot"
 def backward(amount):
     if myro.globvars.robot:
         return myro.globvars.robot.backward(amount)
+    else:
+        raise AttributeError, "need to initialize robot"
 def turn(direction, amount = .8):
     if myro.globvars.robot:
         return myro.globvars.robot.turn(direction, amount)
+    else:
+        raise AttributeError, "need to initialize robot"
 def turnLeft(amount):
     if myro.globvars.robot:
         return myro.globvars.robot.turnLeft(amount)
+    else:
+        raise AttributeError, "need to initialize robot"
 def turnRight(amount):
     if myro.globvars.robot:
         return myro.globvars.robot.turnRight(amount)
+    else:
+        raise AttributeError, "need to initialize robot"
 def stop():
     if myro.globvars.robot:
         return myro.globvars.robot.stop()
+    else:
+        raise AttributeError, "need to initialize robot"
 def openConnection():
     if myro.globvars.robot:
         return myro.globvars.robot.open()
+    else:
+        raise AttributeError, "need to initialize robot"
 def closeConnection():
     if myro.globvars.robot:
         return myro.globvars.robot.close()
+    else:
+        raise AttributeError, "need to initialize robot"
 def get(sensor = "all", *pos):
     if myro.globvars.robot:
         return myro.globvars.robot.get(sensor, *pos)
+    else:
+        raise AttributeError, "need to initialize robot"
 def getVersion():
     if myro.globvars.robot:
         return myro.globvars.robot.get("version")
+    else:
+        raise AttributeError, "need to initialize robot"
 def getLight(*pos):
     if myro.globvars.robot:
         return myro.globvars.robot.get("light", *pos)
+    else:
+        raise AttributeError, "need to initialize robot"
 def getIR(*pos):
     if myro.globvars.robot:
         return myro.globvars.robot.get("ir", *pos)
+    else:
+        raise AttributeError, "need to initialize robot"
 def getLine(*pos):
     if myro.globvars.robot:
         return myro.globvars.robot.get("line", *pos)
+    else:
+        raise AttributeError, "need to initialize robot"
 def getStall():
     if myro.globvars.robot:
         return myro.globvars.robot.get("stall")
+    else:
+        raise AttributeError, "need to initialize robot"
 def getAll():
     if myro.globvars.robot:
         return myro.globvars.robot.get("all")
+    else:
+        raise AttributeError, "need to initialize robot"
 def getName():
     if myro.globvars.robot:
         return myro.globvars.robot.get("name")
+    else:
+        raise AttributeError, "need to initialize robot"
 def getStartSong():
     if myro.globvars.robot:
         return myro.globvars.robot.get("startsong")
+    else:
+        raise AttributeError, "need to initialize robot"
 def getVolume():
     if myro.globvars.robot:
         return myro.globvars.robot.get("volume")
+    else:
+        raise AttributeError, "need to initialize robot"
 def update():
     if myro.globvars.robot:
         return myro.globvars.robot.update()
+    else:
+        raise AttributeError, "need to initialize robot"
 def beep(duration, frequency1, frequency2 = None):
     if myro.globvars.robot:
         return myro.globvars.robot.beep(duration, frequency1, frequency2)
+    else:
+        raise AttributeError, "need to initialize robot"
 def set(item, position, value = None):
     if myro.globvars.robot:
         return myro.globvars.robot.set(item, position, value)
+    else:
+        raise AttributeError, "need to initialize robot"
 def setLED(position, value):
     if myro.globvars.robot:
         return myro.globvars.robot.set("led", position, value)
+    else:
+        raise AttributeError, "need to initialize robot"
 def setName(name):
     if myro.globvars.robot:
         return myro.globvars.robot.set("name", name)
+    else:
+        raise AttributeError, "need to initialize robot"
 def setVolume(value):
     if myro.globvars.robot:
         return myro.globvars.robot.set("volume", value)
+    else:
+        raise AttributeError, "need to initialize robot"
 def setStartSong(songName):
     if myro.globvars.robot:
         return myro.globvars.robot.set("startsong", songName)
+    else:
+        raise AttributeError, "need to initialize robot"
 def motors(left, right):
     if myro.globvars.robot:
         return myro.globvars.robot.motors(left, right)
+    else:
+        raise AttributeError, "need to initialize robot"
 def restart():
     if myro.globvars.robot:
         return myro.globvars.robot.restart()
-def joyStick():
+    else:
+        raise AttributeError, "need to initialize robot"
+def joyStick(showSensors = 0):
     if myro.globvars.robot:
-        return myro.globvars.robot.joyStick()
+        return myro.globvars.robot.joyStick(showSensors)
+    else:
+        raise AttributeError, "need to initialize robot"
 def playSong(song, wholeNoteDuration = .545):
     if myro.globvars.robot:
         return myro.globvars.robot.playSong(song, wholeNoteDuration)
+    else:
+        raise AttributeError, "need to initialize robot"
 def playNote(tup, wholeNoteDuration = .545):
     if myro.globvars.robot:
         return myro.globvars.robot.playNote(tup, wholeNoteDuration)
+    else:
+        raise AttributeError, "need to initialize robot"
 # --------------------------------------------------------
 # Error handler:
 # --------------------------------------------------------

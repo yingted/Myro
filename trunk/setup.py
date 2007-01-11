@@ -24,8 +24,6 @@ setup(
     author_email="dblank@cs.brynmawr.edu",
     url="http://myro.roboteducation.org/",
     packages=['myro', 'myro.robot', 'myro.worlds', 'myro.globvars'],
-    package_dir={'idlelib': 'misc'},
-    package_data={'idlelib': ['config-extensions.def']},
     license="Shared Source",
     long_description="Tools for exploring robotics in education",
     classifiers = [
@@ -40,7 +38,18 @@ setup(
 )
 
 import idlelib, os
-path = idlelib.__file__.split(os.sep)[:-1]
-path = os.sep.join(path)
-copy_file("misc/ScriptBinding.py", path)
-copy_file("misc/config-extensions.def", path)
+sitepath = idlelib.__file__.split(os.sep)[:-2]
+sitepath.append("site-packages")
+idlepath = idlelib.__file__.split(os.sep)[:-1]
+idlepath = os.sep.join(idlepath)
+sitepath = os.sep.join(sitepath)
+if "install" in sys.argv:
+    copy_file("misc" + os.sep + "ScriptBinding.py", idlepath)
+    copy_file("misc" + os.sep + "config-extensions.def", idlepath)
+    copy_file("myro" + os.sep + "graphics.py", sitepath)
+else:
+    print "on install, will:"
+    print "   copy misc" + os.sep + "ScriptBinding.py" + " -> "+ idlepath
+    print "   copy misc" + os.sep + "config-extensions.def" + " -> " + idlepath
+    print "   copy myro" + os.sep + "graphics.py" + " -> " + sitepath
+    

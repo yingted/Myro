@@ -82,8 +82,6 @@ class Thread(threading.Thread):
         self.gui.destroy()
 
 import Tkinter, time, math, random
-
-import myro.globvars
 try:
     import cPickle as pickle
 except:
@@ -653,11 +651,11 @@ class Simulator:
 
 class TkSimulator(Tkinter.Toplevel, Simulator):
     def __init__(self, dimensions, offsets, scale, root = None, run = 1):
-        if root == None:
-            if myro.globvars.gui == None:
-                myro.globvars.gui = Tkinter.Tk()
-                myro.globvars.gui.withdraw()
-        Tkinter.Toplevel.__init__(self, myro.globvars.gui)
+        #if root == None:
+        #    if myro.globvars.gui == None:
+        #        myro.globvars.gui = Tkinter.Tk()
+        #        myro.globvars.gui.withdraw()
+        Tkinter.Toplevel.__init__(self) # , myro.globvars.gui)
         Simulator.__init__(self, dimensions, offsets, scale)
         self.root = root
         self.wm_title("Myro Simulator")
