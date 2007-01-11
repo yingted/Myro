@@ -75,16 +75,19 @@ def askQuestion(question, answers = ["Yes", "No"], title = "Myro Question",
     return answers[int(d.num)]
 
 def pickAFolder():
+    """ Returns a folder path/name """
     folder = tkFileDialog.askdirectory()
     if folder == '':
         folder = myro.globvars.mediaFolder
     return folder
 	
 def pickAFile():
+    """ Returns a filename """
     path = tkFileDialog.askopenfilename(parent=myro.globvars.gui)
     return path
 
 def pickAColor():
+    """ Returns an RGB color tuple """
     color = tkColorChooser.askcolor()
     newColor = Color(color[0][0], color[0][1], color[0][2])
     return newColor
