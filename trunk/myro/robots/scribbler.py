@@ -235,6 +235,7 @@ class Scribbler(Robot):
                     return self._get(Scribbler.GET_LINE_ALL, 2)
                 elif sensor == "all":
                     retval = self._get(Scribbler.GET_ALL, 11) # returned as bytes
+                    self._lastSensors = retval # single bit sensors
                     return {"light": [retval[2] << 8 | retval[3], retval[4] << 8 | retval[5], retval[6] << 8 | retval[7]],
                             "ir": [retval[0], retval[1]], "line": [retval[8], retval[9]], "stall": retval[10]}
                 else:
@@ -418,7 +419,7 @@ class Scribbler(Robot):
         self.ser.write(data)      # write packets
 
     def _set(self, *values):
-        #self.lock.acquire()
+        self.lock.acquire()
         self._write(values)
         self._read(Scribbler.PACKET_LENGTH) # read echo
         self._lastSensors = self._read(11) # single bit sensors
@@ -427,10 +428,10 @@ class Scribbler(Robot):
             self.requestStop = 0
             self.stop()
             raise KeyboardInterrupt
-        #self.lock.release()
+        self.lock.release()
 
     def _get(self, value, bytes = 1, mode = "byte"):
-        #self.lock.acquire()
+        self.lock.acquire()
         self._write([value])
         self._read(Scribbler.PACKET_LENGTH) # read the echo
         if mode == "byte":
@@ -443,7 +444,7 @@ class Scribbler(Robot):
         elif mode == "line": # until hit \n newline
             retval = self.ser.readline()
         self.ser.flushInput()
-        #self.lock.release()
+        self.lock.release()
         return retval
 
     def _set_speaker(self, frequency, duration):

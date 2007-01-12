@@ -61,10 +61,10 @@ class Joystick(Tkinter.Toplevel):
 
    def updateWidget(self, name, pos, value):
       """Updates the device view window."""
-      if self.showSensors: return
+      if not self.showSensors: return
       try:
-         self.widgets["%s%d.entry" % (name, pos)].delete(0,'end')
-         self.widgets["%s%d.entry" % (name, pos)].insert(0,value)
+          self.widgets["%s%d.entry" % (name, pos)].delete(0,'end')
+          self.widgets["%s%d.entry" % (name, pos)].insert(0,value)
       except: pass
 
    def minorloop(self, delay = None): # in milliseconds
@@ -73,21 +73,29 @@ class Joystick(Tkinter.Toplevel):
        in IDLE.
        """
        self.running = 1
+       lastUpdated = 0
+       lastData = []
        while self.running:
            if self.robot and self.showSensors:
                data = self.robot.getLastSensors()
-               light = data.get("light", [0, 0, 0])
-               line = data.get("line", [0, 0])
-               ir = data.get("ir", [0, 0])
-               stall = data.get("stall", [0])
-               for i in light:
-                  self.updateWidget("Light", i, light[i])
-               for i in line:
-                  self.updateWidget("Line", i, line[i])
-               for i in light:
-                  self.updateWidget("IR", i, ir[i])
-               for i in light:
-                  self.updateWidget("Stall", i, stall[i])
+               now = time.time()
+               if data != lastData or now - lastUpdated > 1:
+                   if now - lastUpdated > 1:
+                       data = self.robot.getAll()
+                   light = data.get("light", [0, 0, 0])
+                   line = data.get("line", [0, 0])
+                   ir = data.get("ir", [0, 0])
+                   stall = [data.get("stall", 0)]
+                   for i in range(len(light)):
+                      self.updateWidget("Light", i, light[i])
+                   for i in range(len(line)):
+                      self.updateWidget("Line", i, line[i])
+                   for i in range(len(ir)):
+                      self.updateWidget("IR", i, ir[i])
+                   for i in range(len(stall)):
+                      self.updateWidget("Stall", i, stall[i])
+                   lastUpdated = time.time()
+                   lastData = data
            self.update()
            start = time.time()
            time.sleep(self.delay)
@@ -114,9 +122,9 @@ class Joystick(Tkinter.Toplevel):
       if self.debug:
          print self.translate, self.rotate
       if self.robot != None:
-         self.robot.lock.acquire()
+         #self.robot.lock.acquire()
          self.robot.move(self.translate, self.rotate)
-         self.robot.lock.release()
+         #self.robot.lock.release()
 
    def canvas_clicked_up(self, event):
       self.canvas.delete("lines")
