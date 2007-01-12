@@ -404,6 +404,8 @@ class Computer(Robot):
             myro.globvars.tts.speak(message, async)
         else:
             print "Text-to-speech is not loaded"
+    def get(self, what):
+        return {}
     def stopSpeaking(self):
         if myro.globvars.tts != None:
             myro.globvars.tts.stop()
@@ -443,8 +445,6 @@ def _cleanup():
         myro.globvars.robot.stop() # hangs?
 	time.sleep(.5)
         myro.globvars.robot.close()
-    if myro.globvars.simulator != None:
-       myro.globvars.simulator.destroy()
 
 # Get ready for user prompt; set up environment:
 if not myro.globvars.setup:
