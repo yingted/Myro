@@ -23,7 +23,7 @@ def file_exists(file_name):
             return exists(file_name)
     else:
         raise AttributeError, "filename nust be a string"
-    
+
 def loadINIT(filename, engine=0, redo=0, brain=0, args=None):
     path = filename.split("/")
     modulefile = path.pop() # module name

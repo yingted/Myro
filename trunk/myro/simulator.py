@@ -44,8 +44,8 @@ class Handler(SocketServer.BaseRequestHandler):
                 request = self.request.recv(10240).strip()
                 sockname = self.request.getsockname()
             except:
-                time.sleep(.01)
-                continue
+                print "socket problem"
+                break
             try:
                 retval = self.gui.process(request, sockname)
             except:
@@ -62,10 +62,12 @@ class Thread(threading.Thread):
     def __init__(self, gui, port):
         threading.Thread.__init__(self)
         self.gui = gui
+        self.ok = 1
         try:
             self.server = Server(('', port),  Handler, gui)
         except:
             print "Simulator seems to be already running."
+            self.ok = 0
             return
         try:
             self.server.socket.settimeout(1) # checks to see if need to quit
@@ -74,12 +76,15 @@ class Thread(threading.Thread):
             print "WARN: entering deadlock zone; upgrade to Python 2.3 to avoid"
 
     def run(self):
+        if self.ok == 0: return
         while not self.gui.quit:
+            print "running", self.gui.quit
             if "server" in dir(self):
                 self.server.handle_request()
             else:
                 self.gui.quit = 1
-        self.gui.destroy()
+        #self.gui.destroy()
+        sys.exit(1)
 
 import Tkinter, time, math, random
 try:
@@ -650,7 +655,7 @@ class Simulator:
             return retval
 
 class TkSimulator(Tkinter.Toplevel, Simulator):
-    def __init__(self, dimensions, offsets, scale, root = None, run = 1):
+    def __init__(self, dimensions, offsets, scale, root = None, run = 0):
         #if root == None:
         #    if myro.globvars.gui == None:
         #        myro.globvars.gui = Tkinter.Tk()
@@ -698,11 +703,11 @@ class TkSimulator(Tkinter.Toplevel, Simulator):
         for entry in menu:
             self.mBar.tk_menuBar(self.makeMenu(self.mBar, entry[0], entry[1]))
         self.shapes = []
-        if run:
-            self.running = 1
-            self.after(100, self.step)
-        else:
-            self.running = 0
+    def destroy(self):
+        print "DESTROY!"
+        self.quit = 1
+        time.sleep(2)
+        sys.exit(1)
     def setMode(self, mode):
         self.mode = mode
     def toggleOption(self, key):
@@ -743,17 +748,6 @@ class TkSimulator(Tkinter.Toplevel, Simulator):
                 menu.filemenu.add_separator()
         menu['menu'] = menu.filemenu
         return menu
-    def destroy(self):
-        if not self.running:
-            self.withdraw()
-        self.done = 1 # stop processing requests, if handling
-        self.quit = 1 # stop accept/bind toplevel
-        if "quit" in dir(self.root):
-            self.root.quit() # kill the gui
-        try: # FIX: hack to allow myro main thread to hide this window
-            self.withdraw()
-        except:
-            pass
     def dispatch_event(self, event, type):
         if self.lastEventRobot:
             return self.lastEventRobot.mouse_event(event, type, self.lastEventRobot)
@@ -2087,3 +2081,13 @@ class MyroLineSensors:
         self.groups = {"all": range(len(geometry))}
         self.scan = [0] * len(geometry) # for data
         self.rgb = [[0,0,0] for g in geometry]
+
+if __name__ == "__main__":
+    globalspath, filename = os.path.split(myro.globvars.__file__)
+    myro.globvars.myropath, directory = os.path.split(globalspath)
+    simulator = INIT(os.path.join(myro.globvars.myropath, "worlds", "MyroWorld"))
+    for port in [60000]:
+        print "Simulator starting listener on port", port, "..."
+        t = Thread(simulator, port)
+        t.start()
+    simulator.mainloop()

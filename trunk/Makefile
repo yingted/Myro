@@ -23,7 +23,7 @@ clean:
 	rm -f myro.zip
 
 install: compile
-	cp -r myro $(site)
+	cd myro; python setup.py install
 
 
 test:

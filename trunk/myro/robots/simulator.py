@@ -8,55 +8,23 @@ Distributed under a Shared Source License
 __REVISION__ = "$Revision$"
 __AUTHOR__   = "Doug Blank"
 
-import os, atexit, time, thread, threading
+import os, atexit, time, threading
 from myro import Robot
+from myro.robot.symbolic import TCPRobot
 import myro.globvars
-
-def _cleanup(): # copy from myro/__init__.py
-    if myro.globvars.robot != None:
-        myro.globvars.robot.stop() # hangs?
-	time.sleep(.5)
-        myro.globvars.robot.close()
-    if myro.globvars.simulator != None:
-       myro.globvars.simulator.destroy()
 
 class SimScribbler(Robot):
     def __init__(self, id = None):
         Robot.__init__(self)
-        import myro.simulator
-        globalspath, filename = os.path.split(myro.globvars.__file__)
-        myro.globvars.myropath, directory = os.path.split(globalspath)
-        self._simulator = myro.simulator.INIT(
-            os.path.join(myro.globvars.myropath, "worlds", "MyroWorld"))
-        for port in self._simulator.ports:
-            print "Simulator starting listener on port", port, "..."
-            t = myro.simulator.Thread(self._simulator, port)
-            t.start()
         # start the client(s):
-        from myro.robot.symbolic import TCPRobot
         self._clients = []
-        for port in self._simulator.ports:
+        for port in [60000]:
             self._clients.append(TCPRobot("localhost", port))
-        myro.globvars.robot = self
-        myro.globvars.simulator = self._simulator
-        # FIX: hack to get _cleanup called before Tk exitfunc, which hangs
-        atexit.register(_cleanup)
         self.volume = 1
         self.name = "Scribby"
         self.startsong = "tada"
         self.lock = threading.Lock()
         self.delay = 0.1
-        thread.start_new_thread(self._simulator.mainloop, ())
-    def minorloop(self):
-       """
-       As opposed to mainloop. This is a simple loop that works
-       in IDLE.
-       """
-       self.running = 1
-       while self.running:
-           self._simulator.update()
-           start = time.time()
-           time.sleep(self.delay)
     def translate(self, amount):
         return self._clients[0].translate(amount)
     def rotate(self, amount):

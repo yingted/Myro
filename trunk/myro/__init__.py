@@ -11,7 +11,7 @@ __VERSION__  = "1.0." + __BUILD__.split()[1]
 __AUTHOR__   = "Doug Blank <dblank@cs.brynmawr.edu>"
 
 from idlelib import PyShell
-import sys, atexit, time, random, pickle, threading
+import sys, atexit, time, random, pickle, threading, os
 import myro.globvars
 from myro.media import *
 from myro.speech import *
@@ -465,6 +465,8 @@ def requestStop():
 def initialize(id = None):
     myro.globvars.robot = Scribbler(id)
 def simulator(id = None):
+    _startSimulator()
+    time.sleep(4)
     myro.globvars.robot = SimScribbler(id)
 def translate(amount):
     if myro.globvars.robot:
@@ -631,6 +633,18 @@ def playNote(tup, wholeNoteDuration = .545):
         return myro.globvars.robot.playNote(tup, wholeNoteDuration)
     else:
         raise AttributeError, "need to initialize robot"
+
+def _startSimulator():
+    globalspath, filename = os.path.split(myro.globvars.__file__)
+    myro.globvars.myropath, directory = os.path.split(globalspath)
+    simulator_file = os.path.join(myro.globvars.myropath, "simulator.py")
+    if os.name in ['nt', 'dos', 'os2'] :
+        os.system("start c:\Python24\pythonw.exe %s" % simulator_file)
+    elif os.name in ['posix']:
+        os.system("/usr/bin/env python %s &" % simulator_file)
+    else:
+        raise AttributeError, "your operating system (%s) is not currently supported" % os.name
+    
 # --------------------------------------------------------
 # Error handler:
 # --------------------------------------------------------
