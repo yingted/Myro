@@ -12,3 +12,4 @@ copy /Y "Start Python.pyw"  "c:\Documents and Settings\%USERNAME%\Desktop\"
 copy /Y misc\config-extensions.def c:\Python24\Lib\idlelib\
 copy /Y misc\ScriptBinding.py c:\Python24\Lib\idlelib\
 copy /Y misc\graphics.py c:\Python24\Lib\site-packages\
+pause
