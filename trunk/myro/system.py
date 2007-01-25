@@ -1,6 +1,7 @@
 import zipfile, tarfile, urllib
 import os, string
 from myro import __VERSION__ as myro_version
+import myro.globvars
 
 class RegFile:
     """ Class for treating a regular file like other archives. """
@@ -16,8 +17,15 @@ class RegFile:
     def namelist(self):
         return [self.filename]
 
-def import_url(url, tmp_dir = "."):
+def import_url(url, tmp_dir = None):
     """ Retrieves the contents of a url, and then calls import_file. """
+    if tmp_dir == None:
+        if "TMP" in os.environ:
+            tmp_dir = os.environ["TMP"]
+        elif "TEMP" in os.environ:
+            tmp_dir = os.environ["TEMP"]
+        else:
+            tmp_dir = "."
     # get url into tmp_file
     path, file = url.rsplit("/", 1)
     tmp_file = tmp_dir + os.sep + file
@@ -43,10 +51,26 @@ def import_file(filename):
         infp = RegFile(filename)
     name_list =infp.namelist()
     director = {}
-    VALUES = {"PYTHONDIR": "c:\\Python24\\",
-              "HOME": "c:\\Documents and Settings\\%USERNAME%\\",
-              "DESKTOP" : "c:\\Documents and Settings\\%USERNAME%\\DESKTOP\\",
-              }
+    VALUES = {} 
+    if "USERNAME" in os.environ:
+        VALUES["USER"] = os.environ["USERNAME"] # NameId
+    if "HOMEPATH" in os.environ:
+        VALUES["HOME"] = 'C:' + os.sep + os.environ["HOMEPATH"] + os.sep
+    if "USERPROFILE" in os.environ:
+        VALUES["HOME"] = os.environ["USERPROFILE"] + os.sep
+    globalspath, f = myro.globvars.__file__.rsplit(os.sep, 1)
+    #print "globalspath:", globalspath
+    myropath, f = globalspath.rsplit(os.sep, 1)
+    #print "myropath:", myropath
+    sitepath, f = myropath.rsplit(os.sep, 1)
+    #print "sitepath:", sitepath
+    myroparts = myropath.split(os.sep)
+    pythonpath = myroparts[0] + os.sep + myroparts[1] + os.sep
+    VALUES["DESKTOP"] = VALUES["HOME"] + "DESKTOP" + os.sep
+    VALUES["PYTHONDIR"] = pythonpath
+    VALUES["MYRODIR"] = myropath + os.sep
+    VALUES["PYTHONSITEDIR"] = sitepath + os.sep
+    VALUES["PYTHONDIR"] = pythonpath
     if "MANIFEST" in name_list:
         manifest = infp.read("MANIFEST")
         lines = manifest.split("\n")
@@ -61,17 +85,16 @@ def import_file(filename):
             outfp = open(director[name], "wb")
             outfp.write(contents)
             outfp.close()
-            # now use system copy to put it where it goes
-            # so to use system expansions
-            # or maybe get these from environment?
-            #os.system("copy file file")
     else:
-        print "ERROR: no MANIFEST in upgrade; skipping"
+        print "   ERROR: no MANIFEST in upgrade; skipping"
     infp.close()
     return 1
 
-def upgrade():
+def upgrade(school = None):
     url = "http://myro.roboteducation.org/upgrade/"
+    if school != None:
+        url += school + "/"        
+    print "Looking for upgrades at", url, "..."
     myro_ver = map(int, myro_version.split("."))
     # go to site, check for latest greater than our version
     infp = urllib.urlopen(url)
@@ -81,11 +104,12 @@ def upgrade():
     for filename in lines:
         filename = filename.strip()
         if filename != "" and filename[0] != '#':
-            print filename
+            print "Considering", filename, "..."
             if filename.startswith("myro-upgrade-"):
                 end = filename.index(".zip")
                 patch_ver = map(int, filename[13:end].split("."))
                 if patch_ver > myro_ver:
-                    print patch_ver
                     # download it
+                    print "   Downloading..."
                     import_url(url + filename)
+    print "Done upgrading! Please exit and restart Python"
