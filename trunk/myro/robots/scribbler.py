@@ -207,7 +207,9 @@ class Scribbler(Robot):
     def get(self, sensor = "all", *position):
         sensor = sensor.lower()
         if sensor == "stall":
-            return self._get(Scribbler.GET_STALL)
+            retval = self._get(Scribbler.GET_ALL, 11) # returned as bytes
+            self._lastSensors = retval # single bit sensors
+            return retval[10]
         elif sensor == "startsong":
             #TODO: need to get this from flash memory
             return "tada"

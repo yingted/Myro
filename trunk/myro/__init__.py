@@ -305,6 +305,10 @@ class Robot(object):
         """ Returns the stall reading. """
         return self.get("stall")
 
+    def getInfo(self, *item):
+        """ Returns the info. """
+        return self.get("info", *item)
+
     def getName(self):
         """ Returns the robot's name. """
         return self.get("name")
@@ -551,6 +555,11 @@ def getLine(*pos):
 def getStall():
     if myro.globvars.robot:
         return myro.globvars.robot.get("stall")
+    else:
+        raise AttributeError, "need to initialize robot"
+def getInfo(*item):
+    if myro.globvars.robot:
+        return myro.globvars.robot.getInfo(*item)
     else:
         raise AttributeError, "need to initialize robot"
 def getAll():
