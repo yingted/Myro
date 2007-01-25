@@ -1,5 +1,6 @@
 import zipfile, tarfile, urllib
 import os, string
+from myro import __VERSION__ as myro_version
 
 class RegFile:
     """ Class for treating a regular file like other archives. """
@@ -42,29 +43,49 @@ def import_file(filename):
         infp = RegFile(filename)
     name_list =infp.namelist()
     director = {}
-    VALUES = {"PYTHONDIR": "c:\\Python24"}
+    VALUES = {"PYTHONDIR": "c:\\Python24\\",
+              "HOME": "c:\\Documents and Settings\\%USERNAME%\\",
+              "DESKTOP" : "c:\\Documents and Settings\\%USERNAME%\\DESKTOP\\",
+              }
     if "MANIFEST" in name_list:
         manifest = infp.read("MANIFEST")
-        for line in manifest:
+        lines = manifest.split("\n")
+        for line in lines:
             f, dest = map(string.strip, line.strip().split(":"))
             director[f] = dest % VALUES
         for name in name_list:
+            if name == "MANIFEST": continue
             contents = infp.read(name)
+            print "   writing:", director[name], "..."
+            # first write to temp file:
             outfp = open(director[name], "wb")
             outfp.write(contents)
             outfp.close()
+            # now use system copy to put it where it goes
+            # so to use system expansions
+            # or maybe get these from environment?
+            #os.system("copy file file")
     else:
-        print "error: no MANIFEST in upgrade"
+        print "ERROR: no MANIFEST in upgrade; skipping"
     infp.close()
     return 1
 
 def upgrade():
+    url = "http://myro.roboteducation.org/upgrade/"
+    myro_ver = map(int, myro_version.split("."))
     # go to site, check for latest greater than our version
-    infp = urllib.urlopen("http://myro.roboteducation.org/upgrade/")
+    infp = urllib.urlopen(url)
     contents = infp.read()
+    lines = contents.split("\n")
     infp.close()
-    
-    # download it
-    # get manifest, and put each file where it belongs
-    # if upgraded, should close idle
-    # else, no updates available
+    for filename in lines:
+        filename = filename.strip()
+        if filename != "" and filename[0] != '#':
+            print filename
+            if filename.startswith("myro-upgrade-"):
+                end = filename.index(".zip")
+                patch_ver = map(int, filename[13:end].split("."))
+                if patch_ver > myro_ver:
+                    print patch_ver
+                    # download it
+                    import_url(url + filename)
