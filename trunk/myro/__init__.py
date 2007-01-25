@@ -16,6 +16,7 @@ import myro.globvars
 from myro.media import *
 from myro.speech import *
 from myro.chat import *
+from myro.system import *
 
 try:
     import Tkinter
