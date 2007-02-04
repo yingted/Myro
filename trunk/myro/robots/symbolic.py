@@ -384,6 +384,7 @@ class TCPRobot(Simbot):
 		self.init(startDevices)
 
 	def move(self, message, other = None):
+                print "message:", message
                 _update_gui()
                 self.interruptRequest = 0
                 exp = None
@@ -402,6 +403,7 @@ class TCPRobot(Simbot):
                             self.socket = 0
                             exp = None
                     else:
+                            print "sending", message, self.addr
                             self.socket.sendto(message, self.addr)
                             retval = ""
                             try:

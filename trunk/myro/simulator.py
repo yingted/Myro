@@ -37,24 +37,33 @@ class Server(SocketServer.TCPServer):
                 
 class Handler(SocketServer.BaseRequestHandler):
     def handle(self):
-        self.request.setblocking(0)
+        print 1
+        self.request.setblocking(1)
+        self.request.settimeout(1)
         self.gui.done = 0
+        print 2
         while not self.gui.done:
+            print 3
             try:
-                request = self.request.recv(10240).strip()
-                sockname = self.request.getsockname()
+                request = self.request.recv(10240)
+                print "request:", request
             except:
-                print "socket problem"
-                break
+                continue
+            sockname = self.request.getsockname()
+            print "sockname:", sockname
+            print 4
             try:
                 retval = self.gui.process(request, sockname)
+                print "retval:", retval
             except:
                 continue
             if request == "disconnect":
                 break
             try:
                 self.request.send(retval)
+                print "sent ok"
             except: # broken pipe, etc
+                print "broken pipe"
                 self.gui.done = 1
         self.request.close()
 
@@ -84,6 +93,19 @@ class Thread(threading.Thread):
             else:
                 self.gui.quit = 1
         #self.gui.destroy()
+        print "Exiting run"
+        sys.exit(1)
+
+class Updater(threading.Thread):
+    def __init__(self, gui):
+        threading.Thread.__init__(self)
+        self.gui = gui
+    def run(self):
+        while not self.gui.quit:
+            print "updating"
+            self.gui.step()
+            time.sleep(.1)
+        print "Exiting update"
         sys.exit(1)
 
 import Tkinter, time, math, random
@@ -240,7 +262,9 @@ class Simulator:
     def mainloop(self):
         """ Simulates what TkSimulator does. """
         self.running = 1
+        print "starting loop..."
         while not self.done:
+            print "running"
             self.step()
             time.sleep(self.timeslice/1000.0) # to run in real time
         self.running = 0
@@ -706,6 +730,7 @@ class TkSimulator(Tkinter.Toplevel, Simulator):
     def destroy(self):
         print "DESTROY!"
         self.quit = 1
+        self.done = 1
         time.sleep(2)
         sys.exit(1)
     def setMode(self, mode):
@@ -964,13 +989,10 @@ class TkSimulator(Tkinter.Toplevel, Simulator):
     def remove(self, thing):
         self.canvas.delete(thing)
     def step(self, run = 1):
+        print "stepping..."
         self.remove('robot')
         Simulator.step(self, run)
-        if run and not self.stop:
-            self.running = 1
-            self.after(self.timeslice, self.step)
-        else:
-            self.running = 0
+        self.update()
     def addTrail(self, pos, index, robot):
         Simulator.addTrail(self, pos, index, robot)
         if robot.display["trail"] == 1:
@@ -2090,4 +2112,8 @@ if __name__ == "__main__":
         print "Simulator starting listener on port", port, "..."
         t = Thread(simulator, port)
         t.start()
+    print "here"
+    u = Updater(simulator)
+    u.start()
     simulator.mainloop()
+    print "Done!"

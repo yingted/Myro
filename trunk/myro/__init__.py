@@ -6,7 +6,7 @@ Distributed under a Shared Source License
 """
 
 __REVISION__ = "$Revision$"
-__BUILD__    = "$Build: 1 $"
+__BUILD__    = "$Build: 2 $"
 __VERSION__  = "1.0." + __BUILD__.split()[1]
 __AUTHOR__   = "Doug Blank <dblank@cs.brynmawr.edu>"
 
@@ -378,7 +378,7 @@ class Robot(object):
         """ Plays a song (list of note names, durations) """
         # 1 whole note should be .545 seconds for normal
         for tuple in song:
-            self.playNote(tuple)
+            self.playNote(tuple, wholeNoteDuration)
 
     def playNote(self, tuple, wholeNoteDuration = .545):
         if len(tuple) == 2:
@@ -471,7 +471,7 @@ def initialize(id = None):
     myro.globvars.robot = Scribbler(id)
 def simulator(id = None):
     _startSimulator()
-    time.sleep(4)
+    time.sleep(2)
     myro.globvars.robot = SimScribbler(id)
 def translate(amount):
     if myro.globvars.robot:
@@ -649,9 +649,10 @@ def _startSimulator():
     myro.globvars.myropath, directory = os.path.split(globalspath)
     simulator_file = os.path.join(myro.globvars.myropath, "simulator.py")
     if os.name in ['nt', 'dos', 'os2'] :
-        os.system("start c:\Python24\pythonw.exe %s" % simulator_file)
+        print simulator_file
+        os.system("""start c:\Python24\python.exe "%s" """ % simulator_file)
     elif os.name in ['posix']:
-        os.system("/usr/bin/env python %s &" % simulator_file)
+        os.system("""/usr/bin/env python "%s" &""" % simulator_file)
     else:
         raise AttributeError, "your operating system (%s) is not currently supported" % os.name
     
