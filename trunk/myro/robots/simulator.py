@@ -64,12 +64,23 @@ class SimScribbler(Robot):
                 else:
                     raise ("invalid sensor name: '%s'" % sensor)
             for position in positions:
-                position = int(position)
                 if sensor == "light":
-                    retvals.append(self._clients[0].light[0].value[position])
+                    if position in ["left", "center", "right"]:
+                        position = ["left", "center", "right"].index(position)
+                    else:
+                        position = int(position)
+                    retvals.append(self._getLight(position))
                 elif sensor == "ir":
+                    if position in ["left", "right"]:
+                        position = ["left", "right"].index(position)
+                    else:
+                        position = int(position)
                     retvals.append(self._clients[0].ir[0].value[position])
                 elif sensor == "line":
+                    if position in ["left", "right"]:
+                        position = ["left", "right"].index(position)
+                    else:
+                        position = int(position)
                     retvals.append(self._clients[0].line[0].value[position])
                 else:
                     raise ("invalid sensor name: '%s'" % sensor)
@@ -78,6 +89,10 @@ class SimScribbler(Robot):
             else:
                 return retvals
 
+    def _getLight(self, position):
+        retval = self._clients[0].light[0].value[position]
+        return int(retval * 3000)
+    
     def set(self, item, position, value = None):
         item = item.lower()
         if item == "led":

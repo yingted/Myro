@@ -37,31 +37,31 @@ class Server(SocketServer.TCPServer):
                 
 class Handler(SocketServer.BaseRequestHandler):
     def handle(self):
-        print 1
+        #print 1
         self.request.setblocking(1)
         self.request.settimeout(1)
         self.gui.done = 0
-        print 2
+        #print 2
         while not self.gui.done:
-            print 3
+            #print 3
             try:
                 request = self.request.recv(10240)
-                print "request:", request
+                #print "request:", request
             except:
                 continue
             sockname = self.request.getsockname()
-            print "sockname:", sockname
-            print 4
+            #print "sockname:", sockname
+            #print 4
             try:
                 retval = self.gui.process(request, sockname)
-                print "retval:", retval
+                #print "retval:", retval
             except:
                 continue
             if request == "disconnect":
                 break
             try:
                 self.request.send(retval)
-                print "sent ok"
+                #print "sent ok"
             except: # broken pipe, etc
                 print "broken pipe"
                 self.gui.done = 1
@@ -87,13 +87,13 @@ class Thread(threading.Thread):
     def run(self):
         if self.ok == 0: return
         while not self.gui.quit:
-            print "running", self.gui.quit
+            #print "running", self.gui.quit
             if "server" in dir(self):
                 self.server.handle_request()
             else:
                 self.gui.quit = 1
         #self.gui.destroy()
-        print "Exiting run"
+        #print "Exiting run"
         sys.exit(1)
 
 class Updater(threading.Thread):
@@ -102,10 +102,10 @@ class Updater(threading.Thread):
         self.gui = gui
     def run(self):
         while not self.gui.quit:
-            print "updating"
+            #print "updating"
             self.gui.step()
             time.sleep(.1)
-        print "Exiting update"
+        #print "Exiting update"
         sys.exit(1)
 
 import Tkinter, time, math, random
@@ -262,9 +262,9 @@ class Simulator:
     def mainloop(self):
         """ Simulates what TkSimulator does. """
         self.running = 1
-        print "starting loop..."
+        #print "starting loop..."
         while not self.done:
-            print "running"
+            #print "running"
             self.step()
             time.sleep(self.timeslice/1000.0) # to run in real time
         self.running = 0
@@ -728,7 +728,7 @@ class TkSimulator(Tkinter.Toplevel, Simulator):
             self.mBar.tk_menuBar(self.makeMenu(self.mBar, entry[0], entry[1]))
         self.shapes = []
     def destroy(self):
-        print "DESTROY!"
+        #print "DESTROY!"
         self.quit = 1
         self.done = 1
         time.sleep(2)
@@ -989,7 +989,7 @@ class TkSimulator(Tkinter.Toplevel, Simulator):
     def remove(self, thing):
         self.canvas.delete(thing)
     def step(self, run = 1):
-        print "stepping..."
+        #print "stepping..."
         self.remove('robot')
         Simulator.step(self, run)
         self.update()
@@ -2112,8 +2112,8 @@ if __name__ == "__main__":
         print "Simulator starting listener on port", port, "..."
         t = Thread(simulator, port)
         t.start()
-    print "here"
+    #print "here"
     u = Updater(simulator)
     u.start()
     simulator.mainloop()
-    print "Done!"
+    #print "Done!"
