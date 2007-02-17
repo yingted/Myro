@@ -1,7 +1,8 @@
 #! /usr/bin/env python
 
 from idlelib import PyShell
-import sys
+import sys, os
+os.system("taskkill /IM pythonw.exe")
 #sys.argv = [sys.argv[0]] + ['-n'] 
 try:
     commands = open("mystart.py", "r").readlines()
