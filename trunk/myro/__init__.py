@@ -347,27 +347,27 @@ class Robot(object):
 
     def turn(self, direction, value = .8):
         if type(direction) in [float, int]:
-            return self.rotate(direction)
+            return self.move(0, direction)
         else:
             direction = direction.lower()
             if direction == "left":
-                return self.turnLeft(value)
+                return self.move(0, value)
             elif direction == "right":
-                return self.turnRight(value)
+                return self.move(0, -value)
             elif direction in ["straight", "center"]:
-                return self.rotate(0)
+                return self.move(0, 0) # aka, stop!
 
     def forward(self, amount):
-        return self.translate(amount)
+        return self.move(amount, 0)
 
     def backward(self, amount):
-        return self.translate(-amount)
+        return self.move(-amount, 0)
 
     def turnLeft(self, amount):
-        return self.rotate(amount)
+        return self.move(0, amount)
     
     def turnRight(self, amount):
-        return self.rotate(-amount)
+        return self.move(0, -amount)
 
     def stop(self):
         return self.move(0, 0)
