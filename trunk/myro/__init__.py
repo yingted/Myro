@@ -56,6 +56,15 @@ def currentTime():
     """
     return time.time()
 
+def pickOne(*args):
+    """
+    Randomly pick one of a list, or one between [0, arg).
+    """
+    if len(args) == 1:
+        return random.randrange(args[0])
+    else:
+        return args[random.randrange(len(args))]
+
 def flipCoin():
     """
     Randomly returns "heads" or "tails".

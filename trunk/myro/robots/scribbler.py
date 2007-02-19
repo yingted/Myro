@@ -18,8 +18,10 @@ def _commport(s):
     if type(s) == str:
         s = s.replace('\\', "")
         s = s.replace('.', "")
-        if s.lower().startswith("com"): return 1
-        if s.startswith("/dev/"): return 1
+        if s.lower().startswith("com") and s[3:].isdigit():
+            return 1
+        if s.startswith("/dev/"):
+            return 1
     return 0
 
 def isTrue(value):
@@ -93,7 +95,7 @@ class Scribbler(Robot):
             serialport = ask("Port", useCache = 1)
         # Deal with requirement that Windows "COM#" names where # >= 9 needs to
         # be in the format "\\.\COM#"
-        if type(serialport) == str and serialport.startswith("com"):
+        if type(serialport) == str and serialport.lower().startswith("com"):
             portnum = int(serialport[3:])
             if portnum >= 10:
                 serialport = r'\\.\COM%d' % (portnum)
@@ -109,8 +111,8 @@ class Scribbler(Robot):
         if answer != "OK":
             raise KeyboardInterrupt
         for x in range(1, 21):
-            port = "com" + str(x)
-            print "Searching on port", port, "for", self.serialPort
+            port = "COM" + str(x)
+            print "Searching on port %s for robot named '%s'...", (port, self.serialPort)
             try:
                 self.ser = serial.Serial(port, timeout=.5)
             except KeyboardInterrupt:
