@@ -101,6 +101,7 @@ class Updater(threading.Thread):
         threading.Thread.__init__(self)
         self.gui = gui
     def run(self):
+        self.gui.quit = 0
         while not self.gui.quit:
             #print "updating"
             self.gui.step()
