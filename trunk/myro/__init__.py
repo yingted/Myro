@@ -657,10 +657,18 @@ def _startSimulator():
     globalspath, filename = os.path.split(myro.globvars.__file__)
     myro.globvars.myropath, directory = os.path.split(globalspath)
     simulator_file = os.path.join(myro.globvars.myropath, "simulator.py")
+    path = myro.globvars.myropath
     if os.name in ['nt', 'dos', 'os2'] :
-        print simulator_file
+        if "PYTHONPATH" in os.environ:
+            os.environ["PYTHONPATH"] = path + ";" + os.getcwd() + ";" + os.environ["PYTHONPATH"] 
+        else:
+            os.environ["PYTHONPATH"] = path
         os.system("""start c:\Python24\python.exe "%s" """ % simulator_file)
     elif os.name in ['posix']:
+        if "PYTHONPATH" in os.environ:
+            os.environ["PYTHONPATH"] = path + ":" + os.getcwd() + ":" + os.environ["PYTHONPATH"]
+        else:
+            os.environ["PYTHONPATH"] = path
         os.system("""/usr/bin/env python "%s" &""" % simulator_file)
     else:
         raise AttributeError, "your operating system (%s) is not currently supported" % os.name

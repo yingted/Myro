@@ -2,7 +2,8 @@
 
 from idlelib import PyShell
 import sys, os
-os.system("taskkill /IM pythonw.exe")
+if os.name in ['nt', 'dos', 'os2'] :
+    os.system("taskkill /IM pythonw.exe")
 #sys.argv = [sys.argv[0]] + ['-n'] 
 try:
     commands = open("mystart.py", "r").readlines()
