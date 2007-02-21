@@ -40,7 +40,7 @@ class Joystick(Tkinter.Toplevel):
       self.translate = 0.0
       self.rotate = 0.0
       self.threshold = 0.10
-      self.delay = 0.05 # in seconds
+      self.delay = 0.10 # in seconds
       self.running = 0
 
    def destroy(self):
@@ -72,6 +72,8 @@ class Joystick(Tkinter.Toplevel):
        As opposed to mainloop. This is a simple loop that works
        in IDLE.
        """
+       if delay != None:
+           self.delay = delay
        self.running = 1
        lastUpdated = 0
        lastData = []
@@ -97,7 +99,6 @@ class Joystick(Tkinter.Toplevel):
                    lastUpdated = time.time()
                    lastData = data
            self.update()
-           start = time.time()
            time.sleep(self.delay)
 
    def initHandlers(self):

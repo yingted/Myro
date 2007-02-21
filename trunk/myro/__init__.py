@@ -286,8 +286,8 @@ class Robot(object):
         time.sleep(.1) # simulated delay, like real robot
 
     def getLastSensors(self):
-        """ Returns last sensor readings as dictionary """
-        return {}
+        """ Should not get the current, but the last. This is default behavior. """
+        return self.get("all")
 
     def update(self):
         """ Update the robot """

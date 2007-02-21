@@ -8,6 +8,12 @@ Distributed under a Shared Source License
 __REVISION__ = "$Revision$"
 __AUTHOR__   = "Doug Blank"
 
+# fix    current should
+# light  0-800   0-3500? dark/light?
+# ir     0 - .55 0,1    obs/none?
+# line   0,1     0,1    none,line?
+# stall ok
+
 import os, atexit, time, threading
 from myro import Robot
 from myro.robot.symbolic import TCPRobot
