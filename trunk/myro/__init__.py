@@ -345,29 +345,44 @@ class Robot(object):
         # this will not work, must be in same thread:
         #thread.start_new_thread(self._joy.minorloop, ())
 
-    def turn(self, direction, value = .8):
+    def forward(self, amount, interval=None):
+        self.move(amount, 0)
+        if interval != None:
+            time.sleep(interval)
+            self.stop()
+
+    def backward(self, amount, interval=None):
+        self.move(-amount, 0)
+        if interval != None:
+            time.sleep(interval)
+            self.stop()
+
+    def turn(self, direction, value = .8, interval=None):
         if type(direction) in [float, int]:
-            return self.move(0, direction)
+            self.move(0, direction)
         else:
             direction = direction.lower()
             if direction == "left":
-                return self.move(0, value)
+                self.move(0, value)
             elif direction == "right":
-                return self.move(0, -value)
+                self.move(0, -value)
             elif direction in ["straight", "center"]:
-                return self.move(0, 0) # aka, stop!
+                self.move(0, 0) # aka, stop!
+        if interval != None:
+            time.sleep(interval)
+            self.stop()
 
-    def forward(self, amount):
-        return self.move(amount, 0)
-
-    def backward(self, amount):
-        return self.move(-amount, 0)
-
-    def turnLeft(self, amount):
-        return self.move(0, amount)
+    def turnLeft(self, amount, interval=None):
+        self.move(0, amount)
+        if interval != None:
+            time.sleep(interval)
+            self.stop()
     
-    def turnRight(self, amount):
-        return self.move(0, -amount)
+    def turnRight(self, amount, interval=None):
+        self.move(0, -amount)
+        if interval != None:
+            time.sleep(interval)
+            self.stop()
 
     def stop(self):
         return self.move(0, 0)
