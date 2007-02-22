@@ -8,7 +8,7 @@ pyTTS-3.0.win32-py2.4.exe
 xmpppy-0.4.0.win32.exe
 copy /Y snack\tkSnack.py c:\Python24\Lib\
 copy /Y snack\snacklib\ c:\Python24\tcl\
-copy /Y "Start Python.pyw"  "c:\Documents and Settings\%USERNAME%\Desktop\"
+copy /Y "Start Python.py"  "c:\Documents and Settings\%USERNAME%\Desktop\"
 copy /Y misc\config-extensions.def c:\Python24\Lib\idlelib\
 copy /Y misc\ScriptBinding.py c:\Python24\Lib\idlelib\
 copy /Y misc\graphics.py c:\Python24\Lib\site-packages\

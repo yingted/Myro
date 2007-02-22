@@ -5,7 +5,7 @@ compile: clean
 	python -c 'import compileall; compileall.compile_dir("myro")'
 
 zip: clean
-	zip -r myro.zip *.py install.bat "Start Python.pyw" myro misc -x myro/CVS/ myro/*/CVS/ myro/CVS/* myro/*/CVS/* misc/CVS/* misc/CVS/
+	zip -r myro.zip *.py install.bat "Start Python.py" myro misc -x myro/CVS/ myro/*/CVS/ myro/CVS/* myro/*/CVS/* misc/CVS/* misc/CVS/
 
 build: zip
 	mkdir -p ../html/myro/

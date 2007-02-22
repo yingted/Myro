@@ -1,21 +1,16 @@
 # setup.py
-
 from distutils.core import setup
 from distutils.file_util import copy_file
 import sys
 from myro import __VERSION__
-
 #windows installer:
 # python setup.py bdist_wininst
-
 # patch distutils if it can't cope with the "classifiers" or
 # "download_url" keywords
-
 if sys.version < '2.2.3':
     from distutils.dist import DistributionMetadata
     DistributionMetadata.classifiers = None
     DistributionMetadata.download_url = None
-
 setup(
     name="myro",
     description="My Robot Python Exploration Library, from the IPRE",
@@ -36,7 +31,6 @@ setup(
         'Topic :: Software Development :: Libraries',
     ],
 )
-
 import idlelib, os
 sitepath = idlelib.__file__.split(os.sep)[:-2]
 sitepath.append("site-packages")
