@@ -359,30 +359,35 @@ class Robot(object):
 
     def turn(self, direction, value = .8, interval=None):
         if type(direction) in [float, int]:
-            self.move(0, direction)
+            retval = self.move(0, direction)
         else:
             direction = direction.lower()
             if direction == "left":
-                self.move(0, value)
+                retval = self.move(0, value)
             elif direction == "right":
-                self.move(0, -value)
+                retval = self.move(0, -value)
             elif direction in ["straight", "center"]:
-                self.move(0, 0) # aka, stop!
+                retval = self.move(0, 0) # aka, stop!
+            else:
+                retval = "error"
         if interval != None:
             time.sleep(interval)
             self.stop()
+        return retval
 
     def turnLeft(self, amount, interval=None):
-        self.move(0, amount)
+        retval = self.move(0, amount)
         if interval != None:
             time.sleep(interval)
             self.stop()
+        return retval
     
     def turnRight(self, amount, interval=None):
-        self.move(0, -amount)
+        retval = self.move(0, -amount)
         if interval != None:
             time.sleep(interval)
             self.stop()
+        return retval
 
     def stop(self):
         return self.move(0, 0)
