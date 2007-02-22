@@ -3,7 +3,8 @@
 from idlelib import PyShell
 import sys, os
 if os.name in ['nt', 'dos', 'os2'] :
-    os.system("taskkill /IM pythonw.exe")
+    os.system("taskkill /F /IM pythonw.exe")
+    # kill force processes named pythonw.exe
 #sys.argv = [sys.argv[0]] + ['-n'] 
 try:
     commands = open("mystart.py", "r").readlines()

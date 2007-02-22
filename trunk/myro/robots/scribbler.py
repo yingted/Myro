@@ -14,7 +14,7 @@ from myro import Robot, ask, askQuestion, _update_gui
 import myro.globvars
 
 def _commport(s):
-    if type(s) != int: return 1
+    if type(s) == int: return 1
     if type(s) == str:
         s = s.replace('\\', "")
         s = s.replace('.', "")
@@ -111,10 +111,14 @@ class Scribbler(Robot):
         if answer != "OK":
             raise KeyboardInterrupt
         for x in range(1, 21):
-            port = "COM" + str(x)
-            print "Searching on port %s for robot named '%s'...", (port, self.serialPort)
+            if x >= 10:
+                port = r'\\.\COM%d' % x
+            else:
+                port = "COM" + str(x)
+            prettyPort = "COM" + str(x)
+            print "Searching on port %s for robot named '%s'..." % (prettyPort, self.serialPort)
             try:
-                self.ser = serial.Serial(port, timeout=.5)
+                self.ser = serial.Serial(port, timeout=1)
             except KeyboardInterrupt:
                 raise
             except serial.SerialException:
@@ -129,12 +133,16 @@ class Scribbler(Robot):
                 name = lines[position+4:position+9+4]
                 name = name.replace("\x00", "")
                 name = name.strip()
-                print "   Found robot named", name, "on port", port, "!"
+                s = port.replace('\\', "")
+                s = s.replace('.', "")
+                print "   Found robot named", name, "on port", s, "!"
                 if name == self.serialPort:
                     self.serialPort = port
                     self.ser.timeout = 2.0
-                    askQuestion("You can use \"%s\" from now on, like this:\n   Scribbler(\"%s\")" %
-                                (self.serialPort, self.serialPort), answers=["Ok"])
+                    s = self.serialPort.replace('\\', "")
+                    s = s.replace('.', "")
+                    askQuestion("You can use \"%s\" from now on, like this:\n   initialize(\"%s\")" %
+                                (s, s), answers=["Ok"])
                     return
                 else:
                     self.ser.close()
