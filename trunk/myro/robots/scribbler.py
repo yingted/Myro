@@ -334,7 +334,7 @@ class Scribbler(Robot):
                     else:             return self._set(Scribbler.SET_LED_CENTER_OFF)
                 elif position == 2:
                     if isTrue(value): return self._set(Scribbler.SET_LED_RIGHT_ON)
-                    else:             return self._set(Scribbler.SET_LED_CENTER_OFF)
+                    else:             return self._set(Scribbler.SET_LED_RIGHT_OFF)
                 else:
                     raise AttributeError, "no such LED: '%s'" % position
             else:
