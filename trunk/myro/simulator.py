@@ -897,7 +897,14 @@ class TkSimulator(Tkinter.Toplevel, Simulator):
                 name, points, nargs = shape
                 xys = [(self.scale_x(x), self.scale_y(y)) for (x, y) in points]
                 self.canvas.create_polygon(xys, tag="line", **nargs)
-            elif shape[0] == "line":
+        for light in self.lights:
+            if light.type != "fixed": continue 
+            x, y, brightness, color = light.x, light.y, light.brightness, light.color
+            self.drawOval((x - brightness), (y - brightness),
+                          (x + brightness), (y + brightness),
+                          tag="line", fill=color, outline="orange")
+        for shape in self.shapes:
+            if shape[0] == "line":
                 name, (x1, y1, x2, y2), nargs = shape
                 if "width" in nargs.keys():
                     width = nargs["width"]/2.0
@@ -931,12 +938,6 @@ class TkSimulator(Tkinter.Toplevel, Simulator):
                 (x1, y1), (x2, y2) = segment.start, segment.end
                 id = self.drawLine(x1, y1, x2, y2, fill="black", tag="line")
                 segment.id = id
-        for light in self.lights:
-            if light.type != "fixed": continue 
-            x, y, brightness, color = light.x, light.y, light.brightness, light.color
-            self.drawOval((x - brightness), (y - brightness),
-                          (x + brightness), (y + brightness),
-                          tag="line", fill=color, outline="orange")
         i = 0
         for path in self.trail:
             if self.robots[i].subscribed and self.robots[i].display["trail"] == 1:

@@ -95,9 +95,13 @@ class SimScribbler(Robot):
             else:
                 return retvals
 
+    def _getIR(self, position):
+        retval = self._clients[0].ir[0].value[position]
+        return int(1 - round(retval, 0))
+
     def _getLight(self, position):
         retval = self._clients[0].light[0].value[position]
-        return int(retval * 3000)
+        return 1000 - int(retval * 1000)
     
     def set(self, item, position, value = None):
         item = item.lower()
