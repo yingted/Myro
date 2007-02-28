@@ -44,6 +44,14 @@ def _update_gui():
         PyShell.flist.pyshell.write("")
         #PyShell.flist.pyshell.update()
 
+def timer(seconds=0):
+    start = time.time()
+    while True:
+        timepast = time.time() - start
+        if seconds != 0 and timepast > seconds:
+            raise StopIteration
+        yield round(timepast, 3)
+
 def wait(seconds):
     """
     Wrapper for time.sleep() so that we may later overload.
