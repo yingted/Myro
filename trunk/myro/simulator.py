@@ -724,6 +724,11 @@ class TkSimulator(Tkinter.Toplevel, Simulator):
                           lambda: self.toggleOption("lightAboveWalls")],
                          ['draw mode', lambda: self.setMode('draw')],
                          ['view mode', lambda: self.setMode('view')]]),
+            ('Clear',[['lights', lambda: self.simClear("lights")],
+                      ['shapes', lambda: self.simClear("shapes")],
+                      ['walls', lambda: self.simClear("walls")],
+                     ]
+             ),
             ]
         for entry in menu:
             self.mBar.tk_menuBar(self.makeMenu(self.mBar, entry[0], entry[1]))
@@ -744,6 +749,14 @@ class TkSimulator(Tkinter.Toplevel, Simulator):
         self.redraw()
     def simToggle(self, key):
         self.display[key] = not self.display[key]
+        self.redraw()
+    def simClear(self, key):
+        if key == "lights":
+            self.lights = []
+        elif key == "shapes":
+            self.shapes = []
+        elif key == "walls":
+            self.world = []
         self.redraw()
     def toggle(self, key):
         for r in self.robots:
