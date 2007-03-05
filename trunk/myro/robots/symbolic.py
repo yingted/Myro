@@ -96,7 +96,7 @@ class RangeSimDevice(Device):
 		self.units = "ROBOTS"
 		self.radius = robot.radius
 		self.count = len(self)
-		self._noise = [0.05] * self.count
+		self._noise = [0.00] * self.count
 		
 	def __len__(self):
 		return len(self._geometry[0])

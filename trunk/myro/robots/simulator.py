@@ -31,6 +31,8 @@ class SimScribbler(Robot):
         self.startsong = "tada"
         self.lock = threading.Lock()
         self.delay = 0.1
+        self._clients[0].ir[0].units = "M"
+        self._clients[0].light[0]._noise = [0.05, 0.05, 0.05]
     def translate(self, amount):
         return self._clients[0].translate(amount)
     def rotate(self, amount):
@@ -81,7 +83,7 @@ class SimScribbler(Robot):
                         position = ["left", "right"].index(position)
                     else:
                         position = int(position)
-                    retvals.append(self._clients[0].ir[0].value[position])
+                    retvals.append(self._getIR(position))
                 elif sensor == "line":
                     if position in ["left", "right"]:
                         position = ["left", "right"].index(position)
@@ -97,7 +99,10 @@ class SimScribbler(Robot):
 
     def _getIR(self, position):
         retval = self._clients[0].ir[0].value[position]
-        return int(1 - round(retval, 0))
+        if retval < .31:
+            return 0
+        else:
+            return 1
 
     def _getLight(self, position):
         retval = self._clients[0].light[0].value[position]

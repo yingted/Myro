@@ -257,6 +257,9 @@ class Simulator:
         self.running = 0
         self.stop = 0 # use to stop the sim
         self.mode = "view"
+        self.lightsOrig = []
+        self.shapesOrig = []
+        self.worldOrig = []
     def resetPaths(self): pass
     def resetPath(self, pos): pass
     def update_idletasks(self): pass
@@ -347,7 +350,7 @@ class Simulator:
                 ovy, r.ovy = r.ovy, r.ovy/5.0
                 ova, r.ova = r.ova, r.ova/5.0
             r.step(self.timeslice)
-            if resetVelocities:
+            if r.type != "puck" and resetVelocities:
                 r.vx = ovx
                 r.vy = ovy
                 r.va = ova
@@ -752,10 +755,13 @@ class TkSimulator(Tkinter.Toplevel, Simulator):
         self.redraw()
     def simClear(self, key):
         if key == "lights":
+            self.lightsOrig = self.lights
             self.lights = []
         elif key == "shapes":
+            self.shapesOrig = self.shapes
             self.shapes = []
         elif key == "walls":
+            self.worldOrig = self.world
             self.world = []
         self.redraw()
     def toggle(self, key):
@@ -768,6 +774,15 @@ class TkSimulator(Tkinter.Toplevel, Simulator):
             r._last_pose = (-1, -1, -1)
         self.redraw()
     def reset(self):
+        if len(self.lightsOrig) > 0:
+            self.lights = self.lightsOrig
+            self.lightsOrig = []
+        if len(self.shapesOrig) > 0:
+            self.shapes = self.shapesOrig
+            self.shapesOrig = []
+        if len(self.worldOrig) > 0:
+            self.world = self.worldOrig
+            self.worldOrig = []
         for r in self.robots:
             r._gx, r._gy, r._ga = r._xya
             r.energy = 10000.0
@@ -1425,16 +1440,16 @@ class SimRobot:
                                 # transfer some energy to puck
                                 if movePucks:
                                     r._ga = self._ga + ((random.random() - .5) * 0.4) # send in random direction, 22 degree
-                                    r.ovx = self.ovx * 0.9 # knock it away
+                                    r.vx = self.vx * 0.9 # knock it away
                                     if r not in self.simulator.needToMove:
                                         self.simulator.needToMove.append(r)
                                     if self.type == "puck":
-                                        self.ovx = self.ovx * 0.9 # loose some
+                                        self.vx = self.vx * 0.9 # loose some
                                 pushedAPuck = 1
                         elif bbintersect:
                             if self.type == "puck":
-                                self.ovx = 0.0
-                                self.ovy = 0.0
+                                self.vx = 0.0
+                                self.vy = 0.0
                             self.proposePosition = 0
                             if self.gripper and self.gripper.velocity != 0:
                                 self.gripper.state = "stop"
@@ -1473,12 +1488,20 @@ class SimRobot:
                     r.setPose(rx, ry, 0.0)
                     d.state = "open"
         if self.friction != 1.0:
-            self.ovx *= self.friction
-            self.ovy *= self.friction
-            if 0.0 < self.ovx < 0.1: self.ovx = 0.0
-            if 0.0 < self.ovy < 0.1: self.ovy = 0.0
-            if 0.0 > self.ovx > -0.1: self.ovx = 0.0
-            if 0.0 > self.ovy > -0.1: self.ovy = 0.0
+            if r.type == "puck":
+  	         self.vx *= self.friction
+  	         self.vy *= self.friction
+  	         if 0.0 < self.vx < 0.1: self.vx = 0.0
+  	         if 0.0 < self.vy < 0.1: self.vy = 0.0
+  	         if 0.0 > self.vx > -0.1: self.vx = 0.0
+  	         if 0.0 > self.vy > -0.1: self.vy = 0.0
+  	    else:
+                self.ovx *= self.friction
+                self.ovy *= self.friction
+                if 0.0 < self.ovx < 0.1: self.ovx = 0.0
+                if 0.0 < self.ovy < 0.1: self.ovy = 0.0
+                if 0.0 > self.ovx > -0.1: self.ovx = 0.0
+                if 0.0 > self.ovy > -0.1: self.ovy = 0.0
         self.stall = 0
         self.setPose(p_x, p_y, p_a)
         self.updateDevices()
@@ -2043,7 +2066,7 @@ class MyroIR(RangeSensor):
         RangeSensor.__init__(self,
                              "ir", geometry = (( 0.09, 0.05, 0),
                                                ( 0.09,-0.05, 0)),
-                             arc = 5 * PIOVER180, maxRange = 0.10, noise = 0.0)
+                             arc = 5 * PIOVER180, maxRange = 0.35, noise = 0.0)
         self.groups = {'all': range(2),
                        'front': (0, 1),
                        'front-left' : (0, ),
