@@ -3,7 +3,8 @@
 from idlelib import PyShell
 import sys, os
 if os.name in ['nt', 'dos', 'os2'] :
-    os.system("taskkill /F /IM pythonw.exe")
+    pid = os.getpid()
+    os.system("""taskkill /F /FI "PID ne %d" /IM pythonw.exe /T """ % pid)
     # kill force processes named pythonw.exe
 #sys.argv = [sys.argv[0]] + ['-n'] 
 try:

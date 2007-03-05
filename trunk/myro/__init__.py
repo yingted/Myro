@@ -10,8 +10,13 @@ __BUILD__    = "$Build: 2 $"
 __VERSION__  = "1.0." + __BUILD__.split()[1]
 __AUTHOR__   = "Doug Blank <dblank@cs.brynmawr.edu>"
 
-from idlelib import PyShell
+try:
+    from idlelib import PyShell
+except:
+    PyShell = None
 import sys, atexit, time, random, pickle, threading, os
+import traceback
+# Myro items to be imported:
 import myro.globvars
 from myro.media import *
 from myro.speech import *
@@ -26,7 +31,6 @@ try:
 except:
     Tkinter = None
 if Tkinter != None:
-    #from myro.graphics import *
     from myro.widgets import AskDialog as _AskDialog
     try:
         myro.globvars.gui = Tkinter.Tk()
@@ -40,17 +44,42 @@ except:
     tkSnack = None
 
 def _update_gui():
-    if "flist" in dir(PyShell):
+    if PyShell != None and "flist" in dir(PyShell):
         PyShell.flist.pyshell.write("")
         #PyShell.flist.pyshell.update()
 
 def timer(seconds=0):
+    """ A function to be used with 'for' """
     start = time.time()
     while True:
         timepast = time.time() - start
         if seconds != 0 and timepast > seconds:
             raise StopIteration
         yield round(timepast, 3)
+
+_timers = {}
+def timeRemaining(seconds=0):
+    """ Function to be used with 'while' """
+    global _timers
+    if seconds == 0: return True
+    now = time.time()
+    stack = traceback.extract_stack()
+    filename, line_no, q1, q2 = stack[-2]
+    if filename.startswith("<pyshell"):
+        filename = "pyshell"
+    if (filename, line_no) not in _timers:
+        _timers[(filename, line_no)] = (now, seconds)
+        return True
+    start, duration = _timers[(filename, line_no)]
+    if seconds != duration:
+        _timers[(filename, line_no)] = (now, seconds)
+        return True
+    if now - start > duration:
+        del _timers[(filename, line_no)]
+        return False
+    else:
+        return True
+    
 
 def wait(seconds):
     """
@@ -704,7 +733,6 @@ def _startSimulator():
 # --------------------------------------------------------
 # Error handler:
 # --------------------------------------------------------
-import traceback
 def _myroExceptionHandler(etype, value, tb):
     # make a window
     #win = HelpWindow()
