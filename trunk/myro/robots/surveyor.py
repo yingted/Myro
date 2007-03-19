@@ -81,7 +81,7 @@ class Surveyor(Robot):
             serialport = ask("Port", useCache = 1)
 	# Deal with requirement that Windows "COM#" names where # >= 9 needs to
 	# be in the format "\\.\COM#"
-        if type(serialport) == str and serialport.startswith("com"):
+        if type(serialport) == str and serialport.lower().startswith("com"):
             portnum = int(serialport[3:])
             if portnum >= 10:
                 serialport = r'\\.\COM%d' % (portnum)
@@ -99,6 +99,7 @@ class Surveyor(Robot):
         self.window.wm_title("SRV-1 View (%dx%d)" % self.resolution)
         self.canvas = Tkinter.Canvas(self.window, width = 160, height = 128)
         self.canvas.pack(fill="both", expand="y")
+        self.window.update()
 
     def open(self):
         try:
@@ -143,12 +144,19 @@ class Surveyor(Robot):
 
     def get(self, sensor = "all", *position):
         sensor = sensor.lower()
+        if sensor == "config":
+            return {"ir": 4}
         if sensor == "name":
             return self.name
         elif sensor == "version":
             return self._send("V")
         elif sensor == "resolution":
             return self.resolution
+        elif sensor == "all":
+            retval = {}
+            for s in ["ir"]:
+                retval[s] = self.get(s)
+            return retval
         else:
             retvals = []
             if len(position) == 0:
@@ -166,7 +174,7 @@ class Surveyor(Robot):
                             self.canvas.create_line(pos    , self.resolution[1] - s1 * self.resolution[1] - 1,
                                                     pos + 2, self.resolution[1] - s2 * self.resolution[1] - 1,
                                                     fill="black", tag="scan")
-                        # force IDLE to update
+                        self.update() # Scan will draw on the canvas, if there is one
                     return retval
                 elif sensor == "image":
                     return self.getImage()
@@ -181,7 +189,14 @@ class Surveyor(Robot):
             elif sensor == "ir":
                 data = self._send("B")
                 for pos in position:
-                    retvals.append(data[pos])
+                    if pos in [0, "front"]:
+                        retvals.append(data[0])
+                    elif pos in [1, "left"]:
+                        retvals.append(data[1])
+                    elif pos in [2, "back"]:
+                        retvals.append(data[2])
+                    elif pos in [3, "right"]:
+                        retvals.append(data[3])
             else:
                 raise ("invalid sensor name: '%s'" % sensor)
             if len(retvals) == 1:
@@ -220,7 +235,8 @@ class Surveyor(Robot):
         self._adjustSpeed()
 
     def update(self):
-        pass
+        if self.window != None:
+            self.window.update()
 
     def setResolution(self, mode = (160, 128)): 
         if mode == (80, 64):
@@ -256,6 +272,7 @@ class Surveyor(Robot):
                 self.im = Image.open(fileThing)
                 self.image = ImageTk.PhotoImage(self.im)
                 self.canvas.create_image(80, 64, image = self.image)
+                self.window.update()
                 #print "", # hack to get IDLE to update
             except KeyboardInterrupt:
                 raise
@@ -295,10 +312,10 @@ class Surveyor(Robot):
             try:
                 header = self.ser.read(13)
                 data = self.ser.readline()
-                retval = {"front": int(data[0:8].strip(), 16)/255.0,
-                          "left": int(data[8:16].strip(), 16)/255.0,
-                          "back": int(data[16:24].strip(), 16)/255.0,
-                          "right": int(data[24:32].strip(), 16)/255.0}
+                retval = [int(data[0:8].strip(), 16)/255.0,
+                          int(data[8:16].strip(), 16)/255.0,
+                          int(data[16:24].strip(), 16)/255.0,
+                          int(data[24:32].strip(), 16)/255.0 ]
             except KeyboardInterrupt:
                 raise
             except:
@@ -334,3 +351,9 @@ class Surveyor(Robot):
         ml = int(min(max(motor_left, -100), 100))
         mr = int(min(max(motor_right, -100), 100))
         self._send("M" + encode(ml) + encode(mr) + chr(0))
+
+def watch():
+    if myro.globvars.robot:
+        return myro.globvars.robot.watch()
+    else:
+        raise AttributeError, "need to initialize robot"

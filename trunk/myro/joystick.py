@@ -27,7 +27,11 @@ class Joystick(Tkinter.Toplevel):
       self.widgets = {}
       if self.showSensors:
          newFrame = Tkinter.Frame(self, relief=Tkinter.RAISED, borderwidth=2)
-         self.addWidgets(newFrame, ("Light", 3), ("Line", 2), ("IR", 2), ("Stall", 1))
+         items = []
+         if self.robot != None:
+             d = self.robot.get("config")
+             items = [(key, d[key]) for key in d.keys()]
+         self.addWidgets(newFrame, *items)
          newFrame.pack(side="bottom", fill="both", expand="y")
       self.initHandlers()
       self.canvas.pack(side=Tkinter.BOTTOM)
@@ -84,18 +88,11 @@ class Joystick(Tkinter.Toplevel):
                if data != lastData or now - lastUpdated > 1:
                    if now - lastUpdated > 1:
                        data = self.robot.getAll()
-                   light = data.get("light", [0, 0, 0])
-                   line = data.get("line", [0, 0])
-                   ir = data.get("ir", [0, 0])
-                   stall = [data.get("stall", 0)]
-                   for i in range(len(light)):
-                      self.updateWidget("Light", i, light[i])
-                   for i in range(len(line)):
-                      self.updateWidget("Line", i, line[i])
-                   for i in range(len(ir)):
-                      self.updateWidget("IR", i, ir[i])
-                   for i in range(len(stall)):
-                      self.updateWidget("Stall", i, stall[i])
+                   config = self.robot.get("config") # {"ir": 2, "line": 2, "stall": 1, "light": 3}
+                   for key in config:
+                       item = data.get(key, [0] * config[key])
+                       for i in range(len(item)):
+                          self.updateWidget(key, i, item[i])
                    lastUpdated = time.time()
                    lastData = data
            self.update()

@@ -455,7 +455,7 @@ class Robot(object):
             self.beep(dur * wholeNoteDuration, freq1, freq2)
 
 from myro.robot.scribbler import Scribbler
-from myro.robot.surveyor import Surveyor
+from myro.robot.surveyor import Surveyor, watch
 from myro.robot.simulator import SimScribbler
 
 class Computer(Robot):
@@ -554,29 +554,29 @@ def move(translate, rotate):
         return myro.globvars.robot.move(translate, rotate)
     else:
         raise AttributeError, "need to initialize robot"
-def forward(amount):
+def forward(amount, seconds=None):
     if myro.globvars.robot:
-        return myro.globvars.robot.forward(amount)
+        return myro.globvars.robot.forward(amount, seconds)
     else:
         raise AttributeError, "need to initialize robot"
-def backward(amount):
+def backward(amount, seconds=None):
     if myro.globvars.robot:
-        return myro.globvars.robot.backward(amount)
+        return myro.globvars.robot.backward(amount, seconds)
     else:
         raise AttributeError, "need to initialize robot"
-def turn(direction, amount = .8):
+def turn(direction, amount = .8, seconds=None):
     if myro.globvars.robot:
-        return myro.globvars.robot.turn(direction, amount)
+        return myro.globvars.robot.turn(direction, amount, seconds)
     else:
         raise AttributeError, "need to initialize robot"
-def turnLeft(amount):
+def turnLeft(amount, seconds=None):
     if myro.globvars.robot:
-        return myro.globvars.robot.turnLeft(amount)
+        return myro.globvars.robot.turnLeft(amount, seconds)
     else:
         raise AttributeError, "need to initialize robot"
-def turnRight(amount):
+def turnRight(amount, seconds=None):
     if myro.globvars.robot:
-        return myro.globvars.robot.turnRight(amount)
+        return myro.globvars.robot.turnRight(amount, seconds)
     else:
         raise AttributeError, "need to initialize robot"
 def stop():

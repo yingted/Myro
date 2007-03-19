@@ -216,7 +216,9 @@ class Scribbler(Robot):
 
     def get(self, sensor = "all", *position):
         sensor = sensor.lower()
-        if sensor == "stall":
+        if sensor == "config":
+            return {"ir": 2, "line": 2, "stall": 1, "light": 3}
+        elif sensor == "stall":
             retval = self._get(Scribbler.GET_ALL, 11) # returned as bytes
             self._lastSensors = retval # single bit sensors
             return retval[10]

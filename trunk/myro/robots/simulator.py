@@ -47,7 +47,12 @@ class SimScribbler(Robot):
     def get(self, sensor = "all", *positions):
         self._clients[0].update()
         sensor = sensor.lower()
-        if sensor == "stall":
+        if sensor == "config":
+            return {"ir": 2,
+                    "line": 2,
+                    "stall": 1,
+                    "light": 3}
+        elif sensor == "stall":
             return self._clients[0].stall
         elif sensor == "startsong":
             return self.startsong
