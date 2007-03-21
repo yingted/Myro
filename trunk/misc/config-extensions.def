@@ -80,12 +80,3 @@ fgcolor=Black
 [CodeContext_bindings]
 toggle-code-context=
 
-# [AutoComplete]
-# enable=1
-# popupwait=2000
-# [AutoComplete_cfgBindings]
-# force-open-completions=<Control-Key-space>
-# [AutoComplete_bindings]
-# autocomplete=<Key-Tab>
-# try-open-completions=<KeyRelease-period> <KeyRelease-slash> <KeyRelease-backslash>
-
