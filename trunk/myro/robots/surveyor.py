@@ -299,8 +299,6 @@ class Surveyor(Robot):
             if len(position) == 0:
                 if sensor == "scan":
                     retval = self._send("S")
-                    if self.window.canvas != None:
-                        self.window.updateScan(retval) # Scan will draw on the canvas, if there is one
                     return retval
                 elif sensor == "image":
                     return self.getImage()
@@ -396,13 +394,6 @@ class Surveyor(Robot):
 
     def getImage(self, update=0): # because this isn't in Robot class
         i = self._send("I")
-        if update and self.window.canvas != None and ImageTk != None and Image != None:
-            try:
-                self.window.update()
-            except KeyboardInterrupt:
-                raise
-            except:
-                pass
         return i
 
 ####################### Private
