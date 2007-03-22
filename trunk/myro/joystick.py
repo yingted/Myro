@@ -91,6 +91,8 @@ class Joystick(Tkinter.Toplevel):
                        data = self.robot.getAll()
                    for key in config:
                        item = data.get(key, [0] * config[key])
+                       if type(item) not in [list, tuple]:
+                           item = [item]
                        for i in range(len(item)):
                           self.updateWidget(key, i, item[i])
                    lastUpdated = time.time()
