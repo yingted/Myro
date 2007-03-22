@@ -42,6 +42,31 @@ def dec2bin(num, bits = 8):
         return '1' + retval[1:]
     return retval
 
+"00", "4F", "00", "3F", "0EBE"
+
+def hex2dec(hex, base = 16):
+    """ Like hex(), but to string """
+    hex = hex.upper()
+    retval = 0
+    chars = "0123456789ABCDEF"
+    for count in range(len(hex)):
+        value = base ** count
+        c = hex[-(count + 1)]
+        if c in chars:
+            retval += chars.index(c) * value
+    return retval
+
+def dec2hex(num, positions = 2, base = 16):
+    """ Like chr(), but as string """
+    retval = ""
+    chars = "0123456789ABCDEF"
+    for count in range(positions - 1, -1, -1):
+        value = base ** count
+        digit = chars[int(num / value)] # int division
+        retval += digit
+        num -= int(num/value) * value
+    return retval
+
 def complement(binNum):
     retval = ''
     for bit in binNum:
@@ -70,6 +95,121 @@ def isTrue(value):
     elif value: return True
     return False
 
+class CameraWindow(Tkinter.Toplevel):
+    def __init__(self, robot):
+        self.robot = robot
+        self.delay = .1
+        Tkinter.Toplevel.__init__(self, myro.globvars.gui)
+        self.wm_title("SRV-1 View (%dx%d)" % self.robot.resolution)
+        self.canvas = Tkinter.Canvas(self, width = 160, height = 128)
+        self.canvas.pack(fill="both", expand="y")
+        self.canvas.bind("<B1-Motion>", func=lambda event=self:self.dispatch_event(event, "motion", 0))
+        self.canvas.bind("<Button-1>",  func=lambda event=self:self.dispatch_event(event, "down", 0))
+        self.canvas.bind("<ButtonRelease-1>", func=lambda event=self:self.dispatch_event(event, "up", 0))
+        self.canvas.bind("<B2-Motion>", func=lambda event=self:self.dispatch_event(event, "motion", 1))
+        self.canvas.bind("<Button-2>",  func=lambda event=self:self.dispatch_event(event, "down", 1))
+        self.canvas.bind("<ButtonRelease-2>", func=lambda event=self:self.dispatch_event(event, "up", 1))
+        self.canvas.bind("<B3-Motion>", func=lambda event=self:self.dispatch_event(event, "motion", 2))
+        self.canvas.bind("<Button-3>",  func=lambda event=self:self.dispatch_event(event, "down", 2))
+        self.canvas.bind("<ButtonRelease-3>", func=lambda event=self:self.dispatch_event(event, "up", 2))
+        self.protocol('WM_DELETE_WINDOW',self.destroy)
+        self.click_start = (0,0)
+        self.blob = []
+        self.update()
+
+    def updateScan(self, scan):
+        self.canvas.delete("scan")
+        for c in range(len(scan) - 1):
+            s1 = scan[c]
+            s2 = scan[c + 1]
+            pos = c * 2
+            self.canvas.create_line(pos    ,
+                                    self.robot.resolution[1] - s1 * self.robot.resolution[1],
+                                    pos + 2,
+                                    self.robot.resolution[1] - s2 * self.robot.resolution[1],
+                                    fill="yellow", tag="scan")
+            self.canvas.create_line(pos    ,
+                                    self.robot.resolution[1] - s1 * self.robot.resolution[1] - 1,
+                                    pos + 2,
+                                    self.robot.resolution[1] - s2 * self.robot.resolution[1] - 1,
+                                    fill="black", tag="scan")
+
+    def destroy(self):
+        self.running = 0
+        Tkinter.Toplevel.destroy(self)
+
+    def dispatch_event(self, event, action, bin):
+        if action == "down":
+            self.click_start = event.x, event.y
+            x1, y1 = self.click_start
+            x2, y2 = self.click_start
+            self.canvas.create_rectangle(x1+1, y1+1, x2+1, y2+1,
+                                         outline="yellow", tag="box")
+            self.canvas.create_rectangle(x1, y1, x2, y2,
+                                         outline="blue", tag="box")
+        elif action == "motion":
+            self.canvas.delete("box")
+            x1, y1 = self.click_start
+            x2, y2 = event.x, event.y
+            self.canvas.create_rectangle(x1+1, y1+1, x2+1, y2+1,
+                                         outline="yellow", tag="box")
+            self.canvas.create_rectangle(x1, y1, x2, y2,
+                                         outline="blue", tag="box")
+        elif action == "up":
+            self.canvas.delete("box")
+            x1, y1 = self.click_start
+            x2, y2 = event.x, event.y
+            # divide by 2 because displayed image is 160x128
+            # and color sampling is in 80x64
+            x1 = dec2hex(x1/2)
+            x2 = dec2hex(x2/2)
+            y1 = dec2hex((self.robot.resolution[1] - y1)/2)
+            y2 = dec2hex((self.robot.resolution[1] - y2)/2)
+            message = "vg%s%s%s%s%s" % (bin, x1, x2, y2, y1)
+            # print message
+            self.robot._send(message)
+            # returns YUV as y1, y2, u1, u2, v1, v2
+            print "Stored tracking colors in location %d" % bin
+            if bin not in self.blob:
+                self.blob.append( bin )
+        else:
+            print "unknown mouse action:", action
+
+    def minorloop(self, delay = None): # in milliseconds
+        """
+        As opposed to mainloop. This is a simple loop that works
+        in IDLE.
+        """
+        if delay != None:
+            self.delay = delay
+        self.running = 1
+        while self.robot and self.running:
+            self.update()
+            time.sleep(self.delay)
+
+    def update(self, image = None):
+        if image == None:
+            image = self.robot.getImage()
+        fileThing = StringIO.StringIO(image)
+        try:
+            self.im = Image.open(fileThing)
+        except IOError:
+            return
+        self.image = ImageTk.PhotoImage(self.im)
+        self.canvas.delete("all")
+        self.canvas.create_image(80, 64, image = self.image)
+        colors = ["red", "green", "blue"]
+        for bin in self.blob:
+            color = colors[bin]
+            x1, y1, x2, y2, count = self.robot._send("vb%d" % bin)
+            x1 = x1 * 2
+            x2 = x2 * 2
+            y1 = self.robot.resolution[1] - y1 * 2
+            y2 = self.robot.resolution[1] - y2 * 2
+            self.canvas.create_rectangle(x1, y1, x2, y2,
+                                         outline=color, tag="box")
+        Tkinter.Toplevel.update(self)
+
 class Surveyor(Robot):
     def __init__(self, serialport = None, baudrate = 115200):
         Robot.__init__(self)
@@ -87,19 +227,16 @@ class Surveyor(Robot):
                 serialport = r'\\.\COM%d' % (portnum)
         self.serialPort = serialport
         self.baudRate = baudrate
-        self.canvas = None
         self.window = None
         self.id = None
         self.name = "SRV-1"
         self.open()
         myro.globvars.robot = self
 
-    def watch(self):
-        self.window = Tkinter.Toplevel(myro.globvars.gui)
-        self.window.wm_title("SRV-1 View (%dx%d)" % self.resolution)
-        self.canvas = Tkinter.Canvas(self.window, width = 160, height = 128)
-        self.canvas.pack(fill="both", expand="y")
-        self.window.update()
+    def watch(self, continuous=1):
+        self.window = CameraWindow(self)
+        if continuous:
+            self.window.minorloop()
 
     def open(self):
         try:
@@ -162,19 +299,8 @@ class Surveyor(Robot):
             if len(position) == 0:
                 if sensor == "scan":
                     retval = self._send("S")
-                    if self.canvas != None:
-                        self.canvas.delete("scan")
-                        for c in range(len(retval) - 1):
-                            s1 = retval[c]
-                            s2 = retval[c + 1]
-                            pos = c * 2
-                            self.canvas.create_line(pos    , self.resolution[1] - s1 * self.resolution[1],
-                                                    pos + 2, self.resolution[1] - s2 * self.resolution[1],
-                                                    fill="yellow", tag="scan")
-                            self.canvas.create_line(pos    , self.resolution[1] - s1 * self.resolution[1] - 1,
-                                                    pos + 2, self.resolution[1] - s2 * self.resolution[1] - 1,
-                                                    fill="black", tag="scan")
-                        self.update() # Scan will draw on the canvas, if there is one
+                    if self.window.canvas != None:
+                        self.window.updateScan(retval) # Scan will draw on the canvas, if there is one
                     return retval
                 elif sensor == "image":
                     return self.getImage()
@@ -261,19 +387,18 @@ class Surveyor(Robot):
         self._send("m") # samples background for obstacle detection
         return "ok"
 
+    def getBlob(self, bin): # because this isn't in Robot class
+        """ Get the blob that matches bin color """
+        return self._send("vb%d" % bin)
+
     def getScan(self, *position): # because this isn't in Robot class
         return self.get("scan", *position)
 
-    def getImage(self): # because this isn't in Robot class
+    def getImage(self, update=0): # because this isn't in Robot class
         i = self._send("I")
-        if self.canvas != None and ImageTk != None and Image != None:
+        if update and self.window.canvas != None and ImageTk != None and Image != None:
             try:
-                fileThing = StringIO.StringIO(i)
-                self.im = Image.open(fileThing)
-                self.image = ImageTk.PhotoImage(self.im)
-                self.canvas.create_image(80, 64, image = self.image)
                 self.window.update()
-                #print "", # hack to get IDLE to update
             except KeyboardInterrupt:
                 raise
             except:
@@ -338,8 +463,52 @@ class Surveyor(Robot):
                 print "camera image error"
                 data = None
             return data
-        elif message[0] == 'V':
+        elif message[0] == 'V': # version
             return self.ser.readline()[12:].strip()
+        # Vision commands:
+        elif message[0:2] == 'vg': # vision grab area
+            readline = self.ser.readline()
+            if not readline.startswith("##vg"):
+                print "error in vg command"
+                return None
+            readline = readline[4:] # data
+            return readline
+        elif message[0:2] == 'vr': # vision read area
+            readline = self.ser.readline()
+            if not readline.startswith("##vr"):
+                print "error in vr command"
+                return None
+            readline = readline[4:] # data
+            return readline
+        elif message[0:2] == 'vc': # vision set area
+            readline = self.ser.readline()
+            if not readline.startswith("##vc"):
+                print "error in vc command"
+                return None
+            readline = readline[4:] # data
+            return readline
+        elif message[0:2] == 'vs': # vision scan
+            readline = self.ser.readline()
+            if not readline.startswith("##vs"):
+                print "error in vs command"
+                return None
+            readline = readline[4:] # data
+            return readline
+        elif message[0:2] == 'vb': # vision blob
+            readline = self.ser.readline()
+            if not readline.startswith("##vb"):
+                print "error in vb command"
+                return None
+            readline = readline[5:] # data
+            x1, x2, y1, y2, count = (readline[0:2], readline[2:4],
+                                     readline[4:6], readline[6:8],
+                                     readline[8:12])
+            x1 = hex2dec(x1) 
+            x2 = hex2dec(x2) 
+            y1 = hex2dec(y1) 
+            y2 = hex2dec(y2) 
+            count = hex2dec(count) 
+            return x1, y1, x2, y2, count
         else:
             ack = self.ser.read(2)
             if ack != "#" + message[0]:

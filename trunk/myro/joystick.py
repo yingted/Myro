@@ -57,7 +57,7 @@ class Joystick(Tkinter.Toplevel):
          frame = Tkinter.Frame(window)
          self.widgets[name + ".label"] = Tkinter.Label(frame, text=text, width=10)
          self.widgets[name + ".label"].pack(side="left")
-         for i in range(size):
+         for i in range(size - 1, -1, -1):
             self.widgets["%s%d.entry" % (name, i)] = Tkinter.Entry(frame, bg="white", width = 10)
             self.widgets["%s%d.entry" % (name, i)].insert(0, "")
             self.widgets["%s%d.entry" % (name, i)].pack(side="right", fill="both", expand="y")
@@ -81,6 +81,7 @@ class Joystick(Tkinter.Toplevel):
        self.running = 1
        lastUpdated = 0
        lastData = []
+       config = self.robot.get("config") # {"ir": 2, "line": 2, "stall": 1, "light": 3}
        while self.running:
            if self.robot and self.showSensors:
                data = self.robot.getLastSensors()
@@ -88,7 +89,6 @@ class Joystick(Tkinter.Toplevel):
                if data != lastData or now - lastUpdated > 1:
                    if now - lastUpdated > 1:
                        data = self.robot.getAll()
-                   config = self.robot.get("config") # {"ir": 2, "line": 2, "stall": 1, "light": 3}
                    for key in config:
                        item = data.get(key, [0] * config[key])
                        for i in range(len(item)):
