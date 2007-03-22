@@ -42,8 +42,6 @@ def dec2bin(num, bits = 8):
         return '1' + retval[1:]
     return retval
 
-"00", "4F", "00", "3F", "0EBE"
-
 def hex2dec(hex, base = 16):
     """ Like hex(), but to string """
     hex = hex.upper()
