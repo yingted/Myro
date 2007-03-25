@@ -199,7 +199,10 @@ class CameraWindow(Tkinter.Toplevel):
         colors = ["red", "green", "blue"]
         for bin in self.blob:
             color = colors[bin]
-            x1, y1, x2, y2, count = self.robot._send("vb%d" % bin)
+            try:
+                x1, y1, x2, y2, count = self.robot._send("vb%d" % bin)
+            except:
+                x1, y1, x2, y2, count = 0,0,0,0,0
             x1 = x1 * 2
             x2 = x2 * 2
             y1 = self.robot.resolution[1] - y1 * 2
