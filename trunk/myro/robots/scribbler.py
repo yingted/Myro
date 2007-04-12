@@ -412,6 +412,10 @@ class Scribbler(Robot):
 
     def _read(self, bytes = 1):
         c = self.ser.read(bytes)
+        # .nah. bug fix
+        while (bytes > 1 and len(c) < bytes):      
+            c = c + self.ser.read(bytes-len(c))
+        # .nah. end bug fix
         if self.debug: print "_read:", c, len(c)
         time.sleep(0.01) # HACK! THIS SEEMS TO NEED TO BE HERE!
         if bytes == 1:
