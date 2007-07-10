@@ -47,6 +47,32 @@ class WindowsTTSEngine(TTSEngine):
     def saveSpeech(self, message, filename):
         self.tts.SpeakToWave(filename, message)
             
+class LinuxTTSEngine(TTSEngine):
+    def __init__(self, name = None, echo = 1):
+
+        import festival 
+        self.tts = festival.open() 
+	self.echo = echo
+
+    def speak(self, message, async = 1):
+        self.tts.say(message) 
+	if self.echo:
+	    print message
+
+    def setVoice(self, name):
+	print "Only One Voice!"
+
+    def getVoices(self):
+        return ['Default'] 
+
+    def getVoice(self):
+        return "Default" 
+
+    def stop(self):
+        self.tts.close()
+    # --------------------------------------------------
+
+
 def speak(message, async = 1):
     if myro.globvars.tts != None:
         myro.globvars.tts.speak(message, async)
@@ -86,5 +112,8 @@ def saveSpeech(message, filename):
 try:
     myro.globvars.tts = WindowsTTSEngine()
 except:
-    myro.globvars.tts = None
+    try:
+       myro.globvars.tts = LinuxTTSEngine()
+    except:
+       myro.globvars.tts = None
     
