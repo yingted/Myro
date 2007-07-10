@@ -55,6 +55,7 @@ class Scribbler(Robot):
     GET_INFO          = 80  
     GET_DATA          = 81  
 
+    SET_SINGLE_DATA   = 96
     SET_DATA          = 97  
     SET_ECHO_MODE     = 98  
     SET_LED_LEFT_ON   = 99
@@ -103,6 +104,9 @@ class Scribbler(Robot):
         self.baudRate = baudrate
         self.open()
         myro.globvars.robot = self
+	self._fudge = range(4)
+	self._oldFudge = range(4)
+	self.loadFudge()
 
     def search(self):
         answer = askQuestion(title="Search for " + self.serialPort,
@@ -319,6 +323,10 @@ class Scribbler(Robot):
         data[position] = value
         return self._set(*([Scribbler.SET_DATA] + data))
 
+    def setSingleData(self,position,value):
+	data = [position,value]
+	return self._set(  *([Scribbler.SET_SINGLE_DATA] + data)  )
+
     def setEchoMode(self, value):
         if isTrue(value): return self._set(Scribbler.SET_ECHO_MODE, 1)
         else:             return self._set(Scribbler.SET_ECHO_MODE, 0)
@@ -375,6 +383,54 @@ class Scribbler(Robot):
         else:
             raise ("invalid set item name: '%s'" % item)
 
+   
+    # Sets the fudge values (in memory, and on the flash memory on the robot)
+    def setFudge(self,f1,f2,f3,f4):
+	self._fudge[0] = f1
+	self._fudge[1] = f2
+	self._fudge[2] = f3
+	self._fudge[3] = f4
+
+    	# Save the fudge data (in integer 0..255 form) to the flash memory
+	#f1-f4 are float values 0..2, convert to byte values
+	# But to make things quick, only save the ones that have changed!
+	# 0..255 and save.
+
+	if self._oldFudge[0] != self._fudge[0] :
+		self.setSingleData(0,  int(self._fudge[0] * 127.0) )
+		self._oldFudge[0] = self._fudge[0] 
+
+	if self._oldFudge[1] != self._fudge[1] :
+		self.setSingleData(1,  int(self._fudge[1] * 127.0) )
+		self._oldFudge[1] = self._fudge[1]
+
+
+	if self._oldFudge[2] != self._fudge[2]:
+		self.setSingleData(2,  int(self._fudge[2] * 127.0) )
+		self._oldFudge[2] = self._fudge[2]
+		
+	if self._oldFudge[3] != self._fudge[3] :
+		self.setSingleData(3,  int(self._fudge[3] * 127.0) )
+		self._oldFudge[3] = self._fudge[3]
+				
+	
+   #Called when robot is initialized, after serial connection is established.
+   # Checks to see if the robot has fudge factors saved in it's data area
+   # 0,1,2,3, and uses them. If the robot has zeros, it replaces them with 127
+   # which is the equivalent of no fudge. Each factor goes from 0..255, where
+   # a 127 is straight ahead (no fudging)
+    def loadFudge(self):
+	    for i in range(4):
+	      self._fudge[i] = self.get("data",i)
+	      if self._fudge[i] == 0:
+		    self._fudge[i] = 127
+	      self._fudge[i] = self._fudge[i] / 127.0 # convert back to floating point!
+
+    #Gets the fudge values (from memory, so we don't get penalized by a slow
+    # serial link)
+    def getFudge(self):
+   	return(self._fudge[0],self._fudge[1],self._fudge[2],self._fudge[3])
+
     def stop(self):
         self._lastTranslate = 0
         self._lastRotate = 0
@@ -406,6 +462,47 @@ class Scribbler(Robot):
     def _adjustSpeed(self):
         left  = min(max(self._lastTranslate - self._lastRotate, -1), 1)
         right  = min(max(self._lastTranslate + self._lastRotate, -1), 1)
+
+
+
+	# JWS additions for "calibration" of motors.
+	# Use fudge values 1-4 to change the actual power given to each
+	# motor based upon the forward speed.
+	#
+	# This code is here for documentation purposes only.
+	# 
+	# The algorithm shown here is now implemented on the basic stamp
+	# on the scribbler directly.
+
+	#fudge the left motor when going forward!
+	#if (self._fudge[0] > 1.0 and left > 0.5 ):
+	   #left = left - (self._fudge[0] - 1.0)
+	#if (self._fudge[1] > 1.0 and 0.5 >= left > 0.0):
+	   #left = left - (self._fudge[1] - 1.0)
+	#fudge the right motor when going forward!
+	#if (self._fudge[0] < 1.0 and right > 0.5):
+	  # right = right - (1.0 - self._fudge[0])
+	#if (self._fudge[1] < 1.0 and 0.5 >= right > 0.0):
+	   #right = right - (1.0 - self._fudge[1])
+
+	#Backwards travel is just like forwards travel, but reversed!
+	#fudge the right motor when going backwards.
+	#if (self._fudge[2] > 1.0 and 0.0 > right >= -0.5):
+	#	right = right + (self._fudge[2] - 1.0)
+	#if (self._fudge[3] > 1.0 and -0.5 > right ):
+	#	right = right + (self._fudge[3] - 1.0)
+
+	#fudge the left motor when going backwards.
+	#if (self._fudge[2] < 1.0 and 0.0 > left >= -0.5):
+	#	left = left + (1.0 - self._fudge[2]) 
+	#if (self._fudge[3] < 1.0 and -0.5 > left):
+	#	left = left + (1.0 - self._fudge[3])
+
+  
+
+	#print "actual power: (",left,",",right,")"
+
+	#end JWS additions for "calibration of motors.
         leftPower = (left + 1.0) * 100.0
         rightPower = (right + 1.0) * 100.0
         self._set(Scribbler.SET_MOTORS, rightPower, leftPower)
