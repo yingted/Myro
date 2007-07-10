@@ -127,7 +127,7 @@ def pickAFolder():
     if folder == '':
         folder = myro.globvars.mediaFolder
     return folder
-	
+    
 def pickAFile():
     """ Returns a filename """
     path = tkFileDialog.askopenfilename(parent=myro.globvars.gui)
@@ -317,8 +317,8 @@ class Robot(object):
         elif Tkinter != None:
             myro.globvars.gui.bell()            
             time.sleep(duration)
-	else:
-	    print "beep!", chr(7)
+        else:
+            print "beep!", chr(7)
             time.sleep(duration)
         time.sleep(.1) # simulated delay, like real robot
 
@@ -439,7 +439,7 @@ class Robot(object):
     def close(self):
         pass
     def open(self):
-	pass
+        pass
     def playSong(self, song, wholeNoteDuration = .545):
         """ Plays a song (list of note names, durations) """
         # 1 whole note should be .545 seconds for normal
@@ -514,7 +514,7 @@ computer = Computer()
 def _cleanup():
     if myro.globvars.robot != None:
         myro.globvars.robot.stop() # hangs?
-	time.sleep(.5)
+        time.sleep(.5)
         myro.globvars.robot.close()
 
 # Get ready for user prompt; set up environment:

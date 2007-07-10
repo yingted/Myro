@@ -2,8 +2,8 @@
 ' IPRE (http://www.roboteducation.org/)
 ' For use with Myro and MSRS
 '
-'  {$STAMP BS2}
-'  {$PBASIC 2.5}
+' {$STAMP BS2}
+' {$PBASIC 2.5}
 
 '''''''''''''''''''''''''''''''''''''''
 ' Default Robot Name
@@ -12,7 +12,10 @@
 '   Gets set on reprogram
 '''''''''''''''''''''''''''''''''''''''
 nameData DATA          "Scribby "
-ipreData DATA          0,0,0,0,0,0,0,0
+ipreData DATA          127,127,127,127,0,0,0,0
+'
+'First four values of ipreData are the fudge data stored to EEPROM
+'It defaults to 127 (1.0) or no fudging.
 
 ''''''''''''''''''''''''''''''''''''''''''''''''''''
 ' IPRE Scribbler API
@@ -43,7 +46,6 @@ ipreData DATA          0,0,0,0,0,0,0,0
 ''''''''''''''''''''''''''''''''''''''''''''''''''''
 
 SOFT_RESET         CON 33  ' Format: 33 0 0 0 0 0 0 0 0, Notes: Performs a software reset of robot.  (turns name broadcast back on)
-
 GET_ALL            CON 65  ' Response: leftIR rightIR LeftLightHighyte LeftLightLowByte CenterLightHighByte CenterLightLowByte RightLightHighByte RightLightLowByte LineLeft LineRight Stall 65
 GET_ALL_BINARY     CON 66  ' Response: BinaryData 66, Notes: where the individual bits of BinaryData are: 0x000 IRLeft IRRight Stall LineLeft LineRight
 GET_LIGHT_LEFT     CON 67  ' Response: HighByte LowByte 67
@@ -62,6 +64,7 @@ GET_STALL          CON 79  ' Response: stall 79
 GET_INFO           CON 80  ' Response: "information on version robot, etc" 10 80
 GET_DATA           CON 81  ' Response: data from flash memory 81
 
+SET_SINGLE_DATA    CON 96  ' Sets a single byte of data in flash memory'
 SET_DATA           CON 97  ' Sets 8 bytes of data in flash memory
 SET_ECHO_MODE      CON 98  ' Set the echo mode on or off; if off, no echo is made after command
 SET_LED_LEFT_ON    CON 99
@@ -132,6 +135,13 @@ var3    VAR Word
 temp    VAR Byte
 temp2   VAR Byte
 
+''''''''''''''''''''''''''''''''''''
+' Variables used for Motor Fudging
+' (I'm not going to use unnamed variables! - JWS)
+''''''''''''''''''''''''''''''''''''
+'left  VAR Byte
+'right  VAR Word
+'fudge  VAR Byte(4)
 
 '''''''''''''''''''''''''''''''''''
 ' Software reset start location
@@ -168,6 +178,9 @@ FOR temp = 0 TO (NAME_LENGTH - 1)
   READ temp + nameData, name(temp)
 NEXT
 
+'FOR temp = 0 TO 4
+'  READ temp + ipreData, fudge(temp)
+'NEXT
 
 ''''''''''''''''''''''''''''''
 ' Turn on chirp
@@ -198,8 +211,8 @@ INIT:
 
 BEGIN:
   SERIN SerialPin, BAUD, TIMEOUT, INIT, [STR inCmd\PACKET_LENGTH]
-  LOOKDOWN inCmd(0), = [GET_STATE, GET_LINE_RIGHT, GET_LINE_LEFT, GET_LIGHT_LEFT, GET_LIGHT_CENTER, GET_LIGHT_RIGHT,  GET_IR_LEFT, GET_IR_RIGHT, GET_STALL, GET_NAME, SET_MOTORS_OFF, SET_MOTORS, SET_SPEAKER, SET_SPEAKER_2, SET_LED_LEFT_ON, SET_LED_LEFT_OFF, SET_LED_CENTER_ON, SET_LED_CENTER_OFF, SET_LED_RIGHT_ON, SET_LED_RIGHT_OFF, SET_NAME, SET_LED_ALL_ON, SET_LED_ALL_OFF, GET_LIGHT_ALL, GET_IR_ALL, GET_LINE_ALL, GET_ALL, SET_LOUD, SET_QUIET, GET_ALL_BINARY, SOFT_RESET,    SET_LED_ALL, GET_INFO, GET_DATA, SET_DATA, SET_ECHO_MODE], temp
-  BRANCH temp,         [GetState,  GetLineRight,   GetLineLeft,   GetLightLeft,   GetLightCenter,   GetLightRight,    GetObsLeft,  GetObsRight,  GetStall,  GetName,  MotorsOff,      Motors,     SetSpeaker,  SetSpeaker2,   OnLeftLED,       OffLeftLED,       OnCenterLED,       OffCenterLED,       OnRightLED,       OffRightLED,       SetName,  OnAllLED,       OffAllLED,       GetLightAll,   GetIRAll,   GetLineAll,   GetAll,  SetLoud,  SetQuiet,  GetAllBinary,   SoftwareReset, SetLedAll,   GetInfo,  GetData,  SetData,  SetEchoMode]
+  LOOKDOWN inCmd(0), = [GET_STATE, GET_LINE_RIGHT, GET_LINE_LEFT, GET_LIGHT_LEFT, GET_LIGHT_CENTER, GET_LIGHT_RIGHT,  GET_IR_LEFT, GET_IR_RIGHT, GET_STALL, GET_NAME, SET_MOTORS_OFF, SET_MOTORS, SET_SPEAKER, SET_SPEAKER_2, SET_LED_LEFT_ON, SET_LED_LEFT_OFF, SET_LED_CENTER_ON, SET_LED_CENTER_OFF, SET_LED_RIGHT_ON, SET_LED_RIGHT_OFF, SET_NAME, SET_LED_ALL_ON, SET_LED_ALL_OFF, GET_LIGHT_ALL, GET_IR_ALL, GET_LINE_ALL, GET_ALL, SET_LOUD, SET_QUIET, GET_ALL_BINARY, SOFT_RESET,    SET_LED_ALL, GET_INFO, GET_DATA, SET_DATA, SET_SINGLE_DATA, SET_ECHO_MODE], temp
+  BRANCH temp,         [GetState,  GetLineRight,   GetLineLeft,   GetLightLeft,   GetLightCenter,   GetLightRight,    GetObsLeft,  GetObsRight,  GetStall,  GetName,  MotorsOff,      Motors,     SetSpeaker,  SetSpeaker2,   OnLeftLED,       OffLeftLED,       OnCenterLED,       OffCenterLED,       OnRightLED,       OffRightLED,       SetName,  OnAllLED,       OffAllLED,       GetLightAll,   GetIRAll,   GetLineAll,   GetAll,  SetLoud,  SetQuiet,  GetAllBinary,   SoftwareReset, SetLedAll,   GetInfo,  GetData,  SetData, SetSingleData, SetEchoMode]
 TOP:
   ' echo command to tell we are done
   IF (echoMode = 1)     THEN SEROUT SerialPin, BAUD, [inCmd(0)]
@@ -400,11 +413,69 @@ SetSpeaker2:
      GOTO GetAll
 
 Motors:
-     var1 = (inCmd(1) + 100) * 10
-     var2 = (inCmd(2) + 100) * 10
-     PULSOUT MotorRightPin, var1
-     PULSOUT MotorLeftPin, var2
-     GOTO GetAll
+      var1 = inCmd(1)
+      var2 = inCmd(2)
+
+'Fudge motor values based upon direction & speed:
+'
+
+READ ipreData+0, temp  ' Fudge 0
+'Fudge the left motor when going forward. (51-100%)
+IF (temp > 127) AND (var2 > 150) THEN
+  var2 = var2 - (temp - 127)
+ENDIF
+
+'Fudge the right motor when going foward! (51-100%)
+IF (temp < 127) AND (var1 > 150) THEN
+   var1 = var1 - (127 - temp )
+ENDIF
+
+READ ipreData+1, temp  ' Fudge 1
+'Fudge the left motor when going forward (0-50%)
+IF (temp > 127) AND (150 >= var2) AND ( var2 > 100) THEN
+  var2 = var2 - (temp - 127)
+ENDIF
+'Fudge the right motor when going forward (0-50%)
+IF (temp < 127) AND (150 >= var1) AND (var1 > 100) THEN
+   var1 = var1 - (127 - temp )
+ENDIF
+
+READ ipreData+2, temp  ' Fudge 2
+'Backwards travel is just like forwards travel, but reversed!
+'fudge the right motor when going backwards (0-50%)
+IF ( temp > 127) AND (100 > var1) AND (var1 >= 50) THEN
+  var1 = var1 + ( temp - 127)
+ENDIF
+
+'fudge the left motor when going backwards.  (0-50% )
+IF (temp < 127) AND (100 > var2) AND ( var2 >= 50) THEN
+  var2 = var2 + (127 - temp)
+ENDIF
+
+READ ipreData+3, temp  ' Fudge 3
+'fudge the right motor when going backwards (51-100%)
+IF ( temp > 127) AND (var1 < 50) THEN
+  var1 = var1 + (temp - 127)
+ENDIF
+'fudge the left motor when going backwards (51-100%)
+IF (temp < 127) AND (50 > var2) THEN
+  var2 = var2 + ( 127 - temp )
+ENDIF
+
+      var1 = (var1 + 100) * 10
+      var2 =  (var2 + 100) * 10
+
+      PULSOUT MotorRightPin, var1
+      PULSOUT MotorLeftPin,  var2
+      GOTO GetAll
+
+' Old and busted code to just make the motors do what they
+' were told!
+'     var1 = (inCmd(1) + 100) * 10
+'     var2 = (inCmd(2) + 100) * 10
+'     PULSOUT MotorRightPin, var1
+'     PULSOUT MotorLeftPin, var2
+'     GOTO GetAll
 
 OnLeftLED:
      LedLeftPin = 1
@@ -461,10 +532,15 @@ SetData:
   NEXT
   GOTO GetAll
 
+SetSingleData:
+   temp = inCmd(1)
+   WRITE temp + ipreData, inCmd(2)
+   GOTO GetAll
+
 SetEchoMode:
   echoMode = inCmd(1) & %00000001
   GOTO GetAll
 
 GetInfo:
-  SEROUT SerialPin, BAUD, ["API:1.0,Robot:Scribbler,Mode:Serial", LF]
+  SEROUT SerialPin, BAUD, ["API:1.1,Robot:Scribbler,Mode:Serial", LF]
   GOTO TOP
