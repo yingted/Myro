@@ -6,8 +6,8 @@ Distributed under a Shared Source License
 """
 
 __REVISION__ = "$Revision$"
-__BUILD__    = "$Build: 3 $"
-__VERSION__  = "1.0." + __BUILD__.split()[1]
+__BUILD__    = "$Build: 1 $"
+__VERSION__  = "2.0.0a" 
 __AUTHOR__   = "Doug Blank <dblank@cs.brynmawr.edu>"
 
 try:
@@ -242,6 +242,7 @@ class BackgroundThread(threading.Thread):
 class Robot(object):
     _app = None
     _joy = None
+    _cal = None
     def __init__(self):
         """
         Base robot class.
@@ -381,6 +382,13 @@ class Robot(object):
         self._joy.minorloop()
         # this will not work, must be in same thread:
         #thread.start_new_thread(self._joy.minorloop, ())
+
+    def calibrate(self):
+        from myro.joystick import Calibrate
+        self._cal = Calibrate(parent = self._app, robot = self)
+        self._cal.minorloop()
+        # this will not work, must be in same thread:
+        #thread.start_new_thread(self._cal.minorloop, ())
 
     def forward(self, amount, interval=None):
         self.move(amount, 0)
@@ -697,6 +705,11 @@ def restart():
 def joyStick(showSensors = 0):
     if myro.globvars.robot:
         return myro.globvars.robot.joyStick(showSensors)
+    else:
+        raise AttributeError, "need to initialize robot"
+def calibrate():
+    if myro.globvars.robot:
+        return myro.globvars.robot.calibrate()
     else:
         raise AttributeError, "need to initialize robot"
 def playSong(song, wholeNoteDuration = .545):
