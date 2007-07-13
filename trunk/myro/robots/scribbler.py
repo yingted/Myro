@@ -206,9 +206,11 @@ class Scribbler(Robot):
         self.ser.flushOutput()
         self.stop()
         self.set("led", "all", "off")
-        self.beep(.10, 1600)
-        self.beep(.10, 800)
-        self.beep(.10, 1200)
+        self.beep(.03, 784)
+        self.beep(.03, 880)
+        self.beep(.03, 698)
+        self.beep(.03, 349)
+        self.beep(.03, 523)
         name = self.get("name")
         print "Hello, I'm %s!" % name
 

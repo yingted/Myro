@@ -256,7 +256,7 @@ class Robot(object):
             self.addService("computer.text-to-speech", "type", str(myro.globvars.tts))
 
     def initializeRemoteControl(self, password):
-        self.chat = Chat(self.name, password)
+        self.chat = Chat(self.getName(), password)
 
     def processRemoteControlLoop(self, threaded = 1):
         if threaded:

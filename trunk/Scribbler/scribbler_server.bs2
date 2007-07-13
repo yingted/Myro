@@ -187,14 +187,16 @@ NEXT
 ''''''''''''''''''''''''''''''
 PAUSE 50
 HIGH LedLeftPin
-FREQOUT SpeakerPin, 40, 780
-LOW LedLeftPin
+FREQOUT SpeakerPin, 80, 784
 HIGH LedCenterPin
-FREQOUT SpeakerPin, 40, 850
-LOW LedCenterPin
+FREQOUT SpeakerPin, 80, 880
 HIGH LedRightPin
-FREQOUT SpeakerPin, 40, 1000
+FREQOUT SpeakerPin, 80, 698
 LOW LedRightPin
+FREQOUT SpeakerPin, 80, 349
+LOW LedCenterPin
+FREQOUT SpeakerPin, 80, 523
+LOW LedLeftPin
 
 
 '''''''''''''''''''''''
