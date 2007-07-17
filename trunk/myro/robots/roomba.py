@@ -14,46 +14,47 @@ __author__ = "James Snow <snow91@potsdam.edu>"
 __version__ = "$Revision$"
 
 from myro import ask
-from myro import Robot as TopRobot
-from myro.robot import Robot
+from myro import Robot
+from myro.robot import Robot as PyroRobot
 from myro.robot.device import *
 import myro.globvars
 import string, array, math , struct
 import threading, serial
 import time
 
-class Roomba(TopRobot): # myro robot
-    def __init__(self, id = None):
+class Roomba(Robot): # myro robot
+    def __init__(self, port = None):
         Robot.__init__(self)
         # start the client(s):
-        self._clients = []
-        for port in [60000]:
-            self._clients.append(RoombaRobot(port))
+        self._pyrobot = None
+        self._pyrobot = RoombaRobot(port)
         self.volume = 1
         self.name = "Roomby"
         self.startsong = "tada"
         self.lock = threading.Lock()
         self.delay = 0.1
-        self._clients[0].ir[0].units = "M"
-        #self._clients[0].light[0]._noise = [0.05, 0.05, 0.05]
+        self._pyrobot.ir[0].units = "M"
+        myro.globvars.robot = self
     def translate(self, amount):
-        return self._clients[0].translate(amount)
+        return self._pyrobot.translate(amount)
     def rotate(self, amount):
-        return self._clients[0].rotate(amount)
+        return self._pyrobot.rotate(amount)
     def move(self, translate, rotate):
         self.lock.acquire()
-        retval = self._clients[0].move(translate, rotate)
+        retval = self._pyrobot.move(translate, rotate)
         self.lock.release()
         return retval
     def update(self):
-        return self._clients[0].update()
+        return self._pyrobot.update()
+    def beep(self, duration, frequency1, frequency2 = None):
+        return self._pyrobot.beep(duration, frequency1, frequency2)
     def get(self, sensor = "all", *positions):
-        self._clients[0].update()
+        self._pyrobot.update()
         sensor = sensor.lower()
         if sensor == "config":
             return {"ir": 2}
         elif sensor == "stall":
-            return self._clients[0].stall
+            return self._pyrobot.stall
         elif sensor == "startsong":
             return self.startsong
         elif sensor == "name":
@@ -94,7 +95,7 @@ class Roomba(TopRobot): # myro robot
                         position = ["left", "right"].index(position)
                     else:
                         position = int(position)
-                    retvals.append(self._clients[0].line[0].value[position])
+                    retvals.append(self._pyrobot.line[0].value[position])
                 else:
                     raise ("invalid sensor name: '%s'" % sensor)
             if len(retvals) == 1:
@@ -103,7 +104,7 @@ class Roomba(TopRobot): # myro robot
                 return retvals
 
     def _getIR(self, position):
-        retval = self._clients[0].ir[0].value[position]
+        retval = self._pyrobot.ir[0].value[position]
         if retval < .31:
             return 0
         else:
@@ -281,14 +282,14 @@ class RoombaBatteryDevice(Device):
         self.window.updateWidget("charge", self.charge)
         self.window.updateWidget("temp", self.temperature)
 
-class RoombaRobot(Robot):
+class RoombaRobot(PyroRobot):
     def __init__(self,
                  port = None, 
                  simulator = 0,
                  rate = None,
                  subtype = "Roomba"):
         # simulator = 0 makes it real
-        Robot.__init__(self) # robot constructor
+        PyroRobot.__init__(self) # robot constructor
         self.lock = threading.Lock()
         self.buffer = ''
         self.debug = 0
@@ -390,7 +391,10 @@ class RoombaRobot(Robot):
     	# some roomba's don't have the right dirt detector
     	# the dirt detectors are metallic disks near the brushes
     	self.sensorData['rightDirt'] = r[9]
-	        
+
+        # byte 10: remote control
+        self.sensorData['remoteControl'] = twosComplementInt1byte(r[11])
+
     	# byte 11: button presses
     	self.sensorData['powerButton'] = bitOfByte( 3, r[11] )
     	self.sensorData['spotButton'] = bitOfByte( 2, r[11] )
@@ -456,7 +460,7 @@ class RoombaRobot(Robot):
     	self.sensorData['charge'] = r[22] << 8 | r[23]
     
     def update(self):
-        Robot.update(self)
+        PyroRobot.update(self)
         self.readData()
 
 	''' Attempt at adjusting for straight travel
@@ -476,7 +480,6 @@ class RoombaRobot(Robot):
         # PLAY is opcode 141
         # STORESONG is opcode 140
         msg = struct.pack("BBBBBBB", 140, 15, 1, num, durInt, 141, 15)
-        print msg
         self.sendMsg(msg)
         
     def getSensor(dev, value = None):

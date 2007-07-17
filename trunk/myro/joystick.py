@@ -216,9 +216,16 @@ class Calibrate(Tkinter.Toplevel):
       self.initHandlers()
       self.canvas.pack(side=Tkinter.BOTTOM)
 
-      self.circle_dim = (10, 100, 210, 120) #x0, y0, x1, y1
+##      self.circle_dim = (10, 100, 210, 120) #x0, y0, x1, y1
+##      
+##      self.circle = self.canvas.create_rectangle(self.circle_dim, fill = 'white')
       
-      self.circle = self.canvas.create_rectangle(self.circle_dim, fill = 'white')
+      #Create bars for the 1, 0.5, 0, -0.5, and -1 settings (200 x 20 rect)
+      self.canvas.create_rectangle((10, 5, 210, 25), fill = 'white') #-1
+      self.canvas.create_rectangle((10, 45, 210, 65), fill = 'white') #-0.5
+      self.canvas.create_rectangle((10, 150, 210, 170), fill = 'white') #0.5
+      self.canvas.create_rectangle((10, 195, 210, 215), fill = 'white') #1
+
       #Create some marks for the 1, 0.5, 0, -0.5, and 1 settings
       self.canvas.create_rectangle(105, 10,  115, 20, fill='black')
       self.canvas.create_rectangle(105, 50,   115, 60, fill = 'black')
@@ -375,3 +382,4 @@ if __name__ == '__main__':
    app.withdraw()
    joystick = Joystick(parent = app)
    app.mainloop()
+   
