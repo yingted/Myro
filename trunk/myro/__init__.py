@@ -6,15 +6,14 @@ Distributed under a Shared Source License
 """
 
 __REVISION__ = "$Revision$"
-__BUILD__    = "$Build: 1 $"
-__VERSION__  = "2.0.0a" 
+__VERSION__  = "2.0.1a" 
 __AUTHOR__   = "Doug Blank <dblank@cs.brynmawr.edu>"
 
 try:
     from idlelib import PyShell
 except:
     PyShell = None
-import sys, atexit, time, random, pickle, threading, os
+import sys, atexit, time, random, pickle, threading, os, types
 import traceback
 # Myro items to be imported:
 import myro.globvars
@@ -464,6 +463,7 @@ class Robot(object):
 
 from myro.robot.scribbler import Scribbler
 from myro.robot.surveyor import Surveyor, watch
+from myro.robot.roomba import Roomba, Create
 from myro.robot.simulator import SimScribbler
 
 class Computer(Robot):
@@ -754,3 +754,5 @@ def _myroExceptionHandler(etype, value, tb):
     for line in lines:
         print >> sys.stderr, line.rstrip()
 sys.excepthook = _myroExceptionHandler
+if type(robot) == types.ModuleType:
+    robot = myro.globvars.robot

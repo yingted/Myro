@@ -35,6 +35,11 @@ class Roomba(Robot): # myro robot
         self.delay = 0.1
         self._pyrobot.ir[0].units = "M"
         myro.globvars.robot = self
+        self.setMode("full")
+    def setMode(self, mode):
+        self._pyrobot.setMode(mode)
+    def reset(self):
+        self._pyrobot.reset()
     def translate(self, amount):
         return self._pyrobot.translate(amount)
     def rotate(self, amount):
@@ -64,38 +69,19 @@ class Roomba(Robot): # myro robot
         else:
             retvals = []
             if len(positions) == 0:
-                if sensor == "light":
-                    return self.get("light", 0, 1, 2)
-                elif sensor == "ir":
+                if sensor == "ir":
                     return self.get("ir", 0, 1)
-                elif sensor == "line":
-                    return self.get("line", 0, 1)
                 elif sensor == "all":
-                    return {"light": self.get("light"),
-                            "ir": self.get("ir"),
-                            "line": self.get("line"),
-                            "stall": self.get("stall")}
+                    return {"ir": self.get("ir"),}
                 else:
                     raise ("invalid sensor name: '%s'" % sensor)
             for position in positions:
-                if sensor == "light":
-                    if position in ["left", "center", "right"]:
-                        position = ["left", "center", "right"].index(position)
-                    else:
-                        position = int(position)
-                    retvals.append(self._getLight(position))
-                elif sensor == "ir":
+                if sensor == "ir":
                     if position in ["left", "right"]:
                         position = ["left", "right"].index(position)
                     else:
                         position = int(position)
                     retvals.append(self._getIR(position))
-                elif sensor == "line":
-                    if position in ["left", "right"]:
-                        position = ["left", "right"].index(position)
-                    else:
-                        position = int(position)
-                    retvals.append(self._pyrobot.line[0].value[position])
                 else:
                     raise ("invalid sensor name: '%s'" % sensor)
             if len(retvals) == 1:
@@ -306,6 +292,12 @@ class RoombaRobot(PyroRobot):
                 if portnum >= 10:
                     port = r'\\.\COM%d' % (portnum)
             print "Roomba opening port '%s' with baudrate %s ..." % (port, rate)
+            try:
+                myro.globvars.robot.sc.close()
+            except KeyboardInterrupt:
+                raise
+            except:
+                pass
             self.sc = serial.Serial(port) #, xonxoff=0, rtscts=0)
             self.sc.setTimeout(0.5)
 	    self.sc.baudrate = rate
@@ -581,3 +573,4 @@ class RoombaRobot(PyroRobot):
     def off(dev):
     	dev.sendMsg('\x85')
 	
+Create = Roomba
