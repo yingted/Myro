@@ -22,6 +22,34 @@ import string, array, math , struct
 import threading, serial
 import time
 
+def lookupRC(val):
+    values = {129: ["left"],
+              130: ["forward"],
+              131: ["right"],
+              132: ["spot"],
+              133: ["max"],
+              134: ["small"],
+              135: ["medium"],
+              136: ["large"],
+              137: ["pause"],
+              138: ["power"],
+              139: ["turnLeft"],
+              140: ["turnRight"],
+              141: ["stop"],
+              142: ["sendAll"],
+              143: ["seekDock"],
+              240: ["reserved"],
+              248: ["red"],
+              244: ["green"],
+              242: ["close"],
+              252: ["red", "green"],
+              250: ["red", "close"],
+              246: ["green", "close"],
+              254: ["red", "green", "close"],
+              }
+    if val in values: return values[val]
+    else:             return []
+
 class Roomba(Robot): # myro robot
     def __init__(self, port = None):
         Robot.__init__(self)
@@ -66,6 +94,9 @@ class Roomba(Robot): # myro robot
             return self.name
         elif sensor == "volume":
             return self.volume
+        elif sensor in ["remotecontrol", "rc"]:
+            retval = self._pyrobot.sensorData["remoteControl"]
+            return lookupRC(retval)
         else:
             retvals = []
             if len(positions) == 0:
@@ -132,12 +163,14 @@ def bitOfByte( bit, byte ):
         return 0
     return ((byte >> bit) & 0x01)
 
-def twosComplementInt1byte( byte ):
+def twosComplementInt1byte( byte, unsigned = 0):
     """ returns an int of the same value of the input
         int (a byte), but interpreted in two's
         complement
-        the output range should be -128 to 127
+        the output range should be -128 to 127 if signed.
     """
+    if unsigned:
+        return byte
     # take everything except the top bit
     topbit = bitOfByte( 7, byte )
     lowerbits = byte & 127
@@ -343,7 +376,7 @@ class RoombaRobot(PyroRobot):
     	while self.sc.inWaiting(): # Clear out whatever may be in buffer
 		self.sc.read(size=1)
 	while 1:	
-	    	self.sendMsg('\x8E\x00')
+	    	self.sendMsg('\x8E\x00') # 
 		retval = self.sc.read(size=26) # Read 26 bytes
 		if (retval != '') and (len(retval) == 26): # Fixes a possible crash
 			break
@@ -372,7 +405,9 @@ class RoombaRobot(PyroRobot):
     	self.sensorData['rightCliff'] = bitOfByte( 0, r[5] )
     	# byte 6: virtual wall detector (the separate unit)
     	self.sensorData['virtualWall'] = bitOfByte( 0, r[6] )
-           
+
+        # byte 7: motor currents
+        
     	# byte 8: dirt detector left
     	# the dirt-detecting sensors are acoustic impact sensors
     	# basically, they hear the dirt (or don't) going by toward the back
@@ -385,36 +420,9 @@ class RoombaRobot(PyroRobot):
     	self.sensorData['rightDirt'] = r[9]
 
         # byte 10: remote control
-        self.sensorData['remoteControl'] = twosComplementInt1byte(r[11])
+        self.sensorData['remoteControl'] = twosComplementInt1byte(r[10], unsigned=1)
 
-    	# byte 11: button presses
-    	self.sensorData['powerButton'] = bitOfByte( 3, r[11] )
-    	self.sensorData['spotButton'] = bitOfByte( 2, r[11] )
-    	self.sensorData['cleanButton'] = bitOfByte( 1, r[11] )
-    	self.sensorData['maxButton'] = bitOfByte( 0, r[11] )
-	
-    	# bytes 12 and 13: distance
-    	# the distance that roomba has traveled, in mm, since the
-    	# last time this data was requested (not from a SensorFrame,
-    	# but from the roomba)
-    	# It will stay at the max or min (32767 or -32768) if
-    	# not polled often enough, i.e., it then means "a long way"
-    	# It is the sum of the two drive wheels' distances, divided by 2
-    	self.sensorData['distance'] = twosComplementInt2bytes( r[12], r[13] )
-    	# bytes 14 and 15: angle
-    	self.sensorData['rawAngle'] = twosComplementInt2bytes( r[14], r[15] )
-    	# the distance between the wheels is 258 mm
-    	self.sensorData['angleInRadians'] = (2.0 * self.sensorData['rawAngle']) / 258.0
-    	a = self.sensorData['angleInRadians']
-    	d = self.sensorData['distance'] * 0.001
-        self.x += math.cos(a) * d
-        self.y += math.sin(a) * d
-        self.th += self.sensorData['angleInRadians'] * 180/math.pi
-        self.th %= 360
-        self.thr = self.th % math.pi/180
-
-    	# bytes 17: Communication IR 
-    	self.sensorData['commIR'] = twosComplementInt1byte( r[17] )
+    	# Communication IR 
     	# remote control signals/meaning:
     	# 129 - left
     	# 130 - forward
@@ -441,8 +449,36 @@ class RoombaRobot(PyroRobot):
     	# 250 - red and force field
     	# 246 - green and force field
     	# 254 - red, green, and force field
-    	
-        
+
+    	# byte 11: button presses
+    	self.sensorData['powerButton'] = bitOfByte( 3, r[11] )
+    	self.sensorData['spotButton'] = bitOfByte( 2, r[11] )
+    	self.sensorData['cleanButton'] = bitOfByte( 1, r[11] )
+    	self.sensorData['maxButton'] = bitOfByte( 0, r[11] )
+	
+    	# bytes 12 and 13: distance
+    	# the distance that roomba has traveled, in mm, since the
+    	# last time this data was requested (not from a SensorFrame,
+    	# but from the roomba)
+    	# It will stay at the max or min (32767 or -32768) if
+    	# not polled often enough, i.e., it then means "a long way"
+    	# It is the sum of the two drive wheels' distances, divided by 2
+    	self.sensorData['distance'] = twosComplementInt2bytes( r[12], r[13] )
+    	# bytes 14 and 15: angle
+    	self.sensorData['rawAngle'] = twosComplementInt2bytes( r[14], r[15] )
+    	# the distance between the wheels is 258 mm
+    	self.sensorData['angleInRadians'] = (2.0 * self.sensorData['rawAngle']) / 258.0
+    	a = self.sensorData['angleInRadians']
+    	d = self.sensorData['distance'] * 0.001
+        self.x += math.cos(a) * d
+        self.y += math.sin(a) * d
+        self.th += self.sensorData['angleInRadians'] * 180/math.pi
+        self.th %= 360
+        self.thr = self.th % math.pi/180
+        # 16: charge state
+        # 17-18: voltage
+        # 19-20: current
+
     	# byte 21: temperature of the battery
     	# this is in degrees celsius
     	self.sensorData['temperature'] = twosComplementInt1byte( r[21] )
