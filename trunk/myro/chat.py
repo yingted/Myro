@@ -118,7 +118,10 @@ class Chat:
         self.client.connect()
         print "Registering '%s'..." % self.name
         self.register(self.name.lower(), self.password)
-        self.open()
+        try:
+            self.open()
+        except:
+            print "ERROR: Invalid name/password combination"
 
     def register(self, name, password):
 	""" Register a username/password. """
@@ -171,11 +174,16 @@ class Chat:
         self.client.sendInitPresence()
         self.send("", "2") # make this the only place I'm logged in        
         messages = self.receive()
-        while len(messages) == 0:
+        count = 0
+        while len(messages) == 0 and count < 5:
             print "   waiting for response..."
             time.sleep(1)
             messages = self.receive()
-        print "Done!"
+            count += 1
+        if count >= 5:
+            print "Giving up!"
+        else:
+            print "Done!"
 
     def close(self):
 	"""

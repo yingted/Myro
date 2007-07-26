@@ -72,33 +72,34 @@ class Joystick(Tkinter.Toplevel):
       except: pass
 
    def minorloop(self, delay = None): # in milliseconds
-       """
-       As opposed to mainloop. This is a simple loop that works
-       in IDLE.
-       """
-       if delay != None:
-           self.delay = delay
-       self.running = 1
-       lastUpdated = 0
-       lastData = []
-       config = self.robot.get("config") # {"ir": 2, "line": 2, "stall": 1, "light": 3}
-       while self.running:
-           if self.robot and self.showSensors:
-               data = self.robot.getLastSensors()
-               now = time.time()
-               if data != lastData or now - lastUpdated > 1:
-                   if now - lastUpdated > 1:
-                       data = self.robot.getAll()
-                   for key in config:
-                       item = data.get(key, [0] * config[key])
-                       if type(item) not in [list, tuple]:
-                           item = [item]
-                       for i in range(len(item)):
-                          self.updateWidget(key, i, item[i])
-                   lastUpdated = time.time()
-                   lastData = data
-           self.update()
-           time.sleep(self.delay)
+      """
+      As opposed to mainloop. This is a simple loop that works
+      in IDLE.
+      """
+      if delay != None:
+         self.delay = delay
+      self.running = 1
+      lastUpdated = 0
+      lastData = []
+      config = self.robot.get("config") # {"ir": 2, "line": 2, "stall": 1, "light": 3}
+      while self.running:
+         #self.focus_set()
+         if self.robot and self.showSensors:
+              data = self.robot.getLastSensors()
+              now = time.time()
+              if data != lastData or now - lastUpdated > 1:
+                  if now - lastUpdated > 1:
+                      data = self.robot.getAll()
+                  for key in config:
+                      item = data.get(key, [0] * config[key])
+                      if type(item) not in [list, tuple]:
+                          item = [item]
+                      for i in range(len(item)):
+                         self.updateWidget(key, i, item[i])
+                  lastUpdated = time.time()
+                  lastData = data
+         self.update()
+         time.sleep(self.delay)
 
    def initHandlers(self):
       self.canvas.bind("<ButtonRelease-1>", self.canvas_clicked_up)
@@ -109,36 +110,36 @@ class Joystick(Tkinter.Toplevel):
       return self.translate, self.rotate
 
    def move(self, translate, rotate):
-      self.translate = translate
-      if self.translate < 0.0:
-         self.translate += self.threshold
-      elif self.translate > 0.0:
-         self.translate -= self.threshold
-      self.rotate = rotate
-      if self.rotate < 0.0:
-         self.rotate += self.threshold
-      elif self.rotate > 0.0:
-         self.rotate -= self.threshold
-      if self.debug:
-         print self.translate, self.rotate
-      if self.robot != None:
-         #self.robot.lock.acquire()
-         self.robot.move(self.translate, self.rotate)
-         #self.robot.lock.release()
+     self.translate = translate
+     if self.translate < 0.0:
+        self.translate += self.threshold
+     elif self.translate > 0.0:
+        self.translate -= self.threshold
+     self.rotate = rotate
+     if self.rotate < 0.0:
+        self.rotate += self.threshold
+     elif self.rotate > 0.0:
+        self.rotate -= self.threshold
+     if self.debug:
+        print self.translate, self.rotate
+     if self.robot != None:
+        #self.robot.lock.acquire()
+        self.robot.move(self.translate, self.rotate)
+        #self.robot.lock.release()
 
    def canvas_clicked_up(self, event):
-      self.canvas.delete("lines")
-      self.move(0.0, 0.0)
+     self.canvas.delete("lines")
+     self.move(0.0, 0.0)
 
    def drawArrows(self, x, y, trans, rotate):
-      if trans == 0:
-         self.canvas.create_line(110, 110, 110, y, width=3, fill="blue", tag="lines")
-      else:
-         self.canvas.create_line(110, 110, 110, y, width=3, fill="blue", tag="lines", arrowshape = (10, 10, 3), arrow = "last")
-      if rotate == 0:
-         self.canvas.create_line(110, 110, x, 110, width=3, fill="red", tag="lines")
-      else:
-         self.canvas.create_line(110, 110, x, 110, width=3, fill="red", tag="lines", arrowshape = (10, 10, 3), arrow = "last")
+     if trans == 0:
+        self.canvas.create_line(110, 110, 110, y, width=3, fill="blue", tag="lines")
+     else:
+        self.canvas.create_line(110, 110, 110, y, width=3, fill="blue", tag="lines", arrowshape = (10, 10, 3), arrow = "last")
+     if rotate == 0:
+        self.canvas.create_line(110, 110, x, 110, width=3, fill="red", tag="lines")
+     else:
+        self.canvas.create_line(110, 110, x, 110, width=3, fill="red", tag="lines", arrowshape = (10, 10, 3), arrow = "last")
 
    def canvas_clicked_down(self, event):
       if self.in_circle(event.x, event.y):
