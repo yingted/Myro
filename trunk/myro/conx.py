@@ -2203,26 +2203,26 @@ class Network(object):
                 if (d > 0.0):
                     if (s > 0.0):
                         #print "CASE A1"
-                        nextStep[i] += e * s
+                        nextStep[i] = nextStep[i] + e * s
                     if (s >= (shrinkFactor * p)):
                         #print "CASE B1"
-                        nextStep[i] += self.mu * d
+                        nextStep[i] = nextStep[i] + self.mu * d
                     else:
                         #print "CASE C1"
-                        nextStep[i] += d * s / (p - s)
+                        nextStep[i] = nextStep[i] + d * s / (p - s)
                 elif (d < 0.0):
                     if (s < 0.0):
                         #print "CASE A2"
-                        nextStep[i] += e * s
+                        nextStep[i] = nextStep[i] + e * s
                     if (s <= (shrinkFactor * p)):
                         #print "CASE B2"
-                        nextStep[i] += self.mu * d
+                        nextStep[i] = nextStep[i] + self.mu * d
                     else:
                         #print "CASE C2"
-                        nextStep[i] += d * s / (p - s)
+                        nextStep[i] = nextStep[i] + d * s / (p - s)
                 else:
                     #print "CASE D"
-                    nextStep[i] += e * s + m * d       ##  Last step was zero, so only use linear   ##
+                    nextStep[i] = nextStep[i] + e * s + m * d       ##  Last step was zero, so only use linear   ##
             newDweight = nextStep
             #print "Next Step = ", nextStep[i]
         else: # backprop
