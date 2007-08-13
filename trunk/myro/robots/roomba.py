@@ -15,8 +15,8 @@ __version__ = "$Revision$"
 
 from myro import ask
 from myro import Robot
-from myro.robot import Robot as PyroRobot
-from myro.robot.device import *
+from myro.robots import Robot as PyroRobot
+from myro.robots.device import *
 import myro.globvars
 import string, array, math , struct
 import threading, serial

@@ -6,7 +6,7 @@ Distributed under a Shared Source License
 """
 
 __REVISION__ = "$Revision$"
-__VERSION__  = "2.0.1a" 
+__VERSION__  = "2.0.2a" 
 __AUTHOR__   = "Doug Blank <dblank@cs.brynmawr.edu>"
 
 try:
@@ -461,10 +461,10 @@ class Robot(object):
             (freq1, freq2, dur) = tuple
             self.beep(dur * wholeNoteDuration, freq1, freq2)
 
-from myro.robot.scribbler import Scribbler
-from myro.robot.surveyor import Surveyor, watch
-from myro.robot.roomba import Roomba, Create
-from myro.robot.simulator import SimScribbler
+from myro.robots.scribbler import Scribbler
+from myro.robots.surveyor import Surveyor, watch
+from myro.robots.roomba import Roomba, Create
+from myro.robots.simulator import SimScribbler
 
 class Computer(Robot):
     """ An interface to computer devices. """
@@ -542,11 +542,15 @@ def requestStop():
     else:
         raise AttributeError, "need to initialize robot"
 def initialize(id = None):
+    global robot
     myro.globvars.robot = Scribbler(id)
+    robot = myro.globvars.robot
 def simulator(id = None):
+    global robot
     _startSimulator()
     time.sleep(2)
     myro.globvars.robot = SimScribbler(id)
+    robot = myro.globvars.robot
 def translate(amount):
     if myro.globvars.robot:
         return myro.globvars.robot.translate(amount)
@@ -754,5 +758,3 @@ def _myroExceptionHandler(etype, value, tb):
     for line in lines:
         print >> sys.stderr, line.rstrip()
 sys.excepthook = _myroExceptionHandler
-if type(robot) == types.ModuleType:
-    robot = myro.globvars.robot

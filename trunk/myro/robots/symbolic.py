@@ -9,9 +9,9 @@ __author__ = "Douglas Blank <dblank@brynmawr.edu>"
 __version__ = "$Revision$"
 
 import socket, threading, random, time
-from myro.robot import Robot
+from myro.robots import Robot
 from myro import _update_gui
-from myro.robot.device import * # Device, GripperDevice, SensorValue
+from myro.robots.device import * # Device, GripperDevice, SensorValue
 try:
 	import cPickle as pickle
 except:

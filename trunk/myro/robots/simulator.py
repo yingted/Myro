@@ -16,7 +16,7 @@ __AUTHOR__   = "Doug Blank"
 
 import os, atexit, time, threading
 from myro import Robot
-from myro.robot.symbolic import TCPRobot
+from myro.robots.symbolic import TCPRobot
 import myro.globvars
 
 class SimScribbler(Robot):

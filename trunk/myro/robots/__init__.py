@@ -8,7 +8,7 @@ senses and controllers.
 (c) 2005, PyrobRobotics.org. Licenced under the GNU GPL.
 """
 
-from myro.robot.device import *
+from myro.robots.device import *
 import math, string, time, os, sys, types
 
 __author__ = "Stephen McCaul, Douglas Blank"
