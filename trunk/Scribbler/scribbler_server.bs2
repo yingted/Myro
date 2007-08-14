@@ -12,6 +12,7 @@
 '   Gets set on reprogram
 '''''''''''''''''''''''''''''''''''''''
 nameData DATA          "Scribby         " ' 16 chars for 2 packets
+'                       1234567890123456
 ipreData DATA          127,127,127,127,0,0,0,0
 '
 'First four values of ipreData are the fudge data stored to EEPROM
