@@ -21,7 +21,7 @@ from myro.media import *
 from myro.speech import *
 from myro.chat import *
 from myro.system import *
-
+robot = None
 try:
     import Tkinter
     import tkFileDialog
@@ -594,8 +594,6 @@ def turnRight(amount, seconds=None):
 def stop():
     if myro.globvars.robot:
         return myro.globvars.robot.stop()
-    else:
-        raise AttributeError, "need to initialize robot"
 def openConnection():
     if myro.globvars.robot:
         return myro.globvars.robot.open()
