@@ -51,10 +51,23 @@ class Scribbler(Robot):
     GET_LINE_ALL      = 76  
     GET_STATE         = 77  
     GET_NAME1         = 78  
-    GET_NAME2         = 79  
-    GET_STALL         = 80  
-    GET_INFO          = 81  
-    GET_DATA          = 82  
+    GET_NAME2         = 87  
+    GET_STALL         = 79  
+    GET_INFO          = 80  
+    GET_DATA          = 81  
+
+    # Reserved for Camera Dongle:
+    # R 82
+    # S 83
+    # T 84
+    # U 85
+    # V 86
+    # X 88
+    # Y 89
+    # Z 90
+    # [ 91
+    # ^ 94
+    # _ 95
 
     SET_SINGLE_DATA   = 96
     SET_DATA          = 97  
@@ -76,6 +89,11 @@ class Scribbler(Robot):
     SET_QUIET         = 113
     SET_SPEAKER       = 114 
     SET_SPEAKER_2     = 115
+
+    # Reserved for Camera Dongle:
+    # s 115  CONFLICT!
+    # t 116
+    # u 117
 
     PACKET_LENGTH     =  9
     
@@ -197,14 +215,20 @@ class Scribbler(Robot):
         while 1:
             self.ser.flushInput()         # flush "IPREScribby"...
             self.ser.flushOutput()
-            time.sleep(1.25)              # give it time to see if another IPRE show up
+            #self.ser.read(100000)
+            time.sleep(2)       # give it time to see if another IPRE show up
             if self.ser.inWaiting() == 0: # if none, then we are out of here!
-                break
+                self.setEchoMode(0) # send command to get out of broadcast; turn off echo
+                time.sleep(.25)               # give it some time
+                if self.ser.inWaiting() == 0:
+                    break
             print "Waking robot from sleep..."
             self.setEchoMode(0) # send command to get out of broadcast; turn off echo
             time.sleep(.25)               # give it some time
+        print 1, self.ser.inWaiting()
         self.ser.flushInput()
         self.ser.flushOutput()
+        print 2, self.ser.inWaiting()
         self.stop()
         self.set("led", "all", "off")
         self.beep(.03, 784)
@@ -212,8 +236,12 @@ class Scribbler(Robot):
         self.beep(.03, 698)
         self.beep(.03, 349)
         self.beep(.03, 523)
-        name = self.get("name")
+        print 3, self.ser.inWaiting()
+        name = '' # self.get("name")
+        print 10, self.ser.inWaiting()
         print "Hello, I'm %s!" % name
+        print 20, self.ser.inWaiting()
+        print 30, self.ser.inWaiting()
 
     def beep(self, duration, frequency, frequency2 = None):
         if frequency2 == None:
@@ -367,6 +395,7 @@ class Scribbler(Robot):
                 else:
                     raise AttributeError, "no such LED: '%s'" % position
         elif item == "name":
+            position = position + (" " * 16)
             name1 = position[:8].strip()
             name1_raw = map(lambda x:  ord(x), name1)
             name2 = position[8:16].strip()
