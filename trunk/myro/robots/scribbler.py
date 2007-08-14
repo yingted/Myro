@@ -1,12 +1,12 @@
 """
-Myro Base Classes.
-(c) 2006, Institute for Personal Robots in Education
+Myro code for the Scribbler robot from Parallax
+(c) 2007, Institute for Personal Robots in Education
 http://roboteducation.org/
 Distributed under a Shared Source License
 """
 
 __REVISION__ = "$Revision$"
-__AUTHOR__   = "Keith and Doug"
+__AUTHOR__   = "Keith O'Hara and Doug Blank"
 
 import serial, time, string
 from threading import Lock
@@ -84,7 +84,7 @@ class Scribbler(Robot):
     SET_MOTORS_OFF    = 108 
     SET_MOTORS        = 109 
     SET_NAME1         = 110 
-    SET_NAME2         = 111 
+    SET_NAME2         = 119 
     SET_LOUD          = 112
     SET_QUIET         = 113
     SET_SPEAKER       = 114 
@@ -215,20 +215,14 @@ class Scribbler(Robot):
         while 1:
             self.ser.flushInput()         # flush "IPREScribby"...
             self.ser.flushOutput()
-            #self.ser.read(100000)
-            time.sleep(2)       # give it time to see if another IPRE show up
+            time.sleep(1.2)       # give it time to see if another IPRE show up
             if self.ser.inWaiting() == 0: # if none, then we are out of here!
-                self.setEchoMode(0) # send command to get out of broadcast; turn off echo
-                time.sleep(.25)               # give it some time
-                if self.ser.inWaiting() == 0:
-                    break
+                break
             print "Waking robot from sleep..."
             self.setEchoMode(0) # send command to get out of broadcast; turn off echo
             time.sleep(.25)               # give it some time
-        print 1, self.ser.inWaiting()
         self.ser.flushInput()
         self.ser.flushOutput()
-        print 2, self.ser.inWaiting()
         self.stop()
         self.set("led", "all", "off")
         self.beep(.03, 784)
@@ -236,12 +230,8 @@ class Scribbler(Robot):
         self.beep(.03, 698)
         self.beep(.03, 349)
         self.beep(.03, 523)
-        print 3, self.ser.inWaiting()
-        name = '' # self.get("name")
-        print 10, self.ser.inWaiting()
+        name = self.get("name")
         print "Hello, I'm %s!" % name
-        print 20, self.ser.inWaiting()
-        print 30, self.ser.inWaiting()
 
     def beep(self, duration, frequency, frequency2 = None):
         if frequency2 == None:

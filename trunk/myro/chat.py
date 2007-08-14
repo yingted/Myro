@@ -182,8 +182,10 @@ class Chat:
             count += 1
         if count >= 5:
             print "Giving up!"
+            self.ok = 0
         else:
             print "Done!"
+            self.ok = 1
 
     def close(self):
 	"""

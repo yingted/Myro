@@ -1,6 +1,4 @@
-#from array import array
-from numpy import array #, zeros, uint8
-#from scipy.misc import toimage
+from numpy import array 
 
 import Image
 import time
@@ -18,7 +16,7 @@ class BufferedRead:
         """ Return an element of the string """
         while position >= len(self.data):
             self.data += self.serial.read(self.size - len(self.data))
-            print "      length so far = ", len(self.data), " waiting for total = ", self.size
+            #print "      length so far = ", len(self.data), " waiting for total = ", self.size
         return self.data[position]
     def __len__(self):
         """ Lie. Tell them it is this long. """
@@ -43,90 +41,82 @@ def grab_window(ser, lx, ly, ux, uy, xstep, ystep):
     ser.write('X') # 88
     line = BufferedRead(ser, size)
     buffer = array([0] * (height * width * 3), 'B')
-    if (len(line) == width * height):
-        #create the image from the YUV layer
-        for i in range(0, height, 1):
-            for j in range(3, width, 1):
-                    if ((j % 4) == 3): #3 #2
-                        V = line[i * width + j]
-                        Y = line[i * width + j-1]
-                        U = line[i * width + j-2]
-                    elif ((j % 4) == 1): #1 #0
-                        U = line[i * width + j]
-                        Y = line[i * width + j-1]
-                        V = line[i * width + j-2]
-                    elif ((j % 4) == 2): #2 #1
-                        Y = line[i * width + j]
-                        U = line[i * width + j-1]
-                        V = line[i * width + j-3]
-                    elif ((j % 4) == 0): #0 #3
-                        Y = line[i * width + j]
-                        V = line[i * width + j-1]
-                        U = line[i * width + j-3]
-                    U = (ord(U) - 128)       
-                    V = (ord(V) - 128)
-                    Y = ord(Y)
-                    buffer[(i * width + j) * 3 + 0] = max(min(Y + 1.13983 * V, 255), 0)
-                    buffer[(i * width + j) * 3 + 1] = max(min(Y - 0.39466*U-0.58060*V, 255), 0)
-                    buffer[(i * width + j) * 3 + 2] = max(min(Y + 2.03211*U, 255), 0)
+    for i in range(height):
+        for j in range(width):
+            if j >= 3:
+                # go to the left for other values
+                vy = -1; vu = -2; y1v = -1; y1u = -3; uy = -1; uv = -2; y2u = -1; y2v = -3
+            else:
+                # go to the right for other values
+                vy = 1; vu = 2; y1v = 3; y1u = 1; uy = 1; uv = 2; y2u = 3; y2v = 1
+                                   #   0123 0123 0123
+            if ((j % 4) == 0): #0 #3
+                Y = line[i * width + j]
+                V = line[i * width + j + y1v]
+                U = line[i * width + j + y1u]
+            elif ((j % 4) == 1): #1 #0
+                U = line[i * width + j]
+                Y = line[i * width + j + uy]
+                V = line[i * width + j + uv]
+            elif ((j % 4) == 2): #2 #1
+                Y = line[i * width + j]
+                U = line[i * width + j + y2u]
+                V = line[i * width + j + y2v]
+            elif ((j % 4) == 3): #3 #2
+                V = line[i * width + j]
+                Y = line[i * width + j + vy]
+                U = line[i * width + j + vu]
+            U = (ord(U) - 128)       
+            V = (ord(V) - 128)
+            Y = ord(Y)
+            buffer[(i * width + j) * 3 + 0] = max(min(Y + 1.13983 * V, 255), 0)
+            buffer[(i * width + j) * 3 + 1] = max(min(Y - 0.39466*U-0.58060*V, 255), 0)
+            buffer[(i * width + j) * 3 + 2] = max(min(Y + 2.03211*U, 255), 0)
         return Image.frombuffer("RGB", (width, height), buffer,
                                 "raw", "RGB", 0, 1)
       
 def grab_image(ser, width = 256, height = 192):
-    # array.array:
-    #buffer = array('B', [0] * (height * width * 3))
-    # numpy.array:
     buffer = array([0] * (height * width * 3), 'B')
-    # numpy + scipy:
-    #v3 = zeros((height, width, 3), dtype=uint8)
-    # list:
-    #buffer = [0] * (height * width * 3)
-    print "grabbing image:"
-    retval = None
-    total_time = time.time()
-    ser.setTimeout(.1)
+    oldtimeout = ser.timeout
+    ser.setTimeout(.01)
     ser.write('R') # 82
     size= width*height
     line = BufferedRead(ser, size, start = 0)
-    start = time.time()
-    print "   done in %f seconds!" % (time.time() - start)
-    start = time.time()
-    print "   time so far: %f" % (time.time() - start)
     #create the image from the YUV layer
-    for i in range(0, height, 1):
-        for j in range(3, width, 1):   #   0123 0123 0123
-                if ((j % 4) == 0): #3 #2   VYUY VYUY VYUY
-                    V = line[i * width + j] # v[i][j]
-                    Y = line[i * width + j-1]
-                    U = line[i * width + j-2]
-                elif ((j % 4) == 1): #0 #3
-                    Y = line[i * width + j]
-                    V = line[i * width + j-1]
-                    U = line[i * width + j-3]
-                elif ((j % 4) == 2): #1 #0
-                    U = line[i * width + j]
-                    Y = line[i * width + j-1]
-                    V = line[i * width + j-2]
-                elif ((j % 4) == 3): #2 #1
-                    Y = line[i * width + j]
-                    U = line[i * width + j-1]
-                    V = line[i * width + j-3]
-                U = (ord(U) - 128)       
-                V = (ord(V) - 128)
-                Y = ord(Y)
-                buffer[(i * width + j) * 3 + 0] = max(min(Y + 1.13983 * V, 255), 0)
-                buffer[(i * width + j) * 3 + 1] = max(min(Y - 0.39466*U-0.58060*V, 255), 0)
-                buffer[(i * width + j) * 3 + 2] = max(min(Y + 2.03211*U, 255), 0)
-                #v3[i][j][0] = max(min(Y + 1.13983 * V, 255), 0)
-                #v3[i][j][1] = max(min(Y - 0.39466*U-0.58060*V, 255), 0)
-                #v3[i][j][2] = max(min(Y + 2.03211*U, 255), 0)
-    print "   converted in %f seconds!" % (time.time() - start)
-    start = time.time()
+    for i in range(height):
+        for j in range(width):   
+            if j >= 3:
+                # go to the left for other values
+                vy = -1; vu = -2; y1v = -1; y1u = -3; uy = -1; uv = -2; y2u = -1; y2v = -3
+            else:
+                # go to the right for other values
+                vy = 1; vu = 2; y1v = 3; y1u = 1; uy = 1; uv = 2; y2u = 3; y2v = 1
+                                   #   0123 0123 0123
+            if ((j % 4) == 0): #3 #2   VYUY VYUY VYUY
+                V = line[i * width + j] 
+                Y = line[i * width + j + vy]
+                U = line[i * width + j + vu]
+            elif ((j % 4) == 1): #0 #3
+                Y = line[i * width + j]
+                V = line[i * width + j + y1v]
+                U = line[i * width + j + y1u]
+            elif ((j % 4) == 2): #1 #0
+                U = line[i * width + j]
+                Y = line[i * width + j + uy]
+                V = line[i * width + j + uv]
+            elif ((j % 4) == 3): #2 #1
+                Y = line[i * width + j]
+                U = line[i * width + j + y2u]
+                V = line[i * width + j + y2v]
+            U = (ord(U) - 128)       
+            V = (ord(V) - 128)
+            Y = ord(Y)
+            buffer[(i * width + j) * 3 + 0] = max(min(Y + 1.13983 * V, 255), 0)
+            buffer[(i * width + j) * 3 + 1] = max(min(Y - 0.39466*U-0.58060*V, 255), 0)
+            buffer[(i * width + j) * 3 + 2] = max(min(Y + 2.03211*U, 255), 0)
+    ser.setTimeout(oldtimeout)
     retval = Image.frombuffer("RGB", (width, height), buffer,
                               "raw", "RGB", 0, 1)
-    #retval = toimage(v3, high=255, low=0)
-    print "   toimage in %f seconds!" % (time.time() - start)
-    print "total time: %f" % (time.time() - total_time)
     return retval
 
 def conf_rle(ser,
@@ -222,7 +212,7 @@ def set_ir_power(ser, power):
     ser.write(chr(power))
 
 def set_led1_on(ser):
-    ser.write('s') # 115
+    ser.write('s') # 115 CONFLICT!
 
 def set_led1_off(ser):
     ser.write('t') # 116

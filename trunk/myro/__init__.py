@@ -6,7 +6,7 @@ Distributed under a Shared Source License
 """
 
 __REVISION__ = "$Revision$"
-__VERSION__  = "2.0.2a" 
+__VERSION__  = "2.0.3a" 
 __AUTHOR__   = "Doug Blank <dblank@cs.brynmawr.edu>"
 
 try:
@@ -78,7 +78,17 @@ def timeRemaining(seconds=0):
         return False
     else:
         return True
-    
+
+def register():
+    answers = ask(["School code", "Section code",
+                   "Your email address", "Your robot's name",
+                   "Password"])
+    ch = Chat(answers["Your robot's name"], answers["Password"])
+    if ch.ok == 1:
+        pass
+        # send a special message to create account
+    else:
+        print "That robot name is already taken. Please try another."
 
 def wait(seconds):
     """
@@ -530,27 +540,24 @@ if not myro.globvars.setup:
     myro.globvars.setup = 1
     atexit.register(_cleanup)
     # Ok, now we're ready!
-    print >> sys.stderr, "Myro, (c) 2006 Institute for Personal Robots in Education"
+    print >> sys.stderr, "(c) 2006-2007 Institute for Personal Robots in Education"
     print >> sys.stderr, "[See http://www.roboteducation.org/ for more information]"
-    print >> sys.stderr, "Version %s, Revision %s, ready!" % (__VERSION__, __REVISION__.split()[1])
+    print >> sys.stderr, "Myro version %s is ready!" % (__VERSION__, )
 
 ## Functional interface:
 
 def requestStop():
     if myro.globvars.robot:
         myro.globvars.robot.requestStop = 1
-    else:
-        raise AttributeError, "need to initialize robot"
 def initialize(id = None):
-    global robot
     myro.globvars.robot = Scribbler(id)
-    robot = myro.globvars.robot
+    globals()["robot"] = myro.globvars.robot
+    print robot
 def simulator(id = None):
-    global robot
     _startSimulator()
     time.sleep(2)
     myro.globvars.robot = SimScribbler(id)
-    robot = myro.globvars.robot
+    globals()["robot"] = myro.globvars.robot
 def translate(amount):
     if myro.globvars.robot:
         return myro.globvars.robot.translate(amount)
