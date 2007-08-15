@@ -170,7 +170,7 @@ class AlertDialog(ModalDialog):
 		self.button["command"]   = command
 		self.button.pack({'expand':'yes', 'pady':'2', 'side':'left'})
 
-	def CreateTextBox(self, text, width = 30, default = ""):
+	def CreateTextBox(self, text, width = 30, default = "", show = None):
 		frame = Tkinter.Frame(self.lowerFrame)
 		frame.pack({'expand':'yes', 'side' :'top', 'pady' :'2', 
 			'fill' :'x'})
@@ -180,7 +180,7 @@ class AlertDialog(ModalDialog):
 		label['text'] = text
 		label.pack({'side':'left', 'expand':'no', 'anchor':'w',
                             'fill':'none'})
-		textbox = Tkinter.Entry(frame, width=width, bg="white")
+		textbox = Tkinter.Entry(frame, width=width, bg="white", show=show)
                 textbox.insert(0, default)
 		textbox.pack({'expand':'no', 'side':'right', 'fill':'x'})
                 self.textbox[text] = textbox
@@ -252,7 +252,10 @@ class AskDialog(AlertDialog):
       first = 1
       for text in self.qlist.keys():
          default = self.qlist[text]
-         self.CreateTextBox(text, width=30, default=default)
+         if "password" in text.lower():
+            self.CreateTextBox(text, width=30, default=default, show="*")
+         else:
+            self.CreateTextBox(text, width=30, default=default)
          if first:
             self.textbox[text].focus_set()
             first = 0
