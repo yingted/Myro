@@ -22,6 +22,7 @@ from myro.speech import *
 from myro.chat import *
 from myro.system import *
 robot = None
+globals()["robot"] = None
 try:
     import Tkinter
     import tkFileDialog
@@ -552,7 +553,6 @@ def requestStop():
 def initialize(id = None):
     myro.globvars.robot = Scribbler(id)
     globals()["robot"] = myro.globvars.robot
-    print robot
 def simulator(id = None):
     _startSimulator()
     time.sleep(2)

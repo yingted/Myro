@@ -74,8 +74,15 @@ def grab_window(ser, lx, ly, ux, uy, xstep, ystep):
             buffer[(i * width + j) * 3 + 2] = max(min(Y + 2.03211*U, 255), 0)
         return Image.frombuffer("RGB", (width, height), buffer,
                                 "raw", "RGB", 0, 1)
-      
+
 def grab_image(ser, width = 256, height = 192):
+    buffer = grab_str(ser, width, height)
+    retval = Image.frombuffer("RGB", (width, height), buffer,
+                              "raw", "RGB", 0, 1)
+    return retval
+
+def grab_str(ser, width = 256, height = 192):
+    global line
     buffer = array([0] * (height * width * 3), 'B')
     oldtimeout = ser.timeout
     ser.setTimeout(.01)
@@ -115,9 +122,7 @@ def grab_image(ser, width = 256, height = 192):
             buffer[(i * width + j) * 3 + 1] = max(min(Y - 0.39466*U-0.58060*V, 255), 0)
             buffer[(i * width + j) * 3 + 2] = max(min(Y + 2.03211*U, 255), 0)
     ser.setTimeout(oldtimeout)
-    retval = Image.frombuffer("RGB", (width, height), buffer,
-                              "raw", "RGB", 0, 1)
-    return retval
+    return buffer
 
 def conf_rle(ser,
              delay = 90, smooth_thresh = 4,
@@ -232,3 +237,14 @@ def rgb2yuv(R, G, B):
     U = int(-0.169 * R - 0.332 * G + 0.500 * B + 128)
     V = int( 0.500 * R - 0.419 * G - 0.0813 * B + 128)
     return [max(min(v,255),0) for v in (Y, U, V)]
+
+def im2str(im):
+    """
+    Creates a string which can be moved about (ie, over chat).
+    """
+    s = im.tostring("jpeg", "RGB")
+    return pickle.dumps(s)
+
+def str2im(ps):
+    s = pickle.loads(ps)
+    return Image.fromstring("RGB", (256,192), s, "jpeg", "RGB", None)
