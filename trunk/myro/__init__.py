@@ -21,8 +21,6 @@ from myro.media import *
 from myro.speech import *
 from myro.chat import *
 from myro.system import *
-robot = None
-globals()["robot"] = None
 try:
     import Tkinter
     import tkFileDialog
@@ -552,12 +550,12 @@ def requestStop():
         myro.globvars.robot.requestStop = 1
 def initialize(id = None):
     myro.globvars.robot = Scribbler(id)
-    globals()["robot"] = myro.globvars.robot
+    __builtins__["robot"] = myro.globvars.robot
 def simulator(id = None):
     _startSimulator()
     time.sleep(2)
     myro.globvars.robot = SimScribbler(id)
-    globals()["robot"] = myro.globvars.robot
+    __builtins__["robot"] = myro.globvars.robot
 def translate(amount):
     if myro.globvars.robot:
         return myro.globvars.robot.translate(amount)
