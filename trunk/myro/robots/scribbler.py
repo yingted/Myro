@@ -54,20 +54,21 @@ class Scribbler(Robot):
     GET_NAME2         = 87  
     GET_STALL         = 79  
     GET_INFO          = 80  
-    GET_DATA          = 81  
+    GET_DATA          = 81
 
-    # Reserved for Camera Dongle:
-    # R 82
-    # S 83
-    # T 84
-    # U 85
-    # V 86
-    # X 88
-    # Y 89
-    # Z 90
-    # [ 91
-    # ^ 94
-    # _ 95
+    #Camera Dongle
+    GET_RLE=82  # a segmented and run-length encoded image
+    GET_IMAGE=83  # the entire 256 x 192 image in YUYV format
+    GET_WINDOW=84  # the windowed image (followed by which window)
+    GET_DONGLE_L_IR=85  # number of returned pulses when left emitter is turned on
+    GET_DONGLE_C_IR=86  # number of returned pulses when center emitter is turned on
+    GET_DONGLE_R_IR=87  # number of returned pulses when right emitter is turned on
+    GET_WINDOW_LIGHT=88    # average intensity in the user defined region
+    GET_BATTERY=89  # battery voltage
+    GET_SERIAL_MEM=90  # with the address returns the value in serial memory
+    GET_SCRIB_PROGRAM=91  # with offset, returns the scribbler program buffer
+    GET_CAM_PARAM=92 # with address, returns the camera parameter at that address
+
 
     SET_SINGLE_DATA   = 96
     SET_DATA          = 97  
@@ -90,10 +91,23 @@ class Scribbler(Robot):
     SET_SPEAKER       = 114 
     SET_SPEAKER_2     = 115
 
-    # Reserved for Camera Dongle:
-    # s 115  CONFLICT!
-    # t 116
-    # u 117
+    #Camera Dongle
+    SET_DONGLE_LED_ON=116   # turn binary dongle led on
+    SET_DONGLE_LED_OFF=117  # turn binary dongle led off
+    SET_RLE=118             # set rle parameters 
+    SET_NAME2=119           # set name2 byte
+    SET_DONGLE_IR=120       # set dongle IR power
+    SET_SERIAL_MEM=121      # set serial memory byte
+    SET_SCRIB_PROGRAM=122   # set scribbler program memory byte
+    SET_START_PROGRAM=123   # initiate scribbler programming process
+    SET_RESET_SCRIBBLER=124 # hard reset scribbler
+    SET_SERIAL_ERASE=125    # erase serial memory
+    SET_DIMMER_LED=126      # set dimmer led
+    SET_WINDOW=127          # set user defined window
+    SET_FORWARDNESS=128     # set direction of scribbler
+    SET_WHITE_BALANCE=129   # turn on white balance on camera 
+    SET_NO_WHITE_BALANCE=130 # diable white balance on camera (default)
+    SET_CAM_PARAM=131       # with address and value, sets the camera parameter at that address
 
     PACKET_LENGTH     =  9
     
