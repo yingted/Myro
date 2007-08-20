@@ -95,15 +95,10 @@ SET_MOTORS_OFF     CON 108 ' Format: 108 0 0 0 0 0 0 0 0
 SET_MOTORS         CON 109 ' Format: 109 rightmotor leftmotor 0 0 0 0 0 0, Notes: 0 = full speed backwards, 100 = stop, 200 = full speed forward
 SET_NAME1          CON 110 ' Format: 110 char1 char2 char3 char4 char5 char6 char7 char8
 SET_NAME2          CON 119 ' Format: 119 char9 char10 char11 char12 char13 char14 char15 char16
-SET_LOUD           CON 112
-SET_QUIET          CON 113
-SET_SPEAKER        CON 114 ' Format: 114 DurationHighByte DurationLowByte FreqHighByte FreqLowByte
-SET_SPEAKER_2      CON 115 ' Format: 115 DurationHighByte DurationLowByte Freq1HighByte Freq1LowByte Freq2HighByte Freq2LowByte
-
-' Reserved for Camera Dongle:
-' s 115  CONFLICT!
-' t 116
-' u 117
+SET_LOUD           CON 111
+SET_QUIET          CON 112
+SET_SPEAKER        CON 113 ' Format: 113 DurationHighByte DurationLowByte FreqHighByte FreqLowByte
+SET_SPEAKER_2      CON 114 ' Format: 114 DurationHighByte DurationLowByte Freq1HighByte Freq1LowByte Freq2HighByte Freq2LowByte
 
 TIMEOUT            CON 1000 ' in ms.  How often to broadcast name (if sendName) or flash lights
 PACKET_LENGTH      CON 9
