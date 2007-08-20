@@ -26,6 +26,7 @@ del sys
 
 old_cancel_callback = PyShell.PyShell.cancel_callback
 def cancel_callback(self, event=None):
+    """ Replacement callback to handle cancel events """
     retval = old_cancel_callback(self, event)
     #PyShell.flist.pyshell.interp.runcode(code)
     code = """if "stop" in dir(): stop()"""

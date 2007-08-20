@@ -135,6 +135,24 @@ def pickAFolder():
     if folder == '':
         folder = myro.globvars.mediaFolder
     return folder
+
+class Pick:
+    filetypes = [
+        ("Python and text files", "*.py *.pyw *.txt", "TEXT"),
+        ("All text files", "*", "TEXT"),
+        ("All files", "*"),
+        ]
+
+    def askopenfile(self):
+        dir, base = self.defaultfilename("open")
+        if not self.opendialog:
+            self.opendialog = tkFileDialog.Open(master=self.text,
+                                                filetypes=self.filetypes)
+        filename = self.opendialog.show(initialdir=dir, initialfile=base)
+        if isinstance(filename, unicode):
+            filename = filename.encode(filesystemencoding)
+        return filename
+
     
 def pickAFile():
     """ Returns a filename """
@@ -192,6 +210,7 @@ def _ask(data, title = "Information Request", forceAsk = 0, forceConsole = 0, us
 def _askGUI(qlist, title = "Information Request"):
    d = _AskDialog(myro.globvars.gui, title, qlist)
    d.top.bind("<Return>", lambda event: d.OkPressed())
+   d.top.after(50, d.top.deiconify); d.top.after(50, d.top.tkraise)
    ok = d.Show()
    if ok:
       retval = {"ok": 1}

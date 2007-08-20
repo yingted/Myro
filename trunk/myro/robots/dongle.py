@@ -1,6 +1,8 @@
 from numpy import array 
 
+import ImageTk
 import Image
+import Tkinter
 import time
 import serial
 
@@ -75,11 +77,30 @@ def grab_window(ser, lx, ly, ux, uy, xstep, ystep):
         return Image.frombuffer("RGB", (width, height), buffer,
                                 "raw", "RGB", 0, 1)
 
-def grab_image(ser, width = 256, height = 192):
+class Matrix:
+    def __init__(self, width, height, data=None):
+        self.width = width
+        self.height = height
+        if data != None:
+            self.array = data
+        else:
+            self.array = array([0] * (height * width * 3), 'B')    
+        self.image = None
+    def __repr__(self):
+        return "<Matrix instance (%d x %d)>" % (self.width, self.height)
+    def toImage(self):
+        retval = Image.frombuffer("RGB", (self.width, self.height), self.array,
+                                  "raw", "RGB", 0, 1)
+        return retval
+    def toPhotoImage(self):
+        self.image = Image.frombuffer("RGB", (self.width, self.height), self.array,
+                                      "raw", "RGB", 0, 1)
+        retval = ImageTk.PhotoImage(self.image)
+        return retval
+
+def takePicture(ser, width = 256, height = 192):
     buffer = grab_str(ser, width, height)
-    retval = Image.frombuffer("RGB", (width, height), buffer,
-                              "raw", "RGB", 0, 1)
-    return retval
+    return Matrix(width, height, buffer)
 
 def grab_str(ser, width = 256, height = 192):
     global line
