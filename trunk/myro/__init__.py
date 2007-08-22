@@ -9,27 +9,15 @@ __REVISION__ = "$Revision$"
 __VERSION__  = "2.0.3a" 
 __AUTHOR__   = "Doug Blank <dblank@cs.brynmawr.edu>"
 
-try:
-    from idlelib import PyShell
-except:
-    PyShell = None
 import sys, atexit, time, random, pickle, threading, os, types
 import traceback
 # Myro items to be imported:
 import myro.globvars
-from myro.media import *
-from myro.speech import *
-from myro.chat import *
-from myro.system import *
 try:
     import Tkinter
-    import tkFileDialog
-    import tkColorChooser
-    import Dialog
 except:
     Tkinter = None
 if Tkinter != None:
-    from myro.widgets import AskDialog as _AskDialog
     try:
         myro.globvars.gui = Tkinter.Tk()
         myro.globvars.gui.withdraw()
@@ -40,11 +28,10 @@ try:
     tkSnack.initializeSnack(myro.globvars.gui)
 except:
     tkSnack = None
-
-def _update_gui():
-    if PyShell != None and "flist" in dir(PyShell):
-        PyShell.flist.pyshell.write("")
-        #PyShell.flist.pyshell.update()
+from myro.media import *
+from myro.speech import *
+from myro.chat import *
+from myro.system import *
 
 def timer(seconds=0):
     """ A function to be used with 'for' """
@@ -122,49 +109,6 @@ def randomNumber():
     """
     return random.random()
 
-def askQuestion(question, answers = ["Yes", "No"], title = "Myro Question",
-                default = 0, bitmap=Dialog.DIALOG_ICON):
-    """ Displays a question and returns answer. """
-    d = Dialog.Dialog(title=title, default=default, bitmap=bitmap,
-                      text=question, strings=answers)
-    return answers[int(d.num)]
-
-def pickAFolder():
-    """ Returns a folder path/name """
-    folder = tkFileDialog.askdirectory()
-    if folder == '':
-        folder = myro.globvars.mediaFolder
-    return folder
-
-class Pick:
-    filetypes = [
-        ("Python and text files", "*.py *.pyw *.txt", "TEXT"),
-        ("All text files", "*", "TEXT"),
-        ("All files", "*"),
-        ]
-
-    def askopenfile(self):
-        dir, base = self.defaultfilename("open")
-        if not self.opendialog:
-            self.opendialog = tkFileDialog.Open(master=self.text,
-                                                filetypes=self.filetypes)
-        filename = self.opendialog.show(initialdir=dir, initialfile=base)
-        if isinstance(filename, unicode):
-            filename = filename.encode(filesystemencoding)
-        return filename
-
-    
-def pickAFile():
-    """ Returns a filename """
-    path = tkFileDialog.askopenfilename(parent=myro.globvars.gui)
-    return path
-
-def pickAColor():
-    """ Returns an RGB color tuple """
-    color = tkColorChooser.askcolor()
-    newColor = Color(color[0][0], color[0][1], color[0][2])
-    return newColor
-
 def ask(item, useCache = 0):
     retval = _ask(item, useCache = useCache)
     if len(retval.keys()) == 1:
@@ -208,18 +152,16 @@ def _ask(data, title = "Information Request", forceAsk = 0, forceConsole = 0, us
     return data
 
 def _askGUI(qlist, title = "Information Request"):
-   d = _AskDialog(myro.globvars.gui, title, qlist)
-   d.top.bind("<Return>", lambda event: d.OkPressed())
-   d.top.after(50, d.top.deiconify); d.top.after(50, d.top.tkraise)
-   ok = d.Show()
+   d = AskDialog(title, qlist)
+   ok = d.run()
    if ok:
       retval = {"ok": 1}
       for name in qlist.keys():
           retval[name] = d.textbox[name].get()
-      d.DialogCleanup()
+      d.stop()
       return retval
    else:
-      d.DialogCleanup()
+      d.stop()
       return {"ok" : 0}
 
 def _askConsole(data, title = "Information Request"):
@@ -235,7 +177,6 @@ def _askConsole(data, title = "Information Request"):
         if retval != "":
             data[key] = retval
     return data
-
 
 class BackgroundThread(threading.Thread):
     """
@@ -749,6 +690,94 @@ def playNote(tup, wholeNoteDuration = .545):
     else:
         raise AttributeError, "need to initialize robot"
 
+########################### Pictures:
+
+def takePicture():
+    if myro.globvars.robot:
+        return myro.globvars.robot.takePicture()
+
+def makePicture(filename):
+    retval = Picture()
+    retval.load(filename)
+    return retval
+
+def makeImage(picture):
+    return ImageTk.PhotoImage(picture.image, master=_root)
+
+
+def makeColor(red, green, blue):
+    return Color((red, green, blue))
+
+def show(picture):
+    pass
+
+def repaint(picture):
+    pass
+
+def getWidth(picture):
+    return picture.width
+
+def getHeight(picture):
+    return picture.height
+
+def getPixel(picture, x, y):
+    return picture.getPixel(x, y)
+
+def getPixels(picture):
+    pass
+
+def setWidth(picture, newWidth):
+    pass
+
+def setHeight(picture, newHeight):
+    pass
+
+def setPixel(picture, x, y, color):
+    return picture.setColor(x, y, color)
+
+############################# Pixels and Colors
+
+def getX(pixel):
+    return pixel.x
+
+def getY(pixel):
+    return pixel.y
+
+def getRed(pixel):
+    return pixel.rgb[0]
+
+def getGreen(pixel):
+    return pixel.rgb[1]
+
+def getBlue(pixel):
+    return pixel.rgb[2]
+
+def getColor(pixel):
+    return pixel.getColor()
+
+def setRed(pixel, value):
+    return pixel.setColor(Color(value, pixel.rgb[1], pixel.rgb[2]))
+
+def setGreen(pixel, value):
+    return pixel.setColor(Color(pixel.rgb[0], value, pixel.rgb[2]))
+
+def setBlue(pixel, value):
+    return pixel.setColor(Color(pixel.rgb[0], pixel.rgb[1], value))
+
+def setColor(pixel, color):
+    return pixel.setColor(color)
+
+def makeColor(red, green, blue):
+    return Color([red, green, blue])
+
+############################# Sounds
+
+def makeSound(filename):
+    pass
+
+def play(sound):
+    pass
+
 def _startSimulator():
     globalspath, filename = os.path.split(myro.globvars.__file__)
     myro.globvars.myropath, directory = os.path.split(globalspath)
@@ -780,3 +809,5 @@ def _myroExceptionHandler(etype, value, tb):
     for line in lines:
         print >> sys.stderr, line.rstrip()
 sys.excepthook = _myroExceptionHandler
+
+from myro.graphics import *

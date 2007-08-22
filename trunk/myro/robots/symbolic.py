@@ -10,7 +10,6 @@ __version__ = "$Revision$"
 
 import socket, threading, random, time
 from myro.robots import Robot
-from myro import _update_gui
 from myro.robots.device import * # Device, GripperDevice, SensorValue
 try:
 	import cPickle as pickle
@@ -385,7 +384,6 @@ class TCPRobot(Simbot):
 
 	def move(self, message, other = None):
                 #print "message:", message
-                _update_gui()
                 self.interruptRequest = 0
                 exp = None
                 try:

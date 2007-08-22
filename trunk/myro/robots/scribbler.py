@@ -10,8 +10,29 @@ __AUTHOR__   = "Keith O'Hara and Doug Blank"
 
 import serial, time, string
 from threading import Lock
-from myro import Robot, ask, askQuestion, _update_gui
+from myro import Robot, ask
+from myro.graphics import askQuestion, Picture
 import myro.globvars
+# needed for new camera dongle
+from numpy import array 
+
+class BufferedRead:
+    def __init__(self, serial, size, start = 1):
+        self.serial = serial
+        self.size = size
+        if start:
+            self.data = self.serial.read(size)
+        else:
+            self.data = ""
+    def __getitem__(self, position):
+        """ Return an element of the string """
+        while position >= len(self.data):
+            self.data += self.serial.read(self.size - len(self.data))
+            #print "      length so far = ", len(self.data), " waiting for total = ", self.size
+        return self.data[position]
+    def __len__(self):
+        """ Lie. Tell them it is this long. """
+        return self.size
 
 def _commport(s):
     if type(s) == int: return 1
@@ -367,7 +388,6 @@ class Scribbler(Robot):
         else:             return self._set(Scribbler.SET_ECHO_MODE, 0)
 
     def set(self, item, position, value = None):
-        _update_gui()
         item = item.lower()
         if item == "led":
             if type(position) in [int, float]:
@@ -493,6 +513,54 @@ class Scribbler(Robot):
         return {"light": [retval[2] << 8 | retval[3], retval[4] << 8 | retval[5], retval[6] << 8 | retval[7]],
                 "ir": [retval[0], retval[1]], "line": [retval[8], retval[9]], "stall": retval[10]}
 
+    def takePicture(self, width = 256, height = 192):
+        a = self._grab_array(width, height)
+        p = Picture()
+        p.set(width, height, a)
+        return p
+
+    def _grab_array(self, width, height):
+        buffer = array([0] * (height * width * 3), 'B')
+        oldtimeout = self.ser.timeout
+        self.ser.setTimeout(.01)
+        self.ser.write('R') # 82
+        size= width*height
+        line = BufferedRead(self.ser, size, start = 0)
+        #create the image from the YUV layer
+        for i in range(height):
+            for j in range(width):   
+                if j >= 3:
+                    # go to the left for other values
+                    vy = -1; vu = -2; y1v = -1; y1u = -3; uy = -1; uv = -2; y2u = -1; y2v = -3
+                else:
+                    # go to the right for other values
+                    vy = 1; vu = 2; y1v = 3; y1u = 1; uy = 1; uv = 2; y2u = 3; y2v = 1
+                                       #   0123 0123 0123
+                if ((j % 4) == 0): #3 #2   VYUY VYUY VYUY
+                    V = line[i * width + j] 
+                    Y = line[i * width + j + vy]
+                    U = line[i * width + j + vu]
+                elif ((j % 4) == 1): #0 #3
+                    Y = line[i * width + j]
+                    V = line[i * width + j + y1v]
+                    U = line[i * width + j + y1u]
+                elif ((j % 4) == 2): #1 #0
+                    U = line[i * width + j]
+                    Y = line[i * width + j + uy]
+                    V = line[i * width + j + uv]
+                elif ((j % 4) == 3): #2 #1
+                    Y = line[i * width + j]
+                    U = line[i * width + j + y2u]
+                    V = line[i * width + j + y2v]
+                U = (ord(U) - 128)       
+                V = (ord(V) - 128)
+                Y = ord(Y)
+                buffer[(i * width + j) * 3 + 0] = max(min(Y + 1.13983 * V, 255), 0)
+                buffer[(i * width + j) * 3 + 1] = max(min(Y - 0.39466*U-0.58060*V, 255), 0)
+                buffer[(i * width + j) * 3 + 2] = max(min(Y + 2.03211*U, 255), 0)
+        self.ser.setTimeout(oldtimeout)
+        return buffer
+
     def update(self):
         pass
 
@@ -565,7 +633,6 @@ class Scribbler(Robot):
             return map(ord, c)
 
     def _write(self, rawdata):
-        _update_gui()
         t = map(lambda x: chr(int(x)), rawdata)
         data = string.join(t, '') + (chr(0) * (Scribbler.PACKET_LENGTH - len(t)))[:9]
         if self.debug: print "_write:", data, len(data)

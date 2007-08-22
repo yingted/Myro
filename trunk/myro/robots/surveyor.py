@@ -187,7 +187,7 @@ class CameraWindow(Tkinter.Toplevel):
 
     def update(self, image = None):
         if image == None:
-            image = self.robot.getImage()
+            image = self.robot.getImage() # returns jpeg string
         fileThing = StringIO.StringIO(image)
         try:
             self.im = Image.open(fileThing)

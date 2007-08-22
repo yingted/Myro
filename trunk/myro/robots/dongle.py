@@ -1,28 +1,5 @@
 from numpy import array 
-
-import ImageTk
-import Image
-import Tkinter
-import time
 import serial
-
-class BufferedRead:
-    def __init__(self, serial, size, start = 1):
-        self.serial = serial
-        self.size = size
-        if start:
-            self.data = self.serial.read(size)
-        else:
-            self.data = ""
-    def __getitem__(self, position):
-        """ Return an element of the string """
-        while position >= len(self.data):
-            self.data += self.serial.read(self.size - len(self.data))
-            #print "      length so far = ", len(self.data), " waiting for total = ", self.size
-        return self.data[position]
-    def __len__(self):
-        """ Lie. Tell them it is this long. """
-        return self.size
 
 def conf_window(ser, X_LOW, Y_LOW, X_HIGH, Y_HIGH, X_STEP, Y_STEP):
 
@@ -76,31 +53,6 @@ def grab_window(ser, lx, ly, ux, uy, xstep, ystep):
             buffer[(i * width + j) * 3 + 2] = max(min(Y + 2.03211*U, 255), 0)
         return Image.frombuffer("RGB", (width, height), buffer,
                                 "raw", "RGB", 0, 1)
-
-class Matrix:
-    def __init__(self, width, height, data=None):
-        self.width = width
-        self.height = height
-        if data != None:
-            self.array = data
-        else:
-            self.array = array([0] * (height * width * 3), 'B')    
-        self.image = None
-    def __repr__(self):
-        return "<Matrix instance (%d x %d)>" % (self.width, self.height)
-    def toImage(self):
-        retval = Image.frombuffer("RGB", (self.width, self.height), self.array,
-                                  "raw", "RGB", 0, 1)
-        return retval
-    def toPhotoImage(self):
-        self.image = Image.frombuffer("RGB", (self.width, self.height), self.array,
-                                      "raw", "RGB", 0, 1)
-        retval = ImageTk.PhotoImage(self.image)
-        return retval
-
-def takePicture(ser, width = 256, height = 192):
-    buffer = grab_str(ser, width, height)
-    return Matrix(width, height, buffer)
 
 def grab_str(ser, width = 256, height = 192):
     global line
@@ -169,7 +121,6 @@ def grab_rle(ser):
     ser.setTimeout(10)
     ser.flushInput()
     ser.write('S') # 83
-    time.sleep(1)
     size=ord(ser.read(1))
     size = (size << 8) | ord(ser.read(1))
     print "Grabbing RLE image size =", size
