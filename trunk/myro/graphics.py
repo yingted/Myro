@@ -873,8 +873,9 @@ class Entry(GraphicsObject):
             #self.entry.config(fg=color)
             _tkExec(self.entry.config,fg=color)
 
-def makeImage(picture):
-    return _tkCall(ImageTk.PhotoImage, picture.image)
+def makePixmap(picture):
+    photoimage = ImageTk.PhotoImage(picture.image)
+    return Pixmap(photoimage)
 
 class Picture:
     def __init__(self):
@@ -887,20 +888,20 @@ class Picture:
         self.height = height
         if data == None:
             data = array([0] * (height * width * 3), 'B')
-        self.image = _tkCall(PyImage.frombuffer, "RGB",
-                             (self.width, self.height), data,
-                                        "raw", "RGB", 0, 1)
+        self.image = PyImage.frombuffer("RGB", (self.width, self.height),
+                                        data, "raw", "RGB", 0, 1)
         self.pixels = self.image.load()
+        self.filename = 'Myro Camera Image'
         if self.pixels == None:
             raise AttributeError, "Myro needs at least Python Imaging Library version 1.1.6"
         #self.image = ImageTk.PhotoImage(self.temp, master=_root)
     def load(self, filename):
         #self.image = tk.PhotoImage(file=filename, master=_root)
-        self.image = _tkCall(PyImage.open, filename)
+        self.image = PyImage.open(filename)
         self.pixels = self.image.load()
         self.width = self.image.size[0]
         self.height = self.image.size[1]
-        self.filename = filename
+        self.filename = "Myro file: " + filename
         if self.pixels == None:
             raise AttributeError, "Myro needs at least Python Imaging Library version 1.1.6"
     def __repr__(self):
@@ -954,9 +955,11 @@ class Image(GraphicsObject):
         self.imageId = Image.idCount        # give this image a number
         Image.idCount = Image.idCount + 1 # increment global counter
         if type(pixmap) == type(""): # assume a filename
-            self.img = _tkCall(tk.PhotoImage, pixmap)
+            self.img = _tkCall(tk.PhotoImage, file=pixmap, master=_root)
         else:
             self.img = pixmap.image
+            # _tkCall(tk.PhotoImage, pixmap.image, master=_root)
+            # 
                     
     def _draw(self, canvas, options):
         if self.anchor == None:

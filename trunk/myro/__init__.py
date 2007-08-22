@@ -21,6 +21,7 @@ if Tkinter != None:
     try:
         myro.globvars.gui = Tkinter.Tk()
         myro.globvars.gui.withdraw()
+        myro.globvars.window = None
     except:
         Tkinter = None
 try:
@@ -701,15 +702,18 @@ def makePicture(filename):
     retval.load(filename)
     return retval
 
-def makeImage(picture):
-    return ImageTk.PhotoImage(picture.image, master=_root)
-
-
 def makeColor(red, green, blue):
     return Color((red, green, blue))
 
 def show(picture):
-    pass
+    if myro.globvars.window == None:
+        myro.globvars.window = GraphWin(picture.filename)
+    myro.globvars.window.delete("all")
+    myro.globvars.window['width'] = picture.width
+    myro.globvars.window['height'] = picture.height
+    image = Image(Point(picture.width/2, picture.height/2),
+                  makePixmap(picture))
+    image.draw(myro.globvars.window)
 
 def repaint(picture):
     pass
