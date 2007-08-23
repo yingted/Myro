@@ -128,6 +128,12 @@ import ImageTk
 tk = Tkinter
 from numpy import array 
 import math
+try:
+    import tkSnack
+    #_tkExec(tkSnack.initializeSnack, myro.globvars.gui)
+except:
+    tkSnack = None
+    print "WARNING: sound did not load; need tkSnack?"
 
 ##########################################################################
 # Module Exceptions
@@ -1210,7 +1216,7 @@ class Sound:
     def __init__(self, filename):
         self.filename = filename
         if not myro.globvars.sound:
-            _tkExec(tkSnack.initializeSnack, myro.globvars.gui)
+            _tkExec(tkSnack.initializeSnack, _root)
             myro.globvars.sound = 1
     def play(self):
         return _tkCall(self._play)
@@ -1226,17 +1232,10 @@ def makeSound(filename):
 def play(sound):
     sound.play()
 
-try:
-    import tkSnack
-    #_tkExec(tkSnack.initializeSnack, myro.globvars.gui)
-except:
-    tkSnack = None
-    print "WARNING: sound did not load; need tkSnack?"
-
 def _beep(duration, frequency1, frequency2):
     if tkSnack != None:
         if not myro.globvars.sound:
-            _tkExec(tkSnack.initializeSnack, myro.globvars.gui)
+            tkSnack.initializeSnack(_root)
             myro.globvars.sound = 1
         snd1 = tkSnack.Sound()
         filt1 = tkSnack.Filter('generator', frequency1, 30000,
