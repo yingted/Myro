@@ -1235,6 +1235,9 @@ except:
 
 def _beep(duration, frequency1, frequency2):
     if tkSnack != None:
+        if not myro.globvars.sound:
+            _tkExec(tkSnack.initializeSnack, myro.globvars.gui)
+            myro.globvars.sound = 1
         snd1 = tkSnack.Sound()
         filt1 = tkSnack.Filter('generator', frequency1, 30000,
                                0.0, 'sine', int(11500*duration))
