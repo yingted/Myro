@@ -163,7 +163,8 @@ _exception_info = None
 
 def _tk_thread():
     global _root
-    _root = myro.globvars.gui # tk.Tk()
+    _root = tk.Tk()
+    myro.globvars.gui = _root
     _root.withdraw()
     _root.after(_POLL_INTERVAL, _tk_pump)
     _root.mainloop()

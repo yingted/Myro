@@ -12,15 +12,7 @@ __AUTHOR__   = "Doug Blank <dblank@cs.brynmawr.edu>"
 import sys, atexit, time, random, pickle, threading, os, types
 import traceback
 import myro.globvars
-try:
-    import Tkinter
-    myro.globvars.gui = Tkinter.Tk()
-    myro.globvars.gui.withdraw()
-    myro.globvars.window = None
-except:
-    Tkinter = None
-    print "ERROR: graphics did not load: need tkinter?"
-
+from myro.graphics import *
 from myro.media import *
 from myro.speech import *
 from myro.chat import *
@@ -133,7 +125,7 @@ def _ask(data, title = "Information Request", forceAsk = 0, forceConsole = 0, us
     # if I got it all, and don't need to ask, return
     # else, ask it all:
     if needToAsk or forceAsk: 
-        if Tkinter == None or forceConsole:
+        if myro.globvars.gui == None or forceConsole:
             _askConsole(data, title)
         else:
             data = _askGUI(data, title)
@@ -772,4 +764,3 @@ def _myroExceptionHandler(etype, value, tb):
         print >> sys.stderr, line.rstrip()
 sys.excepthook = _myroExceptionHandler
 
-from myro.graphics import *

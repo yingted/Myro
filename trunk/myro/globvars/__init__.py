@@ -9,6 +9,7 @@ tts       = None
 setup     = 0
 mediaFolder = ""
 askData = {}
+window = None
 
 # constants:
 import math
