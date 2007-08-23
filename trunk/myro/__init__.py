@@ -12,7 +12,6 @@ __AUTHOR__   = "Doug Blank <dblank@cs.brynmawr.edu>"
 import sys, atexit, time, random, pickle, threading, os, types
 import traceback
 import myro.globvars
-from myro.graphics import *
 from myro.media import *
 from myro.speech import *
 from myro.chat import *
@@ -764,3 +763,4 @@ def _myroExceptionHandler(etype, value, tb):
         print >> sys.stderr, line.rstrip()
 sys.excepthook = _myroExceptionHandler
 
+from myro.graphics import *

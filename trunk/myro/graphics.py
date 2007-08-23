@@ -1209,6 +1209,9 @@ cyan      = Color(  0, 255, 255)
 class Sound:
     def __init__(self, filename):
         self.filename = filename
+        if not myro.globvars.sound:
+            _tkExec(tkSnack.initializeSnack, myro.globvars.gui)
+            myro.globvars.sound = 1
     def play(self):
         return _tkCall(self._play)
     def _play(self):
@@ -1225,7 +1228,7 @@ def play(sound):
 
 try:
     import tkSnack
-    _tkExec(tkSnack.initializeSnack, myro.globvars.gui)
+    #_tkExec(tkSnack.initializeSnack, myro.globvars.gui)
 except:
     tkSnack = None
     print "WARNING: sound did not load; need tkSnack?"
@@ -1257,7 +1260,6 @@ def _beep(duration, frequency1, frequency2):
     else:
         time.sleep(duration)
     time.sleep(.1) # simulated delay, like real robot
-
 
 # Kill the tk thread at exit
 atexit.register(_tkShutdown)

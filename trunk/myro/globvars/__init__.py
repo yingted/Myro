@@ -8,8 +8,9 @@ gui       = None
 tts       = None
 setup     = 0
 mediaFolder = ""
-askData = {}
-window = None
+askData   = {}
+window    = None
+sound     = 0
 
 # constants:
 import math
