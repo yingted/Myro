@@ -108,7 +108,7 @@ def saveSpeech(message, filename):
         myro.globvars.tts.saveSpeech(message, filename)
     else:
         print "Text-to-speech is not loaded"
-
+           
 try:
     myro.globvars.tts = WindowsTTSEngine()
 except:

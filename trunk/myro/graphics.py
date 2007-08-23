@@ -127,6 +127,7 @@ import Image as PyImage
 import ImageTk
 tk = Tkinter
 from numpy import array 
+import math
 
 ##########################################################################
 # Module Exceptions
@@ -216,11 +217,19 @@ def _tkShutdown():
     _thread_running = False
     time.sleep(.5) # give tk thread time to quit
 
+# Fire up the separate Tk thread
+thread.start_new_thread(_tk_thread,())
+
 ############################################################################
 # Graphics classes start here
 
 import tkFileDialog, tkColorChooser, Dialog
 from myro.widgets import AlertDialog
+
+def distance(color1, color2):
+    rgb1 = color1.getRGB()
+    rgb2 = color2.getRGB()
+    return math.sqrt((rgb1[0] - rgb2[0]) ** 2 + (rgb1[1] - rgb2[1]) ** 2 + (rgb1[2] - rgb2[2]) ** 2)
 
 class AskDialog(AlertDialog):
     def __init__(self, title, qlist):
@@ -273,7 +282,7 @@ def pickAColor():
     """ Returns an RGB color tuple """
     color = _tkCall(tkColorChooser.askcolor)
     if color[0] != None:
-        return (color[0][0], color[0][1], color[0][2])
+        return Color(color[0][0], color[0][1], color[0][2])
 
 def pickAFolder():
     """ Returns a folder path/name """
@@ -290,7 +299,6 @@ class GraphWin(tk.Canvas):
                  width=200, height=200, autoflush=False):
         _tkCall(self.__init_help, title, width, height, autoflush)
  
-    
     def __init_help(self, title, width, height, autoflush):
         master = tk.Toplevel(_root)
         master.protocol("WM_DELETE_WINDOW", self.__close_help)
@@ -309,7 +317,29 @@ class GraphWin(tk.Canvas):
         self._mouseCallback = None
         self.trans = None
         self.closed = False
+        # at least flash:
+        self.master.after(50, self.master.deiconify)
+        self.master.after(70, self.master.tkraise)
         _root.update()
+
+## Trying to get IDLE subprocess windows to be on top!
+##    def toFront(self):
+##        _tkCall(self.__toFront_help)
+##
+##    def __toFront_help(self):
+##        _root.tkraise()
+##        #self.master.after(50, self.master.deiconify)
+##        #self.master.after(70, self.master.tkraise)
+##        #self.master.after(70, self.master.focus)
+
+## Trying to make a fast repaint, for after a few pixels update
+##    def repaint(self, pixmap):
+##        _tkExec(self._repaint, pixmap)
+##
+##    def _repaint(self, pixmap):
+##        self.delete("all")
+##        self.create_image(pixmap.getWidth()/2, pixmap.getHeight()/2,
+##                          image=pixmap.image)
 
     def __checkOpen(self):
         if self.closed:
@@ -877,7 +907,7 @@ def makePixmap(picture):
     photoimage = ImageTk.PhotoImage(picture.image)
     return Pixmap(photoimage)
 
-class Picture:
+class Picture(object):
     def __init__(self):
         self.width = 0
         self.height = 0
@@ -891,7 +921,8 @@ class Picture:
         self.image = PyImage.frombuffer("RGB", (self.width, self.height),
                                         data, "raw", "RGB", 0, 1)
         self.pixels = self.image.load()
-        self.filename = 'Myro Camera Image'
+        self.palette = self.image.getpalette()
+        self.filename = 'Camera Image'
         if self.pixels == None:
             raise AttributeError, "Myro needs at least Python Imaging Library version 1.1.6"
         #self.image = ImageTk.PhotoImage(self.temp, master=_root)
@@ -901,31 +932,119 @@ class Picture:
         self.pixels = self.image.load()
         self.width = self.image.size[0]
         self.height = self.image.size[1]
-        self.filename = "Myro file: " + filename
+        self.palette = self.image.getpalette()
+        self.filename = filename
         if self.pixels == None:
             raise AttributeError, "Myro needs at least Python Imaging Library version 1.1.6"
     def __repr__(self):
         return "<Picture instance (%d x %d)>" % (self.width, self.height)
     def getPixel(self, x, y):
-        return Pixel(x, y, self)
-    def getRGB(self, x, y):
-        return self.pixels[x][y]
+        return Pixel( x, y, self)
+    def getColor(self, x, y):
+        retval = self.pixels[x, y]
+        if type(retval) == type(1):
+            # gif, need to look up color in palette
+            return Color( self.palette[retval * 3 + 0],
+                          self.palette[retval * 3 + 1],
+                          self.palette[retval * 3 + 2])
+        elif len(retval) == 3:
+            return Color(retval)
     def setColor(self, x, y, newColor):
-        self.pixels[x, y] = tuple(newColor.rgb)
+        if type(self.pixels[x, y]) == type(1):
+            # first look up closest color, get index
+            minDistance = 10000000
+            minIndex = 0
+            for i in range(0, len(self.palette), 3):
+                d = distance(newColor, Color(self.palette[i + 0],
+                                             self.palette[i + 1],
+                                             self.palette[i + 2]))
+                if d < minDistance:
+                    minDistance, minIndex= d, i
+            # put that index in the position
+            self.pixels[x, y] = minIndex
+        else: # 3 tuple
+            self.pixels[x, y] = tuple(newColor.getRGB())
+    def getRGB(self, x, y):
+        retval = self.pixels[x, y]
+        if type(retval) == type(1):
+            # gif, need to look up color in palette
+            return ( self.palette[retval * 3 + 0],
+                     self.palette[retval * 3 + 1],
+                     self.palette[retval * 3 + 2])
+        elif len(retval) == 3:
+            return retval
+    def __eq__(self, other):
+        o1 = self.getRGB()
+        o2 = other.getRGB()
+        return (o1[0] == o2[0] and o1[1] == o2[1] and o1[2] == o2[2])
+    def __sub__(self, other):
+        o1 = self.getRGB()
+        o2 = other.getRGB()
+        return Color(o1[0] - o2[0], o1[1] - o2[1], o1[2] - o2[2])
+    def __add__(self, other):
+        o1 = self.getRGB()
+        o2 = other.getRGB()
+        return Color(o1[0] + o2[0], o1[1] + o2[1], o1[2] + o2[2])
 
-class Pixel:
+class Pixel(object):
     def __init__(self, x, y, picture):
         self.x = x
         self.y = y
         self.picture = picture
+        self.pixels = picture.pixels
+        # we might need this, for gifs:
+        self.palette = self.picture.image.getpalette()
     def __repr__(self):
-        return "<Pixel instance r=%d, g=%d, b=%d>" % tuple(self.picture.pixels[self.x, self.y])
+        return "<Pixel instance r=%d, g=%d, b=%d>" % tuple(self.getRGB())
+    def getPixel(self, x, y):
+        return Pixel( x, y, self.picture)
     def getColor(self):
-        return Color(self.picture.pixels[self.x, self.y])
+        retval = self.pixels[self.x, self.y]
+        if type(retval) == type(1):
+            # gif, need to look up color in palette
+            return Color( self.palette[retval * 3 + 0],
+                          self.palette[retval * 3 + 1],
+                          self.palette[retval * 3 + 2])
+        elif len(retval) == 3:
+            return Color(retval)
     def setColor(self, newColor):
-        self.picture.pixels[self.x, self.y] = tuple(newColor.rgb)
+        if type(self.pixels[self.x, self.y]) == type(1):
+            # first look up closest color, get index
+            minDistance = 10000000
+            minIndex = 0
+            for i in range(0, len(self.palette), 3):
+                d = distance(newColor, Color(self.palette[i + 0],
+                                             self.palette[i + 1],
+                                             self.palette[i + 2]))
+                if d < minDistance:
+                    minDistance, minIndex= d, i
+            # put that index in the position
+            self.pixels[self.x, self.y] = minIndex
+        else: # 3 tuple
+            self.pixels[self.x, self.y] = tuple(newColor.getRGB())
+    def getRGB(self):
+        retval = self.pixels[self.x, self.y]
+        if type(retval) == type(1):
+            # gif, need to look up color in palette
+            return ( self.palette[retval * 3 + 0],
+                     self.palette[retval * 3 + 1],
+                     self.palette[retval * 3 + 2])
+        elif len(retval) == 3:
+            return retval
+    def __eq__(self, other):
+        o1 = self.getRGB()
+        o2 = other.getRGB()
+        return (o1[0] == o2[0] and o1[1] == o2[1] and o1[2] == o2[2])
+    def __sub__(self, other):
+        o1 = self.getRGB()
+        o2 = other.getRGB()
+        return Color(o1[0] - o2[0], o1[1] - o2[1], o1[2] - o2[2])
+    def __add__(self, other):
+        o1 = self.getRGB()
+        o2 = other.getRGB()
+        return Color(o1[0] + o2[0], o1[1] + o2[1], o1[2] + o2[2])
 
-class Color:
+class Color(object):
     def __init__(self, *rgb):
         if len(rgb) == 1:
             self.rgb = rgb[0]
@@ -933,8 +1052,27 @@ class Color:
             self.rgb = rgb
         else:
             raise AttributeError, "invalid colors to Color; need 3 integers: red, green, blue"
+        self.rgb = map(lambda v: max(min(v,255),0), self.rgb)
     def __repr__(self):
         return "<Color instance r=%d, g=%d, b=%d>" % tuple(self.rgb)
+    def getColor(self):
+        return Color(self.rgb)
+    def setColor(self, color):
+        self.rgb = color.getRGB()
+    def getRGB(self):
+        return self.rgb
+    def __eq__(self, other):
+        o1 = self.getRGB()
+        o2 = other.getRGB()
+        return (o1[0] == o2[0] and o1[1] == o2[1] and o1[2] == o2[2])
+    def __sub__(self, other):
+        o1 = self.getRGB()
+        o2 = other.getRGB()
+        return Color(o1[0] - o2[0], o1[1] - o2[1], o1[2] - o2[2])
+    def __add__(self, other):
+        o1 = self.getRGB()
+        o2 = other.getRGB()
+        return Color(o1[0] + o2[0], o1[1] + o2[1], o1[2] + o2[2])
 
 class Image(GraphicsObject):
     idCount = 0
@@ -960,7 +1098,16 @@ class Image(GraphicsObject):
             self.img = pixmap.image
             # _tkCall(tk.PhotoImage, pixmap.image, master=_root)
             # 
-                    
+
+    def refresh(self, canvas):
+        _tkCall(self._refresh, canvas)
+
+    def _refresh(self, canvas):
+        p = self.anchor
+        x,y = canvas.toScreen(p.x,p.y)
+        canvas.delete("all")
+        return canvas.create_image(x,y,image=self.img)
+         
     def _draw(self, canvas, options):
         if self.anchor == None:
             self.anchor = Point(0, 0) # FIX: center point on canvas
@@ -1056,57 +1203,71 @@ def color_rgb(r,g,b):
     Returns color specifier string for the resulting color"""
     return "#%02x%02x%02x" % (r,g,b)
 
-def test():
-    win = GraphWin()
-    win.setCoords(0,0,10,10)
-    t = Text(Point(5,5), "Centered Text")
-    t.draw(win)
-    p = Polygon(Point(1,1), Point(5,3), Point(2,7))
-    p.draw(win)
-    e = Entry(Point(5,6), 10)
-    e.draw(win)
-    win.getMouse()
-    p.setFill("red")
-    p.setOutline("blue")
-    p.setWidth(2)
-    s = ""
-    for pt in p.getPoints():
-        s = s + "(%0.1f,%0.1f) " % (pt.getX(), pt.getY())
-    t.setText(e.getText())
-    e.setFill("green")
-    e.setText("Spam!")
-    e.move(2,0)
-    win.getMouse()
-    p.move(2,3)
-    s = ""
-    for pt in p.getPoints():
-        s = s + "(%0.1f,%0.1f) " % (pt.getX(), pt.getY())
-    t.setText(s)
-    win.getMouse()
-    p.undraw()
-    e.undraw()
-    t.setStyle("bold")
-    win.getMouse()
-    t.setStyle("normal")
-    win.getMouse()
-    t.setStyle("italic")
-    win.getMouse()
-    t.setStyle("bold italic")
-    win.getMouse()
-    t.setSize(14)
-    win.getMouse()
-    t.setFace("arial")
-    t.setSize(20)
-    win.getMouse()
-    win.close()
+black     = Color(  0,   0,   0)
+white     = Color(255, 255, 255)
+blue      = Color(  0,   0, 255)
+red       = Color(255,   0,   0)
+green     = Color(  0, 255,   0)
+gray      = Color(128, 128, 128)
+darkGray  = Color( 64,  64,  64)
+lightGray = Color(192, 192, 192)
+yellow    = Color(255, 255,   0)
+pink      = Color(255, 175, 175)
+magenta   = Color(255,   0, 255)
+cyan      = Color(  0, 255, 255)
 
-# Fire up the separate Tk thread
-thread.start_new_thread(_tk_thread,())
+class Sound:
+    def __init__(self, filename):
+        self.filename = filename
+    def play(self):
+        return _tkCall(self._play)
+    def _play(self):
+        self.snd = tkSnack.Sound()
+        self.snd.read(self.filename)
+        self.snd.play()
+        return 
 
-def restart():
-    thread.start_new_thread(_tk_thread,())
+def makeSound(filename):
+    return Sound(filename)
+
+def play(sound):
+    sound.play()
+
+try:
+    import tkSnack
+    _tkExec(tkSnack.initializeSnack, myro.globvars.gui)
+except:
+    tkSnack = None
+    print "WARNING: sound did not load; need tkSnack?"
+
+def _beep(duration, frequency1, frequency2):
+    if tkSnack != None:
+        snd1 = tkSnack.Sound()
+        filt1 = tkSnack.Filter('generator', frequency1, 30000,
+                               0.0, 'sine', int(11500*duration))
+        if frequency2 != None:
+            snd2 = tkSnack.Sound()
+            filt2 = tkSnack.Filter('generator', frequency2, 30000,
+                                   0.0, 'sine', int(11500*duration))
+            map2 = tkSnack.Filter('map', 1.0)
+            snd2.stop()
+            # blocking is choppy; sleep below
+            snd2.play(filter=filt2, blocking=0) 
+        snd1.stop()
+        # blocking is choppy; sleep below
+        map1 = tkSnack.Filter('map', 1.0)
+        snd1.play(filter=filt1, blocking=0)
+        start = time.time()
+        while time.time() - start < duration:
+            myro.globvars.gui.update()
+            time.sleep(.001)
+    elif Tkinter != None:
+        myro.globvars.gui.bell()            
+        time.sleep(duration)
+    else:
+        time.sleep(duration)
+    time.sleep(.1) # simulated delay, like real robot
+
 
 # Kill the tk thread at exit
 atexit.register(_tkShutdown)
-if __name__ == "__main__":
-    test()

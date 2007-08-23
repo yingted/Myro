@@ -203,7 +203,7 @@ _frequency = {
               "b7":   3951,
               "c8":   4186,
              }
-              
+
 def _getFrequency(s, line, text):
     """ Takes a string that is a note name, or a frequency. Returns """
     if len(s) > 0 and s[0].isalpha(): 

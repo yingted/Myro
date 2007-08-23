@@ -6,29 +6,21 @@ Distributed under a Shared Source License
 """
 
 __REVISION__ = "$Revision$"
-__VERSION__  = "2.0.3a" 
+__VERSION__  = "2.1" 
 __AUTHOR__   = "Doug Blank <dblank@cs.brynmawr.edu>"
 
 import sys, atexit, time, random, pickle, threading, os, types
 import traceback
-# Myro items to be imported:
 import myro.globvars
 try:
     import Tkinter
+    myro.globvars.gui = Tkinter.Tk()
+    myro.globvars.gui.withdraw()
+    myro.globvars.window = None
 except:
     Tkinter = None
-if Tkinter != None:
-    try:
-        myro.globvars.gui = Tkinter.Tk()
-        myro.globvars.gui.withdraw()
-        myro.globvars.window = None
-    except:
-        Tkinter = None
-try:
-    import tkSnack
-    tkSnack.initializeSnack(myro.globvars.gui)
-except:
-    tkSnack = None
+    print "ERROR: graphics did not load: need tkinter?"
+
 from myro.media import *
 from myro.speech import *
 from myro.chat import *
@@ -216,14 +208,8 @@ class Robot(object):
         """
         Base robot class.
         """
-        self.services = {}
-        if tkSnack != None:
-            self.addService("computer.audio", "type", "tksnack")
-        if Tkinter != None:
-            self.addService("computer.graphics", "type", "tkinter")
-        if myro.globvars.tts != None:
-            self.addService("computer.text-to-speech", "type", str(myro.globvars.tts))
-
+        pass
+    
     def initializeRemoteControl(self, password):
         self.chat = Chat(self.getName(), password)
 
@@ -247,13 +233,6 @@ class Robot(object):
                 #print "sending:", pickle.dumps(retval)
                 self.chat.send(name.lower(), pickle.dumps(retval))
 
-    def addService(self, name, attribute, value):
-        if name not in self.services.keys():
-            self.services[name] = {}
-        if attribute not in self.services[name]:
-            self.services[name][attribute] = []
-        self.services[name][attribute].append(value)
-    
     def translate(self, amount):
         raise AttributeError, "this method needs to be written"
 
@@ -264,34 +243,10 @@ class Robot(object):
         raise AttributeError, "this method needs to be written"
 
     def beep(self, duration, frequency1, frequency2 = None):
-        if tkSnack != None:
-            snd1 = tkSnack.Sound()
-            filt1 = tkSnack.Filter('generator', frequency1, 30000,
-                                   0.0, 'sine', int(11500*duration))
-            if frequency2 != None:
-                snd2 = tkSnack.Sound()
-                filt2 = tkSnack.Filter('generator', frequency2, 30000,
-                                       0.0, 'sine', int(11500*duration))
-                map2 = tkSnack.Filter('map', 1.0)
-                snd2.stop()
-                # blocking is choppy; sleep below
-                snd2.play(filter=filt2, blocking=0) 
-            snd1.stop()
-            # blocking is choppy; sleep below
-            map1 = tkSnack.Filter('map', 1.0)
-            snd1.play(filter=filt1, blocking=0)
-            start = time.time()
-            while time.time() - start < duration:
-                myro.globvars.gui.update()
-                time.sleep(.001)
-        elif Tkinter != None:
-            myro.globvars.gui.bell()            
-            time.sleep(duration)
-        else:
-            print "beep!", chr(7)
-            time.sleep(duration)
-        time.sleep(.1) # simulated delay, like real robot
-
+        import myro.graphics
+        print "beep!"
+        return myro.graphics._tkCall(myro.graphics._beep, duration, frequency1, frequency2)
+        
     def getLastSensors(self):
         """ Should not get the current, but the last. This is default behavior. """
         return self.get("all")
@@ -442,8 +397,6 @@ class Computer(Robot):
         """ Constructs a computer object. """
         Robot.__init__(self)
         self.lock = threading.Lock()
-        if tkSnack:
-            self.addService("audio", "type", "tksnack")
     def move(self, translate, rotate):
         """ Moves the robot translate, rotate velocities. """
         print "move(%f, %f)" % (translate, rotate)
@@ -707,17 +660,25 @@ def makeColor(red, green, blue):
 
 def show(picture):
     if myro.globvars.window == None:
+        myro.globvars.window = GraphWin("Myro: %s" % picture.filename)
+    try:
+        myro.globvars.window.delete("all")
+    except:
         myro.globvars.window = GraphWin(picture.filename)
-    myro.globvars.window.delete("all")
+    myro.globvars.picture = picture
     myro.globvars.window['width'] = picture.width
     myro.globvars.window['height'] = picture.height
-    image = Image(Point(picture.width/2, picture.height/2),
-                  makePixmap(picture))
-    image.draw(myro.globvars.window)
+    myro.globvars.pixmap = makePixmap(picture)
+    myro.globvars.image = Image(Point(picture.width/2, picture.height/2),
+                                myro.globvars.pixmap)
+    myro.globvars.image.draw(myro.globvars.window)
 
-def repaint(picture):
-    pass
+repaint = show
 
+# Trying to make a fast repaint
+#def repaint():
+#    myro.globvars.window.repaint(myro.globvars.pixmap)
+        
 def getWidth(picture):
     return picture.width
 
@@ -728,13 +689,8 @@ def getPixel(picture, x, y):
     return picture.getPixel(x, y)
 
 def getPixels(picture):
-    pass
-
-def setWidth(picture, newWidth):
-    pass
-
-def setHeight(picture, newHeight):
-    pass
+    return (Pixel(x, y, picture) for x in range(getWidth(picture))
+            for y in range(getHeight(picture)))
 
 def setPixel(picture, x, y, color):
     return picture.setColor(x, y, color)
@@ -748,25 +704,25 @@ def getY(pixel):
     return pixel.y
 
 def getRed(pixel):
-    return pixel.rgb[0]
+    return pixel.getRGB()[0]
 
 def getGreen(pixel):
-    return pixel.rgb[1]
+    return pixel.getRGB()[1]
 
 def getBlue(pixel):
-    return pixel.rgb[2]
+    return pixel.getRGB()[2]
 
 def getColor(pixel):
     return pixel.getColor()
 
 def setRed(pixel, value):
-    return pixel.setColor(Color(value, pixel.rgb[1], pixel.rgb[2]))
+    return pixel.setColor(Color(value, pixel.getRGB()[1], pixel.getRGB()[2]))
 
 def setGreen(pixel, value):
-    return pixel.setColor(Color(pixel.rgb[0], value, pixel.rgb[2]))
+    return pixel.setColor(Color(pixel.getRGB()[0], value, pixel.getRGB()[2]))
 
 def setBlue(pixel, value):
-    return pixel.setColor(Color(pixel.rgb[0], pixel.rgb[1], value))
+    return pixel.setColor(Color(pixel.getRGB()[0], pixel.getRGB()[1], value))
 
 def setColor(pixel, color):
     return pixel.setColor(color)
@@ -774,13 +730,7 @@ def setColor(pixel, color):
 def makeColor(red, green, blue):
     return Color([red, green, blue])
 
-############################# Sounds
-
-def makeSound(filename):
-    pass
-
-def play(sound):
-    pass
+############################
 
 def _startSimulator():
     globalspath, filename = os.path.split(myro.globvars.__file__)
