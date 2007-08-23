@@ -666,6 +666,7 @@ def show(picture):
     except:
         myro.globvars.window = GraphWin(picture.filename)
     myro.globvars.picture = picture
+    myro.globvars.window.lastUpdated = time.time()
     myro.globvars.window['width'] = picture.width
     myro.globvars.window['height'] = picture.height
     myro.globvars.pixmap = makePixmap(picture)
@@ -673,11 +674,18 @@ def show(picture):
                                 myro.globvars.pixmap)
     myro.globvars.image.draw(myro.globvars.window)
 
-repaint = show
-
-# Trying to make a fast repaint
-#def repaint():
-#    myro.globvars.window.repaint(myro.globvars.pixmap)
+def repaint(picture = None, update = .05):
+    if picture == None:
+        picture = myro.globvars.picture
+        if time.time() - myro.globvars.window.lastUpdated < update:
+            return
+    myro.globvars.window.lastUpdated = time.time()
+    # get a new photoimage from data
+    photoimage = ImageTk.PhotoImage(picture.image)
+    # replace the pixmap data:
+    myro.globvars.image.img = photoimage
+    # refresh the canvas:
+    myro.globvars.image.refresh(myro.globvars.window)
         
 def getWidth(picture):
     return picture.width

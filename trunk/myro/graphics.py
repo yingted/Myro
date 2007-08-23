@@ -973,18 +973,6 @@ class Picture(object):
                      self.palette[retval * 3 + 2])
         elif len(retval) == 3:
             return retval
-    def __eq__(self, other):
-        o1 = self.getRGB()
-        o2 = other.getRGB()
-        return (o1[0] == o2[0] and o1[1] == o2[1] and o1[2] == o2[2])
-    def __sub__(self, other):
-        o1 = self.getRGB()
-        o2 = other.getRGB()
-        return Color(o1[0] - o2[0], o1[1] - o2[1], o1[2] - o2[2])
-    def __add__(self, other):
-        o1 = self.getRGB()
-        o2 = other.getRGB()
-        return Color(o1[0] + o2[0], o1[1] + o2[1], o1[2] + o2[2])
 
 class Pixel(object):
     def __init__(self, x, y, picture):
@@ -1076,7 +1064,7 @@ class Color(object):
 
 class Image(GraphicsObject):
     idCount = 0
-    imageCache = {} # tk photoimages go here to avoid GC while drawn 
+    imageCache = {} # tk photoimages go here to avoid GC while drawn
     def __init__(self, *center_point_and_pixmap):
         """
         Create a Image where p = Point, pixmap is a filename or image.
@@ -1105,8 +1093,9 @@ class Image(GraphicsObject):
     def _refresh(self, canvas):
         p = self.anchor
         x,y = canvas.toScreen(p.x,p.y)
-        canvas.delete("all")
-        return canvas.create_image(x,y,image=self.img)
+        self.imageCache[self.imageId] = self.img
+        canvas.delete("image")
+        return canvas.create_image(x,y,image=self.img,tag="image")
          
     def _draw(self, canvas, options):
         if self.anchor == None:
@@ -1114,7 +1103,7 @@ class Image(GraphicsObject):
         p = self.anchor
         x,y = canvas.toScreen(p.x,p.y)
         self.imageCache[self.imageId] = self.img # save a reference  
-        return canvas.create_image(x,y,image=self.img)
+        return canvas.create_image(x,y,image=self.img,tag="image")
     
     def _move(self, dx, dy):
         self.anchor.move(dx,dy)
