@@ -688,9 +688,9 @@ class TkSimulator(Tkinter.Toplevel, Simulator):
         #    if myro.globvars.gui == None:
         #        myro.globvars.gui = Tkinter.Tk()
         #        myro.globvars.gui.withdraw()
-        Tkinter.Toplevel.__init__(self) # , myro.globvars.gui)
+        Tkinter.Toplevel.__init__(self, myro.globvars.gui) # , myro.globvars.gui)
         Simulator.__init__(self, dimensions, offsets, scale)
-        self.root = root
+        self.root = myro.globvars.gui # root
         self.wm_title("Myro Simulator")
         self.protocol('WM_DELETE_WINDOW',self.destroy)
         self.frame = Tkinter.Frame(self)

@@ -191,31 +191,39 @@ def _tk_pump():
     if _thread_running:
         _root.after(_POLL_INTERVAL, _tk_pump)
 
-def _tkCall(f, *args, **kw):
-    # execute synchronous call to f in the Tk thread
-    # this function should be used when a return value from
-    #   f is required or when synchronizing the threads.
-    # call to _tkCall in Tk thread == DEADLOCK !
-    if not _thread_running:
-        raise GraphicsError, DEAD_THREAD
-    def func():
-        return f(*args, **kw)
-    _tk_request.put((func,True),True)
-    result = _tk_result.get(True)
-    return result
+if myro.globvars.runtkthread:
+    def _tkCall(f, *args, **kw):
+        # execute synchronous call to f in the Tk thread
+        # this function should be used when a return value from
+        #   f is required or when synchronizing the threads.
+        # call to _tkCall in Tk thread == DEADLOCK !
+        if not _thread_running:
+            raise GraphicsError, DEAD_THREAD
+        def func():
+            return f(*args, **kw)
+        _tk_request.put((func,True),True)
+        result = _tk_result.get(True)
+        return result
 
-def _tkExec(f, *args, **kw):
-    # schedule f to execute in the Tk thread. This function does
-    #   not wait for f to actually be executed.
-    #global _exception_info
-    #_exception_info = None
-    if not _thread_running:
-        raise GraphicsError, DEAD_THREAD
-    def func():
+    def _tkExec(f, *args, **kw):
+        # schedule f to execute in the Tk thread. This function does
+        #   not wait for f to actually be executed.
+        #global _exception_info
+        #_exception_info = None
+        if not _thread_running:
+            raise GraphicsError, DEAD_THREAD
+        def func():
+            return f(*args, **kw)
+        _tk_request.put((func,False),True)
+        #if _exception_info is not None:
+        #    raise GraphicsError, "Invalid Operation: %s" % str(_exception_info)
+
+else:
+    def _tkCall(f, *args, **kw):
         return f(*args, **kw)
-    _tk_request.put((func,False),True)
-    #if _exception_info is not None:
-    #    raise GraphicsError, "Invalid Operation: %s" % str(_exception_info)
+
+    def _tkExec(f, *args, **kw):
+        return f(*args, **kw)
 
 def _tkShutdown():
     # shutdown the tk thread
@@ -225,7 +233,13 @@ def _tkShutdown():
     time.sleep(.5) # give tk thread time to quit
 
 # Fire up the separate Tk thread
-thread.start_new_thread(_tk_thread,())
+if myro.globvars.runtkthread:
+    thread.start_new_thread(_tk_thread,())
+else:
+    _root = tk.Tk()
+    myro.globvars.gui = _root
+    _root.withdraw()
+
 
 ############################################################################
 # Graphics classes start here
@@ -339,15 +353,6 @@ class GraphWin(tk.Canvas):
 ##        #self.master.after(70, self.master.tkraise)
 ##        #self.master.after(70, self.master.focus)
 
-## Trying to make a fast repaint, for after a few pixels update
-##    def repaint(self, pixmap):
-##        _tkExec(self._repaint, pixmap)
-##
-##    def _repaint(self, pixmap):
-##        self.delete("all")
-##        self.create_image(pixmap.getWidth()/2, pixmap.getHeight()/2,
-##                          image=pixmap.image)
-
     def __checkOpen(self):
         if self.closed:
             raise GraphicsError, "window is closed"
@@ -460,8 +465,8 @@ class GraphWin(tk.Canvas):
         self.mouseX = e.x
         self.mouseY = e.y
         if self._mouseCallback:
-            self._mouseCallback(Point(e.x, e.y)) 
-                      
+            self._mouseCallback(Point(e.x, e.y))
+
 class Transform:
 
     """Internal class for 2-D coordinate transformations"""
@@ -990,7 +995,7 @@ class Pixel(object):
         # we might need this, for gifs:
         self.palette = self.picture.image.getpalette()
     def __repr__(self):
-        return "<Pixel instance r=%d, g=%d, b=%d>" % tuple(self.getRGB())
+        return ("<Pixel instance (r=%d, g=%d, b=%d) " % tuple(self.getRGB())) + ("at (%d, %d)>" % (self.x, self.y))
     def getPixel(self, x, y):
         return Pixel( x, y, self.picture)
     def getColor(self):
@@ -1038,6 +1043,18 @@ class Pixel(object):
         o1 = self.getRGB()
         o2 = other.getRGB()
         return Color(o1[0] + o2[0], o1[1] + o2[1], o1[2] + o2[2])
+    def makeLighter(self):
+        r, g, b = self.getRGB()
+        rgb = (int(max(min((255 - r) * .35 + r, 255), 0)),
+               int(max(min((255 - g) * .35 + g, 255), 0)),
+               int(max(min((255 - b) * .35 + b, 255), 0)))
+        self.setColor(Color(rgb))
+    def makeDarker(self):
+        r, g, b = self.getRGB()
+        rgb = (int(max(min(r * .65, 255), 0)),
+               int(max(min(g * .65, 255), 0)),
+               int(max(min(b * .65, 255), 0)))
+        self.setColor(Color(rgb))
 
 class Color(object):
     def __init__(self, *rgb):
@@ -1049,7 +1066,7 @@ class Color(object):
             raise AttributeError, "invalid colors to Color; need 3 integers: red, green, blue"
         self.rgb = map(lambda v: max(min(v,255),0), self.rgb)
     def __repr__(self):
-        return "<Color instance r=%d, g=%d, b=%d>" % tuple(self.rgb)
+        return "<Color instance (r=%d, g=%d, b=%d)>)" % tuple(self.rgb)
     def getColor(self):
         return Color(self.rgb)
     def setColor(self, color):
@@ -1068,6 +1085,16 @@ class Color(object):
         o1 = self.getRGB()
         o2 = other.getRGB()
         return Color(o1[0] + o2[0], o1[1] + o2[1], o1[2] + o2[2])
+    def makeLighter(self):
+        r, g, b = self.rgb
+        self.rgb = (max(min((255 - r) * .35 + r, 255), 0),
+                    max(min((255 - g) * .35 + g, 255), 0),
+                    max(min((255 - b) * .35 + b, 255), 0))
+    def makeDarker(self):
+        r, g, b = self.rgb
+        self.rgb = (max(min(r * .65, 255), 0),
+                    max(min(g * .65, 255), 0),
+                    max(min(b * .65, 255), 0))
 
 class Image(GraphicsObject):
     idCount = 0
@@ -1679,13 +1706,7 @@ class Calibrate(Tkinter.Toplevel):
         rot = 0.0
         return (trans, rot)
 
-if __name__ == '__main__':
-    app = Tkinter.Tk()
-    app.withdraw()
-    joystick = Joystick(parent = app)
-    app.mainloop()
-    
-
-
 # Kill the tk thread at exit
-atexit.register(_tkShutdown)
+if myro.globvars.runtkthread:
+    atexit.register(_tkShutdown)
+

@@ -647,17 +647,22 @@ def makePicture(*args):
         retval.set(x, y, array)
     return retval
 
+def _makeMouseCallback(pixmap):
+    def _callback(point):
+        print "Clicked: %s at (%d, %d)" % (pixmap.getRGB(point.x, point.y), point.x, point.y)
+
 def show(picture):
     if myro.globvars.window == None:
         myro.globvars.window = GraphWin("Myro: %s" % picture.filename)
     try:
-        myro.globvars.window.delete("all")
+        myro.globvars.window.delete("image")
     except:
         myro.globvars.window = GraphWin(picture.filename)
     myro.globvars.picture = picture
     myro.globvars.window['width'] = picture.width
     myro.globvars.window['height'] = picture.height
     myro.globvars.pixmap = makePixmap(picture)
+    myro.globvars.window._mouseCallback = _makeMouseCallback(myro.globvars.pixmap)
     myro.globvars.image = Image(Point(picture.width/2, picture.height/2),
                                 myro.globvars.pixmap)
     myro.globvars.image.draw(myro.globvars.window)
@@ -722,6 +727,12 @@ def setColor(pixel, color):
 
 def makeColor(red, green, blue):
     return Color(red, green, blue)
+
+def makeDarker(color):
+    return color.makeDarker()
+
+def makeLighter(color):
+    return color.makeLighter()
 
 ############################
 

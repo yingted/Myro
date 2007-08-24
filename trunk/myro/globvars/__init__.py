@@ -11,6 +11,7 @@ mediaFolder = ""
 askData   = {}
 window    = None
 sound     = 0
+runtkthread = 1
 
 # constants:
 import math
