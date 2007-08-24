@@ -81,7 +81,7 @@ def register():
     answers = ask(["School code", "Section code",
                    "Your email address", "Your robot's name",
                    "Create a Myro password",
-                   "Course keyword"])
+                   "Course keyword"], useCache = 1)
     ch = Chat(answers["Your robot's name"], answers["Create a Myro password"])
     if ch.ok == 1:
         school = answers["School code"]
@@ -94,7 +94,7 @@ def register():
 school: %s
 section: %s
 email: %s
-robot: %s
+username: %s
 password: %s
 keyword: %s
 """ % (school, section, email, robot, password, keyword))
@@ -106,8 +106,7 @@ keyword: %s
             wait(1)
             print "   waiting for confirmation..."
         print "received messages:"
-        for message in message:
-            print "From:", message[0]
+        for message in messages:
             print message[1]
             print
     else:
