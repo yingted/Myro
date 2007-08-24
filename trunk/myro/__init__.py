@@ -665,11 +665,9 @@ def show(picture):
                                 myro.globvars.pixmap)
     myro.globvars.image.draw(myro.globvars.window)
 
-def repaint(picture = None, update = .05):
+def repaint(picture = None):
     if picture == None:
         picture = myro.globvars.picture
-        if time.time() - myro.globvars.window.lastUpdated < update:
-            return
     myro.globvars.window.lastUpdated = time.time()
     # get a new photoimage from data
     photoimage = ImageTk.PhotoImage(picture.image)
