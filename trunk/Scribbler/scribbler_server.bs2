@@ -1,10 +1,9 @@
+' {$STAMP BS2}
+' {$PBASIC 2.5}
 ' Scribbler robot server code
 ' IPRE (http://www.roboteducation.org/)
 ' For use with Myro and MSRS
 '
-' {$STAMP BS2}
-' {$PBASIC 2.5}
-
 '''''''''''''''''''''''''''''''''''''''
 ' Default Robot Name
 '   Gets set on reprogram
@@ -61,7 +60,7 @@ GET_LINE_RIGHT     CON 75  ' Response: lineRight 75
 GET_LINE_ALL       CON 76  ' Response: LineLeft LineRight 76
 GET_STATE          CON 77  ' Response: inPins outPins 77, Notes: inPins is the state of all the input pins (0-7), and outPins is the state of all the output pins (8-15) as defined in the I/O Pin Declarations.
 GET_NAME1          CON 78  ' Response: char1 char2 char3 char4 char5 char6 char7 char8 78
-GET_NAME2          CON 87  ' Response: char9 char10 char11 char12 char13 char14 char15 char16 87
+GET_NAME2          CON 64  ' Response: char9 char10 char11 char12 char13 char14 char15 char16 87
 GET_STALL          CON 79  ' Response: stall 79
 GET_INFO           CON 80  ' Response: "information on version robot, etc" 10 80
 GET_DATA           CON 81  ' Response: data from flash memory 81
@@ -554,5 +553,6 @@ SetEchoMode:
   GOTO GetAll
 
 GetInfo:
-  SEROUT SerialPin, BAUD, ["API:2.1,Robot:Scribbler,Mode:Serial", LF]
+  SEROUT SerialPin, BAUD, ["API:2.2.0,Robot:Scribbler,Mode:Serial", LF]
   GOTO TOP
+  
