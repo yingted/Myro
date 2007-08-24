@@ -118,10 +118,10 @@ class Chat(object):
         self.client.connect()
         print "Registering '%s'..." % self.name
         self.register(self.name.lower(), self.password)
-        #try:
-        self.open()
-        #except:
-        #    print "ERROR: Invalid name/password combination"
+        try:
+            self.open()
+        except AttributeError:
+            print "Help! It appears that the Myro Chat Server is down."
 
     def register(self, name, password):
 	""" Register a username/password. """
@@ -181,7 +181,7 @@ class Chat(object):
             messages = self.receive()
             count += 1
         if count >= 5:
-            print "Giving up!"
+            print "Giving up! Are you sure you have the right password?"
             self.ok = 0
         else:
             print "Done!"

@@ -10,7 +10,7 @@ __VERSION__  = "2.1"
 __AUTHOR__   = "Doug Blank <dblank@cs.brynmawr.edu>"
 
 import sys, atexit, time, random, pickle, threading, os, types
-import traceback
+import StringIO, traceback
 import myro.globvars
 from myro.media import *
 from myro.speech import *
@@ -48,6 +48,34 @@ def timeRemaining(seconds=0):
         return False
     else:
         return True
+
+pickled = None
+
+def sendPicture(picture, photoname, password, robotname = None):
+    global pickled
+    photoname = photoname.replace(" ", "")
+    photoname = photoname.replace("/", "")
+    if robotname == None:
+        robotname = getName()
+    ch = Chat(robotname, password)
+    if ch.ok == 1:
+        image = picture.image
+        if image.mode == "P":
+            image = image.convert()
+        sio = StringIO.StringIO()
+        image.save(sio, "jpeg")
+        compressed = sio.getvalue()
+        pickled = pickle.dumps(compressed)
+        ch.send("admin", ("photo\nname: %s\n" % photoname) + pickled)
+        messages = ch.receive()
+        while len(messages) == 0:
+            messages = ch.receive()
+            wait(1)
+            print "   waiting for confirmation..."
+        print "received messages:"
+        for message in messages:
+            print "   ", message[1]
+        print "Sent!"
 
 def register():
     answers = ask(["School code", "Section code",
