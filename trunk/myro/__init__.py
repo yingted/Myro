@@ -657,7 +657,6 @@ def show(picture):
     except:
         myro.globvars.window = GraphWin(picture.filename)
     myro.globvars.picture = picture
-    myro.globvars.window.lastUpdated = time.time()
     myro.globvars.window['width'] = picture.width
     myro.globvars.window['height'] = picture.height
     myro.globvars.pixmap = makePixmap(picture)
@@ -668,7 +667,6 @@ def show(picture):
 def repaint(picture = None):
     if picture == None:
         picture = myro.globvars.picture
-    myro.globvars.window.lastUpdated = time.time()
     # get a new photoimage from data
     photoimage = ImageTk.PhotoImage(picture.image)
     # replace the pixmap data:
