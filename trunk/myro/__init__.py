@@ -291,20 +291,6 @@ class Robot(object):
     def setStartSong(self, songName):
         return self.set("startsong", songName)
 
-    def joyStick(self, showSensors = 0):
-        from myro.joystick import Joystick
-        self._joy = Joystick(parent = self._app, robot = self, showSensors = showSensors)
-        self._joy.minorloop()
-        # this will not work, must be in same thread:
-        #thread.start_new_thread(self._joy.minorloop, ())
-
-    def calibrate(self):
-        from myro.joystick import Calibrate
-        self._cal = Calibrate(parent = self._app, robot = self)
-        self._cal.minorloop()
-        # this will not work, must be in same thread:
-        #thread.start_new_thread(self._cal.minorloop, ())
-
     def forward(self, amount, interval=None):
         self.move(amount, 0)
         if interval != None:
@@ -616,12 +602,12 @@ def restart():
         raise AttributeError, "need to initialize robot"
 def joyStick(showSensors = 0):
     if myro.globvars.robot:
-        return myro.globvars.robot.joyStick(showSensors)
+        return Joystick(myro.globvars.robot, showSensors)
     else:
         raise AttributeError, "need to initialize robot"
 def calibrate():
     if myro.globvars.robot:
-        return myro.globvars.robot.calibrate()
+        return Calibate(myro.globvars.robot)
     else:
         raise AttributeError, "need to initialize robot"
 def playSong(song, wholeNoteDuration = .545):
