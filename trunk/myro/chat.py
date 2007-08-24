@@ -88,7 +88,7 @@ class LocalRobot:
             time.sleep(1)
         
 
-class Chat:
+class Chat(object):
     def __init__(self, name, password, debug = []):
 	"""
         Constructs a connection for communicating to an IM server.
@@ -118,10 +118,10 @@ class Chat:
         self.client.connect()
         print "Registering '%s'..." % self.name
         self.register(self.name.lower(), self.password)
-        try:
-            self.open()
-        except:
-            print "ERROR: Invalid name/password combination"
+        #try:
+        self.open()
+        #except:
+        #    print "ERROR: Invalid name/password combination"
 
     def register(self, name, password):
 	""" Register a username/password. """

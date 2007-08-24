@@ -324,6 +324,9 @@ class GraphWin(tk.Canvas):
         master = tk.Toplevel(_root)
         master.protocol("WM_DELETE_WINDOW", self.__close_help)
         tk.Canvas.__init__(self, master, width=width, height=height)
+        self.status = tk.Label(self.master, bd=1, relief=tk.SUNKEN,
+                               anchor=tk.W)
+        self.status.pack(fill=tk.X, side="bottom")
         self.master.title(title)
         self.pack()
         master.resizable(0,0)
@@ -342,6 +345,15 @@ class GraphWin(tk.Canvas):
         self.master.after(50, self.master.deiconify)
         self.master.after(70, self.master.tkraise)
         _root.update()
+
+    def setStatusDirect(self, format=""):
+        self.status.config(text=format)
+
+    def setStatus(self, format=""):
+        self._setStatus(format)
+
+    def _setStatus(self, format=""):
+        _tkCall(self.status.config, text=format)
 
 ## Trying to get IDLE subprocess windows to be on top!
 ##    def toFront(self):
@@ -390,7 +402,7 @@ class GraphWin(tk.Canvas):
         self.__checkOpen()
         xs,ys = self.toScreen(x,y)
         #self.create_line(xs,ys,xs+1,ys, fill=color)
-        _tkExec(self.create_line,xs,ys,xs+1,ys,fill=color)
+        _tkExec(self.create_line,xs,ys,xs+1,ys,fill=color,tag="line")
         self.__autoflush()
         
     def plotPixel(self, x, y, color="black"):
@@ -398,7 +410,7 @@ class GraphWin(tk.Canvas):
         (x,y) to color"""
         self.__checkOpen()
         #self.create_line(x,y,x+1,y, fill=color)
-        _tkExec(self.create_line, x,y,x+1,y, fill=color)
+        _tkExec(self.create_line, x,y,x+1,y, fill=color,tag="line")
         self.__autoflush()
         
     def flush(self):
@@ -624,7 +636,7 @@ class Point(GraphicsObject):
         
     def _draw(self, canvas, options):
         x,y = canvas.toScreen(self.x,self.y)
-        return canvas.create_rectangle(x,y,x+1,y+1,options)
+        return canvas.create_rectangle(x,y,x+1,y+1,options,tag="rect")
         
     def _move(self, dx, dy):
         self.x = self.x + dx
@@ -672,7 +684,7 @@ class Rectangle(_BBox):
         p2 = self.p2
         x1,y1 = canvas.toScreen(p1.x,p1.y)
         x2,y2 = canvas.toScreen(p2.x,p2.y)
-        return canvas.create_rectangle(x1,y1,x2,y2,options)
+        return canvas.create_rectangle(x1,y1,x2,y2,options,tag="rect")
         
     def clone(self):
         other = Rectangle(self.p1, self.p2)
@@ -694,7 +706,7 @@ class Oval(_BBox):
         p2 = self.p2
         x1,y1 = canvas.toScreen(p1.x,p1.y)
         x2,y2 = canvas.toScreen(p2.x,p2.y)
-        return canvas.create_oval(x1,y1,x2,y2,options)
+        return canvas.create_oval(x1,y1,x2,y2,options,tag="oval")
     
 class Circle(Oval):
     
@@ -729,7 +741,7 @@ class Line(_BBox):
         p2 = self.p2
         x1,y1 = canvas.toScreen(p1.x,p1.y)
         x2,y2 = canvas.toScreen(p2.x,p2.y)
-        return canvas.create_line(x1,y1,x2,y2,options)
+        return canvas.create_line(x1,y1,x2,y2,options,tag="line")
         
     def setArrow(self, option):
         if not option in ["first","last","both","none"]:
@@ -765,7 +777,7 @@ class Polygon(GraphicsObject):
             args.append(x)
             args.append(y)
         args.append(options)
-        return apply(GraphWin.create_polygon, args) 
+        return apply(GraphWin.create_polygon, args,tag="poly") 
 
 class Text(GraphicsObject):
     
@@ -779,7 +791,7 @@ class Text(GraphicsObject):
         def _draw(self, canvas, options):
             p = self.anchor
             x,y = canvas.toScreen(p.x,p.y)
-            return canvas.create_text(x,y,options)
+            return canvas.create_text(x,y,options,tag="text")
             
         def _move(self, dx, dy):
             self.anchor.move(dx,dy)

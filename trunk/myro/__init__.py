@@ -52,11 +52,36 @@ def timeRemaining(seconds=0):
 def register():
     answers = ask(["School code", "Section code",
                    "Your email address", "Your robot's name",
-                   "Password"])
-    ch = Chat(answers["Your robot's name"], answers["Password"])
+                   "Create a Myro password",
+                   "Course keyword"])
+    ch = Chat(answers["Your robot's name"], answers["Create a Myro password"])
     if ch.ok == 1:
-        pass
+        school = answers["School code"]
+        section = answers["Section code"]
+        email = answers["Your email address"]
+        robot = answers["Your robot's name"]
+        password = answers["Create a Myro password"]
+        keyword = answers["Course keyword"]
+        ch.send("admin", """register
+school: %s
+section: %s
+email: %s
+robot: %s
+password: %s
+keyword: %s
+""" % (school, section, email, robot, password, keyword))
         # send a special message to create account
+        # wait for response:
+        messages = ch.receive()
+        while len(messages) == 0:
+            messages = ch.receive()
+            wait(1)
+            print "   waiting for confirmation..."
+        print "received messages:"
+        for message in message:
+            print "From:", message[0]
+            print message[1]
+            print
     else:
         print "That robot name is already taken. Please try another."
 
@@ -647,9 +672,13 @@ def makePicture(*args):
         retval.set(x, y, array)
     return retval
 
-def _makeMouseCallback(pixmap):
-    def _callback(point):
-        print "Clicked: %s at (%d, %d)" % (pixmap.getRGB(point.x, point.y), point.x, point.y)
+def _mouseCallback(point):
+    window = myro.globvars.window
+    picture = myro.globvars.picture
+    pixel = picture.getPixel(point.x, point.y)
+    rgb = pixel.getRGB()
+    window.setStatusDirect("(%d, %d): (%d,%d,%d)" %
+                           (point.x, point.y, rgb[0], rgb[1], rgb[2]))
 
 def show(picture):
     if myro.globvars.window == None:
@@ -662,7 +691,7 @@ def show(picture):
     myro.globvars.window['width'] = picture.width
     myro.globvars.window['height'] = picture.height
     myro.globvars.pixmap = makePixmap(picture)
-    myro.globvars.window._mouseCallback = _makeMouseCallback(myro.globvars.pixmap)
+    myro.globvars.window._mouseCallback = _mouseCallback
     myro.globvars.image = Image(Point(picture.width/2, picture.height/2),
                                 myro.globvars.pixmap)
     myro.globvars.image.draw(myro.globvars.window)
