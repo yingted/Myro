@@ -81,27 +81,26 @@ def sendPicture(picture, photoname, password, robotname = None):
             print "   ", message[1]
         print "Sent!"
 
-def register():
-    answers = ask(["School code", "Section code",
-                   "Your email address", "Your robot's name",
+def register(oldname = None):
+    answers = ask(["Your email address",
+                   "Your robot's name",
                    "Create a Myro password",
                    "Course keyword"], useCache = 1)
     ch = Chat(answers["Your robot's name"], answers["Create a Myro password"])
     if ch.ok == 1:
-        school = answers["School code"]
-        section = answers["Section code"]
+        oldstr = ""
+        if oldname != None:
+            oldstr += "rename: %s\n" % oldname
         email = answers["Your email address"]
         robot = answers["Your robot's name"]
         password = answers["Create a Myro password"]
         keyword = answers["Course keyword"]
         ch.send("admin", """register
-school: %s
-section: %s
 email: %s
 username: %s
 password: %s
 keyword: %s
-""" % (school, section, email, robot, password, keyword))
+%s""" % (email, robot, password, keyword, oldstr))
         # send a special message to create account
         # wait for response:
         messages = ch.receive()
