@@ -1218,9 +1218,6 @@ def makeWindow(*args, **kwargs):
 def makeImage(*args, **kwargs):
     return Image(*args, **kwargs)
 
-def makePixmap(*args, **kwargs):
-    return Pixmap(*args, **kwargs)
-
 def makeEntry(*args, **kwargs):
     return Entry(*args, **kwargs)
 
