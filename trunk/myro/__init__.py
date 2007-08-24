@@ -112,8 +112,12 @@ keyword: %s
         for message in messages:
             print message[1]
             print
+        # if you have your robot on, then set its name:
+        if myro.globvars.robot != None:
+            setName(answers["Your robot's name"])
+            print "Your robot's name was set to", getName()
     else:
-        print "That robot name is already taken. Please try another."
+        print "The name '%s' has already been taken. Please try another." % answers["Your robot's name"]
 
 def wait(seconds):
     """
