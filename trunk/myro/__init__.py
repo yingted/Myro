@@ -66,7 +66,11 @@ def sendPicture(picture, photoname, password, robotname = None):
         image.save(sio, "jpeg")
         compressed = sio.getvalue()
         pickled = pickle.dumps(compressed)
-        ch.send("admin", ("photo\nname: %s\n" % photoname) + pickled)
+        try:
+            ch.send("admin", ("photo\nname: %s\n" % photoname) + pickled)
+        except IOError:
+            print "ERROR: image file is too big"
+            return
         messages = ch.receive()
         while len(messages) == 0:
             messages = ch.receive()
