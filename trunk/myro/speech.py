@@ -1,4 +1,5 @@
 import myro.globvars
+import os
 
 class TTSEngine:
     def __init__(self, name = None, echo = 1):
@@ -15,6 +16,15 @@ class TTSEngine:
         return self.name
     def getVoices(sel):
         return []
+
+class LinuxTTSEngine(TTSEngine):
+    def speak(self, message, async=1):
+        if async:
+            background = "&"
+        else:
+            background = ""
+        os.system("""echo "%s" | festival --tts %s""" % (message, background))
+
 
 class WindowsTTSEngine(TTSEngine):
     def __init__(self, name = None, echo = 1):
@@ -47,32 +57,6 @@ class WindowsTTSEngine(TTSEngine):
     def saveSpeech(self, message, filename):
         self.tts.SpeakToWave(filename, message)
             
-class LinuxTTSEngine(TTSEngine):
-    def __init__(self, name = None, echo = 1):
-
-        import festival 
-        self.tts = festival.open() 
-	self.echo = echo
-
-    def speak(self, message, async = 1):
-        self.tts.say(message) 
-	if self.echo:
-	    print message
-
-    def setVoice(self, name):
-	print "Only One Voice!"
-
-    def getVoices(self):
-        return ['Default'] 
-
-    def getVoice(self):
-        return "Default" 
-
-    def stop(self):
-        self.tts.close()
-    # --------------------------------------------------
-
-
 def speak(message, async = 1):
     if myro.globvars.tts != None:
         myro.globvars.tts.speak(message, async)

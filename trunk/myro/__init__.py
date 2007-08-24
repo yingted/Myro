@@ -641,13 +641,25 @@ def takePicture():
     if myro.globvars.robot:
         return myro.globvars.robot.takePicture()
 
-def makePicture(filename):
-    retval = Picture()
-    retval.load(filename)
+def makePicture(*args):
+    if len(args) == 0:
+        retval = Picture()
+    elif len(args) == 1:
+        filename = args[0]
+        retval = Picture()
+        retval.load(filename)
+    elif len(args) == 2:
+        x = args[0]
+        y = args[1]
+        retval = Picture()
+        retval.set(x, y)
+    elif len(args) == 3:
+        x = args[0]
+        y = args[1]
+        array = argc[2]
+        retval = Picture()
+        retval.set(x, y, array)
     return retval
-
-def makeColor(red, green, blue):
-    return Color((red, green, blue))
 
 def show(picture):
     if myro.globvars.window == None:
@@ -723,7 +735,7 @@ def setColor(pixel, color):
     return pixel.setColor(color)
 
 def makeColor(red, green, blue):
-    return Color([red, green, blue])
+    return Color(red, green, blue)
 
 ############################
 

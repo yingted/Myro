@@ -1212,6 +1212,40 @@ pink      = Color(255, 175, 175)
 magenta   = Color(255,   0, 255)
 cyan      = Color(  0, 255, 255)
 
+def makeWindow(*args, **kwargs):
+    return GraphWin(*args, **kwargs)
+
+def makeImage(*args, **kwargs):
+    return Image(*args, **kwargs)
+
+def makePixmap(*args, **kwargs):
+    return Pixmap(*args, **kwargs)
+
+def makeEntry(*args, **kwargs):
+    return Entry(*args, **kwargs)
+
+def makePoint(*args, **kwargs):
+    return Point(*args, **kwargs)
+
+def makeRectangle(*args, **kwargs):
+    return Rectangle(*args, **kwargs)
+
+def makeOval(*args, **kwargs):
+    return Oval(*args, **kwargs)
+
+def makeCircle(*args, **kwargs):
+    return Circle(*args, **kwargs)
+
+def makeLine(*args, **kwargs):
+    return Line(*args, **kwargs)
+
+def makePolygon(*args, **kwargs):
+    return Polygon(*args, **kwargs)
+
+def makeText(*args, **kwargs):
+    return Text(*args, **kwargs)
+
+
 class Sound:
     def __init__(self, filename):
         self.filename = filename
