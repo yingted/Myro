@@ -126,7 +126,7 @@ def upgrade_myro(url=None):
     if install_count > 0:
         print "Done upgrading! Please exit and restart Python and Myro"
     else:
-        print "Nothing to upgrade in Myro; it's up to date."
+        print "Nothing to upgrade in Myro; it's up-to-date."
     return install_count
 
 def upgrade_dongle(url=None):
@@ -149,7 +149,7 @@ def upgrade_dongle(url=None):
         dongle_ver = myro.globvars.robot.getInfo()["api"].split(".")
         # go to site, check for latest greater than our version
         infp = urllib.urlopen(url)
-        print "Opened url..."
+        print "Opened url...
         contents = infp.read()
         lines = contents.split("\n")
         infp.close()
@@ -173,9 +173,9 @@ def upgrade_dongle(url=None):
             f = urllib.urlopen(full_url)
             install_count += load_dongle(s, f)
     if install_count > 0:
-        print "Done upgrading! Please exit and restart Python and Myro"
+        print "Done upgrading!"
     else:
-        print "Nothing to upgrade in the Dongle; it's up to date."
+        print "Nothing to upgrade on the Dongle; it's up-to-date."
     return install_count
 
 def load_dongle(s, f):
