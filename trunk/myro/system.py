@@ -1,8 +1,9 @@
 import zipfile, tarfile, urllib
 import os, string
-from myro import __VERSION__ as myro_version, getInfo
+from myro import __VERSION__ as myro_version
+from myro import getInfo
 import myro.globvars
-#from myro.robots.dongle import set_scribbler_start_program, set_scribbler_memory
+from myro.robots.dongle import set_scribbler_start_program, set_scribbler_memory
 
 class RegFile:
     """ Class for treating a regular file like other archives. """
@@ -201,7 +202,3 @@ def upgrade(what="all", url = None):
         install_count += upgrade_myro(url)
         install_count += upgrade_dongle(url)
         return install_count
-
-def set_scribbler_start_program(s, n): pass
-def set_scribbler_memory(s, i, b): pass
-def getInfo(): return {"API": "2.1.0"}
