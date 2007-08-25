@@ -497,7 +497,10 @@ def requestStop():
     if myro.globvars.robot:
         myro.globvars.robot.requestStop = 1
 def initialize(id = None):
-    myro.globvars.robot = Scribbler(id)
+    if id == "simualtor":
+        simulator()
+    else:
+        myro.globvars.robot = Scribbler(id)
     __builtins__["robot"] = myro.globvars.robot
 def simulator(id = None):
     _startSimulator()

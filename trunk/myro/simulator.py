@@ -4,6 +4,15 @@ A simple simulator.
  
 import SocketServer, socket, sys, threading, time, os
 import myro.globvars
+from myro.graphics import _tkCall, _tkExec
+import Tkinter, time, math, random
+try:
+    import cPickle as pickle
+except:
+    import pickle
+
+PIOVER180 = myro.globvars.PIOVER180
+PIOVER2   = myro.globvars.PIOVER2
 
 def INIT(filename):
     path = filename.split(os.path.sep)
@@ -108,15 +117,6 @@ class Updater(threading.Thread):
             time.sleep(.1)
         #print "Exiting update"
         sys.exit(1)
-
-import Tkinter, time, math, random
-try:
-    import cPickle as pickle
-except:
-    import pickle
-
-PIOVER180 = myro.globvars.PIOVER180
-PIOVER2   = myro.globvars.PIOVER2
 
 class Segment:
     def __init__(self, start, end, id = None, partOf = None):
@@ -329,8 +329,15 @@ class Simulator:
 
     def addTrail(self, pos, index, robot):
         self.trail[pos][index] = robot._gx, robot._gy, robot._ga
-        
+
+
+    def stepDirect(self, run = 1):
+        return self._step_help(run)
+
     def step(self, run = 1):
+        #return _tkCall(self._step_help, run)
+
+    #def _step_help(self, run = 1):
         """
         Advance the world by timeslice milliseconds.
         """
@@ -431,6 +438,9 @@ class Simulator:
             return min(hits)
 
     def process(self, request, sockname, pickleIt = 1):
+        #return _tkCall(self._process_help(request, sockname, pickleIt))
+
+    #def _process_help(self, request, sockname, pickleIt = 1):
         """
         Process does all of the work.
         request  - a string message
@@ -684,6 +694,9 @@ class Simulator:
 
 class TkSimulator(Tkinter.Toplevel, Simulator):
     def __init__(self, dimensions, offsets, scale, root = None, run = 0):
+        #_tkCall(self._init_help, dimensions, offsets, scale, root, run)
+
+    #def _init_help(self, dimensions, offsets, scale, root = None, run = 0):
         #if root == None:
         #    if myro.globvars.gui == None:
         #        myro.globvars.gui = Tkinter.Tk()
@@ -1075,6 +1088,7 @@ class SimRobot:
         self._last_pose = (-1, -1, -1) # last robot pose drawn
         self.bulb = None
         self.gripper = None
+        self._mouse_offset_from_center = [0,0]
 
     def additionalSegments(self, x, y, cos_a90, sin_a90, **dict):
         # dynamic segments
@@ -2145,13 +2159,13 @@ class MyroLineSensors:
 if __name__ == "__main__":
     globalspath, filename = os.path.split(myro.globvars.__file__)
     myro.globvars.myropath, directory = os.path.split(globalspath)
-    simulator = INIT(os.path.join(myro.globvars.myropath, "worlds", "MyroWorld"))
+    simulator = _tkCall(INIT, os.path.join(myro.globvars.myropath, "worlds", "MyroWorld"))
     for port in [60000]:
         print "Simulator starting listener on port", port, "..."
         t = Thread(simulator, port)
-        t.start()
-    #print "here"
+        _tkCall(t.start)
+    ###print "here"
     u = Updater(simulator)
-    u.start()
-    simulator.mainloop()
-    #print "Done!"
+    _tkCall(u.start)
+    _tkCall(simulator.mainloop)
+    ##print "Done!"

@@ -193,7 +193,10 @@ def _tk_pump():
                 _tk_result.put(None) # release client
             raise # re-raise the exception -- kills the thread
     if _thread_running:
-        _root.after(_POLL_INTERVAL, _tk_pump)
+        try:
+            _root.after(_POLL_INTERVAL, _tk_pump)
+        except:
+            print "Graphics: Can't pump anymore"
 
 if myro.globvars.runtkthread:
     def _tkCall(f, *args, **kw):
