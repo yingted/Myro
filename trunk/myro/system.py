@@ -106,7 +106,7 @@ def upgrade_myro(url=None):
         install_count += import_file(url) # which is a filename
     else:        
         print "Looking for Myro upgrades at", url, "..."
-        myro_ver = map(int, myro_version.split("."))
+        myro_ver = myro_version.split(".")
         # go to site, check for latest greater than our version
         infp = urllib.urlopen(url)
         contents = infp.read()
@@ -118,7 +118,7 @@ def upgrade_myro(url=None):
                 print "Considering", filename, "..."
                 if filename.startswith("myro-upgrade-"):
                     end = filename.index(".zip")
-                    patch_ver = map(int, filename[13:end].split("."))
+                    patch_ver = filename[13:end].split(".")
                     if patch_ver > myro_ver:
                         # download it
                         print "   Downloading..."
@@ -146,7 +146,7 @@ def upgrade_dongle(url=None):
         install_count += load_dongle(s, f) # which is a filename
     else:        
         print "Looking for Dongle upgrades at", url, "..."
-        dongle_ver = map(int, myro.globvars.robot.getInfo()["api"].split("."))
+        dongle_ver = myro.globvars.robot.getInfo()["api"].split(".")
         # go to site, check for latest greater than our version
         infp = urllib.urlopen(url)
         print "Opened url..."
@@ -161,7 +161,7 @@ def upgrade_dongle(url=None):
                 print "Considering", filename, "..."
                 if filename.startswith("dongle-upgrade-"):
                     end = filename.index(".bytecode")
-                    patch_ver = map(int, filename[15:end].split("."))
+                    patch_ver = filename[15:end].split(".")
                     if patch_ver > dongle_ver:
                         # consider it:
                         consider[tuple(patch_ver)] = url + filename
@@ -169,6 +169,7 @@ def upgrade_dongle(url=None):
         consider_keys.sort()
         if len(consider_keys) > 0:
             full_url = consider[consider_keys[-1]]
+            print "Loading", full_url
             f = urllib.urlopen(full_url)
             install_count += load_dongle(s, f)
     if install_count > 0:
