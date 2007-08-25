@@ -133,7 +133,7 @@ try:
     #_tkExec(tkSnack.initializeSnack, myro.globvars.gui)
 except:
     tkSnack = None
-    print "WARNING: sound did not load; need tkSnack?"
+    print >> sys.stderr, "WARNING: sound did not load; need tkSnack?"
 
 ##########################################################################
 # Module Exceptions
@@ -176,7 +176,7 @@ def _tk_thread():
         _root.mainloop()
     except:
         _root = None
-        print "ERROR: graphics did not start"
+        print >> sys.stderr, "ERROR: graphics did not start"
     myro.globvars.gui = _root
 
 def _tk_pump():
