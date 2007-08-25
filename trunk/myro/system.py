@@ -2,7 +2,7 @@ import zipfile, tarfile, urllib
 import os, string
 from myro import __VERSION__ as myro_version
 import myro.globvars
-from myro.robots.dongle import set_scribbler_start_program, set_scribbler_memory
+from myro.robots.scribbler import set_scribbler_start_program, set_scribbler_memory
 
 class RegFile:
     """ Class for treating a regular file like other archives. """

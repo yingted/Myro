@@ -75,8 +75,29 @@ GET_DATA           CON 81  ' Response: data from flash memory 81
 ' Y 89
 ' Z 90
 ' [ 91
+'   92
+
+' 116
+' 117
+' 118
+' 120
+' 121
+' 122
+' 123
+' 124
+' 125
+' 126
+' 127
+' 128
+' 129
+' 130
+' 131
+
+' Unused:
+
 ' ^ 94
 ' _ 95
+' 131 -> 255
 
 SET_SINGLE_DATA    CON 96  ' Sets a single byte of data in flash memory'
 SET_DATA           CON 97  ' Sets 8 bytes of data in flash memory
