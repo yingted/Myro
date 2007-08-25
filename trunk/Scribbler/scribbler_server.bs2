@@ -4,6 +4,9 @@
 ' IPRE (http://www.roboteducation.org/)
 ' For use with Myro and MSRS
 '
+'--------------------------------------------------------------------
+' THIS VERSION IS FOR USE WITH THE IPRE DONGLE!
+'--------------------------------------------------------------------
 '''''''''''''''''''''''''''''''''''''''
 ' Default Robot Name
 '   Gets set on reprogram
@@ -574,6 +577,5 @@ SetEchoMode:
   GOTO GetAll
 
 GetInfo:
-  SEROUT SerialPin, BAUD, ["API:2.2.0,Robot:Scribbler,Mode:Serial", LF]
+  SEROUT SerialPin, BAUD, ["API:2.2.0,Robot:Scribbler,Mode:Serial,Dongle:1.0.0", LF]
   GOTO TOP
-  
