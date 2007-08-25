@@ -1,7 +1,6 @@
 import zipfile, tarfile, urllib
 import os, string
 from myro import __VERSION__ as myro_version
-from myro import getInfo
 import myro.globvars
 from myro.robots.dongle import set_scribbler_start_program, set_scribbler_memory
 
@@ -146,7 +145,7 @@ def upgrade_dongle(url=None):
         install_count += load_dongle(s, f) # which is a filename
     else:        
         print "Looking for Dongle upgrades at", url, "..."
-        dongle_ver = map(int, getInfo()["API"].split("."))
+        dongle_ver = map(int, myro.globvars.robot.getInfo()["API"].split("."))
         # go to site, check for latest greater than our version
         infp = urllib.urlopen(url)
         contents = infp.read()
