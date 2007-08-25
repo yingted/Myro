@@ -146,9 +146,10 @@ def upgrade_dongle(url=None):
         install_count += load_dongle(s, f) # which is a filename
     else:        
         print "Looking for Dongle upgrades at", url, "..."
-        dongle_ver = map(int, myro.globvars.robot.getInfo()["API"].split("."))
+        dongle_ver = map(int, myro.globvars.robot.getInfo()["api"].split("."))
         # go to site, check for latest greater than our version
         infp = urllib.urlopen(url)
+        print "Opened url..."
         contents = infp.read()
         lines = contents.split("\n")
         infp.close()
@@ -216,3 +217,6 @@ def set_scribbler_start_program(ser, size):
     ser.write(chr(SET_START_PROGRAM))
     write_2byte(ser, size)
             
+def write_2byte(ser, value):
+    ser.write(chr((value >> 8) & 0xFF))
+    ser.write(chr(value & 0xFF))
