@@ -425,11 +425,6 @@ class Robot(object):
             (freq1, freq2, dur) = tuple
             self.beep(dur * wholeNoteDuration, freq1, freq2)
 
-from myro.robots.scribbler import Scribbler
-from myro.robots.surveyor import Surveyor, watch
-from myro.robots.roomba import Roomba, Create
-from myro.robots.simulator import SimScribbler
-
 class Computer(Robot):
     """ An interface to computer devices. """
     def __init__(self):
@@ -834,4 +829,9 @@ def _myroExceptionHandler(etype, value, tb):
         print >> sys.stderr, line.rstrip()
 sys.excepthook = _myroExceptionHandler
 
+from myro.robots.scribbler import Scribbler
+from myro.robots.surveyor import Surveyor, watch
+from myro.robots.roomba import Roomba, Create
+from myro.robots.simulator import SimScribbler
 from myro.graphics import *
+

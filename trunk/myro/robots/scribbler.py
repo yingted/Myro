@@ -1062,6 +1062,7 @@ def erase_mem(ser, page):
     ser.write(chr(Scribbler.SET_SERIAL_ERASE))
     write_2byte(ser, page)
 
+# Also copied into system:
 def set_scribbler_memory(ser, offset, byte):
     ser.write(chr(Scribbler.SET_SCRIB_PROGRAM))
     write_2byte(ser, offset)

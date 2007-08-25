@@ -2,7 +2,8 @@ import zipfile, tarfile, urllib
 import os, string
 from myro import __VERSION__ as myro_version
 import myro.globvars
-from myro.robots.scribbler import set_scribbler_start_program, set_scribbler_memory
+# copied below from scribbler.py:
+#from myro.robots.scribbler import set_scribbler_start_program, set_scribbler_memory
 
 class RegFile:
     """ Class for treating a regular file like other archives. """
@@ -201,3 +202,17 @@ def upgrade(what="all", url = None):
         install_count += upgrade_myro(url)
         install_count += upgrade_dongle(url)
         return install_count
+
+GET_SCRIB_PROGRAM=91  # with offset, returns the scribbler program buffer
+SET_SCRIB_PROGRAM=122   # set scribbler program memory byte
+SET_START_PROGRAM=123   # initiate scribbler programming process
+
+def set_scribbler_memory(ser, offset, byte):
+    ser.write(chr(SET_SCRIB_PROGRAM))
+    write_2byte(ser, offset)
+    ser.write(chr(byte))
+    
+def set_scribbler_start_program(ser, size):
+    ser.write(chr(SET_START_PROGRAM))
+    write_2byte(ser, size)
+            
