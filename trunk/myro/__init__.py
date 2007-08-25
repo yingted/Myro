@@ -56,7 +56,10 @@ def sendPicture(picture, photoname, password, robotname = None):
     photoname = photoname.replace(" ", "")
     photoname = photoname.replace("/", "")
     if robotname == None:
-        robotname = getName()
+        if myro.globvars.robot != None:
+            robotname = myro.globvars.robot.getName()
+        else:
+            raise AttributeError, "no robot name given and robot not connected"
     ch = Chat(robotname, password)
     if ch.ok == 1:
         image = picture.image
