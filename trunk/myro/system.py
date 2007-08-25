@@ -149,7 +149,7 @@ def upgrade_dongle(url=None):
         dongle_ver = myro.globvars.robot.getInfo()["api"].split(".")
         # go to site, check for latest greater than our version
         infp = urllib.urlopen(url)
-        print "Opened url...
+        print "Opened url..."
         contents = infp.read()
         lines = contents.split("\n")
         infp.close()
