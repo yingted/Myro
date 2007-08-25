@@ -191,7 +191,7 @@ def load_dongle(s, f):
     set_scribbler_start_program(s, len(bytes))
     return 1
 
-def upgrade(what="myro", url = None):
+def upgrade(what="all", url = None):
     if what.lower() == "myro":
         return upgrade_myro(url)
     elif what.lower() == "dongle":

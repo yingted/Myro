@@ -1383,6 +1383,25 @@ class Joystick(Tkinter.Toplevel):
         self.threshold = 0.10
         self.delay = 0.10 # in seconds
         self.running = 0
+        #self.after(1000, self._update_help)
+
+    def _update_help(self, delay = None):
+        if self.robot and self.showSensors:
+              data = self.robot.getLastSensors()
+              now = time.time()
+              if data != lastData or now - lastUpdated > 1:
+                    if now - lastUpdated > 1:
+                         data = self.robot.getAll()
+                    for key in config:
+                         item = data.get(key, [0] * config[key])
+                         if type(item) not in [list, tuple]:
+                              item = [item]
+                         for i in range(len(item)):
+                             self.updateWidget(key, i, item[i])
+                    lastUpdated = time.time()
+                    lastData = data
+        self.update()
+        self.after(1000, self._update_help)
 
     def destroy(self):
         self.running = 0
