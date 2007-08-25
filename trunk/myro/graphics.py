@@ -169,11 +169,15 @@ _exception_info = None
 
 def _tk_thread():
     global _root
-    _root = tk.Tk()
+    try:
+        _root = tk.Tk()
+        _root.withdraw()
+        _root.after(_POLL_INTERVAL, _tk_pump)
+        _root.mainloop()
+    except:
+        _root = None
+        print "ERROR: graphics did not start"
     myro.globvars.gui = _root
-    _root.withdraw()
-    _root.after(_POLL_INTERVAL, _tk_pump)
-    _root.mainloop()
 
 def _tk_pump():
     global _thread_running
