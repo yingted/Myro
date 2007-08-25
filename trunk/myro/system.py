@@ -1,8 +1,8 @@
 import zipfile, tarfile, urllib
 import os, string
-from myro import __VERSION__ as myro_version
+from myro import __VERSION__ as myro_version, getInfo
 import myro.globvars
-from myro.robots.dongle import set_scribbler_start_program, set_scribbler_memory
+#from myro.robots.dongle import set_scribbler_start_program, set_scribbler_memory
 
 class RegFile:
     """ Class for treating a regular file like other archives. """
@@ -142,7 +142,7 @@ def upgrade_dongle(url=None):
     if not url.startswith("http://"):
         print "Looking for Dongle upgrades in file", url, "..."
         f = open(url, 'r')
-        install_count += load_dongle(f) # which is a filename
+        install_count += load_dongle(s, f) # which is a filename
     else:        
         print "Looking for Dongle upgrades at", url, "..."
         dongle_ver = map(int, getInfo()["API"].split("."))
@@ -158,24 +158,24 @@ def upgrade_dongle(url=None):
             if filename != "" and filename[0] != '#':
                 print "Considering", filename, "..."
                 if filename.startswith("dongle-upgrade-"):
-                    end = filename.index(".zip")
-                    patch_ver = map(int, filename[13:end].split("."))
+                    end = filename.index(".bytecode")
+                    patch_ver = map(int, filename[15:end].split("."))
                     if patch_ver > dongle_ver:
                         # consider it:
-                        consider[patch_ver] = url + filename
+                        consider[tuple(patch_ver)] = url + filename
         consider_keys = consider.keys()
         consider_keys.sort()
         if len(consider_keys) > 0:
             full_url = consider[consider_keys[-1]]
             f = urllib.urlopen(full_url)
-            install_count += load_dongle(f)
+            install_count += load_dongle(s, f)
     if install_count > 0:
         print "Done upgrading! Please exit and restart Python and Myro"
     else:
         print "Nothing to upgrade in the Dongle; it's up to date."
     return install_count
 
-def load_dongle(f):
+def load_dongle(s, f):
     bytes=[]
     for t in f:
         t = t.strip()
@@ -201,3 +201,7 @@ def upgrade(what="myro", url = None):
         install_count += upgrade_myro(url)
         install_count += upgrade_dongle(url)
         return install_count
+
+def set_scribbler_start_program(s, n): pass
+def set_scribbler_memory(s, i, b): pass
+def getInfo(): return {"API": "2.1.0"}
