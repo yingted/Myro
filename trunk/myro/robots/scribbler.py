@@ -125,37 +125,36 @@ class Scribbler(Robot):
     SET_NO_WHITE_BALANCE=130 # diable white balance on camera (default)
     SET_CAM_PARAM=131       # with address and value, sets the camera parameter at that address
 
-
-    #### Camera Addresses ####
-
-    CAM_PID=0x0A
-    CAM_PID_DEFAULT=0x76
-
-    CAM_VER=0x0B
-    CAM_VER_DEFAULT=0x48
-
-    CAM_BRT=0x06
-    CAM_BRT_DEFAULT=0x80
-
-    CAM_EXP=0x10
-    CAM_EXP_DEFAULT=0x41
-
-    CAM_COMA=0x12
-    CAM_COMA_DEFAULT=0x14
-    CAM_COMA_WHITE_BALANCE_ON= (CAM_COMA_DEFAULT |  (1 << 2))
-    CAM_COMA_WHITE_BALANCE_OFF=(CAM_COMA_DEFAULT & ~(1 << 2))
-
-    CAM_COMB=0x13
-    CAM_COMB_DEFAULT=0xA3
-    CAM_COMB_GAIN_CONTROL_ON= (CAM_COMB_DEFAULT |  (1 << 1))
-    CAM_COMB_GAIN_CONTROL_OFF=(CAM_COMB_DEFAULT & ~(1 << 1))
-    CAM_COMB_EXPOSURE_CONTROL_ON= (CAM_COMB_DEFAULT |  (1 << 0))
-    CAM_COMB_EXPOSURE_CONTROL_OFF=(CAM_COMB_DEFAULT & ~(1 << 0))
-
     PACKET_LENGTH     =  9
     
     def __init__(self, serialport = None, baudrate = 38400):
         Robot.__init__(self)
+
+        #### Camera Addresses ####
+        self.CAM_PID=0x0A
+        self.CAM_PID_DEFAULT=0x76
+    
+        self.CAM_VER=0x0B
+        self.CAM_VER_DEFAULT=0x48
+    
+        self.CAM_BRT=0x06
+        self.CAM_BRT_DEFAULT=0x80
+    
+        self.CAM_EXP=0x10
+        self.CAM_EXP_DEFAULT=0x41
+    
+        self.CAM_COMA=0x12
+        self.CAM_COMA_DEFAULT=0x14
+        self.CAM_COMA_WHITE_BALANCE_ON= (self.CAM_COMA_DEFAULT |  (1 << 2))
+        self.CAM_COMA_WHITE_BALANCE_OFF=(self.CAM_COMA_DEFAULT & ~(1 << 2))
+    
+        self.CAM_COMB=0x13
+        self.CAM_COMB_DEFAULT=0xA3
+        self.CAM_COMB_GAIN_CONTROL_ON= (self.CAM_COMB_DEFAULT |  (1 << 1))
+        self.CAM_COMB_GAIN_CONTROL_OFF=(self.CAM_COMB_DEFAULT & ~(1 << 1))
+        self.CAM_COMB_EXPOSURE_CONTROL_ON= (self.CAM_COMB_DEFAULT |  (1 << 0))
+        self.CAM_COMB_EXPOSURE_CONTROL_OFF=(self.CAM_COMB_DEFAULT & ~(1 << 0))
+
         self.requestStop = 0
         self.debug = 0
         self._lastTranslate = 0
@@ -315,6 +314,10 @@ class Scribbler(Robot):
             return c
         elif sensor == "volume":
             return self._volume
+        elif sensor == "battery":
+            self.ser.write(chr(Scribbler.GET_BATTERY))
+            return read_2byte(self.ser) / 20.9813
+
         else:
             if len(position) == 0:
                 if sensor == "light":
@@ -390,6 +393,24 @@ class Scribbler(Robot):
             else:
                 return retval
 
+    def getIRLeft(self):
+        self.ser.write(chr(Scribbler.GET_DONGLE_L_IR))
+        return read_2byte(ser)
+       
+    def getIRRight(self):
+        self.ser.write(chr(Scribbler.GET_DONGLE_R_IR))
+        return read_2byte(ser)
+    
+    def getIRMiddle(self):
+        self.ser.write(chr(Scribbler.GET_DONGLE_C_IR))
+        return read_2byte(ser)
+    
+    def getBright(self, window):
+        self.ser.write(chr(Scribbler.GET_WINDOW_LIGHT))
+        self.ser.write(chr(window))
+        return read_2byte(ser)
+    
+
     def setData(self, position, value):
         data = self._get(Scribbler.GET_DATA, 8)
         data[position] = value
@@ -458,6 +479,43 @@ class Scribbler(Robot):
         else:
             raise ("invalid set item name: '%s'" % item)
 
+    def setIRPower(self, power):
+        self.ser.write(chr(Scribbler.SET_DONGLE_IR))
+        self.ser.write(chr(power))
+    
+    def setLED1(ser, value):
+        if value:
+            self.ser.write(chr(Scribbler.SET_DONGLE_LED_ON))
+        else:
+            self.ser.write(chr(Scribbler.SET_DONGLE_LED_OFF))
+    
+    def setLED2(self, value):
+        self.ser.write(chr(Scribbler.SET_DIMMER_LED))
+        self.ser.write(chr(value))
+    
+    def setForwardness(self, direction):
+        self.ser.write(chr(Scribbler.SET_FORWARDNESS))
+        self.ser.write(chr(direction))
+    
+    def set_cam_param(ser, addr, byte):
+        ser.write(chr(self.SET_CAM_PARAM))
+        ser.write(chr(addr))
+        ser.write(chr(byte))
+    
+    def get_cam_param(ser, addr):
+        ser.write(chr(self.GET_CAM_PARAM))
+        ser.write(chr(addr))
+        return ord(ser.read(1))
+    
+    def setWhiteBalance(ser, value):
+        if value:
+            ser.write(chr(Scribbler.SET_WHITE_BALANCE))
+        else:
+            ser.write(chr(Scribbler.SET_NO_WHITE_BALANCE))
+    
+    def reset(self):
+        ser.write(chr(Scribbler.SET_RESET_SCRIBBLER))
+    
    
     # Sets the fudge values (in memory, and on the flash memory on the robot)
     def setFudge(self,f1,f2,f3,f4):
@@ -466,10 +524,10 @@ class Scribbler(Robot):
         self._fudge[2] = f3
         self._fudge[3] = f4
 
-    	# Save the fudge data (in integer 0..255 form) to the flash memory
-	#f1-f4 are float values 0..2, convert to byte values
-	# But to make things quick, only save the ones that have changed!
-	# 0..255 and save.
+        # Save the fudge data (in integer 0..255 form) to the flash memory
+        #f1-f4 are float values 0..2, convert to byte values
+        # But to make things quick, only save the ones that have changed!
+        # 0..255 and save.
 
         if self._oldFudge[0] != self._fudge[0] :
                 self.setSingleData(0,  int(self._fudge[0] * 127.0) )
@@ -587,45 +645,45 @@ class Scribbler(Robot):
         right  = min(max(self._lastTranslate + self._lastRotate, -1), 1)
 
 
+        
+        # JWS additions for "calibration" of motors.
+        # Use fudge values 1-4 to change the actual power given to each
+        # motor based upon the forward speed.
+        #
+        # This code is here for documentation purposes only.
+        # 
+        # The algorithm shown here is now implemented on the basic stamp
+        # on the scribbler directly.
 
-	# JWS additions for "calibration" of motors.
-	# Use fudge values 1-4 to change the actual power given to each
-	# motor based upon the forward speed.
-	#
-	# This code is here for documentation purposes only.
-	# 
-	# The algorithm shown here is now implemented on the basic stamp
-	# on the scribbler directly.
+        #fudge the left motor when going forward!
+        #if (self._fudge[0] > 1.0 and left > 0.5 ):
+           #left = left - (self._fudge[0] - 1.0)
+        #if (self._fudge[1] > 1.0 and 0.5 >= left > 0.0):
+           #left = left - (self._fudge[1] - 1.0)
+        #fudge the right motor when going forward!
+        #if (self._fudge[0] < 1.0 and right > 0.5):
+          # right = right - (1.0 - self._fudge[0])
+        #if (self._fudge[1] < 1.0 and 0.5 >= right > 0.0):
+           #right = right - (1.0 - self._fudge[1])
 
-	#fudge the left motor when going forward!
-	#if (self._fudge[0] > 1.0 and left > 0.5 ):
-	   #left = left - (self._fudge[0] - 1.0)
-	#if (self._fudge[1] > 1.0 and 0.5 >= left > 0.0):
-	   #left = left - (self._fudge[1] - 1.0)
-	#fudge the right motor when going forward!
-	#if (self._fudge[0] < 1.0 and right > 0.5):
-	  # right = right - (1.0 - self._fudge[0])
-	#if (self._fudge[1] < 1.0 and 0.5 >= right > 0.0):
-	   #right = right - (1.0 - self._fudge[1])
+        #Backwards travel is just like forwards travel, but reversed!
+        #fudge the right motor when going backwards.
+        #if (self._fudge[2] > 1.0 and 0.0 > right >= -0.5):
+        #        right = right + (self._fudge[2] - 1.0)
+        #if (self._fudge[3] > 1.0 and -0.5 > right ):
+        #        right = right + (self._fudge[3] - 1.0)
 
-	#Backwards travel is just like forwards travel, but reversed!
-	#fudge the right motor when going backwards.
-	#if (self._fudge[2] > 1.0 and 0.0 > right >= -0.5):
-	#	right = right + (self._fudge[2] - 1.0)
-	#if (self._fudge[3] > 1.0 and -0.5 > right ):
-	#	right = right + (self._fudge[3] - 1.0)
-
-	#fudge the left motor when going backwards.
-	#if (self._fudge[2] < 1.0 and 0.0 > left >= -0.5):
-	#	left = left + (1.0 - self._fudge[2]) 
-	#if (self._fudge[3] < 1.0 and -0.5 > left):
-	#	left = left + (1.0 - self._fudge[3])
+        #fudge the left motor when going backwards.
+        #if (self._fudge[2] < 1.0 and 0.0 > left >= -0.5):
+        #        left = left + (1.0 - self._fudge[2]) 
+        #if (self._fudge[3] < 1.0 and -0.5 > left):
+        #        left = left + (1.0 - self._fudge[3])
 
   
 
-	#print "actual power: (",left,",",right,")"
+        #print "actual power: (",left,",",right,")"
 
-	#end JWS additions for "calibration of motors.
+        #end JWS additions for "calibration of motors.
         leftPower = (left + 1.0) * 100.0
         rightPower = (right + 1.0) * 100.0
         self._set(Scribbler.SET_MOTORS, rightPower, leftPower)
@@ -702,16 +760,16 @@ class Scribbler(Robot):
     
 def cap(c):
     if (c > 255): 
-	return 255
+        return 255
     if (c < 0):
-	return 0
+        return 0
 
     return c
 
 def conf_window(ser, window, X_LOW, Y_LOW, X_HIGH, Y_HIGH, X_STEP, Y_STEP):
 
     print "Configuring window", window, X_LOW, Y_LOW, X_HIGH, Y_HIGH, X_STEP, Y_STEP
-    ser.write(chr(SET_WINDOW))
+    ser.write(chr(Scribbler.SET_WINDOW))
     ser.write(chr(window)) 
     ser.write(chr(X_LOW)) 
     ser.write(chr(Y_LOW)) 
@@ -732,27 +790,27 @@ def grab_window(ser, window, lx, ly, ux, uy, xstep, ystep):
     
     #done = True
     print "grabbing image = ", window, "width = ", width, "height = ", height
-    ser.write(chr(GET_WINDOW))
+    ser.write(chr(Scribbler.GET_WINDOW))
     ser.write(chr(window))
     
     #print "dimensions = ", ser.read(6)
     line = ''
     while (len(line) < size):
-	line += ser.read(size-len(line))
+        line += ser.read(size-len(line))
         print "length so far = ", len(line), " waiting for total = ", size
 
     if (len(line) == width * height):
-	i = height
-	j = width
-	px = 0
- 	for i in range(0, height, 1):
- 	    for j in range(0, width, 1):
+        i = height
+        j = width
+        px = 0
+        for i in range(0, height, 1):
+            for j in range(0, width, 1):
                 v[i][j] = ord(line[px])
                 px += 1
                 
         #create the image from the YUV bayer
-	for i in range(0, height, 1):
-	    for j in range(3, width, 1):
+        for i in range(0, height, 1):
+            for j in range(3, width, 1):
                 if ((j % 4) == 0): #3 #2
                     V = v[i][j]
                     Y = v[i][j-1]
@@ -770,23 +828,14 @@ def grab_window(ser, window, lx, ly, ux, uy, xstep, ystep):
                     V = v[i][j-1]
                     U = v[i][j-3]
                     
-		U = (U - 128)		
-		V = (V - 128)
+                U = (U - 128)                
+                V = (V - 128)
 
-		v3[i][j][0] = cap(Y + 1.13983 * V)
-		v3[i][j][1] = cap(Y - 0.39466*U-0.58060*V)
-		v3[i][j][2] = cap(Y + 2.03211*U)
+                v3[i][j][0] = cap(Y + 1.13983 * V)
+                v3[i][j][1] = cap(Y - 0.39466*U-0.58060*V)
+                v3[i][j][2] = cap(Y + 2.03211*U)
                 
         return toimage(v3, high=255, low=0)
-
-def conf_gray_window(ser, window, lx, ly, ux, uy, xstep, ystep):
-    print "Configuring gray image on window",  window
-    # Y's are on odd pixels
-    if (lx % 2)== 0:
-        lx += 1
-    if (xstep % 2) == 1:
-        xstep += 1
-    conf_window(ser, window, lx, ly, ux, uy, xstep, ystep)
 
 def grab_gray_window(ser, window, lx, ly, ux, uy, xstep, ystep):
 
@@ -802,17 +851,16 @@ def grab_gray_window(ser, window, lx, ly, ux, uy, xstep, ystep):
     
     #done = True
     print "grabbing gray window = ", window, "width = ", width, "height = ", height
-    ser.write(chr(GET_WINDOW))
+    ser.write(chr(Scribbler.GET_WINDOW))
     ser.write(chr(window))
     
     #print "dimensions = ", ser.read(6)
     line = ''
     while (len(line) < size):
-	line += ser.read(size-len(line))
+        line += ser.read(size-len(line))
         print "length so far = ", len(line), " waiting for total = ", size
 
     return Image.frombuffer("L", (width, height), line, 'raw', "L", 0, 1)
-
 
 def grab_image(robotser):
 
@@ -825,25 +873,25 @@ def grab_image(robotser):
 
     #done = True
     print "grabbing image"
-    ser.write(chr(GET_IMAGE))
+    ser.write(chr(Scribbler.GET_IMAGE))
     size= width*height
     line = ''
     while (len(line) < size):
-	line += ser.read(size-len(line))
+        line += ser.read(size-len(line))
         print "length so far = ", len(line), " waiting for total = ", size
 
     if (len(line) == width * height):
-	i = height
-	j = width
-	px = 0
- 	for i in range(0, height, 1):
- 	    for j in range(0, width, 1):
+        i = height
+        j = width
+        px = 0
+        for i in range(0, height, 1):
+            for j in range(0, width, 1):
                 v[i][j] = ord(line[px])
                 px +=1
                 
         #create the image from the YUV bayer
-	for i in range(0, height, 1):
-	    for j in range(3, width, 1):
+        for i in range(0, height, 1):
+            for j in range(3, width, 1):
                 if ((j % 4) == 0): #3 #2
                     V = v[i][j]
                     Y = v[i][j-1]
@@ -861,46 +909,36 @@ def grab_image(robotser):
                     V = v[i][j-1]
                     U = v[i][j-3]
                     
-		U = (U - 128)		
-		V = (V - 128)
+                U = (U - 128)                
+                V = (V - 128)
 
-		v3[i][j][0] = cap(Y + 1.13983 * V)
-		v3[i][j][1] = cap(Y - 0.39466*U-0.58060*V)
-		v3[i][j][2] = cap(Y + 2.03211*U)
+                v3[i][j][0] = cap(Y + 1.13983 * V)
+                v3[i][j][1] = cap(Y - 0.39466*U-0.58060*V)
+                v3[i][j][2] = cap(Y + 2.03211*U)
                 
         return toimage(v3, high=255, low=0)
 
+def conf_gray_window(ser, window, lx, ly, ux, uy, xstep, ystep):
+    print "Configuring gray image on window",  window
+    # Y's are on odd pixels
+    if (lx % 2)== 0:
+        lx += 1
+    if (xstep % 2) == 1:
+        xstep += 1
+    conf_window(ser, window, lx, ly, ux, uy, xstep, ystep)
 
 def conf_gray_image(ser):
     # skip every other pixel
     print "Configuring gray image on window 0"
     conf_window(ser, 0, 1, 0, 255, 191, 2, 2)
     
-def grab_gray_image(ser):
-
-    width = 128
-    height = 96
-    size= width*height
-
-    print "grabbing image size = ", size
-    ser.write(chr(GET_WINDOW))
-    ser.write(chr(0))
-    
-    line = ''
-    while (len(line) < size):
-	line += ser.read(size-len(line))
-        print "length so far = ", len(line), " waiting for total = ", size
-
-    return Image.frombuffer("L", (width, height), line, 'raw', "L", 0, 1)
-
 def conf_rle(ser,
              delay = 90, smooth_thresh = 4,
              y_low=0, y_high=254,
              u_low=51, u_high=136,
              v_low=190, v_high=254):
-
     print "Configuring blobs"
-    ser.write(chr(SET_RLE))
+    ser.write(chr(Scribbler.SET_RLE))
     ser.write(chr(delay))
     ser.write(chr(smooth_thresh))
     ser.write(chr(y_low)) 
@@ -910,22 +948,31 @@ def conf_rle(ser,
     ser.write(chr(v_low)) 
     ser.write(chr(v_high))
 
-    
-def grab_rle(ser):
+def grab_gray_image(ser):
+    width = 128
+    height = 96
+    size= width*height
+    print "grabbing image size = ", size
+    ser.write(chr(Scribbler.GET_WINDOW))
+    ser.write(chr(0))
+    line = ''
+    while (len(line) < size):
+        line += ser.read(size-len(line))
+        print "length so far = ", len(line), " waiting for total = ", size
+    return Image.frombuffer("L", (width, height), line, 'raw', "L", 0, 1)
 
+def grab_rle(ser):
     width = 256
     height = 192    
     blobs = zeros(((height + 1), (width + 1)), dtype=uint8)
-    
     line = ''
-    ser.write(chr(GET_RLE))
+    ser.write(chr(Scribbler.GET_RLE))
     size=ord(ser.read(1))
     size = (size << 8) | ord(ser.read(1))
     print "Grabbing RLE image size =", size
     line =''
     while (len(line) < size):
         line+=ser.read(size-len(line))
-    
     px = 0
     counter = 0
     val = 128
@@ -933,9 +980,9 @@ def grab_rle(ser):
     for i in range(0, height, 1):
         for j in range(0, width, 4):
             if (counter < 1 and px < len(line)):
-                counter = ord(line[px])    	
+                counter = ord(line[px])            
                 px += 1
-                counter = (counter << 8) | ord(line[px])    	
+                counter = (counter << 8) | ord(line[px])            
                 px += 1
 
                 if (inside):
@@ -948,26 +995,21 @@ def grab_rle(ser):
             for z in range(0,4):
                 blobs[i][j+z] = val
             counter -= 1
-                
     return toimage(blobs, high=255, low=0)
 
 def grab_rle_on(ser):
-
     width = 256
     height = 192    
     blobs = zeros(((height + 1), (width + 1)), dtype=uint8)
-
     on_pxs = []
-    
     line = ''
-    ser.write(chr(GET_RLE))
+    ser.write(chr(Scribbler.GET_RLE))
     size=ord(ser.read(1))
     size = (size << 8) | ord(ser.read(1))
     #print "Grabbing RLE image size =", size
     line =''
     while (len(line) < size):
         line+=ser.read(size-len(line))
-
     px = 0
     counter = 0
     val = 128
@@ -975,9 +1017,9 @@ def grab_rle_on(ser):
     for i in range(0, height, 1):
         for j in range(0, width, 4):            
             if (counter < 1 and px < len(line)):
-                counter = ord(line[px])    	
+                counter = ord(line[px])            
                 px += 1
-                counter = (counter << 8) | ord(line[px])    	
+                counter = (counter << 8) | ord(line[px])            
                 px += 1
 
                 if (inside):
@@ -992,7 +1034,6 @@ def grab_rle_on(ser):
                 if (inside):
                     on_pxs += [[j+z, i]]
             counter -= 1
-            
     return on_pxs
 
 def read_2byte(ser):
@@ -1006,86 +1047,27 @@ def write_2byte(ser, value):
     ser.write(chr(value & 0xFF))
 
 def read_mem(ser, page, offset):
-    ser.write(chr(GET_SERIAL_MEM))
+    ser.write(chr(Scribbler.GET_SERIAL_MEM))
     write_2byte(ser, page)
     write_2byte(ser, offset)
     return ord(ser.read(1))
 
 def write_mem(ser, page, offset, byte):
-    ser.write(chr(SET_SERIAL_MEM))
+    ser.write(chr(Scribbler.SET_SERIAL_MEM))
     write_2byte(ser, page)
     write_2byte(ser, offset)
     ser.write(chr(byte))
 
 def erase_mem(ser, page):
-    ser.write(chr(SET_SERIAL_ERASE))
+    ser.write(chr(Scribbler.SET_SERIAL_ERASE))
     write_2byte(ser, page)
 
-def get_ir_left(ser):
-    ser.write(chr(GET_DONGLE_L_IR))
-    return read_2byte(ser)
-   
-def get_ir_right(ser):
-    ser.write(chr(GET_DONGLE_R_IR))
-    return read_2byte(ser)
-
-def get_ir_middle(ser):
-    ser.write(chr(GET_DONGLE_C_IR))
-    return read_2byte(ser)
-
-def get_battery(ser):
-    ser.write(chr(GET_BATTERY))
-    return read_2byte(ser)
-
-def set_ir_power(ser, power):
-    ser.write(chr(SET_DONGLE_IR))
-    ser.write(chr(power))
-
-def set_led1_on(ser):
-    ser.write(chr(SET_DONGLE_LED_ON))
-
-def set_led1_off(ser):
-    ser.write(chr(SET_DONGLE_LED_OFF))
-
-def set_led2(ser, value):
-    ser.write(chr(SET_DIMMER_LED))
-    ser.write(chr(value))
-
-def get_window_avg(ser, window):
-    ser.write(chr(GET_WINDOW_LIGHT))
-    ser.write(chr(window))
-    return read_2byte(ser)
-
-def set_forwardness(ser, direction):
-    ser.write(chr(SET_FORWARDNESS))
-    ser.write(chr(direction))
-
 def set_scribbler_memory(ser, offset, byte):
-    ser.write(chr(SET_SCRIB_PROGRAM))
+    ser.write(chr(Scribbler.SET_SCRIB_PROGRAM))
     write_2byte(ser, offset)
     ser.write(chr(byte))
-
+    
 def set_scribbler_start_program(ser, size):
-    ser.write(chr(SET_START_PROGRAM))
+    ser.write(chr(Scribbler.SET_START_PROGRAM))
     write_2byte(ser, size)
-        
-def set_reset_scribbler(ser):
-    ser.write(chr(SET_RESET_SCRIBBLER))
-
-def set_cam_param(ser, addr, byte):
-    ser.write(chr(SET_CAM_PARAM))
-    ser.write(chr(addr))
-    ser.write(chr(byte))
-
-def get_cam_param(ser, addr):
-    ser.write(chr(GET_CAM_PARAM))
-    ser.write(chr(addr))
-    return ord(ser.read(1))
-
-
-def set_no_white_balance(ser):
-    ser.write(chr(SET_NO_WHITE_BALANCE))
-
-def set_white_balance(ser):
-    ser.write(chr(SET_WHITE_BALANCE))
-
+            
