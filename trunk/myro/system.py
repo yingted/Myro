@@ -187,11 +187,13 @@ def load_dongle(s, f):
             bytes.append(nv)
     print "Program size (bytes) = ", len(bytes)    
     f.close()
-    print "Storing program in memory"
+    print "Storing program in memory..."
     for i in range(0, len(bytes)):
         set_scribbler_memory(s, i, bytes[i])
-    print "Programming scribbler"
+    print "Programming scribbler..."
     set_scribbler_start_program(s, len(bytes))
+    print "Done!"
+    myro.globvars.robot.restart()
     return 1
 
 def upgrade(what="all", url = None):
