@@ -1,10 +1,111 @@
-from numpy import array 
-import serial
+SOFT_RESET=33
+GET_ALL=65 
+GET_ALL_BINARY=66  
+GET_LIGHT_LEFT=67  
+GET_LIGHT_CENTER=68  
+GET_LIGHT_RIGHT=69  
+GET_LIGHT_ALL=70  
+GET_IR_LEFT=71  
+GET_IR_RIGHT=72  
+GET_IR_ALL=73  
+GET_LINE_LEFT=74  
+GET_LINE_RIGHT=75  
+GET_LINE_ALL=76  
+GET_STATE=77  
+GET_NAME=78
+GET_STALL=79  
+GET_INFO=80  
+GET_DATA=81  
 
-def conf_window(ser, X_LOW, Y_LOW, X_HIGH, Y_HIGH, X_STEP, Y_STEP):
+GET_RLE=82  # a segmented and run-length encoded image
+GET_IMAGE=83  # the entire 256 x 192 image in YUYV format
+GET_WINDOW=84  # the windowed image (followed by which window)
+GET_DONGLE_L_IR=85  # number of returned pulses when left emitter is turned on
+GET_DONGLE_C_IR=86  # number of returned pulses when center emitter is turned on
+GET_DONGLE_R_IR=87  # number of returned pulses when right emitter is turned on
+GET_WINDOW_LIGHT=88    # average intensity in the user defined region
+GET_BATTERY=89  # battery voltage
+GET_SERIAL_MEM=90  # with the address returns the value in serial memory
+GET_SCRIB_PROGRAM=91  # with offset, returns the scribbler program buffer
+GET_CAM_PARAM=92 # with address, returns the camera parameter at that address
 
-    print "Configuring window ", X_LOW, Y_LOW, X_HIGH, Y_HIGH, X_STEP, Y_STEP
-    ser.write('Y') # 89
+SET_SINGLE_DATA=96
+SET_DATA=97
+SET_ECHO_MODE=98
+SET_LED_LEFT_ON=99 
+SET_LED_LEFT_OFF=100
+SET_LED_CENTER_ON=101
+SET_LED_CENTER_OFF=102
+SET_LED_RIGHT_ON=103
+SET_LED_RIGHT_OFF=104
+SET_LED_ALL_ON=105
+SET_LED_ALL_OFF=106
+SET_LED_ALL=107 
+SET_MOTORS_OFF=108
+SET_MOTORS=109 
+SET_NAME=110 
+SET_LOUD=111
+SET_QUIET=112
+SET_SPEAKER=113
+SET_SPEAKER_2=114
+
+SET_DONGLE_LED_ON=116   # turn binary dongle led on
+SET_DONGLE_LED_OFF=117  # turn binary dongle led off
+SET_RLE=118             # set rle parameters 
+SET_NAME2=119           # set name2 byte
+SET_DONGLE_IR=120       # set dongle IR power
+SET_SERIAL_MEM=121      # set serial memory byte
+SET_SCRIB_PROGRAM=122   # set scribbler program memory byte
+SET_START_PROGRAM=123   # initiate scribbler programming process
+SET_RESET_SCRIBBLER=124 # hard reset scribbler
+SET_SERIAL_ERASE=125    # erase serial memory
+SET_DIMMER_LED=126      # set dimmer led
+SET_WINDOW=127          # set user defined window
+SET_FORWARDNESS=128     # set direction of scribbler
+SET_WHITE_BALANCE=129   # turn on white balance on camera 
+SET_NO_WHITE_BALANCE=130 # diable white balance on camera (default)
+SET_CAM_PARAM=131       # with address and value, sets the camera parameter at that address
+
+
+#### Camera Addresses ####
+
+CAM_PID=0x0A
+CAM_PID_DEFAULT=0x76
+
+CAM_VER=0x0B
+CAM_VER_DEFAULT=0x48
+
+CAM_BRT=0x06
+CAM_BRT_DEFAULT=0x80
+
+CAM_EXP=0x10
+CAM_EXP_DEFAULT=0x41
+
+CAM_COMA=0x12
+CAM_COMA_DEFAULT=0x14
+CAM_COMA_WHITE_BALANCE_ON= (CAM_COMA_DEFAULT |  (1 << 2))
+CAM_COMA_WHITE_BALANCE_OFF=(CAM_COMA_DEFAULT & ~(1 << 2))
+
+CAM_COMB=0x13
+CAM_COMB_DEFAULT=0xA3
+CAM_COMB_GAIN_CONTROL_ON= (CAM_COMB_DEFAULT |  (1 << 1))
+CAM_COMB_GAIN_CONTROL_OFF=(CAM_COMB_DEFAULT & ~(1 << 1))
+CAM_COMB_EXPOSURE_CONTROL_ON= (CAM_COMB_DEFAULT |  (1 << 0))
+CAM_COMB_EXPOSURE_CONTROL_OFF=(CAM_COMB_DEFAULT & ~(1 << 0))
+
+def cap(c):
+    if (c > 255): 
+	return 255
+    if (c < 0):
+	return 0
+
+    return c
+
+def conf_window(ser, window, X_LOW, Y_LOW, X_HIGH, Y_HIGH, X_STEP, Y_STEP):
+
+    print "Configuring window", window, X_LOW, Y_LOW, X_HIGH, Y_HIGH, X_STEP, Y_STEP
+    ser.write(chr(SET_WINDOW))
+    ser.write(chr(window)) 
     ser.write(chr(X_LOW)) 
     ser.write(chr(Y_LOW)) 
     ser.write(chr(X_HIGH))
@@ -12,90 +113,178 @@ def conf_window(ser, X_LOW, Y_LOW, X_HIGH, Y_HIGH, X_STEP, Y_STEP):
     ser.write(chr(X_STEP))
     ser.write(chr(Y_STEP))
 
-def grab_window(ser, lx, ly, ux, uy, xstep, ystep):
-    height = (uy - ly) / ystep
-    width = (ux - lx) / xstep
-    size = width * height
-    print "grabbing image width = ", width, "height = ", height
-    ser.write('X') # 88
-    line = BufferedRead(ser, size)
-    buffer = array([0] * (height * width * 3), 'B')
-    for i in range(height):
-        for j in range(width):
-            if j >= 3:
-                # go to the left for other values
-                vy = -1; vu = -2; y1v = -1; y1u = -3; uy = -1; uv = -2; y2u = -1; y2v = -3
-            else:
-                # go to the right for other values
-                vy = 1; vu = 2; y1v = 3; y1u = 1; uy = 1; uv = 2; y2u = 3; y2v = 1
-                                   #   0123 0123 0123
-            if ((j % 4) == 0): #0 #3
-                Y = line[i * width + j]
-                V = line[i * width + j + y1v]
-                U = line[i * width + j + y1u]
-            elif ((j % 4) == 1): #1 #0
-                U = line[i * width + j]
-                Y = line[i * width + j + uy]
-                V = line[i * width + j + uv]
-            elif ((j % 4) == 2): #2 #1
-                Y = line[i * width + j]
-                U = line[i * width + j + y2u]
-                V = line[i * width + j + y2v]
-            elif ((j % 4) == 3): #3 #2
-                V = line[i * width + j]
-                Y = line[i * width + j + vy]
-                U = line[i * width + j + vu]
-            U = (ord(U) - 128)       
-            V = (ord(V) - 128)
-            Y = ord(Y)
-            buffer[(i * width + j) * 3 + 0] = max(min(Y + 1.13983 * V, 255), 0)
-            buffer[(i * width + j) * 3 + 1] = max(min(Y - 0.39466*U-0.58060*V, 255), 0)
-            buffer[(i * width + j) * 3 + 2] = max(min(Y + 2.03211*U, 255), 0)
-        return Image.frombuffer("RGB", (width, height), buffer,
-                                "raw", "RGB", 0, 1)
 
-def grab_str(ser, width = 256, height = 192):
-    global line
-    buffer = array([0] * (height * width * 3), 'B')
-    oldtimeout = ser.timeout
-    ser.setTimeout(.01)
-    ser.write('R') # 82
+def grab_window(ser, window, lx, ly, ux, uy, xstep, ystep):
+
+    height = (uy - ly + 1) / ystep
+    width = (ux - lx + 1) / xstep
+    size = width * height
+    
+    v = zeros(((height + 1), (width + 1)), dtype=uint8)
+    v3 = zeros(((height + 1), (width + 1), 3), dtype=uint8)
+    
+    #done = True
+    print "grabbing image = ", window, "width = ", width, "height = ", height
+    ser.write(chr(GET_WINDOW))
+    ser.write(chr(window))
+    
+    #print "dimensions = ", ser.read(6)
+    line = ''
+    while (len(line) < size):
+	line += ser.read(size-len(line))
+        print "length so far = ", len(line), " waiting for total = ", size
+
+    if (len(line) == width * height):
+	i = height
+	j = width
+	px = 0
+ 	for i in range(0, height, 1):
+ 	    for j in range(0, width, 1):
+                v[i][j] = ord(line[px])
+                px += 1
+                
+        #create the image from the YUV bayer
+	for i in range(0, height, 1):
+	    for j in range(3, width, 1):
+                if ((j % 4) == 0): #3 #2
+                    V = v[i][j]
+                    Y = v[i][j-1]
+                    U = v[i][j-2]
+                elif ((j % 4) == 2): #1 #0
+                    U = v[i][j]
+                    Y = v[i][j-1]
+                    V = v[i][j-2]
+                elif ((j % 4) == 3): #2 #1
+                    Y = v[i][j]
+                    U = v[i][j-1]
+                    V = v[i][j-3]
+                elif ((j % 4) == 1): #0 #3
+                    Y = v[i][j]
+                    V = v[i][j-1]
+                    U = v[i][j-3]
+                    
+		U = (U - 128)		
+		V = (V - 128)
+
+		v3[i][j][0] = cap(Y + 1.13983 * V)
+		v3[i][j][1] = cap(Y - 0.39466*U-0.58060*V)
+		v3[i][j][2] = cap(Y + 2.03211*U)
+                
+        return toimage(v3, high=255, low=0)
+
+def conf_gray_window(ser, window, lx, ly, ux, uy, xstep, ystep):
+    print "Configuring gray image on window",  window
+    # Y's are on odd pixels
+    if (lx % 2)== 0:
+        lx += 1
+    if (xstep % 2) == 1:
+        xstep += 1
+    conf_window(ser, window, lx, ly, ux, uy, xstep, ystep)
+
+def grab_gray_window(ser, window, lx, ly, ux, uy, xstep, ystep):
+
+    # Y's are on odd pixels
+    if (lx % 2)== 0:
+        lx += 1
+    if (xstep % 2) == 1:
+        xstep += 1
+        
+    height = (uy - ly + 1) / ystep
+    width = (ux - lx + 1) / xstep
+    size = width * height
+    
+    #done = True
+    print "grabbing gray window = ", window, "width = ", width, "height = ", height
+    ser.write(chr(GET_WINDOW))
+    ser.write(chr(window))
+    
+    #print "dimensions = ", ser.read(6)
+    line = ''
+    while (len(line) < size):
+	line += ser.read(size-len(line))
+        print "length so far = ", len(line), " waiting for total = ", size
+
+    return Image.frombuffer("L", (width, height), line, 'raw', "L", 0, 1)
+
+
+def grab_image(robotser):
+
+    width = 256
+    height = 192
+    ser = robotser 
+    
+    v = zeros(((height + 1), (width + 1)), dtype=uint8)
+    v3 = zeros(((height + 1), (width + 1), 3), dtype=uint8)
+
+    #done = True
+    print "grabbing image"
+    ser.write(chr(GET_IMAGE))
     size= width*height
-    line = BufferedRead(ser, size, start = 0)
-    #create the image from the YUV layer
-    for i in range(height):
-        for j in range(width):   
-            if j >= 3:
-                # go to the left for other values
-                vy = -1; vu = -2; y1v = -1; y1u = -3; uy = -1; uv = -2; y2u = -1; y2v = -3
-            else:
-                # go to the right for other values
-                vy = 1; vu = 2; y1v = 3; y1u = 1; uy = 1; uv = 2; y2u = 3; y2v = 1
-                                   #   0123 0123 0123
-            if ((j % 4) == 0): #3 #2   VYUY VYUY VYUY
-                V = line[i * width + j] 
-                Y = line[i * width + j + vy]
-                U = line[i * width + j + vu]
-            elif ((j % 4) == 1): #0 #3
-                Y = line[i * width + j]
-                V = line[i * width + j + y1v]
-                U = line[i * width + j + y1u]
-            elif ((j % 4) == 2): #1 #0
-                U = line[i * width + j]
-                Y = line[i * width + j + uy]
-                V = line[i * width + j + uv]
-            elif ((j % 4) == 3): #2 #1
-                Y = line[i * width + j]
-                U = line[i * width + j + y2u]
-                V = line[i * width + j + y2v]
-            U = (ord(U) - 128)       
-            V = (ord(V) - 128)
-            Y = ord(Y)
-            buffer[(i * width + j) * 3 + 0] = max(min(Y + 1.13983 * V, 255), 0)
-            buffer[(i * width + j) * 3 + 1] = max(min(Y - 0.39466*U-0.58060*V, 255), 0)
-            buffer[(i * width + j) * 3 + 2] = max(min(Y + 2.03211*U, 255), 0)
-    ser.setTimeout(oldtimeout)
-    return buffer
+    line = ''
+    while (len(line) < size):
+	line += ser.read(size-len(line))
+        print "length so far = ", len(line), " waiting for total = ", size
+
+    if (len(line) == width * height):
+	i = height
+	j = width
+	px = 0
+ 	for i in range(0, height, 1):
+ 	    for j in range(0, width, 1):
+                v[i][j] = ord(line[px])
+                px +=1
+                
+        #create the image from the YUV bayer
+	for i in range(0, height, 1):
+	    for j in range(3, width, 1):
+                if ((j % 4) == 0): #3 #2
+                    V = v[i][j]
+                    Y = v[i][j-1]
+                    U = v[i][j-2]
+                elif ((j % 4) == 2): #1 #0
+                    U = v[i][j]
+                    Y = v[i][j-1]
+                    V = v[i][j-2]
+                elif ((j % 4) == 3): #2 #1
+                    Y = v[i][j]
+                    U = v[i][j-1]
+                    V = v[i][j-3]
+                elif ((j % 4) == 1): #0 #3
+                    Y = v[i][j]
+                    V = v[i][j-1]
+                    U = v[i][j-3]
+                    
+		U = (U - 128)		
+		V = (V - 128)
+
+		v3[i][j][0] = cap(Y + 1.13983 * V)
+		v3[i][j][1] = cap(Y - 0.39466*U-0.58060*V)
+		v3[i][j][2] = cap(Y + 2.03211*U)
+                
+        return toimage(v3, high=255, low=0)
+
+
+def conf_gray_image(ser):
+    # skip every other pixel
+    print "Configuring gray image on window 0"
+    conf_window(ser, 0, 1, 0, 255, 191, 2, 2)
+    
+def grab_gray_image(ser):
+
+    width = 128
+    height = 96
+    size= width*height
+
+    print "grabbing image size = ", size
+    ser.write(chr(GET_WINDOW))
+    ser.write(chr(0))
+    
+    line = ''
+    while (len(line) < size):
+	line += ser.read(size-len(line))
+        print "length so far = ", len(line), " waiting for total = ", size
+
+    return Image.frombuffer("L", (width, height), line, 'raw', "L", 0, 1)
 
 def conf_rle(ser,
              delay = 90, smooth_thresh = 4,
@@ -104,7 +293,7 @@ def conf_rle(ser,
              v_low=190, v_high=254):
 
     print "Configuring blobs"
-    ser.write('T') # 84
+    ser.write(chr(SET_RLE))
     ser.write(chr(delay))
     ser.write(chr(smooth_thresh))
     ser.write(chr(y_low)) 
@@ -114,17 +303,22 @@ def conf_rle(ser,
     ser.write(chr(v_low)) 
     ser.write(chr(v_high))
 
+    
 def grab_rle(ser):
+
     width = 256
     height = 192    
-    blobs = array([0] * (height * width), 'B')
-    ser.setTimeout(10)
-    ser.flushInput()
-    ser.write('S') # 83
+    blobs = zeros(((height + 1), (width + 1)), dtype=uint8)
+    
+    line = ''
+    ser.write(chr(GET_RLE))
     size=ord(ser.read(1))
     size = (size << 8) | ord(ser.read(1))
     print "Grabbing RLE image size =", size
-    line = BufferedRead(ser, size)
+    line =''
+    while (len(line) < size):
+        line+=ser.read(size-len(line))
+    
     px = 0
     counter = 0
     val = 128
@@ -132,91 +326,161 @@ def grab_rle(ser):
     for i in range(0, height, 1):
         for j in range(0, width, 4):
             if (counter < 1 and px < len(line)):
-                counter = ord(line[px])     
+                counter = ord(line[px])    	
                 px += 1
-                counter = (counter << 8) | ord(line[px])        
+                counter = (counter << 8) | ord(line[px])    	
                 px += 1
 
                 if (inside):
                     val = 0
                     inside = False
                 else:
-                    val = 1
+                    val = 255
                     inside = True
+
             for z in range(0,4):
-                blobs[i * width + j+z] = val # gray value
+                blobs[i][j+z] = val
             counter -= 1
-    retval = Image.frombuffer("1", (width, height), blobs,
-                              "raw", "1", 0, 1)
-    return retval
+                
+    return toimage(blobs, high=255, low=0)
+
+def grab_rle_on(ser):
+
+    width = 256
+    height = 192    
+    blobs = zeros(((height + 1), (width + 1)), dtype=uint8)
+
+    on_pxs = []
+    
+    line = ''
+    ser.write(chr(GET_RLE))
+    size=ord(ser.read(1))
+    size = (size << 8) | ord(ser.read(1))
+    #print "Grabbing RLE image size =", size
+    line =''
+    while (len(line) < size):
+        line+=ser.read(size-len(line))
+
+    px = 0
+    counter = 0
+    val = 128
+    inside = True
+    for i in range(0, height, 1):
+        for j in range(0, width, 4):            
+            if (counter < 1 and px < len(line)):
+                counter = ord(line[px])    	
+                px += 1
+                counter = (counter << 8) | ord(line[px])    	
+                px += 1
+
+                if (inside):
+                    val = 0
+                    inside = False
+                else:
+                    val = 255
+                    inside = True
+
+            for z in range(0,4):
+                blobs[i][j+z] = val
+                if (inside):
+                    on_pxs += [[j+z, i]]
+            counter -= 1
+            
+    return on_pxs
+
 
 def read_2byte(ser):
     hbyte = ord(ser.read(1))
     lbyte = ord(ser.read(1))
-    lpyte = (hbyte << 8) | lbyte
+    lbyte = (hbyte << 8) | lbyte
     return lbyte
-    
-def get_ir_left(ser):
-    ser.write('U') # 85
-    return read_2byte(ser)
 
-def read_mem(ser, addr):
-    ser.write('`') # 96
-    ser.write(chr((addr >> 8) & 0xFF))
-    ser.write(chr(addr & 0xFF))
+def write_2byte(ser, value):
+    ser.write(chr((value >> 8) & 0xFF))
+    ser.write(chr(value & 0xFF))
+
+def read_mem(ser, page, offset):
+    ser.write(chr(GET_SERIAL_MEM))
+    write_2byte(ser, page)
+    write_2byte(ser, offset)
     return ord(ser.read(1))
 
-def write_mem(ser, addr, byte):
-    ser.write('_') # 95
-    ser.write(chr((addr >> 8) & 0xFF))
-    ser.write(chr(addr & 0xFF))
+def write_mem(ser, page, offset, byte):
+    ser.write(chr(SET_SERIAL_MEM))
+    write_2byte(ser, page)
+    write_2byte(ser, offset)
     ser.write(chr(byte))
-    
+
+def erase_mem(ser, page):
+    ser.write(chr(SET_SERIAL_ERASE))
+    write_2byte(ser, page)
+
+def get_ir_left(ser):
+    ser.write(chr(GET_DONGLE_L_IR))
+    return read_2byte(ser)
+   
 def get_ir_right(ser):
-    ser.write('Z') # 90
+    ser.write(chr(GET_DONGLE_R_IR))
     return read_2byte(ser)
 
 def get_ir_middle(ser):
-    ser.write('V') # 86
+    ser.write(chr(GET_DONGLE_C_IR))
     return read_2byte(ser)
 
 def get_battery(ser):
-    ser.write('^') # 94
+    ser.write(chr(GET_BATTERY))
     return read_2byte(ser)
 
 def set_ir_power(ser, power):
-    ser.write('[') # 91
+    ser.write(chr(SET_DONGLE_IR))
     ser.write(chr(power))
 
 def set_led1_on(ser):
-    ser.write('s') # 115 CONFLICT!
+    ser.write(chr(SET_DONGLE_LED_ON))
 
 def set_led1_off(ser):
-    ser.write('t') # 116
+    ser.write(chr(SET_DONGLE_LED_OFF))
 
 def set_led2(ser, value):
-    ser.write('u') # 117
+    ser.write(chr(SET_DIMMER_LED))
     ser.write(chr(value))
 
-def yuv2rgb(Y, U, V):
-    R = int(Y + (1.4075 * (V - 128)))
-    G = int(Y - (0.3455 * (U - 128)) - (0.7169 * (V - 128)))
-    B = int(Y + (1.7790 * (U - 128)))
-    return [max(min(v,255),0) for v in (R, G, B)]
+def get_window_avg(ser, window):
+    ser.write(chr(GET_WINDOW_LIGHT))
+    ser.write(chr(window))
+    return read_2byte(ser)
 
-def rgb2yuv(R, G, B):
-    Y = int(0.299 * R + 0.587 * G + 0.114 * B)
-    U = int(-0.169 * R - 0.332 * G + 0.500 * B + 128)
-    V = int( 0.500 * R - 0.419 * G - 0.0813 * B + 128)
-    return [max(min(v,255),0) for v in (Y, U, V)]
+def set_forwardness(ser, direction):
+    ser.write(chr(SET_FORWARDNESS))
+    ser.write(chr(direction))
 
-def im2str(im):
-    """
-    Creates a string which can be moved about (ie, over chat).
-    """
-    s = im.tostring("jpeg", "RGB")
-    return pickle.dumps(s)
+def set_scribbler_memory(ser, offset, byte):
+    ser.write(chr(SET_SCRIB_PROGRAM))
+    write_2byte(ser, offset)
+    ser.write(chr(byte))
 
-def str2im(ps):
-    s = pickle.loads(ps)
-    return Image.fromstring("RGB", (256,192), s, "jpeg", "RGB", None)
+def set_scribbler_start_program(ser, size):
+    ser.write(chr(SET_START_PROGRAM))
+    write_2byte(ser, size)
+        
+def set_reset_scribbler(ser):
+    ser.write(chr(SET_RESET_SCRIBBLER))
+
+def set_cam_param(ser, addr, byte):
+    ser.write(chr(SET_CAM_PARAM))
+    ser.write(chr(addr))
+    ser.write(chr(byte))
+
+def get_cam_param(ser, addr):
+    ser.write(chr(GET_CAM_PARAM))
+    ser.write(chr(addr))
+    return ord(ser.read(1))
+
+
+def set_no_white_balance(ser):
+    ser.write(chr(SET_NO_WHITE_BALANCE))
+
+def set_white_balance(ser):
+    ser.write(chr(SET_WHITE_BALANCE))
+
+

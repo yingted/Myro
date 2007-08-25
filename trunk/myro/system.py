@@ -2,6 +2,7 @@ import zipfile, tarfile, urllib
 import os, string
 from myro import __VERSION__ as myro_version
 import myro.globvars
+from myro.robots.dongle import set_scribbler_start_program, set_scribbler_memory
 
 class RegFile:
     """ Class for treating a regular file like other archives. """
@@ -71,6 +72,7 @@ def import_file(filename):
     VALUES["MYRODIR"] = myropath + os.sep
     VALUES["PYTHONSITEDIR"] = sitepath + os.sep
     VALUES["PYTHONDIR"] = pythonpath
+    install_count = 0
     if "MANIFEST" in name_list:
         manifest = infp.read("MANIFEST")
         lines = manifest.split("\n")
@@ -85,31 +87,117 @@ def import_file(filename):
             outfp = open(director[name], "wb")
             outfp.write(contents)
             outfp.close()
+            install_count += 1
     else:
-        print "   ERROR: no MANIFEST in upgrade; skipping"
+        print "   ERROR: no MANIFEST in Myro upgrade; skipping"
     infp.close()
+    return install_count
+
+def upgrade_myro(url=None):
+    """
+    Takes a url or filename and upgrades Myro.
+    """
+    if url == None:
+        url = "http://myro.roboteducation.org/upgrade/"
+    install_count = 0
+    if not url.startswith("http://"):
+        print "Looking for Myro upgrades in file", url, "..."
+        install_count += import_file(url) # which is a filename
+    else:        
+        print "Looking for Myro upgrades at", url, "..."
+        myro_ver = map(int, myro_version.split("."))
+        # go to site, check for latest greater than our version
+        infp = urllib.urlopen(url)
+        contents = infp.read()
+        lines = contents.split("\n")
+        infp.close()
+        for filename in lines:
+            filename = filename.strip()
+            if filename != "" and filename[0] != '#':
+                print "Considering", filename, "..."
+                if filename.startswith("myro-upgrade-"):
+                    end = filename.index(".zip")
+                    patch_ver = map(int, filename[13:end].split("."))
+                    if patch_ver > myro_ver:
+                        # download it
+                        print "   Downloading..."
+                        install_count += import_url(url + filename)
+    if install_count > 0:
+        print "Done upgrading! Please exit and restart Python and Myro"
+    else:
+        print "Nothing to upgrade in Myro; it's up to date."
+    return install_count
+
+def upgrade_dongle(url=None):
+    """
+    Takes a url or filename and upgrades Myro.
+    """
+    if myro.globvars.robot != None:
+        s = myro.globvars.robot.ser
+    else:
+        raise AttributeError, "need connection to robot: initialize() first"
+    if url == None:
+        url = "http://myro.roboteducation.org/upgrade/dongle/"
+    install_count = 0
+    if not url.startswith("http://"):
+        print "Looking for Dongle upgrades in file", url, "..."
+        f = open(url, 'r')
+        install_count += load_dongle(f) # which is a filename
+    else:        
+        print "Looking for Dongle upgrades at", url, "..."
+        dongle_ver = map(int, getInfo()["API"].split("."))
+        # go to site, check for latest greater than our version
+        infp = urllib.urlopen(url)
+        contents = infp.read()
+        lines = contents.split("\n")
+        infp.close()
+        consider = {}
+        # find the biggest matching one:
+        for filename in lines:
+            filename = filename.strip()
+            if filename != "" and filename[0] != '#':
+                print "Considering", filename, "..."
+                if filename.startswith("dongle-upgrade-"):
+                    end = filename.index(".zip")
+                    patch_ver = map(int, filename[13:end].split("."))
+                    if patch_ver > dongle_ver:
+                        # consider it:
+                        consider[patch_ver] = url + filename
+        consider_keys = consider.keys()
+        consider_keys.sort()
+        if len(consider_keys) > 0:
+            full_url = consider[consider_keys[-1]]
+            f = urllib.urlopen(full_url)
+            install_count += load_dongle(f)
+    if install_count > 0:
+        print "Done upgrading! Please exit and restart Python and Myro"
+    else:
+        print "Nothing to upgrade in the Dongle; it's up to date."
+    return install_count
+
+def load_dongle(f):
+    bytes=[]
+    for t in f:
+        t = t.strip()
+        if (len(t) > 0):
+            nv = int(t)
+            bytes.append(nv)
+    print "Program size (bytes) = ", len(bytes)    
+    f.close()
+    print "Storing program in memory"
+    for i in range(0, len(bytes)):
+        set_scribbler_memory(s, i, bytes[i])
+    print "Programming scribbler"
+    set_scribbler_start_program(s, len(bytes))
     return 1
 
-def upgrade(school = None):
-    url = "http://myro.roboteducation.org/upgrade/"
-    if school != None:
-        url += school + "/"        
-    print "Looking for upgrades at", url, "..."
-    myro_ver = map(int, myro_version.split("."))
-    # go to site, check for latest greater than our version
-    infp = urllib.urlopen(url)
-    contents = infp.read()
-    lines = contents.split("\n")
-    infp.close()
-    for filename in lines:
-        filename = filename.strip()
-        if filename != "" and filename[0] != '#':
-            print "Considering", filename, "..."
-            if filename.startswith("myro-upgrade-"):
-                end = filename.index(".zip")
-                patch_ver = map(int, filename[13:end].split("."))
-                if patch_ver > myro_ver:
-                    # download it
-                    print "   Downloading..."
-                    import_url(url + filename)
-    print "Done upgrading! Please exit and restart Python"
+def upgrade(what="myro", url = None):
+    if what.lower() == "myro":
+        return upgrade_myro(url)
+    elif what.lower() == "dongle":
+        return upgrade_dongle(url)
+    elif what.lower() == "all":
+        install_count = 0
+        install_count += upgrade_myro(url)
+        install_count += upgrade_dongle(url)
+        return install_count
