@@ -597,7 +597,7 @@ class Scribbler(Robot):
         buffer = array([0] * (height * width * 3), 'B')
         oldtimeout = self.ser.timeout
         self.ser.setTimeout(.01)
-        self.ser.write('R') # 82
+        self.ser.write(chr(Scribbler.GET_IMAGE))
         size= width*height
         line = BufferedRead(self.ser, size, start = 0)
         #create the image from the YUV layer
