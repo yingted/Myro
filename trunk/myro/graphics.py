@@ -944,13 +944,17 @@ class Picture(object):
         self.height = 0
         self.image = None
         self.filename = None
-    def set(self, width, height, data=None):
+    def set(self, width, height, data=None, mode = "rgb"):
         self.width = width
         self.height = height
-        if data == None:
-            data = array([0] * (height * width * 3), 'B')
-        self.image = PyImage.frombuffer("RGB", (self.width, self.height),
-                                        data, "raw", "RGB", 0, 1)
+        if mode.lower() == "rgb":
+            if data == None:
+                data = array([0] * (height * width * 3), 'B')
+            self.image = PyImage.frombuffer("RGB", (self.width, self.height),
+                                            data, "raw", "RGB", 0, 1)
+        else: # "GRAY"
+            self.image = PyImage.frombuffer("L", (self.width, self.height),
+                                            data, 'raw', "L", 0, 1)
         self.pixels = self.image.load()
         self.palette = self.image.getpalette()
         self.filename = 'Camera Image'

@@ -176,6 +176,9 @@ class Scribbler(Robot):
         self._fudge = range(4)
         self._oldFudge = range(4)
         self.loadFudge()
+        conf_gray_window(self.ser, 0, 0, 0,    84, 191, 1, 1)
+        conf_gray_window(self.ser, 1, 84,  0, 170, 191, 1, 1)
+        conf_gray_window(self.ser, 2, 172, 0, 255, 191, 1, 1)
 
     def search(self):
         answer = askQuestion(title="Search for " + self.serialPort,
@@ -406,11 +409,24 @@ class Scribbler(Robot):
         return read_2byte(ser)
     
     def getBright(self, window):
+        # left, middle, right
         self.ser.write(chr(Scribbler.GET_WINDOW_LIGHT))
         self.ser.write(chr(window))
         return read_2byte(ser)
-    
 
+##        print "left"
+##        g = grab_gray_window(s, 0, 0, 0,    84, 191, 1, 1)
+##        g.show()
+##
+##        print "middle"
+##        g = grab_gray_window(s, 1, 84, 0,  170, 191, 1, 1)
+##        g.show()
+##
+##        print "right"
+##        g = grab_gray_window(s, 2, 172, 0, 255, 191, 1, 1)
+##        g.show()
+
+    
     def setData(self, position, value):
         data = self._get(Scribbler.GET_DATA, 8)
         data[position] = value
@@ -862,8 +878,9 @@ def grab_gray_window(ser, window, lx, ly, ux, uy, xstep, ystep):
     while (len(line) < size):
         line += ser.read(size-len(line))
         print "length so far = ", len(line), " waiting for total = ", size
-
-    return Image.frombuffer("L", (width, height), line, 'raw', "L", 0, 1)
+    p = Picture()
+    p.set(width, height, line, "gray")
+    return p
 
 def grab_image(robotser):
 
@@ -962,7 +979,9 @@ def grab_gray_image(ser):
     while (len(line) < size):
         line += ser.read(size-len(line))
         print "length so far = ", len(line), " waiting for total = ", size
-    return Image.frombuffer("L", (width, height), line, 'raw', "L", 0, 1)
+    p = Picture()
+    p.set(width, height, line, "gray")
+    return p
 
 def grab_rle(ser):
     width = 256
