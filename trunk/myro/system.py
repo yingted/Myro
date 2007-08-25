@@ -1,5 +1,5 @@
 import zipfile, tarfile, urllib
-import os, string
+import os, string, serial
 from myro import __VERSION__ as myro_version
 import myro.globvars
 # copied below from scribbler.py:
@@ -129,14 +129,38 @@ def upgrade_myro(url=None):
         print "Nothing to upgrade in Myro; it's up-to-date."
     return install_count
 
+class FakeRobot:
+    def __init__(self, baudrate = 38400):
+        from myro import ask
+        serialport = ask("Port", useCache = 1)
+        # Deal with requirement that Windows "COM#" names where # >= 9 needs to
+        # be in the format "\\.\COM#"
+        if type(serialport) == str and serialport.lower().startswith("com"):
+            portnum = int(serialport[3:])
+            if portnum >= 10:
+                serialport = r'\\.\COM%d' % (portnum)
+        self.serialPort = serialport
+        self.baudRate = baudrate
+        try:
+            myro.globvars.robot.ser.close()
+        except KeyboardInterrupt:
+            raise
+        except:
+            pass
+        self.ser = serial.Serial(self.serialPort, timeout = 2) 
+    def getInfo(self): return {"api": "0.0.0"}
+    def restart(self):
+        print "Please run initialize() to connect onto robot"
+
 def upgrade_dongle(url=None):
     """
     Takes a url or filename and upgrades Myro.
     """
-    if myro.globvars.robot != None:
-        s = myro.globvars.robot.ser
-    else:
-        raise AttributeError, "need connection to robot: initialize() first"
+    if myro.globvars.robot == None:
+        # force upgrade
+        print "Connecting to Scribbler for initial firmware installation..."
+        myro.globvars.robot = FakeRobot()
+    s = myro.globvars.robot.ser
     if url == None:
         url = "http://myro.roboteducation.org/upgrade/dongle/"
     install_count = 0

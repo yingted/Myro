@@ -421,8 +421,12 @@ class Scribbler(Robot):
         return self._set(  *([Scribbler.SET_SINGLE_DATA] + data)  )
 
     def setEchoMode(self, value):
-        if isTrue(value): return self._set(Scribbler.SET_ECHO_MODE, 1)
-        else:             return self._set(Scribbler.SET_ECHO_MODE, 0)
+        if isTrue(value): self._set(Scribbler.SET_ECHO_MODE, 1)
+        else:             self._set(Scribbler.SET_ECHO_MODE, 0)
+        time.sleep(.25)
+        self.ser.flushInput()
+        self.ser.flushOutput()
+        return
 
     def set(self, item, position, value = None):
         item = item.lower()
@@ -484,7 +488,7 @@ class Scribbler(Robot):
         self.ser.write(chr(power))
     
     def setLED1(ser, value):
-        if value:
+        if isTrue(value):
             self.ser.write(chr(Scribbler.SET_DONGLE_LED_ON))
         else:
             self.ser.write(chr(Scribbler.SET_DONGLE_LED_OFF))
@@ -497,25 +501,24 @@ class Scribbler(Robot):
         self.ser.write(chr(Scribbler.SET_FORWARDNESS))
         self.ser.write(chr(direction))
     
-    def set_cam_param(ser, addr, byte):
-        ser.write(chr(self.SET_CAM_PARAM))
-        ser.write(chr(addr))
-        ser.write(chr(byte))
+    def set_cam_param(self, addr, byte):
+        self.ser.write(chr(self.SET_CAM_PARAM))
+        self.ser.write(chr(addr))
+        self.ser.self.write(chr(byte))
     
-    def get_cam_param(ser, addr):
-        ser.write(chr(self.GET_CAM_PARAM))
-        ser.write(chr(addr))
+    def get_cam_param(self, addr):
+        self.ser.write(chr(self.GET_CAM_PARAM))
+        self.ser.write(chr(addr))
         return ord(ser.read(1))
     
     def setWhiteBalance(ser, value):
-        if value:
-            ser.write(chr(Scribbler.SET_WHITE_BALANCE))
+        if isTrue(value):
+            self.ser.write(chr(Scribbler.SET_WHITE_BALANCE))
         else:
-            ser.write(chr(Scribbler.SET_NO_WHITE_BALANCE))
+            self.ser.write(chr(Scribbler.SET_NO_WHITE_BALANCE))
     
-    def reset(self):
-        ser.write(chr(Scribbler.SET_RESET_SCRIBBLER))
-    
+    def reboot(self):
+        self.ser.write(chr(Scribbler.SET_RESET_SCRIBBLER))
    
     # Sets the fudge values (in memory, and on the flash memory on the robot)
     def setFudge(self,f1,f2,f3,f4):
