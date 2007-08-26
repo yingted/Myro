@@ -1,6 +1,9 @@
 # graphics.py
 """Simple object oriented graphics library
 
+Original code by John Zelle
+Updates       by Doug Blank
+
 The library is designed to make it very easy for novice programmers to
 experiment with computer graphics in an object oriented fashion. It is
 written by John Zelle for use with the book "Python Programming: An
@@ -171,13 +174,13 @@ def _tk_thread():
     global _root
     try:
         _root = tk.Tk()
+        myro.globvars.gui = _root
         _root.withdraw()
         _root.after(_POLL_INTERVAL, _tk_pump)
         _root.mainloop()
     except:
         _root = None
         print >> sys.stderr, "ERROR: graphics did not start"
-    myro.globvars.gui = _root
 
 def _tk_pump():
     global _thread_running
@@ -977,15 +980,18 @@ class Picture(object):
         return Pixel( x, y, self)
     def getColor(self, x, y):
         retval = self.pixels[x, y]
-        if type(retval) == type(1):
+        if self.image.mode == "P": # Palette
             # gif, need to look up color in palette
             return Color( self.palette[retval * 3 + 0],
                           self.palette[retval * 3 + 1],
                           self.palette[retval * 3 + 2])
-        elif len(retval) == 3:
+        elif self.image.mode == "RGB": # 3 bytes
             return Color(retval)
+        elif self.image.mode == "L": # Grayscale
+            # gif, need to look up color in palette
+            return Color(retval, retval, retval)
     def setColor(self, x, y, newColor):
-        if type(self.pixels[x, y]) == type(1):
+        if self.image.mode == "P":
             # first look up closest color, get index
             minDistance = 10000000
             minIndex = 0
@@ -997,17 +1003,21 @@ class Picture(object):
                     minDistance, minIndex= d, i
             # put that index in the position
             self.pixels[x, y] = minIndex
-        else: # 3 tuple
+        elif self.image.mode == "RGB": # 3 tuple
             self.pixels[x, y] = tuple(newColor.getRGB())
+        elif self.image.mode == "L": # 1 int
+            self.pixels[x, y] = sum(newColor.getRGB())/3 # avg or the three values
     def getRGB(self, x, y):
         retval = self.pixels[x, y]
-        if type(retval) == type(1):
+        if self.image.mode == "P":
             # gif, need to look up color in palette
             return ( self.palette[retval * 3 + 0],
                      self.palette[retval * 3 + 1],
                      self.palette[retval * 3 + 2])
-        elif len(retval) == 3:
+        elif self.image.mode == "RGB":
             return retval
+        elif self.image.mode == "L":
+            return (retval, retval, retval)
 
 class Pixel(object):
     def __init__(self, x, y, picture):
@@ -1023,15 +1033,17 @@ class Pixel(object):
         return Pixel( x, y, self.picture)
     def getColor(self):
         retval = self.pixels[self.x, self.y]
-        if type(retval) == type(1):
+        if self.picture.image.mode == "P":
             # gif, need to look up color in palette
             return Color( self.palette[retval * 3 + 0],
                           self.palette[retval * 3 + 1],
                           self.palette[retval * 3 + 2])
-        elif len(retval) == 3:
+        elif self.picture.image.mode == "RGB":
             return Color(retval)
+        elif self.picture.image.mode == "L":
+            return Color(retval, retval, retval)
     def setColor(self, newColor):
-        if type(self.pixels[self.x, self.y]) == type(1):
+        if self.picture.image.mode == "P":
             # first look up closest color, get index
             minDistance = 10000000
             minIndex = 0
@@ -1043,17 +1055,21 @@ class Pixel(object):
                     minDistance, minIndex= d, i
             # put that index in the position
             self.pixels[self.x, self.y] = minIndex
-        else: # 3 tuple
+        elif self.picture.image.mode == "RGB":
             self.pixels[self.x, self.y] = tuple(newColor.getRGB())
+        elif self.picture.image.mode == "L":
+            self.pixels[self.x, self.y] = sum(newColor.getRGB())/3 # avg
     def getRGB(self):
         retval = self.pixels[self.x, self.y]
-        if type(retval) == type(1):
+        if self.picture.image.mode == "P":
             # gif, need to look up color in palette
             return ( self.palette[retval * 3 + 0],
                      self.palette[retval * 3 + 1],
                      self.palette[retval * 3 + 2])
-        elif len(retval) == 3:
+        elif self.picture.image.mode == "RGB":
             return retval
+        elif self.picture.image.mode == "L":
+            return retval, retval, retval
     def __eq__(self, other):
         o1 = self.getRGB()
         o2 = other.getRGB()
@@ -1346,7 +1362,6 @@ def _beep(duration, frequency1, frequency2):
 
 
 class Joystick(Tkinter.Toplevel):
-
     def __init__(self, robot = None, showSensors = 0):
         _tkCall(self.__init_help, _root, robot, showSensors)
 
@@ -1394,7 +1409,7 @@ class Joystick(Tkinter.Toplevel):
         self.threshold = 0.10
         self.delay = 0.10 # in seconds
         self.running = 0
-        #self.after(1000, self._update_help)
+        self.after(1000, self._update_help)
 
     def _update_help(self, delay = None):
         if self.robot and self.showSensors:
@@ -1707,9 +1722,7 @@ class Calibrate(Tkinter.Toplevel):
     def stop(self):
         self.move(0.0, 0.0)
 
-
     def calc_tr(self, x, y):
-
         offCenter = (x - 105.0) / 205.0
 
         if (offCenter > 1.0):
@@ -1734,13 +1747,10 @@ class Calibrate(Tkinter.Toplevel):
             speed = -1.0
             self._f4 = (1.0 - offCenter)
 
-
         self.updateWidget("1 Tweak",0,self._f1)
         self.updateWidget("0.5 Tweak",0,self._f2)
         self.updateWidget("-0.5 Tweak",0,self._f3)
         self.updateWidget("-1 Tweak",0,self._f4)
-
-    
         #Update the fudge values.
         self.robot.setFudge(self._f1,self._f2,self._f3,self._f4)
 

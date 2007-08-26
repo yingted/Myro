@@ -176,9 +176,17 @@ class Scribbler(Robot):
         self._fudge = range(4)
         self._oldFudge = range(4)
         self.loadFudge()
+        # Turning on White Balance, Gain Control, and Exposure Control
+        self.set_cam_param(self.CAM_COMA, self.CAM_COMA_WHITE_BALANCE_ON)
+        self.set_cam_param(self.CAM_COMB, self.CAM_COMB_GAIN_CONTROL_ON | self.CAM_COMB_EXPOSURE_CONTROL_ON)
+        # Config grayscale on window 0, 1, 2
         conf_gray_window(self.ser, 0, 0, 0,    84, 191, 1, 1)
         conf_gray_window(self.ser, 1, 84,  0, 170, 191, 1, 1)
         conf_gray_window(self.ser, 2, 172, 0, 255, 191, 1, 1)
+        #conf_window(s, 0, 0, 0,    84, 191, 1, 1)
+        #conf_window(s, 1, 84, 0,  170, 191, 1, 1)
+        #conf_window(s, 2, 172, 0, 255, 191, 1, 1)
+
 
     def search(self):
         answer = askQuestion(title="Search for " + self.serialPort,
@@ -398,21 +406,21 @@ class Scribbler(Robot):
 
     def getIRLeft(self):
         self.ser.write(chr(Scribbler.GET_DONGLE_L_IR))
-        return read_2byte(ser)
+        return read_2byte(self.ser)
        
     def getIRRight(self):
         self.ser.write(chr(Scribbler.GET_DONGLE_R_IR))
-        return read_2byte(ser)
+        return read_2byte(self.ser)
     
     def getIRMiddle(self):
         self.ser.write(chr(Scribbler.GET_DONGLE_C_IR))
-        return read_2byte(ser)
+        return read_2byte(self.ser)
     
     def getBright(self, window):
         # left, middle, right
         self.ser.write(chr(Scribbler.GET_WINDOW_LIGHT))
         self.ser.write(chr(window))
-        return read_2byte(ser)
+        return read_2byte(self.ser)
 
 ##        print "left"
 ##        g = grab_gray_window(s, 0, 0, 0,    84, 191, 1, 1)
@@ -503,7 +511,7 @@ class Scribbler(Robot):
         self.ser.write(chr(Scribbler.SET_DONGLE_IR))
         self.ser.write(chr(power))
     
-    def setLED1(ser, value):
+    def setLED1(self, value):
         if isTrue(value):
             self.ser.write(chr(Scribbler.SET_DONGLE_LED_ON))
         else:
@@ -520,14 +528,14 @@ class Scribbler(Robot):
     def set_cam_param(self, addr, byte):
         self.ser.write(chr(self.SET_CAM_PARAM))
         self.ser.write(chr(addr))
-        self.ser.self.write(chr(byte))
+        self.ser.write(chr(byte))
     
     def get_cam_param(self, addr):
         self.ser.write(chr(self.GET_CAM_PARAM))
         self.ser.write(chr(addr))
-        return ord(ser.read(1))
+        return ord(self.ser.read(1))
     
-    def setWhiteBalance(ser, value):
+    def setWhiteBalance(self, value):
         if isTrue(value):
             self.ser.write(chr(Scribbler.SET_WHITE_BALANCE))
         else:
@@ -1084,7 +1092,7 @@ def erase_mem(ser, page):
     ser.write(chr(Scribbler.SET_SERIAL_ERASE))
     write_2byte(ser, page)
 
-# Also copied into system:
+# Also copied into system.py:
 def set_scribbler_memory(ser, offset, byte):
     ser.write(chr(Scribbler.SET_SCRIB_PROGRAM))
     write_2byte(ser, offset)
@@ -1094,3 +1102,7 @@ def set_scribbler_start_program(ser, size):
     ser.write(chr(Scribbler.SET_START_PROGRAM))
     write_2byte(ser, size)
             
+def get_window_avg(ser, window):
+    ser.write(chr(Scribbler.GET_WINDOW_LIGHT))
+    ser.write(chr(window))
+    return read_2byte(ser)
