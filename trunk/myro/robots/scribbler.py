@@ -189,11 +189,10 @@ class Scribbler(Robot):
             conf_gray_window(self.ser, 1, 84,  0, 170, 191, 1, 1)
             conf_gray_window(self.ser, 2, 172, 0, 255, 191, 1, 1)
             set_ir_power(self.ser, 135)
-            conf_rle(self.ser,
-                     delay = 90, smooth_thresh = 4,
-                     y_low=0, y_high=254,
-                     u_low=51, u_high=136,
-                     v_low=190, v_high=254)
+            self.conf_rle(delay = 90, smooth_thresh = 4,
+                          y_low=0, y_high=254,
+                          u_low=51, u_high=136,
+                          v_low=190, v_high=254)
 
     def search(self):
         answer = askQuestion(title="Search for " + self.serialPort,
@@ -313,7 +312,8 @@ class Scribbler(Robot):
             if self.dongle == None:
                 return {"ir": 2, "line": 2, "stall": 1, "light": 3}
             else:
-                return {"ir": 2, "line": 2, "stall": 1, "light": 3, "battery": 1, "obstacle": 2, "bright": 3}
+                return {"ir": 2, "line": 2, "stall": 1, "light": 3,
+                        "battery": 1, "obstacle": 2, "bright": 3}
         elif sensor == "stall":
             retval = self._get(Scribbler.GET_ALL, 11) # returned as bytes
             self._lastSensors = retval # single bit sensors
@@ -358,6 +358,7 @@ class Scribbler(Robot):
                                 "ir": [retval[0], retval[1]], "line": [retval[8], retval[9]], "stall": retval[10],
                                 "obstacle": [self.getObstacle("left"), self.getObstacle("right")],
                                 "bright": [self.getBright("left"), self.getBright("middle"), self.getBright("right")],
+                                "battery": self.getBattery(),
                                 }
                 else:                
                     raise ("invalid sensor name: '%s'" % sensor)
@@ -429,6 +430,44 @@ class Scribbler(Robot):
 
     ########################################################## Dongle Commands
 
+    def conf_rle_range(self, picture, x1, y1, x2, y2):
+        xs = [x1, x2]
+        ys = [y1, y2]
+        xs.sort()
+        ys.sort()
+        # min, max
+        us = [255, 0]
+        vs = [255, 0]
+        for i in range(xs[0], xs[1] + 1, 1):
+            for j in range(ys[0], ys[1] + 1, 1):
+                r,g,b = picture.getPixel(i, j).getRGB()
+                y,u,v = rgb2yuv(r, g, b)
+                if v < vs[0]:
+                    vs[0] = v
+                elif v > vs[1]:
+                    vs[1] = v
+                if u < us[0]:
+                    us[0] = u
+                elif u > us[1]:
+                    us[1] = u
+        self.conf_rle(delay = 90, smooth_thresh = 4,
+                      u_low=us[0], u_high=us[1],
+                      v_low=vs[0], v_high=vs[1])
+
+    def conf_rle(self, delay = 90, smooth_thresh = 4,
+                 y_low=0, y_high=254,
+                 u_low=51, u_high=136,
+                 v_low=190, v_high=254):
+        self.ser.write(chr(Scribbler.SET_RLE))
+        self.ser.write(chr(delay))
+        self.ser.write(chr(smooth_thresh))
+        self.ser.write(chr(y_low)) 
+        self.ser.write(chr(y_high))
+        self.ser.write(chr(u_low)) 
+        self.ser.write(chr(u_high))
+        self.ser.write(chr(v_low)) 
+        self.ser.write(chr(v_high))
+        
     def takePicture(self, mode="color"):
         width = 256
         height = 192
@@ -889,7 +928,6 @@ def cap(c):
     return c
 
 def conf_window(ser, window, X_LOW, Y_LOW, X_HIGH, Y_HIGH, X_STEP, Y_STEP):
-
     ser.write(chr(Scribbler.SET_WINDOW))
     ser.write(chr(window)) 
     ser.write(chr(X_LOW)) 
@@ -898,141 +936,6 @@ def conf_window(ser, window, X_LOW, Y_LOW, X_HIGH, Y_HIGH, X_STEP, Y_STEP):
     ser.write(chr(Y_HIGH))
     ser.write(chr(X_STEP))
     ser.write(chr(Y_STEP))
-
-
-def grab_window(ser, window, lx, ly, ux, uy, xstep, ystep):
-
-    height = (uy - ly + 1) / ystep
-    width = (ux - lx + 1) / xstep
-    size = width * height
-    
-    v = zeros(((height + 1), (width + 1)), dtype=uint8)
-    v3 = zeros(((height + 1), (width + 1), 3), dtype=uint8)
-    
-    #done = True
-    ser.write(chr(Scribbler.GET_WINDOW))
-    ser.write(chr(window))
-    
-    #print "dimensions = ", ser.read(6)
-    line = ''
-    while (len(line) < size):
-        line += ser.read(size-len(line))
-
-    if (len(line) == width * height):
-        i = height
-        j = width
-        px = 0
-        for i in range(0, height, 1):
-            for j in range(0, width, 1):
-                v[i][j] = ord(line[px])
-                px += 1
-                
-        #create the image from the YUV bayer
-        for i in range(0, height, 1):
-            for j in range(3, width, 1):
-                if ((j % 4) == 0): #3 #2
-                    V = v[i][j]
-                    Y = v[i][j-1]
-                    U = v[i][j-2]
-                elif ((j % 4) == 2): #1 #0
-                    U = v[i][j]
-                    Y = v[i][j-1]
-                    V = v[i][j-2]
-                elif ((j % 4) == 3): #2 #1
-                    Y = v[i][j]
-                    U = v[i][j-1]
-                    V = v[i][j-3]
-                elif ((j % 4) == 1): #0 #3
-                    Y = v[i][j]
-                    V = v[i][j-1]
-                    U = v[i][j-3]
-                    
-                U = (U - 128)                
-                V = (V - 128)
-
-                v3[i][j][0] = cap(Y + 1.13983 * V)
-                v3[i][j][1] = cap(Y - 0.39466*U-0.58060*V)
-                v3[i][j][2] = cap(Y + 2.03211*U)
-                
-        return toimage(v3, high=255, low=0)
-
-def grab_gray_window(ser, window, lx, ly, ux, uy, xstep, ystep):
-
-    # Y's are on odd pixels
-    if (lx % 2)== 0:
-        lx += 1
-    if (xstep % 2) == 1:
-        xstep += 1
-        
-    height = (uy - ly + 1) / ystep
-    width = (ux - lx + 1) / xstep
-    size = width * height
-    
-    #done = True
-    ser.write(chr(Scribbler.GET_WINDOW))
-    ser.write(chr(window))
-    
-    #print "dimensions = ", ser.read(6)
-    line = ''
-    while (len(line) < size):
-        line += ser.read(size-len(line))
-    p = Picture()
-    p.set(width, height, line, "gray")
-    return p
-
-def grab_image(robotser):
-
-    width = 256
-    height = 192
-    ser = robotser 
-    
-    v = zeros(((height + 1), (width + 1)), dtype=uint8)
-    v3 = zeros(((height + 1), (width + 1), 3), dtype=uint8)
-
-    #done = True
-    ser.write(chr(Scribbler.GET_IMAGE))
-    size= width*height
-    line = ''
-    while (len(line) < size):
-        line += ser.read(size-len(line))
-
-    if (len(line) == width * height):
-        i = height
-        j = width
-        px = 0
-        for i in range(0, height, 1):
-            for j in range(0, width, 1):
-                v[i][j] = ord(line[px])
-                px +=1
-                
-        #create the image from the YUV bayer
-        for i in range(0, height, 1):
-            for j in range(3, width, 1):
-                if ((j % 4) == 0): #3 #2
-                    V = v[i][j]
-                    Y = v[i][j-1]
-                    U = v[i][j-2]
-                elif ((j % 4) == 2): #1 #0
-                    U = v[i][j]
-                    Y = v[i][j-1]
-                    V = v[i][j-2]
-                elif ((j % 4) == 3): #2 #1
-                    Y = v[i][j]
-                    U = v[i][j-1]
-                    V = v[i][j-3]
-                elif ((j % 4) == 1): #0 #3
-                    Y = v[i][j]
-                    V = v[i][j-1]
-                    U = v[i][j-3]
-                    
-                U = (U - 128)                
-                V = (V - 128)
-
-                v3[i][j][0] = cap(Y + 1.13983 * V)
-                v3[i][j][1] = cap(Y - 0.39466*U-0.58060*V)
-                v3[i][j][2] = cap(Y + 2.03211*U)
-                
-        return toimage(v3, high=255, low=0)
 
 def conf_gray_window(ser, window, lx, ly, ux, uy, xstep, ystep):
     # Y's are on odd pixels
@@ -1046,70 +949,10 @@ def conf_gray_image(ser):
     # skip every other pixel
     conf_window(ser, 0, 1, 0, 255, 191, 2, 2)
     
-def conf_rle(ser,
-             delay = 90, smooth_thresh = 4,
-             y_low=0, y_high=254,
-             u_low=51, u_high=136,
-             v_low=190, v_high=254):
-    ser.write(chr(Scribbler.SET_RLE))
-    ser.write(chr(delay))
-    ser.write(chr(smooth_thresh))
-    ser.write(chr(y_low)) 
-    ser.write(chr(y_high))
-    ser.write(chr(u_low)) 
-    ser.write(chr(u_high))
-    ser.write(chr(v_low)) 
-    ser.write(chr(v_high))
-
-def grab_gray_image(ser):
-    width = 128
-    height = 96
-    size= width*height
-    ser.write(chr(Scribbler.GET_WINDOW))
-    ser.write(chr(0))
-    line = ''
-    while (len(line) < size):
-        line += ser.read(size-len(line))
-    p = Picture()
-    p.set(width, height, line, "gray")
-    return p
-
-def grab_rle(ser):
-    width = 256
-    height = 192    
-    blobs = zeros(((height + 1), (width + 1)), dtype=uint8)
-    line = ''
-    ser.write(chr(Scribbler.GET_RLE))
-    size=ord(ser.read(1))
-    size = (size << 8) | ord(ser.read(1))
-    line =''
-    while (len(line) < size):
-        line+=ser.read(size-len(line))
-    px = 0
-    counter = 0
-    val = 128
-    inside = True
-    for i in range(0, height, 1):
-        for j in range(0, width, 4):
-            if (counter < 1 and px < len(line)):
-                counter = ord(line[px])            
-                px += 1
-                counter = (counter << 8) | ord(line[px])            
-                px += 1
-
-                if (inside):
-                    val = 0
-                    inside = False
-                else:
-                    val = 255
-                    inside = True
-
-            for z in range(0,4):
-                blobs[i][j+z] = val
-            counter -= 1
-    return toimage(blobs, high=255, low=0)
-
 def grab_rle_on(ser):
+    """
+    Returns a list of pixels that match.
+    """
     width = 256
     height = 192    
     blobs = zeros(((height + 1), (width + 1)), dtype=uint8)
@@ -1208,17 +1051,14 @@ def set_ir_power(ser, power):
     ser.write(chr(Scribbler.SET_DONGLE_IR))
     ser.write(chr(power))
 
-def conf_rle(ser,
-             delay = 90, smooth_thresh = 4,
-             y_low=0, y_high=254,
-             u_low=51, u_high=136,
-             v_low=190, v_high=254):
-    ser.write(chr(Scribbler.SET_RLE))
-    ser.write(chr(delay))
-    ser.write(chr(smooth_thresh))
-    ser.write(chr(y_low)) 
-    ser.write(chr(y_high))
-    ser.write(chr(u_low)) 
-    ser.write(chr(u_high))
-    ser.write(chr(v_low)) 
-    ser.write(chr(v_high))
+def yuv2rgb(Y, U, V):
+    R = int(Y + (1.4075 * (V - 128)))
+    G = int(Y - (0.3455 * (U - 128)) - (0.7169 * (V - 128)))
+    B = int(Y + (1.7790 * (U - 128)))
+    return [max(min(v,255),0) for v in (R, G, B)]
+
+def rgb2yuv(R, G, B):
+    Y = int(0.299 * R + 0.587 * G + 0.114 * B)
+    U = int(-0.169 * R - 0.332 * G + 0.500 * B + 128)
+    V = int( 0.500 * R - 0.419 * G - 0.0813 * B + 128)
+    return [max(min(v,255),0) for v in (Y, U, V)]

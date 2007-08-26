@@ -345,10 +345,12 @@ class GraphWin(tk.Canvas):
         self.mouseX = None
         self.mouseY = None
         self.bind("<Button-1>", self._onClick)
+        self.bind("<ButtonRelease-1>", self._onRelease)
         self.height = height
         self.width = width
         self.autoflush = autoflush
         self._mouseCallback = None
+        self._mouseCallbackRelease = None
         self.trans = None
         self.closed = False
         # at least flash:
@@ -482,12 +484,21 @@ class GraphWin(tk.Canvas):
         
     def setMouseHandler(self, func):
         self._mouseCallback = func
+
+    def setMouseReleaseHandler(self, func):
+        self._mouseCallbackRelease = func
         
     def _onClick(self, e):
         self.mouseX = e.x
         self.mouseY = e.y
         if self._mouseCallback:
             self._mouseCallback(Point(e.x, e.y))
+
+    def _onRelease(self, e):
+        self.mouseX = e.x
+        self.mouseY = e.y
+        if self._mouseCallbackRelease:
+            self._mouseCallbackRelease(Point(e.x, e.y))
 
 class Transform:
 
@@ -1409,25 +1420,20 @@ class Joystick(Tkinter.Toplevel):
         self.threshold = 0.10
         self.delay = 0.10 # in seconds
         self.running = 0
-        self.after(1000, self._update_help)
+        self.after(250, self._update_help)
 
     def _update_help(self, delay = None):
         if self.robot and self.showSensors:
-              data = self.robot.getLastSensors()
-              now = time.time()
-              if data != lastData or now - lastUpdated > 1:
-                    if now - lastUpdated > 1:
-                         data = self.robot.getAll()
-                    for key in config:
-                         item = data.get(key, [0] * config[key])
-                         if type(item) not in [list, tuple]:
-                              item = [item]
-                         for i in range(len(item)):
-                             self.updateWidget(key, i, item[i])
-                    lastUpdated = time.time()
-                    lastData = data
+            config = self.robot.get("config")
+            data = self.robot.getAll()
+            for key in config:
+                 item = data.get(key, [0] * config[key])
+                 if type(item) not in [list, tuple]:
+                      item = [item]
+                 for i in range(len(item)):
+                     self.updateWidget(key, i, item[i])
         self.update()
-        self.after(1000, self._update_help)
+        self.after(250, self._update_help)
 
     def destroy(self):
         self.running = 0
@@ -1450,7 +1456,7 @@ class Joystick(Tkinter.Toplevel):
         if not self.showSensors: return
         try:
              self.widgets["%s%d.entry" % (name, pos)].delete(0,'end')
-             self.widgets["%s%d.entry" % (name, pos)].insert(0,value)
+             self.widgets["%s%d.entry" % (name, pos)].insert(0,str(value))
         except: pass
 
     def minorloop(self, delay = None): # in milliseconds

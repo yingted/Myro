@@ -686,30 +686,44 @@ def playNote(tup, wholeNoteDuration = .545):
 def getBright(position):
     if myro.globvars.robot:
         return myro.globvars.robot.getBright(position)
+    else:
+        raise AttributeError, "need to initialize robot"
     
 def getObstacle(position):
     if myro.globvars.robot:
         return myro.globvars.robot.getObstacle(position)
+    else:
+        raise AttributeError, "need to initialize robot"
     
 def setIRPower(value):
     if myro.globvars.robot:
         return myro.globvars.robot.setIRPower(value)
+    else:
+        raise AttributeError, "need to initialize robot"
 
 def getBattery():
     if myro.globvars.robot:
         return myro.globvars.robot.getBattery()
+    else:
+        raise AttributeError, "need to initialize robot"
     
 def setWhiteBalance(value):
     if myro.globvars.robot:
         return myro.globvars.robot.setWhiteBalance(value)
+    else:
+        raise AttributeError, "need to initialize robot"
     
 def setLEDFront(value):
     if myro.globvars.robot:
         return myro.globvars.robot.setLEDFront(value)
+    else:
+        raise AttributeError, "need to initialize robot"
 
 def setLEDBack(value):
     if myro.globvars.robot:
         return myro.globvars.robot.setLEDBack(value)
+    else:
+        raise AttributeError, "need to initialize robot"
 
 ########################### Pictures:
 
@@ -741,9 +755,20 @@ def _mouseCallback(point):
     window = myro.globvars.window
     picture = myro.globvars.picture
     pixel = picture.getPixel(point.x, point.y)
+    window.lastX, window.lastY = point.x, point.y
     rgb = pixel.getRGB()
     window.setStatusDirect("(%d, %d): (%d,%d,%d)" %
                            (point.x, point.y, rgb[0], rgb[1], rgb[2]))
+
+def _mouseCallbackRelease(point):
+    window = myro.globvars.window
+    picture = myro.globvars.picture
+    if abs(window.lastX - point.x) < 3 or abs(window.lastY - point.y) < 3:
+        return
+    myro.globvars.robot.conf_rle_range(picture,
+                                       window.lastX, window.lastY,
+                                       point.y, point.x)
+    window.setStatusDirect("Blob colors set")
 
 def show(picture):
     if myro.globvars.window == None:
@@ -756,7 +781,8 @@ def show(picture):
     myro.globvars.window['width'] = picture.width
     myro.globvars.window['height'] = picture.height
     myro.globvars.pixmap = makePixmap(picture)
-    myro.globvars.window._mouseCallback = _mouseCallback
+    myro.globvars.window.setMouseHandler(_mouseCallback)
+    myro.globvars.window.setMouseReleaseHandler(_mouseCallbackRelease)
     myro.globvars.image = Image(Point(picture.width/2, picture.height/2),
                                 myro.globvars.pixmap)
     myro.globvars.image.draw(myro.globvars.window)
