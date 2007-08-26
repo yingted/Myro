@@ -332,28 +332,31 @@ class Scribbler(Robot):
             return c
         elif sensor == "volume":
             return self._volume
-        elif sensor == "obstacle":
-            return self.getObstacle(sensor)
-        elif sensor == "bright":
-            return self.getBright(sensor)
-        elif sensor == "picture":
-            return self.takePicture()
         elif sensor == "battery":
             return self.getBattery()
         else:
             if len(position) == 0:
                 if sensor == "light":
                     return self._get(Scribbler.GET_LIGHT_ALL, 6, "word")
-                elif sensor == "ir":
-                    return self._get(Scribbler.GET_IR_ALL, 2)
                 elif sensor == "line":
                     return self._get(Scribbler.GET_LINE_ALL, 2)
+                elif sensor == "obstacle":
+                    return [self.getObstacle("left"), self.getObstacle("right")]
+                elif sensor == "bright":
+                    return [self.getBright("left"), self.getBright("middle"), self.getBright("right") ]
                 elif sensor == "all":
                     retval = self._get(Scribbler.GET_ALL, 11) # returned as bytes
                     self._lastSensors = retval # single bit sensors
-                    return {"light": [retval[2] << 8 | retval[3], retval[4] << 8 | retval[5], retval[6] << 8 | retval[7]],
-                            "ir": [retval[0], retval[1]], "line": [retval[8], retval[9]], "stall": retval[10]}
-                else:
+                    if self.dongle == None:
+                        return {"light": [retval[2] << 8 | retval[3], retval[4] << 8 | retval[5], retval[6] << 8 | retval[7]],
+                                "ir": [retval[0], retval[1]], "line": [retval[8], retval[9]], "stall": retval[10]}
+                    else:
+                        return {"light": [retval[2] << 8 | retval[3], retval[4] << 8 | retval[5], retval[6] << 8 | retval[7]],
+                                "ir": [retval[0], retval[1]], "line": [retval[8], retval[9]], "stall": retval[10],
+                                "obstacle": [self.getObstacle("left"), self.getObstacle("right")],
+                                "bright": [self.getBright("left"), self.getBright("middle"), self.getBright("right")],
+                                }
+                else:                
                     raise ("invalid sensor name: '%s'" % sensor)
             retvals = []
             for pos in position:
@@ -377,6 +380,12 @@ class Scribbler(Robot):
                         retvals.append(values[0])
                     elif pos in [1, "right"]:
                         retvals.append(values[1])
+                elif sensor == "obstacle":
+                    return self.getObstacle(pos)
+                elif sensor == "bright":
+                    return self.getBright(pos)
+                elif sensor == "picture":
+                    return self.takePicture(pos)
                 else:
                     raise ("invalid sensor name: '%s'" % sensor)
             if len(retvals) == 0:
@@ -570,29 +579,9 @@ class Scribbler(Robot):
         self.ser.write(chr(Scribbler.SET_DONGLE_IR))
         self.ser.write(chr(power))
     
-    def setLEDFront(self, value):
-        if isTrue(value):
-            self.ser.write(chr(Scribbler.SET_DONGLE_LED_ON))
-        else:
-            self.ser.write(chr(Scribbler.SET_DONGLE_LED_OFF))
-    
-    def setLEDBack(self, value):
-        self.ser.write(chr(Scribbler.SET_DIMMER_LED))
-        self.ser.write(chr(value))
-    
     def setForwardness(self, direction):
         self.ser.write(chr(Scribbler.SET_FORWARDNESS))
         self.ser.write(chr(direction))
-    
-    def set_cam_param(self, addr, byte):
-        self.ser.write(chr(self.SET_CAM_PARAM))
-        self.ser.write(chr(addr))
-        self.ser.write(chr(byte))
-    
-    def get_cam_param(self, addr):
-        self.ser.write(chr(self.GET_CAM_PARAM))
-        self.ser.write(chr(addr))
-        return ord(self.ser.read(1))
     
     def setWhiteBalance(self, value):
         if isTrue(value):
@@ -603,7 +592,16 @@ class Scribbler(Robot):
     def reboot(self):
         self.ser.write(chr(Scribbler.SET_RESET_SCRIBBLER))
 
+    def set_cam_param(self, addr, byte):
+        self.ser.write(chr(self.SET_CAM_PARAM))
+        self.ser.write(chr(addr))
+        self.ser.write(chr(byte))
     
+    def get_cam_param(self, addr):
+        self.ser.write(chr(self.GET_CAM_PARAM))
+        self.ser.write(chr(addr))
+        return ord(self.ser.read(1))
+        
     ########################################################## End Dongle Commands
 
     def setData(self, position, value):

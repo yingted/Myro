@@ -681,6 +681,36 @@ def playNote(tup, wholeNoteDuration = .545):
     else:
         raise AttributeError, "need to initialize robot"
 
+########################### New dongle commands
+
+def getBright(position):
+    if myro.globvars.robot:
+        return myro.globvars.robot.getBright(position)
+    
+def getObstacle(position):
+    if myro.globvars.robot:
+        return myro.globvars.robot.getObstacle(position)
+    
+def setIRPower(value):
+    if myro.globvars.robot:
+        return myro.globvars.robot.setIRPower(value)
+
+def getBattery():
+    if myro.globvars.robot:
+        return myro.globvars.robot.getBattery()
+    
+def setWhiteBalance(value):
+    if myro.globvars.robot:
+        return myro.globvars.robot.setWhiteBalance(value)
+    
+def setLEDFront(value):
+    if myro.globvars.robot:
+        return myro.globvars.robot.setLEDFront(value)
+
+def setLEDBack(value):
+    if myro.globvars.robot:
+        return myro.globvars.robot.setLEDBack(value)
+
 ########################### Pictures:
 
 def takePicture(mode="color"):
