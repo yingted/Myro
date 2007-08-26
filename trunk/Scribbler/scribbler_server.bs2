@@ -6,6 +6,7 @@
 '
 '--------------------------------------------------------------------
 ' THIS VERSION IS FOR USE WITH THE IPRE DONGLE!
+' Remove Dongle:1.0.0 at bottom for non-dongle use
 '--------------------------------------------------------------------
 '''''''''''''''''''''''''''''''''''''''
 ' Default Robot Name
@@ -19,6 +20,10 @@ ipreData DATA          127,127,127,127,0,0,0,0
 '
 'First four values of ipreData are the fudge data stored to EEPROM
 'It defaults to 127 (1.0) or no fudging.
+
+echoData DATA          1  'MSRS = 1, Myro = 0
+sendData DATA          1  'MSRS = 1, Myro = 0
+quietData DATA         0  'Don't play beeps?
 
 ''''''''''''''''''''''''''''''''''''''''''''''''''''
 ' IPRE Scribbler API
@@ -194,26 +199,42 @@ LOW ObsTxLeftPin
 ' Variable Initialization
 ''''''''''''''''''''''''''''''
 inCmd(PACKET_LENGTH-1) = 0
-quiet = 0
-sendName = 1
-echoMode = 1
+'quiet = 0
+'sendName = 1
+'echoMode = 1
+
+READ echoData, inCmd(0)
+echoMode = inCmd(0) & %00000001
+READ sendData, inCmd(0)
+sendName = inCmd(0) & %00000001
+READ quietData, inCmd(0)
+quiet = inCmd(0) & %00000001
 
 ''''''''''''''''''''''''''''''
 ' Turn on chirp
 ''''''''''''''''''''''''''''''
-PAUSE 50
-HIGH LedLeftPin
-FREQOUT SpeakerPin, 80, 784
-HIGH LedCenterPin
-FREQOUT SpeakerPin, 80, 880
-HIGH LedRightPin
-FREQOUT SpeakerPin, 80, 698
-LOW LedRightPin
-FREQOUT SpeakerPin, 80, 349
-LOW LedCenterPin
-FREQOUT SpeakerPin, 80, 523
-LOW LedLeftPin
-
+IF (quiet = 0) THEN
+  PAUSE 50
+  HIGH LedLeftPin
+  FREQOUT SpeakerPin, 80, 784
+  HIGH LedCenterPin
+  FREQOUT SpeakerPin, 80, 880
+  HIGH LedRightPin
+  FREQOUT SpeakerPin, 80, 698
+  LOW LedRightPin
+  FREQOUT SpeakerPin, 80, 349
+  LOW LedCenterPin
+  FREQOUT SpeakerPin, 80, 523
+  LOW LedLeftPin
+ELSE
+  PAUSE 50
+  HIGH LedLeftPin
+  HIGH LedCenterPin
+  HIGH LedRightPin
+  LOW LedRightPin
+  LOW LedCenterPin
+  LOW LedLeftPin
+ENDIF
 '''''''''''''''''''''''
 ' Main loop
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
@@ -249,10 +270,12 @@ GOTO BEGIN
 
 SetQuiet:
    quiet = 1
+   WRITE quietData, 1
    GOTO GetAll
 
 SetLoud:
    quiet = 0
+   WRITE quietData, 0
    GOTO GetAll
 
 GetState:
@@ -574,6 +597,8 @@ SetSingleData:
 
 SetEchoMode:
   echoMode = inCmd(1) & %00000001
+  WRITE echoData, inCmd(1)
+  WRITE sendData, inCmd(1)
   GOTO GetAll
 
 GetInfo:

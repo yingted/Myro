@@ -683,9 +683,9 @@ def playNote(tup, wholeNoteDuration = .545):
 
 ########################### Pictures:
 
-def takePicture():
+def takePicture(mode="color"):
     if myro.globvars.robot:
-        return myro.globvars.robot.takePicture()
+        return myro.globvars.robot.takePicture(mode)
 
 def makePicture(*args):
     if len(args) == 0:

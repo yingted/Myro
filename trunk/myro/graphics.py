@@ -947,15 +947,15 @@ class Picture(object):
         self.height = 0
         self.image = None
         self.filename = None
-    def set(self, width, height, data=None, mode = "rgb"):
+    def set(self, width, height, data=None, mode = "color"):
         self.width = width
         self.height = height
-        if mode.lower() == "rgb":
+        if mode.lower() == "color":
             if data == None:
                 data = array([0] * (height * width * 3), 'B')
             self.image = PyImage.frombuffer("RGB", (self.width, self.height),
                                             data, "raw", "RGB", 0, 1)
-        else: # "GRAY"
+        else: # "gray", "blob"
             self.image = PyImage.frombuffer("L", (self.width, self.height),
                                             data, 'raw', "L", 0, 1)
         self.pixels = self.image.load()
