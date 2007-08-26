@@ -188,9 +188,12 @@ class Scribbler(Robot):
             conf_gray_window(self.ser, 0, 0, 0,    84, 191, 1, 1)
             conf_gray_window(self.ser, 1, 84,  0, 170, 191, 1, 1)
             conf_gray_window(self.ser, 2, 172, 0, 255, 191, 1, 1)
-            #conf_window(s, 0, 0, 0,    84, 191, 1, 1)
-            #conf_window(s, 1, 84, 0,  170, 191, 1, 1)
-            #conf_window(s, 2, 172, 0, 255, 191, 1, 1)
+            set_ir_power(self.ser, 135)
+            conf_rle(self.ser,
+                     delay = 90, smooth_thresh = 4,
+                     y_low=0, y_high=254,
+                     u_low=51, u_high=136,
+                     v_low=190, v_high=254)
 
     def search(self):
         answer = askQuestion(title="Search for " + self.serialPort,
@@ -887,7 +890,6 @@ def cap(c):
 
 def conf_window(ser, window, X_LOW, Y_LOW, X_HIGH, Y_HIGH, X_STEP, Y_STEP):
 
-    print "Configuring window", window, X_LOW, Y_LOW, X_HIGH, Y_HIGH, X_STEP, Y_STEP
     ser.write(chr(Scribbler.SET_WINDOW))
     ser.write(chr(window)) 
     ser.write(chr(X_LOW)) 
@@ -908,7 +910,6 @@ def grab_window(ser, window, lx, ly, ux, uy, xstep, ystep):
     v3 = zeros(((height + 1), (width + 1), 3), dtype=uint8)
     
     #done = True
-    print "grabbing image = ", window, "width = ", width, "height = ", height
     ser.write(chr(Scribbler.GET_WINDOW))
     ser.write(chr(window))
     
@@ -916,7 +917,6 @@ def grab_window(ser, window, lx, ly, ux, uy, xstep, ystep):
     line = ''
     while (len(line) < size):
         line += ser.read(size-len(line))
-        print "length so far = ", len(line), " waiting for total = ", size
 
     if (len(line) == width * height):
         i = height
@@ -969,7 +969,6 @@ def grab_gray_window(ser, window, lx, ly, ux, uy, xstep, ystep):
     size = width * height
     
     #done = True
-    print "grabbing gray window = ", window, "width = ", width, "height = ", height
     ser.write(chr(Scribbler.GET_WINDOW))
     ser.write(chr(window))
     
@@ -977,7 +976,6 @@ def grab_gray_window(ser, window, lx, ly, ux, uy, xstep, ystep):
     line = ''
     while (len(line) < size):
         line += ser.read(size-len(line))
-        print "length so far = ", len(line), " waiting for total = ", size
     p = Picture()
     p.set(width, height, line, "gray")
     return p
@@ -992,13 +990,11 @@ def grab_image(robotser):
     v3 = zeros(((height + 1), (width + 1), 3), dtype=uint8)
 
     #done = True
-    print "grabbing image"
     ser.write(chr(Scribbler.GET_IMAGE))
     size= width*height
     line = ''
     while (len(line) < size):
         line += ser.read(size-len(line))
-        print "length so far = ", len(line), " waiting for total = ", size
 
     if (len(line) == width * height):
         i = height
@@ -1039,7 +1035,6 @@ def grab_image(robotser):
         return toimage(v3, high=255, low=0)
 
 def conf_gray_window(ser, window, lx, ly, ux, uy, xstep, ystep):
-    print "Configuring gray image on window",  window
     # Y's are on odd pixels
     if (lx % 2)== 0:
         lx += 1
@@ -1049,7 +1044,6 @@ def conf_gray_window(ser, window, lx, ly, ux, uy, xstep, ystep):
 
 def conf_gray_image(ser):
     # skip every other pixel
-    print "Configuring gray image on window 0"
     conf_window(ser, 0, 1, 0, 255, 191, 2, 2)
     
 def conf_rle(ser,
@@ -1057,7 +1051,6 @@ def conf_rle(ser,
              y_low=0, y_high=254,
              u_low=51, u_high=136,
              v_low=190, v_high=254):
-    print "Configuring blobs"
     ser.write(chr(Scribbler.SET_RLE))
     ser.write(chr(delay))
     ser.write(chr(smooth_thresh))
@@ -1072,13 +1065,11 @@ def grab_gray_image(ser):
     width = 128
     height = 96
     size= width*height
-    print "grabbing image size = ", size
     ser.write(chr(Scribbler.GET_WINDOW))
     ser.write(chr(0))
     line = ''
     while (len(line) < size):
         line += ser.read(size-len(line))
-        print "length so far = ", len(line), " waiting for total = ", size
     p = Picture()
     p.set(width, height, line, "gray")
     return p
@@ -1091,7 +1082,6 @@ def grab_rle(ser):
     ser.write(chr(Scribbler.GET_RLE))
     size=ord(ser.read(1))
     size = (size << 8) | ord(ser.read(1))
-    print "Grabbing RLE image size =", size
     line =''
     while (len(line) < size):
         line+=ser.read(size-len(line))
@@ -1213,3 +1203,22 @@ def quadrupleSize(line, width):
             col = 0
             row += 2
     return "".join(retval)
+
+def set_ir_power(ser, power):
+    ser.write(chr(Scribbler.SET_DONGLE_IR))
+    ser.write(chr(power))
+
+def conf_rle(ser,
+             delay = 90, smooth_thresh = 4,
+             y_low=0, y_high=254,
+             u_low=51, u_high=136,
+             v_low=190, v_high=254):
+    ser.write(chr(Scribbler.SET_RLE))
+    ser.write(chr(delay))
+    ser.write(chr(smooth_thresh))
+    ser.write(chr(y_low)) 
+    ser.write(chr(y_high))
+    ser.write(chr(u_low)) 
+    ser.write(chr(u_high))
+    ser.write(chr(v_low)) 
+    ser.write(chr(v_high))
