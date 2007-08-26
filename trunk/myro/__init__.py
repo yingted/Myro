@@ -497,8 +497,8 @@ def requestStop():
     if myro.globvars.robot:
         myro.globvars.robot.requestStop = 1
 def initialize(id = None):
-    if id == "simualtor":
-        simulator()
+    if id == "simulator":
+        simulator(None)
     else:
         myro.globvars.robot = Scribbler(id)
     __builtins__["robot"] = myro.globvars.robot
@@ -769,6 +769,9 @@ def _mouseCallbackRelease(point):
                                        window.lastX, window.lastY,
                                        point.y, point.x)
     window.setStatusDirect("Blob colors set")
+
+def writePictureTo(picture, filename):
+    return picture.image.save(filename)
 
 def show(picture):
     if myro.globvars.window == None:

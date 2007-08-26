@@ -132,7 +132,7 @@ def upgrade_myro(url=None):
 class FakeRobot:
     def __init__(self, baudrate = 38400):
         from myro import ask
-        serialport = ask("Port", useCache = 1)
+        serialport = ask("Port", useCache=1)
         # Deal with requirement that Windows "COM#" names where # >= 9 needs to
         # be in the format "\\.\COM#"
         if type(serialport) == str and serialport.lower().startswith("com"):
