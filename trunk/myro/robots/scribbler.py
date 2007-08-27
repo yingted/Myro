@@ -250,7 +250,7 @@ class Scribbler(Robot):
         else:
             while 1:
                 try:
-                    self.ser = serial.Serial(self.serialPort, timeout = 2) 
+                    self.ser = serial.Serial(self.serialPort, timeout = 10) 
                     break
                 except KeyboardInterrupt:
                     raise
