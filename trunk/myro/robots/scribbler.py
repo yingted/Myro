@@ -212,6 +212,7 @@ class Scribbler(Robot):
             except KeyboardInterrupt:
                 raise
             except serial.SerialException:
+                print "   Serial element not found. Try disabling out Bluetooth"
                 continue
             self.ser.baudrate = self.baudRate
             # assume that it has been running for at least a second!
@@ -254,6 +255,21 @@ class Scribbler(Robot):
                     break
                 except KeyboardInterrupt:
                     raise
+                except serial.SerialException:
+                    print "   Serial element not found. Try disabling out Bluetooth"
+                    try:
+                        self.ser.close()
+                    except KeyboardInterrupt:
+                        raise
+                    except:
+                        pass
+                    try:
+                        del self.ser
+                    except KeyboardInterrupt:
+                        raise
+                    except:
+                        pass
+                    time.sleep(1)
                 except:
                     print "Waiting on port...", self.serialPort
                     try:
@@ -313,7 +329,7 @@ class Scribbler(Robot):
                 return {"ir": 2, "line": 2, "stall": 1, "light": 3}
             else:
                 return {"ir": 2, "line": 2, "stall": 1, "light": 3,
-                        "battery": 1, "obstacle": 2, "bright": 3}
+                        "battery": 1, "obstacle": 3, "bright": 3}
         elif sensor == "stall":
             retval = self._get(Scribbler.GET_ALL, 11) # returned as bytes
             self._lastSensors = retval # single bit sensors
@@ -344,7 +360,7 @@ class Scribbler(Robot):
                 elif sensor == "line":
                     return self._get(Scribbler.GET_LINE_ALL, 2)
                 elif sensor == "obstacle":
-                    return [self.getObstacle("left"), self.getObstacle("right")]
+                    return [self.getObstacle("left"), self.getObstacle("center"), self.getObstacle("right")]
                 elif sensor == "bright":
                     return [self.getBright("left"), self.getBright("middle"), self.getBright("right") ]
                 elif sensor == "all":
@@ -356,7 +372,7 @@ class Scribbler(Robot):
                     else:
                         return {"light": [retval[2] << 8 | retval[3], retval[4] << 8 | retval[5], retval[6] << 8 | retval[7]],
                                 "ir": [retval[0], retval[1]], "line": [retval[8], retval[9]], "stall": retval[10],
-                                "obstacle": [self.getObstacle("left"), self.getObstacle("right")],
+                                "obstacle": [self.getObstacle("left"), self.getObstacle("center"), self.getObstacle("right")],
                                 "bright": [self.getBright("left"), self.getBright("middle"), self.getBright("right")],
                                 "battery": self.getBattery(),
                                 }
