@@ -208,7 +208,7 @@ class Scribbler(Robot):
             prettyPort = "COM" + str(x)
             print "Searching on port %s for robot named '%s'..." % (prettyPort, self.serialPort)
             try:
-                self.ser = serial.Serial(port, timeout=1)
+                self.ser = serial.Serial(port, timeout=10)
             except KeyboardInterrupt:
                 raise
             except serial.SerialException:
@@ -229,7 +229,7 @@ class Scribbler(Robot):
                 print "   Found robot named", name, "on port", s, "!"
                 if name == self.serialPort:
                     self.serialPort = port
-                    self.ser.timeout = 2.0
+                    self.ser.timeout = 10
                     s = self.serialPort.replace('\\', "")
                     s = s.replace('.', "")
                     askQuestion("You can use \"%s\" from now on, like this:\n   initialize(\"%s\")" %
@@ -242,6 +242,8 @@ class Scribbler(Robot):
     def open(self):
         try:
             myro.globvars.robot.ser.close()
+            print "Closing serial port..."
+            time.sleep(3)
         except KeyboardInterrupt:
             raise
         except:
