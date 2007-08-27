@@ -458,6 +458,7 @@ class Scribbler(Robot):
                  y_low=0, y_high=254,
                  u_low=51, u_high=136,
                  v_low=190, v_high=254):
+        self.lock.acquire()
         self.ser.write(chr(Scribbler.SET_RLE))
         self.ser.write(chr(delay))
         self.ser.write(chr(smooth_thresh))
@@ -467,6 +468,7 @@ class Scribbler(Robot):
         self.ser.write(chr(u_high))
         self.ser.write(chr(v_low)) 
         self.ser.write(chr(v_high))
+        self.lock.release()
         
     def takePicture(self, mode="color"):
         width = 256
@@ -490,6 +492,7 @@ class Scribbler(Robot):
         height = 192    
         blobs = array([0] * (height * width), 'B') # zeros(((height + 1), (width + 1)), dtype=uint8)
         line = ''
+        self.lock.acquire()
         self.ser.write(chr(Scribbler.GET_RLE))
         size=ord(self.ser.read(1))
         size = (size << 8) | ord(self.ser.read(1))
@@ -497,6 +500,7 @@ class Scribbler(Robot):
         line =''
         while (len(line) < size):
             line+=self.ser.read(size-len(line))
+        self.lock.release()
         px = 0
         counter = 0
         val = 128
@@ -524,12 +528,14 @@ class Scribbler(Robot):
         height = 96
         size= width*height
         print "grabbing image size = ", size
+        self.lock.acquire()
         self.ser.write(chr(Scribbler.GET_WINDOW))
         self.ser.write(chr(0))
         line = ''
         while (len(line) < size):
             line += self.ser.read(size-len(line))
             print "length so far = ", len(line), " waiting for total = ", size
+        self.lock.release()
         line = quadrupleSize(line, width)
         return line
 
@@ -537,6 +543,7 @@ class Scribbler(Robot):
         width = 256
         height = 192
         buffer = array([0] * (height * width * 3), 'B')
+        self.lock.acquire()
         oldtimeout = self.ser.timeout
         self.ser.setTimeout(.01)
         self.ser.write(chr(Scribbler.GET_IMAGE))
@@ -575,35 +582,48 @@ class Scribbler(Robot):
                 buffer[(i * width + j) * 3 + 1] = max(min(Y - 0.39466*U-0.58060*V, 255), 0)
                 buffer[(i * width + j) * 3 + 2] = max(min(Y + 2.03211*U, 255), 0)
         self.ser.setTimeout(oldtimeout)
+        self.lock.release()
         return buffer
 
     def getBattery(self):
+        self.lock.acquire()
         self.ser.write(chr(Scribbler.GET_BATTERY))
-        return read_2byte(self.ser) / 20.9813
-
+        retval = read_2byte(self.ser) / 20.9813
+        self.lock.release()
+        return retval
+    
     def setBrightPower(self, power):
+        self.lock.acquire()
         self.ser.write(chr(Scribbler.SET_DONGLE_IR))
         self.ser.write(chr(power))
+        self.lock.release()
 
     def setLEDFront(self, value):
+        self.lock.acquire()
         if isTrue(value):
             self.ser.write(chr(Scribbler.SET_DONGLE_LED_ON))
         else:
             self.ser.write(chr(Scribbler.SET_DONGLE_LED_OFF))
+        self.lock.release()
 
     def setLEDBack(self, value):
+        self.lock.acquire()
         self.ser.write(chr(Scribbler.SET_DIMMER_LED))
         self.ser.write(chr(value))
+        self.lock.release()
 
     def getObstacle(self, value):
+        self.lock.acquire()
         if value in ["left", 0]:
             self.ser.write(chr(Scribbler.GET_DONGLE_L_IR))
         elif value in ["middle", "center", 1]:
             self.ser.write(chr(Scribbler.GET_DONGLE_C_IR))
         elif value in ["right", 2]:
             self.ser.write(chr(Scribbler.GET_DONGLE_R_IR))
-        return read_2byte(self.ser)
-       
+        retval = read_2byte(self.ser)
+        self.lock.release()
+        return retval       
+
     def getBright(self, window):
         # left, middle, right
         if type(window) == str:
@@ -613,31 +633,38 @@ class Scribbler(Robot):
                 window = 1
             elif window in ["right"]:
                 window = 2
+        self.lock.acquire()
         self.ser.write(chr(Scribbler.GET_WINDOW_LIGHT))
         self.ser.write(chr(window))
-        return read_2byte(self.ser)
+        retval = read_2byte(self.ser)
+        self.lock.release()
+        return retval 
 
-    def setIRPower(self, power):
-        self.ser.write(chr(Scribbler.SET_DONGLE_IR))
-        self.ser.write(chr(power))
-    
     def setForwardness(self, direction):
+        self.lock.acquire()
         self.ser.write(chr(Scribbler.SET_FORWARDNESS))
         self.ser.write(chr(direction))
+        self.lock.release()
     
     def setWhiteBalance(self, value):
+        self.lock.acquire()
         if isTrue(value):
             self.ser.write(chr(Scribbler.SET_WHITE_BALANCE))
         else:
             self.ser.write(chr(Scribbler.SET_NO_WHITE_BALANCE))
+        self.lock.release()
     
     def reboot(self):
+        self.lock.acquire()
         self.ser.write(chr(Scribbler.SET_RESET_SCRIBBLER))
+        self.lock.release()
 
     def set_cam_param(self, addr, byte):
+        self.lock.acquire()
         self.ser.write(chr(self.SET_CAM_PARAM))
         self.ser.write(chr(addr))
         self.ser.write(chr(byte))
+        self.lock.release()
     
     def get_cam_param(self, addr):
         self.ser.write(chr(self.GET_CAM_PARAM))
@@ -883,6 +910,7 @@ class Scribbler(Robot):
         if self.requestStop:
             self.requestStop = 0
             self.stop()
+            self.lock.release()
             raise KeyboardInterrupt
         self.lock.release()
 

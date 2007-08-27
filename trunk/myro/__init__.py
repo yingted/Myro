@@ -6,7 +6,7 @@ Distributed under a Shared Source License
 """
 
 __REVISION__ = "$Revision$"
-__VERSION__  = "2.1.3" 
+__VERSION__  = "2.1.5" 
 __AUTHOR__   = "Doug Blank <dblank@cs.brynmawr.edu>"
 
 import sys, atexit, time, random, pickle, threading, os, types
@@ -771,6 +771,9 @@ def _mouseCallbackRelease(point):
     window.setStatusDirect("Blob colors set")
 
 def writePictureTo(picture, filename):
+    return picture.image.save(filename)
+
+def savePicture(picture, filename):
     return picture.image.save(filename)
 
 def show(picture):
