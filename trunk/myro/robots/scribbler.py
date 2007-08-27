@@ -212,7 +212,7 @@ class Scribbler(Robot):
             except KeyboardInterrupt:
                 raise
             except serial.SerialException:
-                print "   Serial element not found. Try disabling out Bluetooth"
+                print "   Serial element not found. If this continues, remove/replace serial device..."
                 continue
             self.ser.baudrate = self.baudRate
             # assume that it has been running for at least a second!
@@ -256,7 +256,7 @@ class Scribbler(Robot):
                 except KeyboardInterrupt:
                     raise
                 except serial.SerialException:
-                    print "   Serial element not found. Try disabling out Bluetooth"
+                    print "   Serial element not found. If this continues, remove/replace serial device..."
                     try:
                         self.ser.close()
                     except KeyboardInterrupt:
