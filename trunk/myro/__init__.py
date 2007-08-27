@@ -727,6 +727,40 @@ def setLEDBack(value):
 
 ########################### Pictures:
 
+def _ndim(n, *args):
+    if not args:
+        return [0] * n
+    A = []
+    for i in range(n):
+        A.append( _ndim(*args) )
+    return A
+
+class Column(object):
+    def __init__(self, picture, column):
+        self.picture = picture
+        self.column = column
+    def __getitem__(self, row):
+        return self.picture.getPixel(self.column, row)
+
+class Array(object):
+    def __init__(self, n = 0, *args):
+        if type(n) == Picture:
+            self.data = n
+        else:
+            self.data = _ndim(n, *args)
+    def __getitem__(self, *args):
+        if type(self.data) == Picture:
+            return Column(self.data, args[0])
+        else:
+            current = self.data
+            for i in args:
+                n, rest = args[0], args[1:]
+                current = current[n]
+            return current
+
+def makeArray(*args):
+    return Array(*args)
+
 def takePicture(mode="color"):
     if myro.globvars.robot:
         return myro.globvars.robot.takePicture(mode)
