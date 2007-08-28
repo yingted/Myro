@@ -1419,7 +1419,7 @@ class Joystick(Tkinter.Toplevel):
         self.rotate = 0.0
         self.threshold = 0.10
         self.delay = 0.10 # in seconds
-        self.running = 0
+        self.running = 1
         self.after(250, self._update_help)
 
     def _update_help(self, delay = None):
@@ -1433,7 +1433,8 @@ class Joystick(Tkinter.Toplevel):
                  for i in range(len(item)):
                      self.updateWidget(key, i, item[i])
         self.update()
-        self.after(250, self._update_help)
+        if self.running:
+            self.after(250, self._update_help)
 
     def destroy(self):
         self.running = 0
