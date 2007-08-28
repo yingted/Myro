@@ -801,7 +801,7 @@ def _mouseCallbackRelease(point):
         return
     myro.globvars.robot.conf_rle_range(picture,
                                        window.lastX, window.lastY,
-                                       point.y, point.x)
+                                       point.x, point.y)
     window.setStatusDirect("Blob colors set")
 
 def writePictureTo(picture, filename):
