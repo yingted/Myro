@@ -514,7 +514,7 @@ class Scribbler(Robot):
         self.ser.write(chr(Scribbler.GET_RLE))
         size=ord(self.ser.read(1))
         size = (size << 8) | ord(self.ser.read(1))
-        print "Grabbing RLE image size =", size
+        #print "Grabbing RLE image size =", size
         line =''
         while (len(line) < size):
             line+=self.ser.read(size-len(line))
@@ -545,14 +545,14 @@ class Scribbler(Robot):
         width = 128
         height = 96
         size= width*height
-        print "grabbing image size = ", size
+        #print "grabbing image size = ", size
         self.lock.acquire()
         self.ser.write(chr(Scribbler.GET_WINDOW))
         self.ser.write(chr(0))
         line = ''
         while (len(line) < size):
             line += self.ser.read(size-len(line))
-            print "length so far = ", len(line), " waiting for total = ", size
+            #print "length so far = ", len(line), " waiting for total = ", size
         self.lock.release()
         line = quadrupleSize(line, width)
         return line
