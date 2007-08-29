@@ -667,7 +667,7 @@ def joyStick(showSensors = 0):
         raise AttributeError, "need to initialize robot"
 def calibrate():
     if myro.globvars.robot:
-        return Calibate(myro.globvars.robot)
+        return Calibrate(myro.globvars.robot)
     else:
         raise AttributeError, "need to initialize robot"
 def playSong(song, wholeNoteDuration = .545):
