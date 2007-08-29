@@ -175,7 +175,6 @@ class Scribbler(Robot):
         myro.globvars.robot = self
         self._fudge = range(4)
         self._oldFudge = range(4)
-        self.loadFudge()
         self.dongle = None
         info = self.getInfo()
         if "dongle" in info.keys():
@@ -193,6 +192,7 @@ class Scribbler(Robot):
                           y_low=0, y_high=254,
                           u_low=51, u_high=136,
                           v_low=190, v_high=254)
+        self.loadFudge()
 
     def search(self):
         answer = askQuestion(title="Search for " + self.serialPort,
@@ -773,6 +773,7 @@ class Scribbler(Robot):
    
     # Sets the fudge values (in memory, and on the flash memory on the robot)
     def setFudge(self,f1,f2,f3,f4):
+
         self._fudge[0] = f1
         self._fudge[1] = f2
         self._fudge[2] = f3
@@ -784,21 +785,34 @@ class Scribbler(Robot):
         # 0..255 and save.
 
         if self._oldFudge[0] != self._fudge[0] :
+            if (self.dongle == None):
                 self.setSingleData(0,  int(self._fudge[0] * 127.0) )
-                self._oldFudge[0] = self._fudge[0] 
+            else:
+                self.setSingleData(3,  int(self._fudge[0] * 127.0) )
+
+            self._oldFudge[0] = self._fudge[0] 
 
         if self._oldFudge[1] != self._fudge[1] :
+            if (self.dongle == None):
                 self.setSingleData(1,  int(self._fudge[1] * 127.0) )
-                self._oldFudge[1] = self._fudge[1]
+            else:
+                self.setSingleData(2,  int(self._fudge[1] * 127.0) )
+            self._oldFudge[1] = self._fudge[1]
 
 
         if self._oldFudge[2] != self._fudge[2]:
+            if (self.dongle == None):
                 self.setSingleData(2,  int(self._fudge[2] * 127.0) )
-                self._oldFudge[2] = self._fudge[2]
+            else:
+                self.setSingleData(1,  int(self._fudge[2] * 127.0) )
+            self._oldFudge[2] = self._fudge[2]
         
         if self._oldFudge[3] != self._fudge[3] :
+            if (self.dongle == None):
                 self.setSingleData(3,  int(self._fudge[3] * 127.0) )
-                self._oldFudge[3] = self._fudge[3]
+            else:
+                self.setSingleData(0,  int(self._fudge[3] * 127.0) )
+            self._oldFudge[3] = self._fudge[3]
                 
     
    #Called when robot is initialized, after serial connection is established.
@@ -807,11 +821,15 @@ class Scribbler(Robot):
    # which is the equivalent of no fudge. Each factor goes from 0..255, where
    # a 127 is straight ahead (no fudging)
     def loadFudge(self):
+
         for i in range(4):
             self._fudge[i] = self.get("data",i)
             if self._fudge[i] == 0:
-                    self._fudge[i] = 127
+                self._fudge[i] = 127
             self._fudge[i] = self._fudge[i] / 127.0 # convert back to floating point!
+
+        if (self.dongle != None):
+            self._fudge[0], self._fudge[1], self._fudge[2], self._fudge[3] = self._fudge[3], self._fudge[2], self._fudge[1], self._fudge[0] 
 
     #Gets the fudge values (from memory, so we don't get penalized by a slow
     # serial link)
@@ -888,10 +906,11 @@ class Scribbler(Robot):
   
 
         #print "actual power: (",left,",",right,")"
-
+        
         #end JWS additions for "calibration of motors.
         leftPower = (left + 1.0) * 100.0
         rightPower = (right + 1.0) * 100.0
+        
         self._set(Scribbler.SET_MOTORS, rightPower, leftPower)
 
     def _read(self, bytes = 1):
