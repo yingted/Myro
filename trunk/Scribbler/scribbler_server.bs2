@@ -410,27 +410,27 @@ GetStall:
      GOTO TOP
 
 GetName1:
-     FOR temp = 0 TO (PACKET_LENGTH - 1)
+     FOR temp = 0 TO (DATA_LENGTH - 1)
         READ temp + nameData, inCmd(temp)
      NEXT
-     SEROUT SerialPin, BAUD, [STR inCmd\PACKET_LENGTH]
+     SEROUT SerialPin, BAUD, [STR inCmd\DATA_LENGTH]
      GOTO TOP
 
 GetName2:
-     FOR temp = 0 TO (PACKET_LENGTH - 1)
+     FOR temp = 0 TO (DATA_LENGTH - 1)
         READ temp + nameData + 8, inCmd(temp)
      NEXT
-     SEROUT SerialPin, BAUD, [STR inCmd\PACKET_LENGTH]
+     SEROUT SerialPin, BAUD, [STR inCmd\DATA_LENGTH]
      GOTO TOP
 
 SetName1:
-     FOR temp = 0 TO (PACKET_LENGTH - 1)
+     FOR temp = 0 TO (DATA_LENGTH - 1)
         WRITE temp + nameData, inCmd(1 + temp)
      NEXT
      GOTO GetAll
 
 SetName2:
-     FOR temp = 0 TO (PACKET_LENGTH - 1)
+     FOR temp = 0 TO (DATA_LENGTH - 1)
         WRITE temp + nameData + 8, inCmd(1 + temp)
      NEXT
      GOTO GetAll
@@ -471,8 +471,8 @@ SetSpeaker2:
      GOTO GetAll
 
 Motors:
-      var1 = inCmd(1)
-      var2 = inCmd(2)
+      var1 = inCmd(1) ' right motor
+      var2 = inCmd(2) ' left motor
 
 'Fudge motor values based upon direction & speed:
 '
