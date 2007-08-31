@@ -402,7 +402,12 @@ class TCPRobot(Simbot):
                             exp = None
                     else:
                             #print "sending", message, self.addr
-                            self.socket.sendto(message, self.addr)
+                            try:
+                                self.socket.sendto(message, self.addr)
+                            except:
+                                self.socket.close()
+                                self.socket = 0
+                                exp = None
                             retval = ""
                             try:
                                     retval, addr = self.socket.recvfrom(self.BUFSIZE)
