@@ -300,7 +300,7 @@ def askQuestion(question, answers = ["Yes", "No"], title = "Myro Question",
     """ Displays a question and returns answer. """
     d = _tkCall(Dialog.Dialog, myro.globvars.gui,
                 title=title, default=default, bitmap=bitmap,
-                text=question, strings=answers))
+                text=question, strings=answers)
     return answers[int(d.num)]
 
 def pickAFile():
