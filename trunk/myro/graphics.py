@@ -298,10 +298,9 @@ class AskDialog(AlertDialog):
 def askQuestion(question, answers = ["Yes", "No"], title = "Myro Question",
                 default = 0, bitmap=Dialog.DIALOG_ICON):
     """ Displays a question and returns answer. """
-    #d = Dialog.Dialog(myro.globvars.gui,
-    #                  title=title, default=default, bitmap=bitmap,
-    #                  text=question, strings=answers)
-    d = _tkCall(Dialog.Dialog)
+    d = _tkCall(Dialog.Dialog, myro.globvars.gui,
+                title=title, default=default, bitmap=bitmap,
+                text=question, strings=answers))
     return answers[int(d.num)]
 
 def pickAFile():

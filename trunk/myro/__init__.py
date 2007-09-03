@@ -17,6 +17,19 @@ from myro.speech import *
 from myro.chat import *
 from myro.system import *
 
+# Check versions of things:
+_pil_version = None
+try:
+    import Image
+    _pil_version = Image.VERSION
+    del Image
+except:
+    print >> sys.stderr, "ERROR: you need to install Python Image Library to make pictures"
+if _pil_version != None:
+    if _pil_version.split(".") < ["1", "1", "6"]:
+        print >> sys.stderr, ("ERROR: you need to upgrade Python Image Library to at least 1.1.6 (you're running %s)" % _pil_version)
+del _pil_version
+
 def timer(seconds=0):
     """ A function to be used with 'for' """
     start = time.time()
