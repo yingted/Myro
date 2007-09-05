@@ -1437,7 +1437,11 @@ class Joystick(Tkinter.Toplevel):
 
     def destroy(self):
         self.running = 0
+        if self.robot != None:
+            self.robot.lock.acquire()
         Tkinter.Toplevel.destroy(self)
+        if self.robot != None:
+            self.robot.lock.release()
 
     def addWidgets(self, window, *items):
         for name, size in items:

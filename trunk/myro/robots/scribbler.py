@@ -9,7 +9,6 @@ __REVISION__ = "$Revision$"
 __AUTHOR__   = "Keith O'Hara and Doug Blank"
 
 import serial, time, string
-from threading import Lock
 from myro import Robot, ask
 from myro.graphics import askQuestion, Picture
 import myro.globvars
@@ -160,7 +159,6 @@ class Scribbler(Robot):
         self._lastTranslate = 0
         self._lastRotate    = 0
         self._volume = 0
-        self.lock = Lock()
         if serialport == None:
             serialport = ask("Port", useCache = 1)
         # Deal with requirement that Windows "COM#" names where # >= 9 needs to
