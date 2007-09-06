@@ -6,7 +6,7 @@ Distributed under a Shared Source License
 """
 
 __REVISION__ = "$Revision$"
-__VERSION__  = "2.2.3" 
+__VERSION__  = "2.2.4" 
 __AUTHOR__   = "Doug Blank <dblank@cs.brynmawr.edu>"
 
 import sys, atexit, time, random, pickle, threading, os, types
@@ -87,14 +87,6 @@ def sendPicture(picture, photoname, password, robotname = None):
         except IOError:
             print "ERROR: image file is too big"
             return
-        messages = ch.receive()
-        while len(messages) == 0:
-            messages = ch.receive()
-            wait(1)
-            print "   waiting for confirmation..."
-        print "received messages:"
-        for message in messages:
-            print "   ", message[1]
         print "Sent!"
 
 def register(oldname = None):
