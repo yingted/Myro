@@ -6,7 +6,7 @@ Distributed under a Shared Source License
 """
 
 __REVISION__ = "$Revision$"
-__VERSION__  = "2.2.4" 
+__VERSION__  = "2.2.5" 
 __AUTHOR__   = "Doug Blank <dblank@cs.brynmawr.edu>"
 
 import sys, atexit, time, random, pickle, threading, os, types
@@ -126,6 +126,26 @@ keyword: %s
             print "Your robot's name was set to", getName()
     else:
         print "The name '%s' has already been taken. Please try another." % answers["Your robot's name"]
+
+def setPassword(robotName, emailAddress, newPassword):
+    ch = Chat("myro", "request")
+    if ch.ok == 1:
+        # send a special message to create account
+        # wait for response:
+        ch.send("admin", "password reset\nemail: %s\nusername: %s\npassword: %s"
+                % (emailAddress, robotName, newPassword))
+        messages = ch.receive()
+        while len(messages) == 0:
+            messages = ch.receive()
+            wait(1)
+            print "   waiting for confirmation..."
+        print "received messages:"
+        for message in messages:
+            print message[1]
+            print
+    else:
+        print "The Myro chat account doesn't seem to be taking requests right now."
+
 
 def wait(seconds):
     """

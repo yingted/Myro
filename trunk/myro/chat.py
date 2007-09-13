@@ -25,6 +25,7 @@ try:
     import xmpp              # import xmpp
 except:
     xmpp = None
+    print "WARNING: xmpp was not found: chat and webservices will not be available"
 sys.stderr = temp        # replace stderr
 temp = None              # clean up
 del temp
@@ -139,7 +140,10 @@ class Chat(object):
 	"""
 	Get all of the pending messages, and return them as a list.
 	"""
-        self.client.Process(1) # this should be in a thread
+	try:
+            self.client.Process(1) # this should be in a thread
+        except xmpp.NotAuthorized:
+            raise ValueError, "bad password?"
         self.lock.acquire()
         retval = self.messages
         self.messages = []
