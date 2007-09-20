@@ -661,7 +661,13 @@ class Scribbler(Robot):
         self.ser.write(chr(Scribbler.SET_FORWARDNESS))
         self.ser.write(chr(direction))
         self.lock.release()
-    
+
+    def setIRPower(self, power):
+        self.lock.acquire()
+        self.ser.write(chr(Scribbler.SET_DONGLE_IR))
+        self.ser.write(chr(power))
+        self.lock.release()
+
     def setWhiteBalance(self, value):
         self.lock.acquire()
         if isTrue(value):
