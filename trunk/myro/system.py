@@ -78,8 +78,9 @@ def import_file(filename):
         manifest = infp.read("MANIFEST")
         lines = manifest.split("\n")
         for line in lines:
-            f, dest = map(string.strip, line.strip().split(":"))
-            director[f] = dest % VALUES
+            if ":" in line:
+                f, dest = map(string.strip, line.strip().split(":"))
+                director[f] = dest % VALUES
         for name in name_list:
             if name == "MANIFEST": continue
             contents = infp.read(name)
