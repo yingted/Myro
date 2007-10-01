@@ -830,6 +830,12 @@ def takePicture(mode="color"):
     else:
         raise AttributeError, "need to initialize robot"
 
+def loadPicture(filename):
+    """ Loads a picture from a filename. """
+    picture = Picture()
+    picture.load(filename)
+    return picture
+
 def makePicture(*args):
     if len(args) == 0:
         retval = Picture()
