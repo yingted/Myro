@@ -12,6 +12,7 @@ askData   = {}
 window    = None
 sound     = 0
 runtkthread = 1
+joysticks = []
 
 # constants:
 import math
@@ -24,3 +25,16 @@ COSDEG90RADS = math.cos(DEG90RADS) / 1000.0
 SINDEG90RADS = math.sin(DEG90RADS) / 1000.0
 
 del math
+
+# initialize all joysticks:
+try:
+    import pygame
+    pygame.init()
+except:
+    pygame = None
+
+if pygame != None:
+    for i in range(pygame.joystick.get_count()):
+        js = pygame.joystick.Joystick(i)
+        js.init()
+        joysticks.append(js)

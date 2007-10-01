@@ -180,7 +180,45 @@ def randomNumber():
     """
     return random.random()
 
+def getGamepad(*what):
+    """
+    Return readings from a gamepad/joystick
+    what can be empty, "init", "name", "axis", "ball", "button", or "hat"
+    if what is more than 1 item, then getGamepad will return a dictionary,
+    else it will return the 1 item's value(s).
+    """
+    if len(what) > 0 and type(what[0]) == type(0):
+        id = what[0]
+        what = what[1:]
+    else:
+        id = 0
+    pygame.event.pump()
+    js = myro.globvars.joysticks[id]
+    retval = {}
+    if len(what) == 0:
+        what = ["init", "name", "axis", "ball", "button", "hat"]
+    for item in what:
+        if item == "init":
+            retval["init"] = js.get_init()
+        elif item == "name":
+            retval["name"] = js.get_name()
+        elif item == "axis":
+            retval["axis"] = [js.get_axis(i) for i in range(js.get_numaxes())]
+        elif item == "ball":
+            retval["ball"] = [js.get_ball(i) for i in range(js.get_numballs())]
+        elif item == "button":
+            retval["button"] = [js.get_button(i) for i in range(js.get_numbuttons())]
+        elif item == "hat":
+            retval["hat"] = [js.get_hat(i) for i in range(js.get_numhats())]
+    if len(retval.keys()) == 0:
+        return None
+    elif len(retval.keys()) == 1:
+        return retval[retval.keys()[0]]
+    else:
+        return retval
+
 def ask(item, useCache = 0):
+    """ Ask the user for a value """
     retval = _ask(item, useCache = useCache)
     if len(retval.keys()) == 1:
         return retval[item]
