@@ -13,7 +13,10 @@ from myro import Robot, ask
 from myro.graphics import askQuestion, Picture
 import myro.globvars
 # needed for new camera dongle
-from numpy import array
+try:
+    from numpy import array
+except:
+    pass
 
 class BufferedRead:
     def __init__(self, serial, size, start = 1):

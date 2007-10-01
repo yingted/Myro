@@ -126,10 +126,17 @@ http://mcsp.wartburg.edu/zelle/python for a quick reference"""
 
 import time, os, sys
 import Tkinter
-import Image as PyImage
-import ImageTk
+try:
+    import Image as PyImage
+    import ImageTk
+except:
+    print >> sys.stderr, "WARNING: Image not found; do you need Python Imaging Library?"
 tk = Tkinter
-from numpy import array 
+try:
+    from numpy import array
+except:
+    print >> sys.stderr, "WARNING: numpy not found"
+    
 import math
 try:
     import tkSnack

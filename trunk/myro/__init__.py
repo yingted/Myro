@@ -192,7 +192,7 @@ def getGamepad(*what):
         what = what[1:]
     else:
         id = 0
-    pygame.event.pump()
+    myro.globvars.pygame.event.pump()
     js = myro.globvars.joysticks[id]
     retval = {}
     if len(what) == 0:
