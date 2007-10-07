@@ -57,9 +57,11 @@ def import_file(filename):
     if "USERNAME" in os.environ:
         VALUES["USER"] = os.environ["USERNAME"] # NameId
     if "HOMEPATH" in os.environ:
-        VALUES["HOME"] = 'C:' + os.sep + os.environ["HOMEPATH"] + os.sep
+        VALUES["HOME"] = 'C:' + os.sep + os.environ["HOMEPATH"]
+    if "HOME" in os.environ:
+	VALUES["HOME"] = os.environ["HOME"]
     if "USERPROFILE" in os.environ:
-        VALUES["HOME"] = os.environ["USERPROFILE"] + os.sep
+        VALUES["HOME"] = os.environ["USERPROFILE"]
     globalspath, f = myro.globvars.__file__.rsplit(os.sep, 1)
     #print "globalspath:", globalspath
     myropath, f = globalspath.rsplit(os.sep, 1)
@@ -67,11 +69,11 @@ def import_file(filename):
     sitepath, f = myropath.rsplit(os.sep, 1)
     #print "sitepath:", sitepath
     myroparts = myropath.split(os.sep)
-    pythonpath = myroparts[0] + os.sep + myroparts[1] + os.sep
-    VALUES["DESKTOP"] = VALUES["HOME"] + "DESKTOP" + os.sep
+    pythonpath = myroparts[0] + os.sep + myroparts[1]
+    VALUES["DESKTOP"] = VALUES["HOME"] + os.sep + "DESKTOP" 
     VALUES["PYTHONDIR"] = pythonpath
-    VALUES["MYRODIR"] = myropath + os.sep
-    VALUES["PYTHONSITEDIR"] = sitepath + os.sep
+    VALUES["MYRODIR"] = myropath
+    VALUES["PYTHONSITEDIR"] = sitepath
     VALUES["PYTHONDIR"] = pythonpath
     install_count = 0
     if "MANIFEST" in name_list:
