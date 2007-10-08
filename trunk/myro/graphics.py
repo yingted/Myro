@@ -252,7 +252,8 @@ else:
 
 
 def moveToTop(window):
-    if "win" in sys.platform:
+    if not "darwin" in sys.platform and "win" in sys.platform:        
+        print "this is windows", sys.platform
         window.wm_attributes("-topmost", 1)
     window.lift()
     window.focus() 
