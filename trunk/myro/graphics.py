@@ -136,7 +136,7 @@ try:
     from numpy import array
 except:
     print >> sys.stderr, "WARNING: numpy not found"
-    
+
 import math
 try:
     import tkSnack
@@ -283,6 +283,8 @@ class AskDialog(AlertDialog):
         self.title = title
         self.qlist = qlist
         self.textbox = {}
+        self.top.wm_attributes("-topmost", 1)
+        self.top.focus()
         self.top.bind("<Return>", lambda event: self.OkPressed())
       
     def SetupDialog(self):
@@ -308,6 +310,7 @@ def askQuestion(question, answers = ["Yes", "No"], title = "Myro Question",
                 title=title, default=default, bitmap=bitmap,
                 text=question, strings=answers)
     return answers[int(d.num)]
+
 
 def pickAFile():
     """ Returns a filename """
@@ -342,6 +345,9 @@ class GraphWin(tk.Canvas):
         self.status = tk.Label(self.master, bd=1, relief=tk.SUNKEN,
                                anchor=tk.W)
         self.status.pack(fill=tk.X, side="bottom")
+
+        self.master.wm_attributes("-topmost", 1)
+        self.master.focus()
         self.master.title(title)
         self.pack()
         master.resizable(0,0)
@@ -1391,6 +1397,8 @@ class Joystick(Tkinter.Toplevel):
         self.showSensors = showSensors
         self.parent = parent
         self.wm_title('Joystick')
+        self.wm_attributes("-topmost", 1)
+        self.focus()
         self.protocol('WM_DELETE_WINDOW',self.destroy)
         self.frame = Tkinter.Frame(self)
         label = Tkinter.Label(self.frame, text = "Forward")
@@ -1597,6 +1605,8 @@ class Calibrate(Tkinter.Toplevel):
         self._lastFudged = time.time()
         self.parent = parent
         self.wm_title('calibstick')
+        self.wm_attributes("-topmost", 1)
+        self.focus()
         self.protocol('WM_DELETE_WINDOW',self.destroy)
         self.frame = Tkinter.Frame(self)
         label = Tkinter.Label(self.frame, text = "Forward")
