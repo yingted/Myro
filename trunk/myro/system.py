@@ -122,7 +122,7 @@ def upgrade_myro(url=None):
                 if filename.startswith("myro-upgrade-"):
                     end = filename.index(".zip")
                     patch_ver = filename[13:end].split(".")
-                    if patch_ver > myro_ver:
+                    if map(int, patch_ver) > map(int, myro_ver):
                         # download it
                         print "   Downloading..."
                         install_count += import_url(url + filename)
@@ -189,9 +189,9 @@ def upgrade_dongle(url=None):
                 if filename.startswith("dongle-upgrade-"):
                     end = filename.index(".bytecode")
                     patch_ver = filename[15:end].split(".")
-                    if patch_ver > dongle_ver:
+                    if map(int, patch_ver) > map(int, dongle_ver):
                         # consider it:
-                        consider[tuple(patch_ver)] = url + filename
+                        consider[tuple(map(int, patch_ver))] = url + filename
         consider_keys = consider.keys()
         consider_keys.sort()
         if len(consider_keys) > 0:

@@ -9,10 +9,14 @@ tts       = None
 setup     = 0
 mediaFolder = ""
 askData   = {}
-window    = None
 sound     = 0
 runtkthread = 1
 joysticks = []
+
+windows = {}
+pictures = {}
+pixmaps = {}
+images = {}
 
 # constants:
 import math

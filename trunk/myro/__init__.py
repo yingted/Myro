@@ -875,18 +875,18 @@ def makePicture(*args):
         retval.set(x, y, array)
     return retval
 
-def _mouseCallback(point):
-    window = myro.globvars.window
-    picture = myro.globvars.picture
+def _mouseCallback(point, name="default"):
+    window = myro.globvars.windows[name]
+    picture = myro.globvars.pictures[name]
     pixel = picture.getPixel(point.x, point.y)
     window.lastX, window.lastY = point.x, point.y
     rgb = pixel.getRGB()
     window.setStatusDirect("(%d, %d): (%d,%d,%d)" %
                            (point.x, point.y, rgb[0], rgb[1], rgb[2]))
 
-def _mouseCallbackRelease(point):
-    window = myro.globvars.window
-    picture = myro.globvars.picture
+def _mouseCallbackRelease(point, name="default"):
+    window = myro.globvars.windows[name]
+    picture = myro.globvars.pictures[name]
     if abs(window.lastX - point.x) < 3 or abs(window.lastY - point.y) < 3:
         return
     myro.globvars.robot.conf_rle_range(picture,
@@ -900,32 +900,32 @@ def writePictureTo(picture, filename):
 def savePicture(picture, filename):
     return picture.image.save(filename)
 
-def show(picture):
-    if myro.globvars.window == None:
-        myro.globvars.window = GraphWin("Myro: %s" % picture.filename)
+def show(picture, name="default"):
+    if myro.globvars.windows.get(name, None) == None:
+        myro.globvars.windows[name] = GraphWin("Myro: %s" % name)
     try:
-        myro.globvars.window.delete("image")
+        myro.globvars.windows[name].delete("image")
     except:
-        myro.globvars.window = GraphWin(picture.filename)
-    myro.globvars.picture = picture
-    myro.globvars.window['width'] = picture.width
-    myro.globvars.window['height'] = picture.height
-    myro.globvars.pixmap = makePixmap(picture)
-    myro.globvars.window.setMouseHandler(_mouseCallback)
-    myro.globvars.window.setMouseReleaseHandler(_mouseCallbackRelease)
-    myro.globvars.image = Image(Point(picture.width/2, picture.height/2),
-                                myro.globvars.pixmap)
-    myro.globvars.image.draw(myro.globvars.window)
+        myro.globvars.windows[name] = GraphWin("Myro: %s" % name)
+    myro.globvars.pictures[name] = picture
+    myro.globvars.windows[name]['width'] = picture.width
+    myro.globvars.windows[name]['height'] = picture.height
+    myro.globvars.pixmaps[name] = makePixmap(picture)
+    myro.globvars.windows[name].setMouseHandler(lambda point: _mouseCallback(point, name))
+    myro.globvars.windows[name].setMouseReleaseHandler(lambda point: _mouseCallbackRelease(point, name))
+    myro.globvars.images[name] = Image(Point(picture.width/2, picture.height/2),
+                                    myro.globvars.pixmaps[name])
+    myro.globvars.images[name].draw(myro.globvars.windows[name])
 
-def repaint(picture = None):
+def repaint(picture = None, name="default"):
     if picture == None:
-        picture = myro.globvars.picture
+        picture = myro.globvars.pictures[name]
     # get a new photoimage from data
     photoimage = ImageTk.PhotoImage(picture.image)
     # replace the pixmap data:
-    myro.globvars.image.img = photoimage
+    myro.globvars.images[name].img = photoimage
     # refresh the canvas:
-    myro.globvars.image.refresh(myro.globvars.window)
+    myro.globvars.images[name].refresh(myro.globvars.windows[name])
         
 def getWidth(picture):
     return picture.width
