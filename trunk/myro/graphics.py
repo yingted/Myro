@@ -126,17 +126,10 @@ http://mcsp.wartburg.edu/zelle/python for a quick reference"""
 
 import time, os, sys
 import Tkinter
-try:
-    import Image as PyImage
-    import ImageTk
-except:
-    print >> sys.stderr, "WARNING: Image not found; do you need Python Imaging Library?"
+import Image as PyImage
+import ImageTk
 tk = Tkinter
-try:
-    from numpy import array
-except:
-    print >> sys.stderr, "WARNING: numpy not found"
-
+from numpy import array 
 import math
 try:
     import tkSnack
@@ -164,6 +157,7 @@ DEAD_THREAD = "Graphics thread quit unexpectedly"
 # Support to run Tk in a separate thread
 
 import myro.globvars
+from copy import copy
 from Queue import Queue
 import thread
 import atexit
@@ -257,6 +251,12 @@ else:
     _root.withdraw()
 
 
+def moveToTop(window):
+    if "win" in sys.platform:
+        window.wm_attributes("-topmost", 1)
+    window.lift()
+    window.focus() 
+
 ############################################################################
 # Graphics classes start here
 
@@ -283,8 +283,7 @@ class AskDialog(AlertDialog):
         self.title = title
         self.qlist = qlist
         self.textbox = {}
-        self.top.wm_attributes("-topmost", 1)
-        self.top.focus()
+        moveToTop(self.top)
         self.top.bind("<Return>", lambda event: self.OkPressed())
       
     def SetupDialog(self):
@@ -346,8 +345,7 @@ class GraphWin(tk.Canvas):
                                anchor=tk.W)
         self.status.pack(fill=tk.X, side="bottom")
 
-        self.master.wm_attributes("-topmost", 1)
-        self.master.focus()
+        moveToTop(self.master)
         self.master.title(title)
         self.pack()
         master.resizable(0,0)
@@ -977,8 +975,6 @@ class Picture(object):
                 data = array([0] * (height * width * 3), 'B')
             self.image = PyImage.frombuffer("RGB", (self.width, self.height),
                                             data, "raw", "RGB", 0, 1)
-        elif mode.lower() == "image":
-            self.image = data.copy()
         else: # "gray", "blob"
             self.image = PyImage.frombuffer("L", (self.width, self.height),
                                             data, 'raw', "L", 0, 1)
@@ -1397,8 +1393,7 @@ class Joystick(Tkinter.Toplevel):
         self.showSensors = showSensors
         self.parent = parent
         self.wm_title('Joystick')
-        self.wm_attributes("-topmost", 1)
-        self.focus()
+        moveToTop(self)
         self.protocol('WM_DELETE_WINDOW',self.destroy)
         self.frame = Tkinter.Frame(self)
         label = Tkinter.Label(self.frame, text = "Forward")
@@ -1605,8 +1600,7 @@ class Calibrate(Tkinter.Toplevel):
         self._lastFudged = time.time()
         self.parent = parent
         self.wm_title('calibstick')
-        self.wm_attributes("-topmost", 1)
-        self.focus()
+        moveToTop(self)
         self.protocol('WM_DELETE_WINDOW',self.destroy)
         self.frame = Tkinter.Frame(self)
         label = Tkinter.Label(self.frame, text = "Forward")
