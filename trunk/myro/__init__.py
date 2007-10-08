@@ -6,10 +6,10 @@ Distributed under a Shared Source License
 """
 
 __REVISION__ = "$Revision$"
-__VERSION__  = "2.2.8" 
+__VERSION__  = "2.2.9" 
 __AUTHOR__   = "Doug Blank <dblank@cs.brynmawr.edu>"
 
-import sys, atexit, time, random, pickle, threading, os, types
+import sys, atexit, time, random, pickle, threading, os, types, copy
 import StringIO, traceback
 import myro.globvars
 from myro.media import *
@@ -777,12 +777,14 @@ def setWhiteBalance(value):
         raise AttributeError, "need to initialize robot"
     
 def setLEDFront(value):
+    """ Set the Light Emitting Diode on the robot's front. """
     if myro.globvars.robot:
         return myro.globvars.robot.setLEDFront(value)
     else:
         raise AttributeError, "need to initialize robot"
 
 def setLEDBack(value):
+    """ Set the Light Emitting Diode on the robot's back. """
     if myro.globvars.robot:
         return myro.globvars.robot.setLEDBack(value)
     else:
@@ -822,9 +824,11 @@ class Array(object):
             return current
 
 def makeArray(*args):
+    """ Returns an array of the given dimensions. """
     return Array(*args)
 
 def takePicture(mode="color"):
+    """ Takes a picture using the camera. Mode can be 'color', 'gray', or 'blob' """
     if myro.globvars.robot:
         return myro.globvars.robot.takePicture(mode)
     else:
@@ -836,7 +840,22 @@ def loadPicture(filename):
     picture.load(filename)
     return picture
 
+def copyPicture(picture):
+    """ Takes a Picture object and returns a copy. """
+    newPicture = Picture()
+    newPicture.set(getWidth(picture), getHeight(picture),
+                   picture.image, mode = "image")
+    return newPicture
+
 def makePicture(*args):
+    """
+    Takes zero or more args to make a picture.
+
+    makePicture() - makes a 0x0 image
+    makePicture(width, height)
+    makePicture("filename")
+    makePicture(width, height, data, "mode")
+    """
     if len(args) == 0:
         retval = Picture()
     elif len(args) == 1:

@@ -164,7 +164,6 @@ DEAD_THREAD = "Graphics thread quit unexpectedly"
 # Support to run Tk in a separate thread
 
 import myro.globvars
-from copy import copy
 from Queue import Queue
 import thread
 import atexit
@@ -972,6 +971,8 @@ class Picture(object):
                 data = array([0] * (height * width * 3), 'B')
             self.image = PyImage.frombuffer("RGB", (self.width, self.height),
                                             data, "raw", "RGB", 0, 1)
+        elif mode.lower() == "image":
+            self.image = data.copy()
         else: # "gray", "blob"
             self.image = PyImage.frombuffer("L", (self.width, self.height),
                                             data, 'raw', "L", 0, 1)
