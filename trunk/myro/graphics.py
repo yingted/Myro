@@ -129,12 +129,12 @@ import Tkinter
 try: 	 
      import Image as PyImage	     
      import ImageTk	     
- except: 	 
+except: 	 
      print >> sys.stderr, "WARNING: Image not found; do you need Python Imaging Library?" 	 
- tk = Tkinter	 
- try: 	 
+tk = Tkinter	 
+try: 	 
      from numpy import array	     
- except: 	 
+except: 	 
      print >> sys.stderr, "WARNING: numpy not found" 	 
 
 import math
