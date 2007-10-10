@@ -898,7 +898,33 @@ def writePictureTo(picture, filename):
     return picture.image.save(filename)
 
 def savePicture(picture, filename):
-    return picture.image.save(filename)
+    if type(picture) == type([]):
+        import ImageChops
+        from GifImagePlugin import getheader, getdata
+        # open output file
+        fp = open(filename, "wb")
+        previous = None
+        for im in picture:
+            if type(im) == type(""): # filename
+                im = Image.open(im)
+                im.load()
+                im = im.convert("P") # in case jpeg, etc
+            else:
+                im = im.image.convert("P")
+            if not previous:
+                for s in getheader(im) + getdata(im):
+                    fp.write(s)
+            else:
+                delta = ImageChops.subtract_modulo(im, previous)
+                bbox = delta.getbbox()
+                if bbox:
+                    for s in getdata(im.crop(bbox), offset = bbox[:2]):
+                        fp.write(s)
+            previous = im.copy()
+        fp.write(";")
+        fp.close()
+    else:
+        return picture.image.save(filename)
 
 def show(picture, name="default"):
     if myro.globvars.windows.get(name, None) == None:
