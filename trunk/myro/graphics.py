@@ -1032,9 +1032,9 @@ class Picture(object):
         retval = self.pixels[x, y]
         if self.image.mode == "P":
             # gif, need to look up color in palette
-            return ( self.palette[retval * 3 + 0],
-                     self.palette[retval * 3 + 1],
-                     self.palette[retval * 3 + 2])
+            return ( int(self.palette[retval * 3 + 0]),
+                     int(self.palette[retval * 3 + 1]),
+                     int(self.palette[retval * 3 + 2]))
         elif self.image.mode == "RGB":
             return retval
         elif self.image.mode == "L":
@@ -1084,9 +1084,9 @@ class Pixel(object):
         retval = self.pixels[self.x, self.y]
         if self.picture.image.mode == "P":
             # gif, need to look up color in palette
-            return ( self.palette[retval * 3 + 0],
-                     self.palette[retval * 3 + 1],
-                     self.palette[retval * 3 + 2])
+            return ( int(self.palette[retval * 3 + 0]),
+                     int(self.palette[retval * 3 + 1]),
+                     int(self.palette[retval * 3 + 2]))
         elif self.picture.image.mode == "RGB":
             return retval
         elif self.picture.image.mode == "L":
@@ -1124,7 +1124,7 @@ class Color(object):
             self.rgb = rgb
         else:
             raise AttributeError, "invalid colors to Color; need 3 integers: red, green, blue"
-        self.rgb = map(lambda v: max(min(v,255),0), self.rgb)
+        self.rgb = map(lambda v: int(max(min(v,255),0)), self.rgb)
     def __repr__(self):
         return "<Color instance (r=%d, g=%d, b=%d)>)" % tuple(self.rgb)
     def getColor(self):
@@ -1147,14 +1147,14 @@ class Color(object):
         return Color(o1[0] + o2[0], o1[1] + o2[1], o1[2] + o2[2])
     def makeLighter(self):
         r, g, b = self.rgb
-        self.rgb = (max(min((255 - r) * .35 + r, 255), 0),
-                    max(min((255 - g) * .35 + g, 255), 0),
-                    max(min((255 - b) * .35 + b, 255), 0))
+        self.rgb = (int(max(min((255 - r) * .35 + r, 255), 0)),
+                    int(max(min((255 - g) * .35 + g, 255), 0)),
+                    int(max(min((255 - b) * .35 + b, 255), 0)))
     def makeDarker(self):
         r, g, b = self.rgb
-        self.rgb = (max(min(r * .65, 255), 0),
-                    max(min(g * .65, 255), 0),
-                    max(min(b * .65, 255), 0))
+        self.rgb = (int(max(min(r * .65, 255), 0)),
+                    int(max(min(g * .65, 255), 0)),
+                    int(max(min(b * .65, 255), 0)))
 
 class Image(GraphicsObject):
     idCount = 0
