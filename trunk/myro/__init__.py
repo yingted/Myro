@@ -182,34 +182,69 @@ def randomNumber():
 
 def getGamepad(*what):
     """
-    Return readings from a gamepad/joystick
-    what can be empty, "init", "name", "axis", "ball", "button", or "hat"
-    if what is more than 1 item, then getGamepad will return a dictionary,
-    else it will return the 1 item's value(s).
+    Return readings from a gamepad/joystick when there is a change. 
+
+    what can be empty, "init", "name", "axis", "ball", "button",
+    "hat", or "count".  If what is more than 1 item, then getGamepad
+    will return a dictionary, else it will return the 1 item's
+    value(s). If the first arg given to this function is an int, then
+    it refers to that joystick ID. If the first arg is a list of ints, 
+    then it will return those joystick data.
     """
-    if len(what) > 0 and type(what[0]) == type(0):
-        id = what[0]
-        what = what[1:]
-    else:
-        id = 0
+    retval = getGamepadNow(*what)
+    newRetval = getGamepadNow(*what)
+    while retval != newRetval:
+        newRetval = getGamepadNow(*what)
+        wait(.1)
+
+def getGamepadNow(*what):
+    """
+    Return readings from a gamepad/joystick immediately. 
+
+    what can be empty, "init", "name", "axis", "ball", "button",
+    "hat", or "count".  If what is more than 1 item, then getGamepad
+    will return a dictionary, else it will return the 1 item's
+    value(s). If the first arg given to this function is an int, then
+    it refers to that joystick ID. If the first arg is a list of ints, 
+    then it will return those joystick data.
+    """
+    if len(what) > 0:
+        if type(what[0]) == type(0): # particular gamepad id
+            id = what[0]
+            what = what[1:]
+        elif type(what[0]) == type([]): # list of gamepad ids
+            retval = []
+            for i in what[0]:
+                retval.append((i, getGamepadNow(*what[1:])))
+            return retval
+        else:
+            id = 0
     myro.globvars.pygame.event.pump()
-    js = myro.globvars.joysticks[id]
+    if id <= len(myro.globvars.joysticks):
+        js = myro.globvars.joysticks[id]
+    else:
+        js = None
     retval = {}
     if len(what) == 0:
         what = ["init", "name", "axis", "ball", "button", "hat"]
     for item in what:
-        if item == "init":
-            retval["init"] = js.get_init()
-        elif item == "name":
-            retval["name"] = js.get_name()
-        elif item == "axis":
-            retval["axis"] = [js.get_axis(i) for i in range(js.get_numaxes())]
-        elif item == "ball":
-            retval["ball"] = [js.get_ball(i) for i in range(js.get_numballs())]
-        elif item == "button":
-            retval["button"] = [js.get_button(i) for i in range(js.get_numbuttons())]
-        elif item == "hat":
-            retval["hat"] = [js.get_hat(i) for i in range(js.get_numhats())]
+        if item == "count":
+            retval["count"] = myro.globvars.pygame.joystick.get_count()
+        elif js != None:
+            if item == "init":
+                retval["init"] = js.get_init()
+            elif item == "name":
+                retval["name"] = js.get_name()
+            elif item == "axis":
+                retval["axis"] = [js.get_axis(i) for i in range(js.get_numaxes())]
+            elif item == "ball":
+                retval["ball"] = [js.get_ball(i) for i in range(js.get_numballs())]
+            elif item == "button":
+                retval["button"] = [js.get_button(i) for i in range(js.get_numbuttons())]
+            elif item == "hat":
+                retval["hat"] = [js.get_hat(i) for i in range(js.get_numhats())]
+        else:
+            raise AttributeError, ("not a valid gamepad id: %d" % id)
     if len(retval.keys()) == 0:
         return None
     elif len(retval.keys()) == 1:
@@ -870,7 +905,7 @@ def makePicture(*args):
     elif len(args) == 3:
         x = args[0]
         y = args[1]
-        array = argc[2]
+        array = args[2]
         retval = Picture()
         retval.set(x, y, array)
     return retval
