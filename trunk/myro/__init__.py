@@ -217,7 +217,7 @@ def _or(a, b):
         return a
     elif type(a) == type(""):
         return a
-    elif type(a) == type([]):
+    elif type(a) in [type([]), type((0,))]:
         retval = []
         for i in range(len(a)):
             retval.append(_or(a[i], b[i]))
@@ -228,7 +228,7 @@ def _or(a, b):
             retval[k] = _or(a[k], b[k])
         return retval
     else:
-        raise AttributeError, ("invalid type: %s" % a)
+        raise AttributeError, ("invalid type: %s" % str(a))
                     
 def getGamepadNow(*what):
     """
