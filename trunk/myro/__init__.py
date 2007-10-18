@@ -6,7 +6,7 @@ Distributed under a Shared Source License
 """
 
 __REVISION__ = "$Revision$"
-__VERSION__  = "2.3.4"
+__VERSION__  = "2.3.3"
 __AUTHOR__   = "Doug Blank <dblank@cs.brynmawr.edu>"
 
 import sys, atexit, time, random, pickle, threading, os, types, copy
@@ -926,6 +926,7 @@ def makePicture(*args):
     makePicture() - makes a 0x0 image
     makePicture(width, height)
     makePicture("filename")
+    makePicture(width, height, data)
     makePicture(width, height, data, "mode")
     """
     if len(args) == 0:
@@ -945,6 +946,13 @@ def makePicture(*args):
         array = args[2]
         retval = Picture()
         retval.set(x, y, array)
+    elif len(args) == 4:
+        x = args[0]
+        y = args[1]
+        array = args[2]
+        mode = args[3]
+        retval = Picture()
+        retval.set(x, y, array, mode)
     return retval
 
 def _mouseCallback(point, name="default"):
