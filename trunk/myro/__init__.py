@@ -180,7 +180,7 @@ def randomNumber():
     """
     return random.random()
 
-def getGamepad(*what):
+def getGamepad(*what, **kwargs):
     """
     Return readings from a gamepad/joystick when there is a change. 
 
@@ -191,12 +191,45 @@ def getGamepad(*what):
     it refers to that joystick ID. If the first arg is a list of ints, 
     then it will return those joystick data.
     """
+    if "count" in what:
+        return getGamepadNow(*what)
+    if "wait" in kwargs:
+        waitTime = kwargs["wait"]
+    else:
+        waitTime = 0.05
     retval = getGamepadNow(*what)
     newRetval = getGamepadNow(*what)
-    while retval != newRetval:
+    while retval == newRetval:
         newRetval = getGamepadNow(*what)
-        wait(.1)
+        wait(waitTime)
+    return _or(newRetval, retval)
 
+def _or(a, b):
+    """
+    For buttons, it is handy to just have a 1 if it was pressed
+    or let up.
+    """
+    if type(a) == type(0):
+        return a or b
+    elif type(a) == type(True):
+        return a or b
+    elif type(a) == type(1.0):
+        return a
+    elif type(a) == type(""):
+        return a
+    elif type(a) == type([]):
+        retval = []
+        for i in range(len(a)):
+            retval.append(_or(a[i], b[i]))
+        return retval
+    elif type(a) == type({}):
+        retval = {}
+        for k in a:
+            retval[k] = _or(a[k], b[k])
+        return retval
+    else:
+        raise AttributeError, ("invalid type: %s" % a)
+                    
 def getGamepadNow(*what):
     """
     Return readings from a gamepad/joystick immediately. 
@@ -219,8 +252,10 @@ def getGamepadNow(*what):
             return retval
         else:
             id = 0
+    else:
+        id = 0
     myro.globvars.pygame.event.pump()
-    if id <= len(myro.globvars.joysticks):
+    if id < len(myro.globvars.joysticks):
         js = myro.globvars.joysticks[id]
     else:
         js = None
@@ -235,6 +270,8 @@ def getGamepadNow(*what):
                 retval["init"] = js.get_init()
             elif item == "name":
                 retval["name"] = js.get_name()
+            elif item == "robot":
+                retval["robot"] = [-js.get_axis(1), -js.get_axis(0)]
             elif item == "axis":
                 retval["axis"] = [js.get_axis(i) for i in range(js.get_numaxes())]
             elif item == "ball":
