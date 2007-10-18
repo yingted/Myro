@@ -248,7 +248,7 @@ def getGamepadNow(*what):
         elif type(what[0]) == type([]): # list of gamepad ids
             retval = []
             for i in what[0]:
-                retval.append((i, getGamepadNow(*what[1:])))
+                retval.append((i, getGamepadNow(i, *what[1:])))
             return retval
         else:
             id = 0
