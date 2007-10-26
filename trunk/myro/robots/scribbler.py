@@ -10,7 +10,7 @@ __AUTHOR__   = "Keith O'Hara and Doug Blank"
 
 import serial, time, string
 from myro import Robot, ask
-from myro.graphics import askQuestion, Picture
+from myro.graphics import _askQuestion, Picture
 import myro.globvars
 # needed for new camera dongle
 try:

@@ -6,7 +6,7 @@ Distributed under a Shared Source License
 """
 
 __REVISION__ = "$Revision$"
-__VERSION__  = "2.3.5"
+__VERSION__  = "2.4.0"
 __AUTHOR__   = "Doug Blank <dblank@cs.brynmawr.edu>"
 
 import sys, atexit, time, random, pickle, threading, os, types, copy
@@ -122,8 +122,8 @@ keyword: %s
             print
         # if you have your robot on, then set its name:
         if myro.globvars.robot != None:
-            setName(answers["Your robot's name"])
-            print "Your robot's name was set to", getName()
+            myro.globvars.robot.set("name", answers["Your robot's name"])
+            print "Your robot's name was set to", myro.globvars.robot.get("name")
     else:
         print "The name '%s' has already been taken. Please try another." % answers["Your robot's name"]
 
@@ -192,15 +192,15 @@ def getGamepad(*what, **kwargs):
     then it will return those joystick data.
     """
     if "count" in what:
-        return getGamepadNow(*what)
+        return _getGamepadNow(*what)
     if "wait" in kwargs:
         waitTime = kwargs["wait"]
     else:
         waitTime = 0.05
-    retval = getGamepadNow(*what)
-    newRetval = getGamepadNow(*what)
+    retval = _getGamepadNow(*what)
+    newRetval = _getGamepadNow(*what)
     while retval == newRetval:
-        newRetval = getGamepadNow(*what)
+        newRetval = _getGamepadNow(*what)
         wait(waitTime)
     return _or(newRetval, retval)
 
@@ -248,7 +248,7 @@ def getGamepadNow(*what):
         elif type(what[0]) == type([]): # list of gamepad ids
             retval = []
             for i in what[0]:
-                retval.append((i, getGamepadNow(i, *what[1:])))
+                retval.append((i, _getGamepadNow(i, *what[1:])))
             return retval
         else:
             id = 0
@@ -288,6 +288,8 @@ def getGamepadNow(*what):
         return retval[retval.keys()[0]]
     else:
         return retval
+
+_getGamepadNow = getGamepadNow
 
 def ask(item, useCache = 0):
     """ Ask the user for a value """
@@ -1130,3 +1132,91 @@ from myro.robots.roomba import Roomba, Create
 from myro.robots.simulator import SimScribbler
 from myro.graphics import *
 
+_functions = ("timer", 
+              "time Remaining", 
+              "send Picture",
+              "register",
+              "set Password",
+              "wait",
+              "current Time",
+              "pick One",
+              "flip Coin",
+              "random Number",
+              "get Gamepad",
+              "get Gamepad Now",
+              "ask",
+              "request Stop",
+              "initialize",
+              "simulator",
+              "translate",
+              "rotate",
+              "move",
+              "forward",
+              "backward",
+              "turn",
+              "turn Left",
+              "turn Right",
+              "stop",
+              "open Connection",
+              "close Connection",
+              "get",
+              "get Version",
+              "get Light",
+              "get I R",
+              "get Line",
+              "get Stall",
+              "get Info",
+              "get All",
+              "get Name",
+              "get Start Song",
+              "get Volume",
+              "update",
+              "beep",
+              "set",
+              "set L E D",
+              "set Name",
+              "set Volume",
+              "set Start Song",
+              "motors",
+              "restart",
+              "joy Stick",
+              "calibrate",
+              "play Song",
+              "play Note",
+              "get Bright",
+              "get Obstacle",
+              "set I R Power",
+              "get Battery",
+              "set White Balance",
+              "set L E D Front",
+              "set L E D Back",
+              "make Array",
+              "take Picture",
+              "load Picture",
+              "copy Picture",
+              "make Picture",
+              "write Picture To",
+              "save Picture",
+              "show",
+              "repaint",
+              "get Width",
+              "get Height",
+              "get Pixel",
+              "get Pixels",
+              "set Pixel",
+              "get X",
+              "get Y",
+              "get Red",
+              "get Green",
+              "get Blue",
+              "get Color",
+              "set Red",
+              "set Green",
+              "set Blue",
+              "set Color",
+              "make Color",
+              "make Darker",
+              "make Lighter",
+              )
+
+myro.globvars.makeEnvironment(locals(), _functions)

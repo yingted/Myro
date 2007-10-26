@@ -126,6 +126,7 @@ http://mcsp.wartburg.edu/zelle/python for a quick reference"""
 
 import time, os, sys
 import Tkinter
+import globvars
 try: 	 
      import Image as PyImage	     
      import ImageTk	     
@@ -317,6 +318,7 @@ def askQuestion(question, answers = ["Yes", "No"], title = "Myro Question",
                 text=question, strings=answers)
     return answers[int(d.num)]
 
+_askQuestion = askQuestion
 
 def pickAFile():
     """ Returns a filename """
@@ -1793,3 +1795,43 @@ class Calibrate(Tkinter.Toplevel):
 if myro.globvars.runtkthread:
     atexit.register(_tkShutdown)
 
+_functions = (
+     "move To Top",
+     "distance",
+     "ask Question",
+     "pick A File",
+     "pick A Color",
+     "pick A Folder",
+     "make Pixmap",
+     "make Window",
+     "make Image",
+     "make Entry",
+     "make Point",
+     "make Rectangle",
+     "make Oval",
+     "make Circle",
+     "make Line",
+     "make Polygon",
+     "make Text",
+     "make Sound",
+     "play",
+     )
+
+globvars.makeEnvironment(locals(), _functions)
+
+_variables = (
+     "black",
+     "white",
+     "blue",
+     "red",
+     "green",
+     "gray",
+     "dark Gray",
+     "light Gray",
+     "yellow",
+     "pink",
+     "magenta",
+     "cyan",
+     )
+
+globvars.makeEnvironment(locals(), _variables, "variables")

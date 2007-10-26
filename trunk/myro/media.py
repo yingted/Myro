@@ -56,6 +56,8 @@ robot.playSong(s): plays a song on the robot
 __VERSION__ = "$Revision$ "
 __AUTHOR__  = "Doug Blank <dblank@cs.brynmawr.edu>"
 
+import globvars
+
 _frequency = {
               "rest":     0,
               "pause":    0,
@@ -224,6 +226,8 @@ def getNoteFromFrequency(frequency):
             diffNote = key
     return diffNote[0].upper() + diffNote[1:]
 
+_getNoteFromFrequency = getNoteFromFrequency
+
 def _getDuration(v, line, text):
     """ Takes a string that is a fraction, or a number. Returns whole note portion as float. """
     if "/" in v:
@@ -240,11 +244,11 @@ def song2text(song):
     for tup in song:
         if len(tup) == 2:
             f, d = tup
-            text += "%s %s; " % (getNoteFromFrequency(f), d)
+            text += "%s %s; " % (_getNoteFromFrequency(f), d)
         elif len(tup) == 3:
             f1, f2, d = tup
-            text += "%s %s %s; " % (getNoteFromFrequency(f1),
-                                    getNoteFromFrequency(f2), d)
+            text += "%s %s %s; " % (_getNoteFromFrequency(f1),
+                                    _getNoteFromFrequency(f2), d)
     return text
 
 def saveSong(song, filename, append = 1):
@@ -258,11 +262,11 @@ def saveSong(song, filename, append = 1):
         for tup in song:
             if len(tup) == 2:
                 f, d = tup
-                fp.write("%s %s\n" % (getNoteFromFrequency(f), d))
+                fp.write("%s %s\n" % (_getNoteFromFrequency(f), d))
             elif len(tup) == 3:
                 f1, f2, d = tup
-                fp.write("%s %s %s\n" % (getNoteFromFrequency(f),
-                                         getNoteFromFrequency(f), d))
+                fp.write("%s %s %s\n" % (_getNoteFromFrequency(f),
+                                         _getNoteFromFrequency(f), d))
     else: # string
         song = song.replace("\n", ";")
         lines = song.split(";")
@@ -338,3 +342,10 @@ class Song:
             return 0
     # TODO:make an iterator
 
+_functions = ('get Note From Frequency',
+              'song2text',
+              'save Song',
+              'make Song',
+              'read Song',)
+
+globvars.makeEnvironment(locals(), _functions)

@@ -136,3 +136,15 @@ elif "linux" in sys.platform:
     myro.globvars.tts = LinuxTTSEngine()
 else:
     myro.globvars.tts = TTSEngine()
+
+_functions = (
+    "speak",
+    "stop Speaking",
+    "set Voice",
+    "get Voice",
+    "get Voices",
+    "play Speech",
+    "save Speech",
+)
+
+myro.globvars.makeEnvironment(locals(), _functions)
