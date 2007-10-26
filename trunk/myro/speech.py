@@ -61,27 +61,32 @@ class WindowsTTSEngine(TTSEngine):
 
 class MacTTSEngine(TTSEngine):
     def __init__(self, name = None, echo = 1):
-        import festival
-        self.tts = festival.open()
         self.echo = echo
+        if name:
+            self.voice = name
+        else:
+            self.voice = ""
 
     def speak(self, message, async = 1):
         if self.echo:
             print message
-        self.tts.say(message)
+        if async:
+            background = "&"
+        else:
+            background = ""
+        cmd = "say -v \'%s\' \'%s\' %s" % (self.voice, message,background)
+        print cmd
+        os.system(cmd)
 
-        def setVoice(self, name):
-            print "Only One Voice!"
+    def setVoice(self, name):
+        self.voice = name
 
-        def getVoices(self):
-            return ['Default']
+    def getVoices(self):
+        return ['Agnes', 'Kathy', 'Princess', 'Vicki','Victoria', 'Bruce', 'Fred','Junior', 'Ralph','Albert', 'Bad News','Bahh', 'Bells' 'Boing', 'Bubbles', 'Cellos','Deranged','Good News', 'Hysterical','Pipe Organ', 'Trinoids', 'Whisper', 'Zarvox']
 
-        def getVoice(self):
-            return "Default"
+    def getVoice(self):
+        return self.voice
 
-        def stop(self):
-            self.tts.close()
-            
 def speak(message, async = 1):
     if myro.globvars.tts != None:
         myro.globvars.tts.speak(message, async)
@@ -118,14 +123,14 @@ def saveSpeech(message, filename):
     else:
         print "Text-to-speech is not loaded"
 
-if "win" in sys.platform:
-    try:
-        myro.globvars.tts = WindowsTTSEngine()
-    except:
-        myro.globvars.tts = TTSEngine()
-elif "darwin" in sys.platform:
+if "darwin" in sys.platform:
     try:
         myro.globvars.tts = MacTTSEngine()
+    except:
+        myro.globvars.tts = TTSEngine()
+elif "win" in sys.platform:
+    try:
+        myro.globvars.tts = WindowsTTSEngine()
     except:
         myro.globvars.tts = TTSEngine()
 elif "linux" in sys.platform:
