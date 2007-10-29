@@ -971,10 +971,11 @@ def _mouseCallbackRelease(point, name="default"):
     picture = myro.globvars.pictures[name]
     if abs(window.lastX - point.x) < 3 or abs(window.lastY - point.y) < 3:
         return
-    myro.globvars.robot.conf_rle_range(picture,
-                                       window.lastX, window.lastY,
-                                       point.x, point.y)
-    window.setStatusDirect("Blob colors set!")
+    if myro.globvars.robot != None:
+        myro.globvars.robot.conf_rle_range(picture,
+                                           window.lastX, window.lastY,
+                                           point.x, point.y)
+        window.setStatusDirect("Blob colors set!")
 
 def writePictureTo(picture, filename):
     return picture.image.save(filename)
