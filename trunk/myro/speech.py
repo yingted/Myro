@@ -74,7 +74,7 @@ class MacTTSEngine(TTSEngine):
             background = "&"
         else:
             background = ""
-        cmd = "say -v \'%s\' \'%s\' %s" % (self.voice, message,background)
+        cmd = "say -v \"%s\" \"%s\" %s" % (self.voice, message,background)
         os.system(cmd)
 
     def setVoice(self, name):
