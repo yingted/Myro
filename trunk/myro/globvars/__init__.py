@@ -44,6 +44,15 @@ if pygame != None:
         js.init()
         joysticks.append(js)
 
+def getObject(env, name, type="function"):
+    if type == "function":
+        pattern = formats[0]
+    elif type == "class":
+        pattern = formats[1]
+    else: # variables
+        pattern = formats[2]
+    return env[makeName(name, pattern)]
+
 def makeName(name, format):
     """
     Return a name in the given format example. 
