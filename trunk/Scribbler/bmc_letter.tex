@@ -1,0 +1,108 @@
+\documentclass{letter}[10pt]
+\usepackage{url}
+
+\textheight 8.5in
+
+\pagestyle{empty}
+
+\begin{document}
+
+\signature{Institute for Personal Robots in Education}
+
+\address{Institute for Personal Robots in Education\\
+Park Science Bldg, Room 251\\
+Bryn Mawr College\\
+101 North Merion Ave\\
+Bryn Mawr, PA 19010\\
+Tel. (610) 526-5024}
+
+\begin{letter}{}
+
+\opening{Dear Computer Science Educator,}
+
+The mission of the Institute for Personal Robots in Education,
+abbreviated as IPRE, is to find creative, fun, and useful ways for
+students to learn computer science by programming robots.  The
+institute, created with a grant from Microsoft Research, is jointly
+run by Bryn Mawr College and Georgia Technical Institute.  For more
+information, take a look at IPRE's website:
+
+\url{http://www.roboteducation.org/}
+
+We have enclosed your robot kit, which includes the following:
+
+\begin{enumerate}
+\item Scribbler robot, by Parallax.
+
+\item The `Fluke', IPRE's Bluetooth camera dongle.  Has extra sensors
+for the robot, including a camera, and allows the robot to send
+messages to and receive messages from the computer.
+\item Bluetooth USB dongle.  Allows the computer to send messages to
+and receive messages from the robot.
+\item A nifty carry bag for the robot.
+\item Three Sharpie pens.  For use with Scribbler drawing.
+\item Six double-A batteries.  Note that rechargeable batteries work
+with the Scribbler as well.
+\end{enumerate}
+
+Also included are the original Scribbler manual, cd, and serial cable,
+as well as the Bluetooth USB Dongle manual, CD, and USB cable. None of
+these last set of items are necessary for programming of the Scribbler
+using the Myro library (a set of functions for use with the robot).
+We have included them so that in case you wish to use any of them, you
+can.
+
+Learning to program the Scribbler in the programming language Python
+using the Myro library is fun and relatively easy.  We currently have
+introductory level computer science courses at both Bryn Mawr College
+and Georgia Technical Institute in which students use the Scribbler to
+learn how to program.  For an introduction to the Scribbler and much,
+much more information on using Myro with the Scribbler, go to our Wiki
+Online Textbook:
+
+\url{http://wiki.roboteducation.org/Introduction_to_Computer_Science_via_Robots}
+
+To set up the Scribbler for use, you will need to connect the Fluke
+into the Scribbler's serial port and connect the Bluetooth USB dongle
+into your computer's USB port.  By the serial port there is a black
+on-off switch and a useful red restart button.
+
+To use the Scribbler, you will need to download the installer for the
+programming language Python, as well as the library Myro, a collection
+of functions that can be used with the Scribbler.  Both are freely
+available on the web.  For instructions on how to install Myro as well
+as on how to set up the Bluetooth connection between your robot and
+the computer, go to:
+
+\url{http://wiki.roboteducation.org/Myro_Installation_Manual}
+
+On that page, there is also a link to Python 2.4, which is what is
+used in the Wiki online text.  Alternately, you can get Python 2.4 as
+well as newer versions of Python at \url{http://www.python.org/} (go to
+Quick Links and look under Releases, both located on the left-hand
+side of the webpage).
+
+To make sure that your system is up-to-date, please:
+
+\begin{enumerate}
+\item Double-click the "Start Python.py" icon on your desktop
+\item  Enter "from myro import *" in Python
+\item Enter "upgrade()" and enter your Bluetooth's serial port (ie, COM3).
+\end{enumerate}
+
+Occasionally thereafter, you can enter "upgrade('myro')" at the Python
+prompt to make sure the Python libraries are up-to-date.
+
+Finally, please join our Myro-users mailing list at:
+
+\url{http://myro.roboteducation.org/mailman/listinfo/myro-users}
+
+We hope you enjoy working, playing, and learning with the Scribbler
+robot and Myro!
+
+
+\closing{Sincerely,}
+
+\end{letter}
+
+\end{document}
