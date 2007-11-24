@@ -816,7 +816,7 @@ class Polygon(GraphicsObject):
             args.append(x)
             args.append(y)
         args.append(options)
-        return apply(GraphWin.create_polygon, args,tag="poly") 
+        return apply(GraphWin.create_polygon, args) 
 
 class Text(GraphicsObject):
     
