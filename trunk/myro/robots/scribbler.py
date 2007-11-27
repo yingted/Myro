@@ -157,6 +157,7 @@ class Scribbler(Robot):
         self.CAM_COMB_EXPOSURE_CONTROL_ON= (self.CAM_COMB_DEFAULT |  (1 << 0))
         self.CAM_COMB_EXPOSURE_CONTROL_OFF=(self.CAM_COMB_DEFAULT & ~(1 << 0))
 
+        self.ser = None
         self.requestStop = 0
         self.debug = 0
         self._lastTranslate = 0
@@ -927,7 +928,10 @@ class Scribbler(Robot):
         while (bytes > 1 and len(c) < bytes):      
             c = c + self.ser.read(bytes-len(c))
         # .nah. end bug fix
-        if self.debug: print "_read:", c, len(c)
+        if self.debug:
+            print "_read (%d)" % len(c)
+            print map(lambda x:"%x" % ord(x), c)
+            
         time.sleep(0.01) # HACK! THIS SEEMS TO NEED TO BE HERE!
         if bytes == 1:
             x = -1
@@ -972,6 +976,9 @@ class Scribbler(Robot):
                 retval.append(retvalBytes[p] << 8 | retvalBytes[p + 1])
         elif mode == "line": # until hit \n newline
             retval = self.ser.readline()
+            if self.debug:
+                print "_get(line)", retval
+
         self.ser.flushInput()
         self.lock.release()
         return retval
