@@ -242,15 +242,15 @@ class Scribbler(Robot):
         raise ValueError, ("Couldn't find the scribbler named " + self.serialPort)
     
     def open(self):
-            try:
-                if self.serialPort == myro.globvars.robot.ser.portstr:
-                    myro.globvars.robot.ser.close()
-                    print "Closing serial port..."
-                    time.sleep(3)
-            except KeyboardInterrupt:
-                raise
-            except:
-                pass
+        try:
+            if self.serialPort == myro.globvars.robot.ser.portstr:
+                myro.globvars.robot.ser.close()
+                print "Closing serial port..."
+                time.sleep(3)
+        except KeyboardInterrupt:
+            raise
+        except:
+            pass
         if not _commport(self.serialPort):
             self.search()
         else:
