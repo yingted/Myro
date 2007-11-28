@@ -469,7 +469,9 @@ class Robot(object):
 
     def getInfo(self, *item):
         """ Returns the info. """
-        return self.get("info", *item)
+        retval = self.get("info", *item)
+        retval["myro"] =  __VERSION__
+        return retval
 
     def getName(self):
         """ Returns the robot's name. """
@@ -729,9 +731,11 @@ def getStall():
         raise AttributeError, "need to initialize robot"
 def getInfo(*item):
     if myro.globvars.robot:
-        return myro.globvars.robot.getInfo(*item)
+        retval = myro.globvars.robot.getInfo(*item)
+        retval["myro"] =  __VERSION__
+        return retval
     else:
-        raise AttributeError, "need to initialize robot"
+        return {"myro": __VERSION__}
 def getAll():
     if myro.globvars.robot:
         return myro.globvars.robot.get("all")

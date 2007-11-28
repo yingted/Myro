@@ -223,7 +223,7 @@ def load_dongle(s, f):
     myro.globvars.robot.restart()
     return 1
 
-def upgrade(what="all", url = None):
+def upgrade(what="myro", url = None):
     if what.lower() == "myro":
         return upgrade_myro(url)
     elif what.lower() == "dongle":
