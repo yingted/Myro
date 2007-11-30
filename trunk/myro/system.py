@@ -59,7 +59,7 @@ def import_file(filename):
     if "HOMEPATH" in os.environ:
         VALUES["HOME"] = 'C:' + os.sep + os.environ["HOMEPATH"]
     if "HOME" in os.environ:
-	VALUES["HOME"] = os.environ["HOME"]
+        VALUES["HOME"] = os.environ["HOME"]
     if "USERPROFILE" in os.environ:
         VALUES["HOME"] = os.environ["USERPROFILE"]
     globalspath, f = myro.globvars.__file__.rsplit(os.sep, 1)
@@ -237,6 +237,7 @@ def upgrade(what="myro", url = None):
 GET_SCRIB_PROGRAM=91  # with offset, returns the scribbler program buffer
 SET_SCRIB_PROGRAM=122   # set scribbler program memory byte
 SET_START_PROGRAM=123   # initiate scribbler programming process
+UPDATE_FIRMWARE = 40	# Updates the firmware of the robot 
 
 def set_scribbler_memory(ser, offset, byte):
     ser.write(chr(SET_SCRIB_PROGRAM))
@@ -250,3 +251,115 @@ def set_scribbler_start_program(ser, size):
 def write_2byte(ser, value):
     ser.write(chr((value >> 8) & 0xFF))
     ser.write(chr(value & 0xFF))
+
+def uf_sendPage(s,page,binarray):
+    segment = 0
+    while segment < 264/132 :
+        i = 0
+        sum = 0
+        for i in range (0,132) :
+            s.write(chr(binarray[page*264 + segment*132 + i]))
+            sum = sum + binarray[page*264 + segment*132 + i]
+        s.write(chr(sum % 256))
+        retval = ord(s.read(1))
+        #print "Sum: %d Return: %d" % (sum % 256,retval)
+        if retval == 42 :
+            segment = segment + 1
+
+def uf_recvPage(s,page,binarray):
+    segment = 0
+    while segment < 264/132 :
+        i = 0
+        sum = 0
+        chksum = 0
+        for i in range (0,132) :
+            recv = ord(s.read(1))
+            binarray[page*264 + segment*132 + i] = recv 
+            sum = sum + recv 
+        chksum = ord(s.read(1))
+        #print "My sum: %d Recd chksum: %d" % (sum % 256,chksum)
+        if chksum == sum % 256 :
+            segment = segment + 1
+            s.write(chr(42))
+        else:
+            s.write(chr(1))
+
+def uf_saveEEPROMdump(s,eepromdump):
+    for i in range (0,512) :
+        print '\r' + "%d %%" % ((i*100)/512),
+        sys.stdout.flush()
+        uf_recvPage(s,i,eepromdump)
+    print ""
+
+def uf_restoreEEPROMdump(s,eepromdump):
+    for i in range (0,512) :
+        print '\r' + "%d %%" % ((i*100)/512),
+        sys.stdout.flush()
+        uf_sendPage(s,i,eepromdump)
+    print ""
+
+def uf_storeinEEPROM(s, arlen, binarray):
+    segs = arlen / 264
+    if segs*264 < arlen :
+        segs = segs + 1
+        for i in range (arlen,segs*264):
+            binarray.append(0)
+    #print "Writing %d segments" % segs
+    write_2byte(s,segs)
+    for i in range (0,segs) :
+        print '\r' + "%d %%" % ((i*100)/segs),
+        sys.stdout.flush()
+        uf_sendPage(s,i,binarray)
+    print ""
+
+def check_sum(binarray):
+    for i in range(20,24):
+        binarray[i] = 0
+    sum=0
+    for i in range(0,8):
+        temp_int = 0
+        temp_int = binarray[i*4 + 0] | binarray[i*4 + 1] << 8 | binarray[i*4 + 2] << 16 | binarray[i*4 + 3] << 24
+        sum = sum + temp_int
+    sum = -sum
+    binarray[20] = sum & 0x000000ff
+    binarray[21] = (sum >> 8) & 0x000000ff
+    binarray[22] = (sum >> 16) & 0x000000ff
+    binarray[23] = (sum >> 24) & 0x000000ff 
+    sum=0
+    for i in range(0,8):
+        temp_int = 0
+        temp_int = binarray[i*4 + 0] | binarray[i*4 + 1] << 8 | binarray[i*4 + 2] << 16 | binarray[i*4 + 3] << 24
+        sum = sum + temp_int
+    for i in range(0,arlen):
+        if i % 8192 == 0 :
+            sum = 0
+        sum = sum + binarray[i]
+    return sum
+
+def upgrade_dongle(filename):
+    #define UF_SUCCESS 42
+    #define UF_ERROR 1
+    #define UF_SEGMENT_SIZE 132
+    from intelhex import IntelHex
+    ih = IntelHex(filename)
+    binarray = ih.tobinarray()
+    arlen = len(binarray)    
+    print "%d bytes of firmware." % arlen
+    print "checksumming interrupt vectors"
+    sum = check_sum(binarray)
+    #declare a finite sized array to hold eeprom dump. 
+    #Dynamic appending of lists always comes with a performance hit
+    eepromdump = [0] * 135168
+    s = myro.globvars.robot.ser
+    s.flushOutput()
+    s.flushInput()
+    #print "Getting old EEPROM"
+    #s.write(chr(SAVE_EEPROM))
+    #uf_saveEEPROMdump()
+    print "Sending firmware"
+    s.write(chr(UPDATE_FIRMWARE))
+    uf_storeinEEPROM(s, arlen, binarray)
+    print "Waiting for reboot"
+    time.sleep(2)
+    s.close()
+
