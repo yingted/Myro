@@ -1,5 +1,5 @@
 import zipfile, tarfile, urllib
-import os, string, serial
+import os, string, serial, sys
 from myro import __VERSION__ as myro_version
 import myro.globvars
 # copied below from scribbler.py:
@@ -228,6 +228,8 @@ def upgrade(what="myro", url = None):
         return upgrade_myro(url)
     elif what.lower() == "dongle":
         return upgrade_dongle(url)
+    elif what.lower() == "fluke":
+        return upgrade_fluke(url)
     elif what.lower() == "all":
         install_count = 0
         install_count += upgrade_myro(url)
@@ -312,7 +314,7 @@ def uf_storeinEEPROM(s, arlen, binarray):
         uf_sendPage(s,i,binarray)
     print ""
 
-def check_sum(binarray):
+def check_sum(binarray, arlen):
     for i in range(20,24):
         binarray[i] = 0
     sum=0
@@ -336,7 +338,7 @@ def check_sum(binarray):
         sum = sum + binarray[i]
     return sum
 
-def upgrade_dongle(filename):
+def upgrade_fluke(filename):
     #define UF_SUCCESS 42
     #define UF_ERROR 1
     #define UF_SEGMENT_SIZE 132
@@ -346,7 +348,7 @@ def upgrade_dongle(filename):
     arlen = len(binarray)    
     print "%d bytes of firmware." % arlen
     print "checksumming interrupt vectors"
-    sum = check_sum(binarray)
+    sum = check_sum(binarray, arlen)
     #declare a finite sized array to hold eeprom dump. 
     #Dynamic appending of lists always comes with a performance hit
     eepromdump = [0] * 135168
