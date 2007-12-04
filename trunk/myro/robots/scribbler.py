@@ -479,6 +479,8 @@ class Scribbler(Robot):
                  y_low=0, y_high=254,
                  u_low=51, u_high=136,
                  v_low=190, v_high=254):
+        if self.debug:
+            print "configuring RLE", delay, smooth_thresh, y_low, y_high, u_low, u_high, v_low, v_high
         self.lock.acquire()
         self.ser.write(chr(Scribbler.SET_RLE))
         self.ser.write(chr(delay))
@@ -517,7 +519,8 @@ class Scribbler(Robot):
         self.ser.write(chr(Scribbler.GET_RLE))
         size=ord(self.ser.read(1))
         size = (size << 8) | ord(self.ser.read(1))
-        #print "Grabbing RLE image size =", size
+        if self.debug:
+            print "Grabbing RLE image size =", size
         line =''
         while (len(line) < size):
             line+=self.ser.read(size-len(line))
@@ -1033,6 +1036,7 @@ def grab_rle_on(ser):
     """
     Returns a list of pixels that match.
     """
+    print "RLE"
     width = 256
     height = 192    
     blobs = zeros(((height + 1), (width + 1)), dtype=uint8)
@@ -1041,7 +1045,8 @@ def grab_rle_on(ser):
     ser.write(chr(Scribbler.GET_RLE))
     size=ord(ser.read(1))
     size = (size << 8) | ord(ser.read(1))
-    #print "Grabbing RLE image size =", size
+    if self.debug:
+        print "Grabbing RLE image size =", size
     line =''
     while (len(line) < size):
         line+=ser.read(size-len(line))
@@ -1139,6 +1144,13 @@ def yuv2rgb(Y, U, V):
 
 def rgb2yuv(R, G, B):
     Y = int(0.299 * R + 0.587 * G + 0.114 * B)
-    U = int(-0.169 * R - 0.332 * G + 0.500 * B + 128)
-    V = int( 0.500 * R - 0.419 * G - 0.0813 * B + 128)
+    U = int(-0.14713 * R - 0.28886 * G + 0.436 * B + 128)
+    V = int( 0.615 * R - 0.51499* G - 0.10001 * B + 128)
     return [max(min(v,255),0) for v in (Y, U, V)]
+
+#def rgb2yuv(R, G, B):
+#    Y = int(0.299 * R + 0.587 * G + 0.114 * B)
+#    U = int(-0.169 * R - 0.332 * G + 0.500 * B + 128)
+#    V = int( 0.500 * R - 0.419 * G - 0.0813 * B + 128)
+#    return [max(min(v,255),0) for v in (Y, U, V)]
+
