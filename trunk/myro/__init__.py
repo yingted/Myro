@@ -6,7 +6,7 @@ Distributed under a Shared Source License
 """
 
 __REVISION__ = "$Revision$"
-__VERSION__  = "2.4.4"
+__VERSION__  = "2.4.5"
 __AUTHOR__   = "Doug Blank <dblank@cs.brynmawr.edu>"
 
 import sys, atexit, time, random, pickle, threading, os, types, copy
@@ -641,6 +641,9 @@ def initialize(id = None):
     else:
         myro.globvars.robot = Scribbler(id)
     __builtins__["robot"] = myro.globvars.robot
+
+init = initialize
+
 def simulator(id = None):
     _startSimulator()
     time.sleep(2)
