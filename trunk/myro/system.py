@@ -343,6 +343,7 @@ def upgrade_fluke(filename):
     #define UF_ERROR 1
     #define UF_SEGMENT_SIZE 132
     from intelhex import IntelHex
+    import time
     ih = IntelHex(filename)
     binarray = ih.tobinarray()
     arlen = len(binarray)    
