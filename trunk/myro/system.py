@@ -132,10 +132,11 @@ def upgrade_myro(url=None):
         print "Nothing to upgrade in Myro; it's up-to-date."
     return install_count
 
-class FakeRobot:
-    def __init__(self, baudrate = 38400):
+class SerialRobot:
+    def __init__(self, port=None, baudrate=38400):
         from myro import ask
-        serialport = ask("Port", useCache=1)
+        if port == None:
+            serialport = ask("Port", useCache=0)
         # Deal with requirement that Windows "COM#" names where # >= 9 needs to
         # be in the format "\\.\COM#"
         if type(serialport) == str and serialport.lower().startswith("com"):
@@ -162,7 +163,7 @@ def upgrade_dongle(url=None):
     if myro.globvars.robot == None:
         # force upgrade
         print "Connecting to Scribbler for initial firmware installation..."
-        myro.globvars.robot = FakeRobot()
+        myro.globvars.robot = SerialRobot()
     s = myro.globvars.robot.ser
     if url == None:
         url = "http://myro.roboteducation.org/upgrade/dongle/"

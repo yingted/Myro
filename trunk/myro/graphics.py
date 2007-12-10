@@ -271,10 +271,8 @@ def moveToTop(window):
 import tkFileDialog, tkColorChooser, Dialog
 from myro.widgets import AlertDialog
 
-def distance(color1, color2):
-    rgb1 = color1.getRGB()
-    rgb2 = color2.getRGB()
-    return math.sqrt((rgb1[0] - rgb2[0]) ** 2 + (rgb1[1] - rgb2[1]) ** 2 + (rgb1[2] - rgb2[2]) ** 2)
+def distance(tuple1, tuple2):
+    return math.sqrt(sum([(t1 - t2) ** 2 for (t1, t2) in zip(tuple1, tuple2)]))
 
 class AskDialog(AlertDialog):
     def __init__(self, title, qlist):
