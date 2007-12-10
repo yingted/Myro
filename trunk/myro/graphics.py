@@ -1174,20 +1174,31 @@ class Image(GraphicsObject):
         GraphicsObject.__init__(self, [])     # initialize
         if len(center_point_and_pixmap) == 1: # assume image
             self.anchor = None
-            pixmap = center_point_and_pixmap[0]
+            self.pixmap = center_point_and_pixmap[0]
         elif len(center_point_and_pixmap) == 2: # assume point, image
             self.anchor = center_point_and_pixmap[0].clone()
-            pixmap = center_point_and_pixmap[1]
+            self.pixmap = center_point_and_pixmap[1]
         else:
             raise AttributeError, "invalid parameters to Image(); need 1 or 2"
         self.imageId = Image.idCount        # give this image a number
         Image.idCount = Image.idCount + 1 # increment global counter
-        if type(pixmap) == type(""): # assume a filename
-            self.img = _tkCall(tk.PhotoImage, file=pixmap, master=_root)
+        if type(self.pixmap) == type(""): # assume a filename
+            self.img = _tkCall(tk.PhotoImage, file=self.pixmap, master=_root)
         else:
-            self.img = pixmap.image
+            self.img = self.pixmap.image
             # _tkCall(tk.PhotoImage, pixmap.image, master=_root)
             # 
+
+    def getP1(self):
+         return Point(self.anchor.x - self.pixmap.getWidth()/2, 
+                      self.anchor.y - self.pixmap.getHeight()/2)
+
+    def getP2(self):
+         return Point(self.anchor.x + self.pixmap.getWidth()/2, 
+                      self.anchor.y + self.pixmap.getHeight()/2)
+
+    def getCenter(self):
+         return self.anchor.clone()
 
     def refresh(self, canvas):
         _tkCall(self._refresh, canvas)
