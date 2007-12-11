@@ -686,6 +686,9 @@ class Point(GraphicsObject):
                 
     def getX(self): return self.x
     def getY(self): return self.y
+    def getP1(self): return Point(self.x, self.y)
+    def getP2(self): return Point(self.x, self.y)
+    def getCenter(self): return Point(self.x, self.y)
 
 class _BBox(GraphicsObject):
     # Internal base class for objects represented by bounding box
@@ -1036,6 +1039,8 @@ class Picture(object):
             self.pixels[x, y] = tuple(newColor.getRGB())
         elif self.image.mode == "L": # 1 int
             self.pixels[x, y] = sum(newColor.getRGB())/3 # avg or the three values
+    def setRGB(self, x, y, rgb):
+         self.setColor(x, y, Color(*rgb))
     def getRGB(self, x, y):
         retval = self.pixels[x, y]
         if self.image.mode == "P":
@@ -1088,6 +1093,8 @@ class Pixel(object):
             self.pixels[self.x, self.y] = tuple(newColor.getRGB())
         elif self.picture.image.mode == "L":
             self.pixels[self.x, self.y] = sum(newColor.getRGB())/3 # avg
+    def setRGB(self, rgb):
+         self.setColor(Color(*rgb))
     def getRGB(self):
         retval = self.pixels[self.x, self.y]
         if self.picture.image.mode == "P":
@@ -1139,6 +1146,8 @@ class Color(object):
         return Color(self.rgb)
     def setColor(self, color):
         self.rgb = color.getRGB()
+    def setRGB(self, rgb):
+        self.rgb = copy(rgb)
     def getRGB(self):
         return self.rgb
     def __eq__(self, other):

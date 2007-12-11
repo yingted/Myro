@@ -1079,6 +1079,12 @@ def getBlue(pixel):
 def getColor(pixel):
     return pixel.getColor()
 
+def setRGB(pixel_or_color, rgb):
+    return pixel_or_color.setRGB(rgb)
+
+def getRGB(pixel_or_color):
+    return pixel_or_color.getRGB()
+
 def setRed(pixel, value):
     return pixel.setColor(Color(value, pixel.getRGB()[1], pixel.getRGB()[2]))
 
