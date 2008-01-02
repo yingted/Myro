@@ -27,7 +27,8 @@ except:
     print >> sys.stderr, "ERROR: you need to install Python Image Library to make pictures"
 if _pil_version != None:
     if _pil_version.split(".") < ["1", "1", "6"]:
-        print >> sys.stderr, ("ERROR: you need to upgrade Python Image Library to at least 1.1.6 (you're running %s)" % _pil_version)
+        print >> sys.stderr, ("ERROR: you need to upgrade Python Image Library to at least 1.1.6 (you're running %s)" % 
+                              _pil_version)
 del _pil_version
 
 def timer(seconds=0):
@@ -180,6 +181,72 @@ def randomNumber():
     """
     return random.random()
 
+def gamepad(*phrases):
+    """
+    Run the gamepad controller.
+    """
+    if len(phrases) == 0:
+        try:
+            name = getName()
+        except AttributeError:
+            name = "Scribby"
+        phrases = ["Hello! My name is %s." % name, "Ouch!", "Watch out!", "Good bye."]
+    print "        Pad   Action"
+    print "     ------   -------"
+    print " Left/Right   turnLeft() and turnRight()"
+    print "    Up/Down   forward() and backward()"
+    print ""
+    print "     Button   Action"
+    print "     ------   -------"
+    print "          1   takePicture()"
+    print "          2   beep(440)"  
+    print "          3   beep(.5, 880)"  
+    print "          4   beep(.5, 1760)"  
+    print "          5   speak('%s')" % phrases[0]
+    print "          6   speak('%s')" % phrases[1]
+    print "          7   speak('%s')" % phrases[2]
+    print "          8   speak('%s') and stop()" % phrases[3]
+    print ""
+    print "Gamepad is now running... Button 8 to stop."
+    while True:
+        retval = getGamepad()
+        button = retval["button"]
+        axis = retval["axis"]
+        if button[0]:
+            pic = takePicture()
+            showpic()
+        freqs = [None, None]
+        if button[1]:
+            freqs[0] = 440
+        if button[2]:
+            if freqs[0] == None:
+                freqs[0] = 880
+            else:
+                freqs[1] = 880
+        if button[3]:
+            if freqs[0] == None:
+                freqs[0] = 1760
+            else:
+                freqs[1] = 1760
+        if button[4]:
+            speak(phrases[0], async=1)
+        elif button[5]:
+            speak(phrases[1], async=1)
+        elif button[6]:
+            speak(phrases[2], async=1)
+        elif button[7]:
+            speak(phrases[3], async=1)
+            stop()
+            break
+        else:
+            if abs(axis[0] - 0.0) > .05 or abs(axis[1] - 0.0) > .05: 
+                motors(-axis[1], -axis[0])
+            if freqs != [None, None]:
+                try:
+                    beep(.5, *freqs)
+                except:
+                    computer.beep(.5, *freqs)
+
 def getGamepad(*what, **kwargs):
     """
     Return readings from a gamepad/joystick when there is a change. 
@@ -195,14 +262,23 @@ def getGamepad(*what, **kwargs):
         return _getGamepadNow(*what)
     if "wait" in kwargs:
         waitTime = kwargs["wait"]
+        del kwargs["wait"]
     else:
         waitTime = 0.05
+    if "any" in what:
+        any = True
+        what = list(what)
+        what.remove("any")
+    else:
+        any = False
     retval = _getGamepadNow(*what)
     newRetval = _getGamepadNow(*what)
     while retval == newRetval:
         newRetval = _getGamepadNow(*what)
         wait(waitTime)
-    return _or(newRetval, retval)
+    if any:
+        return _or(newRetval, retval)
+    return newRetval
 
 def _or(a, b):
     """
@@ -229,7 +305,7 @@ def _or(a, b):
         return retval
     else:
         raise AttributeError, ("invalid type: %s" % str(a))
-                    
+
 def getGamepadNow(*what):
     """
     Return readings from a gamepad/joystick immediately. 
@@ -266,6 +342,13 @@ def getGamepadNow(*what):
         if item == "count":
             retval["count"] = myro.globvars.pygame.joystick.get_count()
         elif js != None:
+            if item == "start":
+                myro.globvars.joysticks = []
+                for i in range(myro.globvars.pygame.joystick.get_count()):
+                    js = myro.globvars.pygame.joystick.Joystick(i)
+                    js.init()
+                    myro.globvars.joysticks.append(js)
+                retval["result"] = myro.globvars.pygame.joystick.get_count()
             if item == "init":
                 retval["init"] = js.get_init()
             elif item == "name":
@@ -573,7 +656,7 @@ class Computer(Robot):
     def move(self, translate, rotate):
         """ Moves the robot translate, rotate velocities. """
         print "move(%f, %f)" % (translate, rotate)
-    def speak(self, message, async = 1):
+    def speak(self, message, async = 0):
         """ Speaks a text message. """
         if myro.globvars.tts != None:
             myro.globvars.tts.speak(message, async)

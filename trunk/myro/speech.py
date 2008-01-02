@@ -5,7 +5,7 @@ class TTSEngine:
     def __init__(self, name = None, echo = 1):
 	self.name = name
 	self.echo = echo 
-    def speak(self, message, async = 1):
+    def speak(self, message, async = 0):
 	if self.echo:
             print message
     def stop(self):
@@ -18,7 +18,7 @@ class TTSEngine:
         return []
 
 class LinuxTTSEngine(TTSEngine):
-    def speak(self, message, async=1):
+    def speak(self, message, async=0):
         if self.echo:
             print message
         if async:
@@ -36,7 +36,7 @@ class WindowsTTSEngine(TTSEngine):
             self.setVoice(name)
 	self.echo = echo
 
-    def speak(self, message, async = 1):
+    def speak(self, message, async = 0):
 	if self.echo:
 	    print message
         self.tts.Speak(message, async) # 0 is default, 1 is async
@@ -67,7 +67,7 @@ class MacTTSEngine(TTSEngine):
         else:
             self.voice = ""
 
-    def speak(self, message, async = 1):
+    def speak(self, message, async = 0):
         if self.echo:
             print message
         if async:
@@ -86,7 +86,7 @@ class MacTTSEngine(TTSEngine):
     def getVoice(self):
         return self.voice
 
-def speak(message, async = 1):
+def speak(message, async = 0):
     if myro.globvars.tts != None:
         myro.globvars.tts.speak(message, async)
     else:
