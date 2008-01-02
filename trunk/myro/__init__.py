@@ -6,7 +6,7 @@ Distributed under a Shared Source License
 """
 
 __REVISION__ = "$Revision$"
-__VERSION__  = "2.4.6"
+__VERSION__  = "2.5.0"
 __AUTHOR__   = "Doug Blank <dblank@cs.brynmawr.edu>"
 
 import sys, atexit, time, random, pickle, threading, os, types, copy
@@ -342,13 +342,6 @@ def getGamepadNow(*what):
         if item == "count":
             retval["count"] = myro.globvars.pygame.joystick.get_count()
         elif js != None:
-            if item == "start":
-                myro.globvars.joysticks = []
-                for i in range(myro.globvars.pygame.joystick.get_count()):
-                    js = myro.globvars.pygame.joystick.Joystick(i)
-                    js.init()
-                    myro.globvars.joysticks.append(js)
-                retval["result"] = myro.globvars.pygame.joystick.get_count()
             if item == "init":
                 retval["init"] = js.get_init()
             elif item == "name":
