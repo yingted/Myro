@@ -214,7 +214,7 @@ def gamepad(*phrases):
         axis = retval["axis"]
         if button[0]:
             pic = takePicture()
-            showpic()
+            show(pic)
         freqs = [None, None]
         if button[1]:
             freqs[0] = 440
