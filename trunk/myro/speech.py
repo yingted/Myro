@@ -70,11 +70,13 @@ class MacTTSEngine(TTSEngine):
     def speak(self, message, async = 0):
         if self.echo:
             print message
+
         if async:
             background = "&"
         else:
             background = ""
-        cmd = "say -v \"%s\" \"%s\" %s" % (self.voice, message,background)
+            
+        cmd = "say -v \"%s\" \"%s\" %s" % (self.voice, message, background)
         os.system(cmd)
 
     def setVoice(self, name):

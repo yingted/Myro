@@ -1,5 +1,5 @@
 import zipfile, tarfile, urllib
-import os, string, serial, sys
+import os, string, serial, sys, time
 from myro import __VERSION__ as myro_version
 import myro.globvars
 # copied below from scribbler.py:
@@ -156,7 +156,7 @@ class SerialRobot:
     def restart(self):
         print "Please run initialize() to connect onto robot"
 
-def upgrade_dongle(url=None):
+def upgrade_scribbler(url=None):
     """
     Takes a url or filename and upgrades Myro.
     """
@@ -164,6 +164,7 @@ def upgrade_dongle(url=None):
         # force upgrade
         print "Connecting to Scribbler for initial firmware installation..."
         myro.globvars.robot = SerialRobot()
+            
     s = myro.globvars.robot.ser
     if url == None:
         url = "http://myro.roboteducation.org/upgrade/dongle/"
@@ -171,7 +172,7 @@ def upgrade_dongle(url=None):
     if not url.startswith("http://"):
         print "Looking for Dongle upgrades in file", url, "..."
         f = open(url, 'r')
-        install_count += load_dongle(s, f) # which is a filename
+        install_count += load_scribbler(s, f) # which is a filename
     else:        
         print "Looking for Dongle upgrades at", url, "..."
         dongle_ver = myro.globvars.robot.getInfo()["api"].split(".")
@@ -199,14 +200,60 @@ def upgrade_dongle(url=None):
             full_url = consider[consider_keys[-1]]
             print "Loading", full_url
             f = urllib.urlopen(full_url)
-            install_count += load_dongle(s, f)
+            install_count += load_scribbler(s, f)
     if install_count > 0:
         print "Done upgrading!"
     else:
         print "Nothing to upgrade on the Dongle; it's up-to-date."
     return install_count
 
-def load_dongle(s, f):
+def get_info_timeout(s):
+
+    GET_INFO=80  
+
+    oldtimeout = s.timeout
+    
+    s.timeout = 4
+    s.flushInput()
+    s.flushOutput()
+    s.write(chr(GET_INFO) + (' ' * 8))
+    retval = s.readline()
+    #print "Got", retval    
+    s.write(chr(GET_INFO) + (' ' * 8))
+    retval = s.readline()
+
+    #print "Got", retval
+    if retval[0] == 'P':
+        retval = retval[1:]
+
+    s.timeout = oldtimeout
+    
+    retDict = {}
+    for pair in retval.split(","):
+        if len(pair) > 1:
+            it, value = pair.split(":")
+            retDict[it.lower().strip()] = value.strip()
+    return retDict
+            
+def load_scribbler(s, f):
+    
+    # check to see if we need to send magicKey when upgrading
+    info = get_info_timeout(s)
+
+    sendMagicKey = False
+
+    if "fluke" in info.keys():
+        major      = int(info["fluke"].split(".")[0])
+        minor      = int(info["fluke"].split(".")[1])
+        minorminor = int(info["fluke"].split(".")[2])
+        print "Version of fluke", major, minor, minorminor
+    
+        if major <= 2 and minor <= 5:
+            print "Older firmware version, Not sending magic key"
+        else:
+            sendMagicKey = True
+            print "Sending magic key"
+
     bytes=[]
     for t in f:
         t = t.strip()
@@ -219,7 +266,15 @@ def load_dongle(s, f):
     for i in range(0, len(bytes)):
         set_scribbler_memory(s, i, bytes[i])
     print "Programming scribbler..."
-    set_scribbler_start_program(s, len(bytes))
+    if sendMagicKey:
+        print "sending magic key"
+        set_scribbler_start_program(s, len(bytes))
+    else:
+        print "older version, not sending magic key"
+        set_scribbler_start_program_old(s, len(bytes))
+
+    time.sleep(10)
+
     print "Done!"
     myro.globvars.robot.restart()
     return 1
@@ -227,14 +282,14 @@ def load_dongle(s, f):
 def upgrade(what="myro", url = None):
     if what.lower() == "myro":
         return upgrade_myro(url)
-    elif what.lower() == "dongle":
-        return upgrade_dongle(url)
+    elif what.lower() == "scribbler":
+        return upgrade_scribbler(url)
     elif what.lower() == "fluke":
         return upgrade_fluke(url)
     elif what.lower() == "all":
         install_count = 0
         install_count += upgrade_myro(url)
-        install_count += upgrade_dongle(url)
+        install_count += upgrade_scribbler(url)
         return install_count
 
 GET_SCRIB_PROGRAM=91  # with offset, returns the scribbler program buffer
@@ -249,8 +304,15 @@ def set_scribbler_memory(ser, offset, byte):
     
 def set_scribbler_start_program(ser, size):
     ser.write(chr(SET_START_PROGRAM))
+    # magic code to ensure we don't enter scribbler program by accident
+    ser.write(chr(0x01))
+    ser.write(chr(0x23))
     write_2byte(ser, size)
-            
+
+def set_scribbler_start_program_old(ser, size):
+    ser.write(chr(SET_START_PROGRAM))
+    write_2byte(ser, size)
+
 def write_2byte(ser, value):
     ser.write(chr((value >> 8) & 0xFF))
     ser.write(chr(value & 0xFF))
@@ -343,6 +405,34 @@ def upgrade_fluke(filename):
     #define UF_SUCCESS 42
     #define UF_ERROR 1
     #define UF_SEGMENT_SIZE 132
+
+    if myro.globvars.robot == None:
+        # force upgrade
+        print "Connecting for firmware installation..."
+        myro.globvars.robot = SerialRobot()
+            
+    s = myro.globvars.robot.ser
+
+    # check to see if we can even upgrade
+    info = get_info_timeout(s)
+    
+    if not "fluke" in info.keys():
+        print "sorry can't upgrade this fluke over bluetooth. It must be upgraded manually over the serial port using lpc21isp, see wiki.roboteducation.org"
+        return
+
+    #info = myro.globvars.robot.getInfo()
+    sendMagicKey = True
+    major      = int(info["fluke"].split(".")[0])
+    minor      = int(info["fluke"].split(".")[1])
+    minorminor = int(info["fluke"].split(".")[2])
+    print "Version of fluke", major, minor, minorminor
+    
+    if major <= 2 and minor <= 5:
+        sendMagicKey = False
+        print "Older firmware version, Not sending magic key"
+    else:
+        print "Sending magic key"
+        
     from intelhex import IntelHex
     import time
     ih = IntelHex(filename)
@@ -354,14 +444,19 @@ def upgrade_fluke(filename):
     #declare a finite sized array to hold eeprom dump. 
     #Dynamic appending of lists always comes with a performance hit
     eepromdump = [0] * 135168
-    s = myro.globvars.robot.ser
     s.flushOutput()
     s.flushInput()
+       
     #print "Getting old EEPROM"
     #s.write(chr(SAVE_EEPROM))
     #uf_saveEEPROMdump()
     print "Sending firmware"
     s.write(chr(UPDATE_FIRMWARE))
+    if sendMagicKey:        
+        # magic code to ensure we don't enter program by accident    
+        s.write(chr(0x01))
+        s.write(chr(0x23))
+        
     uf_storeinEEPROM(s, arlen, binarray)
     print "Waiting for reboot"
     time.sleep(2)

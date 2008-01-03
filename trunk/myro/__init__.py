@@ -553,6 +553,10 @@ class Robot(object):
         """ Returns the robot's name. """
         return self.get("name")
 
+    def getPassword(self):
+        """ Returns the robot's password. """
+        return self.get("password")
+
     def getAll(self):
         return self.get("all")
 
@@ -562,6 +566,9 @@ class Robot(object):
     def setName(self, name):
         return self.set("name", name)
 
+    def setPassword(self, password):
+        return self.set("password", password)
+    
     def setVolume(self, value):
         return self.set("volume", value)
 
@@ -692,9 +699,10 @@ computer = Computer()
 
 # functions:
 def _cleanup():
-    if myro.globvars.robot != None:
-        myro.globvars.robot.stop() # hangs?
-        time.sleep(.5)
+    if myro.globvars.robot:
+        if "robot" in myro.globvars.robot.getInfo().keys():
+            myro.globvars.robot.stop() # hangs?
+            time.sleep(.5)
         myro.globvars.robot.close()
 
 # Get ready for user prompt; set up environment:
@@ -825,6 +833,11 @@ def getName():
         return myro.globvars.robot.get("name")
     else:
         raise AttributeError, "need to initialize robot"
+def getPassword():
+    if myro.globvars.robot:
+        return myro.globvars.robot.get("password")
+    else:
+        raise AttributeError, "need to initialize robot"
 def getStartSong():
     if myro.globvars.robot:
         return myro.globvars.robot.get("startsong")
@@ -858,6 +871,11 @@ def setLED(position, value):
 def setName(name):
     if myro.globvars.robot:
         return myro.globvars.robot.set("name", name)
+    else:
+        raise AttributeError, "need to initialize robot"
+def setPassword(password):
+    if myro.globvars.robot:
+        return myro.globvars.robot.set("password", password)
     else:
         raise AttributeError, "need to initialize robot"
 def setVolume(value):
@@ -908,7 +926,13 @@ def getBright(position):
         return myro.globvars.robot.getBright(position)
     else:
         raise AttributeError, "need to initialize robot"
-    
+
+def getBlob():
+    if myro.globvars.robot:
+        return myro.globvars.robot.getBlob()
+    else:
+        raise AttributeError, "need to initialize robot"
+
 def getObstacle(position):
     if myro.globvars.robot:
         return myro.globvars.robot.getObstacle(position)
