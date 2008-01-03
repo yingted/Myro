@@ -218,12 +218,12 @@ def get_info_timeout(s):
     s.flushOutput()
     s.write(chr(GET_INFO) + (' ' * 8))
     retval = s.readline()
-    print "Got", retval    
+    #print "Got", retval    
     s.write(chr(GET_INFO) + (' ' * 8))
     retval = s.readline()
 
     # remove echoes
-    print "Got", retval
+    #print "Got", retval
     if retval[0] == 'P' or retval[0] == 'p':
         retval = retval[1:]
         
@@ -244,7 +244,7 @@ def load_scribbler(s, f):
     # check to see if we need to send magicKey when upgrading
     info = get_info_timeout(s)
 
-    print info
+    #print info
     sendMagicKey = False
 
     if "fluke" in info.keys():
