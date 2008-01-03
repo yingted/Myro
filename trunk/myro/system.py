@@ -207,6 +207,16 @@ def upgrade_scribbler(url=None):
         print "Nothing to upgrade on the Dongle; it's up-to-date."
     return install_count
 
+def manual_flush(ser):
+    old = ser.timeout
+    ser.setTimeout(1)
+    l = 'a'
+    count = 0;
+    while (len(l) != 0 and count < 50000):
+        l = ser.read(1)
+        count += len(l)        
+    ser.timeout = old
+    
 def get_info_timeout(s):
 
     GET_INFO=80  
@@ -214,8 +224,8 @@ def get_info_timeout(s):
     oldtimeout = s.timeout
     
     s.timeout = 4
-    s.flushInput()
-    s.flushOutput()
+    manual_flush(ser)
+    
     s.write(chr(GET_INFO) + (' ' * 8))
     retval = s.readline()
     #print "Got", retval    

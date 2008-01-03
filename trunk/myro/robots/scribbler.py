@@ -310,17 +310,19 @@ class Scribbler(Robot):
     def close(self):
         self.ser.close()
 
+    def manual_flush(self):
+        old = self.ser.timeout
+        self.ser.setTimeout(1)
+        l = 'a'
+        count = 0;
+        while (len(l) != 0 and count < 50000):
+            l = self.ser.read(1)
+            count += len(l)        
+        self.ser.timeout = old
+
     def restart(self):
 
-        #manual flush
-        old = self.ser.timeout
-        self.ser.setTimeout(.001)
-        l = 'a'
-        while (len(l) != 0):
-            l = self.ser.read(1)
-        
-        self.ser.timeout = old
-                                
+        self.manual_flush()
         self.setEchoMode(0) # send command to get out of broadcast; turn off echo
         time.sleep(.25)               # give it some time
         while 1:
@@ -470,17 +472,21 @@ class Scribbler(Robot):
             
         self.ser.timeout = 4
         
-        self.ser.flushInput()
-        self.ser.flushOutput()
+        #self.ser.flushInput()
+        #self.ser.flushOutput()
+        
+        self.manual_flush()
         # have to do this twice since sometime the first echo isn't
         # echoed correctly (spaces) from the scribbler
         self.ser.write(chr(Scribbler.GET_INFO) + (' ' * 8))
         retval = self.ser.readline()
+        print "Got", retval
+        
         self.ser.write(chr(Scribbler.GET_INFO) + (' ' * 8))
         retval = self.ser.readline()
         
         # remove echoes
-        #print "Got", retval
+        print "Got", retval
         if retval[0] == 'P' or retval[0] == 'p':
             retval = retval[1:]
         
