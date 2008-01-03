@@ -190,7 +190,10 @@ def gamepad(*phrases):
             name = getName()
         except AttributeError:
             name = "Scribby"
-        phrases = ["Hello! My name is %s." % name, "Ouch!", "Watch out!", "Good bye."]
+        phrases = ["Hello. My name is %s." % name, 
+                   "Ouch! I'm a sensitive robot.", 
+                   "I'm hungry. Do you have any batteries?", 
+                   "Good bye, for now."]
     print "        Pad   Action"
     print "     ------   -------"
     print " Left/Right   turnLeft() and turnRight()"
@@ -199,35 +202,36 @@ def gamepad(*phrases):
     print "     Button   Action"
     print "     ------   -------"
     print "          1   takePicture()"
-    print "          2   beep(440)"  
-    print "          3   beep(.5, 880)"  
-    print "          4   beep(.5, 1760)"  
+    print "          2   beep(.5, 523)"  
+    print "          3   beep(.5, 587)"  
+    print "          4   beep(.5, 659)"  
     print "          5   speak('%s')" % phrases[0]
     print "          6   speak('%s')" % phrases[1]
     print "          7   speak('%s')" % phrases[2]
     print "          8   speak('%s') and stop()" % phrases[3]
     print ""
-    print "Gamepad is now running... Button 8 to stop."
+    print "Gamepad is now running... Press button 8 to stop."
     while True:
         retval = getGamepad()
         button = retval["button"]
         axis = retval["axis"]
         if button[0]:
+            speak("Taking a picture. Say cheese!")
             pic = takePicture()
             show(pic)
         freqs = [None, None]
         if button[1]:
-            freqs[0] = 440
+            freqs[0] = 523
         if button[2]:
             if freqs[0] == None:
-                freqs[0] = 880
+                freqs[0] = 587
             else:
-                freqs[1] = 880
+                freqs[1] = 587
         if button[3]:
             if freqs[0] == None:
-                freqs[0] = 1760
+                freqs[0] = 659
             else:
-                freqs[1] = 1760
+                freqs[1] = 659
         if button[4]:
             speak(phrases[0], async=1)
         elif button[5]:
@@ -239,8 +243,7 @@ def gamepad(*phrases):
             stop()
             break
         else:
-            if abs(axis[0] - 0.0) > .05 or abs(axis[1] - 0.0) > .05: 
-                motors(-axis[1], -axis[0])
+            move(-axis[1], -axis[0])
             if freqs != [None, None]:
                 try:
                     beep(.5, *freqs)
