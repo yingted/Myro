@@ -1,0 +1,897 @@
+' Scribbler robot demonstration code
+' Copyright 2005, Element Products, Inc.
+'
+'  {$STAMP BS2}
+'  {$PBASIC 2.5}
+
+
+
+#DEFINE Verbose = 0
+
+
+
+' I/O Declarations
+
+LightRight    PIN 0
+LightCenter   PIN 1
+LightLeft     PIN 2
+LineEnable    PIN 3
+LineRight     PIN 4
+LineLeft      PIN 5
+ObsRx         PIN 6
+Stall         PIN 7
+LedRight      PIN 8
+LedCenter     PIN 9
+LedLeft       PIN 10
+Speaker       PIN 11
+MotorRight    PIN 12
+MotorLeft     PIN 13
+ObsTxRight    PIN 14
+ObsTxLeft     PIN 15
+
+
+
+' I/O Initialization
+
+HIGH LightRight
+HIGH LightCenter
+HIGH LightLeft
+LOW LineEnable
+LOW LedRight
+LOW LedCenter
+LOW LedLeft
+LOW Speaker
+LOW MotorRight
+LOW MotorLeft
+LOW ObsTxRight
+LOW ObsTxLeft
+
+
+
+
+
+' Global Constants
+
+VelStop CON 128
+
+
+
+' Global Variables
+
+light_l VAR Word
+light_c VAR Word
+light_r VAR Word
+motor_r VAR Byte
+motor_l VAR Byte
+motor_temp VAR Byte
+move_time VAR Byte
+obs_r VAR Bit
+obs_l VAR Bit
+
+rand_w0 VAR Word
+rand_t0 VAR rand_w0.BIT0
+
+ram_w0 VAR Word
+ram_w1 VAR Word
+ram_w2 VAR Word
+ram_b0 VAR Byte
+ram_b1 VAR Byte
+ram_b2 VAR Byte
+ram_b3 VAR Byte
+ram_n0 VAR Nib
+ram_t0 VAR Bit
+ram_t1 VAR Bit
+
+
+
+
+
+' Check calibration and repair if necessary
+DATA@0, (16)
+
+ram_b0 = 0
+
+FOR ram_b1 = 0 TO 3
+  READ ram_b1, ram_b2
+  ram_b0 = ram_b0 + ram_b2
+NEXT
+
+' Sum of all bytes including checksum (3) should be 0
+' If not, write default values
+IF (ram_b0) THEN
+  FOR ram_b1 = 0 TO 3
+    WRITE ram_b1, 128:  ' = 1.0
+  NEXT
+ENDIF
+
+
+
+
+
+' Startup and Program Selection
+
+' Constants
+
+LightMult CON 4
+LightDiv CON 3
+
+
+' Variables
+
+st_light_l_init VAR ram_w0
+st_light_c_init VAR ram_w1
+st_light_r_init VAR ram_w2
+
+
+
+' Robot Initialization
+
+  motor_r = VelStop
+  motor_l = VelStop
+  GOSUB motor_set
+
+  rand_w0 = 23130
+
+
+' Capture the finger-on light levels
+
+  PAUSE 300
+  GOSUB check_light_sensors
+  st_light_l_init = light_l
+  st_light_c_init = light_c
+  st_light_r_init = light_r
+  PAUSE 200
+
+
+' Beep for user to take fingers off
+
+  FREQOUT Speaker, 100, 400
+
+
+' Check for fingers taken off
+
+  FOR ram_b0 = 0 TO 20
+    PAUSE 100
+    GOSUB check_light_sensors
+    IF ((st_light_r_init > ((light_r / LightDiv) * LightMult)) OR (st_light_c_init > ((light_c / LightDiv) * LightMult)) OR (st_light_l_init > ((light_l / LightDiv) * LightMult))) THEN startup_finger_off
+  NEXT
+
+  ' Time out to default program if no changes
+  GOTO light_sensor
+
+
+' If there are changes, capture finger-off light levels
+
+startup_finger_off:
+
+  ' Pause while fingers are removed
+  PAUSE 1000
+  GOSUB check_light_sensors
+
+
+' Decode the bits
+
+  ram_b0 = 0
+  IF (st_light_r_init > ((light_r / LightDiv) * LightMult)) THEN ram_b0 = ram_b0 + 1
+  IF (st_light_c_init > ((light_c / LightDiv) * LightMult)) THEN ram_b0 = ram_b0 + 2
+  IF (st_light_l_init > ((light_l / LightDiv) * LightMult)) THEN ram_b0 = ram_b0 + 4
+
+
+' Go to the selected program
+
+  BRANCH ram_b0, [light_sensor, light_follow, obs_sensor, obs_avoid,
+                   line_sensor, line_follow, scribble, ambulance]
+
+
+
+
+
+' Sensor and motor subroutines
+
+' Light sensors check subroutine
+'   after the subroutine call
+'   light_r = the right light sensor value
+'   light_c = the center light sensor value
+'   light_l = the left light sensor value
+'   lower values mean more light
+
+check_light_sensors:
+
+  HIGH LightLeft
+  HIGH LightCenter
+  HIGH LightRight
+
+  PAUSE 3
+
+  RCTIME LightLeft, 1, light_l
+  RCTIME LightCenter, 1, light_c
+  RCTIME LightRight, 1, light_r
+
+  RETURN
+
+
+
+
+
+' Obstacle sensors check subroutine
+'   after the subroutine call
+'   obs_r = 0 if there is an obstacle on the right
+'         = 1 if there is no obstacle on the right
+'   obs_l = 0 if there is an obstacle on the left
+'         = 1 if there is no obstacle on the left
+
+check_obstacle_sensors:
+
+  FREQOUT ObsTxRight, 1, 40500
+  obs_r = ObsRx
+  LOW ObsTxRight
+
+  FREQOUT ObsTxLeft, 1, 40500
+  obs_l = ObsRx
+  LOW ObsTxLeft
+
+  RETURN
+
+
+
+
+
+' Motor command subroutine
+'
+' takes three parameters:
+'   motor_r = speed of the right motor (28 - 228)
+'     (28 = full reverse, 128 = stop, 228 = full forward)
+'   motor_l = speed of the left motor (28 - 228)
+'     (28 = full reverse, 128 = stop, 228 = full forward)
+'   move_time = duration of the motor command (0 - 200)
+'     (0 = indefinite, 1 = .025 seconds, 200 = 5 seconds)
+'
+' corrects the motor speed according to the correction factors
+'   stored in address 0 (right) and 1 (left) of the EEPROM.
+'   The correction factors are in the range 0 - 255.
+'    64 = correction factor = 0.5
+'   128 = correction factor = 1.0 (normal speed)
+'   192 = correction factor = 1.5
+
+motor_set:
+  READ 0, motor_temp
+  PULSOUT MotorRight, (((((((motor_r - 128) * motor_temp) >> 7) + 256) & 511) MIN 156) * 10) - 560
+  PAUSE 1
+  IF (move_time) THEN PULSOUT MotorRight, (move_time * 10) + 1000
+
+  READ 1, motor_temp
+  PULSOUT MotorLeft, (((((((motor_l - 128) * motor_temp) >> 7) + 256) & 511) MIN 156) * 10) - 560
+  PAUSE 1
+  IF (move_time) THEN PULSOUT MotorLeft, (move_time * 10) + 1000
+
+  PAUSE move_time * 25
+RETURN
+
+
+
+
+
+' Light sensor demo program
+
+light_sensor:
+
+  HIGH LedRight
+  HIGH LedCenter
+  HIGH LedLeft
+  FREQOUT Speaker, 400, 440
+  FREQOUT Speaker, 250, 349
+  FREQOUT Speaker, 400, 523
+
+
+light_sensor_loop:
+
+  GOSUB check_light_sensors
+
+
+' Show light state on the LEDs
+
+  IF (light_r > ((st_light_r_init / LightDiv) * LightMult)) THEN LOW LedRight ELSE HIGH LedRight
+  IF (light_c > ((st_light_c_init / LightDiv) * LightMult)) THEN LOW LedCenter ELSE HIGH LedCenter
+  IF (light_l > ((st_light_l_init / LightDiv) * LightMult)) THEN LOW LedLeft ELSE HIGH LedLeft
+
+
+' Print out measured light levels
+
+#IF Verbose #THEN
+
+  DEBUG CRSRXY, 0, 0
+  DEBUG "L", DEC5 light_l, " C", DEC5 light_c, " R", DEC5 light_r
+
+#ENDIF
+
+  GOTO light_sensor_loop
+
+
+
+
+
+' Light follow demo program
+
+light_follow:
+
+' Constants
+
+LtfVelDrv CON 183
+LtfVelBack CON 78
+LtfVelArc0F CON 203
+LtfVelArc0R CON 163
+LtfVelArc1F CON 213
+LtfVelArc1R CON 153
+LtfVelArc2F CON 188
+LtfVelArc2R CON 88
+LtfVelStallF CON 176
+LtfVelStallR CON 75
+
+LtfStlBack CON 60
+LtfStlTurn CON 50
+
+Ltf0Mult CON 2
+Ltf0Div CON 3
+Ltf2Mult CON 3
+Ltf2Div CON 4
+
+
+' Variables
+
+ltf_stl VAR ram_b0
+ltf_dir VAR ram_t0
+
+
+
+  FREQOUT Speaker, 1500, 667, 3000
+
+
+light_follow_loop:
+
+  GOSUB check_light_sensors
+
+  IF (ltf_stl > 0) THEN
+    ltf_stl = ltf_stl - 1
+    IF (ltf_stl < LtfStlTurn) THEN
+      IF (ltf_dir = 1) THEN
+        motor_r = LtfVelStallR
+        motor_l = LtfVelStallF
+      ELSE
+        motor_r = LtfVelStallF
+        motor_l = LtfVelStallR
+      ENDIF
+    ENDIF
+
+  ELSEIF (Stall = 1) THEN
+    ltf_stl = LtfStlBack
+    IF (light_r < light_l) THEN
+      ltf_dir = 1
+    ELSE
+      ltf_dir = 0
+    ENDIF
+    motor_r = LtfVelBack
+    motor_l = LtfVelBack
+
+  ELSEIF ((light_c < light_l) AND (light_c < light_r)) THEN
+    IF ((light_c < ((light_l * Ltf0Mult) / Ltf0Div)) AND ((light_c < (light_r * Ltf0Mult) / Ltf0Div))) THEN
+      motor_r = LtfVelDrv
+      motor_l = LtfVelDrv
+
+      LOW LedRight
+      HIGH LedCenter
+      LOW LedLeft
+
+    ELSEIF (light_r < light_l) THEN
+      motor_r = LtfVelArc0R
+      motor_l = LtfVelArc0F
+
+      HIGH LedRight
+      LOW LedCenter
+      LOW LedLeft
+
+    ELSE
+      motor_r = LtfVelArc0F
+      motor_l = LtfVelArc0R
+
+      LOW LedRight
+      LOW LedCenter
+      HIGH LedLeft
+
+    ENDIF
+
+  ELSEIF (light_r < ((light_l * Ltf2Mult) / Ltf2Div)) THEN
+    motor_r = LtfVelArc2R
+    motor_l = LtfVelArc2F
+
+    HIGH LedRight
+    LOW LedCenter
+    LOW LedLeft
+
+  ELSEIF (light_l < ((light_r * Ltf2Mult) / Ltf2Div)) THEN
+    motor_r = LtfVelArc2F
+    motor_l = LtfVelArc2R
+
+    LOW LedRight
+    LOW LedCenter
+    HIGH LedLeft
+
+  ELSE
+    IF (light_r < light_l) THEN
+      motor_r = LtfVelArc1R
+      motor_l = LtfVelArc1F
+
+      HIGH LedRight
+      LOW LedCenter
+      LOW LedLeft
+
+    ELSE
+      motor_r = LtfVelArc1F
+      motor_l = LtfVelArc1R
+
+      LOW LedRight
+      LOW LedCenter
+      HIGH LedLeft
+
+    ENDIF
+  ENDIF
+
+
+  move_time = 0
+  GOSUB motor_set
+  PAUSE 3
+
+  GOTO light_follow_loop
+
+
+
+
+
+' Obstacle sensor demo program
+
+obs_sensor:
+
+obs_sensor_loop:
+
+  GOSUB check_obstacle_sensors
+
+  IF (obs_r = 0) THEN
+    HIGH LedRight : FREQOUT Speaker, 100, 330
+  ELSE
+    LOW LedRight
+  ENDIF
+
+  IF (obs_l = 0) THEN
+    HIGH LedLeft : FREQOUT Speaker, 100, 262
+  ELSE
+    LOW LedLeft
+  ENDIF
+
+  GOTO obs_sensor_loop
+
+
+
+
+
+' Avoid demo program
+
+obs_avoid:
+
+' Constants
+
+AvVelDrv CON 188
+AvVelBack CON 73
+AvVelTurnF CON 176
+AvVelTurnR CON 68
+
+AvDirCnt CON 30
+AvTurnCnt CON 16
+AvStallCnt CON 40
+AvBackCnt CON 12
+
+
+' Variables
+
+av_freq VAR ram_w0
+av_dur VAR ram_w1
+av_cnt VAR ram_b0
+av_index VAR ram_b1
+av_leds VAR ram_b2
+av_dir_cnt VAR ram_b3
+av_back VAR ram_t0
+av_dir VAR ram_t1
+
+
+
+  FREQOUT Speaker, 375, 262
+  HIGH LedLeft
+  FREQOUT Speaker, 300, 587
+  HIGH LedCenter
+  FREQOUT Speaker, 300, 349
+  HIGH LedRight
+  FREQOUT Speaker, 300, 622
+  LOW LedLeft
+  FREQOUT Speaker, 300, 349
+  LOW LedCenter
+  FREQOUT Speaker, 450, 262
+  LOW LedRight
+  FREQOUT Speaker, 450, 262
+
+
+  av_cnt = 1
+  av_back = 0
+
+obs_avoid_loop:
+
+  GOSUB check_obstacle_sensors
+
+  IF (Stall = 1) THEN
+    av_cnt = AvBackCnt
+    av_back = 1
+    motor_r = AvVelBack
+    motor_l = AvVelBack
+  ENDIF
+
+  IF (obs_r = 0) THEN
+    IF ((av_dir_cnt > 0) AND (av_dir = 1)) THEN
+      motor_r = AvVelTurnR
+      motor_l = AvVelTurnF
+    ELSE
+      IF(obs_l = 0) AND (rand_t0 = 1) THEN
+        motor_r = AvVelTurnR
+        motor_l = AvVelTurnF
+        av_dir = 1
+      ELSE
+        motor_r = AvVelTurnF
+        motor_l = AvVelTurnR
+        av_dir = 0
+      ENDIF
+    ENDIF
+    av_cnt = AvTurnCnt
+    av_dir_cnt = AvDirCnt
+  ELSEIF (obs_l = 0) THEN
+    IF((av_dir_cnt > 0) AND (av_dir = 0)) THEN
+      motor_r = AvVelTurnF
+      motor_l = AvVelTurnR
+    ELSE
+      motor_r = AvVelTurnR
+      motor_l = AvVelTurnF
+      av_dir = 1
+    ENDIF
+    av_cnt = AvTurnCnt
+    av_dir_cnt = AvDirCnt
+  ENDIF
+
+  IF (av_dir_cnt > 0) THEN
+    av_dir_cnt = av_dir_cnt - 1
+  ELSE
+    RANDOM rand_w0
+  ENDIF
+
+  IF (av_cnt > 0) THEN
+    av_cnt = av_cnt - 1
+
+    IF (av_cnt = 0) THEN
+      IF (av_back = 1) THEN
+        av_back = 0
+        av_cnt = AvStallCnt
+        av_dir_cnt = AvDirCnt
+        av_dir = rand_t0
+        IF (av_dir = 1) THEN
+          motor_r = AvVelTurnR
+          motor_l = AvVelTurnF
+        ELSE
+          motor_r = AvVelTurnF
+          motor_l = AvVelTurnR
+        ENDIF
+      ELSE
+        motor_r = AvVelDrv
+        motor_l = AvVelDrv
+      ENDIF
+    ENDIF
+  ENDIF
+
+
+  move_time = 0
+  GOSUB motor_set
+  PAUSE 5
+
+  GOTO obs_avoid_loop
+
+
+
+
+
+' Line sensor demo program
+
+line_sensor:
+
+  HIGH LineEnable
+  FREQOUT Speaker, 100, 440
+  FREQOUT Speaker, 150, 392
+  FREQOUT Speaker, 100, 440
+  FREQOUT Speaker, 150, 392
+
+line_sensor_loop:
+
+  IF (LineLeft = 1) THEN HIGH LedLeft ELSE LOW LedLeft
+  IF (LineRight = 1) THEN HIGH LedRight ELSE LOW LedRight
+
+  GOTO line_sensor_loop
+
+
+
+
+
+' Line follow demo program
+
+line_follow:
+
+' Constants
+
+LnfVelDrv CON 168
+LnfVelTurnF CON 173
+LnfVelTurnR CON 83
+LnfVelArcF CON 178
+LnfVelArcR CON 138
+
+LnfMaxInit CON 30
+LnfMaxInc CON 30
+LnfMaxMax CON 120
+
+
+' Variables
+
+lnf_cnt VAR ram_b0
+lnf_max VAR ram_b1
+lnf_now VAR ram_n0
+lnf_last VAR ram_t0
+lnf_in VAR INS.NIB1
+
+
+
+  FREQOUT Speaker, 200, 300, 1200
+  FREQOUT Speaker, 500, 600, 1200
+
+  HIGH LineEnable
+  lnf_max = 30
+  lnf_cnt = 30
+
+
+line_follow_loop:
+
+  IF (Stall = 1) THEN
+    motor_r = VelStop
+    motor_l = VelStop
+    GOSUB motor_set
+    FREQOUT Speaker, 1000, 600
+line_follow_end:
+    GOTO line_follow_end
+  ENDIF
+
+  lnf_now = lnf_in
+
+  SELECT (lnf_now & %0011)
+    CASE %0011
+      motor_r = LnfVelDrv
+      motor_l = LnfVelDrv
+      lnf_max = LnfMaxInit
+      lnf_cnt = LnfMaxInit
+
+      LOW LedRight
+      HIGH LedCenter
+      LOW LedLeft
+
+    CASE %0001
+      motor_r = LnfVelArcR
+      motor_l = LnfVelArcF
+      lnf_last = 1
+      lnf_max = LnfMaxInit
+      lnf_cnt = LnfMaxInit
+
+      HIGH LedRight
+      LOW LedCenter
+      LOW LedLeft
+
+    CASE %0010
+      motor_r = LnfVelArcF
+      motor_l = LnfVelArcR
+      lnf_last = 0
+      lnf_max = LnfMaxInit
+      lnf_cnt = LnfMaxInit
+
+      LOW LedRight
+      LOW LedCenter
+      HIGH LedLeft
+
+    CASE ELSE
+      lnf_cnt = lnf_cnt - 1
+
+      IF (lnf_cnt = 0) THEN
+        lnf_max = lnf_max + LnfMaxInc
+        IF (lnf_max > LnfMaxMax) THEN lnf_max = LnfMaxMax
+        lnf_cnt = lnf_max
+
+        IF (lnf_last = 1) THEN
+          lnf_last = 0
+        ELSE
+          lnf_last = 1
+        ENDIF
+      ENDIF
+
+      IF (lnf_last = 1) THEN
+        motor_r = LnfVelTurnR
+        motor_l = LnfVelTurnF
+      ELSE
+        motor_r = LnfVelTurnF
+        motor_l = LnfVelTurnR
+      ENDIF
+
+  ENDSELECT
+
+  move_time = 0
+  GOSUB motor_set
+  PAUSE 3
+
+
+  GOTO line_follow_loop
+
+
+
+
+
+' Scribble drawing demo program
+
+scribble:
+
+' Variables
+
+scr_move VAR ram_b0
+scr_index VAR ram_n0
+
+
+  FREQOUT Speaker, 275, 329
+  PAUSE 100
+  FREQOUT Speaker, 200, 293
+  FREQOUT Speaker, 200, 262
+  FREQOUT Speaker, 500, 392
+
+  FOR scr_index = 0 TO 1
+    LOOKUP scr_index, [2,3], scr_move
+  GOSUB scribble_cmd
+  NEXT
+
+  FREQOUT Speaker, 200, 400
+  PAUSE 6000
+
+  FOR scr_index = 0 TO 6
+    LOOKUP scr_index, [0,1,0,1,0,1,0], scr_move
+  GOSUB scribble_cmd
+  NEXT
+
+  FREQOUT Speaker, 200, 400
+
+scribble_end:
+  GOTO scribble_end
+
+
+scribble_cmd:
+  '                 Str  L90  CirL CirR
+  '                 0    1    2    3
+  LOOKUP scr_move, [178, 178, 203,  88], motor_r
+  LOOKUP scr_move, [178,  78,  88, 203], motor_l
+  LOOKUP scr_move, [ 16,  30,  88,  88], move_time
+
+  GOSUB motor_set
+
+  RETURN
+
+
+
+
+
+' Ambulance demo program
+
+ambulance:
+
+' Constants
+
+AmVelDrv CON 188
+AmVelBack CON 68
+AmVelTurnF CON 178
+AmVelTurnR CON 78
+
+
+' Variables
+
+am_pau VAR ram_w0
+am_index1 VAR ram_b0
+am_index2 VAR ram_b1
+am_leds VAR ram_b2
+am_cnt VAR ram_b3
+am_turn VAR ram_t0
+am_backup VAR ram_t1
+
+
+
+am_turn = 1
+am_cnt = 1
+
+
+ambulance_loop:
+
+  FOR am_index1 = 0 TO 5
+    HIGH LedCenter
+    HIGH LedLeft
+    LOW LedRight
+    FREQOUT Speaker, 400, 800
+    GOSUB ambulance_motors
+
+    LOW LedLeft
+    HIGH LedRight
+    FREQOUT Speaker, 400, 640
+    GOSUB ambulance_motors
+  NEXT
+
+  FOR am_index2 = 0 TO 5
+    FOR am_index1 = 0 TO 7
+      LOOKUP am_index1, [%001, %000, %011, %000, %100, %000, %110, %000], am_leds
+      LOOKUP am_index1, [ 75,   50,   75,   50,   75,   50,   75,   100], am_pau
+      OUTC = ((OUTC & %1000) | am_leds)
+      PAUSE am_pau
+    NEXT
+    GOSUB ambulance_motors
+  NEXT
+
+  GOTO ambulance_loop:
+
+
+
+ambulance_motors:
+
+  RANDOM rand_w0
+  GOSUB check_obstacle_sensors
+
+  IF (Stall = 1) THEN
+    am_backup = 1
+    motor_r = AmVelBack
+    motor_l = AmVelBack
+  ELSEIF (am_backup = 1) THEN
+    am_backup = 0
+    am_turn = 1
+    am_cnt = 2
+    IF (rand_t0 = 1) THEN
+      motor_r = AmVelTurnR
+      motor_l = AmVelTurnF
+    ELSE
+      motor_r = AmVelTurnF
+      motor_l = AmVelTurnR
+    ENDIF
+  ELSE
+    IF (am_turn = 1) THEN
+      IF (obs_r & obs_l) THEN
+        am_cnt = am_cnt - 1
+        IF (am_cnt = 0) THEN
+          am_turn = 0
+          motor_r = AmVelDrv
+          motor_l = AmVelDrv
+        ENDIF
+      ENDIF
+    ELSE
+      IF (obs_r = 0) THEN
+        am_turn = 1
+        am_cnt = 2
+        motor_r = AmVelTurnF
+        motor_l = AmVelTurnR
+      ELSEIF (obs_l = 0) THEN
+        am_turn = 1
+        am_cnt = 2
+        motor_r = AmVelTurnR
+        motor_l = AmVelTurnF
+      ENDIF
+    ENDIF
+  ENDIF
+
+  move_time = 0
+  GOSUB motor_set
+
+  RETURN
