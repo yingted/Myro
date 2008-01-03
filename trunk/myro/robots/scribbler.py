@@ -480,13 +480,13 @@ class Scribbler(Robot):
         # echoed correctly (spaces) from the scribbler
         self.ser.write(chr(Scribbler.GET_INFO) + (' ' * 8))
         retval = self.ser.readline()
-        print "Got", retval
+        #print "Got", retval
         
         self.ser.write(chr(Scribbler.GET_INFO) + (' ' * 8))
         retval = self.ser.readline()
         
         # remove echoes
-        print "Got", retval
+        #print "Got", retval
         if retval[0] == 'P' or retval[0] == 'p':
             retval = retval[1:]
         
