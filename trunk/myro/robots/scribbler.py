@@ -479,8 +479,14 @@ class Scribbler(Robot):
         self.ser.write(chr(Scribbler.GET_INFO) + (' ' * 8))
         retval = self.ser.readline()
         
-        if retval[0] == 'P':
+        # remove echoes
+        print "Got", retval
+        if retval[0] == 'P' or retval[0] == 'p':
             retval = retval[1:]
+        
+        if retval[0] == 'P' or retval[0] == 'p':
+            retval = retval[1:]
+
 
         self.ser.timeout = oldtimeout
 
