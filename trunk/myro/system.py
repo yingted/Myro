@@ -440,8 +440,26 @@ def upgrade_fluke(url=None):
         url = "http://myro.roboteducation.org/upgrade/fluke/"
     install_count = 0
     if url.startswith("http://"):
+        fluke_ver = getInfo()["fluke"]
         print "Looking for Fluke upgrade at", url, "..."
-        filename = url_retrieve(url)
+        myro_ver = myro_version.split(".")
+        # go to site, check for latest greater than our version
+        infp = urllib.urlopen(url)
+        contents = infp.read()
+        lines = contents.split("\n")
+        infp.close()
+        for filename in lines:
+            filename = filename.strip()
+            if filename != "" and filename[0] != '#':
+                print "Considering", filename, "..."
+                if filename.startswith("fluke-upgrade-"):
+                    end = filename.index(".hex")
+                    patch_ver = filename[14:end].split(".")
+                    if map(int, patch_ver) > map(int, fluke_ver):
+                        # download it
+                        print "   Downloading..."
+                        filename = url_retrieve(url)
+                        break
     else:
         filename = url
 
