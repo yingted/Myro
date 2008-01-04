@@ -1,8 +1,8 @@
 from myro import *
 
-initialize("/dev/tty.scribbler")
+initialize("/dev/tty.scribbler5964")
 
-for i in range(10):
+for i in range(100):
     b = currentTime()
     p = takePicture("gray")
     a = currentTime()
