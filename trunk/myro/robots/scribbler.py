@@ -490,6 +490,8 @@ class Scribbler(Robot):
         
         # remove echoes
         #print "Got", retval
+        if retval == None or len(retval) == 0:
+            return {}
         if retval[0] == 'P' or retval[0] == 'p':
             retval = retval[1:]
         
