@@ -167,15 +167,15 @@ def upgrade_scribbler(url=None):
             
     s = myro.globvars.robot.ser
     if url == None:
-        url = "http://myro.roboteducation.org/upgrade/dongle/"
+        url = "http://myro.roboteducation.org/upgrade/scribbler/"
     install_count = 0
     if not url.startswith("http://"):
-        print "Looking for Dongle upgrades in file", url, "..."
+        print "Looking for Scribbler upgrades in file", url, "..."
         f = open(url, 'r')
         install_count += load_scribbler(s, f) # which is a filename
     else:        
-        print "Looking for Dongle upgrades at", url, "..."
-        dongle_ver = myro.globvars.robot.getInfo()["api"].split(".")
+        print "Looking for Scribbler upgrades at", url, "..."
+        scribbler_ver = myro.globvars.robot.getInfo()["api"].split(".")
         # go to site, check for latest greater than our version
         infp = urllib.urlopen(url)
         print "Opened url..."
@@ -188,10 +188,10 @@ def upgrade_scribbler(url=None):
             filename = filename.strip()
             if filename != "" and filename[0] != '#':
                 print "Considering", filename, "..."
-                if filename.startswith("dongle-upgrade-"):
+                if filename.startswith("scribbler-upgrade-"):
                     end = filename.index(".bytecode")
                     patch_ver = filename[15:end].split(".")
-                    if map(int, patch_ver) > map(int, dongle_ver):
+                    if map(int, patch_ver) > map(int, scribbler_ver):
                         # consider it:
                         consider[tuple(map(int, patch_ver))] = url + filename
         consider_keys = consider.keys()
@@ -204,7 +204,7 @@ def upgrade_scribbler(url=None):
     if install_count > 0:
         print "Done upgrading!"
     else:
-        print "Nothing to upgrade on the Dongle; it's up-to-date."
+        print "Nothing to upgrade on the Scribbler; it's up-to-date."
     return install_count
 
 def manual_flush(ser):
@@ -408,7 +408,7 @@ def check_sum(binarray, arlen):
         sum = sum + binarray[i]
     return sum
 
-def upgrade_fluke(filename):
+def upgrade_fluke(url=None):
     #define UF_SUCCESS 42
     #define UF_ERROR 1
     #define UF_SEGMENT_SIZE 132
@@ -424,8 +424,17 @@ def upgrade_fluke(filename):
     info = get_info_timeout(s)
     
     if not "fluke" in info.keys():
-        print "sorry can't upgrade this fluke over bluetooth. It must be upgraded manually over the serial port using lpc21isp, see wiki.roboteducation.org"
+        print "Sorry, I can't upgrade the Fluke over Bluetooth."
+        print "It must be upgraded manually over the serial port using lpc21isp."
+        print "Please see http://wiki.roboteducation.org/"
         return
+
+    if url == None:
+        url = "http://myro.roboteducation.org/upgrade/fluke/"
+    install_count = 0
+    if not url.startswith("http://"):
+        print "Looking for Fluke upgrade at", url, "..."
+        filename = open(url, 'r')
 
     #info = myro.globvars.robot.getInfo()
     sendMagicKey = True
