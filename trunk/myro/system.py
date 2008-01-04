@@ -190,7 +190,7 @@ def upgrade_scribbler(url=None):
                 print "Considering", filename, "..."
                 if filename.startswith("scribbler-upgrade-"):
                     end = filename.index(".bytecode")
-                    patch_ver = filename[15:end].split(".")
+                    patch_ver = filename[18:end].split(".")
                     if map(int, patch_ver) > map(int, scribbler_ver):
                         # consider it:
                         consider[tuple(map(int, patch_ver))] = url + filename
