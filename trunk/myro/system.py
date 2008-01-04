@@ -133,9 +133,9 @@ def upgrade_myro(url=None):
     return install_count
 
 class SerialRobot:
-    def __init__(self, port=None, baudrate=38400):
+    def __init__(self, serialport=None, baudrate=38400):
         from myro import ask
-        if port == None:
+        if serialport == None:
             serialport = ask("Port", useCache=0)
         # Deal with requirement that Windows "COM#" names where # >= 9 needs to
         # be in the format "\\.\COM#"
