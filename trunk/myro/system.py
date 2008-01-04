@@ -453,13 +453,14 @@ def upgrade_fluke(url=None):
             file = file.strip()
             if file != "" and file[0] != '#':
                 print "Considering", file, "..."
-                if file.startswith("fluke-upgrade-"):
+                if file.startswith("/fluke-upgrade-"):
                     end = file.index(".hex")
-                    patch_ver = file[14:end].split(".")
+                    patch_ver = file[15:end].split(".")
+                    print patch_ver, fluke_ver
                     if map(int, patch_ver) > map(int, fluke_ver):
                         # download it
                         print "   Downloading..."
-                        filename = url_retrieve(file)
+                        filename = url_retrieve(url + file)
                         break
     else:
         filename = url
@@ -508,4 +509,3 @@ def upgrade_fluke(url=None):
     print "Waiting for reboot"
     time.sleep(2)
     s.close()
-
