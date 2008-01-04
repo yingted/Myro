@@ -428,14 +428,16 @@ def upgrade_fluke(url=None):
     if not "fluke" in info.keys():
         print "Sorry, I can't upgrade the Fluke over Bluetooth."
         print "It must be upgraded manually over the serial port using lpc21isp."
-        print "Please see http://wiki.roboteducation.org/"
+        print "Please see http://wiki.roboteducation.org/IPRE_Fluke_Setup"
         return
 
     if url == None:
         url = "http://myro.roboteducation.org/upgrade/fluke/"
     install_count = 0
-    if not url.startswith("http://"):
+    if url.startswith("http://"):
         print "Looking for Fluke upgrade at", url, "..."
+        filename = urllib.urlopen(url)
+    else:
         filename = open(url, 'r')
 
     #info = myro.globvars.robot.getInfo()
