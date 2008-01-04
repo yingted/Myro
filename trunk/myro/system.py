@@ -20,7 +20,12 @@ class RegFile:
         return [self.filename]
 
 def import_url(url, tmp_dir = None):
-    """ Retrieves the contents of a url, and then calls import_file. """
+    """ Retrieves and imports file. """
+    tmp_file = url_retrieve(url, tmp_dir)
+    return import_file(tmp_file)
+
+def url_retrieve(url, tmp_dir = None):
+    """ Retrieves the contents of a url. """
     if tmp_dir == None:
         if "TMP" in os.environ:
             tmp_dir = os.environ["TMP"]
@@ -37,7 +42,7 @@ def import_url(url, tmp_dir = None):
     outfp = open(tmp_file, "wb")
     outfp.write(contents)
     outfp.close()
-    return import_file(tmp_file)
+    return tmp_file
 
 def import_file(filename):
     """
@@ -436,9 +441,9 @@ def upgrade_fluke(url=None):
     install_count = 0
     if url.startswith("http://"):
         print "Looking for Fluke upgrade at", url, "..."
-        filename = urllib.urlopen(url)
+        filename = url_retrieve(url)
     else:
-        filename = open(url, 'r')
+        filename = url
 
     #info = myro.globvars.robot.getInfo()
     sendMagicKey = True
