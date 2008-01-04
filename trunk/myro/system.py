@@ -218,30 +218,22 @@ def manual_flush(ser):
     ser.timeout = old
     
 def get_info_timeout(s):
-
     GET_INFO=80  
-
     oldtimeout = s.timeout
-    
     s.timeout = 4
-    manual_flush(ser)
-    
+    manual_flush(s)
     s.write(chr(GET_INFO) + (' ' * 8))
     retval = s.readline()
     #print "Got", retval    
     s.write(chr(GET_INFO) + (' ' * 8))
     retval = s.readline()
-
     # remove echoes
     #print "Got", retval
     if retval[0] == 'P' or retval[0] == 'p':
         retval = retval[1:]
-        
     if retval[0] == 'P' or retval[0] == 'p':
         retval = retval[1:]
-
     s.timeout = oldtimeout
-    
     retDict = {}
     for pair in retval.split(","):
         if len(pair) > 1:
