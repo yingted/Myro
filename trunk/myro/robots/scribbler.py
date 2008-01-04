@@ -497,8 +497,9 @@ class Scribbler(Robot):
 
         retDict = {}
         for pair in retval.split(","):
-            it, value = pair.split(":")
-            retDict[it.lower().strip()] = value.strip()
+            if ":" in pair:            
+                it, value = pair.split(":")
+                retDict[it.lower().strip()] = value.strip()
         if len(item) == 0:  
             return retDict
         else:               

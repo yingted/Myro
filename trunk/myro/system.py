@@ -236,7 +236,7 @@ def get_info_timeout(s):
     s.timeout = oldtimeout
     retDict = {}
     for pair in retval.split(","):
-        if len(pair) > 1:
+        if ":" in pair:
             it, value = pair.split(":")
             retDict[it.lower().strip()] = value.strip()
     return retDict
