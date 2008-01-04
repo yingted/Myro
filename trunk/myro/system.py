@@ -449,21 +449,24 @@ def upgrade_fluke(url=None):
         contents = infp.read()
         lines = contents.split("\n")
         infp.close()
-        for filename in lines:
-            filename = filename.strip()
-            if filename != "" and filename[0] != '#':
-                print "Considering", filename, "..."
-                if filename.startswith("fluke-upgrade-"):
-                    end = filename.index(".hex")
-                    patch_ver = filename[14:end].split(".")
+        for file in lines:
+            file = file.strip()
+            if file != "" and file[0] != '#':
+                print "Considering", file, "..."
+                if file.startswith("fluke-upgrade-"):
+                    end = file.index(".hex")
+                    patch_ver = file[14:end].split(".")
                     if map(int, patch_ver) > map(int, fluke_ver):
                         # download it
                         print "   Downloading..."
-                        filename = url_retrieve(url)
+                        filename = url_retrieve(file)
                         break
     else:
         filename = url
 
+    if filename = None:
+        print "Nothing found to upgrade!"
+        return
     #info = myro.globvars.robot.getInfo()
     sendMagicKey = True
     major      = int(info["fluke"].split(".")[0])
