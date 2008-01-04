@@ -430,7 +430,8 @@ def upgrade_fluke(url=None):
     # check to see if we can even upgrade
     info = get_info_timeout(s)
     
-    if not "fluke" in info.keys():
+    if "fluke" not in info.keys():
+        print "(If you just upgraded Myro, please restart Python.)"
         print "Sorry, I can't upgrade the Fluke over Bluetooth."
         print "It must be upgraded manually over the serial port using lpc21isp."
         print "Please see http://wiki.roboteducation.org/IPRE_Fluke_Setup"
