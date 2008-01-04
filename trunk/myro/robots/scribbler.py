@@ -367,6 +367,12 @@ class Scribbler(Robot):
             retval = self._get(Scribbler.GET_ALL, 11) # returned as bytes
             self._lastSensors = retval # single bit sensors
             return retval[10]
+        elif sensor == "forwardness":
+            if read_mem(self.ser, 0, 0) == 1:
+                retval = "fluke-forward"
+            else:
+                retval = "scribbler-forward"
+            return retval
         elif sensor == "startsong":
             #TODO: need to get this from flash memory
             return "tada"
@@ -811,6 +817,7 @@ class Scribbler(Robot):
         self.lock.release()
 
     def setLEDFront(self, value):
+        value = int(min(max(value, 0), 1))
         self.lock.acquire()
         if isTrue(value):
             self.ser.write(chr(Scribbler.SET_DONGLE_LED_ON))
@@ -819,12 +826,18 @@ class Scribbler(Robot):
         self.lock.release()
 
     def setLEDBack(self, value):
+        if value > 1:
+            value = 1
+        elif value <= 0:
+            value = 0
+        else:
+            value = int(float(value) * (255 - 170) + 170) # scale
         self.lock.acquire()
         self.ser.write(chr(Scribbler.SET_DIMMER_LED))
         self.ser.write(chr(value))
         self.lock.release()
 
-    def getObstacle(self, value):
+    def getObstacle(self, value=None):
         self.lock.acquire()
         if value in ["left", 0]:
             self.ser.write(chr(Scribbler.GET_DONGLE_L_IR))
@@ -832,6 +845,9 @@ class Scribbler(Robot):
             self.ser.write(chr(Scribbler.GET_DONGLE_C_IR))
         elif value in ["right", 2]:
             self.ser.write(chr(Scribbler.GET_DONGLE_R_IR))
+        elif value == None:
+            self.lock.release()
+            return self.get("obstacle")
         retval = read_2byte(self.ser)
         self.lock.release()
         return retval       
@@ -869,6 +885,12 @@ class Scribbler(Robot):
         return (numpixs, xloc, yloc)
 
     def setForwardness(self, direction):
+        if direction in ["fluke-forward", 1]
+            direction = 1
+        elif direction in ["scribbler-forward", 0]:
+            direction = 0
+        else:
+            raise AttibuteError, ("unknown direction: '%s'" % direction)
         self.lock.acquire()
         self.ser.write(chr(Scribbler.SET_FORWARDNESS))
         self.ser.write(chr(direction))
@@ -1021,6 +1043,10 @@ class Scribbler(Robot):
             return self.setEchoMode(position)
         elif item == "data":
             return self.setData(position, value)
+        elif item == "password":
+            return self.setPassword(position)
+        elif item == "forwardness":
+            return self.setForwardness(position)
         else:
             raise ("invalid set item name: '%s'" % item)
    
