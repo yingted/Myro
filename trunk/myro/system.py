@@ -464,7 +464,7 @@ def upgrade_fluke(url=None):
     else:
         filename = url
 
-    if filename = None:
+    if filename == None:
         print "Nothing found to upgrade!"
         return
     #info = myro.globvars.robot.getInfo()
