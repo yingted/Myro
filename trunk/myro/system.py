@@ -152,7 +152,7 @@ class SerialRobot:
         except:
             pass
         self.ser = serial.Serial(self.serialPort, timeout = 2) 
-    def getInfo(self): return {"api": "0.0.0"}
+    def getInfo(self): return {"robot":"Serial", "mode": "serial"}
     def restart(self):
         print "Please run initialize() to connect onto robot"
 
@@ -175,7 +175,7 @@ def upgrade_scribbler(url=None):
         install_count += load_scribbler(s, f) # which is a filename
     else:        
         print "Looking for Scribbler upgrades at", url, "..."
-        scribbler_ver = myro.globvars.robot.getInfo()["api"].split(".")
+        scribbler_ver = myro.globvars.robot.getInfo()["robot-version"].split(".")
         # go to site, check for latest greater than our version
         infp = urllib.urlopen(url)
         print "Opened url..."
@@ -229,6 +229,8 @@ def get_info_timeout(s):
     retval = s.readline()
     # remove echoes
     #print "Got", retval
+    if retval == None or len(retval) == 0:
+        return {}
     if retval[0] == 'P' or retval[0] == 'p':
         retval = retval[1:]
     if retval[0] == 'P' or retval[0] == 'p':
