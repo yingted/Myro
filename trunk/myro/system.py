@@ -180,7 +180,15 @@ def upgrade_scribbler(url=None):
         install_count += load_scribbler(s, f) # which is a filename
     else:        
         print "Looking for Scribbler upgrades at", url, "..."
-        scribbler_ver = myro.globvars.robot.getInfo()["robot-version"].split(".")
+
+        info = get_info_timeout(s)
+
+        scribbler_ver = [0, 0, 0]
+        if "robot-version" in info.keys():            
+            scribbler_ver = info["robot-version"].split(".")
+        elif "api" in info.keys():            
+            scribbler_ver = info["api"].split(".")
+        
         # go to site, check for latest greater than our version
         infp = urllib.urlopen(url)
         print "Opened url..."
@@ -219,28 +227,32 @@ def manual_flush(ser):
     count = 0;
     while (len(l) != 0 and count < 50000):
         l = ser.read(1)
-        count += len(l)        
-    ser.timeout = old
+        count += len(l)
+    ser.setTimeout(old)
+
     
 def get_info_timeout(s):
     GET_INFO=80  
     oldtimeout = s.timeout
-    s.timeout = 4
+    s.setTimeout(4)
     manual_flush(s)
     s.write(chr(GET_INFO) + (' ' * 8))
     retval = s.readline()
-    #print "Got", retval    
+    #print "Got", retval   
     s.write(chr(GET_INFO) + (' ' * 8))
     retval = s.readline()
     # remove echoes
     #print "Got", retval
+    
     if retval == None or len(retval) == 0:
         return {}
     if retval[0] == 'P' or retval[0] == 'p':
         retval = retval[1:]
     if retval[0] == 'P' or retval[0] == 'p':
         retval = retval[1:]
-    s.timeout = oldtimeout
+
+    s.setTimeout(oldtimeout)
+    
     retDict = {}
     for pair in retval.split(","):
         if ":" in pair:
@@ -257,12 +269,11 @@ def load_scribbler(s, f):
     sendMagicKey = False
 
     if "fluke" in info.keys():
-        major      = int(info["fluke"].split(".")[0])
-        minor      = int(info["fluke"].split(".")[1])
-        minorminor = int(info["fluke"].split(".")[2])
-        print "Version of fluke", major, minor, minorminor
+
+        version = map(int, info["fluke"].split("."))
+        print "Version of fluke", version
     
-        if major <= 2 and minor <= 5:
+        if version <= [2, 5, 0]:
             print "Older firmware version, Not sending magic key"
         else:
             sendMagicKey = True
@@ -429,6 +440,8 @@ def upgrade_fluke(url=None):
 
     # check to see if we can even upgrade
     info = get_info_timeout(s)
+
+    print info
     
     if "fluke" not in info.keys():
         print "(If you just upgraded Myro, please restart Python.)"
@@ -440,6 +453,7 @@ def upgrade_fluke(url=None):
     if url == None:
         url = "http://myro.roboteducation.org/upgrade/fluke/"
     install_count = 0
+    filename = None
     if url.startswith("http://"):
         fluke_ver = info["fluke"].split(".")
         print "Looking for Fluke upgrade at", url, "..."
@@ -470,12 +484,11 @@ def upgrade_fluke(url=None):
         return
     #info = myro.globvars.robot.getInfo()
     sendMagicKey = True
-    major      = int(info["fluke"].split(".")[0])
-    minor      = int(info["fluke"].split(".")[1])
-    minorminor = int(info["fluke"].split(".")[2])
-    print "Version of fluke", major, minor, minorminor
+
+    version = map(int, info["fluke"].split("."))
+    print "Version of fluke", version
     
-    if major <= 2 and minor <= 5:
+    if version <= [2, 5, 0]:
         sendMagicKey = False
         print "Older firmware version, Not sending magic key"
     else:

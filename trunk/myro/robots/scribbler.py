@@ -320,8 +320,8 @@ class Scribbler(Robot):
         count = 0;
         while (len(l) != 0 and count < 50000):
             l = self.ser.read(1)
-            count += len(l)        
-        self.ser.timeout = old
+            count += len(l)
+        self.ser.setTimeout(old)
 
     def restart(self):
 
@@ -477,9 +477,8 @@ class Scribbler(Robot):
     def getInfo(self, *item):
         #retval = self._get(Scribbler.GET_INFO, mode="line")
 
-        oldtimeout = self.ser.timeout
-            
-        self.ser.timeout = 4
+        oldtimeout = self.ser.timeout        
+        self.ser.setTimeout(4)
         
         #self.ser.flushInput()
         #self.ser.flushOutput()
@@ -488,11 +487,11 @@ class Scribbler(Robot):
         # have to do this twice since sometime the first echo isn't
         # echoed correctly (spaces) from the scribbler
         self.ser.write(chr(Scribbler.GET_INFO) + (' ' * 8))
-        retval = self.ser.readline()
+        retval = self.ser.readline().lower()
         #print "Got", retval
         
         self.ser.write(chr(Scribbler.GET_INFO) + (' ' * 8))
-        retval = self.ser.readline()
+        retval = self.ser.readline().lower()
         
         # remove echoes
         #print "Got", retval
@@ -504,7 +503,7 @@ class Scribbler(Robot):
         if retval[0] == 'P' or retval[0] == 'p':
             retval = retval[1:]
 
-        self.ser.timeout = oldtimeout
+        self.ser.setTimeout(oldtimeout)
 
         retDict = {}
         for pair in retval.split(","):
