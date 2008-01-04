@@ -441,7 +441,7 @@ def upgrade_fluke(url=None):
         url = "http://myro.roboteducation.org/upgrade/fluke/"
     install_count = 0
     if url.startswith("http://"):
-        fluke_ver = myro.globvars.robot.getInfo()["fluke"]
+        fluke_ver = myro.globvars.robot.getInfo()["fluke"].split(".")
         print "Looking for Fluke upgrade at", url, "..."
         myro_ver = myro_version.split(".")
         # go to site, check for latest greater than our version
