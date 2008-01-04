@@ -560,6 +560,10 @@ class Robot(object):
         """ Returns the robot's password. """
         return self.get("password")
 
+    def getForwardness(self):
+        """ Returns the robot's directionality. """
+        return self.get("forwardness")
+
     def getAll(self):
         return self.get("all")
 
@@ -571,6 +575,9 @@ class Robot(object):
 
     def setPassword(self, password):
         return self.set("password", password)
+
+    def setForwardness(self, value):
+        return self.set("forwardness", value)
     
     def setVolume(self, value):
         return self.set("volume", value)
@@ -841,6 +848,11 @@ def getPassword():
         return myro.globvars.robot.get("password")
     else:
         raise AttributeError, "need to initialize robot"
+def getForwardness():
+    if myro.globvars.robot:
+        return myro.globvars.robot.get("forwardness")
+    else:
+        raise AttributeError, "need to initialize robot"
 def getStartSong():
     if myro.globvars.robot:
         return myro.globvars.robot.get("startsong")
@@ -879,6 +891,11 @@ def setName(name):
 def setPassword(password):
     if myro.globvars.robot:
         return myro.globvars.robot.set("password", password)
+    else:
+        raise AttributeError, "need to initialize robot"
+def setForwardness(value):
+    if myro.globvars.robot:
+        return myro.globvars.robot.set("forwardness", value)
     else:
         raise AttributeError, "need to initialize robot"
 def setVolume(value):
@@ -1254,6 +1271,7 @@ _functions = ("timer",
               "send Picture",
               "register",
               "set Password",
+              "set Forwardness",
               "wait",
               "current Time",
               "pick One",
