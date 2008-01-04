@@ -885,7 +885,7 @@ class Scribbler(Robot):
         return (numpixs, xloc, yloc)
 
     def setForwardness(self, direction):
-        if direction in ["fluke-forward", 1]
+        if direction in ["fluke-forward", 1]:
             direction = 1
         elif direction in ["scribbler-forward", 0]:
             direction = 0
