@@ -1613,6 +1613,109 @@ class Joystick(Tkinter.Toplevel):
             trans = 0.0
         return (trans, rot)
 
+class senses(Tkinter.Toplevel):
+    def __init__(self, robot = None):
+        _tkCall(self.__init_help, _root, robot)
+
+    def __init_help(self, parent = None, robot = None):
+        Tkinter.Toplevel.__init__(self, parent)
+        self.debug = 0
+        self._running = 0
+        if robot == None:
+            self.robot = myro.globvars.robot
+        else:
+            self.robot = robot
+        self.parent = parent
+        self.wm_title('Senses')
+        moveToTop(self)
+        self.protocol('WM_DELETE_WINDOW',self.destroy)
+        self.widgets = {}
+        self.frame = Tkinter.Frame(self, relief=Tkinter.RAISED, borderwidth=2)
+        items = []
+        if self.robot != None:
+             d = self.robot.get("config")
+             items = [(key, d[key]) for key in d.keys()]
+        self.addWidgets(self.frame, *items)
+        self.frame.pack(side="bottom", fill="both", expand="y")
+        self.translate = 0.0
+        self.rotate = 0.0
+        self.threshold = 0.10
+        self.delay = 0.10 # in seconds
+        self.running = 1
+        #self.frame.pack()
+        self.after(250, self._update_help)
+
+    def _update_help(self, delay = None):
+        if self.robot:
+            config = self.robot.get("config")
+            data = self.robot.getAll()
+            for key in config:
+                 item = data.get(key, [0] * config[key])
+                 if type(item) not in [list, tuple]:
+                      item = [item]
+                 for i in range(len(item)):
+                     self.updateWidget(key, i, item[i])
+        self.update()
+        if self.running:
+            self.after(250, self._update_help)
+
+    def destroy(self):
+        self.running = 0
+        if self.robot != None:
+            self.robot.lock.acquire()
+        Tkinter.Toplevel.destroy(self)
+        if self.robot != None:
+            self.robot.lock.release()
+
+    def addWidgets(self, window, *items):
+        for name, size in items:
+            text = name + ":"
+            frame = Tkinter.Frame(window)
+            self.widgets[name + ".label"] = Tkinter.Label(frame, text=text, width=10)
+            self.widgets[name + ".label"].pack(side="left")
+            for i in range(size - 1, -1, -1):
+                self.widgets["%s%d.entry" % (name, i)] = Tkinter.Entry(frame, bg="white", width = 10)
+                self.widgets["%s%d.entry" % (name, i)].insert(0, "")
+                self.widgets["%s%d.entry" % (name, i)].pack(side="right", fill="both", expand="y")
+            frame.pack(side="bottom", fill="both", expand="y")
+
+    def updateWidget(self, name, pos, value):
+        """Updates the device view window."""
+        try:
+             self.widgets["%s%d.entry" % (name, pos)].delete(0,'end')
+             self.widgets["%s%d.entry" % (name, pos)].insert(0,str(value))
+        except: pass
+
+    def minorloop(self, delay = None): # in milliseconds
+        """
+        As opposed to mainloop. This is a simple loop that works
+        in IDLE.
+        """
+        if delay != None:
+            self.delay = delay
+        self.running = 1
+        lastUpdated = 0
+        lastData = []
+        config = self.robot.get("config") # {"ir": 2, "line": 2, "stall": 1, "light": 3}
+        while self.running:
+            #self.focus_set()
+            if self.robot:
+                  data = self.robot.getLastSensors()
+                  now = time.time()
+                  if data != lastData or now - lastUpdated > 1:
+                        if now - lastUpdated > 1:
+                             data = self.robot.getAll()
+                        for key in config:
+                             item = data.get(key, [0] * config[key])
+                             if type(item) not in [list, tuple]:
+                                  item = [item]
+                             for i in range(len(item)):
+                                 self.updateWidget(key, i, item[i])
+                        lastUpdated = time.time()
+                        lastData = data
+            self.update()
+            time.sleep(self.delay)
+
 
 class Calibrate(Tkinter.Toplevel):
     def __init__(self, robot = None):

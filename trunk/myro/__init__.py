@@ -202,21 +202,23 @@ def gamepad(*phrases):
     print "     Button   Action"
     print "     ------   -------"
     print "          1   takePicture()"
-    print "          2   beep(.5, 523)"  
-    print "          3   beep(.5, 587)"  
-    print "          4   beep(.5, 659)"  
+    print "          2   beep(.25, 523)"  
+    print "          3   beep(.25, 587)"  
+    print "          4   beep(.25, 659)"  
     print "          5   speak('%s')" % phrases[0]
     print "          6   speak('%s')" % phrases[1]
     print "          7   speak('%s')" % phrases[2]
     print "          8   speak('%s') and stop()" % phrases[3]
     print ""
     print "Gamepad is now running... Press button 8 to stop."
+    lastMove = [0, 0]
+    done = True
     while True:
-        retval = getGamepad()
+        retval = getGamepadNow()
         button = retval["button"]
         axis = retval["axis"]
         if button[0]:
-            speak("Taking a picture. Say cheese!")
+            speak("Taking a picture. Say cheese!", async=1)
             pic = takePicture()
             show(pic)
         freqs = [None, None]
@@ -233,22 +235,31 @@ def gamepad(*phrases):
             else:
                 freqs[1] = 659
         if button[4]:
-            speak(phrases[0], async=1)
+            if done:
+                speak(phrases[0], async=1)
+                done = False
         elif button[5]:
-            speak(phrases[1], async=1)
+            if done:
+                speak(phrases[1], async=1)
+                done = False
         elif button[6]:
-            speak(phrases[2], async=1)
+            if done:
+                speak(phrases[2], async=1)
+                done = False
         elif button[7]:
             speak(phrases[3], async=1)
             stop()
             break
         else:
+            done = True
+        if (axis[0], axis[1]) != lastMove:
             move(-axis[1], -axis[0])
-            if freqs != [None, None]:
-                try:
-                    beep(.5, *freqs)
-                except:
-                    computer.beep(.5, *freqs)
+            lastMove = axis[0], axis[1]
+        if freqs != [None, None]:
+            try:
+                beep(.25, *freqs)
+            except:
+                computer.beep(.25, *freqs)
 
 def getGamepad(*what, **kwargs):
     """
@@ -941,7 +952,7 @@ def playNote(tup, wholeNoteDuration = .545):
 
 ########################### New dongle commands
 
-def getBright(position):
+def getBright(position=None):
     if myro.globvars.robot:
         return myro.globvars.robot.getBright(position)
     else:
@@ -953,7 +964,7 @@ def getBlob():
     else:
         raise AttributeError, "need to initialize robot"
 
-def getObstacle(position):
+def getObstacle(position=None):
     if myro.globvars.robot:
         return myro.globvars.robot.getObstacle(position)
     else:

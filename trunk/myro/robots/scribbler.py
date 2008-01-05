@@ -851,7 +851,7 @@ class Scribbler(Robot):
         self.lock.release()
         return retval       
 
-    def getBright(self, window):
+    def getBright(self, window=None):
         # left, middle, right
 
         # assumes this configuartion of the windows
@@ -859,6 +859,8 @@ class Scribbler(Robot):
         # conf_gray_window(self.ser, 1, 84,  0, 170, 191, 1, 1)
         # conf_gray_window(self.ser, 2, 170, 0, 254, 191, 1, 1)
 
+        if window == None:
+            return self.get("bright")
         if type(window) == str:
             if window in ["left"]:
                 window = 0
