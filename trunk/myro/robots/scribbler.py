@@ -368,7 +368,7 @@ class Scribbler(Robot):
             self._lastSensors = retval # single bit sensors
             return retval[10]
         elif sensor == "forwardness":
-            if read_mem(self.ser, 0, 0) == 1:
+            if read_mem(self.ser, 0, 0) != 0xDF:
                 retval = "fluke-forward"
             else:
                 retval = "scribbler-forward"
