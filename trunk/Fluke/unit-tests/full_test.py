@@ -1,11 +1,11 @@
 from myro import *
 
-initialize("/dev/tty.scribbler")
+initialize()
 
-print "Back LED 205", setLEDBack(205)
+print "Back LED 1.0", setLEDBack(1.0)
 wait(2)
 
-print "Back LED 255", setLEDBack(255)
+print "Back LED 0.5", setLEDBack(.5)
 wait(2)
 
 print "Front LED on", setLEDFront(1)

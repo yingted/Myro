@@ -1,6 +1,6 @@
 from myro import *
 
-initialize("/dev/tty.scribbler5964")
+initialize()
 
 for i in range(100):
     b = currentTime()

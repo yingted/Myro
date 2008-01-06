@@ -2,7 +2,7 @@ from myro import *
 import random
 from time import *
 
-initialize("/dev/tty.scribbler")
+initialize()
 
 speed=0.7
 

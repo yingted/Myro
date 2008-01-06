@@ -209,7 +209,10 @@ class Scribbler(Robot):
                           v_low=190, v_high=255)
 
         if "robot" in info.keys():
-            print "You are using scribbler firmware", info["robot-version"]
+            if "api" in info.keys():
+                print "You are using scribbler firmware", info["api"]
+            elif "robot-version" in info.keys():
+                print "You are using scribbler firmware", info["robot-version"]
             self.restart()
             self.loadFudge()
 

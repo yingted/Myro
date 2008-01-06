@@ -249,7 +249,7 @@ def get_info_timeout(s):
     
     if retval[0] == 'P' or retval[0] == 'p':
         retval = retval[1:]
-        
+
     if retval[0] == 'P' or retval[0] == 'p':
         retval = retval[1:]
 
