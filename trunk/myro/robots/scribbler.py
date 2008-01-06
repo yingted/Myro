@@ -558,6 +558,16 @@ class Scribbler(Robot):
                       u_low=us[0], u_high=us[1],
                       v_low=vs[0], v_high=vs[1])
 
+
+    def configureBlob(self,
+                      y_low=0,  y_high=255,
+                      u_low=0,  u_high=255,
+                      v_low=0,  v_high=255):        
+        self.conf_rle(y_low=y_low, y_high=y_high,
+                      u_low=u_low, u_high=u_high,
+                      v_low=v_low, v_high=v_high)
+
+
     def conf_rle(self, delay = 90, smooth_thresh = 4,
                  y_low=0, y_high=254,
                  u_low=51, u_high=136,

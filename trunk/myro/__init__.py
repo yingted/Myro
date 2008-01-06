@@ -981,6 +981,14 @@ def getBattery():
         return myro.globvars.robot.getBattery()
     else:
         raise AttributeError, "need to initialize robot"
+
+def configureBlob(y_low=0, y_high=255,
+                  u_low=0, u_high=255,
+                  v_low=0, v_high=255):
+    if myro.globvars.robot:
+        return myro.globvars.robot.configureBlob(y_low, y_high, u_low, u_high, v_low, v_high)
+    else:
+        raise AttributeError, "need to initialize robot"
     
 def setWhiteBalance(value):
     if myro.globvars.robot:

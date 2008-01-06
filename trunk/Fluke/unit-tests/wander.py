@@ -3,8 +3,6 @@ import random
 from time import *
 
 initialize("/dev/tty.scribbler")
-print "connected!"
-sleep(1)
 
 speed=0.7
 
