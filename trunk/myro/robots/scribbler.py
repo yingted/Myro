@@ -188,12 +188,12 @@ class Scribbler(Robot):
         self._oldFudge = range(4)
         self.dongle = None
         info = self.getInfo()
-        if "dongle" in info.keys():
-            self.dongle = info["dongle"]
-            print "You are using fluke firmware", info["dongle"]
         if "fluke" in info.keys():
             self.dongle = info["fluke"]
             print "You are using fluke firmware", info["fluke"]
+        elif "dongle" in info.keys():
+            self.dongle = info["dongle"]
+            print "You are using fluke firmware", info["dongle"]
         if self.dongle != None:
             # Turning on White Balance, Gain Control, and Exposure Control
             self.set_cam_param(self.CAM_COMA, self.CAM_COMA_WHITE_BALANCE_ON)
@@ -209,10 +209,10 @@ class Scribbler(Robot):
                           v_low=190, v_high=255)
 
         if "robot" in info.keys():
-            if "api" in info.keys():
-                print "You are using scribbler firmware", info["api"]
-            elif "robot-version" in info.keys():
+            if "robot-version" in info.keys():
                 print "You are using scribbler firmware", info["robot-version"]
+            elif "api" in info.keys():
+                print "You are using scribbler firmware", info["api"]
             self.restart()
             self.loadFudge()
 
