@@ -43,7 +43,7 @@ def brain():
             robot.move(GAIN, -GAIN)            
             print "Turning right"            
         else:
-            if left >= 220000:
+            if left >= 220000: #0.9: 
                 print "Found the light"
                 robot.move(GAIN, 0.0)
             else:

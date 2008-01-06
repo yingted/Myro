@@ -871,7 +871,7 @@ class Scribbler(Robot):
         self.lock.acquire()
         self.ser.write(chr(Scribbler.GET_WINDOW_LIGHT))
         self.ser.write(chr(window))
-        retval = read_3byte(self.ser)
+        retval = read_3byte(self.ser) #/ (63.0 * 192.0 * 255.0)
         self.lock.release()
         return retval 
 

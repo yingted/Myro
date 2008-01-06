@@ -987,7 +987,19 @@ def setWhiteBalance(value):
         return myro.globvars.robot.setWhiteBalance(value)
     else:
         raise AttributeError, "need to initialize robot"
-    
+
+def darkenCamera(value=0):
+    if myro.globvars.robot:
+        return myro.globvars.robot.darkenCamera(value)
+    else:
+        raise AttributeError, "need to initialize robot"
+
+def autoCamera(value=0):
+    if myro.globvars.robot:
+        return myro.globvars.robot.autoCamera()
+    else:
+        raise AttributeError, "need to initialize robot"
+
 def setLEDFront(value):
     """ Set the Light Emitting Diode on the robot's front. """
     if myro.globvars.robot:
