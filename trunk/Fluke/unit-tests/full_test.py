@@ -35,6 +35,5 @@ for power in range(129,140,2):
     setIRPower(power)
     for i in range(6):    
         print "l %d\tm %d\tr %d" % (getObstacle("left"), getObstacle("center"), getObstacle("right"))
-        wait(.25)
 
 

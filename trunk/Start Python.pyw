@@ -24,17 +24,17 @@ del command
 del commands
 del sys
 
-old_cancel_callback = PyShell.PyShell.cancel_callback
-def cancel_callback(self, event=None):
-    """ Replacement callback to handle cancel events """
-    retval = old_cancel_callback(self, event)
-    #PyShell.flist.pyshell.interp.runcode(code)
-    code = """if "stop" in dir(): stop()"""
-    try:
-        PyShell.flist.pyshell.interp.rpcclt.asyncqueue("exec", "runcode",
-                                                       (code,), {})
-    except:
-        pass
-    return retval
-PyShell.PyShell.cancel_callback = cancel_callback
+# old_cancel_callback = PyShell.PyShell.cancel_callback
+# def cancel_callback(self, event=None):
+#     """ Replacement callback to handle cancel events """
+#     retval = old_cancel_callback(self, event)
+#     #PyShell.flist.pyshell.interp.runcode(code)
+#     code = """if "stop" in dir(): stop()"""
+#     try:
+#         PyShell.flist.pyshell.interp.rpcclt.asyncqueue("exec", "runcode",
+#                                                        (code,), {})
+#     except:
+#         pass
+#     return retval
+# PyShell.PyShell.cancel_callback = cancel_callback
 PyShell.main()

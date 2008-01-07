@@ -209,6 +209,7 @@ class Scribbler(Robot):
                           v_low=190, v_high=255)
 
         if "robot" in info.keys():
+            self.robotinfo = info["robot"]
             if "robot-version" in info.keys():
                 print "You are using scribbler firmware", info["robot-version"]
             elif "api" in info.keys():
@@ -266,7 +267,7 @@ class Scribbler(Robot):
             if self.serialPort == myro.globvars.robot.ser.portstr:
                 myro.globvars.robot.ser.close()
                 print "Closing serial port..."
-                time.sleep(3)
+                time.sleep(1)
         except KeyboardInterrupt:
             raise
         except:
@@ -318,7 +319,7 @@ class Scribbler(Robot):
 
     def manual_flush(self):
         old = self.ser.timeout
-        self.ser.setTimeout(1)
+        self.ser.setTimeout(.5)
         l = 'a'
         count = 0;
         while (len(l) != 0 and count < 50000):
@@ -578,17 +579,19 @@ class Scribbler(Robot):
                  v_low=190, v_high=254):
         if self.debug:
             print "configuring RLE", delay, smooth_thresh, y_low, y_high, u_low, u_high, v_low, v_high
-        self.lock.acquire()
-        self.ser.write(chr(Scribbler.SET_RLE))
-        self.ser.write(chr(delay))
-        self.ser.write(chr(smooth_thresh))
-        self.ser.write(chr(y_low)) 
-        self.ser.write(chr(y_high))
-        self.ser.write(chr(u_low)) 
-        self.ser.write(chr(u_high))
-        self.ser.write(chr(v_low)) 
-        self.ser.write(chr(v_high))
-        self.lock.release()
+        try:
+            self.lock.acquire()
+            self.ser.write(chr(Scribbler.SET_RLE))
+            self.ser.write(chr(delay))
+            self.ser.write(chr(smooth_thresh))
+            self.ser.write(chr(y_low)) 
+            self.ser.write(chr(y_high))
+            self.ser.write(chr(u_low)) 
+            self.ser.write(chr(u_high))
+            self.ser.write(chr(v_low)) 
+            self.ser.write(chr(v_high))
+        finally:
+            self.lock.release()
         
     def takePicture(self, mode="color"):
         width = 256
@@ -612,16 +615,19 @@ class Scribbler(Robot):
         height = 192    
         blobs = array([0] * (height * width), 'B') # zeros(((height + 1), (width + 1)), dtype=uint8)
         line = ''
-        self.lock.acquire()
-        self.ser.write(chr(Scribbler.GET_RLE))
-        size=ord(self.ser.read(1))
-        size = (size << 8) | ord(self.ser.read(1))
-        if self.debug:
-            print "Grabbing RLE image size =", size
-        line =''
-        while (len(line) < size):
-            line+=self.ser.read(size-len(line))
-        self.lock.release()
+        try:
+            self.lock.acquire()
+            self.ser.write(chr(Scribbler.GET_RLE))
+            size=ord(self.ser.read(1))
+            size = (size << 8) | ord(self.ser.read(1))
+            if self.debug:
+                print "Grabbing RLE image size =", size
+            line =''
+            while (len(line) < size):
+                line+=self.ser.read(size-len(line))
+        finally:
+            self.lock.release()
+            
         px = 0
         counter = 0
         val = 128
@@ -649,14 +655,17 @@ class Scribbler(Robot):
         height = 96
         size= width*height
         #print "grabbing image size = ", size
-        self.lock.acquire()
-        self.ser.write(chr(Scribbler.GET_WINDOW))
-        self.ser.write(chr(0))
-        line = ''
-        while (len(line) < size):
-            line += self.ser.read(size-len(line))
-            #print "length so far = ", len(line), " waiting for total = ", size
-        self.lock.release()
+        try:
+            self.lock.acquire()
+            self.ser.write(chr(Scribbler.GET_WINDOW))
+            self.ser.write(chr(0))
+            line = ''
+            while (len(line) < size):
+                line += self.ser.read(size-len(line))
+                #print "length so far = ", len(line), " waiting for total = ", size
+        finally:
+            self.lock.release()
+            
         line = quadrupleSize(line, width)
         return line
 
@@ -664,179 +673,192 @@ class Scribbler(Robot):
         width = 256
         height = 192
         buffer = array([0] * (height * width * 3), 'B')
-        self.lock.acquire()
-        oldtimeout = self.ser.timeout
-        self.ser.setTimeout(.01)
-        self.ser.write(chr(Scribbler.GET_IMAGE))
-        size= width*height
-        line = BufferedRead(self.ser, size, start = 0)
-        #create the image from the YUV layer
-        for i in range(height):
-            for j in range(width):   
-                if j >= 3:
-                    # go to the left for other values
-                    #vy = -1; vu = -2; y1v = -1; y1u = -3; uy = -1; uv = -2; y2u = -1; y2v = -3
-                    vy = -1; vu = -2; y1v = -1; y1u = -3; uy = -1; uv = -2; y2u = -1; y2v = -3
-                else:
-                    # go to the right for other values
-                    vy = 1; vu = 2; y1v = 3; y1u = 1; uy = 1; uv = 2; y2u = 3; y2v = 1
+        try:
+            self.lock.acquire()
+            oldtimeout = self.ser.timeout
+            self.ser.setTimeout(.01)
+            self.ser.write(chr(Scribbler.GET_IMAGE))
+            size= width*height
+            line = BufferedRead(self.ser, size, start = 0)
+            #create the image from the YUV layer
+            for i in range(height):
+                for j in range(width):   
+                    if j >= 3:
+                        # go to the left for other values
+                        #vy = -1; vu = -2; y1v = -1; y1u = -3; uy = -1; uv = -2; y2u = -1; y2v = -3
+                        vy = -1; vu = -2; y1v = -1; y1u = -3; uy = -1; uv = -2; y2u = -1; y2v = -3
+                    else:
+                        # go to the right for other values
+                        vy = 1; vu = 2; y1v = 3; y1u = 1; uy = 1; uv = 2; y2u = 3; y2v = 1
                     
                                        #   0123 0123 0123
-                if ((j % 4) == 0): #3 #2   VYUY VYUY VYUY
-                    V = ord(line[i * width + j])
-                    Y = ord(line[i * width + j + vy])
-                    U = ord(line[i * width + j + vu])
-                elif ((j % 4) == 1): #0 #3
-                    Y = ord(line[i * width + j])
-                    V = ord(line[i * width + j + y1v])
-                    U = ord(line[i * width + j + y1u])
-                elif ((j % 4) == 2): #1 #0
-                    U = ord(line[i * width + j])
-                    Y = ord(line[i * width + j + uy])
-                    V = ord(line[i * width + j + uv])
-                elif ((j % 4) == 3): #2 #1
-                    Y = ord(line[i * width + j])
-                    U = ord(line[i * width + j + y2u])
-                    V = ord(line[i * width + j + y2v])
-                U = U - 128
-                V = V - 128
-                Y = Y
-                buffer[(i * width + j) * 3 + 0] = max(min(Y + 1.13983 * V, 255), 0)
-                buffer[(i * width + j) * 3 + 1] = max(min(Y - 0.39466*U-0.58060*V, 255), 0)
-                buffer[(i * width + j) * 3 + 2] = max(min(Y + 2.03211*U, 255), 0)
-        self.ser.setTimeout(oldtimeout)
-        self.lock.release()
+                    if ((j % 4) == 0): #3 #2   VYUY VYUY VYUY
+                        V = ord(line[i * width + j])
+                        Y = ord(line[i * width + j + vy])
+                        U = ord(line[i * width + j + vu])
+                    elif ((j % 4) == 1): #0 #3
+                        Y = ord(line[i * width + j])
+                        V = ord(line[i * width + j + y1v])
+                        U = ord(line[i * width + j + y1u])
+                    elif ((j % 4) == 2): #1 #0
+                        U = ord(line[i * width + j])
+                        Y = ord(line[i * width + j + uy])
+                        V = ord(line[i * width + j + uv])
+                    elif ((j % 4) == 3): #2 #1
+                        Y = ord(line[i * width + j])
+                        U = ord(line[i * width + j + y2u])
+                        V = ord(line[i * width + j + y2v])
+                    U = U - 128
+                    V = V - 128
+                    Y = Y
+                    buffer[(i * width + j) * 3 + 0] = max(min(Y + 1.13983 * V, 255), 0)
+                    buffer[(i * width + j) * 3 + 1] = max(min(Y - 0.39466*U-0.58060*V, 255), 0)
+                    buffer[(i * width + j) * 3 + 2] = max(min(Y + 2.03211*U, 255), 0)
+            self.ser.setTimeout(oldtimeout)
+        finally:
+            self.lock.release()
+            
         return buffer
 
     def _grab_array_bilinear_horizontal(self):
         width = 256
         height = 192
         buffer = array([0] * (height * width * 3), 'B')
-        self.lock.acquire()
-        oldtimeout = self.ser.timeout
-        self.ser.setTimeout(.01)
-        self.ser.write(chr(Scribbler.GET_IMAGE))
-        size= width*height
-        line = BufferedRead(self.ser, size, start = 0)
-        #create the image from the YUV layer
-        for i in range(height):
-            for j in range(width):
-                vy = 1; vu = 2; y1v = 3; y1u = 1; uy = 1; uv = 2; y2u = 3; y2v = 1
-                vy2 = -1; vu2 = -2; y1v2 = -1; y1u2 = -3; uy2 = -1; uv2 = -2; y2u2 = -1; y2v2 = -3
-                    
-                if j >= 3:
-                    # go to the left for other values
-                    #vy = -1; vu = -2; y1v = -1; y1u = -3; uy = -1; uv = -2; y2u = -1; y2v = -3
-                    vy = -1; vu = -2; y1v = -1; y1u = -3; uy = -1; uv = -2; y2u = -1; y2v = -3
-                    if j < (width - 4):
-                        vy2 = +3; vu2 = +2; y1v2 = +3; y1u2 = +1; uy2 = +3; uv2 = +2; y2u2 = +3; y2v2 = +1
+        try:
+            self.lock.acquire()
+            oldtimeout = self.ser.timeout
+            self.ser.setTimeout(.01)
+            self.ser.write(chr(Scribbler.GET_IMAGE))
+            size= width*height
+            line = BufferedRead(self.ser, size, start = 0)
+            #create the image from the YUV layer
+            for i in range(height):
+                for j in range(width):
+                    vy = 1; vu = 2; y1v = 3; y1u = 1; uy = 1; uv = 2; y2u = 3; y2v = 1
+                    vy2 = -1; vu2 = -2; y1v2 = -1; y1u2 = -3; uy2 = -1; uv2 = -2; y2u2 = -1; y2v2 = -3
 
-                    
-                                       #   0123 0123 0123
-                if ((j % 4) == 0): #3 #2   VYUY VYUY VYUY
-                    V = ord(line[i * width + j])
-                    Y = 0.5*ord(line[i * width + j + vy]) + 0.5*ord(line[(i) * width + j + vy2])
-                    U = 0.5*ord(line[i * width + j + vu]) + 0.5*ord(line[(i) * width + j + vu2])
-                elif ((j % 4) == 1): #0 #3
-                    Y = ord(line[i * width + j])
-                    V = 0.5*ord(line[i * width + j + y1v]) + 0.5*ord(line[(i) * width + j + y1v2])
-                    U = 0.5*ord(line[i * width + j + y1u]) + 0.5*ord(line[(i) * width + j + y1u2]) 
-                elif ((j % 4) == 2): #1 #0
-                    U = ord(line[i * width + j])
-                    Y = 0.5*ord(line[i * width + j + uy]) + 0.5*ord(line[(i) * width + j + uy2])
-                    V = 0.5*ord(line[i * width + j + uv]) + 0.5*ord(line[(i) * width + j + uv2])
-                elif ((j % 4) == 3): #2 #1
-                    Y = ord(line[i * width + j])
-                    U = 0.5*ord(line[i * width + j + y2u]) + 0.5*ord(line[(i) * width + j + y2u2])
-                    V = 0.5*ord(line[i * width + j + y2v]) + 0.5*ord(line[(i) * width + j + y2v2])
-                U = U - 128
-                V = V - 128
-                Y = Y
-                buffer[(i * width + j) * 3 + 0] = max(min(Y + 1.13983 * V, 255), 0)
-                buffer[(i * width + j) * 3 + 1] = max(min(Y - 0.39466*U-0.58060*V, 255), 0)
-                buffer[(i * width + j) * 3 + 2] = max(min(Y + 2.03211*U, 255), 0)
-        self.ser.setTimeout(oldtimeout)
-        self.lock.release()
+                    if j >= 3:
+                        # go to the left for other values
+                        #vy = -1; vu = -2; y1v = -1; y1u = -3; uy = -1; uv = -2; y2u = -1; y2v = -3
+                        vy = -1; vu = -2; y1v = -1; y1u = -3; uy = -1; uv = -2; y2u = -1; y2v = -3
+                        if j < (width - 4):
+                            vy2 = +3; vu2 = +2; y1v2 = +3; y1u2 = +1; uy2 = +3; uv2 = +2; y2u2 = +3; y2v2 = +1
+
+
+                                #   0123 0123 0123
+                    if ((j % 4) == 0): #3 #2   VYUY VYUY VYUY
+                        V = ord(line[i * width + j])
+                        Y = 0.5*ord(line[i * width + j + vy]) + 0.5*ord(line[(i) * width + j + vy2])
+                        U = 0.5*ord(line[i * width + j + vu]) + 0.5*ord(line[(i) * width + j + vu2])
+                    elif ((j % 4) == 1): #0 #3
+                        Y = ord(line[i * width + j])
+                        V = 0.5*ord(line[i * width + j + y1v]) + 0.5*ord(line[(i) * width + j + y1v2])
+                        U = 0.5*ord(line[i * width + j + y1u]) + 0.5*ord(line[(i) * width + j + y1u2]) 
+                    elif ((j % 4) == 2): #1 #0
+                        U = ord(line[i * width + j])
+                        Y = 0.5*ord(line[i * width + j + uy]) + 0.5*ord(line[(i) * width + j + uy2])
+                        V = 0.5*ord(line[i * width + j + uv]) + 0.5*ord(line[(i) * width + j + uv2])
+                    elif ((j % 4) == 3): #2 #1
+                        Y = ord(line[i * width + j])
+                        U = 0.5*ord(line[i * width + j + y2u]) + 0.5*ord(line[(i) * width + j + y2u2])
+                        V = 0.5*ord(line[i * width + j + y2v]) + 0.5*ord(line[(i) * width + j + y2v2])
+                    U = U - 128
+                    V = V - 128
+                    Y = Y
+                    buffer[(i * width + j) * 3 + 0] = max(min(Y + 1.13983 * V, 255), 0)
+                    buffer[(i * width + j) * 3 + 1] = max(min(Y - 0.39466*U-0.58060*V, 255), 0)
+                    buffer[(i * width + j) * 3 + 2] = max(min(Y + 2.03211*U, 255), 0)
+            self.ser.setTimeout(oldtimeout)
+        finally:
+            self.lock.release()
         return buffer
 
     def _grab_array_bilinear_vert(self):
         width = 256
         height = 192
         buffer = array([0] * (height * width * 3), 'B')
-        self.lock.acquire()
-        oldtimeout = self.ser.timeout
-        self.ser.setTimeout(.01)
-        self.ser.write(chr(Scribbler.GET_IMAGE))
-        size= width*height
-        line = BufferedRead(self.ser, size, start = 0)
-        #create the image from the YUV layer
-        for i in range(height):
-            if i < 1:
-                n = 0
-            else:
-                n = 1
-                    
-            for j in range(width):   
-                if j >= 3:
-                    # go to the left for other values
-                    #vy = -1; vu = -2; y1v = -1; y1u = -3; uy = -1; uv = -2; y2u = -1; y2v = -3
-                    vy = -1; vu = -2; y1v = -1; y1u = +1; uy = -1; uv = -2; y2u = -1;
-                    if j < (width - 2):
-                        y2v = +1
-                    else:
-                        y2v = -3
+        try:
+            self.lock.acquire()
+            oldtimeout = self.ser.timeout
+            self.ser.setTimeout(.01)
+            self.ser.write(chr(Scribbler.GET_IMAGE))
+            size= width*height
+            line = BufferedRead(self.ser, size, start = 0)
+            #create the image from the YUV layer
+            for i in range(height):
+                if i < 1:
+                    n = 0
                 else:
-                    # go to the right for other values
-                    vy = 1; vu = 2; y1v = 3; y1u = 1; uy = 1; uv = 2; y2u = 3; y2v = 1
-                    
-                                       #   0123 0123 0123
-                if ((j % 4) == 0): #3 #2   VYUY VYUY VYUY
-                    V = ord(line[i * width + j])
-                    Y = 0.5*ord(line[i * width + j + vy]) + 0.5*ord(line[(i-n) * width + j + vy])
-                    U = 0.5*ord(line[i * width + j + vu]) + 0.5*ord(line[(i-n) * width + j + vu])
-                elif ((j % 4) == 1): #0 #3
-                    Y = ord(line[i * width + j])
-                    V = 0.5*ord(line[i * width + j + y1v]) + 0.5*ord(line[(i-n) * width + j + y1v])
-                    U = 0.5*ord(line[i * width + j + y1u]) + 0.5*ord(line[(i-n) * width + j + y1u]) 
-                elif ((j % 4) == 2): #1 #0
-                    U = ord(line[i * width + j])
-                    Y = 0.5*ord(line[i * width + j + uy]) + 0.5*ord(line[(i-n) * width + j + uy])
-                    V = 0.5*ord(line[i * width + j + uv]) + 0.5*ord(line[(i-n) * width + j + uv])
-                elif ((j % 4) == 3): #2 #1
-                    Y = ord(line[i * width + j])
-                    U = 0.5*ord(line[i * width + j + y2u]) + 0.5*ord(line[(i-n) * width + j + y2u])
-                    V = 0.5*ord(line[i * width + j + y2v]) + 0.5*ord(line[(i-n) * width + j + y2v])
-                U = U - 128
-                V = V - 128
-                Y = Y
-                buffer[(i * width + j) * 3 + 0] = max(min(Y + 1.13983 * V, 255), 0)
-                buffer[(i * width + j) * 3 + 1] = max(min(Y - 0.39466*U-0.58060*V, 255), 0)
-                buffer[(i * width + j) * 3 + 2] = max(min(Y + 2.03211*U, 255), 0)
-        self.ser.setTimeout(oldtimeout)
-        self.lock.release()
+                    n = 1
+
+                for j in range(width):   
+                    if j >= 3:
+                        # go to the left for other values
+                        #vy = -1; vu = -2; y1v = -1; y1u = -3; uy = -1; uv = -2; y2u = -1; y2v = -3
+                        vy = -1; vu = -2; y1v = -1; y1u = +1; uy = -1; uv = -2; y2u = -1;
+                        if j < (width - 2):
+                            y2v = +1
+                        else:
+                            y2v = -3
+                    else:
+                        # go to the right for other values
+                        vy = 1; vu = 2; y1v = 3; y1u = 1; uy = 1; uv = 2; y2u = 3; y2v = 1
+
+                            #   0123 0123 0123
+                    if ((j % 4) == 0): #3 #2   VYUY VYUY VYUY
+                        V = ord(line[i * width + j])
+                        Y = 0.5*ord(line[i * width + j + vy]) + 0.5*ord(line[(i-n) * width + j + vy])
+                        U = 0.5*ord(line[i * width + j + vu]) + 0.5*ord(line[(i-n) * width + j + vu])
+                    elif ((j % 4) == 1): #0 #3
+                        Y = ord(line[i * width + j])
+                        V = 0.5*ord(line[i * width + j + y1v]) + 0.5*ord(line[(i-n) * width + j + y1v])
+                        U = 0.5*ord(line[i * width + j + y1u]) + 0.5*ord(line[(i-n) * width + j + y1u]) 
+                    elif ((j % 4) == 2): #1 #0
+                        U = ord(line[i * width + j])
+                        Y = 0.5*ord(line[i * width + j + uy]) + 0.5*ord(line[(i-n) * width + j + uy])
+                        V = 0.5*ord(line[i * width + j + uv]) + 0.5*ord(line[(i-n) * width + j + uv])
+                    elif ((j % 4) == 3): #2 #1
+                        Y = ord(line[i * width + j])
+                        U = 0.5*ord(line[i * width + j + y2u]) + 0.5*ord(line[(i-n) * width + j + y2u])
+                        V = 0.5*ord(line[i * width + j + y2v]) + 0.5*ord(line[(i-n) * width + j + y2v])
+                    U = U - 128
+                    V = V - 128
+                    Y = Y
+                    buffer[(i * width + j) * 3 + 0] = max(min(Y + 1.13983 * V, 255), 0)
+                    buffer[(i * width + j) * 3 + 1] = max(min(Y - 0.39466*U-0.58060*V, 255), 0)
+                    buffer[(i * width + j) * 3 + 2] = max(min(Y + 2.03211*U, 255), 0)
+            self.ser.setTimeout(oldtimeout)
+        finally:
+            self.lock.release()
         return buffer
 
     def getBattery(self):
-        self.lock.acquire()
-        self.ser.write(chr(Scribbler.GET_BATTERY))
-        retval = read_2byte(self.ser) / 20.9813
-        self.lock.release()
+        try:
+            self.lock.acquire()
+            self.ser.write(chr(Scribbler.GET_BATTERY))
+            retval = read_2byte(self.ser) / 20.9813
+        finally:
+            self.lock.release()
         return retval
     
     def setBrightPower(self, power):
-        self.lock.acquire()
-        self.ser.write(chr(Scribbler.SET_DONGLE_IR))
-        self.ser.write(chr(power))
-        self.lock.release()
+        try:
+            self.lock.acquire()
+            self.ser.write(chr(Scribbler.SET_DONGLE_IR))
+            self.ser.write(chr(power))
+        finally:
+            self.lock.release()
 
     def setLEDFront(self, value):
         value = int(min(max(value, 0), 1))
-        self.lock.acquire()
-        if isTrue(value):
-            self.ser.write(chr(Scribbler.SET_DONGLE_LED_ON))
-        else:
-            self.ser.write(chr(Scribbler.SET_DONGLE_LED_OFF))
-        self.lock.release()
+        try:
+            self.lock.acquire()
+            if isTrue(value):
+                self.ser.write(chr(Scribbler.SET_DONGLE_LED_ON))
+            else:
+                self.ser.write(chr(Scribbler.SET_DONGLE_LED_OFF))
+        finally:
+            self.lock.release()
 
     def setLEDBack(self, value):
         if value > 1:
@@ -845,24 +867,27 @@ class Scribbler(Robot):
             value = 0
         else:
             value = int(float(value) * (255 - 170) + 170) # scale
-        self.lock.acquire()
-        self.ser.write(chr(Scribbler.SET_DIMMER_LED))
-        self.ser.write(chr(value))
-        self.lock.release()
+        try:
+            self.lock.acquire()
+            self.ser.write(chr(Scribbler.SET_DIMMER_LED))
+            self.ser.write(chr(value))
+        finally:
+            self.lock.release()
 
     def getObstacle(self, value=None):
-        self.lock.acquire()
-        if value in ["left", 0]:
-            self.ser.write(chr(Scribbler.GET_DONGLE_L_IR))
-        elif value in ["middle", "center", 1]:
-            self.ser.write(chr(Scribbler.GET_DONGLE_C_IR))
-        elif value in ["right", 2]:
-            self.ser.write(chr(Scribbler.GET_DONGLE_R_IR))
-        elif value == None:
-            self.lock.release()
+        if value == None:
             return self.get("obstacle")
-        retval = read_2byte(self.ser)
-        self.lock.release()
+        try:            
+            self.lock.acquire()
+            if value in ["left", 0]:
+                self.ser.write(chr(Scribbler.GET_DONGLE_L_IR))
+            elif value in ["middle", "center", 1]:
+                self.ser.write(chr(Scribbler.GET_DONGLE_C_IR))
+            elif value in ["right", 2]:
+                self.ser.write(chr(Scribbler.GET_DONGLE_R_IR))
+            retval = read_2byte(self.ser)
+        finally:
+            self.lock.release()
         return retval       
 
     def getBright(self, window=None):
@@ -882,21 +907,25 @@ class Scribbler(Robot):
                 window = 1
             elif window in ["right"]:
                 window = 2
-        self.lock.acquire()
-        self.ser.write(chr(Scribbler.GET_WINDOW_LIGHT))
-        self.ser.write(chr(window))
-        retval = read_3byte(self.ser) #/ (63.0 * 192.0 * 255.0)
-        self.lock.release()
+        try:
+            self.lock.acquire()
+            self.ser.write(chr(Scribbler.GET_WINDOW_LIGHT))
+            self.ser.write(chr(window))
+            retval = read_3byte(self.ser) #/ (63.0 * 192.0 * 255.0)
+        finally:
+            self.lock.release()
         return retval 
 
     def getBlob(self):
-        self.lock.acquire()
-        self.ser.write(chr(Scribbler.GET_BLOB))
-        #self.ser.write(chr(window))
-        numpixs = read_2byte(self.ser)
-        xloc = ord(self.ser.read(1))
-        yloc = ord(self.ser.read(1))
-        self.lock.release()
+        try:
+            self.lock.acquire()
+            self.ser.write(chr(Scribbler.GET_BLOB))
+            #self.ser.write(chr(window))
+            numpixs = read_2byte(self.ser)
+            xloc = ord(self.ser.read(1))
+            yloc = ord(self.ser.read(1))
+        finally:
+            self.lock.release()
         return (numpixs, xloc, yloc)
 
     def setForwardness(self, direction):
@@ -906,69 +935,92 @@ class Scribbler(Robot):
             direction = 0
         else:
             raise AttibuteError, ("unknown direction: '%s'" % direction)
-        self.lock.acquire()
-        self.ser.write(chr(Scribbler.SET_FORWARDNESS))
-        self.ser.write(chr(direction))
-        self.lock.release()
+        try:
+            self.lock.acquire()
+            self.ser.write(chr(Scribbler.SET_FORWARDNESS))
+            self.ser.write(chr(direction))
+        finally:
+            self.lock.release()
 
     def setIRPower(self, power):
-        self.lock.acquire()
-        self.ser.write(chr(Scribbler.SET_DONGLE_IR))
-        self.ser.write(chr(power))
-        self.lock.release()
+        try:
+            self.lock.acquire()
+            self.ser.write(chr(Scribbler.SET_DONGLE_IR))
+            self.ser.write(chr(power))
+        finally:
+            self.lock.release()
 
     def setWhiteBalance(self, value):
-        self.lock.acquire()
-        if isTrue(value):
-            self.ser.write(chr(Scribbler.SET_WHITE_BALANCE))
-        else:
-            self.ser.write(chr(Scribbler.SET_NO_WHITE_BALANCE))
-        self.lock.release()
+        try:
+            self.lock.acquire()
+            if isTrue(value):
+                self.ser.write(chr(Scribbler.SET_WHITE_BALANCE))
+            else:
+                self.ser.write(chr(Scribbler.SET_NO_WHITE_BALANCE))
+        finally:
+            self.lock.release()
     
     def reboot(self):
-        self.lock.acquire()
-        self.ser.write(chr(Scribbler.SET_RESET_SCRIBBLER))
-        self.lock.release()
+        try:
+            self.lock.acquire()
+            self.ser.write(chr(Scribbler.SET_RESET_SCRIBBLER))
+        finally:
+            self.lock.release()
 
     def set_cam_param(self, addr, byte):
-        self.lock.acquire()
-        self.ser.write(chr(self.SET_CAM_PARAM))
-        self.ser.write(chr(addr))
-        self.ser.write(chr(byte))
-        time.sleep(.01) # camera needs time to reconfigure
-        self.lock.release()
+        try:
+            self.lock.acquire()
+            self.ser.write(chr(self.SET_CAM_PARAM))
+            self.ser.write(chr(addr))
+            self.ser.write(chr(byte))
+            time.sleep(.05) # camera needs time to reconfigure
+        finally:
+            self.lock.release()
     
     def get_cam_param(self, addr):
-        self.ser.write(chr(self.GET_CAM_PARAM))
-        self.ser.write(chr(addr))
-        return ord(self.ser.read(1))
+        try:
+            self.lock.acquire()
+            self.ser.write(chr(self.GET_CAM_PARAM))
+            self.ser.write(chr(addr))
+            v = ord(self.ser.read(1)) 
+        finally:
+            self.lock.release()
+        return v
 
     def darkenCamera(self, level=0):
         if self.debug:
             print "Turning off White Balance, Gain Control, and Exposure Control", level
-   
-        self.set_cam_param(self.CAM_COMA, self.CAM_COMA_WHITE_BALANCE_OFF)
-        self.set_cam_param(self.CAM_COMB,
-                      (self.CAM_COMB_GAIN_CONTROL_OFF & self.CAM_COMB_EXPOSURE_CONTROL_OFF))
-        self.set_cam_param(0, level)
-        self.set_cam_param(1, 0)
-        self.set_cam_param(2, 0)
-        self.set_cam_param(6, 0)    
-        self.set_cam_param(0x10, 0)
 
+        try:
+            self.lock.acquire()
+
+            self.set_cam_param(self.CAM_COMA, self.CAM_COMA_WHITE_BALANCE_OFF)
+            self.set_cam_param(self.CAM_COMB,
+                               (self.CAM_COMB_GAIN_CONTROL_OFF & self.CAM_COMB_EXPOSURE_CONTROL_OFF))
+            self.set_cam_param(0, level)
+            self.set_cam_param(1, 0)
+            self.set_cam_param(2, 0)
+            self.set_cam_param(6, 0)    
+            self.set_cam_param(0x10, 0)
+        finally:
+            self.lock.release()
 
     def autoCamera(self):
 
         if self.debug:
             print "Turning on White Balance, Gain Control, and Exposure Control"
-            
-        self.set_cam_param(0, 0)
-        self.set_cam_param(1, 0x80)
-        self.set_cam_param(2, 0x80)
-        self.set_cam_param(6, 0x80)
-        self.set_cam_param(0x10, 0x41)
-        self.set_cam_param(self.CAM_COMA, self.CAM_COMA_DEFAULT)
-        self.set_cam_param(self.CAM_COMB, self.CAM_COMB_DEFAULT)
+
+        try:
+            self.lock.acquire()
+            self.set_cam_param(0, 0)
+            self.set_cam_param(1, 0x80)
+            self.set_cam_param(2, 0x80)
+            self.set_cam_param(6, 0x80)
+            self.set_cam_param(0x10, 0x41)
+            self.set_cam_param(self.CAM_COMA, self.CAM_COMA_DEFAULT)
+            self.set_cam_param(self.CAM_COMB, self.CAM_COMB_DEFAULT)
+        finally:
+            self.lock.release()
 
         
     ########################################################## End Dongle Commands
@@ -1131,9 +1183,17 @@ class Scribbler(Robot):
         return(self._fudge[0],self._fudge[1],self._fudge[2],self._fudge[3])
 
     def stop(self):
+        #print "stopping robot"
+        return self._set(Scribbler.SET_MOTORS_OFF)
+
+    def hardStop(self):
+        values = [Scribbler.SET_MOTORS_OFF]
         self._lastTranslate = 0
         self._lastRotate = 0
-        return self._set(Scribbler.SET_MOTORS_OFF)
+        self._write(values)
+        self._read(Scribbler.PACKET_LENGTH) # read echo
+        self._lastSensors = self._read(11) # single bit sensors
+
 
     def translate(self, amount):
         self._lastTranslate = amount
@@ -1239,36 +1299,41 @@ class Scribbler(Robot):
         self.ser.write(data)      # write packets
 
     def _set(self, *values):
-        self.lock.acquire()
-        self._write(values)
-        self._read(Scribbler.PACKET_LENGTH) # read echo
-        self._lastSensors = self._read(11) # single bit sensors
-        self.ser.flushInput()
-        if self.requestStop:
-            self.requestStop = 0
-            self.stop()
+        try:
+            self.lock.acquire() #print "locked acquired"
+            self._write(values)
+            self._read(Scribbler.PACKET_LENGTH) # read echo
+            self._lastSensors = self._read(11) # single bit sensors
+            self.ser.flushInput()
+            if self.requestStop:
+                self.requestStop = 0
+                self.stop()
+                self.lock.release()
+                raise KeyboardInterrupt
+        finally:
             self.lock.release()
-            raise KeyboardInterrupt
-        self.lock.release()
+    
 
     def _get(self, value, bytes = 1, mode = "byte"):
-        self.lock.acquire()
-        self._write([value])
-        self._read(Scribbler.PACKET_LENGTH) # read the echo
-        if mode == "byte":
-            retval = self._read(bytes)
-        elif mode == "word":
-            retvalBytes = self._read(bytes)
-            retval = []
-            for p in range(0,len(retvalBytes),2):
-                retval.append(retvalBytes[p] << 8 | retvalBytes[p + 1])
-        elif mode == "line": # until hit \n newline
-            retval = self.ser.readline()
-            if self.debug:
-                print "_get(line)", retval
-
-        self.ser.flushInput()
-        self.lock.release()
+        try:
+            self.lock.acquire()
+            self._write([value])
+            self._read(Scribbler.PACKET_LENGTH) # read the echo
+            if mode == "byte":
+                retval = self._read(bytes)
+            elif mode == "word":
+                retvalBytes = self._read(bytes)
+                retval = []
+                for p in range(0,len(retvalBytes),2):
+                    retval.append(retvalBytes[p] << 8 | retvalBytes[p + 1])
+            elif mode == "line": # until hit \n newline
+                retval = self.ser.readline()
+                if self.debug:
+                    print "_get(line)", retval
+            self.ser.flushInput()            
+        finally:
+            self.lock.release()
+            
         return retval
 
     def _set_speaker(self, frequency, duration):

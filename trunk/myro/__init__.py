@@ -721,10 +721,24 @@ computer = Computer()
 # functions:
 def _cleanup():
     if myro.globvars.robot:
-        if "robot" in myro.globvars.robot.getInfo().keys():
+        if "robot" in myro.globvars.robot.robotinfo:
             myro.globvars.robot.stop() # hangs?
-            time.sleep(.5)
+            time.sleep(.5)                        
         myro.globvars.robot.close()
+
+import signal
+
+def ctrlc_handler(signum, frame):
+    if myro.globvars.robot:            
+        #myro.globvars.robot.open()
+        #print "done opening"
+        myro.globvars.robot.manual_flush()
+        if "robot" in myro.globvars.robot.robotinfo:            
+            myro.globvars.robot.hardStop()
+    raise KeyboardInterrupt
+
+# Set the signal handler and a 5-second alarm
+signal.signal(signal.SIGINT, ctrlc_handler)
 
 # Get ready for user prompt; set up environment:
 if not myro.globvars.setup:
