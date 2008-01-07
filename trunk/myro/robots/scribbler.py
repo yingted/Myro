@@ -1183,7 +1183,8 @@ class Scribbler(Robot):
         return(self._fudge[0],self._fudge[1],self._fudge[2],self._fudge[3])
 
     def stop(self):
-        #print "stopping robot"
+        self._lastTranslate = 0
+        self._lastRotate = 0
         return self._set(Scribbler.SET_MOTORS_OFF)
 
     def hardStop(self):
