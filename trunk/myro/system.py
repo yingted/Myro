@@ -190,7 +190,12 @@ def upgrade_scribbler(url=None):
             scribbler_ver = info["api"].split(".")
         
         # go to site, check for latest greater than our version
-        infp = urllib.urlopen(url)
+        try:
+            infp = urllib.urlopen(url)
+        except:
+            print "ERROR: There was an error connecting to the web to download updates. Please check your internet connection. For example, see if you can access", url, "using a web browser."
+            return
+        
         print "Opened url..."
         contents = infp.read()
         lines = contents.split("\n")
@@ -461,7 +466,13 @@ def upgrade_fluke(url=None):
         print "Looking for Fluke upgrade at", url, "..."
         myro_ver = myro_version.split(".")
         # go to site, check for latest greater than our version
-        infp = urllib.urlopen(url)
+        #infp = urllib.urlopen(url)
+        try:
+            infp = urllib.urlopen(url)
+        except:
+            print "ERROR: There was an error connecting to the web to download updates. Please check your internet connection. For example, see if you can access", url, "using a web browser."
+            return
+
         contents = infp.read()
         lines = contents.split("\n")
         infp.close()
