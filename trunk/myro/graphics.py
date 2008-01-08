@@ -262,6 +262,7 @@ else:
 def moveToTop(window):
     if not "darwin" in sys.platform and "win" in sys.platform:   
         window.wm_attributes("-topmost", 1)
+    #window.lift(aboveThis=_root)
     window.lift()
     window.focus() 
 

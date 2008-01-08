@@ -2,6 +2,17 @@ from myro import *
 
 initialize()
 
+print getInfo()
+
+forward(1,.5)
+
+print getForwardness()
+print "Setting fluke forward"
+setForwardness("fluke-forward")
+print getForwardness()
+
+forward(1,.5)
+
 print "Back LED 1.0", setLEDBack(1.0)
 wait(2)
 

@@ -409,6 +409,8 @@ class Scribbler(Robot):
                     return self._get(Scribbler.GET_LIGHT_ALL, 6, "word")
                 elif sensor == "line":
                     return self._get(Scribbler.GET_LINE_ALL, 2)
+                elif sensor == "ir":
+                    return self._get(Scribbler.GET_IR_ALL, 2)
                 elif sensor == "obstacle":
                     return [self.getObstacle("left"), self.getObstacle("center"), self.getObstacle("right")]
                 elif sensor == "bright":
@@ -439,12 +441,16 @@ class Scribbler(Robot):
                         retvals.append(values[1])
                     elif pos in [2, "right"]:
                         retvals.append(values[2])
+                    elif pos == None or pos == "all":
+                        retvals.append(values)
                 elif sensor == "ir":
-                    values = self._get(Scribbler.GET_IR_ALL, 2)
+                    values = self._get(Scribbler.GET_IR_ALL, 2)                    
                     if pos in [0, "left"]:
                         retvals.append(values[0])
                     elif pos in [1, "right"]:
                         retvals.append(values[1])
+                    elif pos == None or pos == "all":
+                        retvals.append(values)
                 elif sensor == "line":
                     values = self._get(Scribbler.GET_LINE_ALL, 2)
                     if pos in [0, "left"]:
@@ -898,7 +904,7 @@ class Scribbler(Robot):
         # conf_gray_window(self.ser, 1, 84,  0, 170, 191, 1, 1)
         # conf_gray_window(self.ser, 2, 170, 0, 254, 191, 1, 1)
 
-        if window == None:
+        if window == None or window == "all":
             return self.get("bright")
         if type(window) == str:
             if window in ["left"]:
