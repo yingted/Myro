@@ -167,7 +167,7 @@ class Scribbler(Robot):
 
         self.ser = None
         self.requestStop = 0
-        self.debug = 1
+        self.debug = 0
         self._lastTranslate = 0
         self._lastRotate    = 0
         self._volume = 0
