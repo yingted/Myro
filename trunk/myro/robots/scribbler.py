@@ -167,7 +167,7 @@ class Scribbler(Robot):
 
         self.ser = None
         self.requestStop = 0
-        self.debug = 0
+        self.debug = 1
         self._lastTranslate = 0
         self._lastRotate    = 0
         self._volume = 0
@@ -981,7 +981,7 @@ class Scribbler(Robot):
             self.ser.write(chr(self.SET_CAM_PARAM))
             self.ser.write(chr(addr))
             self.ser.write(chr(byte))
-            time.sleep(.05) # camera needs time to reconfigure
+            time.sleep(.15) # camera needs time to reconfigure
         finally:
             self.lock.release()
     
@@ -999,36 +999,28 @@ class Scribbler(Robot):
         if self.debug:
             print "Turning off White Balance, Gain Control, and Exposure Control", level
 
-        try:
-            self.lock.acquire()
-
-            self.set_cam_param(self.CAM_COMA, self.CAM_COMA_WHITE_BALANCE_OFF)
-            self.set_cam_param(self.CAM_COMB,
-                               (self.CAM_COMB_GAIN_CONTROL_OFF & self.CAM_COMB_EXPOSURE_CONTROL_OFF))
-            self.set_cam_param(0, level)
-            self.set_cam_param(1, 0)
-            self.set_cam_param(2, 0)
-            self.set_cam_param(6, 0)    
-            self.set_cam_param(0x10, 0)
-        finally:
-            self.lock.release()
+            
+        self.set_cam_param(self.CAM_COMA, self.CAM_COMA_WHITE_BALANCE_OFF)
+        self.set_cam_param(self.CAM_COMB,
+                           (self.CAM_COMB_GAIN_CONTROL_OFF & self.CAM_COMB_EXPOSURE_CONTROL_OFF))
+        self.set_cam_param(0, level)
+        self.set_cam_param(1, 0)
+        self.set_cam_param(2, 0)
+        self.set_cam_param(6, 0)    
+        self.set_cam_param(0x10, 0)
 
     def autoCamera(self):
 
         if self.debug:
             print "Turning on White Balance, Gain Control, and Exposure Control"
 
-        try:
-            self.lock.acquire()
-            self.set_cam_param(0, 0)
-            self.set_cam_param(1, 0x80)
-            self.set_cam_param(2, 0x80)
-            self.set_cam_param(6, 0x80)
-            self.set_cam_param(0x10, 0x41)
-            self.set_cam_param(self.CAM_COMA, self.CAM_COMA_DEFAULT)
-            self.set_cam_param(self.CAM_COMB, self.CAM_COMB_DEFAULT)
-        finally:
-            self.lock.release()
+        self.set_cam_param(0, 0)
+        self.set_cam_param(1, 0x80)
+        self.set_cam_param(2, 0x80)
+        self.set_cam_param(6, 0x80)
+        self.set_cam_param(0x10, 0x41)
+        self.set_cam_param(self.CAM_COMA, self.CAM_COMA_DEFAULT)
+        self.set_cam_param(self.CAM_COMB, self.CAM_COMB_DEFAULT)
 
         
     ########################################################## End Dongle Commands
