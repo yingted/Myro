@@ -208,6 +208,7 @@ class Scribbler(Robot):
                           u_low=51, u_high=136,
                           v_low=190, v_high=255)
 
+        self.robotinfo = {}
         if "robot" in info.keys():
             self.robotinfo = info["robot"]
             if "robot-version" in info.keys():
@@ -216,6 +217,7 @@ class Scribbler(Robot):
                 print "You are using scribbler firmware", info["api"]
             self.restart()
             self.loadFudge()
+
 
     def search(self):
         answer = askQuestion(title="Search for " + self.serialPort,

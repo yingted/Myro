@@ -1,6 +1,6 @@
 from myro import *
 
-initialize("/dev/tty.scribbler")
+initialize("/dev/tty.scribbler4812")
 
 avg = 0.0
 num = 10
