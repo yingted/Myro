@@ -188,7 +188,7 @@ def upgrade_scribbler(url=None):
             scribbler_ver = info["robot-version"].split(".")
         elif "api" in info.keys():            
             scribbler_ver = info["api"].split(".")
-        
+
         # go to site, check for latest greater than our version
         try:
             infp = urllib.urlopen(url)
@@ -209,9 +209,15 @@ def upgrade_scribbler(url=None):
                 if filename.startswith("scribbler-upgrade-"):
                     end = filename.index(".bytecode")
                     patch_ver = filename[18:end].split(".")
-                    if map(int, patch_ver) > map(int, scribbler_ver):
+                    try:
+                        scribbler_ver = map(int, scribbler_ver)
+                    except:
+                        #scribbler_ver has letters in it (and so is really old)
+                        scribbler_ver = [0, 0, 0]
+                    if map(int, patch_ver) > scribbler_ver:
                         # consider it:
                         consider[tuple(map(int, patch_ver))] = url + filename
+
         consider_keys = consider.keys()
         consider_keys.sort()
         if len(consider_keys) > 0:

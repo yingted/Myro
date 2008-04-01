@@ -175,8 +175,13 @@ class Scribbler(Robot):
             serialport = ask("Port", useCache = 1)
         # Deal with requirement that Windows "COM#" names where # >= 9 needs to
         # be in the format "\\.\COM#"
+        hasPort = True
         if type(serialport) == str and serialport.lower().startswith("com"):
             portnum = int(serialport[3:])
+        elif isintance(serialport, int): #allow integer input
+            portnum = serialport
+        else: hasPort = False
+        if hasPort:
             if portnum >= 10:
                 serialport = r'\\.\COM%d' % (portnum)
         self.serialPort = serialport
@@ -1061,7 +1066,7 @@ class Scribbler(Robot):
                 position = position.lower()
                 if position == "center":
                     if isTrue(value): return self._set(Scribbler.SET_LED_CENTER_ON)
-                    else:             return self._set(Scribbler.SET_LED_CENTER_OF)
+                    else:             return self._set(Scribbler.SET_LED_CENTER_OFF)
                 elif position == "left":
                     if isTrue(value): return self._set(Scribbler.SET_LED_LEFT_ON)
                     else:             return self._set(Scribbler.SET_LED_LEFT_OFF)

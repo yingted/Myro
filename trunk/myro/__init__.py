@@ -761,7 +761,7 @@ def initialize(id = None):
         myro.globvars.robot = Scribbler(id)
     __builtins__["robot"] = myro.globvars.robot
 
-init = initialize
+init = initialize        
 
 def simulator(id = None):
     _startSimulator()
