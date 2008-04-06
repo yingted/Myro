@@ -506,12 +506,14 @@ class Scribbler(Robot):
         self.ser.write(chr(Scribbler.GET_INFO) + (' ' * 8))
         retval = self.ser.readline()
         #print "Got", retval
+
+        time.sleep(.1)
         
         self.ser.write(chr(Scribbler.GET_INFO) + (' ' * 8))
         retval = self.ser.readline()
+        #print "Got", retval
         
         # remove echoes
-        #print "Got", retval
         if retval == None or len(retval) == 0:
             return {}
         
@@ -580,10 +582,12 @@ class Scribbler(Robot):
     def configureBlob(self,
                       y_low=0,  y_high=255,
                       u_low=0,  u_high=255,
-                      v_low=0,  v_high=255):        
+                      v_low=0,  v_high=255,
+                      smooth_thresh=4):        
         self.conf_rle(y_low=y_low, y_high=y_high,
                       u_low=u_low, u_high=u_high,
-                      v_low=v_low, v_high=v_high)
+                      v_low=v_low, v_high=v_high,
+                      smooth_thresh=smooth_thresh)
 
 
     def conf_rle(self, delay = 90, smooth_thresh = 4,

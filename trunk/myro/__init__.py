@@ -26,8 +26,8 @@ try:
 except:
     print >> sys.stderr, "ERROR: you need to install Python Image Library to make pictures"
 if _pil_version != None:
-    if _pil_version.split(".") < ["1", "1", "6"]:
-        print >> sys.stderr, ("ERROR: you need to upgrade Python Image Library to at least 1.1.6 (you're running %s)" % 
+    if _pil_version.split(".") < ["1", "1", "5"]:
+        print >> sys.stderr, ("ERROR: you need to upgrade Python Image Library to at least 1.1.5 (you're running %s)" % 
                               _pil_version)
 del _pil_version
 
@@ -185,6 +185,10 @@ def gamepad(*phrases):
     """
     Run the gamepad controller.
     """
+    if "darwin" in sys.platform:
+        print "Sorry gamepad not supported on mac os x yet :("
+        return
+        
     if len(phrases) == 0:
         try:
             name = getName()
@@ -344,7 +348,8 @@ def getGamepadNow(*what):
             id = 0
     else:
         id = 0
-    myro.globvars.pygame.event.pump()
+    #myro.globvars.pygame.event.pump()
+    pygame.event.pump()
     if id < len(myro.globvars.joysticks):
         js = myro.globvars.joysticks[id]
     else:
@@ -998,9 +1003,10 @@ def getBattery():
 
 def configureBlob(y_low=0, y_high=255,
                   u_low=0, u_high=255,
-                  v_low=0, v_high=255):
+                  v_low=0, v_high=255,
+                  smooth_thresh=4):
     if myro.globvars.robot:
-        return myro.globvars.robot.configureBlob(y_low, y_high, u_low, u_high, v_low, v_high)
+        return myro.globvars.robot.configureBlob(y_low, y_high, u_low, u_high, v_low, v_high, smooth_thresh)
     else:
         raise AttributeError, "need to initialize robot"
     
@@ -1310,6 +1316,22 @@ from myro.robots.surveyor import Surveyor, watch
 from myro.robots.roomba import Roomba, Create
 from myro.robots.simulator import SimScribbler
 from myro.graphics import *
+
+#######
+## have to load pygame after mostly everything
+if not "darwin" in sys.platform:
+    try:
+        import pygame
+        pygame.init()
+    
+        for i in range(pygame.joystick.get_count()):
+            js = pygame.joystick.Joystick(i)
+            js.init()
+            myro.globvars.joysticks.append(js)
+    except:
+        pygame = None
+        pass
+
 
 _functions = ("timer", 
               "time Remaining", 

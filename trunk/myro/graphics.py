@@ -146,6 +146,7 @@ except:
     tkSnack = None
     print >> sys.stderr, "WARNING: sound did not load; need tkSnack?"
 
+
 ##########################################################################
 # Module Exceptions
 
@@ -178,8 +179,10 @@ _root = None
 _thread_running = True
 _exception_info = None
 
+
 def _tk_thread():
     global _root
+    
     try:
         _root = tk.Tk()
         myro.globvars.gui = _root
@@ -192,6 +195,12 @@ def _tk_thread():
 
 def _tk_pump():
     global _thread_running
+    global _root
+    global _tk_request
+    global _tk_result
+
+    #if myro.globvars.pygame:
+        #myro.globvars.pygame.event.pump()
     while not _tk_request.empty():
         command,returns_value = _tk_request.get()
         try:
@@ -373,7 +382,7 @@ class GraphWin(tk.Canvas):
         # at least flash:
         self.master.after(50, self.master.deiconify)
         self.master.after(70, self.master.tkraise)
-        _root.update()
+        if autoflush: _root.update() 
 
     def setStatusDirect(self, format=""):
         self.status.config(text=format)
@@ -418,7 +427,7 @@ class GraphWin(tk.Canvas):
         self.closed = True
         self.master.destroy()
         _root.update()
-
+        
     def isClosed(self):
         return self.closed
 
@@ -617,6 +626,7 @@ class GraphicsObject:
             if self.canvas.autoflush:
                 #_root.update()
                 _tkCall(_root.update)
+                pass
         self.canvas = None
         self.id = None
 
