@@ -285,8 +285,8 @@ def distance(tuple1, tuple2):
     return math.sqrt(sum([(t1 - t2) ** 2 for (t1, t2) in zip(tuple1, tuple2)]))
 
 class AskDialog(AlertDialog):
-    def __init__(self, title, qlist):
-        _tkCall(self.__init_help, title, qlist)
+    def __init__(self, title, qdict):
+        _tkCall(self.__init_help, title, qdict)
 
     def run(self):
         return _tkCall(self.Show)
@@ -294,10 +294,10 @@ class AskDialog(AlertDialog):
     def stop(self):
         return _tkCall(self.DialogCleanup)
 
-    def __init_help(self, title, qlist):
+    def __init_help(self, title, qdict):
         AlertDialog.__init__(self, _root, title)
         self.title = title
-        self.qlist = qlist
+        self.qdict = qdict
         self.textbox = {}
         moveToTop(self.top)
         self.top.bind("<Return>", lambda event: self.OkPressed())
@@ -306,8 +306,10 @@ class AskDialog(AlertDialog):
         AlertDialog.SetupDialog(self)
         self.bitmap['bitmap'] = 'question'
         first = 1
-        for text in self.qlist.keys():
-            default = self.qlist[text]
+        qlist = self.qdict.keys()
+        qlist.sort()
+        for text in qlist:
+            default = self.qdict[text]
             if "password" in text.lower():
                 self.CreateTextBox(text, width=30, default=default, show="*")
             else:
