@@ -225,7 +225,7 @@ class Scribbler(Robot):
 
 
     def search(self):
-        answer = askQuestion(title="Search for " + self.serialPort,
+        answer = _askQuestion(title="Search for " + self.serialPort,
                              question="Press the red resest button on the robot\nPress OK when ready to search",
                              answers = ["OK", "Cancel"])
         if answer != "OK":
@@ -262,7 +262,7 @@ class Scribbler(Robot):
                     self.ser.timeout = 10
                     s = self.serialPort.replace('\\', "")
                     s = s.replace('.', "")
-                    askQuestion("You can use \"%s\" from now on, like this:\n   initialize(\"%s\")" %
+                    _askQuestion("You can use \"%s\" from now on, like this:\n   initialize(\"%s\")" %
                                 (s, s), answers=["Ok"])
                     return
                 else:
