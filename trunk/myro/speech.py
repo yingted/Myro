@@ -1,5 +1,5 @@
 import myro.globvars
-import os, sys
+import os, sys, re
 
 class TTSEngine:
     def __init__(self, name = None, echo = 1):
@@ -124,6 +124,47 @@ def saveSpeech(message, filename):
     else:
         print "Text-to-speech is not loaded"
 
+def makeStory(story):
+    from myro import ask
+    # go through story, get "items"
+    variables = re.findall('"(.*?)"', story)
+    variables = list(set(variables))
+    variables.sort()
+    variables = map(lambda v: "%s =" % v, variables)
+    values = ask(variables, useDict=1,
+                 title = "For each variable below, fill in a value:")
+    for variable in variables:
+        value = values[variable]
+        if value == "":
+            value = '"%s"' % variable.replace(" =", "")
+        variable = variable.replace(" =", "")
+        story = story.replace('"%s"' % variable, value)
+    return story
+
+def variables():
+    from myro import askQuestion
+    raceStory = """
+One day, the "animal1" and the "animal2" decided to race to the "place_name".
+The "animal1" decided to go the "adjective1" way while "animal2" decided to go the "adjective2" way.
+On the way, the "animal1" "verb1_past" under a "noun1".
+Meanwhile, the "animal2" was winning.
+Soon, the "animal2"'s "part_of_body" got tangled with a "noun2" and it fell.
+The "animal1" caught up with the "animal2" and "verb2_past" that the "animal2" was in trouble.
+So, the "animal1" untangled the "animal2"'s "part_of_body" and "noun2".
+They both went to the "place_name" and won together!"""
+    redStory = """
+One day, "name" was going to "place_name1" to "verb1_present" her grandmother.
+"name" saw a "adjective1" "place_name2" and decided to "verb2_present" some "noun1".
+On the way, a "animal" stopped her to ask her for the "noun2".
+But, the "animal" did not want the "noun2", instead, the "animal" "verb3_past" on "name".
+Then "name" "verb4_past" the "animal"'s "part_of_body" and ran to "verb5_present" her grandmother."""
+    if askQuestion("Which story?", ["The Race", "Red Riding Hood"]) == "The Race":
+        story = makeStory("The Race", raceStory)
+    else:
+        story = makeStory("Red Riding Hood", redStory)
+    speak(story, async=1)
+    return story
+
 if "darwin" in sys.platform:
     try:
         myro.globvars.tts = MacTTSEngine()
@@ -147,6 +188,7 @@ _functions = (
     "get Voices",
     "play Speech",
     "save Speech",
+    "make Story"
 )
 
 myro.globvars.makeEnvironment(locals(), _functions)
