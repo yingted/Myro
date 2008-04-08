@@ -6,7 +6,7 @@ Distributed under a Shared Source License
 """
 
 __REVISION__ = "$Revision$"
-__VERSION__  = "2.6.6"
+__VERSION__  = "2.7.0"
 __AUTHOR__   = "Doug Blank <dblank@cs.brynmawr.edu>"
 
 import sys, atexit, time, random, pickle, threading, os, types, copy
@@ -386,12 +386,18 @@ def getGamepadNow(*what):
 
 _getGamepadNow = getGamepadNow
 
-def ask(item, useCache = 0):
+def ask(item, title = "Information Request", useCache = 0, useDict=0):
     """ Ask the user for a value """
-    retval = _ask(item, useCache = useCache)
-    if len(retval.keys()) == 1:
+    if type(item) in [list, tuple] and len(item) == 1:
+        item = item[0]
+    retval = _ask(item, title = title, useCache = useCache)
+    if useDict:
+        if "ok" in retval:
+            del retval["ok"]
+        return retval
+    elif len(retval.keys()) == 1:
         return retval[item]
-    if len(retval.keys()) == 2 and "ok" in retval.keys():
+    elif len(retval.keys()) == 2 and "ok" in retval.keys():
         return retval[item]
     else:
         return retval
@@ -429,12 +435,12 @@ def _ask(data, title = "Information Request", forceAsk = 0, forceConsole = 0, us
             myro.globvars.askData[text] = data[text]
     return data
 
-def _askGUI(qlist, title = "Information Request"):
-   d = AskDialog(title, qlist)
+def _askGUI(qdict, title = "Information Request"):
+   d = AskDialog(title, qdict)
    ok = d.run()
    if ok:
       retval = {"ok": 1}
-      for name in qlist.keys():
+      for name in qdict.keys():
           retval[name] = d.textbox[name].get()
       d.stop()
       return retval
@@ -1276,6 +1282,20 @@ def makeDarker(color):
 
 def makeLighter(color):
     return color.makeLighter()
+
+def loop(*functions):
+    assert len(functions) > 1, "loop: takes 1 (or more) functions and an integer"
+    assert type(functions[-1]) == int, "loop: last parameter must be an integer"
+    count = functions[-1]
+    for i in range(count):
+        for function in functions[:-1]:
+            print "   loop #%d: running %s()... " % (i + 1, function.__name__),
+            retval = function()
+            if retval:
+                print " => %s" % retval
+            else:
+                print ""
+    return "ok"
 
 ############################
 
