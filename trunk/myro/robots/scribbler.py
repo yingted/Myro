@@ -178,7 +178,7 @@ class Scribbler(Robot):
         hasPort = True
         if type(serialport) == str and serialport.lower().startswith("com"):
             portnum = int(serialport[3:])
-        elif isintance(serialport, int): #allow integer input
+        elif isinstance(serialport, int): #allow integer input
             portnum = serialport
         else: hasPort = False
         if hasPort:
@@ -267,7 +267,7 @@ class Scribbler(Robot):
                     return
                 else:
                     self.ser.close()
-        raise ValueError, ("Couldn't find the scribbler named " + self.serialPort)
+        raise ValueError("Couldn't find robot named '%s'" % self.serialPort)
     
     def open(self):
         try:
@@ -951,7 +951,7 @@ class Scribbler(Robot):
         elif direction in ["scribbler-forward", 0]:
             direction = 0
         else:
-            raise AttibuteError, ("unknown direction: '%s'" % direction)
+            raise AttributeError("unknown direction: '%s': should be 'fluke-forward' or 'scribbler-forward'" % direction)
         try:
             self.lock.acquire()
             self.ser.write(chr(Scribbler.SET_FORWARDNESS))
@@ -1065,7 +1065,7 @@ class Scribbler(Robot):
                     if isTrue(value): return self._set(Scribbler.SET_LED_RIGHT_ON)
                     else:             return self._set(Scribbler.SET_LED_RIGHT_OFF)
                 else:
-                    raise AttributeError, "no such LED: '%s'" % position
+                    raise AttributeError("no such LED: '%s'" % position)
             else:
                 position = position.lower()
                 if position == "center":
@@ -1085,7 +1085,7 @@ class Scribbler(Robot):
                     if isTrue(value): return self._set(Scribbler.SET_LED_ALL_ON)
                     else:             return self._set(Scribbler.SET_LED_ALL_OFF)
                 else:
-                    raise AttributeError, "no such LED: '%s'" % position
+                    raise AttributeError("no such LED: '%s'" % position)
         elif item == "name":
             position = position + (" " * 16)
             name1 = position[:8].strip()
