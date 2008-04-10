@@ -169,6 +169,9 @@ def pickOne(*args):
     else:
         return args[random.randrange(len(args))]
 
+def heads(): return flipCoin() == "heads"
+def tails(): return flipCoin() == "tails"
+
 def flipCoin():
     """
     Randomly returns "heads" or "tails".
@@ -386,11 +389,11 @@ def getGamepadNow(*what):
 
 _getGamepadNow = getGamepadNow
 
-def ask(item, title = "Information Request", useCache = 0, useDict=0):
+def ask(item, title = "Information Request", useCache=0, useDict=0):
     """ Ask the user for a value """
     if type(item) in [list, tuple] and len(item) == 1:
         item = item[0]
-    retval = _ask(item, title = title, useCache = useCache)
+    retval = _ask(item, title = title, useCache=useCache)
     if useDict:
         if "ok" in retval:
             del retval["ok"]
@@ -402,7 +405,7 @@ def ask(item, title = "Information Request", useCache = 0, useDict=0):
     else:
         return retval
 
-def _ask(data, title = "Information Request", forceAsk = 0, forceConsole = 0, useCache = 1):
+def _ask(data, title = "Information Request", forceAsk=1, forceConsole=0, useCache=1):
     """ Given a dictionary return dictionary with answers. """
     if type(data) in [str]:
         data = {data:""}
@@ -1295,6 +1298,7 @@ def loop(*functions):
                 print " => %s" % retval
             else:
                 print ""
+    stop()
     return "ok"
 
 ############################

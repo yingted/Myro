@@ -1,5 +1,5 @@
 import myro.globvars
-import os, sys, re
+import os, sys, re, random
 
 class TTSEngine:
     def __init__(self, name = None, echo = 1):
@@ -164,6 +164,52 @@ Then "name" "verb4_past" the "animal"'s "part_of_body" and ran to "verb5_present
         story = makeStory("Red Riding Hood", redStory)
     speak(story, async=1)
     return story
+
+def numberGame(stop=100, maxGuesses=10):
+    from myro import ask
+    count = 1
+    secret = int(random.random() * 100) + 1
+    ok = False
+    guess = 0
+    while not ok:
+        try:
+            guess = int(ask("Number", 
+                            title = "Try #%d: Guess a number between 1 and %d" % (count, stop)
+                            ))
+            ok = True
+        except KeyboardInterrupt:
+            raise
+        except:
+            ok = False
+    while (guess != secret and count <= maxGuesses):
+        if guess < secret:
+            speak("On try number %d you guessed %d and that is too low." % 
+                  (count, guess))
+        else:
+            speak("On try number %d you guessed %d and that is too high." % 
+                  (count, guess))
+        guess = 0
+        ok = False
+        while not ok:
+            try:
+                guess = int(ask("Number", 
+                                title = "Try #%d: Guess a number between 1 and %d" % (count, stop)))
+                ok = True
+            except KeyboardInterrupt:
+                raise
+            except:
+                ok = False
+        count += 1
+    if count > maxGuesses:
+        speak("Sorry, but you didn't guess it in %d tries. My number was %d." %
+              (maxGuesses, secret))
+    else:
+        speak("You guessed my secret number in %d tries! It was %d." %
+              (count, secret))
+
+def odd(n): return (n % 2) == 1
+def even(n): return (n % 2) == 0
+def wall(): return getObstacle(1) > 4500
 
 if "darwin" in sys.platform:
     try:
