@@ -6,7 +6,7 @@ Distributed under a Shared Source License
 """
 
 __REVISION__ = "$Revision$"
-__VERSION__  = "2.7.2"
+__VERSION__  = "2.7.3"
 __AUTHOR__   = "Doug Blank <dblank@cs.brynmawr.edu>"
 
 import sys, atexit, time, random, pickle, threading, os, types, copy
@@ -1285,6 +1285,10 @@ def makeDarker(color):
 
 def makeLighter(color):
     return color.makeLighter()
+
+def odd(n): return (n % 2) == 1
+def even(n): return (n % 2) == 0
+def wall(): return getObstacle(1) > 4500
 
 def loop(*functions):
     assert len(functions) > 1, "loop: takes 1 (or more) functions and an integer"

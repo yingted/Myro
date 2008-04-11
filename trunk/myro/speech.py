@@ -184,10 +184,10 @@ def numberGame(stop=100, maxGuesses=10):
     while (guess != secret and count <= maxGuesses):
         if guess < secret:
             speak("On try number %d you guessed %d and that is too low." % 
-                  (count, guess))
+                  (count, guess), async=1)
         else:
             speak("On try number %d you guessed %d and that is too high." % 
-                  (count, guess))
+                  (count, guess), async=1)
         guess = 0
         ok = False
         while not ok:
@@ -202,14 +202,10 @@ def numberGame(stop=100, maxGuesses=10):
         count += 1
     if count > maxGuesses:
         speak("Sorry, but you didn't guess it in %d tries. My number was %d." %
-              (maxGuesses, secret))
+              (maxGuesses, secret), async=1)
     else:
         speak("You guessed my secret number in %d tries! It was %d." %
-              (count, secret))
-
-def odd(n): return (n % 2) == 1
-def even(n): return (n % 2) == 0
-def wall(): return getObstacle(1) > 4500
+              (count, secret), async=1)
 
 if "darwin" in sys.platform:
     try:
@@ -234,7 +230,8 @@ _functions = (
     "get Voices",
     "play Speech",
     "save Speech",
-    "make Story"
+    "make Story",
+    "number Game"
 )
 
 myro.globvars.makeEnvironment(locals(), _functions)
