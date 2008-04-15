@@ -102,12 +102,14 @@ def import_file(filename):
     infp.close()
     return install_count
 
-def upgrade_myro(url=None):
+def upgrade_myro(url=None, version=None):
     """
     Takes a url or filename and upgrades Myro.
     """
     if url == None:
         url = "http://myro.roboteducation.org/upgrade/"
+    if version != None:
+        version = version.split(".")
     install_count = 0
     if not url.startswith("http://"):
         print "Looking for Myro upgrades in file", url, "..."
@@ -127,6 +129,10 @@ def upgrade_myro(url=None):
                 if filename.startswith("myro-upgrade-"):
                     end = filename.index(".zip")
                     patch_ver = filename[13:end].split(".")
+                    if (version != None and 
+                        map(int, patch_ver) > map(int, version)):
+                        print "   Downloading..."
+                        install_count += import_url(url + filename)
                     if map(int, patch_ver) > map(int, myro_ver):
                         # download it
                         print "   Downloading..."
@@ -317,9 +323,9 @@ def load_scribbler(s, f):
     myro.globvars.robot.restart()
     return 1
 
-def upgrade(what="myro", url = None):
+def upgrade(what="myro", url = None, version=None):
     if what.lower() == "myro":
-        return upgrade_myro(url)
+        return upgrade_myro(url, version)
     elif what.lower() == "scribbler":
         return upgrade_scribbler(url)
     elif what.lower() == "fluke":
