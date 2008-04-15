@@ -6,7 +6,7 @@ Distributed under a Shared Source License
 """
 
 __REVISION__ = "$Revision$"
-__VERSION__  = "2.7.3"
+__VERSION__  = "2.7.4"
 __AUTHOR__   = "Doug Blank <dblank@cs.brynmawr.edu>"
 
 import sys, atexit, time, random, pickle, threading, os, types, copy
@@ -669,7 +669,7 @@ class Robot(object):
     def open(self):
         pass
     def playSong(self, song, wholeNoteDuration = .545):
-        """ Plays a song (list of note names, durations) """
+        """ Plays a song [(freq, [freq2,] duration),...] """
         # 1 whole note should be .545 seconds for normal
         for tuple in song:
             self.playNote(tuple, wholeNoteDuration)
@@ -1291,19 +1291,40 @@ def even(n): return (n % 2) == 0
 def wall(): return getObstacle(1) > 4500
 
 def loop(*functions):
-    assert len(functions) > 1, "loop: takes 1 (or more) functions and an integer"
+    """
+    Calls each of the given functions seuentially, N times.
+    Example:
+
+    >>> loop(f1, f2, 10)
+    will call f1() then f2(), 10 times.
+    """
+    assert len(functions) > 1,"loop: takes 1 (or more) functions and an integer"
     assert type(functions[-1]) == int, "loop: last parameter must be an integer"
     count = functions[-1]
     for i in range(count):
         for function in functions[:-1]:
             print "   loop #%d: running %s()... " % (i + 1, function.__name__),
-            retval = function()
+            try:
+                retval = function()
+            except TypeError:
+                retval = function(i)
             if retval:
                 print " => %s" % retval
             else:
                 print ""
     stop()
     return "ok"
+
+def beepScale(duration, start, stop, factor=2):
+    """
+    Calls computer.beep(duration, Hz) repeatedly, where Hz is between
+    the given start and stop frequencies, incrementing by the given
+    factor.
+    """
+    hz = start
+    while hz <= stop:
+        computer.beep(duration, hz)
+        hz *= factor
 
 ############################
 
