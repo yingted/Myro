@@ -1003,6 +1003,8 @@ class Picture(object):
         else: # "gray", "blob"
             self.image = PyImage.frombuffer("L", (self.width, self.height),
                                             data, 'raw', "L", 0, 1)
+        if self.image.mode == "P": # palette
+             self.image = self.image.convert()
         self.pixels = self.image.load()
         self.palette = self.image.getpalette()
         self.filename = 'Camera Image'
@@ -1012,6 +1014,8 @@ class Picture(object):
     def load(self, filename):
         #self.image = tk.PhotoImage(file=filename, master=_root)
         self.image = PyImage.open(filename)
+        if self.image.mode == "P": # palette
+             self.image = self.image.convert()
         self.pixels = self.image.load()
         self.width = self.image.size[0]
         self.height = self.image.size[1]
