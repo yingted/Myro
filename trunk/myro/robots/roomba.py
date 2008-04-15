@@ -19,7 +19,11 @@ from myro.robots import Robot as PyroRobot
 from myro.robots.device import *
 import myro.globvars
 import string, array, math , struct
-import threading, serial
+import threading
+try:
+    import serial
+except:
+    print "WARNING: pyserial not loaded: roomba won't work!"
 import time
 
 def lookupRC(val):

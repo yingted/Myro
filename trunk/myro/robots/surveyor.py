@@ -8,7 +8,11 @@ Distributed under a Shared Source License
 __REVISION__ = "$Revision$"
 __AUTHOR__   = "Doug"
 
-import serial, time, string
+import time, string
+try:
+    import serial
+except:
+    print "WARNING: pyserial not loaded: surveyor won't work!"
 from myro import Robot, ask
 import myro.globvars
 import StringIO

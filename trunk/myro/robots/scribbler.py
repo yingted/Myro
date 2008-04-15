@@ -8,7 +8,11 @@ Distributed under a Shared Source License
 __REVISION__ = "$Revision$"
 __AUTHOR__   = "Keith O'Hara and Doug Blank"
 
-import serial, time, string
+import time, string
+try:
+    import serial
+except:
+    print "WARNING: pyserial not loaded: scribbler won't work!"
 from myro import Robot, ask
 from myro.graphics import _askQuestion, Picture
 import myro.globvars

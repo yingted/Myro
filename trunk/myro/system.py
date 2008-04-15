@@ -1,5 +1,9 @@
 import zipfile, tarfile, urllib
-import os, string, serial, sys, time
+import os, string, sys, time
+try:
+    import serial
+except:
+    print "WARNING: pyserial not loaded: can't upgrade robot!"
 from myro import __VERSION__ as myro_version
 import myro.globvars
 # copied below from scribbler.py:
