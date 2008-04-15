@@ -77,8 +77,8 @@ def sendPicture(picture, photoname, password, robotname = None):
     ch = Chat(robotname, password)
     if ch.ok == 1:
         image = picture.image
-        if image.mode == "P":
-            image = image.convert()
+        if image.mode != "RGB":
+            image = image.convert("RGB")
         sio = StringIO.StringIO()
         image.save(sio, "jpeg")
         compressed = sio.getvalue()
