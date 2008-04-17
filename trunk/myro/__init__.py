@@ -6,7 +6,7 @@ Distributed under a Shared Source License
 """
 
 __REVISION__ = "$Revision$"
-__VERSION__  = "2.7.4"
+__VERSION__  = "2.7.5"
 __AUTHOR__   = "Doug Blank <dblank@cs.brynmawr.edu>"
 
 import sys, atexit, time, random, pickle, threading, os, types, copy
@@ -907,11 +907,29 @@ def update():
         return myro.globvars.robot.update()
     else:
         raise AttributeError, "need to initialize robot"
-def beep(duration, frequency1, frequency2 = None):
-    if myro.globvars.robot:
-        return myro.globvars.robot.beep(duration, frequency1, frequency2)
+def beep(duration=.5, frequency1=None, frequency2=None):
+    if frequency1 == None:
+        frequency1 = random.randrange(200, 10000)
+    if type(frequency1) in [tuple, list]:
+        if frequency2 == None:
+            frequency2 = [None for i in range(len(frequency1))]
+        for (f1, f2) in zip(frequency1, frequency2):
+            if myro.globvars.robot:
+                return myro.globvars.robot.beep(duration, f1, f2)
+            else:
+                computer.beep(duration, f1, f2)
     else:
-        raise AttributeError, "need to initialize robot"
+        if myro.globvars.robot:
+            return myro.globvars.robot.beep(duration, frequency1, frequency2)
+        else:
+            computer.beep(duration, frequency1, frequency2)
+
+def scaleUp(loopCount):
+    beep(0.5, 200 + 2 ** loopCount)
+
+def scaleDown(loopCount):
+    beep(0.5, 10000 - 2 ** loopCount)
+
 def set(item, position, value = None):
     if myro.globvars.robot:
         return myro.globvars.robot.set(item, position, value)
@@ -1307,7 +1325,7 @@ def loop(*functions):
             try:
                 retval = function()
             except TypeError:
-                retval = function(i)
+                retval = function(i + 1)
             if retval:
                 print " => %s" % retval
             else:
