@@ -6,7 +6,7 @@ Distributed under a Shared Source License
 """
 
 __REVISION__ = "$Revision$"
-__VERSION__  = "2.7.6"
+__VERSION__  = "2.7.7"
 __AUTHOR__   = "Doug Blank <dblank@cs.brynmawr.edu>"
 
 import sys, atexit, time, random, pickle, threading, os, types, copy
@@ -908,6 +908,9 @@ def update():
     else:
         raise AttributeError, "need to initialize robot"
 def beep(duration=.5, frequency1=None, frequency2=None):
+    if type(duration) in [tuple, list]:
+        frequency1 = duration
+        duration =.5
     if frequency1 == None:
         frequency1 = random.randrange(200, 10000)
     if type(frequency1) in [tuple, list]:
