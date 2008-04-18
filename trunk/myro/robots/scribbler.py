@@ -16,6 +16,7 @@ except:
 from myro import Robot, ask
 from myro.graphics import _askQuestion, Picture
 import myro.globvars
+import cStringIO
 # needed for new camera dongle
 try:
     from numpy import array
@@ -138,6 +139,12 @@ class Scribbler(Robot):
     SET_WHITE_BALANCE=129   # turn on white balance on camera 
     SET_NO_WHITE_BALANCE=130 # diable white balance on camera (default)
     SET_CAM_PARAM=131       # with address and value, sets the camera parameter at that address
+
+    GET_JPEG_GRAY_HEADER=135
+    GET_JPEG_GRAY_SCAN=136
+    GET_JPEG_COLOR_HEADER=137
+    GET_JPEG_COLOR_SCAN=138
+    DUMP_IMAGE=139
 
     PACKET_LENGTH     =  9
     
@@ -613,6 +620,69 @@ class Scribbler(Robot):
             self.ser.write(chr(v_high))
         finally:
             self.lock.release()
+
+    def read_uint32(self):
+        buf = self.ser.read(4)
+        return ord(buf[0]) + ord(buf[1]) * 256 + ord(buf[2]) * 65536 + ord(buf[3]) * 16777216
+    
+    def read_jpeg_scan(self):
+        bytes = ''
+        last_byte = 0
+        while True:
+            byte = self.ser.read(1)
+            bytes += byte
+            
+            if last_byte == chr(0xff) and byte == chr(0xd9):
+                # End-of-image marker
+                break
+
+            last_byte = byte
+
+        bm0 = self.read_uint32();   # Start
+        bm1 = self.read_uint32();   # Read
+        bm2 = self.read_uint32();   # Compress
+
+        if self.debug:
+            print "got image"
+            freq = 60e6
+            print '%.3f %.3f' % (((bm1 - bm0) / freq), ((bm2 - bm1) / freq))
+        
+        return bytes
+    
+    def read_jpeg_header(self):
+        buf = self.ser.read(2)
+        len = ord(buf[0]) + ord(buf[1]) * 256
+        return self.ser.read(len)
+    
+    color_header = None
+    def grab_jpeg_color(self, reliable):
+        try:
+            self.lock.acquire()
+            if self.color_header == None:
+                self.ser.write(chr(self.GET_JPEG_COLOR_HEADER))
+                self.color_header = self.read_jpeg_header()
+            
+            self.ser.write(chr(self.GET_JPEG_COLOR_SCAN))
+            self.ser.write(chr(reliable))
+            jpeg = self.color_header + self.read_jpeg_scan()
+        finally:
+            self.lock.release()
+        return jpeg
+    
+    gray_header = None
+    def grab_jpeg_gray(self, reliable):
+        try:
+            self.lock.acquire()
+            if self.gray_header == None:
+                self.ser.write(chr(self.GET_JPEG_GRAY_HEADER))
+                self.gray_header = self.read_jpeg_header()
+            
+            self.ser.write(chr(self.GET_JPEG_GRAY_SCAN))
+            self.ser.write(chr(reliable))
+            jpeg = self.gray_header + self.read_jpeg_scan()
+        finally:
+            self.lock.release()
+        return jpeg
         
     def takePicture(self, mode="color"):
         width = 256
@@ -621,6 +691,22 @@ class Scribbler(Robot):
         if mode == "color":
             a = self._grab_array()
             p.set(width, height, a)
+        elif mode == "jpeg":
+            jpeg = self.grab_jpeg_color(1)
+            stream = cStringIO.StringIO(jpeg)  
+            p.set(width, height, stream, "jpeg")
+        elif mode == "jpeg-fast":
+            jpeg = self.grab_jpeg_color(0)
+            stream = cStringIO.StringIO(jpeg)  
+            p.set(width, height, stream, "jpeg")
+        elif mode == "grayjpeg":
+            jpeg = self.grab_jpeg_gray(1)
+            stream = cStringIO.StringIO(jpeg)  
+            p.set(width, height, stream, "jpeg")
+        elif mode == "grayjpeg-fast":
+            jpeg = self.grab_jpeg_gray(0)
+            stream = cStringIO.StringIO(jpeg)  
+            p.set(width, height, stream, "jpeg")
         elif mode in ["gray", "grey"]:
             conf_window(self.ser, 0, 1, 0, 255, 191, 2, 2)
             a = self._grab_gray_array()
@@ -1290,8 +1376,9 @@ class Scribbler(Robot):
         if self.debug:
             print "_read (%d)" % len(c)
             print map(lambda x:"0x%x" % ord(x), c)
-            
-        time.sleep(0.01) # HACK! THIS SEEMS TO NEED TO BE HERE!
+
+        if self.dongle == None:
+            time.sleep(0.01) # HACK! THIS SEEMS TO NEED TO BE HERE!
         if bytes == 1:
             x = -1
             if (c != ""):
@@ -1309,7 +1396,8 @@ class Scribbler(Robot):
             print "_write:", data, len(data),
             print "data:",
             print map(lambda x:"0x%x" % ord(x), data)
-        time.sleep(0.01) # HACK! THIS SEEMS TO NEED TO BE HERE!
+        if self.dongle == None:
+            time.sleep(0.01) # HACK! THIS SEEMS TO NEED TO BE HERE!
         self.ser.write(data)      # write packets
 
     def _set(self, *values):
@@ -1318,7 +1406,7 @@ class Scribbler(Robot):
             self._write(values)
             self._read(Scribbler.PACKET_LENGTH) # read echo
             self._lastSensors = self._read(11) # single bit sensors
-            self.ser.flushInput()
+            #self.ser.flushInput()
             if self.requestStop:
                 self.requestStop = 0
                 self.stop()
@@ -1344,7 +1432,7 @@ class Scribbler(Robot):
                 retval = self.ser.readline()
                 if self.debug:
                     print "_get(line)", retval
-            self.ser.flushInput()            
+            #self.ser.flushInput()            
         finally:
             self.lock.release()
             

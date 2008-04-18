@@ -303,7 +303,7 @@ def load_scribbler(s, f):
             print "Sending magic key"
 
     bytes=[]
-    for t in f:
+    for t in f:        
         t = t.strip()
         if (len(t) > 0):
             nv = int(t)

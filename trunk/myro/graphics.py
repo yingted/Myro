@@ -990,9 +990,12 @@ class Picture(object):
         self.height = 0
         self.image = None
         self.filename = None
+        self.mode = None
+
     def set(self, width, height, data=None, mode = "color"):
         self.width = width
         self.height = height
+        self.mode = mode
         if mode.lower() == "color":
             if data == None:
                 data = array([0] * (height * width * 3), 'B')
@@ -1000,6 +1003,9 @@ class Picture(object):
                                             data, "raw", "RGB", 0, 1)
         elif mode.lower() == "image": 	 
              self.image = data.copy()
+        elif mode.lower() == "jpeg": 	 
+             self.image = PyImage.open(data).resize((width,height),PyImage.BILINEAR)
+             #self.image = PyImage.open(data)
         else: # "gray", "blob"
             self.image = PyImage.frombuffer("L", (self.width, self.height),
                                             data, 'raw', "L", 0, 1)
@@ -1011,6 +1017,7 @@ class Picture(object):
         if self.pixels == None:
             raise AttributeError, "Myro needs at least Python Imaging Library version 1.1.6"
         #self.image = ImageTk.PhotoImage(self.temp, master=_root)
+
     def load(self, filename):
         #self.image = tk.PhotoImage(file=filename, master=_root)
         self.image = PyImage.open(filename)
