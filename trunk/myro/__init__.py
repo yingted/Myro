@@ -6,7 +6,7 @@ Distributed under a Shared Source License
 """
 
 __REVISION__ = "$Revision$"
-__VERSION__  = "2.7.5"
+__VERSION__  = "2.7.6"
 __AUTHOR__   = "Doug Blank <dblank@cs.brynmawr.edu>"
 
 import sys, atexit, time, random, pickle, threading, os, types, copy
@@ -924,11 +924,11 @@ def beep(duration=.5, frequency1=None, frequency2=None):
         else:
             computer.beep(duration, frequency1, frequency2)
 
-def scaleUp(loopCount):
-    beep(0.5, 200 + 2 ** loopCount)
-
 def scaleDown(loopCount):
-    beep(0.5, 10000 - 2 ** loopCount)
+    beep(0.5, 9000 - 200 * loopCount)
+
+def scaleUp(loopCount):
+    beep(0.5, 200 + 200 * loopCount)
 
 def set(item, position, value = None):
     if myro.globvars.robot:
