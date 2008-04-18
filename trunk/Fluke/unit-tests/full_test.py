@@ -4,14 +4,19 @@ initialize()
 
 print getInfo()
 
-forward(1,.5)
 
 print getForwardness()
+print "Setting scribbler forward"
+setForwardness("scribbler-forward")
+print getForwardness()
+
+forward(1,.5)
+
 print "Setting fluke forward"
 setForwardness("fluke-forward")
 print getForwardness()
-
 forward(1,.5)
+
 
 print "Back LED 1.0", setLEDBack(1.0)
 wait(2)
@@ -38,6 +43,13 @@ b = currentTime()
 p = takePicture("gray")
 a = currentTime()
 "Gray picture", (a-b)*1000.0, "millseconds"
+show(p)
+wait(2)
+
+b = currentTime()
+p = takePicture("blob")
+a = currentTime()
+"Blob picture", (a-b)*1000.0, "millseconds"
 show(p)
 wait(2)
 

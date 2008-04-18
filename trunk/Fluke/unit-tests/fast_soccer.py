@@ -1,26 +1,22 @@
 from myro import *
 
-#robot = Scribbler("/dev/tty.scribbler")
+
+init()
 
 GO=True
 
 TOO_LEFT = 80.0
 TOO_RIGHT = 144.0
-GAIN = 0.3
+GAIN = 0.45
 
 show(takePicture())
 print "select the color to track"
-#wait(5)
+#wait(2)
 show(takePicture('blob'))
-show(takePicture('blob'))
-show(takePicture('blob'))
-print "starting loop"
 
 lastdir = 'r'
 
-for i in range(40):
-
-    print i
+while True:
 
     px_cnt, avg_x, avg_y = getBlob()
 

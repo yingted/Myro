@@ -1,9 +1,9 @@
 from myro import *
 
-initialize("/dev/tty.scribbler4812")
+initialize()
 
 avg = 0.0
-num = 100
+num = 25
 
 for i in range(num):
     b = currentTime()

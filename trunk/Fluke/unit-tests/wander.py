@@ -8,7 +8,7 @@ speed=0.7
 
 def brain():
 
-    setIRPower(135)
+    setIRPower(132)
     
     for i in range(60):
         r=getObstacle("right")

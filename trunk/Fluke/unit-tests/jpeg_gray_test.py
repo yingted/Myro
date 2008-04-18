@@ -2,13 +2,12 @@ from myro import *
 
 initialize()
 
-
 avg = 0.0
 num = 25
 
 for i in range(num):
     b = currentTime()
-    p = takePicture()
+    p = takePicture('grayjpeg')
     a = currentTime()
     show(p)
     #name = "img-%02d.jpg" % i

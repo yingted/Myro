@@ -1,17 +1,17 @@
 from myro import *
 
-robot = Scribbler("/dev/tty.scribbler")
+#init('/dev/tty.scribbler')
 
 GO=True
 TOO_LEFT = 40.0
 TOO_RIGHT = 230.0
-GAIN = 0.4
+GAIN = 0.45
 lastdir = 'r'
 
 darkenCamera(255)
 configureBlob(y_low=18, y_high = 255, u_low=0, u_high = 128, v_low=128, v_high = 255, smooth_thresh=1)
 
-for i in range(60):
+for i in range(9):
 
     px_cnt, avg_x, avg_y = getBlob()
     
