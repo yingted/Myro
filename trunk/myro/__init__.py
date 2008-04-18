@@ -909,6 +909,7 @@ def update():
         raise AttributeError, "need to initialize robot"
 def beep(duration=.5, frequency1=None, frequency2=None):
     if type(duration) in [tuple, list]:
+        frequency2 = frequency1
         frequency1 = duration
         duration =.5
     if frequency1 == None:
