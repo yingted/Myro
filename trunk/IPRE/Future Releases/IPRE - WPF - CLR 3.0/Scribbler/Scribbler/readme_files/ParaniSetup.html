@@ -1,0 +1,71 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>Parani SD100 Serial to Bluetooth Adapter Setup</title>
+<style type="text/css">
+        Body
+        {
+	       font-family: Verdana;
+	        font-size: smaller;
+	        background-image: url('ipre.png'); 
+	        background-repeat: no-repeat;
+	        background-position: 90% 90%; 
+	        background-attachment: fixed;
+        }
+		ul 
+		{
+			list-style-image: url('bullet.png')
+		}
+		ul ul
+		{
+			list-style-image: url('bullet2.png')
+		}
+     .style1 {font-family: Verdana, Arial, Helvetica, sans-serif}
+</style>
+</head>
+<body>
+<h1>Parani SD100 Serial to Bluetooth Adapter Setup</h1>
+<h3>One time setup / TA Instructions </h3>
+<ol>
+  <li>Use the dip switches on the outside of the device to set the baud rate to 38.4K and disable hardware flow control. 
+    <ol>
+      <li>The positions of the switches should be On, Off, On, Off. </li>
+    </ol>
+  </li>
+  <li>Power the device and connect it to the PC's serial port. </li>
+  <li>Install and run the PromiWin software that ships with the device. </li>
+  <li>Disable AT commands</li>
+  <li>Turn on Authentication and give it a passkey. &quot;1234&quot; is a standard Bluetooth device default password. (There is a bug when there is no passkey).</li>
+  <li>Optionally change the name of the device to something friendlier / unique </li>
+</ol>
+<h3>Re-pairing / Student Instructions  </h3>
+<ol>
+  <li>Turn on scribbler with adapter plugged in.
+    <ol>
+      <li>If scribbler LED flashes really fast, repeat TA instructions above. </li>
+      <li>The Parani Standby LED should be constant amber. </li>
+    </ol>
+  </li>
+  <li>Press and hold Pairing button with tip of mechanical pencil until the Standby LED turns off.
+    <ol>
+      <li>Now the Parani Connect LED should be blinking 3 times every 2 seconds.  (This means device is able to be paired with a computer). </li>
+    </ol>
+  </li>
+  <li>Do the standard windows pairing.
+    <ol>
+      <li>Make sure a com port number is assigned. Go to the &quot;Properties&quot; window for that device, then under the services tab, make sure the &quot;generic serial&quot; profile is checked. </li>
+    </ol>
+  </li>
+  <li>Now connect to robot with  MSRS, Myro, or HyperTerminal.
+    <ol>
+        <li>IMPORTANT: Before connecting to the robot with MSRS, always make sure that the robot is freshly restarted. </li>
+      <li>NOTE: Pairing is not completed on the robot side until this connection is made. </li>
+      <li>When connected, the Connect LED will be constant green. </li>
+    </ol>
+  </li>
+</ol>
+<p>Notes: When you disconnect from the robot, the Connect LED will flash 2 times every 2 seconds.  This indicates that this device has found a pair and will only connect to that computer.  It is not even discoverable by other computers. If you ever need to re-pair, just press and hold the Pairing button again until the Connect LED blinks 3 times every 2 seconds.  Then repeat the re-pairing instructions above. </p>
+<p>&nbsp;</p>
+</body>
+</html>
