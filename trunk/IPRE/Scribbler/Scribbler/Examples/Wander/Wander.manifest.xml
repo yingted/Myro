@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Manifest 
+    xmlns="http://schemas.microsoft.com/xw/2004/10/manifest.html"
+    xmlns:dssp="http://schemas.microsoft.com/xw/2004/10/dssp.html">
+
+  <CreateServiceList>
+
+    <ServiceRecordType>
+      <dssp:Contract>http://www.roboteducation.org/wander.html</dssp:Contract>
+    </ServiceRecordType>
+
+    <!--Start Scribbler Base Service -->
+    <ServiceRecordType>
+      <dssp:Contract>http://www.roboteducation.org/scribblerbase.html</dssp:Contract>
+    </ServiceRecordType>
+
+    <!-- Start the Scribbler Bumper Service -->
+    <ServiceRecordType>
+      <dssp:Contract>http://www.roboteducation.org/scribblerbumper.html</dssp:Contract>
+    </ServiceRecordType>
+
+    <!-- Start the Scribbler Drive Service -->
+    <ServiceRecordType>
+      <dssp:Contract>http://www.roboteducation.org/scribblerdrive.html</dssp:Contract>
+    </ServiceRecordType>
+
+    <!--Start Scribbler Light Sensors service -->
+    <ServiceRecordType>
+      <dssp:Contract>http://www.roboteducation.org/scribblerlightsensor.html</dssp:Contract>
+    </ServiceRecordType>
+
+  </CreateServiceList>
+</Manifest>
