@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<RobotConfig>
+
+  <ManifestFile>
+    <URI>C:\Microsoft Robotics Studio (1.5)\samples\IPRE\Surveyor\SRV-1\Srv1Services\Config\IPRE.Surveyor.SRV1.Vehicle.manifest.xml</URI>
+  </ManifestFile>
+
+  <DssEnvironment>
+    <HttpPort>50000</HttpPort>
+    <SoapPort>50001</SoapPort>
+  </DssEnvironment>
+
+  <!-- Verbosity Level from 1-5 -->
+  <Verbosity>
+    <Level>2</Level>
+  </Verbosity>
+  
+  <Sensor type="drive" class="differential">
+    <Service>/1</Service>
+    <Container>Element</Container>
+    <FinalOrder>0</FinalOrder>
+  </Sensor>
+  
+  <Sensor type="contact" class="bumper">
+    <Service>/2/contactsensor</Service>
+    <Container>Array</Container>
+    <StartIndex>0</StartIndex>
+    <EndIndex>3</EndIndex>
+    <FinalOrder>0</FinalOrder>
+  </Sensor>
+
+  <Sensor type="analog" class="infra-red">
+    <Service>/srv1analogsensor/analogarray</Service>
+    <Container>Array</Container>
+    <StartIndex>0</StartIndex>
+    <EndIndex>3</EndIndex>
+    <FinalOrder>0</FinalOrder>
+  </Sensor>
+
+  <Utility class="text-to-speech">
+    <Service>/tts</Service>
+  </Utility>
+  
+</RobotConfig>
