@@ -140,11 +140,11 @@ except:
 
 import math
 try:
-    import tkSnack
-    #_tkExec(tkSnack.initializeSnack, myro.globvars.gui)
+     import tkSnack
+     #_tkExec(tkSnack.initializeSnack, myro.globvars.gui)
 except:
-    tkSnack = None
-    print >> sys.stderr, "WARNING: sound did not load; need tkSnack?"
+     tkSnack = None
+     print >> sys.stderr, "WARNING: sound did not load; need tkSnack?"
 
 
 ##########################################################################
