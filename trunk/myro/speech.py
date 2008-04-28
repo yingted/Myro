@@ -1,5 +1,6 @@
 import myro.globvars
 import os, sys, re, random
+import pygame
 
 class TTSEngine:
     def __init__(self, name = None, echo = 1):
@@ -16,6 +17,11 @@ class TTSEngine:
         return self.name
     def getVoices(sel):
         return []
+    def playSpeech(self, filename):
+        sound = pygame.mixer.Sound(filename)
+        sound.play()
+    def saveSpeech(self, message, filename):
+        pass
 
 class LinuxTTSEngine(TTSEngine):
     def speak(self, message, async=0):
