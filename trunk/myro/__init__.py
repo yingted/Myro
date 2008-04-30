@@ -6,7 +6,7 @@ Distributed under a Shared Source License
 """
 
 __REVISION__ = "$Revision$"
-__VERSION__  = "2.7.7"
+__VERSION__  = "2.7.8"
 __AUTHOR__   = "Doug Blank <dblank@cs.brynmawr.edu>"
 
 import sys, atexit, time, random, pickle, threading, os, types, copy
@@ -919,12 +919,12 @@ def beep(duration=.5, frequency1=None, frequency2=None):
             frequency2 = [None for i in range(len(frequency1))]
         for (f1, f2) in zip(frequency1, frequency2):
             if myro.globvars.robot:
-                return myro.globvars.robot.beep(duration, f1, f2)
+                myro.globvars.robot.beep(duration, f1, f2)
             else:
                 computer.beep(duration, f1, f2)
     else:
         if myro.globvars.robot:
-            return myro.globvars.robot.beep(duration, frequency1, frequency2)
+            myro.globvars.robot.beep(duration, frequency1, frequency2)
         else:
             computer.beep(duration, frequency1, frequency2)
 
