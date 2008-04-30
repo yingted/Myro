@@ -1,6 +1,10 @@
 import myro.globvars
 import os, sys, re, random
-import pygame
+try:
+    import pygame
+    pygame.mixer.init(16000)
+except:
+    pass
 
 class TTSEngine:
     def __init__(self, name = None, echo = 1):
@@ -27,12 +31,11 @@ class LinuxTTSEngine(TTSEngine):
     def speak(self, message, async=0):
         if self.echo:
             print message
-        if async:
-            background = "&"
-        else:
-            background = ""
-        os.system("""echo "%s" | festival --tts %s""" % (message, background))
-
+        self.filename = "/tmp/%06d.wav" % random.randint(1,999999)
+        message = message.replace('"', '\\"')
+        os.system("""echo "%s" | text2wave -scale 10 -o %s"""
+                  % (message, self.filename))
+        self.playSpeech(self.filename)
 
 class WindowsTTSEngine(TTSEngine):
     def __init__(self, name = None, echo = 1):
