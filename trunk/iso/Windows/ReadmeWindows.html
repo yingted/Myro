@@ -1,0 +1,172 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head><!-- InstanceBegin template="/Templates/subpage.dwt" codeOutsideHTMLIsLocked="false" -->
+
+
+
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"><!-- InstanceBeginEditable name="doctitle" --><title>IPRE Windows XP and Vista Install</title><!-- InstanceEndEditable -->
+
+
+
+<link href="ReadmeWindowsVista_files/styles.css" rel="stylesheet" type="text/css">
+<script src="ReadmeWindowsVista_files/script.js" language="javascript"></script><!-- InstanceBeginEditable name="head" --><!-- InstanceEndEditable -->
+
+<style type="text/css">
+<!--
+.style1 {font-size: 12px}
+-->
+</style></head><body onload="MM_preloadImages('images/menu1_rol.gif')">
+<table id="page" align="center" border="0" cellpadding="0" cellspacing="0" width="924">
+  <tbody><tr>
+    <td><table align="center" border="0" cellpadding="0" cellspacing="0" width="924">
+      <tbody><tr>
+        <td align="right"><div align="left">
+          <table border="0" cellpadding="0" cellspacing="0" width="1003">
+            <tbody><tr align="right">
+              <td width="114"><img src="ReadmeWindowsVista_files/top_left_shadow.jpg" height="100" width="114"></td>
+			      <td width="130"><a href="http://www.roboteducation.org/index.html"><img src="ReadmeWindowsVista_files/logo.jpg" border="0" height="100" width="130"></a></td>
+			      <td width="262"><img src="ReadmeWindowsVista_files/slogan.jpg" height="100" width="262"></td>
+			      <td id="top" halign="right">
+				      
+			        <br>
+			        <!-- Site search from Live Search-->
+			          <table bgcolor="#002768" bordercolor="#002768">
+				          
+			            <tbody><tr bordercolor="#002768" bgcolor="#002768" valign="bottom">
+			              <td bgcolor="#002768">
+			                <div align="right"><span class="style1">
+	                      </span></div></td>
+    </tr>
+		              </tbody></table>
+    </form>
+    <!-- Site Search from Live Search -->
+				      
+			        <div id="menu"></div>			      </td>
+			      <td width="110">&nbsp;</td>
+		        </tr>
+          </tbody></table>
+        </div></td>
+      </tr>
+      <tr>
+        <td><div align="left"><img id="header_subpage" src="ReadmeWindowsVista_files/header_subpage.jpg" height="106" width="861"></div></td>
+      </tr>
+      <tr>
+        <td><table align="left" border="0" cellpadding="0" cellspacing="0" width="924">
+		  <tbody><tr>
+		    <td width="10">&nbsp;</td>
+			<td width="700">
+				<div class="title"><!-- InstanceBeginEditable name="page title" -->Myro Software Install CD<!-- InstanceEndEditable --></div>
+				<!-- InstanceBeginEditable name="content" -->
+				<p class="text_holder">
+
+
+			</p>
+<h3>Windows XP and Vista Install Instructions</h3>
+		Installation on windows XP and Vista currently requires that you run the
+install.bat file as the computer's administrator, and not as a regular user.
+
+<p>
+If you are running as the default user in Windows XP, it is likely that you already have administrator privileges, so go ahead and start the install.bat file by double clicking on it.<p>
+
+To run the batch file in Windows Vista, do one of the following:
+  <ol>
+    <li> Navigate to the CD-Rom. (Right click on the Start button and select Explore. Select Computer.)</li>
+    <li> Go into the Windows folder on the CD. (Right-click on the CD icon, and select Open or Explore from the context menu.)</li>
+    <li> In Windows Vista, <b>Right-Click</b> on the install.bat file. (A context menu will open up.) Select "Run as Administrator" from the context menu. In Windows XP you can simply double-click on the install.bat file.</li>
+  </ol>
+
+ or
+
+<ol>
+<li>  Click the Start button.</li>
+<li>In the start menu, click the All Programs icon.</li>
+<li>In the Programs menu, click the Accessories folder icon.</li>
+<li> <b>Right-click</b> on the Command Prompt icon (which will appear under Accessories).</li>
+<li>Then select "Run as Administrator" from the menu. A window will open up. It is referred to as the Command Prompt.</li>
+<li>In the Command Prompt window, execute the install.bat file by typing
+"d:\WinVista\install.bat" (without the quotes) and pressing enter. If your CD-Rom/DVD drive is a different drive letter than D, you should substitute the correct drive letter.</li>
+</ol>
+
+ By running the install.bat program, you will begin installing a 
+series of programs necessary for Myro to run. Keep clicking Next and Install until it is 
+finished. Some general guidance:
+
+   <ol>
+   <li>Always choose Python2.4 if given a choice</li>
+   <li>If you already have Python2.4 installed, choose the Repair option</li>
+   <li>Always take the recommended defaults (except were noted here)</li>
+   <li>Never select Remove</li>
+   <li>You must have administrator rights to install the software (and upgrade it)      </li>
+   <li>If you receive error messages about a missing <b>MSVCR71.DLL</b> file, 
+   you should install Microsoft .NET 1.1 framework. (install file 
+   included on CD)</li>
+   </ul>
+
+
+
+        <h3>Upgrading</h3>
+        After you install the software, you must upgrade to the latest
+  version via the Internet. Double-click the "Start Python.pyw" file on your 
+desktop to start the IDLE window.  In the IDLE window, enter the following:
+ <pre>
+  >>> from myro import *
+  >>> upgrade("myro")
+ </pre>
+
+ If you get error messages about not having the proper permissions to 
+  write/upgrade files, you need to start python as an Administrator. The
+  easiest way is to open an administrator command prompt (described above),
+  navigate to your desktop, and run <b>python "Start Python.pyw"</b> in the
+  command prompt window.)
+<p>  
+
+
+ For the latest information on installing Myro, check 
+the <a href="http://wiki.roboteducation.org/Myro_Installation_Manual">online website</a>.
+
+<h3>Next Steps</h3>
+Go to the <a href="http://wiki.roboteducation.org/">website</a> to learn how to setup 
+the <a href="http://wiki.roboteducation.org/Bluetooth_Setup">Bluetooth link</a> to your robot. 
+After you connect to your robot, you should check to see if the Robot or IPRE Lancet Fluke 
+requires new software with the following python commands:
+<pre>
+  >>> from myro import *
+  >>> upgrade("fluke")
+  >>> upgrade("scribbler")
+  >>> init("<com port>")
+ </pre>
+
+Then you should look at the <a href="http://wiki.roboteducation.org/Myro_Reference_Manual">Myro 
+Reference Manual</a>.
+
+
+
+
+                    <table border="0" cellpadding="0" cellspacing="0">
+
+                  <tbody><tr>
+		<td><div class="content_line"></div></td>
+                  </tr>
+                </tbody></table>
+				<!-- InstanceEndEditable -->				<p></p>			</td>
+			<td></td>
+		  </tr>
+		</tbody></table>		</td>
+      </tr>
+    </tbody></table></td>
+  </tr>
+  <tr>
+    <td id="footer">
+		<div class="holder">
+			<div class="content">
+			<a href="http://robotics.gatech.edu/" target="_blank"><img src="ReadmeWindowsVista_files/baner1.gif" border="0" height="38" width="153"></a><a href="http://cs.brynmawr.edu/" target="_blank"><img src="ReadmeWindowsVista_files/baner2.gif" class="baners" border="0" height="38" width="153"></a><a href="http://research.microsoft.com/" target="_blank"><img src="ReadmeWindowsVista_files/baner3.gif" border="0" height="38" width="153"></a>			</div>
+	  <div class="copy">
+				Copyright © 2007 Institute for Personal Robots in Education. All rights reserved. Last updated: Feb 27 2008<br>
+		  </div>
+		</div>
+	</td>
+  </tr>
+</tbody></table>
+
+<!-- InstanceEnd -->
+</body></html>

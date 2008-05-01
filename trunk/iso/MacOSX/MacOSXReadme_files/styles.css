@@ -1,0 +1,68 @@
+/* CSS Document */
+body	{
+	margin:0;
+	background:#002768;
+	font-family:Verdana;
+	color:#FFFFFF;
+	font-size:12px;
+}
+img		{ border:0; vertical-align:top;}
+td		{
+	vertical-align:top;
+	font-size:14px;
+	line-height:16px;
+}
+p		{ margin:0; padding:0;}
+a		{ color:#B9D4FE; text-decoration:underline;}
+a:hover	{ text-decoration:none;}
+strong	{
+	color:#FFFFFF;
+}
+
+#page	{ width:100%; height:100%;}
+
+
+#top			{ background:url(images/top_shadow.jpg) left no-repeat; color:#B9D4FE; text-align:right;}
+#header_home	{ margin-left:71px; margin-bottom:30px;}
+#header_subpage	{ margin-left:74px; margin-bottom:9px;}
+
+.title			{
+	padding-left:30px;
+	border-left:1px solid #1C458B;
+	margin-bottom:15px;
+	font-size:36px;
+	line-height:26px;
+	color:#FFFFFF;
+	font-family:arial
+}
+
+.text_holder	{
+	line-height:20px;
+	padding-left:31px;
+	font-size:14px;
+	color: #FFFFFF;
+}
+
+.date			{
+	border:1px solid #405A87;
+	float:right;
+	color:#FFFFFF;
+	font-size:12px;
+	line-height:12px;
+	padding:1px 2px;
+}
+
+#search				{ vertical-align:middle; font-family:Arial; padding-top:20px; padding-right:10px;}
+#menu				{ margin-right:10px;}
+
+.content_line		{ border-top:1px solid #133B7F; width:345px; padding-top:16px;}
+
+#search input		{ vertical-align:middle;}
+#search input.text	{ width:106px; height:17px; border:1px solid #7693C5; background:#002768; margin:0 1px 0 10px; color:#B9D4FE; line-height:10px; font-size:11px;}
+
+#footer								{ height:190px; background: url(images/footer_bg.gif); text-align:center; font-size:10px; padding-top:40px;}
+#footer .holder						{ width:811px; margin:0 auto; text-align:right;}
+#footer .holder	.content			{ width:780px; margin-right:30px; text-align:right; border-left:1px solid #1C458B;}
+#footer .holder .content .links	{ margin-left:145px; margin-right:146px;}
+#footer .holder .copy				{ padding-right:30px; padding-top:26px;}
+#footer .holder .copy img			{ margin-top:15px;}

@@ -1,0 +1,4 @@
+[autorun]
+ShellExecute=Readme.html
+label="IPRE March 2008"
+icon=Media\logo.ico
