@@ -1,6 +1,7 @@
 using Gtk;
 using GtkSourceView;
 using System.IO;
+using System;
 
 using PyjamaInterfaces;
 
@@ -36,11 +37,16 @@ public class TextDocument: PyjamaInterfaces.IDocument
 	buffer = new SourceBuffer(language);
         buffer.Highlight = true;
 	source_view = new SourceView();
-	source_view.WrapMode = Gtk.WrapMode.Word;
 	source_view.Buffer = buffer;
+	source_view.Buffer.Changed += new EventHandler(OnSourceViewChanged);
 	// Options should be set by user:
+	source_view.WrapMode = Gtk.WrapMode.Word;
         source_view.ShowLineNumbers = true;
         source_view.AutoIndent = true;
+    }
+
+    private void OnSourceViewChanged(object obj, EventArgs args) 
+    {
     }
     
     public Widget GetView()
