@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Gtk;
 using GtkSourceView;
+using Mono.Unix;
 
 using PyjamaInterfaces;
 
@@ -63,6 +64,17 @@ public class Document: PyjamaInterfaces.IDocument
     }
 }
 
+public class Utils
+{
+    public static string _(string msg) {
+	return Catalog.GetString(msg);
+    }
+
+    public static string _s(string msg1, string msg2, int count) {
+	return Catalog.GetPluralString(msg1, msg2, count);
+    }
+}
+
 public class WindowMenuBar: Gtk.MenuBar
 {
     Test window;
@@ -72,7 +84,7 @@ public class WindowMenuBar: Gtk.MenuBar
 	window = win;
 	
 	Menu file_menu = new Menu();
-	MenuItem file_item = new MenuItem("_File");
+	MenuItem file_item = new MenuItem(Utils._("_File"));
 	file_item.Submenu = file_menu;
 	Append(file_item);
         
@@ -112,6 +124,9 @@ public class Test: Window
     
     public Test(): base("Pyjama")
     {
+	// Initialize I18N: 
+	Catalog.Init("pyjama", "./locale");
+
         // Set up syntax highlighting
         SourceLanguagesManager mgr = new SourceLanguagesManager();
         Document.language = mgr.GetLanguageFromMimeType("text/x-python");
