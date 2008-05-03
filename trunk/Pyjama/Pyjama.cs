@@ -151,9 +151,10 @@ public class Test: Window
         file_list.Model = file_list_store;
         file_list.HeadersVisible = false;
         file_list.CursorChanged += select_file;
+	# MONO ON WIN: needed to cast the TreeCellDataFunc function
         file_list.AppendColumn("Filename", 
 			       new CellRendererText(), 
-			       document_filename);
+			       ((Gtk.TreeCellDataFunc)document_filename));
         
         ScrolledWindow file_list_win = new ScrolledWindow();
         file_list_win.Add(file_list);
@@ -199,7 +200,8 @@ public class Test: Window
     }
     
     // Sets the text in a CellRendererText to a Document's filename.
-    void document_filename(TreeViewColumn tree_column, CellRenderer cell, TreeModel tree_model, TreeIter iter)
+    void document_filename(TreeViewColumn tree_column, 
+	CellRenderer cell, TreeModel tree_model, TreeIter iter)
     {
         Document doc = (Document)tree_model.GetValue(iter, 0);
         
