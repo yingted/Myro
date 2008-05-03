@@ -1,3 +1,5 @@
+using Gtk;
+
 namespace PyjamaInterfaces
 {
     public interface IDocument
@@ -9,6 +11,7 @@ namespace PyjamaInterfaces
 	void Save();
 	void SaveAs(string value);
 	void SetFilename(string value);
+	Widget GetView();
     }
 }
 

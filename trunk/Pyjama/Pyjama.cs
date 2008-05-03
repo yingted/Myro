@@ -102,7 +102,7 @@ public class MainWindow: Window
 
         // This must be done after it has been added to all its containers.
         // Set the focus to the first notbook page editor.
-        notebook.CurrentPageWidget.GrabFocus();
+        documents[0].GetView().GrabFocus();
     }
     
     // Returns the document that is currently selected in the file list
@@ -141,8 +141,9 @@ public class MainWindow: Window
         page.VscrollbarPolicy = PolicyType.Automatic;
 	notebook.AppendPage(page, new Label(filename));
 	documents.Add(textdoc);
-        notebook.Page = notebook.NPages - 1;
 	page.ShowAll();
+        notebook.Page = notebook.NPages - 1;
+        textdoc.GetView().GrabFocus();
     }
     
     public void file_open(object obj, EventArgs args)

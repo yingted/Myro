@@ -38,9 +38,9 @@ public class TextDocument: PyjamaInterfaces.IDocument
         source_view.AutoIndent = true;
     }
     
-    public SourceView GetView()
+    public Widget GetView()
     {
-	return source_view;
+	return (Widget) source_view;
     }
 
     public string GetShortName()
