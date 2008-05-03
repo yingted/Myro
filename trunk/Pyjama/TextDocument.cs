@@ -36,6 +36,7 @@ public class TextDocument: PyjamaInterfaces.IDocument
 	buffer = new SourceBuffer(language);
         buffer.Highlight = true;
 	source_view = new SourceView();
+	source_view.WrapMode = Gtk.WrapMode.Word;
 	source_view.Buffer = buffer;
 	// Options should be set by user:
         source_view.ShowLineNumbers = true;
