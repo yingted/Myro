@@ -121,7 +121,6 @@ public class MainWindow: Window
 
     public void file_new(object obj, EventArgs args)
     {
-	Console.WriteLine("You have selected file_new.");
 	add_file(null);
     }
 
