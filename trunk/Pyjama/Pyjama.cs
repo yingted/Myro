@@ -151,7 +151,7 @@ public class Test: Window
         file_list.Model = file_list_store;
         file_list.HeadersVisible = false;
         file_list.CursorChanged += select_file;
-	# MONO ON WIN: needed to cast the TreeCellDataFunc function
+	// MONO ON WIN: needed to cast the TreeCellDataFunc function
         file_list.AppendColumn("Filename", 
 			       new CellRendererText(), 
 			       ((Gtk.TreeCellDataFunc)document_filename));
