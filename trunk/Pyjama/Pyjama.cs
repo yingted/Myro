@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 using Mono.Unix;
 using Gtk;
 
@@ -49,6 +50,7 @@ public class WindowMenuBar: Gtk.MenuBar
 public class MainWindow: Window
 {
     Notebook notebook;
+    List <IDocument> documents = new List <IDocument>();
 
     public MainWindow(): base(Utils.Tran("Pyjama"))
     {
@@ -130,6 +132,7 @@ public class MainWindow: Window
 	if (filename == null) {
 	    filename = Utils.Tran("Untitled") + "-" + pages + ".py";
 	    textdoc = new TextDocument();
+	    textdoc.SetFilename(filename); // so if you want to save it later
 	} else {
 	    textdoc = new TextDocument(filename);
 	}
@@ -138,13 +141,13 @@ public class MainWindow: Window
         page.HscrollbarPolicy = PolicyType.Automatic;
         page.VscrollbarPolicy = PolicyType.Automatic;
 	notebook.AppendPage(page, new Label(filename));
+	documents.Add(textdoc);
         notebook.Page = notebook.NPages - 1;
 	page.ShowAll();
     }
     
     public void file_open(object obj, EventArgs args)
     {
-	Console.WriteLine("You have selected file_open.");
         FileChooserDialog dlg = new FileChooserDialog(
 				       "Open", this, FileChooserAction.Open,
 				       "Cancel", ResponseType.Cancel,
@@ -161,37 +164,33 @@ public class MainWindow: Window
     public void file_save(object obj, EventArgs args)
     {
 	int page_num = notebook.CurrentPage;
-	Console.WriteLine("You have selected file_save page {0}.", page_num);
+	IDocument currentdoc = documents[page_num];
+	currentdoc.Save();
     }
     
     public void file_save_as(object obj, EventArgs args)
     {
 	int page_num = notebook.CurrentPage;
-	Console.WriteLine("You have selected file_save_as page {0}.", page_num);
-	//Widget widget = notebook.GetNthPage(page_num);
-	//TODO: need a list of IDocuments
-    }
-    
-    public bool file_save()
-    {
-	int page_num = notebook.CurrentPage;
-	Console.WriteLine("You have selected file_save page {0}.", page_num);
-        return true;
-    }
-    
-    public bool file_save_as()
-    {
-	int page_num = notebook.CurrentPage;
-	Console.WriteLine("You have selected file_save_as page {0}.", page_num);
-        return true;
+	IDocument currentdoc = documents[page_num];
+        FileChooserDialog dlg = new FileChooserDialog("Save As", this, 
+						      FileChooserAction.Save,
+						      "Cancel", ResponseType.Cancel,
+						      "Save", ResponseType.Accept);
+        bool ret = (dlg.Run() == (int)ResponseType.Accept);
+        if (ret)
+        {
+	    currentdoc.SaveAs(dlg.Filename);
+	    notebook.SetTabLabelText(notebook.CurrentPageWidget, dlg.Filename);
+        }
+        dlg.Destroy();
     }
     
     public void file_close(object obj, EventArgs args)
     {
 	int page_num = notebook.CurrentPage;
-	Console.WriteLine("You have selected file_close page {0}.", page_num);
 	// TODO: check for Modified
 	notebook.RemovePage(page_num);
+	documents.RemoveAt(page_num);
 	if (notebook.NPages == 0)
 	    file_new(null, null);
 	notebook.Show();

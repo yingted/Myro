@@ -2,7 +2,7 @@ PROJECT=pyjama
 SRCS=Pyjama.cs PyjamaInterfaces.cs Utils.cs TextDocument.cs
 DLLS=-r:Mono.Posix.dll
 CSFLAGS=-pkg:gtk-sharp-2.0 -pkg:gtksourceview-sharp-2.0
-MCS=mcs
+CS=gmcs
 MONO=mono
 
 .PHONY: all
@@ -16,7 +16,7 @@ run:	$(PROJECT).exe
 #	$(MCS) PyjamaInterfaces.cs -out:PyjamaInterfaces.dll -target:library
 
 $(PROJECT).exe:	$(SRCS) # PyjamaInterfaces.dll
-	$(MCS) $(CSFLAGS) $(SRCS) $(DLLS) -out:$@
+	$(CS) $(CSFLAGS) $(SRCS) $(DLLS) -out:$@
 
 clean:
 	@$(RM) $(PROJECT).exe *.dll *~

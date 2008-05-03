@@ -75,5 +75,10 @@ public class TextDocument: PyjamaInterfaces.IDocument
     	filename = fn;
         Save();
     }
+
+    public void SetFilename(string fn)
+    {
+    	filename = fn;
+    }
 }
 

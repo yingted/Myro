@@ -8,6 +8,7 @@ namespace PyjamaInterfaces
 	void SetModified(bool value);
 	void Save();
 	void SaveAs(string value);
+	void SetFilename(string value);
     }
 }
 
