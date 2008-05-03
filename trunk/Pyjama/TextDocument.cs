@@ -13,21 +13,25 @@ public class TextDocument: PyjamaInterfaces.IDocument
     
     public TextDocument()
     {
-	Init();
+	Init(null);
     }
     
     public TextDocument(string fn)
     {
-	Init();
+	// TODO: get mime type from file or filename
+	Init(null);
 	StreamReader file = File.OpenText(fn);
 	buffer.Text = file.ReadToEnd();
+	buffer.PlaceCursor(buffer.StartIter);
         filename = fn;
     }
 
-    void Init()
+    void Init(string mime_type)
     {
+	if (mime_type == null)
+	    mime_type = "text/x-python";
         SourceLanguagesManager mgr = new SourceLanguagesManager();
-	language = mgr.GetLanguageFromMimeType("text/x-python");
+	language = mgr.GetLanguageFromMimeType(mime_type);
         // Set up syntax highlighting
 	buffer = new SourceBuffer(language);
         buffer.Highlight = true;
@@ -45,6 +49,7 @@ public class TextDocument: PyjamaInterfaces.IDocument
 
     public string GetShortName()
     {
+	// this only works if the file already exists
         if (filename != null) {
 	    FileInfo info = new FileInfo(filename);
 	    return info.Name;
