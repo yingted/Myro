@@ -4,6 +4,7 @@ using System.IO;
 using System;
 
 using PyjamaInterfaces;
+using PyjamaGraphics;
 
 public class TextDocument: PyjamaInterfaces.IDocument
 {
@@ -13,19 +14,14 @@ public class TextDocument: PyjamaInterfaces.IDocument
     SourceView source_view;
     int page;
     bool dirty;
+    MainWindow window;
     
-    public TextDocument(string fn, int page)
+    public TextDocument(MainWindow win, string fn, int page)
     {
-	// TODO: get mime type from file or filename
+	window = win;
         filename = fn;
 	this.page = page;
-	string mime_type;
-	if (filename != null) {
-	    string extension = System.IO.Path.GetExtension(filename);
-	    mime_type = Utils.GetMimeType(extension);
-	} else {
-	    mime_type = "text/x-python";
-	}
+	string mime_type = GetMimeType(filename);
         SourceLanguagesManager mgr = new SourceLanguagesManager();
 	language = mgr.GetLanguageFromMimeType(mime_type);
         // Set up syntax highlighting
@@ -48,16 +44,12 @@ public class TextDocument: PyjamaInterfaces.IDocument
 	}
     }
 
-    public void SetCallback(object method) 
-    {
-	//callback = method;
-    }
-
     private void OnSourceViewChanged(object obj, EventArgs args) 
     {
-	if (!dirty)
+	if (!dirty) {
 	    Console.WriteLine("callback");
-	//    callback(page, true);
+	    window.SetDirty(page, true);
+	}
 	dirty = true;
     }
     
@@ -92,11 +84,18 @@ public class TextDocument: PyjamaInterfaces.IDocument
         file.Write(buffer.Text);
         file.Close();
 	dirty = false;
+	window.SetDirty(page, false);
     }
     
     public void SaveAs(string fn)
     {
     	filename = fn;
+	string mime_type = GetMimeType(filename);
+	SourceLanguagesManager mgr = new SourceLanguagesManager();
+	language = mgr.GetLanguageFromMimeType(mime_type);
+	if (buffer.Language != language) {
+	    buffer.Language = language;
+	}
         Save();
     }
 
@@ -108,6 +107,15 @@ public class TextDocument: PyjamaInterfaces.IDocument
     public string GetFilename()
     {
     	return filename;
+    }
+
+    string GetMimeType(string filename) {
+	if (filename != null) {
+	    string extension = System.IO.Path.GetExtension(filename);
+	    return Utils.GetMimeType(extension);
+	} else {
+	    return "text/x-python";
+	}
     }
 }
 
