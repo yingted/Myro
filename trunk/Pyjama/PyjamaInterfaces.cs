@@ -11,6 +11,7 @@ namespace PyjamaInterfaces
 	void Save();
 	void SaveAs(string value);
 	void SetFilename(string value);
+	string GetFilename();
 	Widget GetView();
     }
 }

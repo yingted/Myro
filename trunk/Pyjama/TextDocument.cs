@@ -12,25 +12,17 @@ public class TextDocument: PyjamaInterfaces.IDocument
     SourceLanguage language;
     SourceView source_view;
     
-    public TextDocument()
-    {
-	Init(null);
-    }
-    
-    public TextDocument(string fn)
+    public TextDocument(string fn, int pages)
     {
 	// TODO: get mime type from file or filename
-	Init(null);
-	StreamReader file = File.OpenText(fn);
-	buffer.Text = file.ReadToEnd();
-	buffer.PlaceCursor(buffer.StartIter);
         filename = fn;
-    }
-
-    void Init(string mime_type)
-    {
-	if (mime_type == null)
+	string mime_type;
+	if (filename != null) {
+	    string extension = System.IO.Path.GetExtension(filename);
+	    mime_type = Utils.GetMimeType(extension);
+	} else {
 	    mime_type = "text/x-python";
+	}
         SourceLanguagesManager mgr = new SourceLanguagesManager();
 	language = mgr.GetLanguageFromMimeType(mime_type);
         // Set up syntax highlighting
@@ -43,6 +35,14 @@ public class TextDocument: PyjamaInterfaces.IDocument
 	source_view.WrapMode = Gtk.WrapMode.Word;
         source_view.ShowLineNumbers = true;
         source_view.AutoIndent = true;
+	if (filename != null) {
+	    // TODO: make sure it exists, and can be read; readonly?
+	    StreamReader file = File.OpenText(fn);
+	    buffer.Text = file.ReadToEnd();
+	    buffer.PlaceCursor(buffer.StartIter);
+	} else {
+	    filename = Utils.Tran("Untitled") + "-" + pages + ".py";
+	}
     }
 
     private void OnSourceViewChanged(object obj, EventArgs args) 
@@ -56,13 +56,12 @@ public class TextDocument: PyjamaInterfaces.IDocument
 
     public string GetShortName()
     {
-	// this only works if the file already exists
-        if (filename != null) {
-	    FileInfo info = new FileInfo(filename);
-	    return info.Name;
-	} else {
-	    return null;
-        }
+	// Path.GetDirectoryName()
+	string name = System.IO.Path.GetFileName(filename);
+	if (name == "__init__") {
+	    // add directory onto name
+	}
+	return name;
     }
     
     public bool GetModified()
@@ -91,6 +90,11 @@ public class TextDocument: PyjamaInterfaces.IDocument
     public void SetFilename(string fn)
     {
     	filename = fn;
+    }
+
+    public string GetFilename()
+    {
+    	return filename;
     }
 }
 

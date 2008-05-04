@@ -58,7 +58,7 @@ public class MainWindow: Window
 	Catalog.Init("pyjama", "./locale");
 
         DeleteEvent += file_exit;
-        SetDefaultSize(800, 600);
+        SetDefaultSize(600, 600);
         
         // Layout
 	// +-------------------------------------------+
@@ -78,7 +78,7 @@ public class MainWindow: Window
         vbox.PackStart(menubar, false, false, 0);
 
         VPaned split = new VPaned();
-        split.Position = 800;
+        split.Position = 400;
 
 	notebook = new Notebook();
 
@@ -96,7 +96,7 @@ public class MainWindow: Window
         text_win.VscrollbarPolicy = PolicyType.Automatic;
         split.Pack2(text_win, true, false);
 
-	// Add Notebook/shell:
+	// Add notebook and shell:
 	vbox.PackStart(split);
 
 	// Add everything:
@@ -128,22 +128,16 @@ public class MainWindow: Window
 
     public void add_file(string filename)
     {
-	TextDocument textdoc;
+	IDocument textdoc;
 	int pages = notebook.NPages + 1;
-	if (filename == null) {
-	    filename = Utils.Tran("Untitled") + "-" + pages + ".py";
-	    textdoc = new TextDocument();
-	    textdoc.SetFilename(filename); // so if you want to save it later
-	} else {
-	    textdoc = new TextDocument(filename);
-	}
-        ScrolledWindow page = new ScrolledWindow();
-	page.AddWithViewport(textdoc.GetView());
-        page.HscrollbarPolicy = PolicyType.Automatic;
-        page.VscrollbarPolicy = PolicyType.Automatic;
-	notebook.AppendPage(page, new Label(filename));
+	textdoc = new TextDocument(filename, pages);
+        ScrolledWindow sw = new ScrolledWindow();
+	sw.AddWithViewport(textdoc.GetView());
+        sw.HscrollbarPolicy = PolicyType.Automatic;
+        sw.VscrollbarPolicy = PolicyType.Automatic;
+	notebook.AppendPage(sw, new Label(textdoc.GetShortName()));
 	documents.Add(textdoc);
-	page.ShowAll();
+	notebook.ShowAll();
         notebook.Page = notebook.NPages - 1;
         textdoc.GetView().GrabFocus();
     }
