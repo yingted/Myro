@@ -160,7 +160,7 @@ public class MainWindow: Window
     public void file_close(object obj, EventArgs args)
     {
 	int page_num = notebook.CurrentPage;
-	// TODO: check for Modified
+	// FIXME: check for Modified before closing
 	notebook.RemovePage(page_num);
 	documents.RemoveAt(page_num);
 	if (notebook.NPages == 0)
