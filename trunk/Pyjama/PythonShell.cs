@@ -19,29 +19,65 @@ public class PythonShell: PyjamaInterfaces.IShell
         // Set up syntax highlighting
 	buffer = new SourceBuffer(language);
         buffer.Highlight = true;
-	source_view = new SourceView();
-	source_view.Buffer = buffer;
-	source_view.Buffer.InsertText += new Gtk.InsertTextHandler(OnSourceViewChanged);
+	source_view = new SourceView(buffer);
+	source_view.KeyPressEvent += new KeyPressEventHandler(OnSourceViewChanged);
 	source_view.WrapMode = Gtk.WrapMode.Word;
         source_view.AutoIndent = true;
-	source_view.Buffer.Text = "\"\"\"IronPython console: IronPython 2.0A5 (2.0.11011.00) on .NET 2.0.50727.42\nCopyright (c) Microsoft Corporation. All rights reserved.\"\"\"\n>>> ";
+	buffer.Text = "\"\"\"IronPython 2.0A5 (2.0.11011.00) on .NET 2.0.50727.42\nCopyright (c) Microsoft Corporation. All rights reserved.\"\"\"\n>>> ";
     }
 
-    private void OnSourceViewChanged(object obj, Gtk.InsertTextArgs args) 
+    // To get in the loop before the SourceView handles the keypress
+    // you need this directive:
+    [GLib.ConnectBefore]
+    private void OnSourceViewChanged(object obj, KeyPressEventArgs args) 
     {
-	// FIXME: on enter, evaluate line
-	// Need to handle keypress events
-	// KeyPressEventArgs a = (KeyPressEventArgs) args;
-	if (args.Text == "\n") {
-	    Console.WriteLine("eval");
+	switch (args.Event.Key) {
+	case Gdk.Key.Return:
+	    // FIXME: this is rough, but gives examples of most of
+	    // what we'll need
+            int cursor_pos = buffer.CursorPosition;
+	    TextIter iter = buffer.GetIterAtOffset(cursor_pos);
+	    int line_cnt = iter.Line;
+            bool echo = false;
+            TextIter start = buffer.GetIterAtLine(line_cnt);
+            int line_len = iter.CharsInLine;
+            int buffer_cnt = buffer.LineCount;
+	    Console.WriteLine("diff: " + (buffer_cnt - line_cnt));
+            if ((buffer_cnt - line_cnt) > 1) {
+                line_len -= 1;
+                echo = true;
+	    }
+            TextIter end = buffer.GetIterAtLineOffset(line_cnt, line_len);
+            string line = buffer.GetText(start, end, false);
+            buffer.Text += "\n";
+	    Console.WriteLine("line: '{0}'", line);
+            if (line.StartsWith(">>>")) {
+		line = line.Substring(1, line.Length - 1).Trim();
+	    } else {
+		buffer.Text += ">>> ";
+                end = buffer.EndIter;
+		buffer.PlaceCursor(end);
+		args.RetVal = true;
+		return;
+	    }
+            if (echo) {
+		buffer.Text += ">>> " + line;
+		end = buffer.EndIter;
+                buffer.PlaceCursor(end);
+		args.RetVal = true;
+		return;
+	    }
+            //_retval = self.process_command(line)
+            //if _retval != None:
+	    buffer.Text += "Ok\n>>> ";
+            end = buffer.EndIter;
+            buffer.PlaceCursor(end);
+	    args.RetVal = true;
+	    return;
+	default:
+	    break;
 	}
-	/* Code I have written for a CPython + Gtk Evaluator
-        if (event.keyval == gtk.keysyms.Home or
-            ((event.keyval == gtk.keysyms.a and 
-              event.get_state() & gtk.gdk.CONTROL_MASK))): 
-            buffer = widget.get_buffer()
-            cursor_pos = buffer.get_property("cursor-position")
-            iter = buffer.get_iter_at_offset(cursor_pos)
+	/* Some code I have written for a CPython + Gtk application.
             line_cnt = iter.get_line()
             start = buffer.get_iter_at_line(line_cnt)
             start.forward_chars(2)
