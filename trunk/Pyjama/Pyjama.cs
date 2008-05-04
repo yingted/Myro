@@ -126,11 +126,14 @@ public class MainWindow: Window
 	add_file(null);
     }
 
+    public void mark_dirty(int page) {
+    }
+
     public void add_file(string filename)
     {
 	IDocument textdoc;
-	int pages = notebook.NPages + 1;
-	textdoc = new TextDocument(filename, pages);
+	int page = notebook.NPages + 1;
+	textdoc = new TextDocument(filename, page);
         ScrolledWindow sw = new ScrolledWindow();
 	sw.AddWithViewport(textdoc.GetView());
         sw.HscrollbarPolicy = PolicyType.Automatic;

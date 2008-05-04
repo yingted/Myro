@@ -11,11 +11,14 @@ public class TextDocument: PyjamaInterfaces.IDocument
     SourceBuffer buffer;
     SourceLanguage language;
     SourceView source_view;
+    int page;
+    bool dirty;
     
-    public TextDocument(string fn, int pages)
+    public TextDocument(string fn, int page)
     {
 	// TODO: get mime type from file or filename
         filename = fn;
+	this.page = page;
 	string mime_type;
 	if (filename != null) {
 	    string extension = System.IO.Path.GetExtension(filename);
@@ -41,12 +44,20 @@ public class TextDocument: PyjamaInterfaces.IDocument
 	    buffer.Text = file.ReadToEnd();
 	    buffer.PlaceCursor(buffer.StartIter);
 	} else {
-	    filename = Utils.Tran("Untitled") + "-" + pages + ".py";
+	    filename = Utils.Tran("Untitled") + "-" + page + ".py";
 	}
+    }
+
+    public void SetCallback(object method) 
+    {
+	//callback = method;
     }
 
     private void OnSourceViewChanged(object obj, EventArgs args) 
     {
+	//if (!dirty)
+	//    callback(page, true);
+	dirty = true;
     }
     
     public Widget GetView()
@@ -79,6 +90,7 @@ public class TextDocument: PyjamaInterfaces.IDocument
         StreamWriter file = new StreamWriter(filename);
         file.Write(buffer.Text);
         file.Close();
+	dirty = false;
     }
     
     public void SaveAs(string fn)
