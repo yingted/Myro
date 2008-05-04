@@ -1,5 +1,6 @@
 PROJECT=pyjama
-SRCS=Pyjama.cs PyjamaInterfaces.cs Utils.cs TextDocument.cs PyjamaGraphics.cs
+SRCS=Pyjama.cs PyjamaInterfaces.cs Utils.cs TextDocument.cs PyjamaGraphics.cs\
+     PythonShell.cs
 DLLS=-r:Mono.Posix.dll
 CSFLAGS=-pkg:gtk-sharp-2.0 -pkg:gtksourceview-sharp-2.0
 CS=gmcs

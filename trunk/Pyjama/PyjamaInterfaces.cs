@@ -14,5 +14,15 @@ namespace PyjamaInterfaces
 	string GetFilename();
 	Widget GetView();
     }
+
+    public interface IShell
+    {
+	// Defines the Shell interface
+	void ExecuteFile(string filename);
+	void EvaluateExp(string expression);
+	void Restart();
+	void Quit();
+	Widget GetView();
+    }
 }
 

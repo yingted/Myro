@@ -55,8 +55,8 @@ public class MainWindow: Window
 
 	// Add shell:
         ScrolledWindow text_win = new ScrolledWindow();
-	TextView shell = new TextView();
-	text_win.AddWithViewport(shell);
+	IShell shell = new PythonShell(this);
+	text_win.AddWithViewport(shell.GetView());
         text_win.HscrollbarPolicy = PolicyType.Automatic;
         text_win.VscrollbarPolicy = PolicyType.Automatic;
         split.Pack2(text_win, true, false);
