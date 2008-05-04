@@ -86,10 +86,12 @@ public class MainWindow: Window
         file_new(null, null); // adds a new empty page
 
 	// Add Notebook:
-        split.Pack1(notebook, false, false);
+        split.Pack1(notebook, true, true);
 
 	// Add shell:
         ScrolledWindow text_win = new ScrolledWindow();
+	TextView shell = new TextView();
+	text_win.AddWithViewport(shell);
         text_win.HscrollbarPolicy = PolicyType.Automatic;
         text_win.VscrollbarPolicy = PolicyType.Automatic;
         split.Pack2(text_win, true, false);
