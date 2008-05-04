@@ -44,7 +44,7 @@ public class TextDocument: PyjamaInterfaces.IDocument
 	    buffer.Text = file.ReadToEnd();
 	    buffer.PlaceCursor(buffer.StartIter);
 	} else {
-	    filename = Utils.Tran("Untitled") + "-" + page + ".py";
+	    filename = Utils.Tran("Untitled") + "-" + this.page + ".py";
 	}
     }
 
@@ -55,7 +55,8 @@ public class TextDocument: PyjamaInterfaces.IDocument
 
     private void OnSourceViewChanged(object obj, EventArgs args) 
     {
-	//if (!dirty)
+	if (!dirty)
+	    Console.WriteLine("callback");
 	//    callback(page, true);
 	dirty = true;
     }

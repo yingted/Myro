@@ -52,7 +52,7 @@ public class MainWindow: Window
     Notebook notebook;
     List <IDocument> documents = new List <IDocument>();
 
-    public MainWindow(): base(Utils.Tran("Pyjama"))
+    public MainWindow(string[] args): base(Utils.Tran("Pyjama"))
     {
 	// Initialize I18N: 
 	Catalog.Init("pyjama", "./locale");
@@ -82,8 +82,12 @@ public class MainWindow: Window
 
 	notebook = new Notebook();
 
-	// Add a page:
-        file_new(null, null); // adds a new empty page
+	if (args.Length > 0)
+	    foreach (string name in args)
+		add_file(name); // adds a new empty page
+	else
+	    // Add a blank page:
+	    add_file(null); // adds a new empty page
 
 	// Add Notebook:
         split.Pack1(notebook, true, true);
@@ -113,10 +117,10 @@ public class MainWindow: Window
         Application.Quit();
     }
     
-    public static void Main()
+    public static void Main(string[] args)
     {
         Application.Init();
-        MainWindow mainwin = new MainWindow();
+        MainWindow mainwin = new MainWindow(args);
         mainwin.ShowAll();
         Application.Run();
     }
@@ -191,7 +195,7 @@ public class MainWindow: Window
 	notebook.RemovePage(page_num);
 	documents.RemoveAt(page_num);
 	if (notebook.NPages == 0)
-	    file_new(null, null);
+	    add_file(null);
 	notebook.Show();
     }
 }
