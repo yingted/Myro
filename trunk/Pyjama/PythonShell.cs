@@ -1,4 +1,5 @@
 using Gtk;
+using Gdk;
 using GtkSourceView;
 using System.IO;
 using System;
@@ -33,7 +34,8 @@ public class PythonShell: PyjamaInterfaces.IShell
     {
 	TextIter iter, start, end;
 	int line_cnt;
-	if (args.Event.Key == Gdk.Key.Return) {
+	// Had to cast as int on Windows for Gdk.Key and bit mask comparison
+	if ((int)(args.Event.Key) == (int)(Gdk.Key.Return)) {
 	    // FIXME: this is rough, but gives examples of most of
 	    // what we'll need
             int cursor_pos = buffer.CursorPosition;
@@ -73,9 +75,9 @@ public class PythonShell: PyjamaInterfaces.IShell
             end = buffer.EndIter;
             buffer.PlaceCursor(end);
 	    args.RetVal = true;
-	} else if ((args.Event.Key == Gdk.Key.Home) || 
-		   ((args.Event.Key == Gdk.Key.a) && 
-		    ((args.Event.State & Gdk.ModifierType.ControlMask) != 0))) {
+	} else if (((int)(args.Event.Key) == (int)(Gdk.Key.Home)) || 
+		   (((int)(args.Event.Key) == (int)(Gdk.Key.a)) && 
+		    (((int)(args.Event.State) & (int)(Gdk.ModifierType.ControlMask)) != 0))) {
             int cursor_pos = buffer.CursorPosition;
 	    iter = buffer.GetIterAtOffset(cursor_pos);
 	    line_cnt = iter.Line;
@@ -83,9 +85,9 @@ public class PythonShell: PyjamaInterfaces.IShell
 	    start.ForwardChars(3);
 	    buffer.PlaceCursor(start);
 	    args.RetVal = true;
-	} else if ((args.Event.Key == Gdk.Key.End) && 
-		   ((args.Event.Key == Gdk.Key.e) && 
-		    ((args.Event.State & Gdk.ModifierType.ControlMask) != 0))) {
+	} else if (((int)(args.Event.Key) == (int)(Gdk.Key.End)) && 
+		   (((int)(args.Event.Key) == (int)(Gdk.Key.e)) && 
+		    (((int)(args.Event.State) & (int)(Gdk.ModifierType.ControlMask)) != 0))) {
 	    end = buffer.EndIter;
 	    buffer.PlaceCursor(end);
 	    args.RetVal = true;

@@ -12,5 +12,5 @@ REM mcs -pkg:gtk-sharp-2.0 -pkg:gtksourceview-sharp-2.0 Pyjama.cs -r:PyjamaInter
 
 REM Had to copy gtksourceview-sharp.dll and gtk-sharp.dll to this dir
 REM Had to set MONO_PATH to include lib:
-mcs Pyjama.cs -lib:./lib -r:gtk-sharp.dll -r:gtksourceview-sharp -r:PyjamaInterfaces.dll -r:Mono.Posix.dll -out:pyjama.exe
+gmcs Pyjama.cs PyjamaInterfaces.cs Utils.cs TextDocument.cs PyjamaGraphics.cs PythonShell.cs -lib:./lib -r:gtk-sharp.dll -r:gtksourceview-sharp -r:PyjamaInterfaces.dll -r:Mono.Posix.dll -r:glib-sharp.dll -r:gdk-sharp.dll -out:pyjama.exe
 
