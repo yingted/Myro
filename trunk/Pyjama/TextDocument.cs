@@ -2,6 +2,7 @@ using Gtk;
 using GtkSourceView;
 using System.IO;
 using System;
+using System.Collections.Generic;
 
 using PyjamaInterfaces;
 using PyjamaGraphics;
@@ -40,8 +41,8 @@ public class TextDocument: PyjamaInterfaces.IDocument
 	    source_view.Buffer = buffer;
 	    source_view.ShowLineNumbers = true;
 	}
-	//source_view.Buffer.Changed += new EventHandler(OnSourceViewChanged);
-	source_view.KeyPressEvent += new KeyPressEventHandler(OnSourceViewChanged);
+	source_view.Buffer.Changed += new EventHandler(OnSourceViewChanged);
+	source_view.KeyPressEvent += new KeyPressEventHandler(OnKeyPress);
 	if (filename != null) {
 	    // TODO: make sure it exists, and can be read; readonly?
 	    StreamReader file = File.OpenText(fn);
@@ -54,14 +55,13 @@ public class TextDocument: PyjamaInterfaces.IDocument
     }
 
     [GLib.ConnectBefore]
-    private void OnSourceViewChanged(object obj, KeyPressEventArgs args) 
+    private void OnKeyPress(object obj, KeyPressEventArgs args) 
     {
-	//int cursor_pos = buffer.CursorPosition;
-	//Console.WriteLine("cursor position: {0}", cursor_pos);
-	//TextIter iter = buffer.GetIterAtOffset(cursor_pos);
-	//TextMark mark = buffer.
 	source_view.ScrollMarkOnscreen(buffer.InsertMark);
-	//Console.WriteLine("view change: {0}, page: {1}, dirty: {2}", filename, page, dirty);
+    }
+
+    private void OnSourceViewChanged(object obj, EventArgs args) 
+    {
 	if (!dirty) {
 	    window.SetDirty(page, true);
 	}
@@ -77,8 +77,14 @@ public class TextDocument: PyjamaInterfaces.IDocument
     {
 	// Path.GetDirectoryName()
 	string name = System.IO.Path.GetFileName(filename);
-	if (name == "__init__") {
+	if (name == "__init__.py") {
 	    // add directory onto name
+	    char [] c = new char[1];
+	    c[0] = Path.DirectorySeparatorChar;
+	    string [] path = filename.Split(c,
+					    StringSplitOptions.RemoveEmptyEntries);
+	    if (path.Length > 1)
+		name = path[path.Length - 2] + Path.DirectorySeparatorChar + name;
 	}
 	return name;
     }
