@@ -1,0 +1,30 @@
+1. Menu Hook up items:
+   a. undo/redo - do no undo before load
+   b. accelerators for items (eg, control+s)
+   c. search
+
+2. Make backup copy prior to each save (filename~). Good idea to have
+   automatic backup, and recover, before actual save
+
+3. Add dialog on close/exit for unsaved items
+
+4. Fixed width font for Python?
+
+5. Is there a way to handle text/plain? Currently uses text/html
+
+6. Check for read-only, and other problems on open
+   a. Warn on trying to open binary file
+   b. Prevent opening same twice
+
+7. Keep track of the last directory on open and reuse on next open
+
+8. Add close boxes in tab
+
+9. Editable config
+   a. font, size, indent
+   b. search path
+
+10. Make the shell be based on mime_type: Ruby for .ry, 
+    Python for .py, Bash for C#, etc. Could make a set of tabs
+    so that you could be editing a mixture of languages...
+
