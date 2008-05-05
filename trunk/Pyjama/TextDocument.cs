@@ -23,11 +23,8 @@ public class TextDocument: PyjamaInterfaces.IDocument
 	this.page = page;
 	string mime_type = GetMimeType(filename);
         SourceLanguagesManager mgr = new SourceLanguagesManager();
+	// FIXME: why does text/plain complain?
 	language = mgr.GetLanguageFromMimeType(mime_type);
-        // Set up syntax highlighting
-	if (language == null) {
-	    language = mgr.GetLanguageFromMimeType("text/plain");
-	}
 	buffer = new SourceBuffer(language);
 	buffer.Highlight = true;
 	source_view = new SourceView();
@@ -132,6 +129,10 @@ public class TextDocument: PyjamaInterfaces.IDocument
 
     public void SetPage(int value) {
 	page = value;
+    }
+    
+    public int GetSize() {
+    	return buffer.CharCount;
     }
 }
 

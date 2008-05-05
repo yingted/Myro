@@ -45,6 +45,7 @@ public class MainWindow: Window
 
 	if (args.Length > 0)
 	    foreach (string name in args)
+		// FIXME: if it can open it
 		add_file(name); // adds a new empty page
 	else
 	    // Add a blank page:
@@ -130,7 +131,8 @@ public class MainWindow: Window
             //FIXME - Error handling
 	    if (notebook.NPages > 0 && 
 		!documents[notebook.NPages - 1].GetDirty() && 
-		documents[notebook.NPages - 1].GetShortName().StartsWith("Untitled")) {
+		documents[notebook.NPages - 1].GetShortName().StartsWith("Untitled") &&
+		documents[notebook.NPages - 1].GetSize() == 0) {
 		int page = notebook.NPages - 1;
 		notebook.RemovePage(page);
 		foreach (IDocument doc in documents){
