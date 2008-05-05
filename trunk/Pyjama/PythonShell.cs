@@ -31,28 +31,27 @@ public class PythonShell: PyjamaInterfaces.IShell
     [GLib.ConnectBefore]
     private void OnSourceViewChanged(object obj, KeyPressEventArgs args) 
     {
-	switch (args.Event.Key) {
-	case Gdk.Key.Return:
+	TextIter iter, start, end;
+	int line_cnt;
+	if (args.Event.Key == Gdk.Key.Return) {
 	    // FIXME: this is rough, but gives examples of most of
 	    // what we'll need
             int cursor_pos = buffer.CursorPosition;
-	    TextIter iter = buffer.GetIterAtOffset(cursor_pos);
-	    int line_cnt = iter.Line;
+	    iter = buffer.GetIterAtOffset(cursor_pos);
+	    line_cnt = iter.Line;
             bool echo = false;
-            TextIter start = buffer.GetIterAtLine(line_cnt);
+            start = buffer.GetIterAtLine(line_cnt);
             int line_len = iter.CharsInLine;
             int buffer_cnt = buffer.LineCount;
-	    Console.WriteLine("diff: " + (buffer_cnt - line_cnt));
             if ((buffer_cnt - line_cnt) > 1) {
                 line_len -= 1;
                 echo = true;
 	    }
-            TextIter end = buffer.GetIterAtLineOffset(line_cnt, line_len);
+            end = buffer.GetIterAtLineOffset(line_cnt, line_len);
             string line = buffer.GetText(start, end, false);
             buffer.Text += "\n";
-	    Console.WriteLine("line: '{0}'", line);
             if (line.StartsWith(">>>")) {
-		line = line.Substring(1, line.Length - 1).Trim();
+		line = line.Substring(3, line.Length - 3).Trim();
 	    } else {
 		buffer.Text += ">>> ";
                 end = buffer.EndIter;
@@ -67,64 +66,30 @@ public class PythonShell: PyjamaInterfaces.IShell
 		args.RetVal = true;
 		return;
 	    }
+	    Console.WriteLine("[evaluate: '{0}']", line);
             //_retval = self.process_command(line)
             //if _retval != None:
 	    buffer.Text += "Ok\n>>> ";
             end = buffer.EndIter;
             buffer.PlaceCursor(end);
 	    args.RetVal = true;
-	    return;
-	default:
-	    break;
+	} else if ((args.Event.Key == Gdk.Key.Home) || 
+		   ((args.Event.Key == Gdk.Key.a) && 
+		    ((args.Event.State & Gdk.ModifierType.ControlMask) != 0))) {
+            int cursor_pos = buffer.CursorPosition;
+	    iter = buffer.GetIterAtOffset(cursor_pos);
+	    line_cnt = iter.Line;
+            start = buffer.GetIterAtLine(line_cnt);
+	    start.ForwardChars(3);
+	    buffer.PlaceCursor(start);
+	    args.RetVal = true;
+	} else if ((args.Event.Key == Gdk.Key.End) && 
+		   ((args.Event.Key == Gdk.Key.e) && 
+		    ((args.Event.State & Gdk.ModifierType.ControlMask) != 0))) {
+	    end = buffer.EndIter;
+	    buffer.PlaceCursor(end);
+	    args.RetVal = true;
 	}
-	/* Some code I have written for a CPython + Gtk application.
-            line_cnt = iter.get_line()
-            start = buffer.get_iter_at_line(line_cnt)
-            start.forward_chars(2)
-            buffer.place_cursor(start)
-            return True
-        elif (event.keyval == gtk.keysyms.End or 
-              (event.keyval == gtk.keysyms.e and 
-               event.get_state() & gtk.gdk.CONTROL_MASK)): 
-            buffer = widget.get_buffer()
-            end = buffer.get_end_iter()
-            buffer.place_cursor(end)
-            return True
-        elif event.keyval == gtk.keysyms.Return: 
-            echo = False
-            buffer = widget.get_buffer()
-            cursor_pos = buffer.get_property("cursor-position")
-            iter = buffer.get_iter_at_offset(cursor_pos)
-            line_cnt = iter.get_line()
-            start = buffer.get_iter_at_line(line_cnt)
-            line_len = iter.get_chars_in_line()
-            buffer_cnt = buffer.get_line_count()
-            if (buffer_cnt - line_cnt) > 1:
-                line_len -= 1
-                echo = True
-            end = buffer.get_iter_at_line_offset(line_cnt, line_len)
-            line = buffer.get_text(start, end)
-            self.append_text("\n")
-            if line.startswith(self.prompt):
-                line = line[1:].strip()
-            else:
-                self.append_text("%s " % self.prompt)
-                end = buffer.get_end_iter()
-                buffer.place_cursor(end)
-                return True
-            if echo:
-                self.append_text(("%s " % self.prompt) + line)
-                end = buffer.get_end_iter()
-                buffer.place_cursor(end)
-                return True
-            _retval = self.process_command(line)
-            if _retval != None:
-                self.append_text("%s\n" % str(_retval))
-            self.append_text("%s " % self.prompt)
-            end = buffer.get_end_iter()
-            buffer.place_cursor(end)
-            return True
-	*/
     }
     
     public void ExecuteFile(string filename)
