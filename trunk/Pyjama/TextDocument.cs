@@ -24,16 +24,23 @@ public class TextDocument: PyjamaInterfaces.IDocument
 	string mime_type = GetMimeType(filename);
         SourceLanguagesManager mgr = new SourceLanguagesManager();
 	// FIXME: why does text/plain complain?
-	language = mgr.GetLanguageFromMimeType(mime_type);
-	buffer = new SourceBuffer(language);
-	buffer.Highlight = true;
 	source_view = new SourceView();
-	source_view.Buffer = buffer;
+	if (mime_type != "text/plain") {
+	    language = mgr.GetLanguageFromMimeType(mime_type);
+	    buffer = new SourceBuffer(language);
+	    buffer.Highlight = true;
+	    source_view.Buffer = buffer;
+	    // Options should be set by user:
+	    source_view.WrapMode = Gtk.WrapMode.Word;
+	    source_view.ShowLineNumbers = true;
+	    source_view.AutoIndent = true;
+	} else {
+	    language = mgr.GetLanguageFromMimeType("text/html");
+	    buffer = new SourceBuffer(language);
+	    source_view.Buffer = buffer;
+	    source_view.ShowLineNumbers = true;
+	}
 	source_view.Buffer.Changed += new EventHandler(OnSourceViewChanged);
-	// Options should be set by user:
-	source_view.WrapMode = Gtk.WrapMode.Word;
-        source_view.ShowLineNumbers = true;
-        source_view.AutoIndent = true;
 	if (filename != null) {
 	    // TODO: make sure it exists, and can be read; readonly?
 	    StreamReader file = File.OpenText(fn);
