@@ -40,7 +40,8 @@ public class TextDocument: PyjamaInterfaces.IDocument
 	    source_view.Buffer = buffer;
 	    source_view.ShowLineNumbers = true;
 	}
-	source_view.Buffer.Changed += new EventHandler(OnSourceViewChanged);
+	//source_view.Buffer.Changed += new EventHandler(OnSourceViewChanged);
+	source_view.KeyPressEvent += new KeyPressEventHandler(OnSourceViewChanged);
 	if (filename != null) {
 	    // TODO: make sure it exists, and can be read; readonly?
 	    StreamReader file = File.OpenText(fn);
@@ -52,9 +53,15 @@ public class TextDocument: PyjamaInterfaces.IDocument
 	dirty = false;
     }
 
-    private void OnSourceViewChanged(object obj, EventArgs args) 
+    [GLib.ConnectBefore]
+    private void OnSourceViewChanged(object obj, KeyPressEventArgs args) 
     {
-	Console.WriteLine("view change: {0}, page: {1}, dirty: {2}", filename, page, dirty);
+	//int cursor_pos = buffer.CursorPosition;
+	//Console.WriteLine("cursor position: {0}", cursor_pos);
+	//TextIter iter = buffer.GetIterAtOffset(cursor_pos);
+	//TextMark mark = buffer.
+	source_view.ScrollMarkOnscreen(buffer.InsertMark);
+	//Console.WriteLine("view change: {0}, page: {1}, dirty: {2}", filename, page, dirty);
 	if (!dirty) {
 	    window.SetDirty(page, true);
 	}

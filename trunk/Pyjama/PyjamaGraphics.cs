@@ -57,7 +57,7 @@ public class MainWindow: Window
 	// Add shell:
         ScrolledWindow text_win = new ScrolledWindow();
 	IShell shell = new PythonShell();
-	text_win.AddWithViewport(shell.GetView());
+	text_win.Add(shell.GetView());
         text_win.HscrollbarPolicy = PolicyType.Automatic;
         text_win.VscrollbarPolicy = PolicyType.Automatic;
         split.Pack2(text_win, true, false);
@@ -109,7 +109,7 @@ public class MainWindow: Window
 	textdoc = new TextDocument(this, filename, page);
 	// FIXME: why does the cursor not stay in view?
         ScrolledWindow sw = new ScrolledWindow();
-	sw.AddWithViewport(textdoc.GetView());
+	sw.Add(textdoc.GetView());
         sw.HscrollbarPolicy = PolicyType.Automatic;
         sw.VscrollbarPolicy = PolicyType.Automatic;
 	notebook.AppendPage(sw, new Label(textdoc.GetShortName()));

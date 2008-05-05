@@ -59,6 +59,7 @@ public class PythonShell: PyjamaInterfaces.IShell
                 end = buffer.EndIter;
 		buffer.PlaceCursor(end);
 		args.RetVal = true;
+		source_view.ScrollMarkOnscreen(buffer.InsertMark);
 		return;
 	    }
             if (echo) {
@@ -66,6 +67,7 @@ public class PythonShell: PyjamaInterfaces.IShell
 		end = buffer.EndIter;
                 buffer.PlaceCursor(end);
 		args.RetVal = true;
+		source_view.ScrollMarkOnscreen(buffer.InsertMark);
 		return;
 	    }
 	    Console.WriteLine("[evaluate: '{0}']", line);
@@ -92,6 +94,7 @@ public class PythonShell: PyjamaInterfaces.IShell
 	    buffer.PlaceCursor(end);
 	    args.RetVal = true;
 	}
+	source_view.ScrollMarkOnscreen(buffer.InsertMark);
     }
     
     public void ExecuteFile(string filename)
