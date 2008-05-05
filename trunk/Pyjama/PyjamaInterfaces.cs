@@ -13,6 +13,9 @@ namespace PyjamaInterfaces
 	void SetFilename(string value);
 	string GetFilename();
 	Widget GetView();
+        bool GetDirty();
+	int GetPage();
+	void SetPage(int page);
     }
 
     public interface IShell

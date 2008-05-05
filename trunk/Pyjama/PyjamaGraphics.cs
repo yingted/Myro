@@ -84,17 +84,18 @@ public class MainWindow: Window
     }
 
     public void SetDirty(int page, bool dirty) {
-	string labelText = notebook.GetTabLabelText(notebook.CurrentPageWidget);
-	if (dirty) {
-	    if (!labelText.StartsWith("*")) {
-		notebook.SetTabLabelText(notebook.CurrentPageWidget, 
-					 "*" + labelText);
-	    }
-	} else {
-	    if (labelText.StartsWith("*")) {
-		notebook.SetTabLabelText(notebook.CurrentPageWidget, 
-					 labelText.Substring(1, 
-							labelText.Length - 1));
+	Widget widget = notebook.GetNthPage(page);
+	if (widget != null) {
+	    string labelText = notebook.GetTabLabelText(widget);
+	    if (dirty) {
+		if (!labelText.StartsWith("*")) {
+		    notebook.SetTabLabelText(widget, "*" + labelText);
+		}
+	    } else {
+		if (labelText.StartsWith("*")) {
+		    notebook.SetTabLabelText(widget, labelText.Substring(1, 
+							  labelText.Length - 1));
+		}
 	    }
 	}
     }
@@ -102,7 +103,7 @@ public class MainWindow: Window
     public void add_file(string filename)
     {
 	IDocument textdoc;
-	int page = notebook.NPages + 1;
+	int page = notebook.NPages;
 	// FIXME: select what type of IDocument to create:
 	textdoc = new TextDocument(this, filename, page);
 	// FIXME: why does the cursor not stay in view?
@@ -127,6 +128,18 @@ public class MainWindow: Window
         {
             // Open the file
             //FIXME - Error handling
+	    if (notebook.NPages > 0 && 
+		!documents[notebook.NPages - 1].GetDirty() && 
+		documents[notebook.NPages - 1].GetShortName().StartsWith("Untitled")) {
+		int page = notebook.NPages - 1;
+		notebook.RemovePage(page);
+		foreach (IDocument doc in documents){
+		    if (doc.GetPage() > page) {
+			doc.SetPage(doc.GetPage() - 1);
+		    }
+		}
+		documents.RemoveAt(page);
+	    }
 	    add_file(dlg.Filename);
         }
         dlg.Destroy();
@@ -162,9 +175,15 @@ public class MainWindow: Window
 	int page_num = notebook.CurrentPage;
 	// FIXME: check for Modified before closing
 	notebook.RemovePage(page_num);
+	foreach (IDocument doc in documents){
+	    if (doc.GetPage() > page_num) {
+		doc.SetPage(doc.GetPage() - 1);
+	    }
+	}
 	documents.RemoveAt(page_num);
-	if (notebook.NPages == 0)
-	    add_file(null);
+	// This would prevent an empty page
+	//if (notebook.NPages == 0)
+	//    add_file(null);
 	notebook.Show();
     }
 }

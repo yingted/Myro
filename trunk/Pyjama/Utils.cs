@@ -68,6 +68,7 @@ class Utils
 	case ".shtml":
 	    mime_type = "text/html";
 	    break;
+	case ".txt":
 	default:
 	    mime_type = "text/plain";
 	    break;

@@ -25,8 +25,11 @@ public class TextDocument: PyjamaInterfaces.IDocument
         SourceLanguagesManager mgr = new SourceLanguagesManager();
 	language = mgr.GetLanguageFromMimeType(mime_type);
         // Set up syntax highlighting
+	if (language == null) {
+	    language = mgr.GetLanguageFromMimeType("text/plain");
+	}
 	buffer = new SourceBuffer(language);
-        buffer.Highlight = true;
+	buffer.Highlight = true;
 	source_view = new SourceView();
 	source_view.Buffer = buffer;
 	source_view.Buffer.Changed += new EventHandler(OnSourceViewChanged);
@@ -40,14 +43,15 @@ public class TextDocument: PyjamaInterfaces.IDocument
 	    buffer.Text = file.ReadToEnd();
 	    buffer.PlaceCursor(buffer.StartIter);
 	} else {
-	    filename = Utils.Tran("Untitled") + "-" + this.page + ".py";
+	    filename = Utils.Tran("Untitled") + "-" + (this.page + 1) + ".py";
 	}
+	dirty = false;
     }
 
     private void OnSourceViewChanged(object obj, EventArgs args) 
     {
+	Console.WriteLine("view change: {0}, page: {1}, dirty: {2}", filename, page, dirty);
 	if (!dirty) {
-	    Console.WriteLine("callback");
 	    window.SetDirty(page, true);
 	}
 	dirty = true;
@@ -93,7 +97,7 @@ public class TextDocument: PyjamaInterfaces.IDocument
 	string mime_type = GetMimeType(filename);
 	SourceLanguagesManager mgr = new SourceLanguagesManager();
 	language = mgr.GetLanguageFromMimeType(mime_type);
-	if (buffer.Language != language) {
+	if (buffer.Language != language && language != null) {
 	    buffer.Language = language;
 	}
         Save();
@@ -116,6 +120,18 @@ public class TextDocument: PyjamaInterfaces.IDocument
 	} else {
 	    return "text/x-python";
 	}
+    }
+
+    public bool GetDirty() {
+	return dirty;
+    }
+
+    public int GetPage() {
+	return page;
+    }
+
+    public void SetPage(int value) {
+	page = value;
     }
 }
 
