@@ -44,12 +44,16 @@ public class MainWindow: Window
 	notebook = new Notebook();
 
 	if (args.Length > 0)
+        {
 	    foreach (string name in args)
+            {
 		// FIXME: if it can open it
 		add_file(name); // adds a new empty page
-	else
+            }
+	} else {
 	    // Add a blank page:
 	    add_file(null); // adds a new empty page
+        }
 
 	// Add Notebook:
         split.Pack1(notebook, true, true);
@@ -73,9 +77,19 @@ public class MainWindow: Window
         documents[0].GetView().GrabFocus();
     }
     
+    public IDocument CurrentDocument
+    {
+        get
+        {
+            int page_num = notebook.CurrentPage;
+            return documents[page_num];
+        }
+    }
+    
     // Returns the document that is currently selected in the file list
     public void file_exit(object obj, EventArgs args)
     {
+        //FIXME - Ask to abandon changes on all modified documents
         Application.Quit();
     }
     
@@ -88,6 +102,7 @@ public class MainWindow: Window
 	Widget widget = notebook.GetNthPage(page);
 	if (widget != null) {
 	    string labelText = notebook.GetTabLabelText(widget);
+            //FIXME - Use a real flag.  Filenames can actually start with '*'.
 	    if (dirty) {
 		if (!labelText.StartsWith("*")) {
 		    notebook.SetTabLabelText(widget, "*" + labelText);
@@ -129,18 +144,20 @@ public class MainWindow: Window
         {
             // Open the file
             //FIXME - Error handling
-	    if (notebook.NPages > 0 && 
-		!documents[notebook.NPages - 1].GetDirty() && 
-		documents[notebook.NPages - 1].GetShortName().StartsWith("Untitled") &&
-		documents[notebook.NPages - 1].GetSize() == 0) {
-		int page = notebook.NPages - 1;
-		notebook.RemovePage(page);
-		foreach (IDocument doc in documents){
-		    if (doc.GetPage() > page) {
-			doc.SetPage(doc.GetPage() - 1);
-		    }
-		}
-		documents.RemoveAt(page);
+	    if (notebook.NPages > 0)
+            {
+                IDocument last_doc = documents[notebook.NPages - 1];
+		if (!last_doc.GetDirty() && last_doc.Untitled && last_doc.GetSize() == 0)
+                {
+                    int page = notebook.NPages - 1;
+                    notebook.RemovePage(page);
+                    foreach (IDocument doc in documents){
+                        if (doc.GetPage() > page) {
+                            doc.SetPage(doc.GetPage() - 1);
+                        }
+                    }
+                    documents.RemoveAt(page);
+                }
 	    }
 	    add_file(dlg.Filename);
         }
@@ -149,15 +166,29 @@ public class MainWindow: Window
     
     public void file_save(object obj, EventArgs args)
     {
-	int page_num = notebook.CurrentPage;
-	IDocument currentdoc = documents[page_num];
-	currentdoc.Save();
+        file_save();
+    }
+    
+    public bool file_save()
+    {
+	IDocument doc = CurrentDocument;
+        if (doc.Untitled)
+        {
+            return file_save_as();
+        } else {
+            doc.Save();
+            return true;
+        }
     }
     
     public void file_save_as(object obj, EventArgs args)
     {
-	int page_num = notebook.CurrentPage;
-	IDocument currentdoc = documents[page_num];
+        file_save_as();
+    }
+    
+    public bool file_save_as()
+    {
+        IDocument doc = CurrentDocument;
         FileChooserDialog dlg = new FileChooserDialog("Save As", this, 
 						      FileChooserAction.Save,
 						      "Cancel", ResponseType.Cancel,
@@ -165,18 +196,40 @@ public class MainWindow: Window
         bool ret = (dlg.Run() == (int)ResponseType.Accept);
         if (ret)
         {
-	    currentdoc.SaveAs(dlg.Filename);
+	    doc.SaveAs(dlg.Filename);
 	    notebook.SetTabLabelText(notebook.CurrentPageWidget, 
-				     currentdoc.GetShortName());
+				     doc.GetShortName());
         }
         dlg.Destroy();
+        
+        return ret;
     }
     
     public void file_close(object obj, EventArgs args)
     {
-	int page_num = notebook.CurrentPage;
-	// FIXME: check for Modified before closing
-	notebook.RemovePage(page_num);
+        IDocument currentdoc = CurrentDocument;
+        if (currentdoc.GetDirty())
+        {
+            // Save/Discard/Cancel prompt
+            MessageDialog dlg = new MessageDialog(this, DialogFlags.Modal,
+                MessageType.Question, ButtonsType.None,
+                "The document \"{0}\" has been modified.\nDo you want to save or discard changes?",
+                currentdoc.GetFilename());
+            dlg.AddButton("Save", ResponseType.Accept);
+            dlg.AddButton("Discard", ResponseType.Reject);
+            dlg.AddButton("Cancel", ResponseType.Cancel);
+            ResponseType ret = (ResponseType)dlg.Run();
+            dlg.Destroy();
+            
+            if ((ret == ResponseType.Accept && !file_save()) || ret == ResponseType.Cancel || ret == ResponseType.DeleteEvent)
+            {
+                // Save failed or cancelled
+                return;
+            }
+        }
+	
+        int page_num = notebook.CurrentPage;
+        notebook.RemovePage(page_num);
 	foreach (IDocument doc in documents){
 	    if (doc.GetPage() > page_num) {
 		doc.SetPage(doc.GetPage() - 1);

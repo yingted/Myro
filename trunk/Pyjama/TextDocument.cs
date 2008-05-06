@@ -14,6 +14,7 @@ public class TextDocument: PyjamaInterfaces.IDocument
     SourceLanguage language;
     SourceView source_view;
     int page;
+    bool untitled;
     MainWindow window;
     
     public TextDocument(MainWindow win, string fn, int page)
@@ -24,7 +25,6 @@ public class TextDocument: PyjamaInterfaces.IDocument
 	string mime_type = GetMimeType(filename);
         SourceLanguagesManager mgr = new SourceLanguagesManager();
 	// mgr.LangFilesDirs.Append("./language-specs");
-	// FIXME: why does text/plain complain? What's a good alternative?
 	source_view = new SourceView();
 	if (mime_type != "text/plain") {
 	    language = mgr.GetLanguageFromMimeType(mime_type);
@@ -36,9 +36,9 @@ public class TextDocument: PyjamaInterfaces.IDocument
 	    source_view.ShowLineNumbers = true;
 	    source_view.AutoIndent = true;
 	} else {
-	    language = mgr.GetLanguageFromMimeType("text/html");
-	    buffer = new SourceBuffer(language);
-	    source_view.Buffer = buffer;
+            // Plain text doesn't need any highlighting.
+            buffer = new SourceBuffer(language);
+            source_view.Buffer = buffer;
 	    source_view.ShowLineNumbers = true;
 	}
 	source_view.Buffer.Changed += new EventHandler(OnSourceViewChanged);
@@ -51,8 +51,10 @@ public class TextDocument: PyjamaInterfaces.IDocument
 	    buffer.Text = file.ReadToEnd();
 	    buffer.EndNotUndoableAction();
 	    buffer.PlaceCursor(buffer.StartIter);
+            untitled = false;
 	} else {
 	    filename = Utils.Tran("Untitled") + "-" + (this.page + 1) + ".py";
+            untitled = true;
 	}
     }
 
@@ -70,6 +72,14 @@ public class TextDocument: PyjamaInterfaces.IDocument
     private void OnSourceViewChanged(object obj, EventArgs args) 
     {
 	window.SetDirty(page, buffer.CanUndo());
+    }
+    
+    public bool Untitled
+    {
+        get
+        {
+            return untitled;
+        }
     }
     
     public Widget GetView()
@@ -117,6 +127,7 @@ public class TextDocument: PyjamaInterfaces.IDocument
     
     public void SaveAs(string fn)
     {
+        untitled = false;
     	filename = fn;
 	string mime_type = GetMimeType(filename);
 	SourceLanguagesManager mgr = new SourceLanguagesManager();

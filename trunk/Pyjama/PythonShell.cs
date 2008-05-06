@@ -6,12 +6,92 @@ using System;
 
 using PyjamaInterfaces;
 using PyjamaGraphics;
+using IronPython.Hosting;
+
+class TextBufferOutputStream: Stream
+{
+    TextBuffer buffer;
+    
+    public TextBufferOutputStream(TextBuffer b)
+    {
+        buffer = b;
+    }
+    
+    override public bool CanRead
+    {
+        get
+        {
+            return false;
+        }
+    }
+    
+    override public bool CanSeek
+    {
+        get
+        {
+            return false;
+        }
+    }
+    
+    override public bool CanWrite
+    {
+        get
+        {
+            return true;
+        }
+    }
+    
+    override public long Length
+    {
+        get
+        {
+            return 0;
+        }
+    }
+    
+    override public long Position
+    {
+        get
+        {
+            return 0;
+        }
+        
+        set
+        {
+        }
+    }
+    
+    override public void Flush()
+    {
+    }
+    
+    override public int Read(byte[] data, int offset, int count)
+    {
+        return 0;
+    }
+    
+    override public void Write(byte[] data, int offset, int count)
+    {
+        string str = System.Text.Encoding.ASCII.GetString(data);
+        buffer.Text += str.Substring(0, count);
+    }
+    
+    override public long Seek(long offset, SeekOrigin origin)
+    {
+        return 0;
+    }
+    
+    override public void SetLength(long length)
+    {
+    }
+}
 
 public class PythonShell: PyjamaInterfaces.IShell
 {
     SourceBuffer buffer;
     SourceLanguage language;
     SourceView source_view;
+    PythonEngine python;
     
     public PythonShell()
     {
@@ -25,6 +105,11 @@ public class PythonShell: PyjamaInterfaces.IShell
 	source_view.WrapMode = Gtk.WrapMode.Word;
         source_view.AutoIndent = true;
 	buffer.Text = "\"\"\"IronPython 2.0A5 (2.0.11011.00) on .NET 2.0.50727.42\nCopyright (c) Microsoft Corporation. All rights reserved.\"\"\"\n>>> ";
+    
+        python = new PythonEngine();
+        TextBufferOutputStream output_stream = new TextBufferOutputStream(buffer);
+        python.SetStandardOutput(output_stream);
+        python.SetStandardError(output_stream);
     }
 
     // To get in the loop before the SourceView handles the keypress
@@ -70,10 +155,16 @@ public class PythonShell: PyjamaInterfaces.IShell
 		source_view.ScrollMarkOnscreen(buffer.InsertMark);
 		return;
 	    }
-	    Console.WriteLine("[evaluate: '{0}']", line);
-            //_retval = self.process_command(line)
-            //if _retval != None:
-	    buffer.Text += "Ok\n>>> ";
+            
+            try
+            {
+                python.Execute(line);
+            } catch (Exception e)
+            {
+                buffer.Text += e;
+            }
+            
+            buffer.Text += "\n>>> ";
             end = buffer.EndIter;
             buffer.PlaceCursor(end);
 	    args.RetVal = true;
@@ -122,4 +213,3 @@ public class PythonShell: PyjamaInterfaces.IShell
 	return (Widget) source_view;
     }
 }
-
