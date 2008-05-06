@@ -37,9 +37,15 @@ public class TextDocument: PyjamaInterfaces.IDocument
 	    source_view.AutoIndent = true;
 	} else {
             // Plain text doesn't need any highlighting.
+	    // I think this causes a Gtk assert issue if not set.
+	    language = mgr.GetLanguageFromMimeType("text/x-changelog");
             buffer = new SourceBuffer(language);
-            source_view.Buffer = buffer;
-	    source_view.ShowLineNumbers = true;
+	    buffer.Highlight = false;
+	    source_view.Buffer = buffer;
+	    // Options should be set by user:
+	    source_view.WrapMode = Gtk.WrapMode.Word;
+	    source_view.ShowLineNumbers = false;
+	    source_view.AutoIndent = false;
 	}
 	source_view.Buffer.Changed += new EventHandler(OnSourceViewChanged);
 	buffer.CanUndoFired += new CanUndoFiredHandler(CanUndo);
