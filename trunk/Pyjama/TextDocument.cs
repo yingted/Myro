@@ -24,7 +24,8 @@ public class TextDocument: PyjamaInterfaces.IDocument
 	this.page = page;
 	string mime_type = GetMimeType(filename);
         SourceLanguagesManager mgr = new SourceLanguagesManager();
-	// FIXME: why does text/plain complain?
+	// mgr.LangFilesDirs.Append("./language-specs");
+	// FIXME: why does text/plain complain? What's a good alternative?
 	source_view = new SourceView();
 	if (mime_type != "text/plain") {
 	    language = mgr.GetLanguageFromMimeType(mime_type);
