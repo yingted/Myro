@@ -14,7 +14,6 @@ public class TextDocument: PyjamaInterfaces.IDocument
     SourceLanguage language;
     SourceView source_view;
     int page;
-    bool dirty;
     MainWindow window;
     
     public TextDocument(MainWindow win, string fn, int page)
@@ -55,7 +54,6 @@ public class TextDocument: PyjamaInterfaces.IDocument
 	} else {
 	    filename = Utils.Tran("Untitled") + "-" + (this.page + 1) + ".py";
 	}
-	dirty = false;
     }
 
     private void CanUndo(object obj, CanUndoFiredArgs args) 
@@ -71,10 +69,7 @@ public class TextDocument: PyjamaInterfaces.IDocument
 
     private void OnSourceViewChanged(object obj, EventArgs args) 
     {
-	if (!dirty) {
-	    window.SetDirty(page, true);
-	}
-	dirty = true;
+	window.SetDirty(page, buffer.CanUndo());
     }
     
     public Widget GetView()
@@ -113,8 +108,11 @@ public class TextDocument: PyjamaInterfaces.IDocument
         StreamWriter file = new StreamWriter(filename);
         file.Write(buffer.Text);
         file.Close();
-	dirty = false;
+	buffer.Modified = false;
 	window.SetDirty(page, false);
+	// Forces no redo past this point
+	//buffer.BeginNotUndoableAction(); 
+	//buffer.EndNotUndoableAction();
     }
     
     public void SaveAs(string fn)
@@ -149,7 +147,7 @@ public class TextDocument: PyjamaInterfaces.IDocument
     }
 
     public bool GetDirty() {
-	return dirty;
+	return buffer.CanUndo();
     }
 
     public int GetPage() {
