@@ -43,16 +43,24 @@ public class TextDocument: PyjamaInterfaces.IDocument
 	    source_view.ShowLineNumbers = true;
 	}
 	source_view.Buffer.Changed += new EventHandler(OnSourceViewChanged);
+	buffer.CanUndoFired += new CanUndoFiredHandler(CanUndo);
 	source_view.KeyPressEvent += new KeyPressEventHandler(OnKeyPress);
 	if (filename != null) {
 	    // TODO: make sure it exists, and can be read; readonly?
 	    StreamReader file = File.OpenText(fn);
+	    buffer.BeginNotUndoableAction();
 	    buffer.Text = file.ReadToEnd();
+	    buffer.EndNotUndoableAction();
 	    buffer.PlaceCursor(buffer.StartIter);
 	} else {
 	    filename = Utils.Tran("Untitled") + "-" + (this.page + 1) + ".py";
 	}
 	dirty = false;
+    }
+
+    private void CanUndo(object obj, CanUndoFiredArgs args) 
+    {
+	window.SetDirty(page, buffer.CanUndo());
     }
 
     [GLib.ConnectBefore]
