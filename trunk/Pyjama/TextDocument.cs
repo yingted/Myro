@@ -47,6 +47,11 @@ public class TextDocument: PyjamaInterfaces.IDocument
 	    source_view.ShowLineNumbers = false;
 	    source_view.AutoIndent = false;
 	}
+	// Change the font to fixed-width:
+	Pango.FontDescription font = new Pango.FontDescription();
+	font.Family = "Monospace";
+	source_view.ModifyFont(font);
+	// Set up event handlers:
 	source_view.Buffer.Changed += new EventHandler(OnSourceViewChanged);
 	buffer.CanUndoFired += new CanUndoFiredHandler(CanUndo);
 	source_view.KeyPressEvent += new KeyPressEventHandler(OnKeyPress);

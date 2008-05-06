@@ -101,10 +101,15 @@ public class PythonShell: PyjamaInterfaces.IShell
 	buffer = new SourceBuffer(language);
         buffer.Highlight = true;
 	source_view = new SourceView(buffer);
+	// Change the font to fixed-width:
+	Pango.FontDescription font = new Pango.FontDescription();
+	font.Family = "Monospace";
+	source_view.ModifyFont(font);
+	// Event Handlers:
 	source_view.KeyPressEvent += new KeyPressEventHandler(OnSourceViewChanged);
 	source_view.WrapMode = Gtk.WrapMode.Word;
         source_view.AutoIndent = true;
-	buffer.Text = "\"\"\"IronPython 2.0A5 (2.0.11011.00) on .NET 2.0.50727.42\nCopyright (c) Microsoft Corporation. All rights reserved.\"\"\"\n>>> ";
+	buffer.Text = "# IronPython 1.1\n# Copyright (c) Microsoft Corporation. All rights reserved.\n>>> ";
     
         python = new PythonEngine();
         TextBufferOutputStream output_stream = new TextBufferOutputStream(buffer);
@@ -118,12 +123,12 @@ public class PythonShell: PyjamaInterfaces.IShell
     private void OnSourceViewChanged(object obj, KeyPressEventArgs args) 
     {
 	TextIter iter, start, end;
-	int line_cnt;
+	int line_cnt, cursor_pos;
 	// Had to cast as int on Windows for Gdk.Key and bit mask comparison
 	if ((int)(args.Event.Key) == (int)(Gdk.Key.Return)) {
 	    // FIXME: this is rough, but gives examples of most of
 	    // what we'll need
-            int cursor_pos = buffer.CursorPosition;
+            cursor_pos = buffer.CursorPosition;
 	    iter = buffer.GetIterAtOffset(cursor_pos);
 	    line_cnt = iter.Line;
             bool echo = false;
@@ -156,22 +161,31 @@ public class PythonShell: PyjamaInterfaces.IShell
 		return;
 	    }
             
-            try
-            {
-                python.Execute(line);
-            } catch (Exception e)
-            {
-                buffer.Text += e;
+	    // This is a hack, but works for now
+            try {
+                object o = python.Evaluate(line);
+		buffer.Text += o.ToString();
+            } catch (Exception e) {
+		try {
+		    python.Execute(line);
+		} catch {
+		    buffer.Text += e;
+		}
             }
-            
-            buffer.Text += "\n>>> ";
+	    // Don't give a newline unless we need one:
+            cursor_pos = buffer.CursorPosition;
+	    iter = buffer.GetIterAtOffset(cursor_pos);
+	    if (iter.CharsInLine != 0) {
+		buffer.Text += "\n";
+	    }
+	    buffer.Text += ">>> ";
             end = buffer.EndIter;
             buffer.PlaceCursor(end);
 	    args.RetVal = true;
 	} else if (((int)(args.Event.Key) == (int)(Gdk.Key.Home)) || 
 		   (((int)(args.Event.Key) == (int)(Gdk.Key.a)) && 
 		    (((int)(args.Event.State) & (int)(Gdk.ModifierType.ControlMask)) != 0))) {
-            int cursor_pos = buffer.CursorPosition;
+            cursor_pos = buffer.CursorPosition;
 	    iter = buffer.GetIterAtOffset(cursor_pos);
 	    line_cnt = iter.Line;
             start = buffer.GetIterAtLine(line_cnt);
