@@ -116,9 +116,10 @@ public class PythonShell: PyjamaInterfaces.IShell
 	// Probably a more direct way to do these things:
 	python.Execute("import sys");
 	python.Execute("sys.path.append('.')");
-	buffer.Text = "# Python " + python.Evaluate("sys.version");
+	buffer.Text =  "# Python " + python.Evaluate("sys.version") + "\n";
+	buffer.Text += "# " + python.Evaluate("sys.copyright") + "\n";
 	python.Execute("del sys");
-	buffer.Text += "\n>>> ";
+	buffer.Text += ">>> ";
     }
 
     // To get in the loop before the SourceView handles the keypress
@@ -166,6 +167,8 @@ public class PythonShell: PyjamaInterfaces.IShell
 	    }
             
 	    // This is a hack, but works for now
+	    // FIXME: should check for parse error
+	    //        before starting to execute??
             try {
 		object o = python.Evaluate(line);
 		buffer.Text += o.ToString();
