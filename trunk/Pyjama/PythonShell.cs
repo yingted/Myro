@@ -163,8 +163,12 @@ public class PythonShell: PyjamaInterfaces.IShell
             
 	    // This is a hack, but works for now
             try {
-                object o = python.Evaluate(line);
-		buffer.Text += o.ToString();
+		object o = python.Evaluate(line);
+		try {
+		    buffer.Text += o.ToString();
+		} catch {
+		    // Can't turn to a string. Ok.
+		}
             } catch (Exception e) {
 		try {
 		    python.Execute(line);
