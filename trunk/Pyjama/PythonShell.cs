@@ -109,12 +109,16 @@ public class PythonShell: PyjamaInterfaces.IShell
 	source_view.KeyPressEvent += new KeyPressEventHandler(OnSourceViewChanged);
 	source_view.WrapMode = Gtk.WrapMode.Word;
         source_view.AutoIndent = true;
-	buffer.Text = "# IronPython 1.1\n# Copyright (c) Microsoft Corporation. All rights reserved.\n>>> ";
-    
         python = new PythonEngine();
         TextBufferOutputStream output_stream = new TextBufferOutputStream(buffer);
         python.SetStandardOutput(output_stream);
         python.SetStandardError(output_stream);
+	// Probably a more direct way to do these things:
+	python.Execute("import sys");
+	python.Execute("sys.path.append('.')");
+	buffer.Text = "# IronPython " + python.Evaluate("sys.version");
+	python.Execute("del sys");
+	buffer.Text += "\n>>> ";
     }
 
     // To get in the loop before the SourceView handles the keypress
@@ -164,11 +168,7 @@ public class PythonShell: PyjamaInterfaces.IShell
 	    // This is a hack, but works for now
             try {
 		object o = python.Evaluate(line);
-		try {
-		    buffer.Text += o.ToString();
-		} catch {
-		    // Can't turn to a string. Ok.
-		}
+		buffer.Text += o.ToString();
             } catch (Exception e) {
 		try {
 		    python.Execute(line);
