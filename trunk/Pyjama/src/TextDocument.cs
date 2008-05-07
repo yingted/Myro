@@ -71,7 +71,6 @@ public class TextDocument: PyjamaInterfaces.IDocument
 	}
     }
 
-
     [GLib.ConnectBefore]
     private void OnKeyPressBefore(object obj, KeyPressEventArgs args) 
     {
