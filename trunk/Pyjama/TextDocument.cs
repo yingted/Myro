@@ -51,11 +51,10 @@ public class TextDocument: PyjamaInterfaces.IDocument
 	Pango.FontDescription font = new Pango.FontDescription();
 	font.Family = "Monospace";
 	source_view.ModifyFont(font);
+
 	// Set up event handlers:
 	source_view.Buffer.Changed += new EventHandler(OnSourceViewChanged);
-	// FIXME: This crashes windows when fired:
-	//buffer.CanUndoFired += new CanUndoFiredHandler(CanUndo);
-	source_view.KeyPressEvent += new KeyPressEventHandler(OnKeyPress);
+	source_view.KeyPressEvent += new KeyPressEventHandler(OnKeyPressBefore);
 	
 	if (filename != null) {
 	    // TODO: make sure it exists, and can be read; readonly?
@@ -65,26 +64,29 @@ public class TextDocument: PyjamaInterfaces.IDocument
 	    buffer.EndNotUndoableAction();
 	    buffer.PlaceCursor(buffer.StartIter);
             untitled = false;
+	    file.Close();
 	} else {
 	    filename = Utils.Tran("Untitled") + "-" + (this.page + 1) + ".py";
             untitled = true;
 	}
     }
 
-    private void CanUndo(object obj, CanUndoFiredArgs args) 
-    {
-	window.SetDirty(page, buffer.CanUndo());
-    }
 
     [GLib.ConnectBefore]
-    private void OnKeyPress(object obj, KeyPressEventArgs args) 
+    private void OnKeyPressBefore(object obj, KeyPressEventArgs args) 
     {
+	// FIXME:
+	// This isn't correct as they should happen after the change
+	// but source_view.KeyPressEvent eats the signal, and won't
+	// call any other events, and CanUndoFired crashes Windows
+	window.SetDirty(page, buffer.CanUndo());
 	source_view.ScrollMarkOnscreen(buffer.InsertMark);
     }
 
     private void OnSourceViewChanged(object obj, EventArgs args) 
     {
 	window.SetDirty(page, buffer.CanUndo());
+	source_view.ScrollMarkOnscreen(buffer.InsertMark);
     }
     
     public bool Untitled
@@ -140,15 +142,27 @@ public class TextDocument: PyjamaInterfaces.IDocument
     
     public void SaveAs(string fn)
     {
-        untitled = false;
-    	filename = fn;
+	if (File.Exists(fn)) {
+            MessageDialog dlg = new MessageDialog(window, DialogFlags.Modal,
+                MessageType.Question, ButtonsType.None,
+                "Do you want to overwrite \"{0}\"?", fn);
+            dlg.AddButton("Overwrite", ResponseType.Accept);
+            dlg.AddButton("Cancel", ResponseType.Cancel);
+            ResponseType ret = (ResponseType)dlg.Run();
+            dlg.Destroy();
+            if (ret == ResponseType.Cancel) {
+		return;
+	    }
+	} 
+	untitled = false;
+	filename = fn;
 	string mime_type = GetMimeType(filename);
 	SourceLanguagesManager mgr = new SourceLanguagesManager();
 	language = mgr.GetLanguageFromMimeType(mime_type);
 	if (buffer.Language != language && language != null) {
 	    buffer.Language = language;
 	}
-        Save();
+	Save();
     }
 
     public void SetFilename(string fn)
