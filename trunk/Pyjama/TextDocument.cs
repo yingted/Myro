@@ -53,8 +53,10 @@ public class TextDocument: PyjamaInterfaces.IDocument
 	source_view.ModifyFont(font);
 	// Set up event handlers:
 	source_view.Buffer.Changed += new EventHandler(OnSourceViewChanged);
-	buffer.CanUndoFired += new CanUndoFiredHandler(CanUndo);
+	// This crashes windows when fired:
+	//buffer.CanUndoFired += new CanUndoFiredHandler(CanUndo);
 	source_view.KeyPressEvent += new KeyPressEventHandler(OnKeyPress);
+	
 	if (filename != null) {
 	    // TODO: make sure it exists, and can be read; readonly?
 	    StreamReader file = File.OpenText(fn);
