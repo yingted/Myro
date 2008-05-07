@@ -116,7 +116,7 @@ public class PythonShell: PyjamaInterfaces.IShell
 	// Probably a more direct way to do these things:
 	python.Execute("import sys");
 	python.Execute("sys.path.append('.')");
-	buffer.Text = "# IronPython " + python.Evaluate("sys.version");
+	buffer.Text = "# Python " + python.Evaluate("sys.version");
 	python.Execute("del sys");
 	buffer.Text += "\n>>> ";
     }
