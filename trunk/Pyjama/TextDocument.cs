@@ -53,7 +53,7 @@ public class TextDocument: PyjamaInterfaces.IDocument
 	source_view.ModifyFont(font);
 	// Set up event handlers:
 	source_view.Buffer.Changed += new EventHandler(OnSourceViewChanged);
-	// This crashes windows when fired:
+	// FIXME: This crashes windows when fired:
 	//buffer.CanUndoFired += new CanUndoFiredHandler(CanUndo);
 	source_view.KeyPressEvent += new KeyPressEventHandler(OnKeyPress);
 	
