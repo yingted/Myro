@@ -1,11 +1,7 @@
-try:
-    import zipfile
-except:
-    print "Missing zipfile"
-import tarfile, urllib
+import zipfile, tarfile, urllib
 import os, string, sys, time
 try:
-    import myro.serial as serial
+    import serial
 except:
     print "WARNING: pyserial not loaded: can't upgrade robot!"
 from myro import __VERSION__ as myro_version

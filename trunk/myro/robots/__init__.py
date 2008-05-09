@@ -70,7 +70,7 @@ def commas(lyst):
             retval = "'%s'" % i
     return retval
 
-class Robot(object):
+class Robot:
     """
     The object with which to interact with motors and sensors.
     
