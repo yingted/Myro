@@ -50,6 +50,10 @@ public class TextDocument: PyjamaInterfaces.IDocument
 	// Change the font to fixed-width:
 	Pango.FontDescription font = new Pango.FontDescription();
 	font.Family = "Monospace";
+	// FIXME: This may work differently on different platforms
+	// value is in points * PangoScale
+	// Pango also has 11 predefined sizes
+	font.AbsoluteSize = 15 * Pango.Scale.PangoScale;
 	source_view.ModifyFont(font);
 
 	// Set up event handlers:
