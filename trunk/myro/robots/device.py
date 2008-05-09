@@ -7,7 +7,7 @@ from these.
 (c) 2005, PyrobRobotics.org. Licenced under the GNU GPL.
 """
 
-import types, random, exceptions, math, Tkinter, threading
+import types, random, exceptions, math, threading
 
 # constants:
 TOLERANCE = .0001
@@ -20,97 +20,6 @@ SINDEG90RADS = math.sin(DEG90RADS) / 1000.0
 __author__ = "Douglas Blank <dblank@brynmawr.edu>"
 __version__ = "$Revision$"
 
-
-class DeviceWindow(Tkinter.Toplevel):
-    """
-    An object responsible for showing device data.
-    """
-    def __init__(self, device, title = None):
-        """Constructor for the DeviceWindow class."""
-        import myro
-        if not myro._gui:
-            myro._gui = Tkinter.Tk()
-            myro._gui.withdraw()
-        Tkinter.Toplevel.__init__(self, myro._gui)
-        self.visibleData = 0
-        self._dev = device
-        self.wm_title(title)
-        self.widgets = {}   # Tkinter widget, keyed by a name
-        self.variables = {} # Tkvar -> pythonvar, keyed by python object's fieldname
-        if self._dev != None:
-            self._dev.addWidgets(self) # self is window, add widgets to it
-            if self.visibleData: # are any of those widgets data?
-                v = self.makeVariable(self._dev, "visible", 1)
-                self.addCheckbox("visible.checkbox", "Update window", v,
-                                 command = self.updateVariables)
-    def makeVariable(self, obj, name, val):
-        """ Make a Tkvar and set the value """
-        v = Tkinter.BooleanVar()
-        v.set(val)
-        self.variables[name] = v
-        obj.__dict__[name] = val
-        return v
-    def updateVariables(self):
-        for v in self.variables.keys():
-            self._dev.__dict__[v] = self.variables[v].get()
-    def update(self):
-        """Method called to update a device."""
-        pass
-    def addButton(self, name, text, command):
-        """Adds a button to the device view window."""
-        self.widgets[name] = Tkinter.Button(self, text=text, command=command)
-        self.widgets[name].pack(fill="both", expand="y")
-    def addCheckbox(self, name, text, variable, command):
-        """Adds a checkbox to the device view window."""
-        self.widgets[name] = Tkinter.Checkbutton(self, text=text, variable=variable, command=command)
-        self.widgets[name].pack(anchor="w")
-    def addLabel(self, name, text):
-        """Adds a label to the device view window."""
-        self.widgets[name] = Tkinter.Label(self, text=text)
-        self.widgets[name].pack(fill="both", expand="y")
-    def updateWidget(self, name, value):
-        """Updates the device view window."""
-        try:
-            self.widgets[name+".entry"].delete(0,'end')
-            self.widgets[name+".entry"].insert(0,value)
-        except: pass
-    def addData(self, name, text, value):
-        """Adds a data field to the device view window."""
-        self.visibleData = 1
-        frame = Tkinter.Frame(self)
-        frame.pack(fill="both", expand="y")
-        try:
-            self.widgets[name + ".label"] = Tkinter.Label(frame, text=text)
-            self.widgets[name + ".label"].pack(side="left")
-            self.widgets[name + ".entry"] = Tkinter.Entry(frame, bg="white")
-            self.widgets[name + ".entry"].insert(0, value)
-            self.widgets[name + ".entry"].pack(side="right", fill="both", expand="y")
-        except: pass
-    def addCommand(self, name, text, value, procedure):
-        """Adds a command field to the device view window."""
-        frame = Tkinter.Frame(self)
-        frame.pack(fill="both", expand="y")
-        try:
-            self.widgets[name + ".button"] = Tkinter.Button(frame, text=text, command=lambda name=name, proc=procedure: self.onButton(name, proc))
-            self.widgets[name + ".button"].pack(side="left")
-            self.widgets[name + ".entry"] = Tkinter.Entry(frame, bg="white")
-            self.widgets[name + ".entry"].insert(0, value)
-            self.widgets[name + ".entry"].pack(side="right", fill="both", expand="y")
-        except: pass
-    def onButton(self, name, proc):
-        command = self.widgets[name + ".entry"].get().strip()
-        print proc(command)
-    def destroy(self):
-        """Hides the device view window."""
-        if self._dev:
-            self._dev.visible = 0
-        self.withdraw()
-
-class WindowError(AttributeError):
-    """ Device Window Error """
-
-class DeviceError(AttributeError):
-    """ Used to signal device problem """
 
 class SensorValue:
     """ Used in new Python range sensor interface """

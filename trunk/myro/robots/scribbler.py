@@ -10,11 +10,12 @@ __AUTHOR__   = "Keith O'Hara and Doug Blank"
 
 import time, string
 try:
-    import serial
+    import myro.serial as serial
 except:
     print "WARNING: pyserial not loaded: scribbler won't work!"
 from myro import Robot, ask
-from myro.graphics import _askQuestion, Picture
+# FIXME
+#from myro.graphics import _askQuestion, Picture
 import myro.globvars
 import cStringIO
 # needed for new camera dongle
@@ -166,15 +167,15 @@ class Scribbler(Robot):
     
         self.CAM_COMA=0x12
         self.CAM_COMA_DEFAULT=0x14
-        self.CAM_COMA_WHITE_BALANCE_ON= (self.CAM_COMA_DEFAULT |  (1 << 2))
-        self.CAM_COMA_WHITE_BALANCE_OFF=(self.CAM_COMA_DEFAULT & ~(1 << 2))
+        #self.CAM_COMA_WHITE_BALANCE_ON= (self.CAM_COMA_DEFAULT |  (1 << 2))
+        #self.CAM_COMA_WHITE_BALANCE_OFF=(self.CAM_COMA_DEFAULT & ~(1 << 2))
     
-        self.CAM_COMB=0x13
-        self.CAM_COMB_DEFAULT=0xA3
-        self.CAM_COMB_GAIN_CONTROL_ON= (self.CAM_COMB_DEFAULT |  (1 << 1))
-        self.CAM_COMB_GAIN_CONTROL_OFF=(self.CAM_COMB_DEFAULT & ~(1 << 1))
-        self.CAM_COMB_EXPOSURE_CONTROL_ON= (self.CAM_COMB_DEFAULT |  (1 << 0))
-        self.CAM_COMB_EXPOSURE_CONTROL_OFF=(self.CAM_COMB_DEFAULT & ~(1 << 0))
+        #self.CAM_COMB=0x13
+        #self.CAM_COMB_DEFAULT=0xA3
+        #self.CAM_COMB_GAIN_CONTROL_ON= (self.CAM_COMB_DEFAULT |  (1 << 1))
+        #self.CAM_COMB_GAIN_CONTROL_OFF=(self.CAM_COMB_DEFAULT & ~(1 << 1))
+        #self.CAM_COMB_EXPOSURE_CONTROL_ON= (self.CAM_COMB_DEFAULT |  (1 << 0))
+        #self.CAM_COMB_EXPOSURE_CONTROL_OFF=(self.CAM_COMB_DEFAULT & ~(1 << 0))
 
         self.ser = None
         self.requestStop = 0
@@ -198,7 +199,7 @@ class Scribbler(Robot):
         self.serialPort = serialport
         self.baudRate = baudrate
         self.open()
-        
+       
         myro.globvars.robot = self
         self._fudge = range(4)
         self._oldFudge = range(4)
@@ -270,7 +271,7 @@ class Scribbler(Robot):
                 print "   Found robot named", name, "on port", s, "!"
                 if name == self.serialPort:
                     self.serialPort = port
-                    self.ser.timeout = 10
+                    self.ser.setTimeout(10)
                     s = self.serialPort.replace('\\', "")
                     s = s.replace('.', "")
                     _askQuestion("You can use \"%s\" from now on, like this:\n   initialize(\"%s\")" %
@@ -315,6 +316,7 @@ class Scribbler(Robot):
                         pass
                     time.sleep(1)
                 except:
+                    raise
                     print "Waiting on port...", self.serialPort
                     try:
                         self.ser.close()
@@ -336,7 +338,7 @@ class Scribbler(Robot):
         self.ser.close()
 
     def manual_flush(self):
-        old = self.ser.timeout
+        old = self.ser.getTimeout()
         self.ser.setTimeout(.5)
         l = 'a'
         count = 0;
@@ -505,7 +507,7 @@ class Scribbler(Robot):
     def getInfo(self, *item):
         #retval = self._get(Scribbler.GET_INFO, mode="line")
 
-        oldtimeout = self.ser.timeout        
+        oldtimeout = self.ser.getTimeout()
         self.ser.setTimeout(4)
         
         #self.ser.flushInput()
@@ -782,7 +784,7 @@ class Scribbler(Robot):
         buffer = array([0] * (height * width * 3), 'B')
         try:
             self.lock.acquire()
-            oldtimeout = self.ser.timeout
+            oldtimeout = self.ser.getTimeout()
             self.ser.setTimeout(.01)
             self.ser.write(chr(Scribbler.GET_IMAGE))
             size= width*height
@@ -833,7 +835,7 @@ class Scribbler(Robot):
         buffer = array([0] * (height * width * 3), 'B')
         try:
             self.lock.acquire()
-            oldtimeout = self.ser.timeout
+            oldtimeout = self.ser.getTimeout()
             self.ser.setTimeout(.01)
             self.ser.write(chr(Scribbler.GET_IMAGE))
             size= width*height
@@ -886,7 +888,7 @@ class Scribbler(Robot):
         buffer = array([0] * (height * width * 3), 'B')
         try:
             self.lock.acquire()
-            oldtimeout = self.ser.timeout
+            oldtimeout = self.ser.getTimeout
             self.ser.setTimeout(.01)
             self.ser.write(chr(Scribbler.GET_IMAGE))
             size= width*height
@@ -1440,7 +1442,7 @@ class Scribbler(Robot):
 
     def _set_speaker(self, frequency, duration):
         return self._set(Scribbler.SET_SPEAKER, 
-             duration >> 8,
+                         duration >> 8,
                          duration % 256,
                          frequency >> 8,
                          frequency % 256)
