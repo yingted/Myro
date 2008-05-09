@@ -1200,6 +1200,8 @@ class Color(object):
                     int(max(min(g * .65, 255), 0)),
                     int(max(min(b * .65, 255), 0)))
 
+makeColor = Color
+
 class Image(GraphicsObject):
     idCount = 0
     imageCache = {} # tk photoimages go here to avoid GC while drawn
