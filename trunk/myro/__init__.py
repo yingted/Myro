@@ -12,25 +12,23 @@ __AUTHOR__   = "Doug Blank <dblank@cs.brynmawr.edu>"
 import sys, atexit, time, random, pickle, threading, os, types, copy
 import StringIO, traceback
 import myro.globvars
-# FIXME
-#from myro.media import *
-#from myro.speech import *
-#from myro.chat import *
+from myro.media import *
+from myro.speech import *
+from myro.chat import *
 from myro.system import *
 
 # Check versions of things:
 _pil_version = None
-# FIXME
-# try:
-#     import Image
-#     _pil_version = Image.VERSION
-#     del Image
-# except:
-#     print >> sys.stderr, "ERROR: you need to install Python Image Library to make pictures"
-# if _pil_version != None:
-#     if _pil_version.split(".") < ["1", "1", "5"]:
-#         print >> sys.stderr, ("ERROR: you need to upgrade Python Image Library to at least 1.1.5 (you're running %s)" % 
-#                               _pil_version)
+try:
+    import Image
+    _pil_version = Image.VERSION
+    del Image
+except:
+    print >> sys.stderr, "ERROR: you need to install Python Image Library to make pictures"
+if _pil_version != None:
+    if _pil_version.split(".") < ["1", "1", "5"]:
+        print >> sys.stderr, ("ERROR: you need to upgrade Python Image Library to at least 1.1.5 (you're running %s)" % 
+                              _pil_version)
 del _pil_version
 
 def timer(seconds=0):
@@ -539,10 +537,9 @@ class Robot(object):
         raise AttributeError, "this method needs to be written"
 
     def beep(self, duration, frequency1, frequency2 = None):
-        #FIXME
-        #import myro.graphics
+        import myro.graphics
         print "beep!"
-        #return myro.graphics._tkCall(myro.graphics._beep, duration, frequency1, frequency2)
+        return myro.graphics._tkCall(myro.graphics._beep, duration, frequency1, frequency2)
         
     def getLastSensors(self):
         """ Should not get the current, but the last. This is default behavior. """
@@ -743,20 +740,19 @@ def _cleanup():
             time.sleep(.5)                        
         myro.globvars.robot.close()
 
-# FIXME: handle control+c
-# import signal
+import signal
 
-# def ctrlc_handler(signum, frame):
-#     if myro.globvars.robot:            
-#         #myro.globvars.robot.open()
-#         #print "done opening"
-#         myro.globvars.robot.manual_flush()
-#         if "robot" in myro.globvars.robot.robotinfo:            
-#             myro.globvars.robot.hardStop()
-#     raise KeyboardInterrupt
+def ctrlc_handler(signum, frame):
+    if myro.globvars.robot:            
+        #myro.globvars.robot.open()
+        #print "done opening"
+        myro.globvars.robot.manual_flush()
+        if "robot" in myro.globvars.robot.robotinfo:            
+            myro.globvars.robot.hardStop()
+    raise KeyboardInterrupt
 
-# # Set the signal handler and a 5-second alarm
-# signal.signal(signal.SIGINT, ctrlc_handler)
+# Set the signal handler and a 5-second alarm
+signal.signal(signal.SIGINT, ctrlc_handler)
 
 # Get ready for user prompt; set up environment:
 if not myro.globvars.setup:
@@ -777,8 +773,7 @@ def initialize(id = None):
         simulator(None)
     else:
         myro.globvars.robot = Scribbler(id)
-    # FIXME: Difference between IP and CP:
-    __builtins__.robot = myro.globvars.robot
+    __builtins__["robot"] = myro.globvars.robot
 
 init = initialize        
 
@@ -1405,31 +1400,28 @@ def _myroExceptionHandler(etype, value, tb):
     print >> sys.stderr, "Myro is stopping: -------------------------------------------"
     for line in lines:
         print >> sys.stderr, line.rstrip()
-#FIXME
-#sys.excepthook = _myroExceptionHandler
+sys.excepthook = _myroExceptionHandler
 
 from myro.robots.scribbler import Scribbler
-# FIXME
-#from myro.robots.surveyor import Surveyor, watch
-#from myro.robots.roomba import Roomba, Create
-#from myro.robots.simulator import SimScribbler
-#from myro.graphics import *
+from myro.robots.surveyor import Surveyor, watch
+from myro.robots.roomba import Roomba, Create
+from myro.robots.simulator import SimScribbler
+from myro.graphics import *
 
 #######
 ## have to load pygame after mostly everything
-# FIXME
-# if not "darwin" in sys.platform:
-#     try:
-#         import pygame
-#         pygame.init()
+if not "darwin" in sys.platform:
+    try:
+        import pygame
+        pygame.init()
     
-#         for i in range(pygame.joystick.get_count()):
-#             js = pygame.joystick.Joystick(i)
-#             js.init()
-#             myro.globvars.joysticks.append(js)
-#     except:
-#         pygame = None
-#         pass
+        for i in range(pygame.joystick.get_count()):
+            js = pygame.joystick.Joystick(i)
+            js.init()
+            myro.globvars.joysticks.append(js)
+    except:
+        pygame = None
+        pass
 
 
 _functions = ("timer", 
