@@ -1261,6 +1261,12 @@ def getPixels(picture):
 def setPixel(picture, x, y, color):
     return picture.setColor(x, y, color)
 
+def getGray(picture, x, y):
+    return sum(picture.getPixel(x, y).getRGB())/3
+
+def setGray(picture, x, y, gray):
+    return getPixel(picture, x, y).setRGB([gray,gray,gray])
+
 ############################# Pixels and Colors
 
 def getX(pixel):
