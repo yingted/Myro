@@ -992,13 +992,16 @@ class Picture(object):
         self.filename = None
         self.mode = None
 
-    def set(self, width, height, data=None, mode = "color"):
+    def set(self, width, height, data=None, mode="color", value=255):
         self.width = width
         self.height = height
         self.mode = mode
         if mode.lower() == "color":
             if data == None:
-                data = array([0] * (height * width * 3), 'B')
+                 if type(value) == int:
+                      data = array([value] * (height * width * 3), 'B')
+                 elif len(value) == 3:
+                      data = array(value * (height * width), 'B')
             self.image = PyImage.frombuffer("RGB", (self.width, self.height),
                                             data, "raw", "RGB", 0, 1)
         elif mode.lower() == "image": 	 

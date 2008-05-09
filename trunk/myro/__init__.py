@@ -1075,12 +1075,12 @@ def setLEDBack(value):
 
 ########################### Pictures:
 
-def _ndim(n, *args):
+def _ndim(n, *args, **kwargs):
     if not args:
-        return [0] * n
+        return [kwargs.get("value", 0)] * n
     A = []
     for i in range(n):
-        A.append( _ndim(*args) )
+        A.append( _ndim(*args, **kwargs) )
     return A
 
 class Column(object):
@@ -1091,11 +1091,14 @@ class Column(object):
         return self.picture.getPixel(self.column, row)
 
 class Array(object):
-    def __init__(self, n = 0, *args):
+    def __init__(self, n = 0, *args, **kwargs):
         if type(n) == Picture:
             self.data = n
         else:
-            self.data = _ndim(n, *args)
+            self.data = _ndim(n, *args, **kwargs)
+    def __len__(self):
+        return len(self.data)
+
     def __getitem__(self, *args):
         if type(self.data) == Picture:
             return Column(self.data, args[0])
@@ -1106,9 +1109,9 @@ class Array(object):
                 current = current[n]
             return current
 
-def makeArray(*args):
+def makeArray(*args, **kwargs):
     """ Returns an array of the given dimensions. """
-    return Array(*args)
+    return Array(*args, **kwargs)
 
 def takePicture(mode="color"):
     """ Takes a picture using the camera. Mode can be 'color', 'gray', or 'blob' """
@@ -1154,9 +1157,20 @@ def makePicture(*args):
     elif len(args) == 3:
         x = args[0]
         y = args[1]
-        array = args[2]
-        retval = Picture()
-        retval.set(x, y, array)
+        if type(args[2]) in [Color, Pixel]:
+            retval = Picture()
+            retval.set(x, y, value=args[2].getRGB())
+        elif type(args[2]) == int:
+            retval = Picture()
+            retval.set(x, y, value=args[2])
+        elif type(args[2]) in [list, tuple]: # Undocumented
+            array = args[2]
+            retval = Picture()
+            retval.set(x, y, value=args[2])
+        else:
+            raise AttributeError("unknown type: %s is '%s'; " +
+                                 "should be Color, Pixel, int grayscale", 
+                                 args[2], type(args[2]))
     elif len(args) == 4:
         x = args[0]
         y = args[1]
