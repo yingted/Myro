@@ -1,15 +1,16 @@
 PROJECT=pyjama
 
 # Where the IP dlls are:
-IPPATH=/opt/mono-1.9/lib/IPCE/ipy
+IPPATH=/opt/mono-1.9/lib/IPCE/ms
+#IPPATH=/opt/mono-1.9/lib/IPCE/ipy
 #IPPATH=/opt/mono-1.9/lib/IPCE/ipy2
 
 # Where site.py and other bits are:
-IPSITE=/opt/mono-1.9/lib/IPCE/Lib:/home/dblank/Myro/Pyjama
+IPSITE=/opt/mono-1.9/lib/IPCE/Lib
 
-DLLS=-r:Mono.Posix.dll -r:IronPython.dll -r:IronMath.dll
-#DLLS=-r:Mono.Posix.dll -r:IronPython.dll -r:IronPython.Modules.dll \
-	-r:Microsoft.Scripting.dll 
+#DLLS=-r:Mono.Posix.dll -r:IronPython.dll -r:IronMath.dll
+DLLS=-r:Mono.Posix.dll -r:IronPython.dll -r:IronPython.Modules.dll \
+	-r:Microsoft.Scripting.dll -r:Microsoft.Scripting.Core.dll 
 
 SRCS=src/Pyjama.cs src/PyjamaInterfaces.cs src/Utils.cs \
 	src/TextDocument.cs src/PyjamaGraphics.cs \

@@ -2,11 +2,20 @@ using Gtk;
 using Gdk;
 using GtkSourceView;
 using System.IO;
+using System.Text;
 using System;
 
 using PyjamaInterfaces;
 using PyjamaGraphics;
+
+using IronPython;
+using IronPython.Compiler;
 using IronPython.Hosting;
+using IronPython.Runtime;
+
+using Microsoft;
+using Microsoft.Scripting;
+using Microsoft.Scripting.Hosting;
 
 class TextBufferOutputStream: Stream
 {
@@ -91,7 +100,9 @@ public class PythonShell: PyjamaInterfaces.IShell
     SourceBuffer buffer;
     SourceLanguage language;
     SourceView source_view;
-    PythonEngine python;
+    private readonly ScriptEngine engine;
+    private readonly ScriptRuntime runtime;
+    private ScriptScope scope;
     
     public PythonShell()
     {
@@ -109,12 +120,20 @@ public class PythonShell: PyjamaInterfaces.IShell
 	source_view.KeyPressEvent += new KeyPressEventHandler(OnSourceViewChanged);
 	source_view.WrapMode = Gtk.WrapMode.Word;
         source_view.AutoIndent = true;
-        python = new PythonEngine();
         TextBufferOutputStream output_stream = new TextBufferOutputStream(buffer);
-        python.SetStandardOutput(output_stream);
-        python.SetStandardError(output_stream);
+	runtime = ScriptRuntime.Create();
+	runtime.LoadAssembly(typeof(string).Assembly);
+        //runtime.LoadAssembly(typeof(Debug).Assembly);
+	engine = runtime.GetEngine("py");
+
+	Encoding encoding = Encoding.UTF8;
+	//engine.Runtime.IO.SetInput(stdin, encoding);
+        engine.Runtime.IO.SetOutput(output_stream, encoding);
+        engine.Runtime.IO.SetErrorOutput(output_stream, encoding);
+	scope = engine.Runtime.CreateScope();
+
 	// Probably a more direct way to do these things:
-	python.Execute("import sys");
+	Execute("import sys");
 	string ip_site = Environment.GetEnvironmentVariable("IRONPYTHON_PATH");
 	// FIXME: path delimiter:
 	char [] c = new char[1];
@@ -124,14 +143,31 @@ public class PythonShell: PyjamaInterfaces.IShell
 					StringSplitOptions.RemoveEmptyEntries);
 	foreach (string p in path) {
 	    if (p != "") {
-		python.Execute("sys.path.append('" + p + "')");
+		Execute("sys.path.append('" + p + "')");
 	    }
 	}
-	python.Execute("sys.path.append('.')");
-	buffer.Text =  "# Python " + python.Evaluate("sys.version") + "\n";
-	buffer.Text += "# " + python.Evaluate("sys.copyright") + "\n";
-	python.Execute("del sys");
+	Execute("sys.path.append('.')");
+	buffer.Text =  "# Python " + Execute("sys.version") + "\n";
+	buffer.Text += "# " + Execute("sys.copyright") + "\n";
+	Execute("del sys");
 	buffer.Text += ">>> ";
+    }
+
+    object Execute(string input) {
+	string retval = "";
+	try {
+	    object o = engine.CreateScriptSourceFromString(input, 
+				 SourceCodeKind.Expression).Execute(scope);
+	    retval = o.ToString();
+	} catch {
+	    try {
+		engine.CreateScriptSourceFromString(input, 
+			    SourceCodeKind.Statements).Execute(scope);
+	    } catch (Exception e) {
+		retval = e.ToString();
+	    }
+	}
+	return retval;
     }
 
     // To get in the loop before the SourceView handles the keypress
@@ -177,10 +213,12 @@ public class PythonShell: PyjamaInterfaces.IShell
 		source_view.ScrollMarkOnscreen(buffer.InsertMark);
 		return;
 	    }
-            
+	    buffer.Text += Execute(line);
+
 	    // This is a hack, but works for now
 	    // FIXME: should check for parse error
 	    //        before starting to execute??
+	    /*
             try {
 		object o = python.Evaluate(line);
 		buffer.Text += o.ToString();
@@ -191,6 +229,7 @@ public class PythonShell: PyjamaInterfaces.IShell
 		    buffer.Text += e;
 		}
             }
+	    */
 	    // Don't give a newline unless we need one:
             cursor_pos = buffer.CursorPosition;
 	    iter = buffer.GetIterAtOffset(cursor_pos);
