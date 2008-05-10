@@ -115,6 +115,18 @@ public class PythonShell: PyjamaInterfaces.IShell
         python.SetStandardError(output_stream);
 	// Probably a more direct way to do these things:
 	python.Execute("import sys");
+	string ip_site = Environment.GetEnvironmentVariable("IRONPYTHON_PATH");
+	// FIXME: path delimiter:
+	char [] c = new char[1];
+	//c[0] = Path.PathSeparatorChar;
+	c[0] = ':';
+	string [] path = ip_site.Split(c,
+					StringSplitOptions.RemoveEmptyEntries);
+	foreach (string p in path) {
+	    if (p != "") {
+		python.Execute("sys.path.append('" + p + "')");
+	    }
+	}
 	python.Execute("sys.path.append('.')");
 	buffer.Text =  "# Python " + python.Evaluate("sys.version") + "\n";
 	buffer.Text += "# " + python.Evaluate("sys.copyright") + "\n";

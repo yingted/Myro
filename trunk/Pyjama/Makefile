@@ -1,9 +1,19 @@
 PROJECT=pyjama
+
+# Where the IP dlls are:
 IPPATH=/opt/mono-1.9/lib/IPCE/ipy
+#IPPATH=/opt/mono-1.9/lib/IPCE/ipy2
+
+# Where site.py and other bits are:
+IPSITE=/opt/mono-1.9/lib/IPCE/Lib:/home/dblank/Myro/Pyjama
+
+DLLS=-r:Mono.Posix.dll -r:IronPython.dll -r:IronMath.dll
+#DLLS=-r:Mono.Posix.dll -r:IronPython.dll -r:IronPython.Modules.dll \
+	-r:Microsoft.Scripting.dll 
+
 SRCS=src/Pyjama.cs src/PyjamaInterfaces.cs src/Utils.cs \
 	src/TextDocument.cs src/PyjamaGraphics.cs \
 	src/PythonShell.cs
-DLLS=-r:Mono.Posix.dll -r:IronPython.dll
 CSFLAGS=-pkg:gtk-sharp-2.0 -pkg:gtksourceview-sharp-2.0
 CS=gmcs
 MONO=mono
@@ -13,19 +23,10 @@ MONO=mono
 all:	$(PROJECT).exe
 
 run:	$(PROJECT).exe
-	$(MONO) ./$(PROJECT).exe
+	MONO_PATH=$(IPPATH) IRONPYTHON_PATH=$(IPSITE) $(MONO) ./$(PROJECT).exe
 
-#PyjamaInterfaces.dll: PyjamaInterfaces.cs
-#	$(MCS) PyjamaInterfaces.cs -out:PyjamaInterfaces.dll -target:library
-
-IronPython.dll: $(IPPATH)/IronPython.dll
-	cp $(IPPATH)/IronPython.dll .
-
-IronMath.dll: $(IPPATH)/IronMath.dll
-	cp $(IPPATH)/IronMath.dll .
-
-$(PROJECT).exe:	$(SRCS) IronPython.dll IronMath.dll
-	$(CS) $(CSFLAGS) $(SRCS) $(DLLS) -out:$@
+$(PROJECT).exe:	$(SRCS) 
+	$(CS) $(CSFLAGS) $(SRCS) $(DLLS) -lib:$(IPPATH) -out:$@
 
 clean:
 	$(RM) $(PROJECT).exe *.dll *~
