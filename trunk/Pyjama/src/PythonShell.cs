@@ -14,8 +14,11 @@ using IronPython.Hosting;
 using IronPython.Runtime;
 
 using Microsoft;
+
+#if HOSTINGVER2
 using Microsoft.Scripting;
 using Microsoft.Scripting.Hosting;
+#endif
 
 class TextBufferOutputStream: Stream
 {
@@ -100,10 +103,13 @@ public class PythonShell: PyjamaInterfaces.IShell
     SourceBuffer buffer;
     SourceLanguage language;
     SourceView source_view;
+#if HOSTINGVER2
     private readonly ScriptEngine engine;
     private readonly ScriptRuntime runtime;
     private ScriptScope scope;
-    
+#elif HOSTINGVER1
+    PythonEngine engine;
+#endif
     public PythonShell()
     {
         SourceLanguagesManager mgr = new SourceLanguagesManager();
@@ -121,6 +127,7 @@ public class PythonShell: PyjamaInterfaces.IShell
 	source_view.WrapMode = Gtk.WrapMode.Word;
         source_view.AutoIndent = true;
         TextBufferOutputStream output_stream = new TextBufferOutputStream(buffer);
+#if HOSTINGVER2
 	runtime = ScriptRuntime.Create();
 	runtime.LoadAssembly(typeof(string).Assembly);
         //runtime.LoadAssembly(typeof(Debug).Assembly);
@@ -131,7 +138,11 @@ public class PythonShell: PyjamaInterfaces.IShell
         engine.Runtime.IO.SetOutput(output_stream, encoding);
         engine.Runtime.IO.SetErrorOutput(output_stream, encoding);
 	scope = engine.Runtime.CreateScope();
-
+#elif HOSTINGVER1
+        engine = new PythonEngine();
+        engine.SetStandardOutput(output_stream); 	         
+	engine.SetStandardError(output_stream);
+#endif
 	// Probably a more direct way to do these things:
 	Execute("import sys");
 	string ip_site = Environment.GetEnvironmentVariable("IRONPYTHON_PATH");
@@ -155,6 +166,7 @@ public class PythonShell: PyjamaInterfaces.IShell
 
     object Execute(string input) {
 	string retval = "";
+#if HOSTINGVER2
 	try {
 	    object o = engine.CreateScriptSourceFromString(input, 
 				 SourceCodeKind.Expression).Execute(scope);
@@ -167,6 +179,19 @@ public class PythonShell: PyjamaInterfaces.IShell
 		retval = e.ToString();
 	    }
 	}
+#elif HOSTINGVER1
+        // This is a hack, but works for now
+        try {
+	    object o = engine.Evaluate(input);
+	    retval = o.ToString();
+	} catch {
+	    try {
+		engine.Execute(input);
+	    } catch (Exception e) {
+		retval = e.ToString();
+	    }
+	}
+#endif
 	return retval;
     }
 
