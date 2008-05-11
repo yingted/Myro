@@ -10,6 +10,8 @@ __AUTHOR__   = "Keith O'Hara and Doug Blank"
 
 import time, string
 try:
+    import myro
+    import myro.serial
     import myro.serial as serial
 except:
     print "WARNING: pyserial not loaded: scribbler won't work!"

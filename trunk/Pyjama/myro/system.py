@@ -5,7 +5,7 @@ except:
 import tarfile, urllib
 import os, string, sys, time
 try:
-    import myro.serial as serial
+    import myro.serial
 except:
     print "WARNING: pyserial not loaded: can't upgrade robot!"
 from myro import __VERSION__ as myro_version
@@ -170,7 +170,7 @@ class SerialRobot:
             raise
         except:
             pass
-        self.ser = serial.Serial(self.serialPort, timeout = 2) 
+        self.ser = myro.serial.Serial(self.serialPort, timeout = 2) 
     def getInfo(self): return {"robot":"Serial", "mode": "serial"}
     def restart(self):
         print "Please run initialize() to connect onto robot"
