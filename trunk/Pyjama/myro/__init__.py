@@ -777,8 +777,7 @@ def initialize(id = None):
         simulator(None)
     else:
         myro.globvars.robot = Scribbler(id)
-    # FIXME: Difference between IP and CP:
-    __builtins__.robot = myro.globvars.robot
+    __builtins__["robot"] = myro.globvars.robot
 
 init = initialize        
 

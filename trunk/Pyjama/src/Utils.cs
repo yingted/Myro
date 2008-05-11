@@ -75,5 +75,39 @@ class Utils
 	}
 	return mime_type;
     }
+
+    public static char GetPathSeparatorChar() {
+    	string os = GetOS();
+    	char c = ':';
+    	switch (os) {
+    	case "WINDOWS":
+    	    c = ';';
+    	    break;
+    	case "UNIX":
+    	    c = ':';
+    	    break;
+    	default:
+    	    c = ':';
+    	    break;
+    	}
+    	return c;
+    }
+
+    public static string GetOS() {
+	System.OperatingSystem osInfo = System.Environment.OSVersion;
+	string operatingSystem = "UNKNOWN";
+
+	switch ( osInfo.Platform )
+	{
+	case System.PlatformID.Win32Windows:
+        case System.PlatformID.Win32NT:
+            operatingSystem = "WINDOWS";
+	    break;
+        case System.PlatformID.Unix:
+            operatingSystem = "UNIX";
+	    break;
+	}
+	return operatingSystem;
+     }
 }
 
