@@ -146,15 +146,18 @@ public class PythonShell: PyjamaInterfaces.IShell
 	// Probably a more direct way to do these things:
 	Execute("import sys");
 	string ip_site = Environment.GetEnvironmentVariable("IRONPYTHON_PATH");
+	Console.WriteLine("ip_site: {0}", ip_site);
 	// FIXME: path delimiter:
 	char [] c = new char[1];
 	//c[0] = Path.PathSeparatorChar;
 	c[0] = ':';
-	string [] path = ip_site.Split(c,
-					StringSplitOptions.RemoveEmptyEntries);
-	foreach (string p in path) {
-	    if (p != "") {
-		Execute("sys.path.append('" + p + "')");
+	if (ip_site != null) {
+	    string [] path = ip_site.Split(c,
+			      	StringSplitOptions.RemoveEmptyEntries);
+	    foreach (string p in path) {
+		if (p != "") {
+		    Execute("sys.path.append('" + p + "')");
+		}
 	    }
 	}
 	Execute("sys.path.append('.')");
