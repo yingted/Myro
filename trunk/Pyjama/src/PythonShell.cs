@@ -179,7 +179,7 @@ public class PythonShell: PyjamaInterfaces.IShell
 		engine.CreateScriptSourceFromString(input, 
 			    SourceCodeKind.Statements).Execute(scope);
 	    } catch (Exception e) {
-		retval = e.ToString();
+		retval = e.Message + " at " + e.Source;
 	    }
 	}
 #elif HOSTINGVER1
@@ -191,7 +191,7 @@ public class PythonShell: PyjamaInterfaces.IShell
 	    try {
 		engine.Execute(input);
 	    } catch (Exception e) {
-		retval = e.ToString();
+		retval = e.Message + " at " + e.Source;
 	    }
 	}
 #endif
