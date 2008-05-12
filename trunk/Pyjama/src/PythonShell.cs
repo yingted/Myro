@@ -9,6 +9,12 @@ using PyjamaInterfaces;
 using PyjamaGraphics;
 using IronPython.Hosting;
 
+#if HOSTINGVER2
+using System.Text;
+using Microsoft.Scripting;
+using Microsoft.Scripting.Hosting;
+#endif
+
 class TextBufferOutputStream: Stream
 {
     TextBuffer buffer;
@@ -147,11 +153,11 @@ public class PythonShell: PyjamaInterfaces.IShell
 #endif
         
         // Probably a more direct way to do these things:
-	engine.Execute("import sys");
-	engine.Execute("sys.path.append('.')");
-	buffer.Text =  "# Python " + engine.Evaluate("sys.version") + "\n";
-	buffer.Text += "# " + engine.Evaluate("sys.copyright") + "\n";
-	engine.Execute("del sys");
+	command("import sys");
+	command("sys.path.append('.')");
+	buffer.Text =  "# Python " + command("sys.version") + "\n";
+	buffer.Text += "# " + command("sys.copyright") + "\n";
+	command("del sys");
 	
         add_prompt();
     }
@@ -159,41 +165,41 @@ public class PythonShell: PyjamaInterfaces.IShell
     // Evaluates an expression or executes a statement.
     // Call this for user command-line input when you don't know if
     // the string is an expression or statement.
-    public void command(string line)
+    public string command(string line)
     {
+	string retval = "";
 #if HOSTINGVER2
         try {
-            object o = engine.CreateScriptSourceFromString(input, 
+            object o = engine.CreateScriptSourceFromString(line, 
                                  SourceCodeKind.Expression).Execute(scope);
             retval = o.ToString();
-        } catch (IronPython.Runtime.Exceptions.PythonSyntaxErrorException) {
+        } catch (Exception) {
+	    // FIXME: what is the IP2 version of PythonSyntaxErrorException?
             // Not a valid expression, so try it as a statement
             try {
-                engine.CreateScriptSourceFromString(input, 
+                engine.CreateScriptSourceFromString(line, 
                             SourceCodeKind.Statements).Execute(scope);
             } catch (Exception e) {
-                buffer.Text += e;
+                retval = e.ToString();
             }
-        } catch (Exception e) {
-            // Not a parse error, so this is an exception caused by the expression.
-            buffer.Text += e.Message + " at " + e.Source;
         }
 #elif HOSTINGVER1
         try {
             object o = engine.Evaluate(line);
-            buffer.Text += o.ToString();
+            retval = o.ToString();
         } catch (IronPython.Runtime.Exceptions.PythonSyntaxErrorException) {
             // Not a valid expression, so try it as a statement
             try {
                 engine.Execute(line);
             } catch (Exception e) {
-                buffer.Text += e.Message + " at " + e.Source;
+                retval = (e.Message + " at " + e.Source);
             }
         } catch (Exception e) {
             // Not a parse error, so this is an exception caused by the expression.
-            buffer.Text += e.Message + " at " + e.Source;
+            retval = (e.Message + " at " + e.Source);
         }
 #endif
+	return retval;
     }
 
     void add_prompt()
@@ -244,7 +250,7 @@ public class PythonShell: PyjamaInterfaces.IShell
         */
         
         // Evaluate or execute
-        command(line);
+        buffer.Text += command(line);
         
         Console.WriteLine("History:");
         foreach (string s in history)
