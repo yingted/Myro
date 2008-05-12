@@ -3,7 +3,7 @@ HOSTINGVER=1
 
 # Where the IP dlls are:
 #IPPATH=/opt/mono-1.9/lib/IPCE/ms
-IPPATH=/opt/mono-1.9/lib/IPCE/ipy
+IPPATH?=/opt/mono-1.9/lib/IPCE/ipy
 #IPPATH=/opt/mono-1.9/lib/IPCE/ipy2
 
 # Where site.py and other bits are:
