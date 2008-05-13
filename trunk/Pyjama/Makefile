@@ -13,7 +13,7 @@ DLLS=-r:Mono.Posix.dll -r:IronPython.dll -r:IronMath.dll
 #DLLS=-r:Mono.Posix.dll -r:IronPython.dll -r:IronPython.Modules.dll \
 	-r:Microsoft.Scripting.dll 
 #DLLS=-r:Mono.Posix.dll -r:IronPython.dll -r:IronPython.Modules.dll \
-#	-r:Microsoft.Scripting.dll -r:Microsoft.Scripting.Core.dll 
+	-r:Microsoft.Scripting.dll -r:Microsoft.Scripting.Core.dll 
 
 SRCS=src/Pyjama.cs src/PyjamaInterfaces.cs src/Utils.cs \
 	src/TextDocument.cs src/PyjamaGraphics.cs \
