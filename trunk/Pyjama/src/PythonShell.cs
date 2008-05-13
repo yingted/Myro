@@ -172,7 +172,9 @@ public class PythonShell: PyjamaInterfaces.IShell
         try {
             object o = engine.CreateScriptSourceFromString(line, 
                                  SourceCodeKind.Expression).Execute(scope);
-            retval = o.ToString();
+	    if (o != null) {
+		retval = o.ToString();
+	    }
         } catch (Exception) {
 	    // FIXME: what is the IP2 version of PythonSyntaxErrorException?
             // Not a valid expression, so try it as a statement
@@ -186,13 +188,15 @@ public class PythonShell: PyjamaInterfaces.IShell
 #elif HOSTINGVER1
         try {
             object o = engine.Evaluate(line);
-            retval = o.ToString();
+	    if (o != null) {
+		retval = o.ToString();
+	    }
         } catch (IronPython.Runtime.Exceptions.PythonSyntaxErrorException) {
             // Not a valid expression, so try it as a statement
             try {
                 engine.Execute(line);
             } catch (Exception e) {
-                retval = (e.Message + " at " + e.Source);
+                retval = (e.Message + " in " + e.Source);
             }
         } catch (Exception e) {
             // Not a parse error, so this is an exception caused by the expression.
