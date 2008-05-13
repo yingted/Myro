@@ -96,6 +96,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Srv1Controller", "Surveyor\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SurveyorSrv1Services", "Surveyor\SRV-1\Srv1Services\SurveyorSrv1Services.csproj", "{A585257E-673D-4636-90F7-24AEB8E218A8}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Demos", "Demos", "{63C7CC9B-D217-4439-9A83-8C5A440C011F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
