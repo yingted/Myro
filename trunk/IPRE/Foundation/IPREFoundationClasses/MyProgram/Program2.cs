@@ -50,8 +50,8 @@ namespace MyProgram
 
         public static void work()
         {
-            ScribPlaySong();
-            rbt.setLED("left", 1);
+            //ScribPlaySong();
+            //rbt.setLED("left", 1);
             DrawSquareLoop();
             //NxtAvoidCollision();
         }

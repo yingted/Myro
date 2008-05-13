@@ -13,5 +13,6 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
     <StartWorkingDirectory>C:\Microsoft Robotics Studio (1.5)\</StartWorkingDirectory>
     <StartProgram>C:\Microsoft Robotics Studio (1.5)\bin\DssHost.exe</StartProgram>
-  <StartAction>Program</StartAction></PropertyGroup>
+    <StartAction>Program</StartAction>
+  </PropertyGroup>
 </Project>

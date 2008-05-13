@@ -20,7 +20,8 @@ namespace MyProgram
         {
             Console.WriteLine("hello scribby");
             //rbt = new NxtBrain(@"C:\Microsoft Robotics Studio (1.5)\samples\IPRE\Foundation\IPREFoundationClasses\IPREFoundationClasses\NxtConfig\IPRE.LEGO.NXT.TriBot.Simulation.config.xml");
-            rbt = new ScribblerBrain(@"C:\Microsoft Robotics Studio (1.5)\samples\IPRE\Foundation\IPREFoundationClasses\IPREFoundationClasses\IPRE.Scribbler.standard.config.xml");
+            //rbt = new ScribblerBrain(@"C:\Microsoft Robotics Studio (1.5)\samples\IPRE\Foundation\IPREFoundationClasses\IPREFoundationClasses\IPRE.Scribbler.standard.config.xml");
+            rbt = new ScribblerBrain(@"Foundation\IPREFoundationClasses\IPREFoundationClasses\IPRE.ScribblerSim.config.xml");
             //rbt = new SRV1Brain(@"C:\Microsoft Robotics Studio (1.5)\samples\IPRE\Surveyor\SRV-1\Srv1Services\Config\IPRE.Surveyor.SRV1.Vehicle.config.xml");
             //rbt = new CreateBrain(@"C:\Microsoft Robotics Studio (1.5)\samples\IPRE\Foundation\IPREFoundationClasses\IPREFoundationClasses\CreateConfig\IPRE.iRobot.Create.Simulation.config.xml");
 
