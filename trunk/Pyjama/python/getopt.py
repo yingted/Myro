@@ -1,4 +1,3 @@
-# -*- coding: iso-8859-1 -*-
 """Parser for command line options.
 
 This module helps scripts to parse the command line arguments in

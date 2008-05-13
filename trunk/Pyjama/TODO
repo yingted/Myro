@@ -31,3 +31,13 @@
 11. Print
 
 12. Logging items for later analysis
+
+13. In Pyjama/python/*.py I took out coding lines
+
+python/getopt.py:# -*- coding: iso-8859-1 -*-
+python/inspect.py:# -*- coding: iso-8859-1 -*-
+python/shlex.py:# -*- coding: iso-8859-1 -*-
+python/tarfile.py:# -*- coding: iso-8859-1 -*-
+
+What needs to be added to pyjama.exe to prevent that?
+

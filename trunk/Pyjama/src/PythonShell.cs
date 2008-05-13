@@ -155,6 +155,7 @@ public class PythonShell: PyjamaInterfaces.IShell
         // Probably a more direct way to do these things:
 	command("import sys");
 	command("sys.path.append('.')");
+	command("sys.path.append('python')");
 	buffer.Text =  "# Python " + command("sys.version") + "\n";
 	buffer.Text += "# " + command("sys.copyright") + "\n";
 	command("del sys");

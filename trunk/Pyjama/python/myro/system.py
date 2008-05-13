@@ -5,9 +5,9 @@ except:
 import tarfile, urllib
 import os, string, sys, time
 try:
-    import myro.serial
+    import serial
 except:
-    print "WARNING: pyserial not loaded: can't upgrade robot!"
+    print "WARNING: serial not loaded: can't upgrade robot!"
 from myro import __VERSION__ as myro_version
 import myro.globvars
 # copied below from scribbler.py:

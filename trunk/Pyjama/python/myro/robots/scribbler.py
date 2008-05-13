@@ -10,11 +10,9 @@ __AUTHOR__   = "Keith O'Hara and Doug Blank"
 
 import time, string
 try:
-    import myro
-    import myro.serial
-    import myro.serial as serial
+    import serial
 except:
-    print "WARNING: pyserial not loaded: scribbler won't work!"
+    print "WARNING: serial not loaded: can't connect to scribbler!"
 from myro import Robot, ask
 # FIXME
 #from myro.graphics import _askQuestion, Picture
