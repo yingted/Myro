@@ -69,12 +69,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\IPREFoundationClasses\IPREFoundationClasses.csproj">
-      <Project>{6797FAE4-297B-4316-AE6E-79323CA021D1}</Project>
-      <Name>IPREFoundationClasses</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="mrisamples.snk" />
     <None Include="myroKey.snk" />
   </ItemGroup>
@@ -94,6 +88,12 @@
       <ProductName>.NET Framework 3.5</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Foundation\IPREFoundationClasses\IPREFoundationClasses.csproj">
+      <Project>{6797FAE4-297B-4316-AE6E-79323CA021D1}</Project>
+      <Name>IPREFoundationClasses</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

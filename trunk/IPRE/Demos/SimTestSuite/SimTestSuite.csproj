@@ -59,7 +59,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Foundation\IPREFoundationClasses\IPREFoundationClasses\IPREFoundationClasses.csproj">
+    <ProjectReference Include="..\..\Foundation\IPREFoundationClasses\IPREFoundationClasses.csproj">
       <Project>{6797FAE4-297B-4316-AE6E-79323CA021D1}</Project>
       <Name>IPREFoundationClasses</Name>
     </ProjectReference>

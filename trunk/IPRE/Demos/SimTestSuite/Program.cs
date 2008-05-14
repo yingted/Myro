@@ -6,14 +6,13 @@ using System.Threading;
 using System.Windows.Forms;
 
 using IPREFoundationClasses;
-using IPREFoundationClasses.RobotGUI;
 
 namespace SimTestSuite
 {
     class SimTestSuite
     {
         ScribblerBrain scribbler;
-        Form1 robotGui;
+        TestPanel panel;
 
         public void start()
         {
@@ -21,8 +20,8 @@ namespace SimTestSuite
             scribbler = new ScribblerBrain("Config\\IPRE.ScribblerSim.config.xml");
             Console.WriteLine("Scribbler is ready!");
 
-            new Thread(new ThreadStart(bumperLoop)).Start();
-            new Thread(new ThreadStart(driveLoop)).Start();
+            //new Thread(new ThreadStart(bumperLoop)).Start();
+            //new Thread(new ThreadStart(driveLoop)).Start();
 
             startGUI();
         }
@@ -45,8 +44,8 @@ namespace SimTestSuite
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            robotGui = new Form1(scribbler);
-            Application.Run(robotGui);
+            panel = new TestPanel(scribbler);
+            Application.Run(panel);
         }
     }
 

@@ -285,6 +285,37 @@ namespace IPREFoundationClasses
             return value;
         }
 
+        public float[] getContact()
+        {
+            ArrayList list = new ArrayList();
+            if (!SensorsDictionary.TryGetValue(SensorTypes.ContactSensorArray, out list))
+                throw new NoInstanceException();
+
+            if (list.Count == 0 || list.Count < index + 1)
+                throw new IndexOutOfRangeException();
+
+            float[] ret = new float[list.Count];
+            for (int index = 0; index < list.Count; index++)
+            {
+                ListEntry le = (ListEntry)list[index];
+                float value = Defines.INVALID_FLOAT;
+
+                if (le.Adapter.AdapterType == AdapterTypes.ContactSensorArrayAdapter)
+                {
+                    ContactSensorArrayAdapter adapter = (ContactSensorArrayAdapter)le.Adapter;
+                    if (adapter.get(le.BeginOffset))
+                        value = 1;
+                    else
+                        value = 0;
+                }
+
+                if (value == Defines.INVALID_FLOAT)
+                    throw new InvalidValueException("Cannot get true value.");
+            }
+
+            return ret;
+        }
+
         #endregion
 
         #region Movement implementation
