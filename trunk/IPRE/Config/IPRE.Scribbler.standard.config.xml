@@ -3,7 +3,7 @@
 <RobotConfig>
 
   <ManifestFile>
-    <URI>C:\Microsoft Robotics Studio (1.5)\samples\IPRE\Foundation\IPREFoundationClasses\IPREFoundationClasses\IPRE.Scribbler.standard.manifest.xml</URI>
+    <URI>IPRE.Scribbler.standard.manifest.xml</URI>
   </ManifestFile>
 
   <DssEnvironment>

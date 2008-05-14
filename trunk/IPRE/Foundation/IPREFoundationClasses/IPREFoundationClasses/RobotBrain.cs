@@ -14,6 +14,7 @@ using Microsoft.Dss.ServiceModel.DsspServiceBase;
 using System.Xml;
 using System.Xml.XPath;
 using System.Windows.Forms;
+using System.IO;
 
 using IPREFoundationClasses.Adapters;
 using IPREFoundationClasses.RobotGUI;
@@ -107,9 +108,10 @@ namespace IPREFoundationClasses
             verbosity = int.Parse(xpnav.SelectSingleNode("//Verbosity/Level").Value);
 
             // Initialize Dss manifest
-            Console.WriteLine("Starting DSS environment with manifest: " + manifestFile);
-            DssEnvironment.Initialize(httpPort, soapPort, manifestFile);
-            Console.WriteLine("Done");
+            String manifestFileFull = Path.Combine(Path.GetDirectoryName(Path.GetFullPath(configFile)), manifestFile);
+            Console.WriteLine("Starting DSS environment with manifest: " + manifestFileFull);
+            DssEnvironment.Initialize(httpPort, soapPort, manifestFileFull);
+            //Console.WriteLine("Done");
             
             // Wait for 30 seconds for the DssEnvironment to completely load all services
             // TODO: utilize config file to remove the sleep

@@ -3,7 +3,7 @@
 <RobotConfig>
 
   <ManifestFile>
-    <URI>file:///C:\Users\t-richr\Myro-dev\IPRE\Foundation\IPREFoundationClasses\IPREFoundationClasses\IPRE.ScribblerSim.manifest.xml</URI>
+    <URI>IPRE.ScribblerSim.manifest.xml</URI>
   </ManifestFile>
 
   <DssEnvironment>
