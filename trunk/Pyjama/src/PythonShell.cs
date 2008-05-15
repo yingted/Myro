@@ -4,6 +4,7 @@ using GtkSourceView;
 using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Threading;
 
 using PyjamaInterfaces;
 using PyjamaGraphics;
@@ -77,6 +78,7 @@ class TextBufferOutputStream: Stream
     }
 }
 
+//FIXME - Don't let undo remove output
 class ShellSourceView: SourceView
 {
     string prompt = ">>> ";
@@ -192,7 +194,7 @@ class ShellSourceView: SourceView
             
             Execute(line);
             
-            AddPrompt();
+//            AddPrompt();
         } else if (key == (int)(Gdk.Key.Up)) {
             args.RetVal = true;
             if (history_pos > 0)
@@ -357,10 +359,11 @@ public class PythonShell: PyjamaInterfaces.IShell
         return retval;
     }
 
-    void execute(string line)
+    string command_line;
+    void do_exec()
     {
         // Evaluate or execute
-        source_view.AppendText(command(line));
+        source_view.AppendText(command(command_line));
         
         // Don't give a newline unless we need one:
         int cursor_pos = buffer.CursorPosition;
@@ -368,6 +371,30 @@ public class PythonShell: PyjamaInterfaces.IShell
         if (iter.CharsInLine != 0) {
             source_view.AppendText("\n");
         }
+        
+        source_view.AddPrompt();
+    }
+
+    void execute(string line)
+    {
+        //FIXME - Prevent editing the ShellSourceView while the command is running.
+        //      Also prevent execute from being called again.
+        //FIXME - Gtk is probably not threeadsafe, so we need a mutex for python stdout.
+        command_line = line;
+        do_exec();
+        /*
+        Thread thread = new Thread(this.do_exec);
+        thread.Start();
+        
+        
+        thread.Join();
+        
+        // Don't give a newline unless we need one:
+        int cursor_pos = buffer.CursorPosition;
+        TextIter iter = buffer.GetIterAtOffset(cursor_pos);
+        if (iter.CharsInLine != 0) {
+            source_view.AppendText("\n");
+        }*/
     }
 
     public void ExecuteFile(string filename)
