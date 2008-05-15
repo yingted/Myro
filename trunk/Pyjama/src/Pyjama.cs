@@ -1,15 +1,14 @@
 using Gtk;
 
 using PyjamaInterfaces;
-using PyjamaGraphics;
 
 public class Pyjama
 {
-   public static void Main(string[] args)
+    public static void Main(string[] args)
     {
         Application.Init();
-        MainWindow mainwin = new MainWindow(args);
-        mainwin.ShowAll();
+        PyjamaGUI gui = new PyjamaGUI(args);
+        gui.ShowAll();
         Application.Run();
     }
 }

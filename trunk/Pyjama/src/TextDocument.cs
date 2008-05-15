@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 
 using PyjamaInterfaces;
-using PyjamaGraphics;
 
 public class TextDocument: PyjamaInterfaces.IDocument
 {
@@ -15,11 +14,11 @@ public class TextDocument: PyjamaInterfaces.IDocument
     SourceView source_view;
     int page;
     bool untitled;
-    MainWindow window;
+    PyjamaGUI gui;
     
-    public TextDocument(MainWindow win, string fn, int page)
+    public TextDocument(PyjamaGUI g, string fn, int page)
     {
-	window = win;
+	gui = g;
         filename = fn;
 	this.page = page;
 	string mime_type = GetMimeType(filename);
@@ -82,13 +81,13 @@ public class TextDocument: PyjamaInterfaces.IDocument
 	// This isn't correct as they should happen after the change
 	// but source_view.KeyPressEvent eats the signal, and won't
 	// call any other events, and CanUndoFired crashes Windows
-	window.SetDirty(page, buffer.CanUndo());
+	gui.SetDirty(page, buffer.CanUndo());
 	source_view.ScrollMarkOnscreen(buffer.InsertMark);
     }
 
     private void OnSourceViewChanged(object obj, EventArgs args) 
     {
-	window.SetDirty(page, buffer.CanUndo());
+	gui.SetDirty(page, buffer.CanUndo());
 	source_view.ScrollMarkOnscreen(buffer.InsertMark);
     }
     
@@ -137,7 +136,7 @@ public class TextDocument: PyjamaInterfaces.IDocument
         file.Write(buffer.Text);
         file.Close();
 	buffer.Modified = false;
-	window.SetDirty(page, false);
+	gui.SetDirty(page, false);
 	// Forces no redo past this point
 	//buffer.BeginNotUndoableAction(); 
 	//buffer.EndNotUndoableAction();
@@ -146,7 +145,7 @@ public class TextDocument: PyjamaInterfaces.IDocument
     public void SaveAs(string fn)
     {
 	if (File.Exists(fn)) {
-            MessageDialog dlg = new MessageDialog(window, DialogFlags.Modal,
+            MessageDialog dlg = new MessageDialog(gui.MainWindow, DialogFlags.Modal,
                 MessageType.Question, ButtonsType.None,
                 "Do you want to overwrite \"{0}\"?", fn);
             dlg.AddButton("Overwrite", ResponseType.Accept);

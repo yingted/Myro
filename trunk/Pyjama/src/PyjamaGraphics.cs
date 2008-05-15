@@ -1,4 +1,5 @@
 using Gtk;
+using Glade;
 using Mono.Unix;
 using System;
 using System.IO;
@@ -15,7 +16,7 @@ public class MainWindow: Window
 
     public MainWindow(string[] args): base(Utils.Tran("Pyjama"))
     {
-	// Initialize I18N: 
+        // Initialize I18N: 
 	Catalog.Init("pyjama", "./locale");
 
         DeleteEvent += file_exit;
@@ -77,6 +78,7 @@ public class MainWindow: Window
         documents[0].GetView().GrabFocus();
     }
     
+    // Returns the document that is currently selected in the file list
     public IDocument CurrentDocument
     {
         get
@@ -86,7 +88,6 @@ public class MainWindow: Window
         }
     }
     
-    // Returns the document that is currently selected in the file list
     public void file_exit(object obj, EventArgs args)
     {
         //FIXME - Ask to abandon changes on all modified documents

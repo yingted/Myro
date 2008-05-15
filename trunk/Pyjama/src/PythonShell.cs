@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Threading;
 
 using PyjamaInterfaces;
-using PyjamaGraphics;
 using IronPython.Hosting;
 
 #if HOSTINGVER2
