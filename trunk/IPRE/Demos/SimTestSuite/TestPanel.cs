@@ -6,6 +6,8 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.Threading;
+
 using IPREFoundationClasses;
 
 namespace SimTestSuite
@@ -24,6 +26,7 @@ namespace SimTestSuite
             this.rbt = rbt;
             InitializeComponent();
             myInitialize();
+            new Thread(new ThreadStart(updateLoop)).Start();
         }
 
         //public TestPanel()
@@ -47,6 +50,15 @@ namespace SimTestSuite
             g.DrawString("R", this.Font, new SolidBrush(Color.Black), new PointF(rectX + rectWidth + lengthTick, rectY + rectHeight / 2 - 2 * fontSpacing));
             g.DrawString("L", this.Font, new SolidBrush(Color.Black), new PointF(rectX - lengthTick - 3 * fontSpacing, rectY + rectHeight / 2 - 2 * fontSpacing));
             driveBox.Image = bmp;
+        }
+
+        private void updateLoop()
+        {
+            while (true)
+            {
+                this.update();
+                Thread.Sleep(400);
+            }
         }
 
         private void driveBox_MouseDown(object sender, MouseEventArgs e)
@@ -222,7 +234,7 @@ namespace SimTestSuite
             int widthEach = widthTotal / count;
             int offset = (widthEach - widthOne) / 2;
             int[] ret = new int[count];
-            for(int i=0; i<count; i++)
+            for (int i = 0; i < count; i++)
                 ret[i] = widthEach * i + offset;
             return ret;
         }
@@ -231,25 +243,28 @@ namespace SimTestSuite
         {
             Bitmap bmp = new Bitmap(contactSensorImg.Width, contactSensorImg.Height);
             Graphics g = Graphics.FromImage(bmp);
-            Pen red = new Pen(Color.Red);
+            Brush red = new SolidBrush(Color.Red);
 
             int maxCircleRadius = 15;
             int[] xs = layout(contactSensorImg.Width, maxCircleRadius * 2, vals.Length);
-            int[] radii = from v in vals
-                          let normalized = (v - min) / (max - min)
-                          select (int)(normalized * (float)maxCircleRadius);
+            //Console.WriteLine("L: " + vals[0] + "  R: " + vals[1]);
+            IEnumerable<int> radii = from v in vals
+                                     let normalized = (v - min) / (max - min)
+                                     select (int)(normalized * (float)maxCircleRadius);
             for (int i = 0; i < xs.Length; i++)
             {
-                int offset = maxCircleRadius - r;
-                g.DrawEllipse(red, xs[i] + offset, offset, 2 * radii[i], 2 * radii[i]);
+                //Console.WriteLine("Radius: " + radii.ElementAt(i));
+                int offset = maxCircleRadius - radii.ElementAt(i);
+                g.FillEllipse(red, xs[i] + offset, offset, 2 * radii.ElementAt(i), 2 * radii.ElementAt(i));
             }
             control.Image = bmp;
+            control.Invoke(new Action(delegate() { control.Refresh(); }));
         }
 
         private void update()
         {
             float[] contacts = rbt.getContact();
-            drawCircleMeters(contactSensorImg, contacts, 0.f, 1.f);
+            drawCircleMeters(contactSensorImg, contacts, 0.0f, 1.0f);
         }
 
         private void TestPanel_Load(object sender, EventArgs e)

@@ -165,8 +165,8 @@ namespace IPRE.ScribblerSim
             BoxShape leftBumper = new BoxShape(
                 new BoxShapeProperties("front left",
                     0.001f,
-                    new Pose(new Vector3(-0.035f, 0.03f, -0.09f)),
-                    new Vector3(0.07f, 0.03f, 0.03f)
+                    new Pose(new Vector3(-0.036f, 0.03f, -0.09f)),
+                    new Vector3(0.07f, 0.03f, 0.06f)
                 )
             );
             leftBumper.State.DiffuseColor = new Vector4(0.1f, 0.1f, 0.1f, 1.0f);
@@ -174,8 +174,8 @@ namespace IPRE.ScribblerSim
             BoxShape rightBumper = new BoxShape(
                 new BoxShapeProperties("front right",
                     0.001f,
-                    new Pose(new Vector3(0.035f, 0.03f, -0.09f)),
-                    new Vector3(0.07f, 0.03f, 0.03f)
+                    new Pose(new Vector3(0.036f, 0.03f, -0.09f)),
+                    new Vector3(0.07f, 0.03f, 0.06f)
                 )
             );
             rightBumper.State.DiffuseColor = new Vector4(0.1f, 0.1f, 0.1f, 1.0f);
