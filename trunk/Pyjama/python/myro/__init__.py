@@ -777,7 +777,13 @@ def initialize(id = None):
         simulator(None)
     else:
         myro.globvars.robot = Scribbler(id)
-    __builtins__["robot"] = myro.globvars.robot
+    # FIXME:
+    try:
+        # ip2
+        __builtins__["robot"] = myro.globvars.robot
+    except:
+        # ip1
+        globals()["robot"] = None
 
 init = initialize        
 
