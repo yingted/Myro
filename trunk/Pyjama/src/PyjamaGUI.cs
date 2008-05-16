@@ -285,10 +285,13 @@ public class PyjamaGUI
     public void Help_About()
     {
         AboutDialog dlg = new AboutDialog();
-        
         //FIXME - Real information
+	//FIXME - we should be targeting Mono >= 1.9
+#if GTKVER1
         dlg.ProgramName = "Pyjama";
-        
+#else        
+        dlg.Name = "Pyjama";
+#endif
         dlg.Run();
         dlg.Destroy();
     }
