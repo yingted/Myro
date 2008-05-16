@@ -28,6 +28,7 @@ namespace IPREFoundationClasses.Adapters
         {
             // Initialize the port
             sensorPort = DssEnvironment.ServiceForwarder<analogArray.AnalogSensorOperations>(new Uri(serviceUri));
+            Console.WriteLine("Analog sensor array adapter: " + serviceUri);
         }
 
         public string ServiceUri

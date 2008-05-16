@@ -30,6 +30,9 @@ using Microsoft.Robotics.PhysicalModel;
 using System.ComponentModel;
 using Microsoft.Dss.Core.DsspHttp;
 using System.Net;
+
+using valuearray = Robotics.ValueArrayStorage.Proxy;
+
 #endregion
 
 namespace IPRE.ScribblerSim
@@ -68,6 +71,8 @@ namespace IPRE.ScribblerSim
         protected override void Start()
         {
             base.Start();
+
+            
 
             _state.Cubes = 0;
 

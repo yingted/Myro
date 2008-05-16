@@ -25,7 +25,7 @@
   </Sensor>
 
   <Sensor type="analog" class="light">
-    <Service>/4/ScribblerGenericAnalogSensor</Service>
+    <Service>/4/analogsensorarray</Service>
     <Container>Array</Container>
     <StartIndex>0</StartIndex>
     <EndIndex>2</EndIndex>

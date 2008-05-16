@@ -34,6 +34,11 @@
         </dssp:Partner>
       </dssp:PartnerList>
     </ServiceRecordType>
+
+    <ServiceRecordType>
+      <dssp:Contract>http://schemas.tempuri.org/2008/05/valuearray.html</dssp:Contract>
+      <dssp:Service>http://hello/led</dssp:Service>
+    </ServiceRecordType>
     
   </CreateServiceList>
 </Manifest>

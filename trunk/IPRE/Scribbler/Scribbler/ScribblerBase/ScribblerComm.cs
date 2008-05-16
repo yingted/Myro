@@ -236,6 +236,7 @@ namespace IPRE.ScribblerBase
 
             foreach (string spName in SerialPort.GetPortNames())
             {
+                Console.WriteLine("Checking " + spName);
                 string spName2 = FixComPortName(spName);
 
                 Console.Write("Checking for robot on " + spName2 + ".  ");

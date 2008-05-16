@@ -30,16 +30,16 @@ namespace IPRE.ScribblerLightSensor
     [DisplayName("Scribbler Light Sensors")]
     [Description("The Scribbler Light Sensor Service")]
     [Contract(Contract.Identifier)]
-    [AlternateContract(analogArray.Contract.Identifier)]
+    //[AlternateContract(analogArray.Contract.Identifier)]
     public class ScribblerLightSensor : DsspServiceBase
     {
         private ScribblerLightSensorState _state = null;
         private analogArray.AnalogSensorArrayState _alternateState = null;
 
-        [ServicePort("ScribblerLightSensor", AllowMultipleInstances = false)]
+        [ServicePort("/ScribblerLightSensor", AllowMultipleInstances = false)]
         private ScribblerLightSensorOperations _mainPort = new ScribblerLightSensorOperations();
 
-        [AlternateServicePort("ScribblerGenericAnalogSensor", AllowMultipleInstances = false, AlternateContract = analogArray.Contract.Identifier)]
+        [AlternateServicePort(AlternateContract = analogArray.Contract.Identifier)]
         private analogArray.AnalogSensorOperations _alternatePort = new analogArray.AnalogSensorOperations();
 
         [Partner("ScribblerBase", Contract = brick.Contract.Identifier, CreationPolicy = PartnerCreationPolicy.UseExistingOrCreate, Optional = false)]
@@ -64,9 +64,8 @@ namespace IPRE.ScribblerLightSensor
         /// </summary>
         protected override void Start()
         {
-
             // Alternate Port Operations handlers
-            Activate(Arbiter.ReceiveWithIterator<analogArray.Get>(true, _alternatePort, AlternateGetHandler));
+            //Activate(Arbiter.ReceiveWithIterator<analogArray.Get>(true, _alternatePort, AlternateGetHandler));
 
             //configure default state
             if (_state == null)
@@ -87,15 +86,19 @@ namespace IPRE.ScribblerLightSensor
             }
 
             // Listen on the main port for requests and call the appropriate handler.
-            ActivateDsspOperationHandlers();
+            //ActivateDsspOperationHandlers();
 
             // Publish the service to the local Node Directory
-            DirectoryInsert();
+            //DirectoryInsert();
 
 			// display HTTP service Uri
 			LogInfo(LogGroups.Console, "Service uri: ");
 
             SubscribeToScribblerBase();
+
+            base.Start();
+
+            //_alternatePort.Get();
         }
 
 
@@ -160,6 +163,8 @@ namespace IPRE.ScribblerLightSensor
 
             bool changed = true;
 
+            //Console.WriteLine("Light sensor update");
+
             if (changed)
             {
                 //notify subscribers on any bumper pressed or unpressed
@@ -176,6 +181,7 @@ namespace IPRE.ScribblerLightSensor
         [ServiceHandler(ServiceHandlerBehavior.Concurrent)]
         public virtual IEnumerator<ITask> GetHandler(Get get)
         {
+            //Console.WriteLine("Light get");
             get.ResponsePort.Post(_state);
             yield break;
         }
@@ -186,9 +192,10 @@ namespace IPRE.ScribblerLightSensor
         /// </summary>
         /// <param name="get"></param>
         /// <returns></returns>
-        [ServiceHandler(ServiceHandlerBehavior.Concurrent,PortFieldName="_alternatePort")]
+        [ServiceHandler(ServiceHandlerBehavior.Concurrent, PortFieldName = "_alternatePort")]
         public virtual IEnumerator<ITask> AlternateGetHandler(analogArray.Get get)
         {
+            //Console.WriteLine("Light generic get");
             _alternateState = new analogArray.AnalogSensorArrayState();
             _alternateState.Sensors = new List<Microsoft.Robotics.Services.AnalogSensor.Proxy.AnalogSensorState>();
             _alternateState.Sensors.Add(_state.LeftSensor);
