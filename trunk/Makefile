@@ -5,16 +5,17 @@ compile: clean
 	python -c 'import compileall; compileall.compile_dir("myro")'
 
 zip: clean
-	zip -r myro.zip *.py install.bat "Start Python.py" myro misc -x myro/CVS/ myro/*/CVS/ myro/CVS/* myro/*/CVS/* misc/CVS/* misc/CVS/
+	zip -r myro.zip *.py install.bat "Start Python.py" myro misc -x myro/.svn/ myro/.svn/* myro/*/.svn/* myro/.svn/* myro/*/.svn/* misc/.svn/* misc/.svn/ misc/.svn/*/* myro/robots/.svn/ myro/globvars/.svn/ myro/worlds/.svn/ misc/.svn/*/* misc/.svn/*/ misc/.svn/ misc/.svn/*/*/ myro/.svn/*/* myro/.svn/*/*/ myro/.svn/*/ myro/*/.svn/* myro/*/.svn/*/*/ myro/*/.svn/*/*/* myro/*/.svn/*/* myro/*/.svn/*/
+
 
 build: zip
-	mkdir -p ../html/myro/
-	cp myro.zip ../html/myro/$(zipfile)
-	cp myro.zip ../html/myro/myro.zip
-	cp packages/scribbler.exe ../html/myro/scribbler.exe
-	cp Scribbler/ScribblerAPI.html ../html/myro/docs/
-	ls -al ../html/myro/
-	cd ../html/myro/; ./index.py > index.html
+	mkdir -p ../../html/myro/
+	cp myro.zip ../../html/myro/$(zipfile)
+	cp myro.zip ../../html/myro/myro.zip
+	cp packages/scribbler.exe ../../html/myro/scribbler.exe
+	cp Scribbler/ScribblerAPI.html ../../html/myro/docs/
+	ls -al ../../html/myro/
+	cd ../../html/myro/; ./index.py > index.html
 
 clean:
 	rm -f `find | grep "~$$"`
