@@ -1,0 +1,22 @@
+Index: IronPython-2.0B2/Src/IronPython/Runtime/Types/DictProxy.cs
+===================================================================
+--- IronPython-2.0B2.orig/Src/IronPython/Runtime/Types/DictProxy.cs	2008-04-28 04:00:58.000000000 +0900
++++ IronPython-2.0B2/Src/IronPython/Runtime/Types/DictProxy.cs	2008-04-28 04:04:23.000000000 +0900
+@@ -58,6 +58,17 @@
+             return TryGetValue(key, out dummy);
+         }
+ 
++        public object get(object key) {
++            return get(key, null);
++        }
++
++        public object get(object key, object defaultValue) {
++            object res;
++            if (TryGetValue(key, out res))
++                return res;
++            return defaultValue;
++        }
++
+         public object keys(CodeContext context) {
+             return new List(_dt.GetMemberDictionary(context).Keys);
+         }

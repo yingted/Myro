@@ -1,0 +1,95 @@
+Index: IronPython-2.0B2/Src/IronPython.build
+===================================================================
+--- /dev/null	1970-01-01 00:00:00.000000000 +0000
++++ IronPython-2.0B2/Src/IronPython.build	2008-04-27 23:31:25.000000000 +0900
+@@ -0,0 +1,89 @@
++<!-- vim:set ft=xml: -->
++<project name="IronPython">
++    <property name="warn" value="4"/>
++    <resgen input="Microsoft.Scripting.Core/Microsoft.Scripting.txt"
++        output="Microsoft.Scripting.Core/Microsoft.Scripting.Core.resources"/>
++    <csc target="library" output="Microsoft.Scripting.Core.dll"
++        warninglevel="${warn}">
++        <sources>
++            <include name="Microsoft.Scripting.Core/**/*.cs"/>
++        </sources>
++        <resources dynamicprefix="true" basedir="Microsoft.Scripting.Core">
++            <include name="Microsoft.Scripting.Core.resources"/>
++        </resources>
++        <references>
++            <include name="System.Configuration.dll"/>
++        </references>
++    </csc>
++    <csc target="library" output="Microsoft.Scripting.dll"
++        warninglevel="${warn}">
++        <sources>
++            <include name="Microsoft.Scripting/**/*.cs"/>
++        </sources>
++        <resources dynamicprefix="true">
++            <include name="Microsoft.Scripting/**/*.resx"/>
++        </resources>
++        <references>
++            <include name="System.Configuration.dll"/>
++            <include name="Microsoft.Scripting.Core.dll"/>
++        </references>
++    </csc>
++    <csc target="library" output="IronPython.dll"
++        warninglevel="${warn}">
++        <sources>
++            <include name="IronPython/**/*.cs"/>
++        </sources>
++        <resources dynamicprefix="true">
++            <include name="IronPython/**/*.resx"/>
++        </resources>
++        <references>
++            <include name="Microsoft.Scripting.dll"/>
++            <include name="Microsoft.Scripting.Core.dll"/>
++        </references>
++    </csc>
++    <csc target="library" output="IronPython.Modules.dll"
++        warninglevel="${warn}">
++        <sources>
++            <include name="IronPython.Modules/**/*.cs"/>
++        </sources>
++        <references>
++            <include name="Microsoft.Scripting.dll"/>
++            <include name="Microsoft.Scripting.Core.dll"/>
++            <include name="IronPython.dll"/>
++        </references>
++    </csc>
++    <csc target="library" output="IronPythonTest.dll"
++        noconfig="true" warninglevel="${warn}">
++        <sources>
++            <include name="IronPythonTest/**/*.cs"/>
++        </sources>
++        <references>
++            <include name="System.dll"/>
++            <include name="System.Xml.dll"/>
++            <include name="Microsoft.Scripting.dll"/>
++            <include name="Microsoft.Scripting.Core.dll"/>
++            <include name="IronPython.dll"/>
++        </references>
++    </csc>
++    <csc target="exe" output="ipy.exe"
++        warninglevel="${warn}">
++        <sources>
++            <include name="IronPythonConsole/**/*.cs"/>
++        </sources>
++        <references>
++            <include name="Microsoft.Scripting.dll"/>
++            <include name="Microsoft.Scripting.Core.dll"/>
++            <include name="IronPython.dll"/>
++        </references>
++    </csc>
++    <csc target="winexe" output="ipyw.exe" define="IRONPYTHON_WINDOW"
++        warninglevel="${warn}">
++        <sources>
++            <include name="IronPythonConsole/**/*.cs"/>
++        </sources>
++        <references>
++            <include name="Microsoft.Scripting.dll"/>
++            <include name="Microsoft.Scripting.Core.dll"/>
++            <include name="IronPython.dll"/>
++        </references>
++    </csc>
++</project>

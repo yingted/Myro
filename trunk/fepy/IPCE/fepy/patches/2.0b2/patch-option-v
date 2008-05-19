@@ -1,0 +1,17 @@
+Index: IronPython-2.0B2/Src/IronPython/Runtime/Importer.cs
+===================================================================
+--- IronPython-2.0B2.orig/Src/IronPython/Runtime/Importer.cs	2008-04-28 04:12:46.000000000 +0900
++++ IronPython-2.0B2/Src/IronPython/Runtime/Importer.cs	2008-04-28 04:17:26.000000000 +0900
+@@ -744,7 +744,11 @@
+ 
+         private static PythonModule/*!*/ LoadFromSourceUnit(CodeContext/*!*/ context, SourceUnit/*!*/ sourceCode, string/*!*/ name, string/*!*/ path) {
+             Assert.NotNull(sourceCode, name, path);
+-            return PythonContext.GetContext(context).CompileModule(path, name, sourceCode, ModuleOptions.Initialize | ModuleOptions.Optimized | ModuleOptions.PublishModule, false);
++            PythonContext pc = PythonContext.GetContext(context);
++            if (pc.DomainManager.GlobalOptions.Verbose)
++                Console.WriteLine("import {0}", name);
++
++            return pc.CompileModule(path, name, sourceCode, ModuleOptions.Initialize | ModuleOptions.Optimized | ModuleOptions.PublishModule, false);
+         }
+     }
+ }
