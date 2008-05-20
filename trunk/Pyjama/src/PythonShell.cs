@@ -114,7 +114,14 @@ class ShellSourceView: SourceView
     {
         TextIter start_iter = Buffer.GetIterAtMark(command_start);
         int start_pos = start_iter.Offset;
-        if (Buffer.CursorPosition > start_pos)
+#if NEWSOURCEVIEW
+        int cur_pos = Buffer.CursorPosition;
+#else
+	TextMark mark = Buffer.InsertMark;
+	TextIter iter = Buffer.GetIterAtMark(mark);
+	int cur_pos = iter.Offset;
+#endif
+        if (cur_pos > start_pos)
         {
             base.OnBackspace();
         }
@@ -145,7 +152,13 @@ class ShellSourceView: SourceView
     {
         TextIter start_iter = Buffer.GetIterAtMark(command_start);
         int start_pos = start_iter.Offset;
+#if NEWSOURCEVIEW
         return Buffer.CursorPosition >= start_pos;
+#else
+	TextMark mark = Buffer.InsertMark;
+	TextIter iter = Buffer.GetIterAtMark(mark);
+	return iter.Offset >= start_pos;
+#endif
     }
 
     protected override bool OnButtonPressEvent(Gdk.EventButton e)
@@ -161,7 +174,14 @@ class ShellSourceView: SourceView
         // and put the cursor back at the beginning of the line.
         TextIter start_iter = Buffer.GetIterAtMark(command_start);
         int start_pos = start_iter.Offset;
-        if (Buffer.CursorPosition < start_pos)
+#if NEWSOURCEVIEW
+	int cur_pos = Buffer.CursorPosition;
+#else
+	TextMark mark = Buffer.InsertMark;
+	TextIter iter = Buffer.GetIterAtMark(mark);
+	int cur_pos = iter.Offset;
+#endif
+        if (cur_pos < start_pos)
         {
             Buffer.PlaceCursor(start_iter);
         }
@@ -365,12 +385,16 @@ public class PythonShell: PyjamaInterfaces.IShell
         source_view.AppendText(command(command_line));
         
         // Don't give a newline unless we need one:
+#if NEWSOURCEVIEW
         int cursor_pos = buffer.CursorPosition;
         TextIter iter = buffer.GetIterAtOffset(cursor_pos);
+#else
+	TextMark mark = buffer.InsertMark;
+	TextIter iter = buffer.GetIterAtMark(mark);
+#endif
         if (iter.CharsInLine != 0) {
             source_view.AppendText("\n");
         }
-        
         source_view.AddPrompt();
     }
 
