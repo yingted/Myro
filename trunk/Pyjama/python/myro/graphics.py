@@ -83,16 +83,20 @@ class GraphWin(object):
 
 class BaseGraphic(object):            
     def setFill(self, color):
-        """Sets the interior of the object to the given color.""" 
+        """Sets the interior of the object to the given color."""
+        self.fillColor = color 
         
     def setOutline(self, color):
         """Sets the outline of the object to the given color.""" 
+	self.outlineColor = color
 
     def setWidth(self, pixels):
-        """Sets the width of the outline of the object to this many pixels. (Does not work for Point.)""" 
+        """Sets the width of the outline of the object to this many pixels. (Does not work for Point.)"""
+        self.width = pixels 
 
     def draw(self, aGraphWin):
-        """Draws the object into the given GraphWin. An object may only be drawn in one window at a time.""" 
+        """Draws the object into the given GraphWin. An object may only be drawn in one window at a time."""
+        self.window = aGraphWin 
 
     def undraw(self):
         """Undraws the object from a graphics window. Returns silently if object is not drawn.""" 
@@ -105,16 +109,24 @@ class BaseGraphic(object):
 
 class Point(BaseGraphic):
     def __init__(self,x,y):
-        """Constructs a point having the given coordinates.""" 
+        """Constructs a point having the given coordinates."""
+        self.x = x
+        self.y = y
+         
     def getX(self):
-        """Returns the $x$ coordinate of a point.""" 
+        """Returns the $x$ coordinate of a point."""
+        return self.x
+         
     def getY(self):
         """Returns the $y$ coordinate of a point."""
+        return self.y
         
 class Line(BaseGraphic):
 
     def __init__(self, point1, point2):
         """Constructs a line segment from point1 to point2. """
+        self.point1 = point1
+        self.point2 = point2
 
     def setArrow(self, string):
         """Sets the arrowhead status of a line. Arrows may be drawn at either the first point, the last point, or both. Possible values of string are 'first', 'last', 'both', and 'none'. The default setting is 'none'. """
@@ -236,9 +248,18 @@ class Entry(BaseGraphic):
 
 class Image(BaseGraphic):
 
+#Gtk.Image image= new Gtk.Image();
+#image.Pixbuf = new Gdk.Pixbuf("/usr/share/pixmaps/faces/race-car.jpg");
+#Gdk.Image img = image.ImageProp;
+#for (int x =0 ; x < 640;x++){
+#      for (int y =0 ; y < 200;y++){
+#               img.PutPixel(0,0,1);
+#      }
+#}
+
     def __init__(self, centerPoint, image):
         """image is either the name of an image file, or a Pixmap object (see next section). Constructs an image from contents of the given file or pixmap, centered at the given center point. Note: if image is a Pixmap, subsequent changes to the Pixmap will be reflected in the drawn Image. """
-        self.img = Gdk.Image(image.pixbuf)
+        self.img = Gdk.Image(image.pixbuf.Pixels)
         # FIXME: img.PutPixel, img.GetPixel
 
     def getAnchor(self):
@@ -252,9 +273,9 @@ class Pixmap(BaseGraphic):
         if len(args) == 0:
             pass
         elif len(args) == 1:
-            self.pixbuf = Gdk.Pixbuf(arg[0])
+            self.pixbuf = Gdk.Pixbuf(args[0])
         elif len(args) == 2:
-            self.pixbuf = Gdk.Pixbuf(Gdk.Colorspace.Rgb, False, 8, arg[0], arg[1])
+            self.pixbuf = Gdk.Pixbuf(Gdk.Colorspace.Rgb, False, 8, args[0], args[1])
 
     def getWidth(self):
         """Returns the width of the image in pixels. """
