@@ -15,6 +15,17 @@ class Color(object):
     """
     Color object
     """
+    def __init__(self, red=0, green=0, blue=0):
+        self.red = red
+        self.green = green
+        self.blue = blue
+
+    def getRed(self): return self.red
+    def getGreen(self): return self.green
+    def getBlue(self): return self.blue
+        
+black = Color(0,0,0)
+white = Color(255,255,255)
 
 class GraphWin(object):
 
@@ -248,51 +259,76 @@ class Entry(BaseGraphic):
 
 class Image(BaseGraphic):
 
-#Gtk.Image image= new Gtk.Image();
-#image.Pixbuf = new Gdk.Pixbuf("/usr/share/pixmaps/faces/race-car.jpg");
-#Gdk.Image img = image.ImageProp;
-#for (int x =0 ; x < 640;x++){
-#      for (int y =0 ; y < 200;y++){
-#               img.PutPixel(0,0,1);
-#      }
-#}
-
     def __init__(self, centerPoint, image):
-        """image is either the name of an image file, or a Pixmap object (see next section). Constructs an image from contents of the given file or pixmap, centered at the given center point. Note: if image is a Pixmap, subsequent changes to the Pixmap will be reflected in the drawn Image. """
-        self.img = Gdk.Image(image.pixbuf.Pixels)
-        # FIXME: img.PutPixel, img.GetPixel
+        """
+        image is either the name of an image file, or a Pixmap 
+        object (see next section). Constructs an image from contents 
+        of the given file or pixmap, centered at the given center 
+        point. Note: if image is a Pixmap, subsequent changes to the 
+        Pixmap will be reflected in the drawn Image. """
+        self.image = image
 
     def getAnchor(self):
         """Returns a clone of the point where the image is centered. """
 
+# win._window.Add(image) works fine
+
 class Pixmap(BaseGraphic):
 
     def __init__(self, *args):
-        """Constructs a Pixmap from the image file, filename. See Image for supported file types. """
-        """Constructs a Pixmap of the given height and width. Initially, all pixels will be transparent. """
-        if len(args) == 0:
-            pass
-        elif len(args) == 1:
+        """
+        Constructs a Pixmap from the image file, filename, given 
+        height and width. See Image for supported file types. 
+        """
+        if len(args) == 0: # default size
+            self.pixbuf = Gdk.Pixbuf(Gdk.Colorspace.Rgb, False, 8, 200, 200)
+        elif len(args) == 1: # string, filename
             self.pixbuf = Gdk.Pixbuf(args[0])
-        elif len(args) == 2:
-            self.pixbuf = Gdk.Pixbuf(Gdk.Colorspace.Rgb, False, 8, args[0], args[1])
+        elif len(args) == 2: # width, height
+            self.pixbuf = Gdk.Pixbuf(Gdk.Colorspace.Rgb, False, 8, 
+                                     args[0], args[1])
+        self.gtk_image = Gtk.Image(self.pixbuf)
+        self.gdk_image = Gdk.Image(Gdk.ImageType.Normal, 
+                                   self.gtk_image.Visual, 
+                                   self.pixbuf.Width, 
+                                   self.pixbuf.Height) 
 
     def getWidth(self):
-        """Returns the width of the image in pixels. """
+        """ Returns the width of the image in pixels. """
         return self.pixbuf.Width
 
     def getHeight(self):
-        """Returns the height of the image in pixels. """
+        """ Returns the height of the image in pixels. """
         return self.pixbuf.Height
     
     def getPixel(self, x,y):
-        """Returns a triple (r,g,b) of the red, green, and blue intensities of the pixel at (x,y). Intensity values are in range(256). """
+        """
+        Returns a triple (r,g,b) of the red, green, and blue 
+        intensities of the pixel at (x,y). Intensity values are 
+        in range(256). 
+        """
+        uint = long(self.gdk_image.GetPixel(x,y))
+        red = uint / (2 ** 16)
+        green = (uint - (red * (2 ** 16))) / (2 ** 8)
+        blue =  uint - (red * (2 ** 16)) - (green * (2 ** 8))
+        return (red, green, blue)
 
     def setPixel(self, x, y, color):
-        """Color is a triple (r,g,b) representing a color for the pixel. Sets pixel at (x,y) to the given color. """
+        """
+        Color is a triple (r,g,b) representing a color for the pixel. 
+        Sets pixel at (x,y) to the given color. 
+        """
+        red = color.getRed()     * (2 ** 16)
+        green = color.getGreen() * (2  ** 8)
+        blue =  color.getBlue()
+        self.gdk_image.PutPixel(x,y, long(red + green + blue))
     
     def save(self, filename):
-        """Saves the image in a file having the given name. The format for the file is determined by the extension on the filename (e.g. .ppm or .gif). """
+        """
+        Saves the image in a file having the given name. The format 
+        for the file is determined by the extension on the filename 
+        (e.g. .ppm or .gif). 
+        """
         self.pixbuf.Save(filename, "jpeg") # or "png"
     
     def clone(self):
