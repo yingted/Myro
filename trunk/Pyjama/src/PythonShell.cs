@@ -8,6 +8,7 @@ using System.Threading;
 
 using PyjamaInterfaces;
 using IronPython.Hosting;
+using IronPython.Runtime.Types;
 
 #if HOSTINGVER2
 using System.Text;
@@ -342,7 +343,8 @@ public class PythonShell: PyjamaInterfaces.IShell
         string retval = "";
 #if HOSTINGVER2
         try {
-            object o = engine.CreateScriptSourceFromString(line, 
+            // FIXME: do the conversion to REPR in C# (replace ToString())
+            object o = engine.CreateScriptSourceFromString("repr(" + line + ")", 
                                  SourceCodeKind.Expression).Execute(scope);
             if (o != null) {
                 retval = o.ToString();
