@@ -32,6 +32,7 @@ class GraphWin(object):
     def __init__(self, title="Graphics Window", width=200, height=200, 
                  autoflush=False):
         self._window = Gtk.Window(title)
+        # FIXME: add a canvas
         self._window.Resize(width, height)
         self._window.ShowAll()
         self._autoflush = autoflush
@@ -102,21 +103,39 @@ class BaseGraphic(object):
 	self.outlineColor = color
 
     def setWidth(self, pixels):
-        """Sets the width of the outline of the object to this many pixels. (Does not work for Point.)"""
+        """
+        Sets the width of the outline of the object to this 
+        many pixels. (Does not work for Point.)
+        """
         self.width = pixels 
 
     def draw(self, aGraphWin):
-        """Draws the object into the given GraphWin. An object may only be drawn in one window at a time."""
+        """
+        Draws the object into the given GraphWin. An object may only 
+        be drawn in one window at a time.
+        """
         self.window = aGraphWin 
+        # FIXME: add it to the canvas
+        # win._window.Add(image) works fine
 
     def undraw(self):
-        """Undraws the object from a graphics window. Returns silently if object is not drawn.""" 
+        """
+        Undraws the object from a graphics window. Returns silently if
+        object is not drawn.""" 
 
     def move(self, dx,dy):
-        """Moves the object dx units in the $x$ direction and dy units in the $y$ direction. If the object is currently drawn, its image is adjusted to the new position.""" 
+        """
+        Moves the object dx units in the $x$ direction and dy units in
+        the $y$ direction. If the object is currently drawn, its image
+        is adjusted to the new position.
+        """ 
 
     def clone(self):
-        """Returns a duplicate of the object. Clones are always created in an undrawn state. Other than that, they are identical to the cloned object.""" 
+        """
+        Returns a duplicate of the object. Clones are always created
+        in an undrawn state. Other than that, they are identical to
+        the cloned object.
+        """ 
 
 class Point(BaseGraphic):
     def __init__(self,x,y):
@@ -140,7 +159,12 @@ class Line(BaseGraphic):
         self.point2 = point2
 
     def setArrow(self, string):
-        """Sets the arrowhead status of a line. Arrows may be drawn at either the first point, the last point, or both. Possible values of string are 'first', 'last', 'both', and 'none'. The default setting is 'none'. """
+        """
+        Sets the arrowhead status of a line. Arrows may be drawn at
+        either the first point, the last point, or both. Possible
+        values of string are 'first', 'last', 'both', and 'none'. The
+        default setting is 'none'. 
+        """
 
     def getCenter(self):
         """Returns a clone of the midpoint of the line segment. """
@@ -162,53 +186,90 @@ class Circle(BaseGraphic):
         """Returns the radius of the circle. """
 
     def getP1(self):
-        """Returns a clone of the corresponding corner of the circle's bounding box. These are opposite corner points of a square that circumscribes the circle. """
+        """
+        Returns a clone of the corresponding corner of the circle's
+        bounding box. These are opposite corner points of a square
+        that circumscribes the circle. 
+        """
 
     def getP2(self):
-        """Returns a clone of the corresponding corner of the circle's bounding box. These are opposite corner points of a square that circumscribes the circle. """
+        """
+        Returns a clone of the corresponding corner of the circle's
+        bounding box. These are opposite corner points of a square
+        that circumscribes the circle. 
+        """
 
 class Rectangle(BaseGraphic):
     def __init__(self, point1, point2):
-        """Constructs a rectangle having opposite corners at point1 and point2. """
+        """
+        Constructs a rectangle having opposite corners at point1 and
+        point2.
+        """
 
     def getCenter(self):
         """Returns a clone of the center point of the rectangle. """
 
     def getP1(self):
-        """Returns a clone of corner points originally used to construct the rectangle. """
+        """
+        Returns a clone of corner points originally used to construct
+        the rectangle.
+        """
 
     def getP2(self):
-        """Returns a clone of corner points originally used to construct the rectangle. """
+        """
+        Returns a clone of corner points originally used to construct
+        the rectangle. 
+        """
 
 
 class Oval(BaseGraphic):
 
     def __init__(self, point1, point2):
-        """Constructs an oval in the bounding box determined by point1 and point2. """
+        """
+        Constructs an oval in the bounding box determined by point1
+        and point2.
+        """
 
     def getCenter(self):
-        """Returns a clone of the point at the center of the oval. """
+        """
+        Returns a clone of the point at the center of the oval. 
+        """
 
     def getP1(self):
-        """Returns a clone of the corresponding point used to construct the oval. """
+        """
+        Returns a clone of the corresponding point used to construct
+        the oval.
+        """
 
     def getP2(self):
-        """Returns a clone of the corresponding point used to construct the oval. """
+        """
+        Returns a clone of the corresponding point used to construct
+        the oval.
+        """
 
 
 class Polygon():
 
     def __init__(self, *points):
-        """Constructs a polygon having the given points as vertices. Also accepts a single parameter that is a list of the vertices. """
+        """
+        Constructs a polygon having the given points as vertices. Also
+        accepts a single parameter that is a list of the vertices.
+        """
 
     def getPoints(self):
-        """Returns a list containing clones of the points used to construct the polygon. """
+        """
+        Returns a list containing clones of the points used to
+        construct the polygon.
+        """
 
 
 class Text(BaseGraphic):
 
     def __init__(self, anchorPoint, string):
-        """Constructs a text object that displays the given string centered at anchorPoint. The text is displayed horizontally. """
+        """
+        Constructs a text object that displays the given string
+        centered at anchorPoint. The text is displayed
+        horizontally. """
 
     def setText(self, string):
         """Sets the text of the object to string. """
@@ -220,21 +281,37 @@ class Text(BaseGraphic):
         """Returns a clone of the anchor point. """
 
     def setFace(self, family):
-        """Changes the font face to the given family. Possible values are: 'helvetica', 'courier', 'times roman', and 'arial'. """
+        """
+        Changes the font face to the given family. Possible values
+        are: 'helvetica', 'courier', 'times roman', and 'arial'.
+        """
 
     def setSize(self, point):
-        """Changes the font size to the given point size. Sizes from 5 to 36 points are legal. """
+        """
+        Changes the font size to the given point size. Sizes from 5 to
+        36 points are legal.
+        """
 
     def setStyle(self, style):
-        """Changes font to the given style. Possible values are 'normal', 'bold', 'italic', and 'bold italic'. """
+        """
+        Changes font to the given style. Possible values are 'normal',
+        'bold', 'italic', and 'bold italic'.
+        """
 
     def setTextColor(self, color):
-        """Sets the color of the text to color. Note: setFill has the same effect. """
+        """
+        Sets the color of the text to color. Note: setFill has the
+        same effect. 
+        """
 
 class Entry(BaseGraphic):
 
     def __init__(self, centerPoint, width):
-        """Constructs an Entry having the given center point and width. The width is specified in number of characters of text that can be displayed. """
+        """
+        Constructs an Entry having the given center point and
+        width. The width is specified in number of characters of text
+        that can be displayed. 
+        """
 
     def getAnchor(self):
         """Returns a clone of the point where the entry box is centered. """
@@ -271,8 +348,6 @@ class Image(BaseGraphic):
     def getAnchor(self):
         """Returns a clone of the point where the image is centered. """
 
-# win._window.Add(image) works fine
-
 class Pixmap(BaseGraphic):
 
     def __init__(self, *args):
@@ -308,9 +383,9 @@ class Pixmap(BaseGraphic):
         in range(256). 
         """
         uint = long(self.gdk_image.GetPixel(x,y))
-        red = uint / (2 ** 16)
-        green = (uint - (red * (2 ** 16))) / (2 ** 8)
-        blue =  uint - (red * (2 ** 16)) - (green * (2 ** 8))
+        red = int(uint / (2 ** 16))
+        green = int((uint - (red * (2 ** 16))) / (2 ** 8))
+        blue =  int(uint - (red * (2 ** 16)) - (green * (2 ** 8)))
         return (red, green, blue)
 
     def setPixel(self, x, y, color):
@@ -329,10 +404,12 @@ class Pixmap(BaseGraphic):
         for the file is determined by the extension on the filename 
         (e.g. .ppm or .gif). 
         """
+        # FIXME: get type from filename
         self.pixbuf.Save(filename, "jpeg") # or "png"
     
     def clone(self):
         """Returns a copy of the Pixmap. """
+        # FIXME: copy this object, and lower levels
         copy = Pixmap()
         copy.pixbuf = self.pixbuf.Copy() # or Clone()
         return copy
