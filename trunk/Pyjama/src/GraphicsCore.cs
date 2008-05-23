@@ -11,8 +11,18 @@ using Gnome;
 public class GraphicsCore {
 
     GraphWin defaultWindow = null;
-    public static Color black = new Color(0,0,0);
-    public static Color white = new Color(255,255,255);
+    public static Color black     = new Color(0,     0,   0);
+    public static Color white     = new Color(255, 255, 255);
+    public static Color blue      = new Color(  0,   0, 255);
+    public static Color red       = new Color(255,   0,   0);
+    public static Color green     = new Color(  0, 255,   0);
+    public static Color gray      = new Color(128, 128, 128);
+    public static Color darkGray  = new Color( 64,  64,  64);
+    public static Color lightGray = new Color(192, 192, 192);
+    public static Color yellow    = new Color(255, 255,   0);
+    public static Color pink      = new Color(255, 175, 175);
+    public static Color magenta   = new Color(255,   0, 255);
+    public static Color cyan      = new Color(  0, 255, 255);
 
     public GraphicsCore() {
 	// Gtk.Application.Init()
@@ -72,6 +82,22 @@ public class GraphicsCore {
 	    this.blue = blue;
 	}
 
+	public int getRed() { return this.red; }
+	public int getGreen() { return this.green; }
+	public int getBlue() { return this.blue; }
+	public int getGray() { 
+	    return (this.red + this.green + this.blue) / 3;
+	}
+
+	public void setRed(int red) { this.red = red; }
+	public void setGreen(int green) { this.green = green; }
+	public void setBlue(int blue) { this.blue = blue; }
+	public void setGray(int gray) { 
+	    this.red = gray;
+	    this.green = gray;
+	    this.blue = gray;
+	}
+
 	public void setColor(Color color) {
 	    red = color.getRed();
 	    green = color.getGreen();
@@ -109,62 +135,87 @@ public class GraphicsCore {
 	}
     }
 
-public class Color {
+    public class Color {
+	
+	int red, green, blue;
+	
+	public Color(int red, int green, int blue) {
+	    this.red = red;
+	    this.green = green;
+	    this.blue = blue;
+	}
+	
+	public int getRed() { return this.red; }
+	public int getGreen() { return this.green; }
+	public int getBlue() { return this.blue; }
+	public int getGray() { 
+	    return (this.red + this.green + this.blue) / 3;
+	}
+	
+	public void setRed(int red) { this.red = red; }
+	public void setGreen(int green) { this.green = green; }
+	public void setBlue(int blue) { this.blue = blue; }
+	public void setGray(int gray) { 
+	    this.red = gray;
+	    this.green = gray;
+	    this.blue = gray;
+	}
 
-    int red, green, blue;
-
-    public Color(int red, int green, int blue) {
-        this.red = red;
-        this.green = green;
-        this.blue = blue;
+	public void setColor(Color color) {
+	    red = color.getRed();
+	    green = color.getGreen();
+	    blue = color.getBlue();
+	}
+	
+	public void setColor(RGB rgb) {
+	    red = rgb.red;
+	    green = rgb.green;
+	    blue = rgb.blue;
+	}
+	
+	public void setColor(int gray) {
+	    red = gray;
+	    green = gray;
+	    blue = gray;
+	}
+	
+	public void setRGB(RGB rgb) {
+	    red = rgb.red;
+	    green = rgb.green;
+	    blue = rgb.blue;
+	}
+	
+	public void setRGB(Color color) {
+	    red = color.getRed();
+	    green = color.getGreen();
+	    blue = color.getBlue();
+	}
+	
+	public void setRGB(int gray) {
+	    red = gray;
+	    green = gray;
+	    blue = gray;
+	}
     }
-
-    public int getRed() { return this.red; }
-    public int getGreen() { return this.green; }
-    public int getBlue() { return this.blue; }
-
-    public void setColor(Color color) {
-	red = color.getRed();
-	green = color.getGreen();
-	blue = color.getBlue();
-    }
-
-    public void setColor(RGB rgb) {
-	red = rgb.red;
-	green = rgb.green;
-	blue = rgb.blue;
-    }
-
-    public void setColor(int gray) {
-	red = gray;
-	green = gray;
-	blue = gray;
-    }
-
-    public void setRGB(RGB rgb) {
-	red = rgb.red;
-	green = rgb.green;
-	blue = rgb.blue;
-    }
-
-    public void setRGB(Color color) {
-	red = color.getRed();
-	green = color.getGreen();
-	blue = color.getBlue();
-    }
-
-    public void setRGB(int gray) {
-	red = gray;
-	green = gray;
-	blue = gray;
-    }
-}
-
+    
 public class GraphWin {
 
     public Gtk.Window window;
     public Gnome.Canvas canvas;
     bool autoflush;
+
+    public GraphWin(): this("Graphics Window", 200, 200, true) {
+    }
+
+    public GraphWin(string title): this(title, 200, 200, true) {
+    }
+
+    public GraphWin(string title, int width): this(title, width, 200, true) {
+    }
+
+    public GraphWin(string title, int width, int height): 
+	this(title, width, height, true) {
+    }
 
     public GraphWin(string title, int width, int height, bool autoflush) {
         this.window = new Gtk.Window(title);
@@ -616,37 +667,70 @@ public class Image : BaseGraphic {
 	    this.pixmap = pixmap;
 	}
 
-    public void setColor(Color color) {
-	pixmap.setPixel(x, y, color);
-    }
-
-    public void setColor(RGB rgb) {
-	pixmap.setPixel(x, y, rgb);
-    }
-
-    public void setColor(int gray) {
-	pixmap.setPixel(x, y, gray);
-    }
-
-    public void setRGB(RGB rgb) {
-	pixmap.setPixel(x, y, rgb);
-    }
-
-    public void setRGB(Color color) {
-	pixmap.setPixel(x, y, color);
+	public void setColor(Color color) {
+	    pixmap.setPixel(x, y, color);
+	}
 	
-    }
-
-    public void setRGB(int gray) {
-	pixmap.setPixel(x, y, gray);
+	public void setColor(RGB rgb) {
+	    pixmap.setPixel(x, y, rgb);
+	}
 	
-    }
-
+	public void setColor(int gray) {
+	    pixmap.setPixel(x, y, gray);
+	}
+	
+	public void setRGB(RGB rgb) {
+	    pixmap.setPixel(x, y, rgb);
+	}
+	
+	public void setRGB(Color color) {
+	    pixmap.setPixel(x, y, color);
+	    
+	}
+	
+	public void setRGB(int gray) {
+	    pixmap.setPixel(x, y, gray);
+	    
+	}
+	
 	public Color getColor() {
 	    return pixmap.getColor(x, y);
 	}
+
 	public RGB getRGB() {
 	    return pixmap.getRGB(x, y);
+	}
+
+	public int getRed() {
+	    return pixmap.getRed(x, y);
+	}
+
+	public int getGreen() {
+	    return pixmap.getGreen(x, y);
+	}
+
+	public int getBlue() {
+	    return pixmap.getBlue(x, y);
+	}
+
+	public int getGray() {
+	    return pixmap.getGray(x, y);
+	}
+
+	public void setRed(int red) {
+	    pixmap.setRed(x, y, red);
+	}
+
+	public void setGreen(int green) {
+	    pixmap.setGreen(x, y, green);
+	}
+
+	public void setBlue(int blue) {
+	    pixmap.setBlue(x, y, blue);
+	}
+
+	public void setGray(int gray) {
+	    pixmap.setGray(x, y, gray);
 	}
 
 	public string ToString() {
@@ -755,7 +839,7 @@ public class Pixmap : BaseGraphic {
 	    g = pixels[x*3 + y * this.pixbuf.Rowstride + 1];
 	    b = pixels[x*3 + y * this.pixbuf.Rowstride + 2];
 	}
-        return new Color(r, g, b);
+        return new Color((int)r, (int)g, (int)b);
     }
 
     public RGB getRGB(int x, int y) {
@@ -771,7 +855,7 @@ public class Pixmap : BaseGraphic {
 	    g = pixels[x*3 + y * this.pixbuf.Rowstride + 1];
 	    b = pixels[x*3 + y * this.pixbuf.Rowstride + 2];
 	}
-        return new RGB(r, g, b);
+        return new RGB((int)r, (int)g, (int)b);
     }
 
     public void setPixel(int x, int y, int gray) {
@@ -806,7 +890,6 @@ public class Pixmap : BaseGraphic {
 	}
     }
 
-
     public void setPixel(int x, int y, Color color) {
         /*
         Color is a triple (r,g,b) representing a color for the pixel. 
@@ -821,6 +904,114 @@ public class Pixmap : BaseGraphic {
 	    *g = (byte) color.getGreen();
 	    *b = (byte) color.getBlue();
 	}
+    }
+
+    public void setRed(int x, int y, int red) {
+        /*
+        Color is a triple (r,g,b) representing a color for the pixel. 
+        Sets pixel at (x,y) to the given color. 
+        */
+	unsafe {
+	    byte *pixels = (byte *)this.pixbuf.Pixels;
+	    byte *r = &pixels[x*3 + y * this.pixbuf.Rowstride + 0];
+	    *r = (byte) red;
+	}
+    }
+
+    public void setGreen(int x, int y, int green) {
+        /*
+        Color is a triple (r,g,b) representing a color for the pixel. 
+        Sets pixel at (x,y) to the given color. 
+        */
+	unsafe {
+	    byte *pixels = (byte *)this.pixbuf.Pixels;
+	    byte *g = &pixels[x*3 + y * this.pixbuf.Rowstride + 1];
+	    *g = (byte) green;
+	}
+    }
+
+    public void setBlue(int x, int y, int blue) {
+        /*
+        Color is a triple (r,g,b) representing a color for the pixel. 
+        Sets pixel at (x,y) to the given color. 
+        */
+	unsafe {
+	    byte *pixels = (byte *)this.pixbuf.Pixels;
+	    byte *b = &pixels[x*3 + y * this.pixbuf.Rowstride + 2];
+	    *b = (byte) blue;
+	}
+    }
+
+    public void setGray(int x, int y, int gray) {
+        /*
+        Color is a triple (r,g,b) representing a color for the pixel. 
+        Sets pixel at (x,y) to the given color. 
+        */
+	unsafe {
+	    byte *pixels = (byte *)this.pixbuf.Pixels;
+	    byte *r = &pixels[x*3 + y * this.pixbuf.Rowstride + 0];
+	    byte *g = &pixels[x*3 + y * this.pixbuf.Rowstride + 1];
+	    byte *b = &pixels[x*3 + y * this.pixbuf.Rowstride + 2];
+	    *r = (byte) gray;
+	    *g = (byte) gray;
+	    *b = (byte) gray;
+	}
+    }
+
+    public int getRed(int x, int y) {
+        /*
+        Color is a triple (r,g,b) representing a color for the pixel. 
+        Sets pixel at (x,y) to the given color. 
+        */
+	int r;
+	unsafe {
+	    byte *pixels = (byte *)this.pixbuf.Pixels;
+	    r = (int) pixels[x*3 + y * this.pixbuf.Rowstride + 0];
+	}
+	return r;
+    }
+
+    public int getGreen(int x, int y) {
+        /*
+        Color is a triple (r,g,b) representing a color for the pixel. 
+        Sets pixel at (x,y) to the given color. 
+        */
+	int g;
+	unsafe {
+	    byte *pixels = (byte *)this.pixbuf.Pixels;
+	    g = (int) pixels[x*3 + y * this.pixbuf.Rowstride + 1];
+	}
+	return g;
+    }
+
+    public int getBlue(int x, int y) {
+        /*
+        Color is a triple (r,g,b) representing a color for the pixel. 
+        Sets pixel at (x,y) to the given color. 
+        */
+	int b;
+	unsafe {
+	    byte *pixels = (byte *)this.pixbuf.Pixels;
+	    b = (int) pixels[x*3 + y * this.pixbuf.Rowstride + 2];
+	}
+	return b;
+    }
+
+    public int getGray(int x, int y) {
+        /*
+        Color is a triple (r,g,b) representing a color for the pixel. 
+        Sets pixel at (x,y) to the given color. 
+        */
+	int r;
+	int g;
+	int b;
+	unsafe {
+	    byte *pixels = (byte *)this.pixbuf.Pixels;
+	    r = (int) pixels[x*3 + y * this.pixbuf.Rowstride + 0];
+	    g = (int) pixels[x*3 + y * this.pixbuf.Rowstride + 1];
+	    b = (int) pixels[x*3 + y * this.pixbuf.Rowstride + 2];
+	}
+	return ((r + g + b)/3);
     }
 
     public void save(string filename) {
