@@ -5,10 +5,14 @@ Based on John Zelle's Graphics Library.
 import clr
 clr.AddReference("gtk-sharp")
 clr.AddReference("gdk-sharp")
+clr.AddReference("gnome-sharp")
+clr.AddReference("System")
 #clr.AddReference("glib-sharp")
 #import GLib
 import Gtk
 import Gdk
+import Gnome
+import System
 Gtk.Application.Init()
 
 class Color(object):
@@ -33,10 +37,27 @@ class GraphWin(object):
                  autoflush=False):
         self._window = Gtk.Window(title)
         # FIXME: add a canvas
+        self._canvas = Gnome.Canvas()
+        #self._drawingArea = Gtk.DrawingArea()
+        #self._window.DeleteEvent += self.OnWinDelete
+        #self._drawingArea.Realized += self.OnRealized
+        #self._drawingArea.ExposeEvent += self.OnExposed
+        #self._gc = Gdk.GC(self._drawingArea)
+        self._hbox = Gtk.HBox()
+        self._window.Add(self._canvas)
         self._window.Resize(width, height)
         self._window.ShowAll()
         self._autoflush = autoflush
+
+    def OnWinDelete(self, widget, args):
+        pass
         
+    def OnRealized(self, widget, args):
+        pass
+        
+    def OnExposed(self, widget, args):
+        pass
+	        
     def plot(self, x, y, color):
         """
         Draws the pixel at $(x,y)$ in the window. Color is optional, 
@@ -151,29 +172,52 @@ class Point(BaseGraphic):
         """Returns the $y$ coordinate of a point."""
         return self.y
         
+    def clone(self):
+        return Point(self.x, self.y)
+        
 class Line(BaseGraphic):
 
     def __init__(self, point1, point2):
         """Constructs a line segment from point1 to point2. """
         self.point1 = point1
         self.point2 = point2
+        self.arrowType = 'none'
+        self._graphwin = None
+        self._line = None 
 
-    def setArrow(self, string):
+    def draw(self, aGraphWin):
+    	self._graphwin = aGraphWin
+    	self._line = Gnome.CanvasLine(self._graphwin._canvas.Root())
+        self._line.Points = Gnome.CanvasPoints(System.Array[System.Double]([self.point1.x, self.point1.y, 
+                                                                            self.point2.x, self.point2.y]))
+
+    def setArrow(self, arrowType):
         """
         Sets the arrowhead status of a line. Arrows may be drawn at
         either the first point, the last point, or both. Possible
         values of string are 'first', 'last', 'both', and 'none'. The
         default setting is 'none'. 
         """
+        self.arrowType = arrowType
 
     def getCenter(self):
         """Returns a clone of the midpoint of the line segment. """
+        return Point(int((self.point1.x + self.point2.x)/2),
+                     int((self.point1.y + self.point2.y)/2))
+
+    def clone(self):
+        line = Line(self.point1.x, self.point1.y,
+                    self.point2.x, self.point2.y)
+        line.arrowType = self.arrowType
+        return line
 
     def getP1(self):
         """Returns a clone of the corresponding endpoint of the segment. """
+        return self.point1.clone()
 
     def getP2(self):
         """Returns a clone of the corresponding endpoint of the segment. """
+        return self.point2.clone()
 
 class Circle(BaseGraphic):
     def __init__(self, centerPoint, radius):
@@ -344,9 +388,17 @@ class Image(BaseGraphic):
         point. Note: if image is a Pixmap, subsequent changes to the 
         Pixmap will be reflected in the drawn Image. """
         self.image = image
+        self.centerPoint = centerPoint
 
     def getAnchor(self):
         """Returns a clone of the point where the image is centered. """
+
+    def draw(self, aGraphWin):
+        self._graphwin = aGraphWin
+        self._cpixbuf = Gnome.CanvasPixbuf(self._graphwin._canvas.Root())
+        self._cpixbuf.Pixbuf = self.image._pixbuf
+        self._cpixbuf.X = self.centerPoint.x
+        self._cpixbuf.Y = self.centerPoint.y
 
 class Pixmap(BaseGraphic):
 
@@ -356,25 +408,29 @@ class Pixmap(BaseGraphic):
         height and width. See Image for supported file types. 
         """
         if len(args) == 0: # default size
-            self.pixbuf = Gdk.Pixbuf(Gdk.Colorspace.Rgb, False, 8, 200, 200)
+            # False is HasAlpha
+            self._pixbuf = Gdk.Pixbuf(Gdk.Colorspace.Rgb, False, 8, 200, 200)
         elif len(args) == 1: # string, filename
-            self.pixbuf = Gdk.Pixbuf(args[0])
+            self._pixbuf = Gdk.Pixbuf(args[0])
         elif len(args) == 2: # width, height
-            self.pixbuf = Gdk.Pixbuf(Gdk.Colorspace.Rgb, False, 8, 
+            self._pixbuf = Gdk.Pixbuf(Gdk.Colorspace.Rgb, False, 8, 
                                      args[0], args[1])
-        self.gtk_image = Gtk.Image(self.pixbuf)
+        self.gtk_image = Gtk.Image(self._pixbuf)
         self.gdk_image = Gdk.Image(Gdk.ImageType.Normal, 
                                    self.gtk_image.Visual, 
-                                   self.pixbuf.Width, 
-                                   self.pixbuf.Height) 
+                                   self._pixbuf.Width, 
+                                   self._pixbuf.Height) 
+                                   
+    def draw(self, aGraphWin):
+        raise AttributeError("can't draw a pixmap; make an Image")
 
     def getWidth(self):
         """ Returns the width of the image in pixels. """
-        return self.pixbuf.Width
+        return self._pixbuf.Width
 
     def getHeight(self):
         """ Returns the height of the image in pixels. """
-        return self.pixbuf.Height
+        return self._pixbuf.Height
     
     def getPixel(self, x,y):
         """
@@ -405,7 +461,7 @@ class Pixmap(BaseGraphic):
         (e.g. .ppm or .gif). 
         """
         # FIXME: get type from filename
-        self.pixbuf.Save(filename, "jpeg") # or "png"
+        self._pixbuf.Save(filename, "jpeg") # or "png"
     
     def clone(self):
         """Returns a copy of the Pixmap. """
