@@ -1,12 +1,12 @@
 // Based on John Zelle's Graphics Library.
 
+using System;
+using System.Collections;
+using System.Collections.Generic;
+
 using Gtk;
 using Gdk;
 using Gnome;
-
-// Gtk.Application.Init()
-//public Color black = new Color(0,0,0);
-//public static Color white = Color(255,255,255);
 
 public class GraphicsCore {
 
@@ -15,13 +15,99 @@ public class GraphicsCore {
     public static Color white = new Color(255,255,255);
 
     public GraphicsCore() {
+	// Gtk.Application.Init()
     }
-
 
     public void show() {
     }
     
+    public static IEnumerator getPixels(Pixmap pixmap) {
+	return pixmap.getPixels();
+    }
+
+    public static void setColor(Color color1, Color color2) {
+	color1.setColor(color2);
+    }
+    public static void setColor(Color color, RGB rgb) {
+	color.setColor(rgb);
+    }
+    public static void setColor(Color color, int gray) {
+	color.setColor(gray);
+    }
+    public static void setColor(RGB rgb, int gray) {
+	rgb.setColor(gray);
+    }
+    public static void setColor(RGB rgb, Color color) {
+	rgb.setColor(color);
+    }
+    public static void setColor(RGB rgb1, RGB rgb2) {
+	rgb1.setColor(rgb2);
+    }
+    public static void setRGB(RGB rgb, Color color) {
+	rgb.setRGB(color);
+    }
+    public static void setRGB(RGB rgb1, RGB rgb2) {
+	rgb1.setRGB(rgb2);
+    }
+    public static void setRGB(Color color1, Color color2) {
+	color1.setRGB(color2);
+    }
+    public static void setRGB(Color color, RGB rgb) {
+	color.setRGB(rgb);
+    }
+    public static void setRGB(Color color, int gray) {
+	color.setRGB(gray);
+    }
+    public static void setRGB(RGB rgb, int gray) {
+	rgb.setRGB(gray);
+    }
     
+    public class RGB {
+
+	public int red, green, blue;
+
+	public RGB(int red, int green, int blue) {
+	    this.red = red;
+	    this.green = green;
+	    this.blue = blue;
+	}
+
+	public void setColor(Color color) {
+	    red = color.getRed();
+	    green = color.getGreen();
+	    blue = color.getBlue();
+	}
+	
+	public void setColor(RGB rgb) {
+	    red = rgb.red;
+	    green = rgb.green;
+	    blue = rgb.blue;
+	}
+	
+	public void setColor(int gray) {
+	    red = gray;
+	    green = gray;
+	    blue = gray;
+	}
+	
+	public void setRGB(RGB rgb) {
+	    red = rgb.red;
+	    green = rgb.green;
+	    blue = rgb.blue;
+	}
+	
+	public void setRGB(Color color) {
+	    red = color.getRed();
+	    green = color.getGreen();
+	    blue = color.getBlue();
+	}
+	
+	public void setRGB(int gray) {
+	    red = gray;
+	    green = gray;
+	    blue = gray;
+	}
+    }
 
 public class Color {
 
@@ -36,21 +122,57 @@ public class Color {
     public int getRed() { return this.red; }
     public int getGreen() { return this.green; }
     public int getBlue() { return this.blue; }
+
+    public void setColor(Color color) {
+	red = color.getRed();
+	green = color.getGreen();
+	blue = color.getBlue();
+    }
+
+    public void setColor(RGB rgb) {
+	red = rgb.red;
+	green = rgb.green;
+	blue = rgb.blue;
+    }
+
+    public void setColor(int gray) {
+	red = gray;
+	green = gray;
+	blue = gray;
+    }
+
+    public void setRGB(RGB rgb) {
+	red = rgb.red;
+	green = rgb.green;
+	blue = rgb.blue;
+    }
+
+    public void setRGB(Color color) {
+	red = color.getRed();
+	green = color.getGreen();
+	blue = color.getBlue();
+    }
+
+    public void setRGB(int gray) {
+	red = gray;
+	green = gray;
+	blue = gray;
+    }
 }
 
 public class GraphWin {
 
-    public Gtk.Window _window;
-    public Gnome.Canvas _canvas;
-    bool _autoflush;
+    public Gtk.Window window;
+    public Gnome.Canvas canvas;
+    bool autoflush;
 
     public GraphWin(string title, int width, int height, bool autoflush) {
-        this._window = new Gtk.Window(title);
-        this._canvas = new Gnome.Canvas();
-        this._window.Add(this._canvas);
-        this._window.Resize(width, height);
-        this._window.ShowAll();
-        this._autoflush = autoflush;
+        this.window = new Gtk.Window(title);
+        this.canvas = new Gnome.Canvas();
+        this.window.Add(this.canvas);
+        this.window.Resize(width, height);
+        this.window.ShowAll();
+        this.autoflush = autoflush;
     }
 
     public void plot(int x, int y, Color color) {
@@ -115,25 +237,25 @@ public class GraphWin {
         this will happen automatically during idle periods. Explicit update() 
         calls may be useful for animations.
         */
-	this._window.QueueDraw();
+	this.window.QueueDraw();
     }
 }
 
 public class BaseGraphic {            
 
-    Color _fillColor;
-    Color _outlineColor;
-    int _width;
-    public GraphWin _graphwin;
+    Color fillColor;
+    Color outlineColor;
+    int width;
+    public GraphWin graphwin;
 
     public void setFill(Color color) {
         /*Sets the interior of the object to the given color.*/
-        this._fillColor = color;
+        this.fillColor = color;
     }
         
     public void setOutline(Color color) {
         /*Sets the outline of the object to the given color.*/ 
-	this._outlineColor = color;
+	this.outlineColor = color;
     }
 
     public void setWidth(int pixels) {
@@ -141,7 +263,7 @@ public class BaseGraphic {
         Sets the width of the outline of the object to this 
         many pixels. (Does not work for Point.)
         */
-        this._width = pixels;
+        this.width = pixels;
     }
 
     public void draw(GraphWin aGraphWin) {
@@ -149,9 +271,9 @@ public class BaseGraphic {
         Draws the object into the given GraphWin. An object may only 
         be drawn in one window at a time.
         */
-        this._graphwin = aGraphWin;
+        this.graphwin = aGraphWin;
         // FIXME { add it to the canvas
-        // win._window.Add(image) works fine
+        // win.window.Add(image) works fine
     }
 
     public void undraw() {
@@ -205,7 +327,7 @@ public class Point: BaseGraphic {
 public class Line: BaseGraphic {
 
     Point point1, point2;
-    Gnome.CanvasLine _line;
+    Gnome.CanvasLine line;
     string arrowType;
 
     public Line(Point point1, Point point2) {
@@ -213,16 +335,16 @@ public class Line: BaseGraphic {
         this.point1 = point1;
         this.point2 = point2;
         this.arrowType = "none";
-        this._graphwin = null;
-        this._line = null;
+        this.graphwin = null;
+        this.line = null;
     }
 
     public void draw(GraphWin aGraphWin) {
-    	this._graphwin = aGraphWin;
-    	this._line = new Gnome.CanvasLine(this._graphwin._canvas.Root());
+    	this.graphwin = aGraphWin;
+    	this.line = new Gnome.CanvasLine(this.graphwin.canvas.Root());
 	int [] points = new int[] {this.point1.x, this.point1.y, 
 			 this.point2.x, this.point2.y};
-        //this._line.Points = new Gnome.CanvasPoints( points );
+        //this.line.Points = new Gnome.CanvasPoints( points );
     }
 
     public void setArrow(string arrowType) {
@@ -457,7 +579,7 @@ public class Image : BaseGraphic {
 
     Pixmap image;
     Point centerPoint;
-    Gnome.CanvasPixbuf _cpixbuf;
+    Gnome.CanvasPixbuf cpixbuf;
 
     public Image(Point centerPoint, Pixmap image) {
         /*
@@ -475,17 +597,72 @@ public class Image : BaseGraphic {
     }
 
     public void draw(GraphWin aGraphWin) {
-        this._graphwin = aGraphWin;
-        this._cpixbuf = new Gnome.CanvasPixbuf(this._graphwin._canvas.Root());
-        this._cpixbuf.Pixbuf = this.image._pixbuf;
-        this._cpixbuf.X = this.centerPoint.x;
-        this._cpixbuf.Y = this.centerPoint.y;
+        this.graphwin = aGraphWin;
+        this.cpixbuf = new Gnome.CanvasPixbuf(this.graphwin.canvas.Root());
+        this.cpixbuf.Pixbuf = this.image.pixbuf;
+        this.cpixbuf.X = this.centerPoint.x;
+        this.cpixbuf.Y = this.centerPoint.y;
     }
 }
 
+    public class Pixel {
+
+	int x, y;
+	Pixmap pixmap;
+
+	public Pixel(int x, int y, Pixmap pixmap) {
+	    this.x = x;
+	    this.y = y;
+	    this.pixmap = pixmap;
+	}
+
+    public void setColor(Color color) {
+	pixmap.setPixel(x, y, color);
+    }
+
+    public void setColor(RGB rgb) {
+	pixmap.setPixel(x, y, rgb);
+    }
+
+    public void setColor(int gray) {
+	pixmap.setPixel(x, y, gray);
+    }
+
+    public void setRGB(RGB rgb) {
+	pixmap.setPixel(x, y, rgb);
+    }
+
+    public void setRGB(Color color) {
+	pixmap.setPixel(x, y, color);
+	
+    }
+
+    public void setRGB(int gray) {
+	pixmap.setPixel(x, y, gray);
+	
+    }
+
+	public Color getColor() {
+	    return pixmap.getColor(x, y);
+	}
+	public RGB getRGB() {
+	    return pixmap.getRGB(x, y);
+	}
+
+	public string ToString() {
+	    return String.Format("<Pixel at ({0},{1})>", x, y);
+	}
+
+	public string StringRepr() {
+	    return String.Format("<Pixel at ({0},{1})>", x, y);
+	}
+
+    }
+
+
 public class Pixmap : BaseGraphic {
 
-    public Gdk.Pixbuf _pixbuf;
+    public Gdk.Pixbuf pixbuf;
 
     public Pixmap() {
         /*
@@ -493,16 +670,16 @@ public class Pixmap : BaseGraphic {
         height and width. See Image for supported file types. 
         */
 	// false is HasAlpha
-	this._pixbuf = new Gdk.Pixbuf(Gdk.Colorspace.Rgb, false, 8, 200, 200);
+	this.pixbuf = new Gdk.Pixbuf(Gdk.Colorspace.Rgb, false, 8, 200, 200);
 	clear();
     }
 
     public Pixmap(string filename) {
-	this._pixbuf = new Gdk.Pixbuf(filename);
+	this.pixbuf = new Gdk.Pixbuf(filename);
     }
 
     public Pixmap(int w, int h) {
-	this._pixbuf = new Gdk.Pixbuf(Gdk.Colorspace.Rgb, false, 8, w, h);
+	this.pixbuf = new Gdk.Pixbuf(Gdk.Colorspace.Rgb, false, 8, w, h);
 	clear();
     }
 
@@ -512,10 +689,10 @@ public class Pixmap : BaseGraphic {
 
     public void clear(Color color) {
 	unsafe {
-	    int rowstride = _pixbuf.Rowstride;
-	    int width = _pixbuf.Width;
-	    int height = _pixbuf.Height;
-	    byte *line = (byte *)_pixbuf.Pixels;
+	    int rowstride = pixbuf.Rowstride;
+	    int width = pixbuf.Width;
+	    int height = pixbuf.Height;
+	    byte *line = (byte *) pixbuf.Pixels;
 	    
 	    int r = color.getRed();
 	    int g = color.getGreen();
@@ -539,15 +716,33 @@ public class Pixmap : BaseGraphic {
 
     public int getWidth() {
         /* Returns the width of the image in pixels. */
-        return this._pixbuf.Width;
+        return this.pixbuf.Width;
     }
 
     public int getHeight() {
         /* Returns the height of the image in pixels. */
-        return this._pixbuf.Height;
+        return this.pixbuf.Height;
     }
     
-    public Color getPixel(int x, int y) {
+    public IEnumerator getPixels() {
+	for (int y = 0; y < pixbuf.Height; y++) {
+	    for (int x = 0; x < pixbuf.Width; x++) {
+		yield return new Pixel(x, y, this);
+	    }
+	}
+    }
+    
+    public Pixel getPixel(int x, int y) {
+        /*
+	  Returns a triple (r,g,b) of the red, green, and blue 
+	  intensities of the pixel at (x,y). Intensity values are 
+	  in range(256). 
+        */
+        return new Pixel(x, y, this);
+    }
+
+
+    public Color getColor(int x, int y) {
         /*
 	  Returns a triple (r,g,b) of the red, green, and blue 
 	  intensities of the pixel at (x,y). Intensity values are 
@@ -555,13 +750,62 @@ public class Pixmap : BaseGraphic {
         */
 	byte r, g, b;
 	unsafe {
-	    byte *pixels = (byte *)this._pixbuf.Pixels;
-	    r = pixels[x*3 + y * this._pixbuf.Rowstride + 0];
-	    g = pixels[x*3 + y * this._pixbuf.Rowstride + 1];
-	    b = pixels[x*3 + y * this._pixbuf.Rowstride + 2];
+	    byte *pixels = (byte *)this.pixbuf.Pixels;
+	    r = pixels[x*3 + y * this.pixbuf.Rowstride + 0];
+	    g = pixels[x*3 + y * this.pixbuf.Rowstride + 1];
+	    b = pixels[x*3 + y * this.pixbuf.Rowstride + 2];
 	}
         return new Color(r, g, b);
     }
+
+    public RGB getRGB(int x, int y) {
+        /*
+	  Returns a triple (r,g,b) of the red, green, and blue 
+	  intensities of the pixel at (x,y). Intensity values are 
+	  in range(256). 
+        */
+	byte r, g, b;
+	unsafe {
+	    byte *pixels = (byte *)this.pixbuf.Pixels;
+	    r = pixels[x*3 + y * this.pixbuf.Rowstride + 0];
+	    g = pixels[x*3 + y * this.pixbuf.Rowstride + 1];
+	    b = pixels[x*3 + y * this.pixbuf.Rowstride + 2];
+	}
+        return new RGB(r, g, b);
+    }
+
+    public void setPixel(int x, int y, int gray) {
+        /*
+        Color is a triple (r,g,b) representing a color for the pixel. 
+        Sets pixel at (x,y) to the given color. 
+        */
+	unsafe {
+	    byte *pixels = (byte *)this.pixbuf.Pixels;
+	    byte *r = &pixels[x*3 + y * this.pixbuf.Rowstride + 0];
+	    byte *g = &pixels[x*3 + y * this.pixbuf.Rowstride + 1];
+	    byte *b = &pixels[x*3 + y * this.pixbuf.Rowstride + 2];
+	    *r = (byte) gray;
+	    *g = (byte) gray;
+	    *b = (byte) gray;
+	}
+    }
+
+    public void setPixel(int x, int y, RGB rgb) {
+        /*
+        Color is a triple (r,g,b) representing a color for the pixel. 
+        Sets pixel at (x,y) to the given color. 
+        */
+	unsafe {
+	    byte *pixels = (byte *)this.pixbuf.Pixels;
+	    byte *r = &pixels[x*3 + y * this.pixbuf.Rowstride + 0];
+	    byte *g = &pixels[x*3 + y * this.pixbuf.Rowstride + 1];
+	    byte *b = &pixels[x*3 + y * this.pixbuf.Rowstride + 2];
+	    *r = (byte) rgb.red;
+	    *g = (byte) rgb.green;
+	    *b = (byte) rgb.blue;
+	}
+    }
+
 
     public void setPixel(int x, int y, Color color) {
         /*
@@ -569,10 +813,10 @@ public class Pixmap : BaseGraphic {
         Sets pixel at (x,y) to the given color. 
         */
 	unsafe {
-	    byte *pixels = (byte *)this._pixbuf.Pixels;
-	    byte *r = &pixels[x*3 + y * this._pixbuf.Rowstride + 0];
-	    byte *g = &pixels[x*3 + y * this._pixbuf.Rowstride + 1];
-	    byte *b = &pixels[x*3 + y * this._pixbuf.Rowstride + 2];
+	    byte *pixels = (byte *)this.pixbuf.Pixels;
+	    byte *r = &pixels[x*3 + y * this.pixbuf.Rowstride + 0];
+	    byte *g = &pixels[x*3 + y * this.pixbuf.Rowstride + 1];
+	    byte *b = &pixels[x*3 + y * this.pixbuf.Rowstride + 2];
 	    *r = (byte) color.getRed();
 	    *g = (byte) color.getGreen();
 	    *b = (byte) color.getBlue();
@@ -586,14 +830,14 @@ public class Pixmap : BaseGraphic {
         (e.g. .ppm or .gif). 
         */
         // FIXME { get type from filename
-	this._pixbuf.Save(filename, "jpeg"); // or "png"
+	this.pixbuf.Save(filename, "jpeg"); // or "png"
     }
 		
     public Pixmap clone() {
         /*Returns a copy of the Pixmap. */
 	// FIXME: copy this object, and lower levels
 	Pixmap copy = new Pixmap();
-        copy._pixbuf = this._pixbuf.Copy(); // or Clone()
+        copy.pixbuf = this.pixbuf.Copy(); // or Clone()
         return copy;
     }
 }

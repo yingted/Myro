@@ -34,7 +34,7 @@ all:	$(PROJECT).exe
 run:	$(PROJECT).exe
 	MONO_PATH=$(IPPATH) IRONPYTHON_PATH=$(IPSITE) $(MONO) ./$(PROJECT).exe
 
-$(PROJECT).exe:	$(SRCS) Makefile
+$(PROJECT).exe:	$(SRCS) Makefile GraphicsCore.dll
 	$(CS) $(CSFLAGS) $(SRCS) $(DLLS) $(IPPATHLIB) -out:$@
 
 GraphicsCore.dll: src/GraphicsCore.cs
