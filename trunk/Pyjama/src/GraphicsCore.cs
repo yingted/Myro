@@ -8,9 +8,22 @@ using Gnome;
 //public Color black = new Color(0,0,0);
 //public static Color white = Color(255,255,255);
 
-namespace Graphics {
+public class GraphicsCore {
 
-class Color {
+    GraphWin defaultWindow = null;
+    public static Color black = new Color(0,0,0);
+    public static Color white = new Color(255,255,255);
+
+    public GraphicsCore() {
+    }
+
+
+    public void show() {
+    }
+    
+    
+
+public class Color {
 
     int red, green, blue;
 
@@ -25,13 +38,13 @@ class Color {
     public int getBlue() { return this.blue; }
 }
 
-class GraphWin {
+public class GraphWin {
 
     public Gtk.Window _window;
     public Gnome.Canvas _canvas;
     bool _autoflush;
 
-    GraphWin(string title, int width, int height, bool autoflush) {
+    public GraphWin(string title, int width, int height, bool autoflush) {
         this._window = new Gtk.Window(title);
         this._canvas = new Gnome.Canvas();
         this._window.Add(this._canvas);
@@ -102,10 +115,11 @@ class GraphWin {
         this will happen automatically during idle periods. Explicit update() 
         calls may be useful for animations.
         */
+	this._window.QueueDraw();
     }
 }
 
-class BaseGraphic {            
+public class BaseGraphic {            
 
     Color _fillColor;
     Color _outlineColor;
@@ -163,7 +177,7 @@ class BaseGraphic {
     }
 }
 
-class Point: BaseGraphic {
+public class Point: BaseGraphic {
 
     public int x, y;
 
@@ -188,7 +202,7 @@ class Point: BaseGraphic {
     }
 }
         
-class Line: BaseGraphic {
+public class Line: BaseGraphic {
 
     Point point1, point2;
     Gnome.CanvasLine _line;
@@ -244,7 +258,7 @@ class Line: BaseGraphic {
     }
 }
 
-class Circle: BaseGraphic {
+public class Circle: BaseGraphic {
     public Circle(Point centerPoint, int radius) {
         /*Constructs a circle with given center point and radius. */
     }
@@ -274,7 +288,7 @@ class Circle: BaseGraphic {
     }
 }
 
-class Rectangle : BaseGraphic {
+public class Rectangle : BaseGraphic {
     public Rectangle(Point point1, Point point2) {
         /*
         Constructs a rectangle having opposite corners at point1 and
@@ -302,7 +316,7 @@ class Rectangle : BaseGraphic {
 }
 
 
-class Oval: BaseGraphic {
+public class Oval: BaseGraphic {
 
     public Oval(Point point1, Point point2) {
         /*
@@ -333,7 +347,7 @@ class Oval: BaseGraphic {
 }
 
 
-class Polygon: BaseGraphic {
+public class Polygon: BaseGraphic {
 
     public Polygon(Point points) {
         /*
@@ -350,7 +364,7 @@ class Polygon: BaseGraphic {
     }
 }
 
-class Text : BaseGraphic {
+public class Text : BaseGraphic {
 
     public Text(Point anchorPoint, string s) {
         /*
@@ -400,7 +414,7 @@ class Text : BaseGraphic {
     }
 }
 
-class Entry : BaseGraphic {
+public class Entry : BaseGraphic {
 
     public Entry(Point centerPoint, int width) {
         /*
@@ -439,7 +453,7 @@ class Entry : BaseGraphic {
     }
 }
 
-class Image : BaseGraphic {
+public class Image : BaseGraphic {
 
     Pixmap image;
     Point centerPoint;
@@ -469,10 +483,8 @@ class Image : BaseGraphic {
     }
 }
 
-class Pixmap : BaseGraphic {
+public class Pixmap : BaseGraphic {
 
-    Gdk.Image gdk_image;
-    Gtk.Image gtk_image;
     public Gdk.Pixbuf _pixbuf;
 
     public Pixmap() {
@@ -480,28 +492,46 @@ class Pixmap : BaseGraphic {
         Constructs a Pixmap from the image file, filename, given 
         height and width. See Image for supported file types. 
         */
-	// False is HasAlpha
+	// false is HasAlpha
 	this._pixbuf = new Gdk.Pixbuf(Gdk.Colorspace.Rgb, false, 8, 200, 200);
-	init();
+	clear();
     }
 
     public Pixmap(string filename) {
 	this._pixbuf = new Gdk.Pixbuf(filename);
-	init();
     }
 
     public Pixmap(int w, int h) {
 	this._pixbuf = new Gdk.Pixbuf(Gdk.Colorspace.Rgb, false, 8, w, h);
-	init();
+	clear();
     }
 
-    public void init() {
-	this.gtk_image = new Gtk.Image(this._pixbuf);
-        this.gdk_image = new Gdk.Image(Gdk.ImageType.Normal, 
-				       this.gtk_image.Visual, 
-				       this._pixbuf.Width, 
-				       this._pixbuf.Height);
-    }               
+    public void clear() {
+	clear(white);
+    }
+
+    public void clear(Color color) {
+	unsafe {
+	    int rowstride = _pixbuf.Rowstride;
+	    int width = _pixbuf.Width;
+	    int height = _pixbuf.Height;
+	    byte *line = (byte *)_pixbuf.Pixels;
+	    
+	    int r = color.getRed();
+	    int g = color.getGreen();
+	    int b = color.getBlue();
+
+	    for (int y = 0; y < height; y++){
+		for (int x = 0; x < width; x++){
+		    byte *rgb = &line[x*3];
+		    *rgb++ = (byte) r;
+		    *rgb++ = (byte) g;
+		    *rgb++ = (byte) b;
+		}
+		line += rowstride;
+	    }
+	}
+    }
 
     public void draw(GraphWin aGraphWin) {
         //raise AttributeError("can't draw a pixmap; make an Image");
@@ -523,11 +553,14 @@ class Pixmap : BaseGraphic {
 	  intensities of the pixel at (x,y). Intensity values are 
 	  in range(256). 
         */
-        uint val = gdk_image.GetPixel(x,y);
-        int red = (int)(val / (2 ^ 16));
-        int green = (int) ((val - (red * (2 ^ 16))) / (2 ^ 8));
-        int blue =  (int) (val - (red * (2 ^ 16)) - (green * (2 ^ 8)));
-        return new Color(red, green, blue);
+	byte r, g, b;
+	unsafe {
+	    byte *pixels = (byte *)this._pixbuf.Pixels;
+	    r = pixels[x*3 + y * this._pixbuf.Rowstride + 0];
+	    g = pixels[x*3 + y * this._pixbuf.Rowstride + 1];
+	    b = pixels[x*3 + y * this._pixbuf.Rowstride + 2];
+	}
+        return new Color(r, g, b);
     }
 
     public void setPixel(int x, int y, Color color) {
@@ -535,10 +568,15 @@ class Pixmap : BaseGraphic {
         Color is a triple (r,g,b) representing a color for the pixel. 
         Sets pixel at (x,y) to the given color. 
         */
-        int red = color.getRed()     * (2 ^ 16);
-        int green = color.getGreen() * (2  ^ 8);
-        int blue =  color.getBlue();
-        this.gdk_image.PutPixel(x,y, (uint)(red + green + blue));
+	unsafe {
+	    byte *pixels = (byte *)this._pixbuf.Pixels;
+	    byte *r = &pixels[x*3 + y * this._pixbuf.Rowstride + 0];
+	    byte *g = &pixels[x*3 + y * this._pixbuf.Rowstride + 1];
+	    byte *b = &pixels[x*3 + y * this._pixbuf.Rowstride + 2];
+	    *r = (byte) color.getRed();
+	    *g = (byte) color.getGreen();
+	    *b = (byte) color.getBlue();
+	}
     }
 
     public void save(string filename) {

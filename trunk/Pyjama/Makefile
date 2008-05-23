@@ -37,6 +37,9 @@ run:	$(PROJECT).exe
 $(PROJECT).exe:	$(SRCS) Makefile
 	$(CS) $(CSFLAGS) $(SRCS) $(DLLS) $(IPPATHLIB) -out:$@
 
+GraphicsCore.dll: src/GraphicsCore.cs
+	$(CS) -target:library -pkg:gtk-sharp-2.0 -pkg:gnome-sharp-2.0 -out:GraphicsCore.dll /unsafe src/GraphicsCore.cs
+
 clean:
 	$(RM) $(PROJECT).exe *.dll *~
 
