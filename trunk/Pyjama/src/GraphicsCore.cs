@@ -2,11 +2,14 @@
 
 using System;
 using System.Collections;
-using System.Collections.Generic;
 
 using Gtk;
 using Gdk;
 using Gnome;
+
+// This should come from the DLR, not Python:
+using IronPython.Runtime;
+// uses: List
 
 public class GraphicsCore {
 
@@ -64,23 +67,23 @@ public class GraphicsCore {
     public static int getGray(Pixmap pixmap, int x, int y) {
 	return pixmap.getGray(x, y);
     }
-    public static int getGray(List<int> list) {
-	return (list[0] + list[1] + list[2]) / 3;
+    public static int getGray(List list) {
+	return (((int)list[0]) + ((int)list[1]) + ((int)list[2])) / 3;
     }
-    public static List<int> getRGB(Pixel pixel) {
+    public static List getRGB(Pixel pixel) {
 	return pixel.getRGB();
     }
-    public static List<int> getRGB(Color color) {
+    public static List getRGB(Color color) {
 	return color.getRGB();
     }
-    public static List<int> getRGB(Pixmap pixmap, int x, int y) {
+    public static List getRGB(Pixmap pixmap, int x, int y) {
 	return pixmap.getRGB(x, y);
     }
 
     public static void setColor(Color color1, Color color2) {
 	color1.setColor(color2);
     }
-    public static void setColor(Color color, List<int> list) {
+    public static void setColor(Color color, List list) {
 	color.setColor(list);
     }
     public static void setColor(Color color, int gray) {
@@ -89,7 +92,7 @@ public class GraphicsCore {
     public static void setRGB(Color color1, Color color2) {
 	color1.setRGB(color2);
     }
-    public static void setRGB(Color color, List<int> list) {
+    public static void setRGB(Color color, List list) {
 	color.setRGB(list);
     }
     public static void setRGB(Color color, int gray) {
@@ -112,11 +115,11 @@ public class GraphicsCore {
 	public int getGray() { 
 	    return (this.red + this.green + this.blue) / 3;
 	}
-	public List<int> getRGB() { 
-	    List<int> list = new List<int>();
-	    list.Add(this.red);
-	    list.Add(this.green);
-	    list.Add(this.blue);
+	public List getRGB() { 
+	    List list = new List();
+	    list.append(this.red);
+	    list.append(this.green);
+	    list.append(this.blue);
 	    return list;
 	}
 	
@@ -135,10 +138,10 @@ public class GraphicsCore {
 	    blue = color.getBlue();
 	}
 	
-	public void setColor(List<int> list) {
-	    red = list[0];
-	    green = list[2];
-	    blue = list[3];
+	public void setColor(List list) {
+	    red = (int) list[0];
+	    green = (int) list[2];
+	    blue = (int) list[3];
 	}
 	
 	public void setColor(int gray) {
@@ -147,10 +150,10 @@ public class GraphicsCore {
 	    blue = gray;
 	}
 	
-	public void setRGB(List<int> list) {
-	    red = list[0];
-	    green = list[1];
-	    blue = list[2];
+	public void setRGB(List list) {
+	    red = (int) list[0];
+	    green = (int) list[1];
+	    blue = (int) list[2];
 	}
 	
 	public void setRGB(Color color) {
@@ -170,91 +173,86 @@ public class GraphicsCore {
 	
 	public Gtk.Window window;
 	public Gnome.Canvas canvas;
-	bool autoflush;
 	
-	public GraphWin(): this("Graphics Window", 200, 200, true) {
+	public GraphWin(): this("Graphics Window", 200, 200) {
 	}
-	
-	public GraphWin(string title): this(title, 200, 200, true) {
+	public GraphWin(string title): this(title, 200, 200) {
 	}
-	
-	public GraphWin(string title, int width): this(title, width, 200, true) {
-	}
-	
-	public GraphWin(string title, int width, int height): 
-	    this(title, width, height, true) {
-	}
-	
-	public GraphWin(string title, int width, int height, bool autoflush) {
+	public GraphWin(string title, int width, int height) {
 	    this.window = new Gtk.Window(title);
 	    this.canvas = new Gnome.Canvas();
-	    this.window.Add(this.canvas);
+	    this.window.Add(canvas);
 	    this.window.Resize(width, height);
 	    this.window.ShowAll();
-	    this.autoflush = autoflush;
 	}
 	
 	public void plot(int x, int y, Color color) {
 	    /*
-	      Draws the pixel at $(x,y)$ in the window. Color is optional, 
-	      black is the default. Note: pixel-level operations are very 
-	      inefficient and this method should be avoided.
+	      Draws the pixel at $(x,y)$ in the window. Color is
+	      optional, black is the default. Note: pixel-level
+	      operations are very inefficient and this method should
+	      be avoided.
 	    */ 
 	}
 	
 	public void plotPixel(int x, int y, Color color) {
 	    /*
-	      Draws the pixel at the ``raw'' position $(x,y)$ ignoring any 
-	      coordinate transformations set up by setCoords. Note: pixel-
-	      level operations are very inefficient and this method should 
-	      be avoided.
+	      Draws the pixel at the ``raw'' position $(x,y)$ ignoring
+	      any coordinate transformations set up by
+	      setCoords. Note: pixel- level operations are very
+	      inefficient and this method should be avoided.
 	    */ 
 	}
 	
 	public void setBackground(Color color) {
 	    /*
-	      Sets the window background to the given color. The initial 
-	      background is gray. See Section 5.8.5 for information on 
-	      specifying colors.
+	      Sets the window background to the given color. The
+	      initial background is gray. See Section 5.8.5 for
+	      information on specifying colors.
 	    */ 
 	}
 	
 	public void close() {
 	    /*
-	      Closes the on-screen window. Once a window is closed, further 
-	      operations on the window will raise a GraphicsError exception.
+	      Closes the on-screen window. Once a window is closed,
+	      further operations on the window will raise a
+	      GraphicsError exception.
 	    */ 
 	}
 	
 	public void isClosed() {
 	    /*
-	      Returns a Boolean indicating if the window has been closed either
-	      by an explicit call to close or a click on its close box.
+	      Returns a Boolean indicating if the window has been
+	      closed either by an explicit call to close or a click on
+	      its close box.
 	    */
 	}
 	
 	public void getMouse() {
 	    /*
-	      Pauses for the user to click in the window and returns where the 
-	      mouse was clicked as a Point object. Raises GraphicsError if the 
-	      window is closed while getMouse is in progress. 
+	      Pauses for the user to click in the window and returns
+	      where the mouse was clicked as a Point object. Raises
+	      GraphicsError if the window is closed while getMouse is
+	      in progress.
 	    */
 	}
 	
 	public void setCoords(int xll, int yll, int xur, int yur) {
 	    /*
-	      Sets the coordinate system of the window. The lower left corner 
-	      is $(xll, yll)$ and the upper right corner is $(xur, yur)$. All 
-	      subsequent drawing will be done with respect to the altered 
-	      coordinate system (except for plotPixel). 
+	      Sets the coordinate system of the window. The lower left
+	      corner is $(xll, yll)$ and the upper right corner is
+	      $(xur, yur)$. All subsequent drawing will be done with
+	      respect to the altered coordinate system (except for
+	      plotPixel).
 	    */
 	}
 	
 	public void update() {
 	    /*
-	      Causes any pending window operations to be performed. Normally, 
-	      this will happen automatically during idle periods. Explicit update() 
-	      calls may be useful for animations.
+	      Causes any pending window operations to be
+	      performed. Normally, this will happen automatically
+	      during idle periods. Explicit update() calls may be
+	      useful for animations.
 	    */
 	    this.window.QueueDraw();
 	}
@@ -639,7 +637,7 @@ public class GraphicsCore {
 	    pixmap.setPixel(x, y, color);
 	}
 	
-	public void setColor(List<int> list) {
+	public void setColor(List list) {
 	    pixmap.setPixel(x, y, list);
 	}
 	
@@ -647,7 +645,7 @@ public class GraphicsCore {
 	    pixmap.setPixel(x, y, gray);
 	}
 	
-	public void setRGB(List<int> list) {
+	public void setRGB(List list) {
 	    pixmap.setPixel(x, y, list);
 	}
 	
@@ -665,7 +663,7 @@ public class GraphicsCore {
 	    return pixmap.getColor(x, y);
 	}
 	
-	public List<int> getRGB() {
+	public List getRGB() {
 	    return pixmap.getRGB(x, y);
 	}
 	
@@ -701,14 +699,13 @@ public class GraphicsCore {
 	    pixmap.setGray(x, y, gray);
 	}
 	
-	public string ToString() {
+	public string __repr__() {
 	    return String.Format("<Pixel at ({0},{1})>", x, y);
 	}
-	
-	public string StringRepr() {
+
+	public string __str__() {
 	    return String.Format("<Pixel at ({0},{1})>", x, y);
 	}
-	
     }
     
     
@@ -814,7 +811,7 @@ public class GraphicsCore {
 	    return new Color((int)r, (int)g, (int)b);
 	}
 	
-	public List<int> getRGB(int x, int y) {
+	public List getRGB(int x, int y) {
 	    /*
 	      Returns a triple (r,g,b) of the red, green, and blue 
 	      intensities of the pixel at (x,y). Intensity values are 
@@ -827,10 +824,10 @@ public class GraphicsCore {
 		g = pixels[x * bytesPerPixel + y * pixbuf.Rowstride + 1];
 		b = pixels[x * bytesPerPixel + y * pixbuf.Rowstride + 2];
 	    }
-	    List<int> list = new List<int>();
-	    list.Add((int)r);
-	    list.Add((int)g);
-	    list.Add((int)b);
+	    List list = new List();
+	    list.append((int)r);
+	    list.append((int)g);
+	    list.append((int)b);
 	    return list;
 	}
 	
@@ -850,7 +847,7 @@ public class GraphicsCore {
 	    }
 	}
 	
-	public void setPixel(int x, int y, List<int> list) {
+	public void setPixel(int x, int y, List list) {
 	    /*
 	      Color is a triple (r,g,b) representing a color for the pixel. 
 	      Sets pixel at (x,y) to the given color. 
