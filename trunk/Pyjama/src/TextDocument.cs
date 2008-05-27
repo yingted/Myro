@@ -201,5 +201,27 @@ public class TextDocument: PyjamaInterfaces.IDocument
     public int GetSize() {
     	return buffer.CharCount;
     }
+    
+    public void Cut()
+    {
+        Clipboard clipboard = Clipboard.Get(Gdk.Atom.Intern("CLIPBOARD", true));
+        buffer.CutClipboard(clipboard, true);
+    }
+    
+    public void Copy()
+    {
+        Clipboard clipboard = Clipboard.Get(Gdk.Atom.Intern("CLIPBOARD", true));
+        buffer.CopyClipboard(clipboard);
+    }
+    
+    public void Paste()
+    {
+        Clipboard clipboard = Clipboard.Get(Gdk.Atom.Intern("CLIPBOARD", true));
+        buffer.PasteClipboard(clipboard);
+    }
+    
+    public void Delete()
+    {
+        buffer.DeleteSelection(true, true);
+    }
 }
-

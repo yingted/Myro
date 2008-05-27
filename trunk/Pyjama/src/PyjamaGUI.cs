@@ -42,11 +42,11 @@ public class PyjamaGUI
         {
             foreach (string name in args)
             {
-                AddFile(name); // adds a new empty page
+                AddFile(name);
             }
         } else {
             // Add a blank page:
-            AddFile(null); // adds a new empty page
+            AddFile(null);
         }
     }
     
@@ -248,6 +248,7 @@ public class PyjamaGUI
     
     public void Edit_Cut()
     {
+        CurrentDocument.Cut();
     }
     
     public void Edit_Copy(object obj, EventArgs args)
@@ -257,6 +258,7 @@ public class PyjamaGUI
     
     public void Edit_Copy()
     {
+        CurrentDocument.Copy();
     }
     
     public void Edit_Paste(object obj, EventArgs args)
@@ -266,6 +268,7 @@ public class PyjamaGUI
     
     public void Edit_Paste()
     {
+        CurrentDocument.Paste();
     }
     
     public void Edit_Delete(object obj, EventArgs args)
@@ -275,6 +278,7 @@ public class PyjamaGUI
     
     public void Edit_Delete()
     {
+        CurrentDocument.Delete();
     }
     
     public void Help_About(object obj, EventArgs args)

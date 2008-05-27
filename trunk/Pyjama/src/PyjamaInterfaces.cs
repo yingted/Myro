@@ -17,6 +17,10 @@ namespace PyjamaInterfaces
 	int GetPage();
 	void SetPage(int page);
 	int GetSize();
+        void Cut();
+        void Copy();
+        void Paste();
+        void Delete();
         bool Untitled { get; }
     }
 
