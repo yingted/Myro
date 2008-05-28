@@ -344,6 +344,7 @@ public class PythonShell: PyjamaInterfaces.IShell
         command("import sys");
         command("sys.path.append('.')");
         command("sys.path.append('python')");
+        command("sys.path.append('DLLs')");
         buffer.Text += "# Python " + command("sys.version") + "\n" +
                        "# " + command("sys.copyright") + "\n";
         command("del sys");

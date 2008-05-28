@@ -1,5 +1,5 @@
 import clr
-clr.AddReference("GraphicsCore.dll")
+clr.AddReference("Graphics.dll")
 clr.AddReference("gtk-sharp")
 clr.AddReference("gdk-sharp")         
 clr.AddReference("gnome-sharp")
@@ -10,4 +10,4 @@ import Gnome
 import Gdk
 Gtk.Application.Init()
 
-from GraphicsCore import *
+from Graphics import *

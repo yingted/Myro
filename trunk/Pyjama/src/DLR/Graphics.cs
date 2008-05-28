@@ -32,7 +32,7 @@ using Gnome;
 using IronPython.Runtime;
 // uses: List
 
-public class GraphicsCore {
+public class Graphics {
 
     static GraphWin defaultWindow = null;
     public static Color black     = new Color(0,     0,   0);
@@ -48,7 +48,7 @@ public class GraphicsCore {
     public static Color magenta   = new Color(255,   0, 255);
     public static Color cyan      = new Color(  0, 255, 255);
     
-    public GraphicsCore() {
+    public Graphics() {
 	// Gtk.Application.Init()
     }
     
