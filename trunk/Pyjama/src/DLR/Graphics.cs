@@ -29,7 +29,9 @@ using Gnome;
 
 // This should come from the DLR, not Python:
 using IronPython.Runtime;
-// uses: List
+// uses: List, ICodeFormattable
+using Microsoft.Scripting.Runtime;
+// uses: __repr__
 
 public class Graphics {
 
@@ -642,7 +644,7 @@ public class Graphics {
 	}
     }
     
-    public class Pixel {
+    public class Pixel : ICodeFormattable {
 	
 	int x, y;
 	Pixmap pixmap;
@@ -653,6 +655,10 @@ public class Graphics {
 	    this.pixmap = pixmap;
 	}
 	
+	public virtual string __repr__(CodeContext context) {
+	    return String.Format("<Pixel at ({0},{1})>", x, y);
+        }
+
 	public void setColor(Color color) {
 	    pixmap.setPixel(x, y, color);
 	}
@@ -719,10 +725,6 @@ public class Graphics {
 	    pixmap.setGray(x, y, gray);
 	}
 	
-	public string __repr__() {
-	    return String.Format("<Pixel at ({0},{1})>", x, y);
-	}
-
 	public string __str__() {
 	    return String.Format("<Pixel at ({0},{1})>", x, y);
 	}
