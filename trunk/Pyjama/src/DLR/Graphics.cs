@@ -22,6 +22,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 
 using Gtk;
 using Gdk;
@@ -35,7 +36,7 @@ using Microsoft.Scripting.Runtime;
 
 public class Graphics {
 
-    static GraphWin defaultWindow = null;
+    public static GraphWin _defaultWindow = null;
     public static Color black     = new Color(0,     0,   0);
     public static Color white     = new Color(255, 255, 255);
     public static Color blue      = new Color(  0,   0, 255);
@@ -54,16 +55,23 @@ public class Graphics {
     }
     
     public static void show() {
-	if (defaultWindow != null) {
-	    defaultWindow.update();
+	if (_defaultWindow != null) {
+	    _defaultWindow.update();
 	}
     }
     
     public static void show(Image image) {
-	if (defaultWindow == null) {
-	    defaultWindow = new GraphWin();
+	if (_defaultWindow == null) {
+	    _defaultWindow = new GraphWin();
+	    image.draw(_defaultWindow);
+	} else {
+	    try {
+		image.draw(_defaultWindow);
+	    } catch {
+		_defaultWindow = new GraphWin();
+		image.draw(_defaultWindow);
+	    }
 	}
-	image.draw(defaultWindow);
     }
     
     public static IEnumerator getPixels(Pixmap pixmap) {
@@ -121,7 +129,7 @@ public class Graphics {
 	color.setRGB(gray);
     }
     
-    public class Color {
+    public class Color : ICodeFormattable {
 	
 	int red, green, blue;
 	
@@ -189,9 +197,14 @@ public class Graphics {
 	    green = gray;
 	    blue = gray;
 	}
+
+	public virtual string __repr__(CodeContext context) {
+	    return String.Format("<Color (r={0},g={1},b={2})>",
+				 red, green, blue);
+        }
     }
     
-    public class GraphWin {
+    public class GraphWin : ICodeFormattable {
 	
 	public Gtk.Window window;
 	public Gnome.Canvas canvas;
@@ -203,9 +216,13 @@ public class Graphics {
 	public GraphWin(string title, int width, int height) {
 	    this.window = new Gtk.Window(title);
 	    this.canvas = new Gnome.Canvas();
-	    this.window.Add(canvas);
-	    this.window.Resize(width, height);
-	    this.window.ShowAll();
+	    // expand, fill, padding
+	    canvas.SetSizeRequest(width, height);
+	    canvas.SetScrollRegion(0.0, 0.0, 
+				   (double) width, (double) height);
+	    window.Resize(width, height);
+	    window.Add(canvas);
+	    window.ShowAll();
 	}
 	
 	public void plot(int x, int y, Color color) {
@@ -278,9 +295,13 @@ public class Graphics {
 	    */
 	    this.window.QueueDraw();
 	}
+
+	public virtual string __repr__(CodeContext context) {
+	    return String.Format("<GraphWin object>");
+        }
     }
     
-    public class BaseGraphic {            
+    public class BaseGraphic {
 	
 	Color fillColor;
 	Color outlineColor;
@@ -338,7 +359,7 @@ public class Graphics {
 	}
     }
     
-    public class Point: BaseGraphic {
+    public class Point: BaseGraphic, ICodeFormattable {
 	
 	public int x, y;
 	
@@ -361,12 +382,17 @@ public class Graphics {
 	public Point clone() {
 	    return new Point(this.x, this.y);
 	}
+
+	public virtual string __repr__(CodeContext context) {
+	    return String.Format("<Point at ({0},{1})>", x, y);
+        }
     }
     
-    public class Line: BaseGraphic {
+    public class Line: BaseGraphic, ICodeFormattable {
 	
 	Point point1, point2;
 	Gnome.CanvasLine line;
+	Gnome.CanvasPoints points;
 	string arrowType;
 	
 	public Line(Point point1, Point point2) {
@@ -381,9 +407,9 @@ public class Graphics {
 	public void draw(GraphWin aGraphWin) {
 	    this.graphwin = aGraphWin;
 	    this.line = new Gnome.CanvasLine(this.graphwin.canvas.Root());
-	    int [] points = new int[] {this.point1.x, this.point1.y, 
-				       this.point2.x, this.point2.y};
-	    //this.line.Points = new Gnome.CanvasPoints( points );
+	    points = new Gnome.CanvasPoints(new double[]{
+		    point1.x, point1.y, point2.x, point2.y});
+	    this.line.Points = points;
 	}
 	
 	public void setArrow(string arrowType) {
@@ -417,11 +443,22 @@ public class Graphics {
 	    /*Returns a clone of the corresponding endpoint of the segment. */
 	    return this.point2.clone();
 	}
+
+	public virtual string __repr__(CodeContext context) {
+	    return String.Format("<Line at ({0},{1}) to ({2},{3})>",
+				 point1.x, point1.y, point2.x, point2.y);
+        }
     }
     
-    public class Circle: BaseGraphic {
+    public class Circle: BaseGraphic, ICodeFormattable {
+	Point point1, point2;
+	Point centerPoint;
+	int radius;
+
 	public Circle(Point centerPoint, int radius) {
 	    /*Constructs a circle with given center point and radius. */
+	    this.centerPoint = centerPoint;
+	    this.radius = radius;
 	}
 	
 	public void getCenter() {
@@ -447,9 +484,15 @@ public class Graphics {
 	      that circumscribes the circle. 
 	    */
 	}
+
+	public virtual string __repr__(CodeContext context) {
+	    return String.Format("<Circle at ({0},{1}) radius={2}>",
+				 centerPoint.x, centerPoint.y, radius);
+        }
     }
     
-    public class Rectangle : BaseGraphic {
+    public class Rectangle : BaseGraphic, ICodeFormattable {
+	Point point1, point2;
 	public Rectangle(Point point1, Point point2) {
 	    /*
 	      Constructs a rectangle having opposite corners at point1 and
@@ -474,10 +517,17 @@ public class Graphics {
 	      the rectangle. 
 	    */
 	}
+
+	public virtual string __repr__(CodeContext context) {
+	    return String.Format("<Rectangle at ({0},{1}) to ({2},{3})>",
+				 point1.x, point1.y, point2.x, point2.y);
+        }
     }
     
     
-    public class Oval: BaseGraphic {
+    public class Oval: BaseGraphic, ICodeFormattable {
+
+	Point point1, point2;
 	
 	public Oval(Point point1, Point point2) {
 	    /*
@@ -505,10 +555,15 @@ public class Graphics {
 	      the oval.
 	    */
 	}
+
+	public virtual string __repr__(CodeContext context) {
+	    return String.Format("<Oval at ({0},{1}) to ({2},{3})>", 
+				 point1.x, point1.y, point2.x, point2.y);
+        }
     }
     
     
-    public class Polygon: BaseGraphic {
+    public class Polygon: BaseGraphic, ICodeFormattable {
 	
 	public Polygon(Point points) {
 	    /*
@@ -523,27 +578,39 @@ public class Graphics {
 	      construct the polygon.
 	    */
 	}
+
+	public virtual string __repr__(CodeContext context) {
+	    return String.Format("<Polygon object>");
+        }
     }
     
-    public class Text : BaseGraphic {
+    public class Text : BaseGraphic, ICodeFormattable {
 	
+	Point anchorPoint;
+	String str;
+
 	public Text(Point anchorPoint, string s) {
 	    /*
 	      Constructs a text object that displays the given string
 	      centered at anchorPoint. The text is displayed
 	      horizontally. */
+	    this.anchorPoint = anchorPoint; // FIXME
+	    this.str = s;
 	}
 	
 	public void setText(string s) {
 	    /*Sets the text of the object to string. */
+	    str = s;
 	}
 	
-	public void getText() {
+	public string getText() {
 	    /*Returns the current string. */
+	    return str;
 	}
 	
-	public void getAnchor() {
+	public Point getAnchor() {
 	    /*Returns a clone of the anchor point. */
+	    return anchorPoint; // FIXME
 	}
 	
 	public void setFace(string family) {
@@ -573,24 +640,35 @@ public class Graphics {
 	      same effect. 
 	    */
 	}
+
+	public virtual string __repr__(CodeContext context) {
+	    return String.Format("<Text object>");
+        }
     }
     
-    public class Entry : BaseGraphic {
+    public class Entry : BaseGraphic, ICodeFormattable {
 	
+	Point centerPoint;
+	int width;
+
 	public Entry(Point centerPoint, int width) {
 	    /*
 	      Constructs an Entry having the given center point and
 	      width. The width is specified in number of characters of text
 	      that can be displayed. 
 	    */
+	    this.centerPoint = centerPoint;
+	    this.width = width;
 	}
 	
 	public void getAnchor() {
-	    /*Returns a clone of the point where the entry box is centered. */
+	    /*Returns a clone of the point where the entry box is
+	     * centered. */
 	}
 	
 	public void getText() {
-	    /*Returns the string of text that is currently in the entry box. */
+	    /*Returns the string of text that is currently in the
+	     * entry box. */
 	}
 	
 	public void setText(string s) {
@@ -598,23 +676,32 @@ public class Graphics {
 	}
 	
 	public void setFace(string family) {
-	    /*Changes the font face to the given family. Possible values are { 'helvetica', 'courier', 'times roman', and 'arial'. */
+	    /*Changes the font face to the given family. Possible
+	     * values are { 'helvetica', 'courier', 'times roman', and
+	     * 'arial'. */
 	}
 	
 	public void setSize(int point) {
-	    /*Changes the font size to the given point size. Sizes from 5 to 36 points are legal. */
+	    /*Changes the font size to the given point size. Sizes
+	     * from 5 to 36 points are legal. */
 	}
 	
 	public void setStyle(string style) {
-	    /*Changes font to the given style. Possible values are { 'normal', 'bold', 'italic', and 'bold italic'. */
+	    /*Changes font to the given style. Possible values are {
+	     * 'normal', 'bold', 'italic', and 'bold italic'. */
 	}
 	
 	public void setTextColor(Color color) {
 	    /*Sets the color of the text to color*/
 	}
+
+	public virtual string __repr__(CodeContext context) {
+	    return String.Format("<Entry at ({0},{1}) width={2}>",
+				 centerPoint.x, centerPoint.y, width);
+        }
     }
     
-    public class Image : BaseGraphic {
+    public class Image : BaseGraphic, ICodeFormattable {
 	
 	Pixmap image;
 	Point centerPoint;
@@ -642,6 +729,10 @@ public class Graphics {
 	    this.cpixbuf.X = this.centerPoint.x;
 	    this.cpixbuf.Y = this.centerPoint.y;
 	}
+
+	public virtual string __repr__(CodeContext context) {
+	    return String.Format("<Image object>");
+        }
     }
     
     public class Pixel : ICodeFormattable {
@@ -655,10 +746,6 @@ public class Graphics {
 	    this.pixmap = pixmap;
 	}
 	
-	public virtual string __repr__(CodeContext context) {
-	    return String.Format("<Pixel at ({0},{1})>", x, y);
-        }
-
 	public void setColor(Color color) {
 	    pixmap.setPixel(x, y, color);
 	}
@@ -728,10 +815,14 @@ public class Graphics {
 	public string __str__() {
 	    return String.Format("<Pixel at ({0},{1})>", x, y);
 	}
+
+	public virtual string __repr__(CodeContext context) {
+	    return String.Format("<Pixel at ({0},{1})>", x, y);
+        }
     }
     
     
-    public class Pixmap : BaseGraphic {
+    public class Pixmap : BaseGraphic, ICodeFormattable {
 	
 	public Gdk.Pixbuf pixbuf;
 	int bytesPerPixel;
@@ -742,7 +833,7 @@ public class Graphics {
 	      height and width. See Image for supported file types. 
 	    */
 	    // false is HasAlpha
-	    this.pixbuf = new Gdk.Pixbuf(Gdk.Colorspace.Rgb, false, 8, 200, 200);
+	    this.pixbuf = new Gdk.Pixbuf(Gdk.Colorspace.Rgb,false,8,200,200);
 	    bytesPerPixel = this.pixbuf.HasAlpha ? 4 : 3;
 	    clear();
 	}
@@ -1026,5 +1117,10 @@ public class Graphics {
 	    copy.pixbuf = this.pixbuf.Copy(); // or Clone()
 	    return copy;
 	}
+
+	public virtual string __repr__(CodeContext context) {
+	    return String.Format("<Pixmap ({0},{1})>", 
+				 pixbuf.Width, pixbuf.Height);
+        }
     }
 }
