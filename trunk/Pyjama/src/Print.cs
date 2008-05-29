@@ -9,7 +9,8 @@ class PrintText
 	
 	public PrintText(TextView tv)
 	{
-		this.tv = tv;
+		this.tv = new TextView();
+		this.tv.Buffer = tv.Buffer;
 		Gtk.Window win = new Gtk.Window("Print Text");
 		win.SetDefaultSize(400, 300);
 		//win.DeleteEvent += new DeleteEventHandler(OnWinDelete);
@@ -32,14 +33,14 @@ class PrintText
 	
 	void OnPrintClicked(object o, EventArgs args)
 	{
-		PrintJob pj = new PrintJob(PrintConfig.Default ());
+		PrintJob pj = new PrintJob(PrintConfig.Default());
 		PrintDialog dialog = new PrintDialog(pj, "Print Test", 0);
-		int response = dialog.Run ();
+		int response = dialog.Run();
 		Console.WriteLine("response: " + response);
 		if (response == (int) PrintButtons.Cancel) {
-			Console.WriteLine ("Canceled");
-			dialog.Hide ();
-			dialog.Dispose ();
+			Console.WriteLine("Canceled");
+			dialog.Hide();
+			dialog.Dispose();
 			return;
 		}
 		PrintContext ctx = pj.Context;
