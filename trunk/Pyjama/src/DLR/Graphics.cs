@@ -22,7 +22,6 @@
 
 using System;
 using System.Collections;
-using System.Collections.Generic;
 
 using Gtk;
 using Gdk;
@@ -208,7 +207,11 @@ public class Graphics {
 	
 	public Gtk.Window window;
 	public Gnome.Canvas canvas;
+	Color background;
 	
+	public GraphWin(int width, int height): 
+	    this("Graphics Window", width, height) {
+	}
 	public GraphWin(): this("Graphics Window", 200, 200) {
 	}
 	public GraphWin(string title): this(title, 200, 200) {
@@ -223,6 +226,10 @@ public class Graphics {
 	    window.Resize(width, height);
 	    window.Add(canvas);
 	    window.ShowAll();
+	}
+
+	public void plot(int x, int y) {
+	    this.plot(x, y, black);
 	}
 	
 	public void plot(int x, int y, Color color) {
@@ -332,8 +339,6 @@ public class Graphics {
 	      be drawn in one window at a time.
 	    */
 	    this.graphwin = aGraphWin;
-	    // FIXME { add it to the canvas
-	    // win.window.Add(image) works fine
 	}
 	
 	public void undraw() {
@@ -429,7 +434,6 @@ public class Graphics {
 	}
 	public Line clone() {
 	    Line line = new Line(this.point1, this.point2);
-	    // FIXME: need to copy
 	    line.arrowType = this.arrowType;
 	    return line;
 	}
@@ -461,28 +465,32 @@ public class Graphics {
 	    this.radius = radius;
 	}
 	
-	public void getCenter() {
+	public Point getCenter() {
 	    /*Returns a clone of the center point of the circle. */
+	    return centerPoint.clone();
 	}
 	
-	public void getRadius() {
+	public int getRadius() {
 	    /*Returns the radius of the circle. */
+	    return radius;
 	}
 	
-	public void getP1() {
+	public Point getP1() {
 	    /*
 	      Returns a clone of the corresponding corner of the circle's
 	      bounding box. These are opposite corner points of a square
 	      that circumscribes the circle. 
 	    */
+	    return point1.clone();
 	}
 	
-	public void getP2() {
+	public Point getP2() {
 	    /*
 	      Returns a clone of the corresponding corner of the circle's
 	      bounding box. These are opposite corner points of a square
 	      that circumscribes the circle. 
 	    */
+	    return point2.clone();
 	}
 
 	public virtual string __repr__(CodeContext context) {
@@ -498,24 +506,30 @@ public class Graphics {
 	      Constructs a rectangle having opposite corners at point1 and
 	      point2.
 	    */
+	    this.point1 = point1;
+	    this.point2 = point2;
 	}
 	
-	public void getCenter() {
+	public Point getCenter() {
 	    /*Returns a clone of the center point of the rectangle. */
+	    return new Point((this.point1.x + this.point2.x)/2,
+			     (this.point1.y + this.point2.y)/2);
 	}
 	
-	public void getP1() {
+	public Point getP1() {
 	    /*
 	      Returns a clone of corner points originally used to construct
 	      the rectangle.
 	    */
+	    return point1.clone();
 	}
 	
-	public void getP2() {
+	public Point getP2() {
 	    /*
 	      Returns a clone of corner points originally used to construct
 	      the rectangle. 
 	    */
+	    return point2.clone();
 	}
 
 	public virtual string __repr__(CodeContext context) {
@@ -536,24 +550,28 @@ public class Graphics {
 	    */
 	}
 	
-	public void getCenter() {
+	public Point getCenter() {
 	    /*
 	      Returns a clone of the point at the center of the oval. 
 	    */
+	    return new Point((this.point1.x + this.point2.x)/2,
+			     (this.point1.y + this.point2.y)/2);
 	}
 	
-	public void getP1() {
+	public Point getP1() {
 	    /*
 	      Returns a clone of the corresponding point used to construct
 	      the oval.
 	    */
+	    return this.point1.clone();
 	}
 	
-	public void getP2() {
+	public Point getP2() {
 	    /*
 	      Returns a clone of the corresponding point used to construct
 	      the oval.
 	    */
+	    return this.point2.clone();
 	}
 
 	public virtual string __repr__(CodeContext context) {
@@ -594,7 +612,7 @@ public class Graphics {
 	      Constructs a text object that displays the given string
 	      centered at anchorPoint. The text is displayed
 	      horizontally. */
-	    this.anchorPoint = anchorPoint; // FIXME
+	    this.anchorPoint = anchorPoint; // Share!
 	    this.str = s;
 	}
 	
@@ -610,7 +628,7 @@ public class Graphics {
 	
 	public Point getAnchor() {
 	    /*Returns a clone of the anchor point. */
-	    return anchorPoint; // FIXME
+	    return anchorPoint; // Share!
 	}
 	
 	public void setFace(string family) {
@@ -661,9 +679,10 @@ public class Graphics {
 	    this.width = width;
 	}
 	
-	public void getAnchor() {
+	public Point getCenter() {
 	    /*Returns a clone of the point where the entry box is
 	     * centered. */
+	    return centerPoint.clone();
 	}
 	
 	public void getText() {
@@ -718,8 +737,9 @@ public class Graphics {
 	    this.centerPoint = centerPoint;
 	}
 	
-	public void getAnchor() {
+	public Point getCenter() {
 	    /*Returns a clone of the point where the image is centered. */
+	    return centerPoint.clone();
 	}
 	
 	public void draw(GraphWin aGraphWin) {
@@ -1112,7 +1132,6 @@ public class Graphics {
 	
 	public Pixmap clone() {
 	    /*Returns a copy of the Pixmap. */
-	    // FIXME: copy this object, and lower levels
 	    Pixmap copy = new Pixmap();
 	    copy.pixbuf = this.pixbuf.Copy(); // or Clone()
 	    return copy;
