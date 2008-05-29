@@ -240,4 +240,10 @@ public class TextDocument: PyjamaInterfaces.IDocument
     {
         buffer.DeleteSelection(true, true);
     }
+
+    public void Print()
+    {
+        PrintText print = new PrintText(source_view);
+    }
+
 }

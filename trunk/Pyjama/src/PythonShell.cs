@@ -458,6 +458,10 @@ public class PythonShell: PyjamaInterfaces.IShell
     {
         // FIXME: close the shell
     }
+    
+    public void Print() {
+    	PrintText print = new PrintText(source_view);
+    }
 
     public Widget GetView()
     {

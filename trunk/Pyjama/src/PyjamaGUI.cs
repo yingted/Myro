@@ -251,10 +251,21 @@ public class PyjamaGUI
         File_Exit();
     }
     
+
     public void File_Exit()
     {
         //FIXME - Ask to abandon changes on all modified documents
         Application.Quit();
+    }
+    
+    public void File_Print(object obj, EventArgs args)
+    {
+        File_Print();
+    }
+    
+    public void File_Print()
+    {
+        CurrentDocument.Print();
     }
     
     public void Edit_Cut(object obj, EventArgs args)

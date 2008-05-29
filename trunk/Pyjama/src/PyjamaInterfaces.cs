@@ -37,6 +37,7 @@ namespace PyjamaInterfaces
         void Copy();
         void Paste();
         void Delete();
+        void Print();
         bool Untitled { get; }
     }
 
@@ -47,6 +48,7 @@ namespace PyjamaInterfaces
 	void EvaluateExp(string expression);
 	void Restart();
 	void Quit();
+	void Print();
 	Widget GetView();
     }
 }
