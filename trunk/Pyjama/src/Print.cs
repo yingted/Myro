@@ -23,17 +23,17 @@ class PrintText
 		win.ShowAll();
 	}
 	
-	void MyPrint(PrintContext gpc)
+	void MyPrint(Gnome.PrintContext gpc)
 	{
-		Print.Beginpage(gpc, "demo");
-		Print.Moveto(gpc, 1, 700);
-		Print.Show(gpc, tv.Buffer.Text);
-		Print.Showpage(gpc);
+		Gnome.Print.Beginpage(gpc, "demo");
+		Gnome.Print.Moveto(gpc, 1, 700);
+		Gnome.Print.Show(gpc, tv.Buffer.Text);
+		Gnome.Print.Showpage(gpc);
 	}
 	
 	void OnPrintClicked(object o, EventArgs args)
 	{
-		PrintJob pj = new PrintJob(PrintConfig.Default());
+		Gnome.PrintJob pj = new Gnome.PrintJob(PrintConfig.Default());
 		PrintDialog dialog = new PrintDialog(pj, "Print Test", 0);
 		int response = dialog.Run();
 		Console.WriteLine("response: " + response);
@@ -43,7 +43,7 @@ class PrintText
 			dialog.Dispose();
 			return;
 		}
-		PrintContext ctx = pj.Context;
+		Gnome.PrintContext ctx = pj.Context;
 		MyPrint (ctx); 
 		pj.Close ();
 		switch (response) {
@@ -51,7 +51,7 @@ class PrintText
 			pj.Print(); 
 			break;
 		case (int) PrintButtons.Preview:
-			new PrintJobPreview(pj, "Print Test").Show();
+			new Gnome.PrintJobPreview(pj, "Print Test").Show();
 			break;
 		}
 		dialog.Hide();
