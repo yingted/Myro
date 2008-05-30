@@ -8,7 +8,7 @@ SRC=Expression.cs Marker.cs Program.cs Env.cs Hashlist.cs Primitive.cs \
 
 scheme.exe: $(SRC)
 	gmcs $(SRC) -r:Microsoft.VisualBasic.dll -r:System.Windows.Forms.dll \
-             -out:tachy.exe
+             -out:scheme.exe
 
 clean:
 	$(RM) scheme.exe *~
