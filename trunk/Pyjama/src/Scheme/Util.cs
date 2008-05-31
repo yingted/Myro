@@ -537,7 +537,7 @@ namespace Tachy
     [TypeConverter(typeof(ExpandableObjectConverter))]
     public class Pair : ICollection
     {  
-        private object car_; private Pair cdr_; 
+        private object car_; private object cdr_; 
         public bool hasMember = false;
         public string member = "";
         
@@ -547,26 +547,27 @@ namespace Tachy
 
         [TypeConverter(typeof(ExpandableObjectConverter))]
         public object car
-        {
-            get {return car_;}
-            set {car_ = value;}
-        }
+	    {
+		get {return car_;}
+		set {car_ = value;}
+	    }
 
         public Pair cdr
         {
-            get {return cdr_;}
-            set {cdr_ = value;}
-        }
-        
+            get {return (Pair)cdr_;}
+	    set {cdr_ = (object) value;}
+	}
+    
         public static Pair Cons(object obj, Pair p)
         {
             Pair newPair = new Pair(obj);
             newPair.cdr = p;
             return newPair;
         }
-
+        
         public static Pair Cons(object obj, object p)
         {
+	    // FIXME!
             if (p != null)
                 throw new Exception("dotted pairs not supported");
             Pair newPair = new Pair(obj);
@@ -580,6 +581,16 @@ namespace Tachy
             while (curr.cdr != null)  { curr = curr.cdr; }
             curr.cdr = new Pair(obj);
         }
+
+	public static bool IsCdrPair(Pair p) {
+	    return p._IsCdrPair;
+	}
+
+	bool _IsCdrPair {
+	    get {
+		return (cdr_ is Pair);
+	    }
+	}
 
         public int Count 
         {
@@ -703,14 +714,12 @@ namespace Tachy
             return retval;
         }
 
-
         override public System.String ToString() 
         { 
             System.String retVal = "(";
 
-	    object current = car;
-
 	    /*
+	    object current = car;
 	    while (current != null) {
 		retVal += current.ToString();
 		if (cdr == null) {

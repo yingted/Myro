@@ -15,20 +15,6 @@ namespace Tachy
     {
         static Hashtable prims = null;
 
-/*
-          static public void InitializeGraphics()
-        {
-            // Set our presentation parameters
-            PresentParameters presentParams = new PresentParameters();
-
-            presentParams.Windowed = true;
-            presentParams.SwapEffect = SwapEffect.Discard;
-
-            // Create our device
-            device = new Device(0, DeviceType.Hardware, this, CreateFlags.SoftwareVertexProcessing, presentParams);
-        }
-*/
-
         static public IPrim getPrim(string name)
         {
             if (prims == null)
@@ -96,7 +82,10 @@ namespace Tachy
         { 
             public object Call(Object[] args)    
             { 
-                return args[0].ToString(); 
+		if (args[0] == null)
+		    return "()";
+		else
+		    return args[0].ToString(); 
             }
         }
         
@@ -114,8 +103,11 @@ namespace Tachy
         public class VecLenPrim : IPrim    
         {
             public object Call(Object[] args)    
-            { 
-                return (args[0] as System.Array).Length; 
+            {
+		if (args[0] == null)
+		    return 0;
+		else
+		    return (args[0] as System.Array).Length; 
             }
         }
         
@@ -244,7 +236,7 @@ namespace Tachy
             { 
                 if ((args[0] is Boolean) && (args[1] is Boolean))
                     return (bool) args[0] == (bool) args[1];
-                else
+                else 
                     return System.Object.ReferenceEquals(args[0],args[1]);
             } 
         }
@@ -264,14 +256,22 @@ namespace Tachy
         { 
             public object Call(Object[] args)    
             {
-                return args[0].Equals(args[1]); 
+		if (args[0] == null) {
+		    return (args[1] == null);
+		} else {
+		    return args[0].Equals(args[1]); 
+		}
             }
         }
         public class TypeofPrim : IPrim     
         { 
             public object Call(Object[] args)    
             {
-                return args[0].GetType(); 
+		if (args[0] == null) {
+		    return null;
+		} else {
+		    return args[0].GetType(); 
+		} 
             }
         }
 

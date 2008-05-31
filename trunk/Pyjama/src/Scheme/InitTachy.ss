@@ -83,11 +83,11 @@
   (eqv?-prim obj1 obj2))
 
 ;; Needs work (see TSPL)
-					;(define (equal? obj1 obj2) 
-					;		(if (pair? obj1) 
-					;			(if (equal? (car obj1) (car obj2)) 
-					;				(equal? (cdr obj1) (cdr obj2)) #f) 
-					;				(eqv? obj1 obj2)))
+;(define (equal? obj1 obj2) 
+;		(if (pair? obj1) 
+;			(if (equal? (car obj1) (car obj2)) 
+;				(equal? (cdr obj1) (cdr obj2)) #f) 
+;				(eqv? obj1 obj2)))
 
 (define (boolean? x) 
   (if (eq? x #t)
@@ -163,9 +163,6 @@
 ;; this is just too cool
 (define list 
   (lambda x x))
-
-(define (list? obj)
-  (pair? obj))
 
 (define (length lst) 
   (if (null? lst)
@@ -298,6 +295,12 @@
 	    (cons 'begin (cdr curr))
 	    (list 'if (car curr) (cons 'begin (cdr curr)) (cond-helper (cdr code)))))))
 (define-syntax cond cond-trans)
+
+;; Things that need previous
+
+(define (list? obj)
+  (or (eq? obj ()) 
+      (pair? obj)))
 
 ;; Numbers
 ;; (exact? num)
