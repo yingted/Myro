@@ -5,7 +5,7 @@ using System.Windows.Forms;
 using System.IO;
 //using EnvDTE;
 
-namespace Tachy
+namespace Scheme
 {
     // Expressions 
     public abstract class Expression 

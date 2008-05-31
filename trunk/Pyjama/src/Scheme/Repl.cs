@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using System.Windows.Forms;
 
-namespace Tachy
+namespace Scheme
 {
     // Environment
     public class Interpreter
@@ -16,7 +16,7 @@ namespace Tachy
             {
                 prog = new A_Program();
 		// FIXME; don't load if flag
-                prog.LoadEmbededInitTachy();
+                prog.LoadEmbededInitScheme();
             }
 
             int end = Environment.TickCount;
@@ -51,7 +51,7 @@ namespace Tachy
                     } 
                     catch (Exception e) 
                     {
-                        Console.WriteLine("Tachy Error: " + e.Message); // + e.Message); // .Message);
+                        Console.WriteLine("Scheme Error: " + e.Message); // + e.Message); // .Message);
                         Console.WriteLine("Stacktrace: " + e.StackTrace);
                     }
 		    if (str != null)

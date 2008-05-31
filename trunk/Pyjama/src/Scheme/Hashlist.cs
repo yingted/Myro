@@ -1,7 +1,7 @@
 using System;
 using System.Collections;
 
-namespace Tachy
+namespace Scheme
 {
 	/// <summary>
 	/// Summary description for Hashlist.

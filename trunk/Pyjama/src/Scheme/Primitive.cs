@@ -4,7 +4,7 @@ using System.Reflection;
 using System.Collections;
 using Microsoft.VisualBasic.CompilerServices;
 
-namespace Tachy
+namespace Scheme
 {
     public interface IPrim 
     {
@@ -74,7 +74,7 @@ namespace Tachy
         {
             public object Call(Object[] args)    
             {
-                return Tachy.Symbol.Create((string) args[0]); 
+                return Scheme.Symbol.Create((string) args[0]); 
             }
         }
         
@@ -281,9 +281,9 @@ namespace Tachy
             public object Call(Object[] args) // sym typename, pair usings
             {
                 if (args[1] == null)
-                    return Tachy.Util.GetType(args[0].ToString());
+                    return Scheme.Util.GetType(args[0].ToString());
                 else
-                    return Tachy.Util.GetType(args[0].ToString(), args[1] as Pair);
+                    return Scheme.Util.GetType(args[0].ToString(), args[1] as Pair);
             }
         }
 

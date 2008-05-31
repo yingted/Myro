@@ -3,11 +3,10 @@ using System.IO;
 using System.Reflection;
 using System.Collections;
 using System.Diagnostics;
-//using EnvDTE;
 using System.Windows.Forms;
 using System.ComponentModel;
 
-namespace Tachy
+namespace Scheme
 {
     public class Util
     {

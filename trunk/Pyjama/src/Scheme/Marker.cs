@@ -8,7 +8,7 @@ using System.IO;
 //using Microsoft.Office.Core;
 
 
-namespace Tachy
+namespace Scheme
 {
 	/// <summary>
 	/// Summary description for Marker.
@@ -244,20 +244,20 @@ namespace Tachy
 		public static bool GetEnabledStatus(string commandName)
 		{
 			return
-				(commandName == "TachyExtension.Connect.Start")||
-				((commandName == "TachyExtension.Connect.BreakAll") && (tachyProg != null) && (!debugWaitEventIsWaiting) && (!tachyMainCommandEventIsWaiting))||
-				((commandName == "TachyExtension.Connect.Stop") && (tachyProg != null))||
-				((commandName == "TachyExtension.Connect.Restart") && (tachyProg != null))||
-				(commandName == "TachyExtension.Connect.StepInto")||
-				(commandName == "TachyExtension.Connect.StepOver")||
-				((commandName == "TachyExtension.Connect.StepSelected") && tachyMainCommandEventIsWaiting)||
-				((commandName == "TachyExtension.Connect.RunSelected") && (tachyMainCommandEventIsWaiting || debugWaitEventIsWaiting ) )||
-				((commandName == "TachyExtension.Connect.StepCurrentDocument") && (tachyMainCommandEventIsWaiting))||
-				((commandName == "TachyExtension.Connect.RunCurrentDocument") && (tachyMainCommandEventIsWaiting || debugWaitEventIsWaiting ) )||
-				((commandName == "TachyExtension.Connect.ShowNextStatement") && (debugWaitEventIsWaiting))||
-				(commandName == "TachyExtension.Connect.Clear")||
-				(commandName == "TachyExtension.Connect.ShowAllTachyWindows")||
-				(commandName == "TachyExtension.Connect.HideAllTachyWindows")||
+				(commandName == "SchemeExtension.Connect.Start")||
+				((commandName == "SchemeExtension.Connect.BreakAll") && (tachyProg != null) && (!debugWaitEventIsWaiting) && (!tachyMainCommandEventIsWaiting))||
+				((commandName == "SchemeExtension.Connect.Stop") && (tachyProg != null))||
+				((commandName == "SchemeExtension.Connect.Restart") && (tachyProg != null))||
+				(commandName == "SchemeExtension.Connect.StepInto")||
+				(commandName == "SchemeExtension.Connect.StepOver")||
+				((commandName == "SchemeExtension.Connect.StepSelected") && tachyMainCommandEventIsWaiting)||
+				((commandName == "SchemeExtension.Connect.RunSelected") && (tachyMainCommandEventIsWaiting || debugWaitEventIsWaiting ) )||
+				((commandName == "SchemeExtension.Connect.StepCurrentDocument") && (tachyMainCommandEventIsWaiting))||
+				((commandName == "SchemeExtension.Connect.RunCurrentDocument") && (tachyMainCommandEventIsWaiting || debugWaitEventIsWaiting ) )||
+				((commandName == "SchemeExtension.Connect.ShowNextStatement") && (debugWaitEventIsWaiting))||
+				(commandName == "SchemeExtension.Connect.Clear")||
+				(commandName == "SchemeExtension.Connect.ShowAllSchemeWindows")||
+				(commandName == "SchemeExtension.Connect.HideAllSchemeWindows")||
 				false;//the only function of false is to ease adding commands at the bottom with copy/paste
 
 		}
@@ -334,8 +334,8 @@ namespace Tachy
 			procIndexOfItemInCallStack.Add(procs.Count - 1);
 
 			//ListViewItem lvi = callstackListView.Items.Add("");
-			//lvi.SubItems.Add("(Tachy)");
-			calls.Add("(Tachy)");
+			//lvi.SubItems.Add("(Scheme)");
+			calls.Add("(Scheme)");
 		}
 
 		public static void Push(Closure proc, Expression rator, Object[] args, Marker marker)
@@ -360,7 +360,7 @@ namespace Tachy
 			procIndexOfItemInCallStack.Add(procs.Count - 1);
 			string ratorname;
 			if (rator is Var)
-				ratorname = ((Tachy.Var) rator).id.ToString();
+				ratorname = ((Scheme.Var) rator).id.ToString();
 			else
 				ratorname = "...";
 

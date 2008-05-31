@@ -3,7 +3,7 @@ using System.IO;
 using System.Collections;
 using System.Reflection;
 
-namespace Tachy
+namespace Scheme
 {
     // Interpreter
     // Programs 
@@ -25,13 +25,13 @@ namespace Tachy
         } // new Pair(new Symbol("x")), new Pair(3), Env.The_Empty_Env);}
         // this.initEnv = Env.The_Empty_Env; // new Pair(new Symbol("x")), new Pair(3), Env.The_Empty_Env);}
             
-        public object LoadEmbededInitTachy()
+        public object LoadEmbededInitScheme()
         {
             //Assembly executingAssembly = Assembly.GetExecutingAssembly();
-            //Stream initTachyStream = executingAssembly.GetManifestResourceStream("Tachy.InitTachy.ss");
-            //StreamReader initTachyStreamReader = new StreamReader(initTachyStream); 
+            //Stream initSchemeStream = executingAssembly.GetManifestResourceStream("Scheme.InitScheme.ss");
+            //StreamReader initSchemeStreamReader = new StreamReader(initSchemeStream); 
 	    // FIXME: get from current directory?
-            StreamReader streamReader = new StreamReader("InitTachy.ss");
+            StreamReader streamReader = new StreamReader("init.ss");
             return Eval(streamReader);
         }
 

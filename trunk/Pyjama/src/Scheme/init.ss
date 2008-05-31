@@ -1,4 +1,4 @@
-;; Tachy Utility Library
+;; Scheme Utility Library
 
 ;; CLR Utility functions
 
@@ -100,7 +100,7 @@
   (eq? x '()))
 
 (define (pair? obj) 
-  (if (eq? (typeof obj) 'Tachy.Pair) #t #f))
+  (if (eq? (typeof obj) 'Scheme.Pair) #t #f))
 
 (define (integer? obj)
   (if (eq? (typeof obj) 'System.Int32) #t #f))
@@ -127,10 +127,10 @@
   (if (eq? (typeof obj) 'System.Object[]) #t #f))
 
 (define (symbol? obj)
-  (if (eq? (typeof obj) 'Tachy.Symbol) #t #f))
+  (if (eq? (typeof obj) 'Scheme.Symbol) #t #f))
 
 (define (procedure? obj)
-  (if (eq? (typeof obj) 'Tachy.Closure) #t #f))
+  (if (eq? (typeof obj) 'Scheme.Closure) #t #f))
 
 ;; Lists & Pairs
 
@@ -627,11 +627,10 @@
 (define (substring str start end) 
   (call str 'Substring start (- end start)))
 
-					; strings are immutable in clr, so state change likely remain unsupported
-					;(define (string-fill! string char)  
-
-					;(define (string->list string) 
-					;(define (list->string list) 
+; strings are immutable in clr, so state change likely remain unsupported
+;(define (string-fill! string char)  
+;(define (string->list string) 
+;(define (list->string list) 
 
 ;;  Vectors (Arrays)
 
@@ -677,7 +676,7 @@
 ;; (with-output-to-file filename thunk) 
 
 (define (write obj) 
-  (call-static 'Tachy.Util 'Dump obj))
+  (call-static 'Scheme.Util 'Dump obj))
 
 ;; (write obj output-port) 
 
