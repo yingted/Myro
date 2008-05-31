@@ -18,7 +18,9 @@ namespace Tachy
     {
         public A_Program() 
         {
-            this.initEnv = new Extended_Env(new Symbol[] { Symbol.Create("_macros") } , new Object[] { macros }, Env.The_Empty_Env);
+            this.initEnv = new Extended_Env(new Symbol[] { Symbol.Create("_macros") }, 
+					      new Object[] { macros }, 
+					      Env.The_Empty_Env);
 
         } // new Pair(new Symbol("x")), new Pair(3), Env.The_Empty_Env);}
         // this.initEnv = Env.The_Empty_Env; // new Pair(new Symbol("x")), new Pair(3), Env.The_Empty_Env);}
@@ -75,7 +77,7 @@ namespace Tachy
                     DebugInfo.RunHidden = true; //don't debug the macro expension code
 
                     Closure macroExpand = initEnv.Apply(Symbol.Create("macro-expand")) as Closure;
-                    parsedObj = macroExpand.Eval(new Object[] { parsedObj });
+                    parsedObj = macroExpand.Eval(initEnv, new Object[] { parsedObj });
 
                     DebugInfo.RunHidden = curRunHidden;
                 } 
@@ -106,7 +108,7 @@ namespace Tachy
                         expr.Mark(p);
                         initEnv.Bind(def, Eval(expr));                    
                         break;
-                    case "macro":
+                    case "define-syntax":
                         Symbol name = p.cdr.car as Symbol;
                         // Console.WriteLine("macrodef" + name + " " + Expression.Parse(p.cdr.cdr.car).Eval(initEnv).ToString());
                         Closure transformer = (Closure) Expression.Parse(p.cdr.cdr.car).Eval(initEnv);

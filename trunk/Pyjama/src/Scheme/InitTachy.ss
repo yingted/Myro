@@ -264,7 +264,7 @@
 	 (make-list-of-body-items code)) 
 	(make-list-of-operands code)))
 
-(macro let let-trans)
+(define-syntax let let-trans)
 
 (define (letrec-trans code)
   (append (list (append (append (append (list 'lambda)
@@ -275,15 +275,15 @@
 
 (define (make-undefined ls) (list 'quote 'undefined))
 (define (make-set ls) (append (list 'set!) ls))
-(macro letrec letrec-trans)
+(define-syntax letrec letrec-trans)
 
 (define (and-trans code)
   (list 'if (second code) (list 'if (third code) #t #f) #f))
-(macro and and-trans)
+(define-syntax and and-trans)
 
 (define (or-trans code)
   (list 'if (second code) #t (list 'if (third code) #t #f)))
-(macro or or-trans)
+(define-syntax or or-trans)
 
 (define (cond-trans code)
   (cond-helper (cdr code)))
@@ -294,16 +294,7 @@
 	(if (eq? (car curr) 'else)
 	    (cons 'begin (cdr curr))
 	    (list 'if (car curr) (cons 'begin (cdr curr)) (cond-helper (cdr code)))))))
-(macro cond cond-trans)
-
-;; need to move to macros
-
-;;(define (or obj1 obj2) 
-;;	(if obj1 #t (if obj2 #t #f)))
-;;
-;;(define (and obj1 obj2) 
-;;	(if obj1 (if obj2 #t #f) #f))
-
+(define-syntax cond cond-trans)
 
 ;; Numbers
 ;; (exact? num)

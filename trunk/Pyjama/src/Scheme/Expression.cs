@@ -12,8 +12,8 @@ namespace Tachy
     {
         internal Marker marker;
 
-        abstract public object Eval(Env env);
-        
+        abstract public object Eval(Env Env);
+
         internal void Mark(object obj)
         {
             if (obj is Pair)
@@ -35,6 +35,7 @@ namespace Tachy
 
         static public Expression Parse(object a)
         {
+	    Console.WriteLine("parse1");
             if (a is Symbol) 
             {
                 if (((Symbol) a).val.IndexOf(".") == -1)
@@ -52,6 +53,7 @@ namespace Tachy
                     
                 }
             }
+	    Console.WriteLine("parse2");
             if (a is Pair) 
             {
                 Pair pair = a as Pair;
@@ -70,6 +72,8 @@ namespace Tachy
                         Begin beginExps = new Begin(exps);
                         beginExps.Mark(pair);
                         return beginExps;
+                    case "dir":
+			return new SpecialForm("env");
                     case "if": 
                         Pair curr = pair.cdr;
                         Expression test_exp = Parse(curr.car);
@@ -116,10 +120,12 @@ namespace Tachy
                         curr = pair.cdr  as Pair;
                         Symbol[] ids = null;
                         bool all_in_one = false;
+			Console.WriteLine("parsing lambda...");
                         if (curr.car != null)
                         {
                             if (curr.car is Pair)
                             {
+				Console.WriteLine("each symbol is an arg!");
                                 Object[] ids_as_obj = (curr.car as Pair).ToArray();
                                 ids = new Symbol[ids_as_obj.Length];
                                 for (int i=0; i<ids_as_obj.Length; i++)
@@ -131,13 +137,16 @@ namespace Tachy
                             } 
                             else 
                             {
+				Console.WriteLine("all_in_one!");
                                 all_in_one = true;
                                 ids = new Symbol[1];
                                 ids[0] = curr.car as Symbol;
                                 if (ids[0] == null)
                                     throw new Exception("lambda error -> params must be symbols: " + Util.Dump(pair));
                             }
-                        }
+                        } else {
+			    Console.WriteLine("car is null");
+			}
                         curr = curr.cdr  as Pair;
                         // insert implied begin if neccessary
                         Expression body;
@@ -243,7 +252,7 @@ namespace Tachy
         public override object Eval(Env env)
         {
             // Debug.WriteLine("Eval->Var: " + id);
-            return env.Apply(id);
+	    return env.Apply(id);
         }
 
         override public System.String ToString() { return "<var: " + id + "> "; } 
@@ -280,12 +289,22 @@ namespace Tachy
         }
     }
 
+    public class SpecialForm : Expression {
+	string key;
+        public SpecialForm(string key) { this.key = key; }
+        public override string ToString()    {    return "<SpecialForm>";    }
+        public override object Eval(Env env)
+        {
+	    return env.ToExpression();
+        }
+    }
+
     public class Begin : Expression 
     {
         public Expression[] expressions;
         public Begin(Expression[] expressions) { this.expressions = expressions; }
         public override string ToString()    {    return "<begin: exps=[" + Util.arrayToString(expressions) + "]> ";    }
-        public override object Eval(Env env) 
+        public override object Eval(Env env)
         {
             Expression[] exps = expressions;
             // Debug.WriteLine("Eval->Begin");
@@ -332,7 +351,7 @@ namespace Tachy
             // Debug.WriteLine("Eval->Assign: " + id);
             object valEval = val.Eval(env);
             DebugInfo.EvalExpression(this);
-            return env.Bind(id, valEval);
+	    return env.Bind(id, valEval);
         }
     }
 
@@ -352,14 +371,14 @@ namespace Tachy
             {
                 DebugInfo.Push(proc as Closure, rator, args, marker);
 
-                object result = (proc as Closure).Eval(args);
+                object result = (proc as Closure).Eval(env, args);
                 
                 DebugInfo.Pop(marker);
                 
                 return result;
             }
             else
-                throw new Exception("invalid operator" + proc.ToString());
+                throw new Exception(String.Format("invalid operator '{0}'", proc.ToString()));
         }
     }
 }
