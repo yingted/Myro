@@ -494,7 +494,7 @@ namespace Tachy
             else 
                 eval_Env = localEnv; // tailcall
 
-            DebugInfo.SetEnvironment(eval_Env);
+            //DebugInfo.SetEnvironment(eval_Env);
             return body.Eval(globalEnv, eval_Env); 
         }
     }
@@ -504,7 +504,6 @@ namespace Tachy
     public class Pair : ICollection
     {  
         private object car_; private Pair cdr_; 
-        public Marker marker;
         public bool hasMember = false;
         public string member = "";
         
@@ -655,12 +654,10 @@ namespace Tachy
         public static Pair FromArrayAt(Object[] array, int pos)
         {
             Pair retval = null;
-	    try {
+	    if (array != null) { // (list) gives null array
 		for (int i=array.Length-1;i>=pos;i--) {
 		    retval = Pair.Cons(array[i], retval);
 		}
-	    } catch {
-		// FIXME to work with (list) better
 	    }
             return retval;        
         }
@@ -671,19 +668,36 @@ namespace Tachy
             CopyTo(retval, 0);
             return retval;
         }
-        
+
+
         override public System.String ToString() 
         { 
             System.String retVal = "(";
 
+	    object current = car;
+
+	    /*
+	    while (current != null) {
+		retVal += current.ToString();
+		if (cdr == null) {
+		    // ok, just end
+		} else if (cdr is Pair) {
+		    // ok, just print
+		} else { // dotted pair
+		    retVal += " . ";
+		}
+		current = cdr;
+	    }
+	    */
+            // FIXME: broke dotted pairs
             foreach (object obj in this)
             {
 		if (retVal != "(") 
 		    retVal += " ";
                 retVal += obj;
             }
+
             retVal += ")";
-            // broke dotted pairs
             return retVal;
         } 
 
