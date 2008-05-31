@@ -24,6 +24,9 @@
   (call-prim obj method args))
 
 ;; sym args
+(define (defined? name . args)
+  (defined-prim? name args))
+
 (define (call-static classname method . args)
   (call-static-prim classname method args))
 

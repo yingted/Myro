@@ -31,19 +31,17 @@ namespace Tachy
         {
             if (a is Symbol) 
             {
+		// FIXME: get-property interfers with dot-notation of assemblies
                 if (((Symbol) a).val.IndexOf(".") == -1)
                     return new Var(a as Symbol);
                 else
                 {
                     string aString = ((Symbol) a).val;
                     int posLastDot = aString.LastIndexOf(".");
-                    
                     Expression[] rands = new Expression[2];
                     rands[0] = Expression.Parse(Symbol.Create(aString.Substring(0, posLastDot)));
                     rands[1] = new Lit(Symbol.Create(aString.Substring(posLastDot + 1, aString.Length - posLastDot - 1)));
-
-                    return new App(Expression.Parse(Symbol.Create("get-property")), rands);
-                    
+		    return new App(Expression.Parse(Symbol.Create("get-property")), rands);
                 }
             }
             if (a is Pair) 
@@ -204,8 +202,8 @@ namespace Tachy
                             }
                             else
                             {
-                                App app = new App(Expression.Parse(pair.car), rands);
-                                return app;
+				App app = new App(Expression.Parse(pair.car), rands);
+				return app;
                             }
                         }
                 }
@@ -237,7 +235,7 @@ namespace Tachy
             // Debug.WriteLine("Eval->Var: " + id);
 	    if (localEnv.Contains(id))
 		return localEnv.Apply(id);
-	    else
+	    else // if (globalsEnv.Contains(id))
 		return globalEnv.Apply(id);
         }
 
@@ -264,7 +262,15 @@ namespace Tachy
     {
         public IPrim prim;
         public Expression[] rands;
-        public Primapp(IPrim prim, Expression[] rands) { this.prim = prim; this.rands = rands; }
+	public String rator;
+
+        public Primapp(IPrim prim, Expression[] rands) { 
+	    this.prim = prim; this.rands = rands; 
+	}
+        public Primapp(IPrim prim, String rator, Expression[] rands) { 
+	    this.rator = rator;
+	    this.rands = rands;
+	}
         override public System.String ToString() { return "<primapp: prim=" + prim + " rands=[" + Util.arrayToString(rands) + "]> "; } 
         public override object Eval(Env globalEnv, Env localEnv)
         {
@@ -349,9 +355,11 @@ namespace Tachy
 	    // FIXME: assign to whichone has it
 	    if (localEnv.Contains(id))
 		return localEnv.Bind(id, valEval);
-	    else
+	    else if (globalEnv.Contains(id))
 		return globalEnv.Bind(id, valEval);
-        }
+	    else
+		throw new Exception(String.Format("can't set! '{0}'; needs to exist", id));
+	}
     }
 
     public class App : Expression
@@ -359,25 +367,21 @@ namespace Tachy
         public Expression rator; 
         public Expression[] rands;
         public App(Expression rator, Expression[] rands) { this.rator = rator; this.rands = rands; }
-        override public System.String ToString() { return "<app: rator=" + rator + ", rands=[" + Util.arrayToString(rands) + "]> "; } 
+        override public System.String ToString() { 
+	    return "<app: rator=" + rator + ", rands=[" + Util.arrayToString(rands) + "]> "; 
+	} 
         public override object Eval(Env globalEnv, Env localEnv)
         {
-            Object proc = rator.Eval(globalEnv, localEnv);
-            Object[] args = Eval_Rands(rands, globalEnv, localEnv);
-            //DebugInfo.EvalExpression(this);
-            // Debug.WriteLine("Eval->App: " + proc + " " + args);
+            Object proc = null;
+	    proc = rator.Eval(globalEnv, localEnv);
             if (proc is Closure)
-            {
-                //DebugInfo.Push(proc as Closure, rator, args, marker);
-
-                object result = (proc as Closure).Eval(globalEnv, localEnv, args);
-                
-                //DebugInfo.Pop(marker);
-                
-                return result;
-            }
-            else
-                throw new Exception(String.Format("invalid operator '{0}'", proc.ToString()));
+	    {
+		Object[] args = Eval_Rands(rands, globalEnv, localEnv);
+		object result = (proc as Closure).Eval(globalEnv, localEnv, args);
+		return result;
+	    } else {
+		throw new Exception(String.Format("invalid operator '{0}'", proc.ToString()));
+	    }
         }
     }
 }

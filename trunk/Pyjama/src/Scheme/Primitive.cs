@@ -72,7 +72,7 @@ namespace Tachy
             prims["string->symbol-prim"] = new StrSymPrim();
             prims["tostring-prim"] = new TostringPrim();
 
-              prims["get-type-prim" ] = new GetTypePrim();
+	    prims["get-type-prim" ] = new GetTypePrim();
             prims["new-prim"] = new NewPrim();
             prims["call-prim"] = new CallPrim();
             prims["call-static-prim"] = new CallStaticPrim();
@@ -81,6 +81,7 @@ namespace Tachy
             prims["get-field-prim"] = new GetFieldPrim();
             prims["set-field-prim"] = new SetFieldPrim();
             prims["copy-debug-prim"] = new CopyDebugPrim();
+	    prims["defined-prim?"] = new DefinedPrim();
         }
 
         public class StrSymPrim : IPrim    
@@ -311,6 +312,14 @@ namespace Tachy
             public object Call(Object[] args)
             {
                 return Util.Call_Method(args,false);
+            }
+        }
+
+        public class DefinedPrim : IPrim
+        {
+            public object Call(Object[] args)
+            {
+                return Util.Defined(args);
             }
         }
 

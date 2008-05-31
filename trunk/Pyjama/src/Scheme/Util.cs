@@ -255,6 +255,40 @@ namespace Tachy
         }
 
         // could move to scheme, but likely just take out of prims & make part of Expressions.App
+        public static bool Defined(Object[] args)
+        {
+	    // 'Class.Method (args)
+	    String [] parts = args[0].ToString().Split('.');
+	    String className = "";
+	    String methodName = "";
+            Console.WriteLine(parts);	    
+	    if (parts.Length > 1) {
+		for (int i = 0; i < (parts.Length - 1); i++) {
+		    if (className != "") 
+			className += ".";
+		    className += parts[i];
+		}
+		methodName = parts[parts.Length - 1];
+		
+		Type[] types = new Type[0];
+		if (args[1] != null) 
+		    {
+			types = GetTypes((args[1] as Pair).ToArray());
+		    }
+		Type type = Util.GetType(className);
+		MethodInfo method = null;
+		try {
+		    method = type.GetMethod(methodName, types);
+		} catch {
+		    // not defined
+		}
+		return (method != null);
+	    } else {
+		return false;
+	    }
+        }
+
+        // could move to scheme, but likely just take out of prims & make part of Expressions.App
         public static object Call_Method(Object[] args, bool static_call)
         {
             // Console.WriteLine("call: " + Util.arrayToString(args));
