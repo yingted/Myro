@@ -12,7 +12,7 @@ namespace Tachy
     {
         internal Marker marker;
 
-        abstract public object Eval(Env Env);
+        abstract public object Eval(Env globalEnv, Env localEnv);
 
         internal void Mark(object obj)
         {
@@ -20,22 +20,23 @@ namespace Tachy
                 marker = ((Pair) obj).marker;
         }
 
-        static public Object[] Eval_Rands(Expression[] rands, Env env)
+        static public Object[] Eval_Rands(Expression[] rands, Env globalEnv, Env localEnv)
         {
             if (rands == null)
                 return null;
 
+	    //Console.WriteLine("Eval_Rands: rands.Length: {0}", rands.Length);
+
             Object[] dest = new Object[rands.Length];
 
             for (int i=0; i<rands.Length; i++)
-                dest[i] = rands[i].Eval(env);
+                dest[i] = rands[i].Eval(globalEnv, localEnv);
         
             return dest;
         }
 
         static public Expression Parse(object a)
         {
-	    Console.WriteLine("parse1");
             if (a is Symbol) 
             {
                 if (((Symbol) a).val.IndexOf(".") == -1)
@@ -53,7 +54,6 @@ namespace Tachy
                     
                 }
             }
-	    Console.WriteLine("parse2");
             if (a is Pair) 
             {
                 Pair pair = a as Pair;
@@ -73,7 +73,11 @@ namespace Tachy
                         beginExps.Mark(pair);
                         return beginExps;
                     case "dir":
-			return new SpecialForm("env");
+			return new SpecialForm("dir");
+                    case "globals":
+			return new SpecialForm("globals");
+                    case "locals":
+			return new SpecialForm("locals");
                     case "if": 
                         Pair curr = pair.cdr;
                         Expression test_exp = Parse(curr.car);
@@ -117,15 +121,14 @@ namespace Tachy
                     }
                     case "lambda":
                         // Debug.WriteLine("sparsing lambda " + pair.ToString());
+			//Console.WriteLine("parsing lambda...");
                         curr = pair.cdr  as Pair;
                         Symbol[] ids = null;
                         bool all_in_one = false;
-			Console.WriteLine("parsing lambda...");
                         if (curr.car != null)
                         {
                             if (curr.car is Pair)
                             {
-				Console.WriteLine("each symbol is an arg!");
                                 Object[] ids_as_obj = (curr.car as Pair).ToArray();
                                 ids = new Symbol[ids_as_obj.Length];
                                 for (int i=0; i<ids_as_obj.Length; i++)
@@ -137,16 +140,13 @@ namespace Tachy
                             } 
                             else 
                             {
-				Console.WriteLine("all_in_one!");
                                 all_in_one = true;
                                 ids = new Symbol[1];
                                 ids[0] = curr.car as Symbol;
                                 if (ids[0] == null)
                                     throw new Exception("lambda error -> params must be symbols: " + Util.Dump(pair));
                             }
-                        } else {
-			    Console.WriteLine("car is null");
-			}
+                        } 
                         curr = curr.cdr  as Pair;
                         // insert implied begin if neccessary
                         Expression body;
@@ -170,6 +170,7 @@ namespace Tachy
                             }
                             body = new Begin(begin);
                         }
+			//Console.WriteLine("returning proc");
                         return new Proc(ids, body, all_in_one);
                     default:  // app
                         if (pair.hasMember)
@@ -210,8 +211,7 @@ namespace Tachy
                                     pos++;
                                 }
                             }
-                        
-                            IPrim prim = Primitives.getPrim(pair.car.ToString());
+			    IPrim prim = Primitives.getPrim(pair.car.ToString());
                             if (prim != null)
                             {
                                 Primapp primapp = new Primapp(prim, rands);
@@ -236,7 +236,7 @@ namespace Tachy
     {
         public object datum;
         public Lit(object datum) { this.datum = datum; }
-        public override object Eval(Env env)
+        public override object Eval(Env globalEnv, Env localEnv)
         {
             // Debug.WriteLine("Eval Lit: " + datum);
             return datum;
@@ -249,10 +249,13 @@ namespace Tachy
     {
         public Symbol id;
         public Var(Symbol id) { this.id = id; }
-        public override object Eval(Env env)
+        public override object Eval(Env globalEnv, Env localEnv)
         {
             // Debug.WriteLine("Eval->Var: " + id);
-	    return env.Apply(id);
+	    if (localEnv.Contains(id))
+		return localEnv.Apply(id);
+	    else
+		return globalEnv.Apply(id);
         }
 
         override public System.String ToString() { return "<var: " + id + "> "; } 
@@ -265,11 +268,11 @@ namespace Tachy
         public bool all_in_one;
         public Proc(Symbol[] ids, Expression body, bool all_in_one) { this.ids = ids; this.body = body; this.all_in_one = all_in_one; }
         override public System.String ToString() { return "<proc: ids=[" + Util.arrayToString(ids) + "]  body=" + body + "> "; } 
-        public override object Eval(Env env)
+        public override object Eval(Env globalEnv, Env localEnv)
         {
             DebugInfo.EvalExpression(this);
             // Debug.WriteLine("Eval->Proc");
-            return new Closure(ids, body, all_in_one, env);
+            return new Closure(ids, body, all_in_one, localEnv);
         }
 
     }
@@ -280,22 +283,31 @@ namespace Tachy
         public Expression[] rands;
         public Primapp(IPrim prim, Expression[] rands) { this.prim = prim; this.rands = rands; }
         override public System.String ToString() { return "<primapp: prim=" + prim + " rands=[" + Util.arrayToString(rands) + "]> "; } 
-        public override object Eval(Env env)
+        public override object Eval(Env globalEnv, Env localEnv)
         {
             // Debug.WriteLine("Eval->Prim: " + prim.ToString());
-            Object[] eval_Rands = Eval_Rands(rands, env);
+            Object[] eval_Rands = Eval_Rands(rands, globalEnv, localEnv);
             DebugInfo.EvalExpression(this);
-            return prim.Call(eval_Rands);
+	    //Console.WriteLine("Length {0}; 1:{1}", eval_Rands.Length, eval_Rands[0]);
+	    return prim.Call(eval_Rands);
         }
     }
 
     public class SpecialForm : Expression {
 	string key;
         public SpecialForm(string key) { this.key = key; }
-        public override string ToString()    {    return "<SpecialForm>";    }
-        public override object Eval(Env env)
+        public override string ToString() {    
+	    return String.Format("<SpecialForm '{0}'>", key);    
+	}
+        public override object Eval(Env globalEnv, Env localEnv)
         {
-	    return env.ToExpression();
+	    if (key == "globals")
+		return globalEnv.ToExpression();
+	    else if (key == "locals")
+		return localEnv.ToExpression();
+	    //if (key == "dir")
+	    else
+		return new Pair(localEnv.ToExpression(), globalEnv.ToExpression());
         }
     }
 
@@ -304,13 +316,13 @@ namespace Tachy
         public Expression[] expressions;
         public Begin(Expression[] expressions) { this.expressions = expressions; }
         public override string ToString()    {    return "<begin: exps=[" + Util.arrayToString(expressions) + "]> ";    }
-        public override object Eval(Env env)
+        public override object Eval(Env globalEnv, Env localEnv)
         {
             Expression[] exps = expressions;
             // Debug.WriteLine("Eval->Begin");
             for (int i=0; i<exps.Length-1; i++)
-                exps[i].Eval(env);
-            return exps[exps.Length-1].Eval(env);
+                exps[i].Eval(globalEnv, localEnv);
+            return exps[exps.Length-1].Eval(globalEnv, localEnv);
         }
     }
 
@@ -322,17 +334,17 @@ namespace Tachy
             this.test_exp = test_exp; this.true_exp = true_exp; this.false_exp = false_exp;
         }
         override public System.String ToString() { return "<if: " + test_exp + true_exp + false_exp + "> "; } 
-        public override object Eval(Env env)
+        public override object Eval(Env globalEnv, Env localEnv)
         {
-            object testVal = test_exp.Eval(env);
+            object testVal = test_exp.Eval(globalEnv, localEnv);
             // Debug.WriteLine("Eval->If: " + testVal);
             if (!(testVal is bool)) 
                 throw new Exception("invalid test expression type in if " + testVal.ToString());
 
             if ((testVal is bool) && (((bool) testVal) == false)) // return false only if a bool false
-                return false_exp.Eval(env);
+                return false_exp.Eval(globalEnv, localEnv);
             else
-                return true_exp.Eval(env);
+                return true_exp.Eval(globalEnv, localEnv);
         }
     }
 
@@ -346,12 +358,16 @@ namespace Tachy
             return "<assignment id=" + id + " val=" + val + ">";
         }
 
-        public override object Eval(Env env)
+        public override object Eval(Env globalEnv, Env localEnv)
         {
             // Debug.WriteLine("Eval->Assign: " + id);
-            object valEval = val.Eval(env);
+            object valEval = val.Eval(globalEnv, localEnv);
             DebugInfo.EvalExpression(this);
-	    return env.Bind(id, valEval);
+	    // FIXME: assign to whichone has it
+	    if (localEnv.Contains(id))
+		return localEnv.Bind(id, valEval);
+	    else
+		return globalEnv.Bind(id, valEval);
         }
     }
 
@@ -361,17 +377,17 @@ namespace Tachy
         public Expression[] rands;
         public App(Expression rator, Expression[] rands) { this.rator = rator; this.rands = rands; }
         override public System.String ToString() { return "<app: rator=" + rator + ", rands=[" + Util.arrayToString(rands) + "]> "; } 
-        public override object Eval(Env env)
+        public override object Eval(Env globalEnv, Env localEnv)
         {
-            Object proc = rator.Eval(env);
-            Object[] args = Eval_Rands(rands, env);
+            Object proc = rator.Eval(globalEnv, localEnv);
+            Object[] args = Eval_Rands(rands, globalEnv, localEnv);
             DebugInfo.EvalExpression(this);
             // Debug.WriteLine("Eval->App: " + proc + " " + args);
             if (proc is Closure)
             {
                 DebugInfo.Push(proc as Closure, rator, args, marker);
 
-                object result = (proc as Closure).Eval(env, args);
+                object result = (proc as Closure).Eval(globalEnv, localEnv, args);
                 
                 DebugInfo.Pop(marker);
                 

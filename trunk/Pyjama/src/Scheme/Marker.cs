@@ -137,8 +137,8 @@ namespace Tachy
 			if ((!InitCalled) || (!BreakPointsSet))
 				return false;
 
-			string myName = marker.document.FullName.ToUpper();
 			/*
+			string myName = marker.document.FullName.ToUpper();
 			Breakpoints breakPoints = applicationObject.Debugger.Breakpoints;
 			foreach (EnvDTE.Breakpoint breakPoint in breakPoints)
 			{

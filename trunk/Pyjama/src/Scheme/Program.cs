@@ -30,11 +30,12 @@ namespace Tachy
             //Assembly executingAssembly = Assembly.GetExecutingAssembly();
             //Stream initTachyStream = executingAssembly.GetManifestResourceStream("Tachy.InitTachy.ss");
             //StreamReader initTachyStreamReader = new StreamReader(initTachyStream); 
+	    // FIXME: get from current directory?
             StreamReader streamReader = new StreamReader("InitTachy.ss");
             return Eval(streamReader);
         }
 
-        public override object Eval(Expression exp)        {    return exp.Eval(initEnv); }
+        public override object Eval(Expression exp)        {    return exp.Eval(initEnv, new Empty_Env()); }
         public object Eval(string str)
         {
             return Eval(new StringReader(str));
@@ -77,8 +78,11 @@ namespace Tachy
                     DebugInfo.RunHidden = true; //don't debug the macro expension code
 
                     Closure macroExpand = initEnv.Apply(Symbol.Create("macro-expand")) as Closure;
-                    parsedObj = macroExpand.Eval(initEnv, new Object[] { parsedObj });
-
+		    try {
+			parsedObj = macroExpand.Eval(initEnv, new Empty_Env(), new Object[] { parsedObj });
+		    } catch {
+			// FIXME; macro's can fail, like on special form "(lambda () 1)"
+		    }
                     DebugInfo.RunHidden = curRunHidden;
                 } 
                 
@@ -111,7 +115,7 @@ namespace Tachy
                     case "define-syntax":
                         Symbol name = p.cdr.car as Symbol;
                         // Console.WriteLine("macrodef" + name + " " + Expression.Parse(p.cdr.cdr.car).Eval(initEnv).ToString());
-                        Closure transformer = (Closure) Expression.Parse(p.cdr.cdr.car).Eval(initEnv);
+                        Closure transformer = (Closure) Expression.Parse(p.cdr.cdr.car).Eval(initEnv, new Empty_Env());
                         this.macros[name] = transformer;
                         // Console.WriteLine("macro: " + name);
                         break;

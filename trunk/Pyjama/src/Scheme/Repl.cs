@@ -15,6 +15,7 @@ namespace Tachy
             for (int i = 0; i < 10; i++)
             {
                 prog = new A_Program();
+		// FIXME; don't load if flag
                 prog.LoadEmbededInitTachy();
             }
 
@@ -30,8 +31,8 @@ namespace Tachy
                 while (true)
                 {
                     Application.DoEvents();
-                    StreamWriter str = new StreamWriter("..\\..\\transcript.ss",true);
-                    // StreamWriter str = new StreamWriter("transcript.ss", true);
+                    StreamWriter str = null;
+		    //str = new StreamWriter("transcript.ss", true);
                     try 
                     {
                         Console.WriteLine("(" + (end - start) + " ms)");
@@ -39,7 +40,8 @@ namespace Tachy
                     
                         String val = Console.ReadLine();
 
-                        str.WriteLine(val);
+			if (str != null)
+			    str.WriteLine(val);
 
                         start = Environment.TickCount;
                         object result = prog.Eval(new StringReader(val));
@@ -52,7 +54,8 @@ namespace Tachy
                         Console.WriteLine("Tachy Error: " + e.Message); // + e.Message); // .Message);
                         Console.WriteLine("Stacktrace: " + e.StackTrace);
                     }
-                    str.Close();
+		    if (str != null)
+			str.Close();
                 }
             }
         }

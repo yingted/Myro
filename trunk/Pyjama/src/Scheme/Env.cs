@@ -12,6 +12,7 @@ namespace Tachy
             return new Extended_Env(syms, vals, this);
         }
         abstract public object Apply(Symbol id);
+        abstract public bool Contains(Symbol id);
         abstract public object Bind(Symbol id, Object val);
 	abstract public Pair ToExpression();
         //    abstract public object Bind(Symbol[] ids, Object[] vals);
@@ -23,13 +24,17 @@ namespace Tachy
         {
             throw new Exception(String.Format("Unbound variable: '{0}' ", id));
         }
+        override public bool Contains(Symbol id)
+        {
+            return false;
+        }
         override public System.String ToString()
         {
             return "()";
         }
         override public Pair ToExpression()
         {
-            return new Pair(null);
+            return new Pair(new Pair(null));
         }
         override public object Bind(Symbol id, Object val)
         {
@@ -129,6 +134,13 @@ namespace Tachy
             }
         }
 
+	override public bool Contains(Symbol id) {
+	    if (this.bindings.ContainsKey(id))
+		return true;
+	    else 
+		return env.Contains(id);
+	}
+	    
         override public object Apply(Symbol id)
         {
 	    if (this.bindings.ContainsKey(id))

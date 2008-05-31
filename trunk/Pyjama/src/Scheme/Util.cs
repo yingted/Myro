@@ -29,7 +29,7 @@ namespace Tachy
                         retval += "null";
 		}
             } else
-                return "{nullarray}";
+                return "";
             return retval;
         }
 
@@ -443,7 +443,9 @@ namespace Tachy
             return ((!IsMember()) && (val.IndexOf('.') != -1));
         }
 
-        override public System.String ToString() { return val;  } 
+        override public System.String ToString() { 
+	    return val;  
+	} 
     }
 
     // Closure
@@ -455,6 +457,7 @@ namespace Tachy
         public bool all_in_one;
         public Closure(Symbol[] ids, Expression body, bool all_in_one, Env env)
         {
+	    //Console.WriteLine("returning closure");
             this.ids = ids; this.body = body; this.all_in_one = all_in_one; this.env = env; 
         }
 
@@ -464,9 +467,16 @@ namespace Tachy
 		" Body=" + body.ToString() + ">";
         }
 
-        public object Eval(Env env, Object[] args)
-        {    
-            // Debug.WriteLine("Closure.Eval: ids:" + ids + " args: " + args);
+        public object Eval(Env globalEnv, Env localEnv, Object[] args)
+        {   
+	    /*
+            Console.WriteLine("Closure.Eval: args: " + args + " all_in_one: " + all_in_one);
+	    foreach (Symbol id in ids) {
+		if (id != null)
+		    Console.Write(id + " ");
+	    }
+	    */
+	    //Console.WriteLine("eval closure");
             Env eval_Env;
             if (ids != null)
             {
@@ -475,17 +485,17 @@ namespace Tachy
                     Pair pairargs = Pair.FromArrayAt(args,0);
                     Object[] newargs = new Object[1];
                     newargs[0] = pairargs;
-                    eval_Env = env.Extend(ids, newargs);
+                    eval_Env = localEnv.Extend(ids, newargs);
                 } 
                 else
-                    eval_Env = env.Extend(ids, args); //tailcall
+                    eval_Env = localEnv.Extend(ids, args); //tailcall
 
             }
             else 
-                eval_Env = env; // tailcall
+                eval_Env = localEnv; // tailcall
 
             DebugInfo.SetEnvironment(eval_Env);
-            return body.Eval(eval_Env); 
+            return body.Eval(globalEnv, eval_Env); 
         }
     }
 
@@ -543,10 +553,8 @@ namespace Tachy
             get 
             {
                 int len = 0;
-                Object sigh; // only to get rid of compiler warning
                 foreach (object obj in this)
                 {
-                    sigh = obj;
                     len++;
                 }
                 return len;
@@ -647,9 +655,13 @@ namespace Tachy
         public static Pair FromArrayAt(Object[] array, int pos)
         {
             Pair retval = null;
-
-            for (int i=array.Length-1;i>=pos;i--)
-                retval = Pair.Cons(array[i], retval);
+	    try {
+		for (int i=array.Length-1;i>=pos;i--) {
+		    retval = Pair.Cons(array[i], retval);
+		}
+	    } catch {
+		// FIXME to work with (list) better
+	    }
             return retval;        
         }
 
