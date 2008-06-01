@@ -310,29 +310,19 @@ namespace Scheme
             // Console.WriteLine(" = " + args[1]);
             
             object retval = null;
+	    MethodInfo method = null;
             try 
             {
-                // Console.WriteLine("Method " + args[0].ToString() + "." + args[1].ToString());
-                MethodInfo method = type.GetMethod(args[1].ToString(), types);
-                if (method != null)
-                    retval = method.Invoke(args[0], objs);
-                else 
-                {
-                    throw new Exception("call: Could not find method " + args[1]);
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                Console.WriteLine("Method " + args[0].ToString() + "." + args[1].ToString() + " failed with arguments ");
-                for (int i=0; i<objs.Length; i++)
-                {
-                    if (objs[i] == null)
-                        Console.WriteLine("null " + "[type: " + types[i] + "]");
-                    else
-                        Console.WriteLine(objs[i] + "[type: " + types[i] + "]");
-                }
-            }
+                method = type.GetMethod(args[1].ToString(), types);
+	    } catch {
+		throw new Exception("call: method sig not found " + args[1]);
+	    }
+	    if (method != null)
+		// FIXME: can reflection tell us how many returns?
+		retval = method.Invoke(args[0], objs);
+	    else { 
+		throw new Exception("call: method sig not found " + args[1]);
+	    }
             return retval;
         }
 
