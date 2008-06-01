@@ -316,7 +316,7 @@ namespace Scheme
         {
             public object Call(Object[] args)    
             {
-		Console.WriteLine("args: {0}", Util.arrayToString(args));
+		//Console.WriteLine("args: {0}", Util.arrayToString(args));
                 Type type = Util.GetType(args[0].ToString(), args[1] as Pair);
 		if (type != null) {
 		    try 
