@@ -56,9 +56,9 @@ namespace Scheme
                 */
                 return read_token(str);
             }
-            else if (c.Equals('('))
+            else if (c.Equals('(') || c.Equals('['))
                 return left_paren_token;
-            else if (c.Equals(')'))
+            else if (c.Equals(')') || c.Equals(']'))
                 return right_paren_token;
             else if (c.Equals('\''))                                                                            // Quote
             {

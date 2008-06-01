@@ -65,30 +65,28 @@ namespace Scheme
 
         public object Eval(TextReader str)
         {
-            //Console.WriteLine("starting eval");
             Object evaledObj = null;
             Object parsedObj = Util.read(str);
-
-            
             if (parsedObj is Pair)
             {
                 if (macros.Count > 0)
                 {
-                    //bool curRunHidden = DebugInfo.RunHidden;
-                    //DebugInfo.RunHidden = true; //don't debug the macro expension code
-
                     Closure macroExpand = initEnv.Apply(Symbol.Create("macro-expand")) as Closure;
 		    try {
 			parsedObj = macroExpand.Eval(initEnv, new Empty_Env(), new Object[] { parsedObj });
 		    } catch {
-			// FIXME; macro's can fail, like on special form "(lambda () 1)"
+			// FIXME; macro's can fail?
 		    }
-                    //DebugInfo.RunHidden = curRunHidden;
                 } 
                 
                 Pair p = parsedObj as Pair;
                 switch (p.car.ToString()) 
                 {
+		    case "load":
+			String filename = (String) Expression.Parse(p.cdr.car).Eval(initEnv, new Empty_Env());
+			String text = File.OpenText(filename).ReadToEnd();
+			Eval(new StringReader(text));
+			break;
                     case "define":
                         Expression expr = null;
                         Symbol def = null;

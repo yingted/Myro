@@ -142,12 +142,16 @@
 (define (set-cdr! a ls) 
   (if (pair? a)
       (set-proper-cdr-prim ls a)
-      (set-improper-cdr-prim ls a)))
+      (if (eq? ls ())
+	  (set-proper-cdr-prim ls a)
+	  (set-improper-cdr-prim ls a))))
 
 (define (cons obj ls)
   (if (pair? ls)
       (cons-proper-prim obj ls)
-      (cons-improper-prim obj ls)))
+      (if (eq? ls ())
+	  (cons-proper-prim obj ls)
+	  (cons-improper-prim obj ls))))
 
 (define (debug-cons from-debug-ls obj ls)
   (copy-debug-info from-debug-ls (cons obj ls)))
@@ -688,6 +692,10 @@
 
 (define (display obj)
   (call-static 'System.Console 'WriteLine (tostring obj)))
+
+(define _brackets #f)
+(define (print-brackets v)
+  (set! _brackets v))
 
 ;; (display obj output-port) 
 
