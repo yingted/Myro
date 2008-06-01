@@ -40,9 +40,11 @@ namespace Scheme
             prims["numcompare-prim"] = new NumcompPrim();
             prims["hash-ref-prim"] = new HashrefPrim();
             prims["hash-set!-prim"] = new HashsetPrim();
-            prims["cons-prim"] = new ConsPrim();
+            prims["cons-proper-prim"] = new ConsProperPrim();
+            prims["cons-improper-prim"] = new ConsImproperPrim();
             prims["set-car-prim"] = new SetCarPrim();
-            prims["set-cdr-prim"] = new SetCdrPrim();
+            prims["set-proper-cdr-prim"] = new SetProperCdrPrim();
+            prims["set-improper-cdr-prim"] = new SetImproperCdrPrim();
             prims["car-prim"] = new CarPrim();
             prims["cdr-prim"] = new CdrPrim();
             prims["eq?-prim"] = new EqPrim();
@@ -191,9 +193,18 @@ namespace Scheme
             }
         }
         
-        public class ConsPrim : IPrim    
+        public class ConsProperPrim : IPrim    
         { 
-            public object Call(Object[] args)    { return Pair.Cons(args[0], args[1] as Pair); }    
+            public object Call(Object[] args) { 
+		return Pair.Cons(args[0], args[1] as Pair); 
+	    }    
+        }
+
+        public class ConsImproperPrim : IPrim    
+        { 
+            public object Call(Object[] args) { 
+		return Pair.Cons(args[0], args[1] as Object); 
+	    }    
         }
 
         public class SetCarPrim : IPrim
@@ -205,11 +216,22 @@ namespace Scheme
             }
         }
         
-        public class SetCdrPrim : IPrim
+        public class SetProperCdrPrim : IPrim
         { 
             public object Call(Object[] args)    
             {
-                (args[0] as Pair).car = args[1];
+                (args[0] as Pair).cdr = (Pair) args[1];
+		((Pair)args[0]).proper = true;
+                return null;
+            }
+        }
+
+        public class SetImproperCdrPrim : IPrim
+        { 
+            public object Call(Object[] args)    
+            {
+                (args[0] as Pair).cdr_ = (object) args[1];
+		((Pair)args[0]).proper = false;
                 return null;
             }
         }
@@ -226,7 +248,10 @@ namespace Scheme
         { 
             public object Call(Object[] args)    
             { 
-                return (args[0] as Pair).cdr; 
+		if (((Pair)args[0]).proper)
+		    return (args[0] as Pair).cdr; 
+		else
+		    return (args[0] as Pair).cdr_; 
             } 
         }
         

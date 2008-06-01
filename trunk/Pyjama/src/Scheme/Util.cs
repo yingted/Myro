@@ -253,14 +253,15 @@ namespace Scheme
             return retval;
         }
 
-        // could move to scheme, but likely just take out of prims & make part of Expressions.App
+        // could move to scheme, but likely just take out of 
+	// prims & make part of Expressions.App
         public static bool Defined(Object[] args)
         {
 	    // 'Class.Method (args)
 	    String [] parts = args[0].ToString().Split('.');
 	    String className = "";
 	    String methodName = "";
-            Console.WriteLine(parts);	    
+            //Console.WriteLine(parts);	    
 	    if (parts.Length > 1) {
 		for (int i = 0; i < (parts.Length - 1); i++) {
 		    if (className != "") 
@@ -287,27 +288,28 @@ namespace Scheme
 	    }
         }
 
-        // could move to scheme, but likely just take out of prims & make part of Expressions.App
+        // could move to scheme, but likely just take out of 
+	// prims & make part of Expressions.App
         public static object Call_Method(Object[] args, bool static_call)
         {
             // Console.WriteLine("call: " + Util.arrayToString(args));
             // Assembly a = System.Reflection.Assembly.Load("System");
             Object[] objs = null;
             Type[] types = new Type[0];
-            if (args[2] != null) // see def of call & call-static in init.ss -- method args passed in as rest, if none then it's ()
+            if (args[2] != null) 
+		// see def of call & call-static in init.ss 
+		// method args passed in as rest, if none then it's ()
             {
                 objs = (args[2] as Pair).ToArray();
                 types = GetTypes(objs);
             }
             Type type;
-            if (static_call == true) // args.car is Symbol) // Static Method Invokation
+            if (static_call == true) // args.car is Symbol 
                 type = Util.GetType(args[0].ToString());
             else if (args[0] == null)
                 type = Type.GetType("System.Object");
             else
                 type = args[0].GetType();
-            //Console.WriteLine("type = " + type.ToString());
-            // Console.WriteLine(" = " + args[1]);
             
             object retval = null;
 	    MethodInfo method = null;
@@ -318,7 +320,6 @@ namespace Scheme
 		throw new Exception("call: method sig not found " + args[1]);
 	    }
 	    if (method != null)
-		// FIXME: can reflection tell us how many returns?
 		retval = method.Invoke(args[0], objs);
 	    else { 
 		throw new Exception("call: method sig not found " + args[1]);
@@ -378,12 +379,18 @@ namespace Scheme
                 Pair curr = exp as Pair;
                 while (curr != null)
                 {
+		    //Console.WriteLine("curr.proper is {0}", curr.proper);
 		    if (retVal != "(")
 			retVal += " ";
                     retVal += Dump(curr.car);
-                    curr = curr.cdr ;
+		    if (curr.proper)
+			curr = curr.cdr;
+		    else {
+			retVal += " . ";
+			retVal += Dump(curr.cdr_);
+			break;
+		    }
                 }
-
                 return retVal + ")";
             } 
             else if (exp == null) 
@@ -526,12 +533,15 @@ namespace Scheme
     [TypeConverter(typeof(ExpandableObjectConverter))]
     public class Pair : ICollection
     {  
-        private object car_; private object cdr_; 
+        private object car_; 
+	public object cdr_; 
         public bool hasMember = false;
         public string member = "";
+	public bool proper = true;
         
         public Pair (object car) { this.car= car; this.cdr = null; }
         public Pair (object car, Pair cdr) { this.car= car; this.cdr = cdr; }
+        public Pair (object car, object cdr) { this.car= car; this.cdr_ = cdr; }
 
 
         [TypeConverter(typeof(ExpandableObjectConverter))]
@@ -556,11 +566,9 @@ namespace Scheme
         
         public static Pair Cons(object obj, object p)
         {
-	    // FIXME!
-            if (p != null)
-                throw new Exception("dotted pairs not supported");
             Pair newPair = new Pair(obj);
-            newPair.cdr = null;
+            newPair.cdr_ = p;
+	    newPair.proper = false;
             return newPair;
         }
 
@@ -705,32 +713,7 @@ namespace Scheme
 
         override public System.String ToString() 
         { 
-            System.String retVal = "(";
-
-	    /*
-	    object current = car;
-	    while (current != null) {
-		retVal += current.ToString();
-		if (cdr == null) {
-		    // ok, just end
-		} else if (cdr is Pair) {
-		    // ok, just print
-		} else { // dotted pair
-		    retVal += " . ";
-		}
-		current = cdr;
-	    }
-	    */
-            // FIXME: broke dotted pairs
-            foreach (object obj in this)
-            {
-		if (retVal != "(") 
-		    retVal += " ";
-                retVal += obj;
-            }
-
-            retVal += ")";
-            return retVal;
+            return Util.Dump(this);
         } 
 
     }

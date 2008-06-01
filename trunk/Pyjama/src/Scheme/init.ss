@@ -4,7 +4,7 @@
 
 (define _using '())
 (define (using typestr)
-	(set! _using (cons-prim typestr _using)))
+	(set! _using (cons-proper-prim typestr _using)))
 (using "System")
 (using "System.Collections")	
 
@@ -140,10 +140,14 @@
   (set-car-prim ls a))
 
 (define (set-cdr! a ls) 
-  (set-cdr-prim ls a))
+  (if (pair? a)
+      (set-proper-cdr-prim ls a)
+      (set-improper-cdr-prim ls a)))
 
 (define (cons obj ls)
-  (cons-prim obj ls))
+  (if (pair? ls)
+      (cons-proper-prim obj ls)
+      (cons-improper-prim obj ls)))
 
 (define (debug-cons from-debug-ls obj ls)
   (copy-debug-info from-debug-ls (cons obj ls)))
