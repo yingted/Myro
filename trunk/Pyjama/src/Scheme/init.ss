@@ -8,6 +8,10 @@
 (using "System")
 (using "System.Collections")	
 
+(define (import name dllfile)
+  (import-prim dllfile)
+  (using name))
+
 (define (get-type typename)
   (get-type-prim typename _using))
 

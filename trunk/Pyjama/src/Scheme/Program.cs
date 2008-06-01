@@ -3,26 +3,21 @@ using System.IO;
 using System.Collections;
 using System.Reflection;
 
-namespace Scheme
-{
-    // Interpreter
-    // Programs 
-    public abstract class Program 
-    { 
+namespace Scheme {
+
+    public class Program {
+	
         public Env initEnv;
         public Hashtable macros = new Hashtable();
-        public abstract object Eval(Expression exp);
-    }
 
-    public class A_Program : Program 
-    {
-        public A_Program() 
+        public Program() 
         {
             this.initEnv = new Extended_Env(new Symbol[] { Symbol.Create("_macros") }, 
 					      new Object[] { macros }, 
 					      Env.The_Empty_Env);
 
-        } // new Pair(new Symbol("x")), new Pair(3), Env.The_Empty_Env);}
+        } 
+	// new Pair(new Symbol("x")), new Pair(3), Env.The_Empty_Env);}
         // this.initEnv = Env.The_Empty_Env; // new Pair(new Symbol("x")), new Pair(3), Env.The_Empty_Env);}
             
         public object LoadEmbededInitScheme()
@@ -35,7 +30,7 @@ namespace Scheme
             return Eval(streamReader);
         }
 
-        public override object Eval(Expression exp) {    
+        public object Eval(Expression exp) {    
 	    return exp.Eval(initEnv, new Empty_Env()); 
 	}
         public object Eval(string str)
@@ -137,5 +132,50 @@ namespace Scheme
             else
                 return Eval(str);
         }
+
+	public static void Main(string[] args) {
+	    int start = Environment.TickCount;
+	    Program prog = null;
+	    prog = new Program();
+	    // FIXME; don't load if flag
+	    prog.LoadEmbededInitScheme();
+	    
+	    for (int i=0; i < args.Length; i++) {
+		try {
+		    String init = File.OpenText(args[0]).ReadToEnd();
+		    prog.Eval(new StringReader(init));
+		    //StreamReader streamReader = new StreamReader(args[i]);
+		    //prog.Eval(streamReader);
+		} catch {
+		    Console.WriteLine(String.Format("Scheme: cannot load '{0}'", args[i]));
+		}
+	    }
+	    
+	    int end = Environment.TickCount;
+	    while (true) {
+		StreamWriter str = null;
+		//str = new StreamWriter("transcript.ss", true);
+		try {
+		    Console.WriteLine("(" + (end - start) + " ms)");
+		    Console.Write("> ");
+		    
+		    String val = Console.ReadLine();
+		    
+		    if (str != null)
+			str.WriteLine(val);
+		    
+		    start = Environment.TickCount;
+		    object result = prog.Eval(new StringReader(val));
+		    end = Environment.TickCount;
+		    
+		    Console.WriteLine(result);
+		} catch (Exception e) {
+		    Console.WriteLine("Scheme Error: " + e.Message); // + e.Message); // .Message);
+		    Console.WriteLine("Stacktrace: " + e.StackTrace);
+		}
+		if (str != null)
+		    str.Close();
+	    }
+	}
     }
 }

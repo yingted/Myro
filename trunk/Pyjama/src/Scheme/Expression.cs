@@ -70,8 +70,8 @@ namespace Scheme
 		    }
 		    beginExps = new Begin(exps);
 		    return beginExps;
-		case "import":
-		    return new Builtin("import", Parse(pair.cdr.car));
+		case "import-prim":
+		    return new Builtin("import-prim", Parse(pair.cdr.car));
 		case "dir":
 		    return new Builtin("dir");
 		case "globals":
@@ -309,7 +309,7 @@ namespace Scheme
 		return Util.arrayToList(localEnv.Keys());
 	    else if (key == "dir")
 		return new Pair(Util.arrayToList(localEnv.Keys()), Util.arrayToList(globalEnv.Keys()));
-	    else if (key == "import") {
+	    else if (key == "import-prim") {
 		String assname = (String) arg.Eval(globalEnv, localEnv);
 		// FIXME: filenames only here
 		Assembly assembly = Assembly.LoadFrom(assname);
@@ -318,15 +318,20 @@ namespace Scheme
 		int i = 0;
 		if (typeArray != null) {
 		    foreach (Type type in typeArray) {
-			names[i++] = type.FullName;
-			Symbol def = Symbol.Create(type.FullName);
-			Pair body = new Pair(Pair.Cons(Symbol.Create("new-prim"),
-						       Pair.Cons(type.FullName,
-								 Pair.Cons(Symbol.Create("_using"),
-									   new Pair(Symbol.Create("args"))))));
-			Expression expr = Expression.Parse(Pair.Cons(Symbol.Create("lambda"), 
-								     Pair.Cons(Symbol.Create("args"), body)));
-			globalEnv.Bind(def, (object) expr.Eval(globalEnv, localEnv));                    
+			int pos = type.FullName.IndexOf("+");
+			if (pos != -1) {
+			    string name = type.FullName.Substring(pos + 1, 
+								  type.FullName.Length - pos - 1);
+			    names[i++] = name;
+			    Symbol def = Symbol.Create(name);
+			    Pair body = new Pair(Pair.Cons(Symbol.Create("new-prim"),
+							   Pair.Cons(type.FullName,
+								     Pair.Cons(Symbol.Create("_using"),
+									       new Pair(Symbol.Create("args"))))));
+			    Expression expr = Expression.Parse(Pair.Cons(Symbol.Create("lambda"), 
+									 Pair.Cons(Symbol.Create("args"), body)));
+			    globalEnv.Bind(def, (object) expr.Eval(globalEnv, localEnv));                    
+			}
 		    }
 		}
 		return names;
