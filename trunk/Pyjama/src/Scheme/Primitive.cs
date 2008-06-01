@@ -316,20 +316,33 @@ namespace Scheme
         {
             public object Call(Object[] args)    
             {
+		Console.WriteLine("args: {0}", Util.arrayToString(args));
                 Type type = Util.GetType(args[0].ToString(), args[1] as Pair);
-                try 
-                {
-                    if (args[2] == null)
-                        return Activator.CreateInstance(type);
-                    else
-                        return Activator.CreateInstance(type, (args[2] as Pair).ToArray(), null);
-                } 
-                catch (Exception e) 
-                {
-                    Console.WriteLine("Newprim failed with type " + type);
-                    throw e;
-                }
-            }
+		if (type != null) {
+		    try 
+			{
+			    if (args[2] == null)
+				return Activator.CreateInstance(type);
+			    else
+				return Activator.CreateInstance(type, (args[2] as Pair).ToArray(), null);
+			} 
+		    catch (Exception e) 
+			{
+			    Console.WriteLine("[Newprim failed with type '{0}']", type);
+			    throw e;
+			}
+		} else {
+		    if (args[2] == null)
+			throw new Exception(String.Format("class '{0}' not found in [{1}]",
+							  args[0].ToString(),
+							  args[1].ToString()));
+		    else
+			throw new Exception(String.Format("class '{0}({2})' not found in [{1}]",
+							  args[0].ToString(),
+							  args[1].ToString(),
+							  args[2].ToString()));
+		}
+	    }
         }
 
         public class CallPrim : IPrim

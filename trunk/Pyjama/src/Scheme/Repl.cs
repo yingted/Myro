@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Windows.Forms;
 
 namespace Scheme
 {
@@ -30,7 +29,6 @@ namespace Scheme
             {
                 while (true)
                 {
-                    Application.DoEvents();
                     StreamWriter str = null;
 		    //str = new StreamWriter("transcript.ss", true);
                     try 
@@ -66,9 +64,6 @@ namespace Scheme
                 Repl(args[0]);
             else    
                 Repl(null);
-            
-            //ReplForm replForm = new ReplForm();
-            //Application.Run(replForm);
         }
     }
 
