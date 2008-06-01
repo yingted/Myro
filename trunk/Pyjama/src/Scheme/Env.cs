@@ -14,7 +14,7 @@ namespace Scheme
         abstract public object Apply(Symbol id);
         abstract public bool Contains(Symbol id);
         abstract public object Bind(Symbol id, Object val);
-	abstract public Pair ToExpression();
+	abstract public object[] Keys();
         //    abstract public object Bind(Symbol[] ids, Object[] vals);
     }
 
@@ -32,9 +32,9 @@ namespace Scheme
         {
             return "()";
         }
-        override public Pair ToExpression()
+        override public Object [] Keys()
         {
-            return new Pair(new Pair(null));
+            return new Object[0];
         }
         override public object Bind(Symbol id, Object val)
         {
@@ -50,22 +50,22 @@ namespace Scheme
 
     public class Extended_Env : Env
     {
-        internal Hashtable bindings = new Hashtable(); //Hashlist
+        internal Hashtable bindings = new Hashtable();
         internal Env env = null;
 
-	override public Pair ToExpression() {
-	    Pair retval = new Pair(new Pair(null));
-	    Pair current = (Pair) retval.car;
+	override public Object [] Keys() {
 	    // FIXME: alpha sort keys
+	    int length = 0;
 	    foreach (object key in bindings.Keys) {
-		if (current.car == null) {
-		    current.car = key; 
-		} else {
-		    current.cdr = new Pair(key);
-		    current = current.cdr;
+		length++;
+	    }
+	    Object [] retval = new Object[length];
+	    if (bindings.Keys != null) {
+		int i = 0;
+		foreach (object key in bindings.Keys) {
+		    retval[i++] = key; 
 		}
 	    }
-	    retval.cdr = env.ToExpression();
 	    return retval;
 	}
 

@@ -35,7 +35,9 @@ namespace Scheme
             return Eval(streamReader);
         }
 
-        public override object Eval(Expression exp)        {    return exp.Eval(initEnv, new Empty_Env()); }
+        public override object Eval(Expression exp) {    
+	    return exp.Eval(initEnv, new Empty_Env()); 
+	}
         public object Eval(string str)
         {
             return Eval(new StringReader(str));
@@ -82,15 +84,16 @@ namespace Scheme
                 Pair p = parsedObj as Pair;
                 switch (p.car.ToString()) 
                 {
-		    case "load":
-			String filename = (String) Expression.Parse(p.cdr.car).Eval(initEnv, new Empty_Env());
-			String text = File.OpenText(filename).ReadToEnd();
-			Eval(new StringReader(text));
-			break;
-                    case "define":
-                        Expression expr = null;
-                        Symbol def = null;
-                        if (p.cdr.car is Pair) // (define (fn x y) body)
+		case "load":
+		    String filename = (String) Expression.Parse(p.cdr.car).Eval(initEnv, new Empty_Env());
+		    Console.WriteLine("Loading '{0}'...", filename);
+		    String text = File.OpenText(filename).ReadToEnd();
+		    evaledObj = Eval(new StringReader(text));
+		    break;
+		case "define":
+		    Expression expr = null;
+		    Symbol def = null;
+		    if (p.cdr.car is Pair) // (define (fn x y) body)
                         {
                             Pair def_and_args = p.cdr.car as Pair;
                             Pair body = p.cdr.cdr;
@@ -99,27 +102,31 @@ namespace Scheme
                             expr = Expression.Parse(Pair.Cons(Symbol.Create("lambda"), Pair.Cons(syms,body)));
                             // Debug.WriteLine(def + "-->" + expr);
                         }
-                        else // (define fn (lambda (x y) body))
+		    else // (define fn (lambda (x y) body))
                         {
                             def = Symbol.Create(p.cdr.car.ToString());
                             expr = Expression.Parse(p.cdr.cdr.car);
                         }
-                        //initEnv = new Extended_Env(new Pair(def), new Pair(null), initEnv);
-                        //Object value = Eval(expr);
-                        //Console.WriteLine("defining: " + def);
-                        initEnv.Bind(def, Eval(expr));                    
-                        break;
-                    case "define-syntax":
-                        Symbol name = p.cdr.car as Symbol;
-                        // Console.WriteLine("macrodef" + name + " " + Expression.Parse(p.cdr.cdr.car).Eval(initEnv).ToString());
-                        Closure transformer = (Closure) Expression.Parse(p.cdr.cdr.car).Eval(initEnv, new Empty_Env());
-                        this.macros[name] = transformer;
-                        // Console.WriteLine("macro: " + name);
-                        break;
-                    default:
-                        // need to call macro-expand in here. but how?
-                        evaledObj = Util.Dump(Eval(Expression.Parse(parsedObj)));
-                        break;
+		    //initEnv = new Extended_Env(new Pair(def), new Pair(null), initEnv);
+		    //Object value = Eval(expr);
+		    //Console.WriteLine("defining: " + def);
+		    initEnv.Bind(def, Eval(expr));                    
+		    evaledObj = Util.Dump(null);
+		    break;
+		case "parse":
+		    evaledObj = Util.Dump(Expression.Parse(p.cdr.car));
+		    break;
+		case "define-syntax":
+		    Symbol name = p.cdr.car as Symbol;
+		    // Console.WriteLine("macrodef" + name + " " + Expression.Parse(p.cdr.cdr.car).Eval(initEnv).ToString());
+		    Closure transformer = (Closure) Expression.Parse(p.cdr.cdr.car).Eval(initEnv, new Empty_Env());
+		    this.macros[name] = transformer;
+		    // Console.WriteLine("macro: " + name);
+		    break;
+		default:
+		    // need to call macro-expand in here. but how?
+		    evaledObj = Util.Dump(Eval(Expression.Parse(parsedObj)));
+		    break;
                 }
             } 
             else 

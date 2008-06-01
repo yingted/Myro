@@ -31,6 +31,24 @@ namespace Scheme
             return retval;
         }
 
+        public static Object arrayToList(Object[] array)
+        {
+            Object retval = null;
+	    Pair current = null;
+            if (array != null) {
+                foreach (Object obj in array) {
+		    if (retval == null) {
+			retval = new Pair(obj);
+			current = (Pair) retval;
+		    } else {
+			current.cdr = new Pair(obj);
+			current = current.cdr;
+		    }
+		}
+            } 
+            return retval;
+        }
+
         public static object read_token(TextReader str)
         {
             if (str.Peek() == -1)
@@ -406,6 +424,16 @@ namespace Scheme
 		}
                 return "ArrayList:(" + retVal + ")";
             } 
+            else if (exp is Object[]) 
+            {
+                String retVal = "";
+                foreach (Object obj in (exp as Object[])) {
+		    if (retVal != "")
+			retVal += " ";
+                    retVal += Dump(obj);
+		}
+                return "(" + retVal + ")";
+            } 
             else 
             { 
                 return exp.ToString();
@@ -498,32 +526,41 @@ namespace Scheme
 
         public object Eval(Env globalEnv, Env localEnv, Object[] args)
         {   
-	    /*
-            Console.WriteLine("Closure.Eval: args: " + args + " all_in_one: " + all_in_one);
-	    foreach (Symbol id in ids) {
-		if (id != null)
-		    Console.Write(id + " ");
-	    }
-	    */
-	    //Console.WriteLine("eval closure");
             Env eval_Env;
-            if (ids != null)
-            {
+	    int idsCount = 0;
+	    int argsCount = 0;
+	    bool variableArgs = false;
+
+	    if (ids != null)
+		idsCount = ids.Length;
+	    if (args != null)
+		argsCount = args.Length;
+
+	    for (int i = 0; i < idsCount; i++) {
+		if (ids[i].ToString() == ".")
+		    variableArgs = true;
+	    }
+            if (ids != null) {
                 if (all_in_one) // this might bear optimization at some point (esp since +,-,*, etc. use this)
                 {
                     Pair pairargs = Pair.FromArrayAt(args,0);
                     Object[] newargs = new Object[1];
                     newargs[0] = pairargs;
                     eval_Env = localEnv.Extend(ids, newargs);
-                } 
-                else
-                    eval_Env = localEnv.Extend(ids, args); //tailcall
-
-            }
-            else 
-                eval_Env = localEnv; // tailcall
-
-            //DebugInfo.SetEnvironment(eval_Env);
+                } else if (idsCount != argsCount && !variableArgs) {
+		    throw new Exception(String.Format("improper number of args: expected {0} but got {1}",
+						      idsCount,
+						      argsCount));
+		} else {
+		    eval_Env = localEnv.Extend(ids, args); //tailcall
+		}
+            } else if (idsCount != argsCount && ! variableArgs) {
+		throw new Exception(String.Format("improper number of args: expected {0} but got {1}",
+						  idsCount,
+						  argsCount));
+	    } else {
+		eval_Env = localEnv; // tailcall
+	    }
             return body.Eval(globalEnv, eval_Env); 
         }
     }

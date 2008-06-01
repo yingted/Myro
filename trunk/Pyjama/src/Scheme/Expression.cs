@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Reflection;
 using System.Threading;
 using System.IO;
 
@@ -27,6 +28,7 @@ namespace Scheme
 
         static public Expression Parse(object a)
         {
+	    int pos = 0;
             if (a is Symbol) 
             {
 		// FIXME: get-property interfers with dot-notation of assemblies
@@ -55,154 +57,159 @@ namespace Scheme
 
                 switch (carString)
                 {
-                    case "begin":
-                        Expression[] exps = new Expression[pair.cdr.Count];
-                        int pos = 0;
-                        foreach (object obj in pair.cdr)
-                        {
-                            exps[pos] = Parse(obj);
-                            pos++;
-                        }
-                        Begin beginExps = new Begin(exps);
-                        return beginExps;
-                    case "dir":
-			return new SpecialForm("dir");
-                    case "globals":
-			return new SpecialForm("globals");
-                    case "locals":
-			return new SpecialForm("locals");
-                    case "if": 
-                        Pair curr = pair.cdr;
-                        Expression test_exp = Parse(curr.car);
-                        curr = curr.cdr;
-                        Expression true_exp = Parse(curr.car);
-                        curr = curr.cdr;
-                        Expression false_exp = Parse(curr.car);
-                        return new If(test_exp, true_exp, false_exp);
-                    case "quote":
-                        return new Lit(pair.cdr.car);
-                    case "set!": 
-                    {
-                        Symbol var = pair.cdr.car as Symbol;
-                        if (var == null)
-                            throw new Exception("set! error -> variable must be a symbol: " + Util.Dump(pair));
-
-                        Expression exp = Parse(pair.cdr.cdr.car) as Expression;
-                        if (var.val.IndexOf('.') == -1)
-                        {
-                            Assignment assignment = new Assignment(var, exp);
-                            return assignment;
-                        }
-                        else
-                        {
-                            string aString = var.val;
-                            int posLastDot = aString.LastIndexOf(".");
-                            Expression[] rands = new Expression[3];
-                            rands[0] = Expression.Parse(Symbol.Create(aString.Substring(0, posLastDot)));
-                            rands[1] = new Lit(Symbol.Create(aString.Substring(posLastDot + 1, aString.Length - posLastDot - 1)));
-                            rands[2] = exp;
-                            
-                            App app = new App(Expression.Parse(Symbol.Create("set-property")), rands);
-                            return app;
-                        }
-                    }
-                    case "lambda":
-                        // Debug.WriteLine("sparsing lambda " + pair.ToString());
-			//Console.WriteLine("parsing lambda...");
-                        curr = pair.cdr  as Pair;
-                        Symbol[] ids = null;
-                        bool all_in_one = false;
-                        if (curr.car != null)
+		case "begin":
+		    Begin beginExps = null;
+		    int count = ((pair.cdr == null) ? 0 : pair.cdr.Count);
+		    Expression[] exps = new Expression[count];
+		    pos = 0;
+		    if (count > 0) {
+			foreach (object obj in pair.cdr) {
+			    exps[pos] = Parse(obj);
+			    pos++;
+			}
+		    }
+		    beginExps = new Begin(exps);
+		    return beginExps;
+		case "import":
+		    return new Builtin("import", Parse(pair.cdr.car));
+		case "dir":
+		    return new Builtin("dir");
+		case "globals":
+		    return new Builtin("globals");
+		case "locals":
+		    return new Builtin("locals");
+		case "if": 
+		    Pair curr = pair.cdr;
+		    Expression test_exp = Parse(curr.car);
+		    curr = curr.cdr;
+		    Expression true_exp = Parse(curr.car);
+		    curr = curr.cdr;
+		    Expression false_exp = Parse(curr.car);
+		    return new If(test_exp, true_exp, false_exp);
+		case "quote":
+		    // FIXME: dotted pair lists need to be parsed someplace
+		    return new Lit(pair.cdr.car);
+		case "set!": 
+		    Symbol var = pair.cdr.car as Symbol;
+		    if (var == null)
+			throw new Exception("set! error -> variable must be a symbol: " + Util.Dump(pair));
+		    
+		    Expression exp = Parse(pair.cdr.cdr.car) as Expression;
+		    if (var.val.IndexOf('.') == -1)
+			{
+			    Assignment assignment = new Assignment(var, exp);
+			    return assignment;
+			}
+		    else
+			{
+			    string aString = var.val;
+			    int posLastDot = aString.LastIndexOf(".");
+			    Expression[] rands = new Expression[3];
+			    rands[0] = Expression.Parse(Symbol.Create(aString.Substring(0, posLastDot)));
+			    rands[1] = new Lit(Symbol.Create(aString.Substring(posLastDot + 1, aString.Length - posLastDot - 1)));
+			    rands[2] = exp;
+			    
+			    App app = new App(Expression.Parse(Symbol.Create("set-property")), rands);
+			    return app;
+			}
+		case "lambda":
+		    // Debug.WriteLine("sparsing lambda " + pair.ToString());
+		    //Console.WriteLine("parsing lambda...");
+		    curr = pair.cdr  as Pair;
+		    Symbol[] ids = null;
+		    bool all_in_one = false;
+		    if (curr.car != null)
                         {
                             if (curr.car is Pair)
-                            {
-                                Object[] ids_as_obj = (curr.car as Pair).ToArray();
-                                ids = new Symbol[ids_as_obj.Length];
-                                for (int i=0; i<ids_as_obj.Length; i++)
-                                {
-                                    ids[i] = ids_as_obj[i] as Symbol;
-                                    if (ids[i] == null)
-                                        throw new Exception("lambda error -> params must be symbols: " + Util.Dump(pair));
-                                }
-                            } 
+				{
+				    Object[] ids_as_obj = (curr.car as Pair).ToArray();
+				    ids = new Symbol[ids_as_obj.Length];
+				    for (int i=0; i<ids_as_obj.Length; i++)
+					{
+					    ids[i] = ids_as_obj[i] as Symbol;
+					    if (ids[i] == null)
+						throw new Exception("lambda error -> params must be symbols: " + Util.Dump(pair));
+					}
+				} 
                             else 
-                            {
-                                all_in_one = true;
-                                ids = new Symbol[1];
-                                ids[0] = curr.car as Symbol;
-                                if (ids[0] == null)
-                                    throw new Exception("lambda error -> params must be symbols: " + Util.Dump(pair));
-                            }
+				{
+				    all_in_one = true;
+				    ids = new Symbol[1];
+				    ids[0] = curr.car as Symbol;
+				    if (ids[0] == null)
+					throw new Exception("lambda error -> params must be symbols: " + Util.Dump(pair));
+				}
                         } 
-                        curr = curr.cdr  as Pair;
-                        // insert implied begin if neccessary
-                        Expression body;
-                        if (curr.cdr == null)
+		    curr = curr.cdr  as Pair;
+		    // insert implied begin if neccessary
+		    Expression body;
+		    if (curr.cdr == null)
                         {
                             body = Parse(curr.car);
                         }
-                        else
+		    else
                         {
                             Expression[] begin = new Expression[curr.Count];
                             pos = 0;
-                            foreach (object obj in curr)
-                            {
-                                begin[pos] = Parse(obj);
-                                pos++;
-                            }
+			    if (curr != null) {
+				foreach (object obj in curr) {
+				    begin[pos] = Parse(obj);
+				    pos++;
+				}
+			    }
                             body = new Begin(begin);
                         }
-			//Console.WriteLine("returning proc");
-                        return new Proc(ids, body, all_in_one);
-                    default:  // app
-                        if (pair.hasMember)
+		    //Console.WriteLine("returning proc");
+		    return new Proc(ids, body, all_in_one);
+		default:  // app
+		    if (pair.hasMember)
                         {
                             Expression[] rands = new Expression[2];
                             if (pair.member.IndexOf('.') != -1)
-                            {
-                                string currentMember = pair.member;
-                                int posLastDot = currentMember.LastIndexOf(".");
-                    
-                                pair.member = currentMember.Substring(0, posLastDot);
-                                rands[0] = Expression.Parse(pair);
-                                pair.member = currentMember;
-
-                                rands[1] = new Lit(Symbol.Create(currentMember.Substring(posLastDot + 1, currentMember.Length - posLastDot - 1)));
-                            }
+				{
+				    string currentMember = pair.member;
+				    int posLastDot = currentMember.LastIndexOf(".");
+				    
+				    pair.member = currentMember.Substring(0, posLastDot);
+				    rands[0] = Expression.Parse(pair);
+				    pair.member = currentMember;
+				    
+				    rands[1] = new Lit(Symbol.Create(currentMember.Substring(posLastDot + 1, currentMember.Length - posLastDot - 1)));
+				}
                             else
-                            {
-                                pair.hasMember = false;
-                                rands[0] = Expression.Parse(pair);
-                                pair.hasMember = true;
-
-                                rands[1] = new Lit(Symbol.Create(pair.member));
-                            }
+				{
+				    pair.hasMember = false;
+				    rands[0] = Expression.Parse(pair);
+				    pair.hasMember = true;
+				    
+				    rands[1] = new Lit(Symbol.Create(pair.member));
+				}
                             return new App(Expression.Parse(Symbol.Create("get-property")), rands);
                         }
-                        else
+		    else
                         {
                             Expression[] rands = null;
                             if (pair.cdr != null)
-                            {
-                                rands = new Expression[pair.cdr.Count];
-                                pos = 0;
-                                foreach (object obj in pair.cdr)
-                                {
-                                    rands[pos] = Expression.Parse(obj);
-                                    pos++;
-                                }
-                            }
+				{
+				    rands = new Expression[pair.cdr.Count];
+				    pos = 0;
+				    foreach (object obj in pair.cdr)
+					{
+					    rands[pos] = Expression.Parse(obj);
+					    pos++;
+					}
+				}
 			    IPrim prim = Primitives.getPrim(pair.car.ToString());
                             if (prim != null)
-                            {
-                                Primapp primapp = new Primapp(prim, rands);
-                                return primapp;
-                            }
+				{
+				    Primapp primapp = new Primapp(prim, rands);
+				    return primapp;
+				}
                             else
-                            {
-				App app = new App(Expression.Parse(pair.car), rands);
-				return app;
-                            }
+				{
+				    App app = new App(Expression.Parse(pair.car), rands);
+				    return app;
+				}
                         }
                 }
             } 
@@ -233,8 +240,11 @@ namespace Scheme
             // Debug.WriteLine("Eval->Var: " + id);
 	    if (localEnv.Contains(id))
 		return localEnv.Apply(id);
-	    else // if (globalsEnv.Contains(id))
+	    else if (globalEnv.Contains(id))
 		return globalEnv.Apply(id);
+	    else
+		throw new Exception(String.Format("unknown variable '{0}'", 
+						  id));
         }
 
         override public System.String ToString() { return "<var: " + id + "> "; } 
@@ -280,36 +290,70 @@ namespace Scheme
         }
     }
 
-    public class SpecialForm : Expression {
+    public class Builtin : Expression {
 	string key;
-        public SpecialForm(string key) { this.key = key; }
+	Expression arg;
+        public Builtin(string key) { this.key = key; }
+        public Builtin(string key, Expression arg) { 
+	    this.key = key; 
+	    this.arg = arg;
+	}
         public override string ToString() {    
-	    return String.Format("<SpecialForm '{0}'>", key);    
+	    return String.Format("<Builtin '{0}'>", key);    
 	}
         public override object Eval(Env globalEnv, Env localEnv)
         {
 	    if (key == "globals")
-		return globalEnv.ToExpression();
+		return Util.arrayToList(globalEnv.Keys());
 	    else if (key == "locals")
-		return localEnv.ToExpression();
-	    //if (key == "dir")
-	    else
-		return new Pair(localEnv.ToExpression(), globalEnv.ToExpression());
+		return Util.arrayToList(localEnv.Keys());
+	    else if (key == "dir")
+		return new Pair(Util.arrayToList(localEnv.Keys()), Util.arrayToList(globalEnv.Keys()));
+	    else if (key == "import") {
+		String assname = (String) arg.Eval(globalEnv, localEnv);
+		// FIXME: filenames only here
+		Assembly assembly = Assembly.LoadFrom(assname);
+		Type[] typeArray = assembly.GetTypes();
+		Object [] names = new Object[typeArray.Length];
+		int i = 0;
+		if (typeArray != null) {
+		    foreach (Type type in typeArray) {
+			names[i++] = type.FullName;
+			Symbol def = Symbol.Create(type.FullName);
+			Pair body = new Pair(Pair.Cons(Symbol.Create("new-prim"),
+						       Pair.Cons(type.FullName,
+								 Pair.Cons(Symbol.Create("_using"),
+									   new Pair(Symbol.Create("args"))))));
+			Expression expr = Expression.Parse(Pair.Cons(Symbol.Create("lambda"), 
+								     Pair.Cons(Symbol.Create("args"), body)));
+			globalEnv.Bind(def, (object) expr.Eval(globalEnv, localEnv));                    
+		    }
+		}
+		return names;
+	    } else {
+		throw new Exception(String.Format("unknown eval for builtin '{0}'", key));
+	    }
         }
     }
 
     public class Begin : Expression 
     {
         public Expression[] expressions;
-        public Begin(Expression[] expressions) { this.expressions = expressions; }
+        public Begin(Expression[] expressions) { 
+	    this.expressions = expressions; 
+	}
         public override string ToString()    {    return "<begin: exps=[" + Util.arrayToString(expressions) + "]> ";    }
         public override object Eval(Env globalEnv, Env localEnv)
         {
             Expression[] exps = expressions;
             // Debug.WriteLine("Eval->Begin");
-            for (int i=0; i<exps.Length-1; i++)
-                exps[i].Eval(globalEnv, localEnv);
-            return exps[exps.Length-1].Eval(globalEnv, localEnv);
+	    if (exps != null && exps.Length > 0) {
+		for (int i=0; i<exps.Length-1; i++)
+		    exps[i].Eval(globalEnv, localEnv);
+		return exps[exps.Length-1].Eval(globalEnv, localEnv);
+	    } else {
+		return (Expression) null;
+	    }
         }
     }
 
