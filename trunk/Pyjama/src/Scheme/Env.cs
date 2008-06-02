@@ -14,7 +14,8 @@ namespace Scheme
         abstract public object Apply(Symbol id);
         abstract public bool Contains(Symbol id);
         abstract public object Bind(Symbol id, Object val);
-	abstract public object[] Keys();
+	abstract public Symbol[] Keys();
+	abstract public object[] Values();
         //    abstract public object Bind(Symbol[] ids, Object[] vals);
     }
 
@@ -32,10 +33,15 @@ namespace Scheme
         {
             return "()";
         }
-        override public Object [] Keys()
+        override public Symbol [] Keys()
         {
+            return new Symbol[0];
+        }
+
+	override public Object [] Values() {
             return new Object[0];
         }
+
         override public object Bind(Symbol id, Object val)
         {
             throw new Exception(String.Format("Unbound variable: '{0}' ", id));
@@ -53,17 +59,32 @@ namespace Scheme
         internal Hashtable bindings = new Hashtable();
         internal Env env = null;
 
-	override public Object [] Keys() {
+	override public Symbol [] Keys() {
 	    // FIXME: alpha sort keys
 	    int length = 0;
-	    foreach (object key in bindings.Keys) {
+	    foreach (Symbol key in bindings.Keys) {
+		length++;
+	    }
+	    Symbol [] retval = new Symbol[length];
+	    if (bindings.Keys != null) {
+		int i = 0;
+		foreach (Symbol key in bindings.Keys) {
+		    retval[i++] = key; 
+		}
+	    }
+	    return retval;
+	}
+
+	override public Object [] Values() {
+	    int length = 0;
+	    foreach (Symbol key in bindings.Keys) {
 		length++;
 	    }
 	    Object [] retval = new Object[length];
 	    if (bindings.Keys != null) {
 		int i = 0;
-		foreach (object key in bindings.Keys) {
-		    retval[i++] = key; 
+		foreach (Symbol key in bindings.Keys) {
+		    retval[i++] = bindings[key]; 
 		}
 	    }
 	    return retval;
@@ -73,7 +94,7 @@ namespace Scheme
         {
 	    string retval = "";
 	    // FIXME: alpha sort keys
-	    foreach (object key in bindings.Keys) {
+	    foreach (Symbol key in bindings.Keys) {
 		if (retval != "") {
 		    retval += " ";
 		}
@@ -84,15 +105,12 @@ namespace Scheme
         public Extended_Env(Symbol[] inSyms, Object[] inVals, Env inEnv)
         {
             this.env = inEnv;
-        
             for (int pos=0; pos < inSyms.Length; pos++)
             {
                 Symbol currSym = (Symbol) inSyms[pos];
-            
-                if (!currSym.ToString().Equals("."))
+                if (!currSym.ToString().Equals(".")) {
                     this.bindings[currSym] = inVals[pos];
-                else 
-                {
+		} else {
                     // multiple values passed in (R5RS 4.1.4)
                     currSym = (Symbol) inSyms[pos+1];
                     this.bindings[currSym] = Pair.FromArrayAt(inVals,pos);

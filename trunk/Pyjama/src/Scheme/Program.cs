@@ -136,7 +136,7 @@ namespace Scheme {
 		    StreamReader streamReader = new StreamReader(args[i]);
 		    prog.Eval(streamReader);
 		} catch {
-		    Console.WriteLine(String.Format("Scheme: cannot load '{0}'", args[i]));
+		    Console.WriteLine(String.Format("Scheme: failed to load '{0}'!", args[i]));
 		}
 	    }
 	    
@@ -145,7 +145,8 @@ namespace Scheme {
 		StreamWriter str = null;
 		//str = new StreamWriter("transcript.ss", true);
 		try {
-		    Console.WriteLine("(" + (end - start) + " ms)");
+		    // FIXME: config flag
+		    //Console.WriteLine("(" + (end - start) + " ms)");
 		    Console.Write("> ");
 		    
 		    String val = Console.ReadLine();
@@ -160,7 +161,8 @@ namespace Scheme {
 		    Console.WriteLine(result);
 		} catch (Exception e) {
 		    Console.WriteLine("Scheme Error: " + e.Message); // + e.Message); // .Message);
-		    Console.WriteLine("Stacktrace: " + e.StackTrace);
+		    // FIXME: flag
+		    //Console.WriteLine("Stacktrace: " + e.StackTrace);
 		}
 		if (str != null)
 		    str.Close();

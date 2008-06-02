@@ -730,14 +730,16 @@ namespace Scheme
     // Closure
     public class Closure
     {
-        public Symbol[] ids;
+        Symbol[] ids;
         public Expression body;
         public Env env;
         public bool all_in_one;
         public Closure(Symbol[] ids, Expression body, bool all_in_one, Env env)
         {
-	    //Console.WriteLine("returning closure");
-            this.ids = ids; this.body = body; this.all_in_one = all_in_one; this.env = env; 
+            this.ids = ids; 
+	    this.body = body; 
+	    this.all_in_one = all_in_one; 
+	    this.env = env; 
         }
 
         public override string ToString()
@@ -762,26 +764,29 @@ namespace Scheme
 		if (ids[i].ToString() == ".")
 		    variableArgs = true;
 	    }
+
+	    Env currentEnv = new Extended_Env(env.Keys(), env.Values(), localEnv);
+
             if (ids != null) {
                 if (all_in_one) // this might bear optimization at some point (esp since +,-,*, etc. use this)
                 {
                     Pair pairargs = Pair.FromArrayAt(args,0);
                     Object[] newargs = new Object[1];
                     newargs[0] = pairargs;
-                    eval_Env = localEnv.Extend(ids, newargs);
+                    eval_Env = currentEnv.Extend(ids, newargs);
                 } else if (idsCount != argsCount && !variableArgs) {
 		    throw new Exception(String.Format("improper number of args: expected {0} but got {1}",
 						      idsCount,
 						      argsCount));
 		} else {
-		    eval_Env = localEnv.Extend(ids, args); //tailcall
+		    eval_Env = currentEnv.Extend(ids, args); //tailcall
 		}
             } else if (idsCount != argsCount && ! variableArgs) {
 		throw new Exception(String.Format("improper number of args: expected {0} but got {1}",
 						  idsCount,
 						  argsCount));
 	    } else {
-		eval_Env = localEnv; // tailcall
+		eval_Env = currentEnv; // tailcall
 	    }
             return body.Eval(globalEnv, eval_Env); 
         }
@@ -956,7 +961,7 @@ namespace Scheme
             Pair retval = null;
 	    if (array != null) { // (list) gives null array
 		for (int i=array.Length-1;i>=pos;i--) {
-		    retval = Pair.Cons(array[i], retval);
+		    retval = Pair.Cons(array[i], retval); /// PROBLEM? destructive to array!?
 		}
 	    }
             return retval;        

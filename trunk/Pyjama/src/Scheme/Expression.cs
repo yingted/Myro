@@ -243,7 +243,7 @@ namespace Scheme
         public Var(Symbol id) { this.id = id; }
         public override object Eval(Env globalEnv, Env localEnv)
         {
-            // Debug.WriteLine("Eval->Var: " + id);
+	    //Console.WriteLine("Eval->Var: " + id + localEnv.ToString());
 	    if (localEnv.Contains(id))
 		return localEnv.Apply(id);
 	    else if (globalEnv.Contains(id))

@@ -49,8 +49,8 @@
 (define (set-field obj fieldname val)
   (set-field-prim obj fieldname val))
 
-(define (copy-debug-info from-pair to-pair)
-  (copy-debug-prim from-pair to-pair))
+;;(define (copy-debug-info from-pair to-pair)
+;;  (copy-debug-prim from-pair to-pair))
 
 (define (get-enum enum_name enum_member)
   (call-static 'System.Enum 'Parse (get-type enum_name) enum_member))
@@ -150,8 +150,8 @@
 	  (cons-proper-prim obj ls)
 	  (cons-improper-prim obj ls))))
 
-(define (debug-cons from-debug-ls obj ls)
-  (copy-debug-info from-debug-ls (cons obj ls)))
+;;(define (debug-cons from-debug-ls obj ls)
+;;  (copy-debug-info from-debug-ls (cons obj ls)))
 
 (define (car ls)
   (car-prim ls))
@@ -245,7 +245,7 @@
 (define (map-preserve proc ls)
   (if (null? ls)
       '()
-      (debug-cons ls (proc (car ls)) (map proc (cdr ls)))))
+      (cons (proc (car ls)) (map proc (cdr ls)))))
 
 ;; Macros 
 (define (macro-expand obj)
@@ -253,7 +253,7 @@
       (if (eq? (car obj) 'quote)
 	  obj
 	  (if (hash-contains-key? _macros (car obj))
-	      (macro-expand (copy-debug-info obj ( (hash-ref _macros (car obj)) obj )))
+	      (macro-expand ((hash-ref _macros (car obj)) obj ))
 	      (map-preserve macro-expand obj)))
       obj))
 
