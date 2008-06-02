@@ -133,8 +133,6 @@
 
 ;; Lists & Pairs
 
-(define ls '(1 2 3 4))
-
 (define (set-car! a ls) 
   (set-car-prim ls a))
 
@@ -290,13 +288,13 @@
 (define (make-set ls) (append (list 'set!) ls))
 (define-syntax letrec letrec-trans)
 
-;; (define (and-trans code)
-;;   (list 'if (second code) (list 'if (third code) #t #f) #f))
-;; (define-syntax and and-trans)
+(define (and-trans code)
+  (list 'if (second code) (list 'if (third code) #t #f) #f))
+(define-syntax and and-trans)
 
-;; (define (or-trans code)
-;;   (list 'if (second code) #t (list 'if (third code) #t #f)))
-;; (define-syntax or or-trans)
+(define (or-trans code)
+  (list 'if (second code) #t (list 'if (third code) #t #f)))
+(define-syntax or or-trans)
 
 (define (cond-trans code)
   (cond-helper (cdr code)))
@@ -310,23 +308,6 @@
 		  (cons 'begin (cdr curr)) 
 		  (cond-helper (cdr code)))))))
 (define-syntax cond cond-trans)
-
-(define or
-  (lambda ls
-    (display ls)
-    (if (null? ls) 
-	#f
-	(if (car ls) 
-	    #t
-	    (or (cdr ls))))))
-
-(define and
-  (lambda ls
-    (if (null? ls) 
-	#t
-	(if (not (car ls))
-	    #f
-	    (and (cdr ls))))))
 
 ;; Things that need previous
 
