@@ -64,11 +64,7 @@ namespace Scheme {
                 if (macros.Count > 0)
                 {
                     Closure macroExpand = initEnv.Apply(Symbol.Create("macro-expand")) as Closure;
-		    try {
-			parsedObj = macroExpand.Eval(initEnv, new Empty_Env(), new Object[] { parsedObj });
-		    } catch {
-			// FIXME; macro's can fail?
-		    }
+		    parsedObj = macroExpand.Eval(initEnv, new Empty_Env(), new Object[] { parsedObj });
                 } 
                 
                 Pair p = parsedObj as Pair;
@@ -80,7 +76,7 @@ namespace Scheme {
 		    String text = File.OpenText(filename).ReadToEnd();
 		    evaledObj = Eval(new StringReader(text));
 		    break;
-		case "exit":
+		case "quit":
 		    Environment.Exit(0);
 		    break;
 		case "define":

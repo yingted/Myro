@@ -78,6 +78,12 @@ namespace Scheme
 		    return new Builtin("globals");
 		case "locals":
 		    return new Builtin("locals");
+		    /*
+		case "or":
+		    return new Builtin("or", Parse(pair.cdr));
+		case "and":
+		    return new Builtin("and", Parse(pair.cdr));
+		    */
 		case "if": 
 		    Pair curr = pair.cdr;
 		    Expression test_exp = Parse(curr.car);
@@ -282,11 +288,21 @@ namespace Scheme
         override public System.String ToString() { return "<primapp: prim=" + prim + " rands=[" + Util.arrayToString(rands) + "]> "; } 
         public override object Eval(Env globalEnv, Env localEnv)
         {
-            // Debug.WriteLine("Eval->Prim: " + prim.ToString());
-            Object[] eval_Rands = Eval_Rands(rands, globalEnv, localEnv);
-            //DebugInfo.EvalExpression(this);
-	    //Console.WriteLine("Length {0}; 1:{1}", eval_Rands.Length, eval_Rands[0]);
-	    return prim.Call(eval_Rands);
+	    Object[] eval_Rands = null;
+	    try {
+		 eval_Rands = Eval_Rands(rands, globalEnv, localEnv);
+	    } catch {
+		throw new Exception(String.Format("bad rands ({0} {1})",
+						  prim.GetRator(),
+						  Util.arrayToString(rands)));
+	    }
+	    try {
+		return prim.Call(eval_Rands);
+	    } catch {
+		throw new Exception(String.Format("bad apply ({0} {1})",
+						  prim.GetRator(),
+						  Util.arrayToString(rands)));
+	    }
         }
     }
 
@@ -303,6 +319,9 @@ namespace Scheme
 	}
         public override object Eval(Env globalEnv, Env localEnv)
         {
+	    //if (key == "or") {
+	    //while ()
+	    //object retval = arg.Eval(globalEnv, localEnv);
 	    if (key == "globals")
 		return Util.arrayToList(globalEnv.Keys());
 	    else if (key == "locals")
@@ -372,15 +391,17 @@ namespace Scheme
         override public System.String ToString() { return "<if: " + test_exp + true_exp + false_exp + "> "; } 
         public override object Eval(Env globalEnv, Env localEnv)
         {
-            object testVal = test_exp.Eval(globalEnv, localEnv);
-            // Debug.WriteLine("Eval->If: " + testVal);
-            if (!(testVal is bool)) 
-                throw new Exception("invalid test expression type in if " + testVal.ToString());
-
-            if ((testVal is bool) && (((bool) testVal) == false)) // return false only if a bool false
-                return false_exp.Eval(globalEnv, localEnv);
-            else
-                return true_exp.Eval(globalEnv, localEnv);
+	    object testVal = false;
+	    if (test_exp != null)
+		testVal = test_exp.Eval(globalEnv, localEnv);
+            if ((testVal is bool) && (((bool) testVal) == false)) { // return false only if a bool false
+		if (false_exp != null)
+		    return false_exp.Eval(globalEnv, localEnv);
+	    } else {
+		if (true_exp != null)
+		    return true_exp.Eval(globalEnv, localEnv);
+	    }
+	    return null;
         }
     }
 

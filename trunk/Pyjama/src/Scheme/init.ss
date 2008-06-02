@@ -15,6 +15,9 @@
 (define (get-type typename)
   (get-type-prim typename _using))
 
+(define (eq? obj1 obj2)
+  (eq?-prim obj1 obj2))
+
 (define (is-type? obj typename)
   (if (eq? (typeof obj) (get-type typename)) 
       #t 
@@ -77,14 +80,6 @@
 
 (define (symbol->string sym)	
   (tostring sym))
-
-;; Scheme Standard Library
-
-(define (eq? obj1 obj2)
-  (eq?-prim obj1 obj2))
-
-(define (eqv? obj1 obj2)
-  (eqv?-prim obj1 obj2))
 
 ;; Needs work (see TSPL)
 ;(define (equal? obj1 obj2) 
@@ -171,6 +166,12 @@
 
 (define (cadr pair)
   (car (cdr pair)))
+
+(define (caddr pair)
+  (car (cdr (cdr pair))))
+
+(define (cadddr pair)
+  (car (cdr (cdr (cdr pair)))))
 
 ;; this is just too cool
 (define list 
@@ -289,13 +290,13 @@
 (define (make-set ls) (append (list 'set!) ls))
 (define-syntax letrec letrec-trans)
 
-(define (and-trans code)
-  (list 'if (second code) (list 'if (third code) #t #f) #f))
-(define-syntax and and-trans)
+;; (define (and-trans code)
+;;   (list 'if (second code) (list 'if (third code) #t #f) #f))
+;; (define-syntax and and-trans)
 
-(define (or-trans code)
-  (list 'if (second code) #t (list 'if (third code) #t #f)))
-(define-syntax or or-trans)
+;; (define (or-trans code)
+;;   (list 'if (second code) #t (list 'if (third code) #t #f)))
+;; (define-syntax or or-trans)
 
 (define (cond-trans code)
   (cond-helper (cdr code)))
@@ -305,8 +306,27 @@
 	(list 'if (car curr) #t (cond-helper (cdr code)))
 	(if (eq? (car curr) 'else)
 	    (cons 'begin (cdr curr))
-	    (list 'if (car curr) (cons 'begin (cdr curr)) (cond-helper (cdr code)))))))
+	    (list 'if (car curr) 
+		  (cons 'begin (cdr curr)) 
+		  (cond-helper (cdr code)))))))
 (define-syntax cond cond-trans)
+
+(define or
+  (lambda ls
+    (display ls)
+    (if (null? ls) 
+	#f
+	(if (car ls) 
+	    #t
+	    (or (cdr ls))))))
+
+(define and
+  (lambda ls
+    (if (null? ls) 
+	#t
+	(if (not (car ls))
+	    #f
+	    (and (cdr ls))))))
 
 ;; Things that need previous
 
@@ -314,13 +334,25 @@
   (or (eq? obj ()) 
       (pair? obj)))
 
+;; Scheme Standard Library
+
+(define (eqv? obj1 obj2)
+  (if (or (fraction? obj1) 
+	  (fraction? obj2))
+      (fraction-eqv-prim? obj1 obj2)
+      (eqv?-prim obj1 obj2)))
+
 ;; Numbers
 ;; (exact? num)
 ;; (inexact? num)
 
 ;; All From ObjTst
 (define (numcompare num1 num2)
-  (numcompare-prim num1 num2))
+  (if (or (fraction? num1)
+	  (fraction? num2))
+      (if (fraction-eqv-prim? num1 num2)
+	  0 1)
+      (numcompare-prim num1 num2)))
 
 (define =
   (lambda ls
@@ -389,17 +421,32 @@
 	  (>=helper (car rest) (cdr rest))
 	  #f)))
 
+(define (fraction? obj)
+  (if (eq? (typeof obj) 'Scheme.Fraction) #t #f))
+
 (define (addobj obj1 obj2)
-  (addobj-prim obj1 obj2))
+  (if (or (fraction? obj1) 
+	  (fraction? obj2))
+      (fraction-add-prim obj1 obj2)
+      (addobj-prim obj1 obj2)))
 
 (define (subobj obj1 obj2)
-  (subobj-prim obj1 obj2))
+  (if (or (fraction? obj1) 
+	  (fraction? obj2))
+      (fraction-sub-prim obj1 obj2)
+      (subobj-prim obj1 obj2)))
 
 (define (mulobj obj1 obj2)
-  (mulobj-prim obj1 obj2))
+  (if (or (fraction? obj1) 
+	  (fraction? obj2))
+      (fraction-mul-prim obj1 obj2)
+      (mulobj-prim obj1 obj2)))
 
 (define (divobj obj1 obj2)
-  (divobj-prim obj1 obj2))
+  (fraction-div-prim obj1 obj2))
+
+;; By default, make ratio
+;;      (divobj-prim obj1 obj2)))
 
 (define +
   (lambda ls

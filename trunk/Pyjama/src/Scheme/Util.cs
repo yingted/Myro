@@ -12,6 +12,7 @@ namespace Scheme
         static Symbol start_vector_token = Symbol.Create("#(");
         static Symbol left_paren_token = Symbol.Create("(");
         static Symbol right_paren_token = Symbol.Create(")");
+        static Symbol dot_token = Symbol.Create(".");
 
         public static string arrayToString(Object[] array)
         {
@@ -55,29 +56,18 @@ namespace Scheme
                 return null;
 
             char c = (char) str.Read();
-            if (Char.IsWhiteSpace(c)) // is_char_whitespace(c)) // .IsWhiteSpace(c))
+            if (Char.IsWhiteSpace(c)) 
                 return read_token(str);
             else if (c.Equals(';'))
             {
                 str.ReadLine();
-                /*
-                char curr = (char) str.Read();
-                Console.WriteLine("skipping chars: ");
-                while (!c.Equals('\n') && !c.Equals('\r') && (str.Peek() != -1))
-                {
-                
-                    curr = (char) str.Read();
-                    Console.Write(curr);
-                }
-                Console.WriteLine("skipping line");
-                */
                 return read_token(str);
             }
             else if (c.Equals('(') || c.Equals('['))
                 return left_paren_token;
             else if (c.Equals(')') || c.Equals(']'))
                 return right_paren_token;
-            else if (c.Equals('\''))                                                                            // Quote
+            else if (c.Equals('\'')) // Quote
             {
                 object curr = read(str);
                 Pair newpair = new Pair(curr);
@@ -98,7 +88,7 @@ namespace Scheme
                 }
                 return strtok;
             } 
-            else if (c.Equals('#'))                                                                            // Boolean OR Character OR Vector
+            else if (c.Equals('#')) // Boolean OR Character OR Vector
             { 
                 char curr = (char) str.Read();
                 if (curr.Equals('\\')) // itsa char
@@ -120,11 +110,24 @@ namespace Scheme
             
                 while (Char.IsNumber((char) str.Peek()) || ((char) str.Peek()).Equals('.'))
                     numstr += (char) str.Read();
-            
-                if (numstr.IndexOf('.') != -1)
-                    return Convert.ToSingle(numstr);
-                else
-                    return Convert.ToInt32(numstr);
+		
+		if (((char)str.Peek()).Equals('/')) {
+		    str.Read(); // read the /
+		    
+		    string numstr2 = "";
+		    
+		    while (Char.IsNumber((char) str.Peek()) || ((char) str.Peek()).Equals('.'))
+			numstr2 += (char) str.Read();
+
+		    return new Fraction(Convert.ToInt32(numstr),
+					Convert.ToInt32(numstr2));
+
+		} else {
+		    if (numstr.IndexOf('.') != -1)
+			return Convert.ToSingle(numstr);
+		    else
+			return Convert.ToInt32(numstr);
+		}
             } 
             else //if (Char.IsLetter(c))
             {
@@ -142,26 +145,8 @@ namespace Scheme
             object next_token = read_token(str);
 
             if (left_paren_token.Equals(next_token))
-            {
-                /*
-                if (str is DocumentReader)
-                {
-                    DocumentReader documentReader = (DocumentReader) str;
-                    //EditPoint startEditPoint = documentReader.editPoint.CreateEditPoint();
-                    int startEditPointLine = documentReader.Line;
-                    int startEditPointCol = documentReader.Col;// - 1;
-                    //startEditPoint.CharLeft(1);
-                    
-                    Pair result = read_list(null, str);
-                    
-                    if (result != null)
-                        result.marker = new Marker(documentReader.document, startEditPointLine, startEditPointCol, documentReader.Line, documentReader.Col + 1, "");//startEditPoint.GetText(documentReader.editPoint));
-
-                    return result;
-                }
-                else
-                */
-                    return read_list(null, str);
+	    {
+		return read_list(null, str);
             }
             if (start_vector_token.Equals(next_token))
                 return read_vector(str);
@@ -201,28 +186,19 @@ namespace Scheme
             
             if (right_paren_token.Equals(token))
                 return Pair.reverse(list_so_far); // if this far we're cool
-            else if (start_vector_token.Equals(token))
+	    /* FIXME: used in params, too
+	       else if (dot_token.Equals(token)) {
+	       // read the next one into cdr (no pair) and we're done
+	       object next_token = read(str);
+	       AddMemberToCdr(list_so_far, next_token);
+	       return read_list(list_so_far,str);
+	       }
+	    */
+	    else if (start_vector_token.Equals(token))
                 return read_list(Pair.Cons(read_vector(str), list_so_far), str);
             else if (left_paren_token.Equals(token)) 
             {
-                /*
-                if (str is DocumentReader)
-                {
-                    DocumentReader documentReader = (DocumentReader) str;
-                    //EditPoint startEditPoint = documentReader.editPoint.CreateEditPoint();
-                    //startEditPoint.CharLeft(1);
-                    int startEditPointLine = documentReader.Line;
-                    int startEditPointCol = documentReader.Col;
-                    
-                    Pair curList = read_list(null,str);
-                    if (curList != null)
-                        curList.marker = new Marker(documentReader.document, startEditPointLine, startEditPointCol, documentReader.Line, documentReader.Col + 1, "");//startEditPoint.GetText(documentReader.editPoint));
-                    
-                    return read_list(Pair.Cons(curList, list_so_far), str);
-                }
-                else
-                */
-                    return read_list(Pair.Cons(read_list(null,str), list_so_far),str);
+		return read_list(Pair.Cons(read_list(null,str), list_so_far),str);
             }
             else if (IsMember(list_so_far, token))
             {
@@ -243,6 +219,12 @@ namespace Scheme
         {
             ((Pair)pair.car).member = ((Symbol) token).val.Substring(1);
             ((Pair)pair.car).hasMember = true;
+        }
+
+        static private void AddMemberToCdr(Pair pair, object token)
+        {
+            ((Pair)pair).cdr_ = token;
+            ((Pair)pair).proper = false;
         }
 
         static public Object[] SubArray(Object[] array, int start)
@@ -440,6 +422,246 @@ namespace Scheme
             }
         }
     }
+
+    public class Fraction {
+	int numerator = 1;
+	int denominator = 1;
+        public Fraction(int numerator, int denominator) {
+	    int gcd = GCD(numerator, denominator);
+	    this.numerator = numerator/gcd;
+	    this.denominator = denominator/gcd;
+	}
+
+	public static int GCD(int n1, int n2) {
+	    // Greatest Common Denominator
+	    n1 = Math.Abs(n1);
+	    n2 = Math.Abs(n2);
+	    if (n1 == 0) return n2;
+	    if (n2 == 0) return n1;
+	    if (n1 > n2) return GCD(n2, n1 % n2);
+	    else         return GCD(n1, n2 % n1);
+	}
+
+	public static int LCM(int n1, int n2) {
+	    // Least Common Multiple
+	    n1 = Math.Abs(n1);
+	    n2 = Math.Abs(n2);
+	    if (n1 > n2) return ((n2 / GCD(n1, n2)) * n1);
+	    else         return ((n1 / GCD(n1, n2)) * n2);
+	}
+
+        public static bool Eqv(object obj1, object obj2) {
+	    object f1 = null, f2 = null;
+	    if (obj1 is int)
+		f1 = new Fraction((int)obj1, 1);
+	    else if (obj1 is Fraction)
+		f1 = (Fraction)obj1;
+	    if (obj2 is int)
+		f2 = new Fraction((int)obj2,1);
+	    else if (obj2 is Fraction) 
+		f2 = ((Fraction)obj2);
+	    if ((f1 is Fraction) && (f2 is Fraction))
+		return Eqv(f1, f2);
+	    // --------------------------------------
+	    if (obj1 is Fraction) 
+		f1 = ToSingle((Fraction)obj1);
+	    else if (obj1 is int) 
+		f1 = (Single)obj1;
+	    else if (obj1 is Single) 
+		f1 = (Single)obj1;
+	    if (obj2 is Fraction) 
+		f2 = ToSingle((Fraction)obj2);
+	    else if (obj2 is int) 
+		f2 = (Single)obj2;
+	    else if (obj2 is Single) 
+		f2 = (Single)obj2;
+	    if ((f1 is Single) && (f2 is Single))
+		return (((Single)f1) == ((Single)f2));
+	    else
+		throw new Exception("can't compare a Fraction with this type");
+	}
+
+        public static bool Eqv(Fraction f1, Fraction f2) {
+	    return (f1.numerator == f2.numerator &&
+		    f1.denominator == f2.denominator);
+	}
+
+        public static object Add(object obj1, object obj2) {
+	    object f1 = null, f2 = null;
+	    if (obj1 is int)
+		f1 = new Fraction((int)obj1, 1);
+	    else if (obj1 is Fraction)
+		f1 = (Fraction)obj1;
+	    if (obj2 is int)
+		f2 = new Fraction((int)obj2,1);
+	    else if (obj2 is Fraction) 
+		f2 = ((Fraction)obj2);
+	    if ((f1 is Fraction) && (f2 is Fraction))
+		return (Fraction)(((Fraction)f1) + ((Fraction)f2));
+	    // --------------------------------------
+	    if (obj1 is Fraction) 
+		f1 = ToSingle((Fraction)obj1);
+	    else if (obj1 is int) 
+		f1 = (Single)obj1;
+	    else if (obj1 is Single) 
+		f1 = (Single)obj1;
+	    if (obj2 is Fraction) 
+		f2 = ToSingle((Fraction)obj2);
+	    else if (obj2 is int) 
+		f2 = (Single)obj2;
+	    else if (obj2 is Single) 
+		f2 = (Single)obj2;
+	    if ((f1 is Single) && (f2 is Single))
+		return (Single)(((Single)f1) + ((Single)f2));
+	    else
+		throw new Exception("can't add a Fraction with this type");
+	}
+
+        public static Fraction operator +(Fraction f1, Fraction f2) {
+	    int lcm = LCM(f1.denominator, f2.denominator);
+	    return new Fraction((f1.numerator * lcm/f1.denominator +
+				 f2.numerator * lcm/f2.denominator),
+				lcm);
+	}
+
+        public static object Sub(object obj1, object obj2) {
+	    object f1 = null, f2 = null;
+	    if (obj1 is int)
+		f1 = new Fraction((int)obj1, 1);
+	    else if (obj1 is Fraction)
+		f1 = (Fraction)obj1;
+	    if (obj2 is int)
+		f2 = new Fraction((int)obj2,1);
+	    else if (obj2 is Fraction) 
+		f2 = ((Fraction)obj2);
+	    if ((f1 is Fraction) && (f2 is Fraction))
+		return (Fraction)(((Fraction)f1) - ((Fraction)f2));
+	    // --------------------------------------
+	    if (obj1 is Fraction) 
+		f1 = ToSingle((Fraction)obj1);
+	    else if (obj1 is int) 
+		f1 = (Single)obj1;
+	    else if (obj1 is Single) 
+		f1 = (Single)obj1;
+	    if (obj2 is Fraction) 
+		f2 = ToSingle((Fraction)obj2);
+	    else if (obj2 is int) 
+		f2 = (Single)obj2;
+	    else if (obj2 is Single) 
+		f2 = (Single)obj2;
+	    if ((f1 is Single) && (f2 is Single))
+		return (Single)(((Single)f1) - ((Single)f2));
+	    else
+		throw new Exception("can't sub a Fraction with this type");
+	}
+
+        public static Fraction operator -(Fraction f1, Fraction f2) {
+	    int lcm = LCM(f1.denominator, f2.denominator);
+	    return new Fraction((f1.numerator * lcm/f1.denominator -
+				 f2.numerator * lcm/f2.denominator),
+				lcm);
+	}
+
+        public static object Mul(object obj1, object obj2) {
+	    object f1 = null, f2 = null;
+	    if (obj1 is int)
+		f1 = new Fraction((int)obj1, 1);
+	    else if (obj1 is Fraction)
+		f1 = (Fraction)obj1;
+	    if (obj2 is int)
+		f2 = new Fraction((int)obj2,1);
+	    else if (obj2 is Fraction) 
+		f2 = ((Fraction)obj2);
+	    if ((f1 is Fraction) && (f2 is Fraction))
+		return (Fraction)(((Fraction)f1) * ((Fraction)f2));
+	    // --------------------------------------
+	    if (obj1 is Fraction) 
+		f1 = ToSingle((Fraction)obj1);
+	    else if (obj1 is int) 
+		f1 = (Single)obj1;
+	    else if (obj1 is Single) 
+		f1 = (Single)obj1;
+	    if (obj2 is Fraction) 
+		f2 = ToSingle((Fraction)obj2);
+	    else if (obj2 is int) 
+		f2 = (Single)obj2;
+	    else if (obj2 is Single) 
+		f2 = (Single)obj2;
+	    if ((f1 is Single) && (f2 is Single))
+		return (Single)(((Single)f1) * ((Single)f2));
+	    else
+		throw new Exception("can't multiply a Fraction with this type");
+	}
+
+        public static Fraction operator *(Fraction f1, Fraction f2) {
+	    return new Fraction(f1.numerator * f2.numerator,
+				f1.denominator * f2.denominator);
+	}
+
+        public static object Div(object obj1, object obj2) {
+	    object f1 = null, f2 = null;
+	    if (obj1 is int)
+		f1 = new Fraction((int)obj1, 1);
+	    else if (obj1 is Fraction)
+		f1 = (Fraction)obj1;
+	    if (obj2 is int)
+		f2 = new Fraction((int)obj2,1);
+	    else if (obj2 is Fraction) 
+		f2 = ((Fraction)obj2);
+	    if ((f1 is Fraction) && (f2 is Fraction))
+		return (Fraction)(((Fraction)f1) / ((Fraction)f2));
+	    // --------------------------------------
+	    if (obj1 is Fraction) 
+		f1 = ToSingle((Fraction)obj1);
+	    else if (obj1 is int) 
+		f1 = (Single)obj1;
+	    else if (obj1 is Single) 
+		f1 = (Single)obj1;
+	    if (obj2 is Fraction) 
+		f2 = ToSingle((Fraction)obj2);
+	    else if (obj2 is int) 
+		f2 = (Single)obj2;
+	    else if (obj2 is Single) 
+		f2 = (Single)obj2;
+	    if ((f1 is Single) && (f2 is Single))
+		return (Single)(((Single)f1) / ((Single)f2));
+	    else
+		throw new Exception("can't divide a Fraction with this type");
+	}
+
+        public static Fraction operator /(Fraction f1, Fraction f2) {
+	    return f1 * new Fraction(f2.denominator,
+				     f2.numerator);
+	}
+
+	public static Single ToSingle(Fraction f) {
+	    return (Single)f.numerator/(Single)f.denominator;
+	}
+	public static int ToInt(Fraction f) {
+	    return (int)f.numerator/(int)f.denominator;
+	}
+	public static implicit operator Single(Fraction f) {
+	    return (Single)f.numerator/(Single)f.denominator;
+	}
+	public static implicit operator int(Fraction f) {
+	    return (int)f.numerator/(int)f.denominator;
+	}
+        public override Boolean Equals(object obj) 
+        {
+            if (obj is Fraction)
+                if ((this.numerator == (obj as Fraction).numerator) &&
+		    (this.denominator == (obj as Fraction).denominator))
+                    return true;
+                else
+                    return false;
+            else 
+                return false;
+        }
+        override public System.String ToString() { 
+	    return String.Format("{0}/{1}", numerator, denominator);  
+	} 
+    }
+
     public class Symbol
     { 
         static int lastGen = 1000;
