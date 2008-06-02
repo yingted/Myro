@@ -112,7 +112,9 @@
       #t
       (if (integer? x)
 	  #t
-	  #f)))
+	  (if (fraction? x)
+	      #t
+	      #f))))
 
 ;;(rational? obj)
 
@@ -153,23 +155,70 @@
 ;;(define (debug-cons from-debug-ls obj ls)
 ;;  (copy-debug-info from-debug-ls (cons obj ls)))
 
-(define (car ls)
+(define (car ls) 
   (car-prim ls))
-
 (define (cdr ls)
   (cdr-prim ls))
 
 (define (caar pair) 
   (car (car pair)))
-
-(define (cadr pair)
+(define (cadr pair) 
   (car (cdr pair)))
+(define (cdar pair) 
+  (cdr (car pair)))
+(define (cddr pair) 
+  (cdr (cdr pair)))
 
-(define (caddr pair)
+(define (caaar pair) 
+  (car (car (car pair))))
+(define (caadr pair) 
+  (car (car (cdr pair))))
+(define (cadar pair) 
+  (car (cdr (car pair))))
+(define (caddr pair) 
   (car (cdr (cdr pair))))
+(define (cdaar pair) 
+  (cdr (car (car pair))))
+(define (cdadr pair) 
+  (cdr (car (cdr pair))))
+(define (cddar pair) 
+  (cdr (cdr (car pair))))
+(define (cdddr pair) 
+  (cdr (cdr (cdr pair))))
 
-(define (cadddr pair)
+(define (caaaar pair) 
+  (car (car (car (car pair)))))
+(define (caaadr pair) 
+  (car (car (car (cdr pair)))))
+(define (caadar pair) 
+  (car (car (cdr (car pair)))))
+(define (caaddr pair) 
+  (car (car (cdr (cdr pair)))))
+(define (cadaar pair) 
+  (car (cdr (car (car pair)))))
+(define (cadadr pair) 
+  (car (cdr (car (cdr pair)))))
+(define (caddar pair) 
+  (car (cdr (cdr (car pair)))))
+(define (cadddr pair) 
   (car (cdr (cdr (cdr pair)))))
+(define (cdaaar pair) 
+  (cdr (car (car (car pair)))))
+(define (cdaadr pair) 
+  (cdr (car (car (cdr pair)))))
+(define (cdadar pair) 
+  (cdr (car (cdr (car pair)))))
+(define (cdaddr pair) 
+  (cdr (car (cdr (cdr pair)))))
+(define (cddaar pair) 
+  (cdr (cdr (car (car pair)))))
+(define (cddadr pair) 
+  (cdr (cdr (car (cdr pair)))))
+(define (cdddar pair) 
+  (cdr (cdr (cdr (car pair)))))
+(define (cddddr pair) 
+  (cdr (cdr (cdr (cdr pair)))))
+
 
 ;; this is just too cool
 (define list 

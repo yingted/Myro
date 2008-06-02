@@ -1,20 +1,21 @@
-1. fix dotted lists (improper) in args (reading, all_in_one)
-   and in parsing regular lists
+Scheme Differences
 
-2. add continuations
+1. Improper lists are currently implemented in a hackish manner. 
+   Need to fix parser, and then adjust application to work with
+   real dotted-pairs.
 
-3. add call/cc
+2. No continuations, and no call/cc
 
-4. should be tail-recursive then
+3. Currently not properly tail recursive
 
-5. call graphics static fields?
+4. Some number types are missing: bignum, complex, scientific
 
-6. write serial port in c#
+5. (= 1/1 0) segfaults
 
-7. go through scheme manual, what works/doesn't
 
-8. missing numbers: bignum, complex
+Things to do
 
-9. (if () 1 2) fails
+1. Figure out how to call graphics static fields
 
-10. and or and others need to be special forms
+2. Write serial port in c# and consume in Scheme
+

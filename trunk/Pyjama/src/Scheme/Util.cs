@@ -461,7 +461,7 @@ namespace Scheme
 	    else if (obj2 is Fraction) 
 		f2 = ((Fraction)obj2);
 	    if ((f1 is Fraction) && (f2 is Fraction))
-		return Eqv(f1, f2);
+		return Eqv((Fraction)f1, (Fraction)f2);
 	    // --------------------------------------
 	    if (obj1 is Fraction) 
 		f1 = ToSingle((Fraction)obj1);
