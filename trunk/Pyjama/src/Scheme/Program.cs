@@ -17,14 +17,9 @@ namespace Scheme {
 					      Env.The_Empty_Env);
 
         } 
-	// new Pair(new Symbol("x")), new Pair(3), Env.The_Empty_Env);}
-        // this.initEnv = Env.The_Empty_Env; // new Pair(new Symbol("x")), new Pair(3), Env.The_Empty_Env);}
             
         public object LoadEmbededInitScheme()
         {
-            //Assembly executingAssembly = Assembly.GetExecutingAssembly();
-            //Stream initSchemeStream = executingAssembly.GetManifestResourceStream("Scheme.InitScheme.ss");
-            //StreamReader initSchemeStreamReader = new StreamReader(initSchemeStream); 
 	    // FIXME: get from current directory?
             StreamReader streamReader = new StreamReader("init.ss");
             return Eval(streamReader);
@@ -85,6 +80,9 @@ namespace Scheme {
 		    String text = File.OpenText(filename).ReadToEnd();
 		    evaledObj = Eval(new StringReader(text));
 		    break;
+		case "exit":
+		    Environment.Exit(0);
+		    break;
 		case "define":
 		    Expression expr = null;
 		    Symbol def = null;
@@ -94,17 +92,14 @@ namespace Scheme {
                             Pair body = p.cdr.cdr;
                             Pair syms = def_and_args.cdr;
                             def = Symbol.Create(def_and_args.car.ToString());
-                            expr = Expression.Parse(Pair.Cons(Symbol.Create("lambda"), Pair.Cons(syms,body)));
-                            // Debug.WriteLine(def + "-->" + expr);
+                            expr = Expression.Parse(Pair.Cons(Symbol.Create("lambda"), 
+							      Pair.Cons(syms,body)));
                         }
 		    else // (define fn (lambda (x y) body))
                         {
                             def = Symbol.Create(p.cdr.car.ToString());
                             expr = Expression.Parse(p.cdr.cdr.car);
                         }
-		    //initEnv = new Extended_Env(new Pair(def), new Pair(null), initEnv);
-		    //Object value = Eval(expr);
-		    //Console.WriteLine("defining: " + def);
 		    initEnv.Bind(def, Eval(expr));                    
 		    evaledObj = Util.Dump(null);
 		    break;
@@ -113,10 +108,8 @@ namespace Scheme {
 		    break;
 		case "define-syntax":
 		    Symbol name = p.cdr.car as Symbol;
-		    // Console.WriteLine("macrodef" + name + " " + Expression.Parse(p.cdr.cdr.car).Eval(initEnv).ToString());
 		    Closure transformer = (Closure) Expression.Parse(p.cdr.cdr.car).Eval(initEnv, new Empty_Env());
 		    this.macros[name] = transformer;
-		    // Console.WriteLine("macro: " + name);
 		    break;
 		default:
 		    // need to call macro-expand in here. but how?
@@ -142,10 +135,10 @@ namespace Scheme {
 	    
 	    for (int i=0; i < args.Length; i++) {
 		try {
-		    String init = File.OpenText(args[0]).ReadToEnd();
-		    prog.Eval(new StringReader(init));
-		    //StreamReader streamReader = new StreamReader(args[i]);
-		    //prog.Eval(streamReader);
+		    //String init = File.OpenText(args[0]).ReadToEnd();
+		    //prog.Eval(new StringReader(init));
+		    StreamReader streamReader = new StreamReader(args[i]);
+		    prog.Eval(streamReader);
 		} catch {
 		    Console.WriteLine(String.Format("Scheme: cannot load '{0}'", args[i]));
 		}
