@@ -72,11 +72,11 @@ namespace Scheme
 		    return beginExps;
 		case "import-prim":
 		    return new Builtin("import-prim", Parse(pair.cdr.car));
-		case "dir":
+		case "dir-prim":
 		    return new Builtin("dir");
-		case "globals":
+		case "globals-prim":
 		    return new Builtin("globals");
-		case "locals":
+		case "locals-prim":
 		    return new Builtin("locals");
 		    /*
 		case "or":

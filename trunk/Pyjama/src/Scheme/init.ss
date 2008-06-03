@@ -326,6 +326,10 @@
 
 (define-syntax let let-trans)
 
+(define (apply-trans code) 
+  (cons (cadr code) (cddr code)))
+(define-syntax apply apply-trans)
+
 (define (letrec-trans code)
   (append (list (append (append (append (list 'lambda)
 					(list (make-list-of-parameters code)))
@@ -337,13 +341,16 @@
 (define (make-set ls) (append (list 'set!) ls))
 (define-syntax letrec letrec-trans)
 
-(define (and-trans code)
-  (list 'if (second code) (list 'if (third code) #t #f) #f))
-(define-syntax and and-trans)
+(define =
+  (lambda ls
+    (=helper (car ls) (cdr ls))))
 
-(define (or-trans code)
-  (list 'if (second code) #t (list 'if (third code) #t #f)))
-(define-syntax or or-trans)
+(define (=helper test rest)
+  (if (null? rest)
+      #t
+      (if (eqv? (numcompare test (car rest)) 0)
+	  (=helper test (cdr rest))
+	  #f)))
 
 (define (cond-trans code)
   (cond-helper (cdr code)))
@@ -358,11 +365,97 @@
 		  (cond-helper (cdr code)))))))
 (define-syntax cond cond-trans)
 
+(define (and-trans code)
+  (if (null? (cdr code)) 
+      #t
+      (list 'if (cadr code) 
+	        (and-trans (cons 'and (cddr code)))
+		#f)))
+(define-syntax and and-trans)
+
+(define (or-trans code)
+  (if (null? (cdr code))
+      #f
+      (list 'if (cadr code)        
+	    #t
+	    (or-trans (cons 'or (cddr code))))))
+(define-syntax or or-trans)
+
 ;; Things that need previous
 
 (define (list? obj)
   (or (eq? obj ()) 
       (pair? obj)))
+
+(define (addobj obj1 obj2)
+  (if (or (fraction? obj1) 
+	  (fraction? obj2))
+      (fraction-add-prim obj1 obj2)
+      (addobj-prim obj1 obj2)))
+
+(define (subobj obj1 obj2)
+  (if (or (fraction? obj1) 
+	  (fraction? obj2))
+      (fraction-sub-prim obj1 obj2)
+      (subobj-prim obj1 obj2)))
+
+(define (mulobj obj1 obj2)
+  (if (or (fraction? obj1) 
+	  (fraction? obj2))
+      (fraction-mul-prim obj1 obj2)
+      (mulobj-prim obj1 obj2)))
+
+(define (divobj obj1 obj2)
+  (fraction-div-prim obj1 obj2))
+
+(define +
+  (lambda ls
+    (addlist 0 ls)))
+(define (addlist curr ls)
+  (if (null? ls)
+      curr
+      (addlist (addobj curr (car ls)) (cdr ls))))
+
+(define - 
+  (lambda ls
+    (sublist (car ls) (cdr ls))))
+(define (sublist curr ls)
+  (if (null? ls)
+      curr
+      (sublist (subobj curr (car ls)) (cdr ls))))
+
+(define *
+  (lambda ls
+    (mullist (car ls) (cdr ls))))
+(define (mullist curr ls)
+  (if (null? ls)
+      curr
+      (mullist (mulobj curr (car ls)) (cdr ls))))
+
+(define /
+  (lambda ls
+    (divlist (car ls) (cdr ls))))
+(define (divlist curr ls)
+  (if (null? ls)
+      curr
+      (divlist (divobj curr (car ls)) (cdr ls))))
+
+(define (zero? num)
+  (= num 0))
+
+(define (positive? real) 
+  (> real 0))
+
+(define (negative? real)
+  (< real 0))
+
+(define (even? int) 
+  (if (= (modulo int 2) 0)
+      #t
+      #f))
+
+(define (odd? int) 
+  (not (even? int)))
 
 ;; Scheme Standard Library
 
@@ -379,17 +472,6 @@
 ;; All From ObjTst
 (define (numcompare num1 num2)
   (numcompare-prim num1 num2))
-
-(define =
-  (lambda ls
-    (=helper (car ls) (cdr ls))))
-
-(define (=helper test rest)
-  (if (null? rest)
-      #t
-      (if (eqv? (numcompare test (car rest)) 0)
-	  (=helper test (cdr rest))
-	  #f)))
 
 (define < 
   (lambda ls
@@ -450,78 +532,8 @@
 (define (fraction? obj)
   (if (eq? (typeof obj) 'Scheme.Fraction) #t #f))
 
-(define (addobj obj1 obj2)
-  (if (or (fraction? obj1) 
-	  (fraction? obj2))
-      (fraction-add-prim obj1 obj2)
-      (addobj-prim obj1 obj2)))
-
-(define (subobj obj1 obj2)
-  (if (or (fraction? obj1) 
-	  (fraction? obj2))
-      (fraction-sub-prim obj1 obj2)
-      (subobj-prim obj1 obj2)))
-
-(define (mulobj obj1 obj2)
-  (if (or (fraction? obj1) 
-	  (fraction? obj2))
-      (fraction-mul-prim obj1 obj2)
-      (mulobj-prim obj1 obj2)))
-
-(define (divobj obj1 obj2)
-  (fraction-div-prim obj1 obj2))
-
 ;; By default, make ratio
 ;;      (divobj-prim obj1 obj2)))
-
-(define +
-  (lambda ls
-    (addlist 0 ls)))
-(define (addlist curr ls)
-  (if (null? ls)
-      curr
-      (addlist (addobj curr (car ls)) (cdr ls))))
-
-(define - 
-  (lambda ls
-    (sublist (car ls) (cdr ls))))
-(define (sublist curr ls)
-  (if (null? ls)
-      curr
-      (sublist (subobj curr (car ls)) (cdr ls))))
-
-(define *
-  (lambda ls
-    (mullist (car ls) (cdr ls))))
-(define (mullist curr ls)
-  (if (null? ls)
-      curr
-      (mullist (mulobj curr (car ls)) (cdr ls))))
-
-(define /
-  (lambda ls
-    (divlist (car ls) (cdr ls))))
-(define (divlist curr ls)
-  (if (null? ls)
-      curr
-      (divlist (divobj curr (car ls)) (cdr ls))))
-
-(define (zero? num)
-  (= num 0))
-
-(define (positive? real) 
-  (> real 0))
-
-(define (negative? real)
-  (< real 0))
-
-(define (even? int) 
-  (if (= (modulo int 2) 0)
-      #t
-      #f))
-
-(define (odd? int) 
-  (not (even? int)))
 
 ;; (quotient int1 int2)
 ;; (remainder int1 int2) 
@@ -785,4 +797,25 @@
 ;; (load filename) 
 ;; (transcript-on filename) 
 ;; (transcript-off) 
+
+(define (qsort lst)
+  (cond
+   ((null? lst) lst)
+   (else 
+    (let ((h (car lst)) (t (cdr lst)))
+      (append
+       (qsort (filter (lambda (x) (<= x h)) t))
+       (list h)
+       (qsort (filter (lambda (x) (> x h)) t))))
+    )))
+
+
+(define (globals)
+  (globals-prim))
+
+(define (locals)
+  (locals-prim))
+
+(define (dir)
+  (dir-prim))
 

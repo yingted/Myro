@@ -10,7 +10,6 @@ Scheme Differences
 
 4. Some number types are missing: bignum, complex, scientific
 
-
 Things to do
 
 1. Figure out how to call graphics static fields
