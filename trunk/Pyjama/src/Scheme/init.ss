@@ -290,12 +290,6 @@
       '()
       (cons (proc (car ls)) (map proc (cdr ls)))))
 
-;;changed cons to change-list to preserve debug info in parsed code lists 
-(define (map-preserve proc ls)
-  (if (null? ls)
-      '()
-      (cons (proc (car ls)) (map proc (cdr ls)))))
-
 ;; Macros 
 (define (macro-expand obj)
   (if (pair? obj)
@@ -303,8 +297,12 @@
 	  obj
 	  (if (hash-contains-key? _macros (car obj))
 	      (macro-expand ((hash-ref _macros (car obj)) obj ))
-	      (map-preserve macro-expand obj)))
+	      (map macro-expand obj)))
       obj))
+
+(define (apply-trans code)
+  (list 'eval (list 'cons (list 'quote (cadr code)) (caddr code))))
+(define-syntax apply apply-trans)
 
 (define (make-list-of-parameters code)
   (map first (second code)))
@@ -325,10 +323,6 @@
 	(make-list-of-operands code)))
 
 (define-syntax let let-trans)
-
-(define (apply-trans code) 
-  (cons (cadr code) (cddr code)))
-(define-syntax apply apply-trans)
 
 (define (letrec-trans code)
   (append (list (append (append (append (list 'lambda)

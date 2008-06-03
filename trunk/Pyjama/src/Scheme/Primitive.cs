@@ -88,7 +88,6 @@ namespace Scheme
 	    prims["fraction-sub-prim"] = new FractionSubPrim("fraction-sub-prim");	    
 	    prims["fraction-div-prim"] = new FractionDivPrim("fraction-div-prim");	    
 	    prims["fraction-mul-prim"] = new FractionMulPrim("fraction-mul-prim");	    
-	    prims["fraction-eqv-prim?"] = new FractionEqvPrim("fraction-eqv-prim?");
         }
 
 	public class FractionEqvPrim : BasePrim, IPrim {

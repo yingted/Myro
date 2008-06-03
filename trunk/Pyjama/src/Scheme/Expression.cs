@@ -29,6 +29,8 @@ namespace Scheme
         static public Expression Parse(object a)
         {
 	    int pos = 0;
+	    Expression[] rands = null;
+	    IPrim prim = null;
             if (a is Symbol) 
             {
 		// FIXME: get-property interfers with dot-notation of assemblies
@@ -38,7 +40,7 @@ namespace Scheme
                 {
                     string aString = ((Symbol) a).val;
                     int posLastDot = aString.LastIndexOf(".");
-                    Expression[] rands = new Expression[2];
+                    rands = new Expression[2];
                     rands[0] = Expression.Parse(Symbol.Create(aString.Substring(0, posLastDot)));
                     rands[1] = new Lit(Symbol.Create(aString.Substring(posLastDot + 1, aString.Length - posLastDot - 1)));
 		    return new App(Expression.Parse(Symbol.Create("get-property")), rands);
@@ -78,12 +80,8 @@ namespace Scheme
 		    return new Builtin("globals");
 		case "locals-prim":
 		    return new Builtin("locals");
-		    /*
-		case "or":
-		    return new Builtin("or", Parse(pair.cdr));
-		case "and":
-		    return new Builtin("and", Parse(pair.cdr));
-		    */
+		case "eval":
+		    return new Builtin("eval", Parse(pair.cdr.car)); 
 		case "if": 
 		    Pair curr = pair.cdr;
 		    Expression test_exp = Parse(curr.car);
@@ -110,7 +108,7 @@ namespace Scheme
 			{
 			    string aString = var.val;
 			    int posLastDot = aString.LastIndexOf(".");
-			    Expression[] rands = new Expression[3];
+			    rands = new Expression[3];
 			    rands[0] = Expression.Parse(Symbol.Create(aString.Substring(0, posLastDot)));
 			    rands[1] = new Lit(Symbol.Create(aString.Substring(posLastDot + 1, aString.Length - posLastDot - 1)));
 			    rands[2] = exp;
@@ -170,7 +168,7 @@ namespace Scheme
 		default:  // app
 		    if (pair.hasMember)
                         {
-                            Expression[] rands = new Expression[2];
+                            rands = new Expression[2];
                             if (pair.member.IndexOf('.') != -1)
 				{
 				    string currentMember = pair.member;
@@ -194,7 +192,7 @@ namespace Scheme
                         }
 		    else
                         {
-                            Expression[] rands = null;
+                            rands = null;
                             if (pair.cdr != null)
 				{
 				    rands = new Expression[pair.cdr.Count];
@@ -205,7 +203,7 @@ namespace Scheme
 					    pos++;
 					}
 				}
-			    IPrim prim = Primitives.getPrim(pair.car.ToString());
+			    prim = Primitives.getPrim(pair.car.ToString());
                             if (prim != null)
 				{
 				    Primapp primapp = new Primapp(prim, rands);
@@ -261,8 +259,14 @@ namespace Scheme
         public Symbol[] ids; // if null, gets all args as a list
         public Expression body;
         public bool all_in_one;
-        public Proc(Symbol[] ids, Expression body, bool all_in_one) { this.ids = ids; this.body = body; this.all_in_one = all_in_one; }
-        override public System.String ToString() { return "<proc: ids=[" + Util.arrayToString(ids) + "]  body=" + body + "> "; } 
+        public Proc(Symbol[] ids, Expression body, bool all_in_one) { 
+	    this.ids = ids; 
+	    this.body = body; 
+	    this.all_in_one = all_in_one; 
+	}
+        override public System.String ToString() { 
+	    return "<proc: ids=[" + Util.arrayToString(ids) + "]  body=" + body + "> "; 
+	} 
         public override object Eval(Env globalEnv, Env localEnv)
         {
             //DebugInfo.EvalExpression(this);
@@ -326,7 +330,13 @@ namespace Scheme
 		return Util.arrayToList(globalEnv.Keys());
 	    else if (key == "locals")
 		return Util.arrayToList(localEnv.Keys());
-	    else if (key == "dir")
+	    else if (key == "eval") {
+		// first eval to get a literal
+		object obj = arg.Eval(globalEnv, localEnv);
+		// now, parse and eval that
+		Expression newexp = Parse(obj);
+		return newexp.Eval(globalEnv, localEnv);
+	    } else if (key == "dir")
 		return new Pair(Util.arrayToList(localEnv.Keys()), Util.arrayToList(globalEnv.Keys()));
 	    else if (key == "import-prim") {
 		String assname = (String) arg.Eval(globalEnv, localEnv);
@@ -434,7 +444,10 @@ namespace Scheme
     {
         public Expression rator; 
         public Expression[] rands;
-        public App(Expression rator, Expression[] rands) { this.rator = rator; this.rands = rands; }
+        public App(Expression rator, Expression[] rands) { 
+	    this.rator = rator; 
+	    this.rands = rands; 
+	}
         override public System.String ToString() { 
 	    return "<app: rator=" + rator + ", rands=[" + Util.arrayToString(rands) + "]> "; 
 	} 
