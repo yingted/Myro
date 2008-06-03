@@ -16,3 +16,4 @@ Things to do
 
 2. Write serial port in c# and consume in Scheme
 
+3. Fix parser on "+" and "(list -)" +/- by itself is a symbol
