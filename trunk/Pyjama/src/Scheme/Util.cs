@@ -104,12 +104,19 @@ namespace Scheme
                           return false; // should maybe also check for #a, etc.
               }
             } 
-            else if ((c.Equals('.')) && Char.IsNumber((char) str.Peek())) {
+            else if ((c.Equals('+') || (c.Equals('-'))) // +. -.
+		     && ((char) str.Peek()).Equals('.')) {
                 string numstr = new string(c, 1);
 		while (Char.IsNumber((char) str.Peek()) || ((char) str.Peek()).Equals('.'))
                     numstr += (char) str.Read();
 		return Convert.ToSingle(numstr);
-	    } else if (Char.IsNumber(c) || ( c.Equals('-') && !Char.IsWhiteSpace((char) str.Peek()) ) )
+	    } else if ((c.Equals('.')) && Char.IsNumber((char) str.Peek())) { // .6
+                string numstr = new string(c, 1);
+		while (Char.IsNumber((char) str.Peek()) || ((char) str.Peek()).Equals('.'))
+                    numstr += (char) str.Read();
+		return Convert.ToSingle(numstr);
+	    } else if (Char.IsNumber(c) || ( (c.Equals('-') || c.Equals('+')) &&   // 6. +6 -6
+					     !Char.IsWhiteSpace((char) str.Peek()) ) )
             {
                 string numstr = new string(c, 1);
             
