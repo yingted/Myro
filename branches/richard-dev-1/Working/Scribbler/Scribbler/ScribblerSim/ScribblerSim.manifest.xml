@@ -1,0 +1,43 @@
+<?xml version="1.0" ?>
+<Manifest 
+    xmlns="http://schemas.microsoft.com/xw/2004/10/manifest.html"
+    xmlns:dssp="http://schemas.microsoft.com/xw/2004/10/dssp.html"
+    xmlns:simcommon="http://schemas.microsoft.com/robotics/2006/04/simulation.html"
+    >
+  <CreateServiceList>
+
+    <ServiceRecordType>
+      <dssp:Contract>http://schemas.microsoft.com/robotics/simulation/services/2006/05/simulateddifferentialdrive.html</dssp:Contract>
+      <dssp:Service>http://hello/1</dssp:Service>
+      <dssp:PartnerList>
+        <dssp:Partner>
+          <!--The partner name must match the entity name-->
+          <dssp:Service>http://localhost/ScribblerRobot</dssp:Service>
+          <dssp:Name>simcommon:Entity</dssp:Name>
+        </dssp:Partner>
+      </dssp:PartnerList>
+    </ServiceRecordType>
+    
+    <ServiceRecordType>
+      <dssp:Contract>http://www.roboteducation.org/scribblersim.html</dssp:Contract>
+    </ServiceRecordType>
+
+    <ServiceRecordType>
+      <dssp:Contract>http://schemas.microsoft.com/robotics/2006/01/simpledashboard.html</dssp:Contract>
+    </ServiceRecordType>
+
+    <!-- Start simulated bumper service -->
+    <ServiceRecordType>
+      <dssp:Contract>http://schemas.microsoft.com/robotics/simulation/services/2006/05/simulatedbumper.html</dssp:Contract>
+      <dssp:Service>http://hello/2</dssp:Service>
+      <dssp:PartnerList>
+        <dssp:Partner>
+          <!--The partner name must match the entity name-->
+          <dssp:Service>http://localhost/ScribblerIRBumpers</dssp:Service>
+          <dssp:Name>simcommon:Entity</dssp:Name>
+        </dssp:Partner>
+      </dssp:PartnerList>
+    </ServiceRecordType>
+    
+  </CreateServiceList>
+</Manifest>

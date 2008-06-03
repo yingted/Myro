@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "ScribblerInstall", "ScribblerInstall.vdproj", "{2C116724-D7A3-407F-AEEB-2868A36D43C6}"
+EndProject
+Global
+	GlobalSection(TeamFoundationVersionControl) = preSolution
+		SccNumberOfProjects = 2
+		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccTeamFoundationServer = http://ipre-server.brynmawr.edu:8080/
+		SccLocalPath0 = .
+		SccProjectUniqueName1 = ScribblerInstall.vdproj
+		SccLocalPath1 = .
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Default = Debug|Default
+		Release|Default = Release|Default
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2C116724-D7A3-407F-AEEB-2868A36D43C6}.Debug|Default.ActiveCfg = Debug
+		{2C116724-D7A3-407F-AEEB-2868A36D43C6}.Debug|Default.Build.0 = Debug
+		{2C116724-D7A3-407F-AEEB-2868A36D43C6}.Release|Default.ActiveCfg = Release
+		{2C116724-D7A3-407F-AEEB-2868A36D43C6}.Release|Default.Build.0 = Release
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
