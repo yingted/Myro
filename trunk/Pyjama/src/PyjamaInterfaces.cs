@@ -50,6 +50,7 @@ namespace PyjamaInterfaces
 	void Quit();
 	void Print();
 	Widget GetView();
+	string command(string line);
     }
 }
 

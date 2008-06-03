@@ -128,6 +128,10 @@ public class Graphics {
 	color.setRGB(gray);
     }
     
+    public static Color makeColor(int red, int green, int blue) {
+	return new Color(red, green, blue);
+    }
+
     public class Color : ICodeFormattable {
 	
 	int red, green, blue;
@@ -201,6 +205,10 @@ public class Graphics {
 	    return String.Format("<Color (r={0},g={1},b={2})>",
 				 red, green, blue);
         }
+    }
+
+    public static GraphWin makeGraphWin() {
+	return new GraphWin();
     }
     
     public class GraphWin : ICodeFormattable {
@@ -364,6 +372,10 @@ public class Graphics {
 	}
     }
     
+    public static Point makePoint(int x, int y) {
+	return new Point(x, y);
+    }
+
     public class Point: BaseGraphic, ICodeFormattable {
 	
 	public int x, y;
@@ -393,6 +405,10 @@ public class Graphics {
         }
     }
     
+    public static Line makeLine(Point p1, Point p2) {
+	return new Line(p1, p2);
+    }
+
     public class Line: BaseGraphic, ICodeFormattable {
 	
 	Point point1, point2;
@@ -720,6 +736,10 @@ public class Graphics {
         }
     }
     
+    public static Image makeImage(Point centerPoint, Pixmap pixmap) {
+	return new Image(centerPoint, pixmap);
+    }
+
     public class Image : BaseGraphic, ICodeFormattable {
 	
 	Pixmap image;
@@ -755,6 +775,10 @@ public class Graphics {
         }
     }
     
+    public static Pixel makePixel(int x, int y, Pixmap pixmap) {
+	return new Pixel(x, y, pixmap);
+    }
+
     public class Pixel : ICodeFormattable {
 	
 	int x, y;
@@ -841,7 +865,10 @@ public class Graphics {
         }
     }
     
-    
+    public static Pixmap makePixmap() {
+	return new Pixmap();
+    }
+
     public class Pixmap : BaseGraphic, ICodeFormattable {
 	
 	public Gdk.Pixbuf pixbuf;

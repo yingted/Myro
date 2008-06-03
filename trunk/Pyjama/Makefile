@@ -21,7 +21,7 @@ DLLS=-r:Mono.Posix.dll -r:IronPython.dll -r:IronPython.Modules.dll \
 	-r:Microsoft.Scripting.dll -r:Microsoft.Scripting.Core.dll 
 
 SRCS=src/Pyjama.cs src/PyjamaInterfaces.cs src/Utils.cs \
-	src/TextDocument.cs src/Print.cs \
+	src/TextDocument.cs src/Print.cs src/Shell.cs \
 	src/PythonShell.cs src/PyjamaGUI.cs
 CSFLAGS=-d:HOSTINGVER$(HOSTINGVER) -pkg:gtksourceview-sharp-2.0 -pkg:gtk-sharp-2.0 -pkg:glade-sharp-2.0 
 CS=gmcs
