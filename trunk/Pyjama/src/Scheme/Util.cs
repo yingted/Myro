@@ -104,7 +104,12 @@ namespace Scheme
                           return false; // should maybe also check for #a, etc.
               }
             } 
-            else if (Char.IsNumber(c) || ( c.Equals('-') && !Char.IsWhiteSpace((char) str.Peek()) ) )
+            else if ((c.Equals('.')) && Char.IsNumber((char) str.Peek())) {
+                string numstr = new string(c, 1);
+		while (Char.IsNumber((char) str.Peek()) || ((char) str.Peek()).Equals('.'))
+                    numstr += (char) str.Read();
+		return Convert.ToSingle(numstr);
+	    } else if (Char.IsNumber(c) || ( c.Equals('-') && !Char.IsWhiteSpace((char) str.Peek()) ) )
             {
                 string numstr = new string(c, 1);
             
@@ -640,6 +645,12 @@ namespace Scheme
 	public static int ToInt(Fraction f) {
 	    return (int)f.numerator/(int)f.denominator;
 	}
+	public Single ToSingle() {
+	    return (Single)numerator/(Single)denominator;
+	}
+	public int ToInt() {
+	    return (int)numerator/(int)denominator;
+	}
 	public static implicit operator Single(Fraction f) {
 	    return (Single)f.numerator/(Single)f.denominator;
 	}
@@ -761,7 +772,7 @@ namespace Scheme
 		argsCount = args.Length;
 
 	    for (int i = 0; i < idsCount; i++) {
-		if (ids[i].ToString() == ".")
+		if (ids[i].ToString() == ".") // FIXME to use dotted pairs
 		    variableArgs = true;
 	    }
 

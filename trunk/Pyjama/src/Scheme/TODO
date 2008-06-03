@@ -10,7 +10,7 @@ Scheme Differences
 
 4. Some number types are missing: bignum, complex, scientific
 
-5. (= 1/1 0) segfaults
+6. nedd to handle + numbers
 
 
 Things to do

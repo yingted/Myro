@@ -283,7 +283,12 @@ namespace Scheme
 	    }
             public object Call(Object[] args)    
             {
-                return ObjectType.ObjTst(args[0], args[1], false);
+		object o1 = args[0], o2 = args[1];
+		if (args[0] is Fraction)
+		    o1 = (Single)((Fraction)args[0]).ToSingle();
+		if (args[1] is Fraction)
+		    o2 = (Single)((Fraction)args[1]).ToSingle();
+                return ObjectType.ObjTst(o1, o2, false);
             }
         }
         

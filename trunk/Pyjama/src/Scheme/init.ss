@@ -378,11 +378,7 @@
 
 ;; All From ObjTst
 (define (numcompare num1 num2)
-  (if (or (fraction? num1)
-	  (fraction? num2))
-      (if (fraction-eqv-prim? num1 num2)
-	  0 1)
-      (numcompare-prim num1 num2)))
+  (numcompare-prim num1 num2))
 
 (define =
   (lambda ls
