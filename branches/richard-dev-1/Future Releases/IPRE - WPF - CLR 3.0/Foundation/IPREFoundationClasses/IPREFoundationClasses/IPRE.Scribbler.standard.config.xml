@@ -1,0 +1,61 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<RobotConfig>
+
+  <ManifestFile>
+    <URI>C:\Microsoft Robotics Studio (1.5)\samples\IPRE\Foundation\IPREFoundationClasses\IPREFoundationClasses\IPRE.Scribbler.standard.manifest.xml</URI>
+  </ManifestFile>
+
+  <DssEnvironment>
+    <HttpPort>50000</HttpPort>
+    <SoapPort>50001</SoapPort>
+  </DssEnvironment>
+
+  <!-- Verbosity Level from 1-5 -->
+  <Verbosity>
+    <Level>2</Level>
+  </Verbosity>
+  
+  <Sensor type="contact" class="line">
+    <Service>/5/contactsensor</Service>
+    <Container>Array</Container>
+    <StartIndex>0</StartIndex>
+    <EndIndex>1</EndIndex>
+    <FinalOrder>0</FinalOrder>
+  </Sensor>
+
+  <Sensor type="analog" class="light">
+    <Service>/4/ScribblerGenericAnalogSensor</Service>
+    <Container>Array</Container>
+    <StartIndex>0</StartIndex>
+    <EndIndex>2</EndIndex>
+    <FinalOrder>0</FinalOrder>
+  </Sensor>
+
+  <Sensor type="contact" class="stall">
+    <Service>/5/contactsensor</Service>
+    <Container>Array</Container>
+    <StartIndex>2</StartIndex>
+    <EndIndex>2</EndIndex>
+    <FinalOrder>0</FinalOrder>
+  </Sensor>
+
+  <Sensor type="drive" class="differential">
+    <Service>/3/drive</Service>
+    <Container>Element</Container>
+    <FinalOrder>0</FinalOrder>
+  </Sensor>
+
+  <Sensor type="sound" class="tone">
+    <Service>/tone/tonegenerator</Service>
+    <Container>Element</Container>
+    <FinalOrder>0</FinalOrder>
+  </Sensor>
+
+  <Sensor type="ledarray" class="led">
+    <Service>/led/ledarray</Service>
+    <Container>Element</Container>
+    <FinalOrder>0</FinalOrder>
+  </Sensor>
+  
+</RobotConfig>

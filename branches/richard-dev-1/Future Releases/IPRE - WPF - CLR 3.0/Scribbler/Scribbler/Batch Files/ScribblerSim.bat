@@ -1,0 +1,1 @@
+"..\..\..\..\bin\DssHost.exe" -p:50000 -m:"..\ScribblerSim\ScribblerSim.manifest.xml"

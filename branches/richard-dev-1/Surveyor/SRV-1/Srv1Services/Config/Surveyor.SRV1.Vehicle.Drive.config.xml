@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<DriveDifferentialTwoWheelState xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://schemas.microsoft.com/robotics/2006/05/drive.html">
+  <TimeStamp>2006-06-13T09:24:09.3822858-07:00</TimeStamp>
+  <LeftWheel>
+    <WheelSpeed xmlns="http://schemas.microsoft.com/robotics/2006/05/motor.html">0</WheelSpeed>
+    <MotorState xmlns="http://schemas.microsoft.com/robotics/2006/05/motor.html">
+      <PowerScalingFactor>1</PowerScalingFactor>
+      <Name>Left Motor</Name>
+      <HardwareIdentifier>1</HardwareIdentifier>
+      <CurrentPower>0</CurrentPower>
+    </MotorState>
+    <Radius xmlns="http://schemas.microsoft.com/robotics/2006/05/motor.html">0.0254</Radius>
+    <GearRatio xmlns="http://schemas.microsoft.com/robotics/2006/05/motor.html">0</GearRatio>
+    <EncoderState xmlns="http://schemas.microsoft.com/robotics/2006/05/motor.html">
+      <TimeStamp xmlns="http://schemas.microsoft.com/robotics/2006/05/encoder.html">0001-01-01T00:00:00</TimeStamp>
+      <TicksSinceReset xmlns="http://schemas.microsoft.com/robotics/2006/05/encoder.html">0</TicksSinceReset>
+      <CurrentReading xmlns="http://schemas.microsoft.com/robotics/2006/05/encoder.html">0</CurrentReading>
+      <TicksPerRevolution xmlns="http://schemas.microsoft.com/robotics/2006/05/encoder.html">8</TicksPerRevolution>
+      <Identifier xmlns="http://schemas.microsoft.com/robotics/2006/05/encoder.html">0</Identifier>
+    </EncoderState>
+  </LeftWheel>
+  <RightWheel>
+    <WheelSpeed xmlns="http://schemas.microsoft.com/robotics/2006/05/motor.html">0</WheelSpeed>
+    <MotorState xmlns="http://schemas.microsoft.com/robotics/2006/05/motor.html">
+      <PowerScalingFactor>1</PowerScalingFactor>
+      <Name>Right Motor</Name>
+      <HardwareIdentifier>2</HardwareIdentifier>
+      <CurrentPower>0</CurrentPower>
+    </MotorState>
+    <Radius xmlns="http://schemas.microsoft.com/robotics/2006/05/motor.html">0.0254</Radius>
+    <GearRatio xmlns="http://schemas.microsoft.com/robotics/2006/05/motor.html">0</GearRatio>
+    <EncoderState xmlns="http://schemas.microsoft.com/robotics/2006/05/motor.html">
+      <TimeStamp xmlns="http://schemas.microsoft.com/robotics/2006/05/encoder.html">0001-01-01T00:00:00</TimeStamp>
+      <TicksSinceReset xmlns="http://schemas.microsoft.com/robotics/2006/05/encoder.html">0</TicksSinceReset>
+      <CurrentReading xmlns="http://schemas.microsoft.com/robotics/2006/05/encoder.html">0</CurrentReading>
+      <TicksPerRevolution xmlns="http://schemas.microsoft.com/robotics/2006/05/encoder.html">8</TicksPerRevolution>
+      <Identifier xmlns="http://schemas.microsoft.com/robotics/2006/05/encoder.html">0</Identifier>
+    </EncoderState>
+  </RightWheel>
+  <DistanceBetweenWheels>.1016</DistanceBetweenWheels>
+  <IsEnabled>true</IsEnabled>
+</DriveDifferentialTwoWheelState>

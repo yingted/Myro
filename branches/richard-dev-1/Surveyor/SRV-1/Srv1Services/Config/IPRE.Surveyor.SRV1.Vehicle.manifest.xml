@@ -1,0 +1,77 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Manifest 
+    xmlns="http://schemas.microsoft.com/xw/2004/10/manifest.html"
+    xmlns:dssp="http://schemas.microsoft.com/xw/2004/10/dssp.html"
+    xmlns:drive="http://schemas.microsoft.com/robotics/2006/05/drive.html" 
+    >
+
+  <CreateServiceList>
+
+    <!--Start the Generic (hardware agnostic) drive service-->
+    <ServiceRecordType>
+      <dssp:Contract>http://schemas.microsoft.com/robotics/2006/05/drive.html</dssp:Contract>
+      <dssp:Service>http://hello/1</dssp:Service>
+      <dssp:PartnerList>
+        <!--Initial state partner-->
+        <dssp:Partner>
+          <!-- In our environment, this maps to %LayoutDir%\config\ -->
+          <dssp:Service>Surveyor.SRV1.Vehicle.Drive.Config.xml</dssp:Service>
+          <dssp:Name>dssp:StateService</dssp:Name>
+        </dssp:Partner>
+        <dssp:Partner>
+          <dssp:Name>drive:BumperService</dssp:Name>
+        </dssp:Partner>
+        <dssp:Partner>
+          <dssp:Name>drive:LeftMotor</dssp:Name>
+        </dssp:Partner>
+        <dssp:Partner>
+          <dssp:Name>drive:RightMotor</dssp:Name>
+        </dssp:Partner>
+      </dssp:PartnerList>
+    </ServiceRecordType>
+
+    <!--The following section creates the services that the generic drive requires as partners -->
+
+    <ServiceRecordType>
+      <dssp:Contract>http://schemas.sharplogic.com/robotics/2006/11/surveyorsrv1contactsensor.html</dssp:Contract>
+      <dssp:Service>http://hello/2</dssp:Service>
+      <dssp:PartnerList>
+        <!--Initial state partner-->
+        <dssp:Partner>
+          <dssp:Service>Surveyor.SRV1.Vehicle.Bumper.Config.xml</dssp:Service>
+          <dssp:Name>dssp:StateService</dssp:Name>
+        </dssp:Partner>
+      </dssp:PartnerList>      
+    </ServiceRecordType>
+
+    <ServiceRecordType>
+      <dssp:Contract>http://schemas.sharplogic.com/robotics/2006/11/surveyorsrv1motor.html</dssp:Contract>
+      <Name>drive:LeftMotor</Name>
+    </ServiceRecordType>
+
+    <ServiceRecordType>
+      <dssp:Contract>http://schemas.sharplogic.com/robotics/2006/11/surveyorsrv1motor.html</dssp:Contract>
+      <Name>drive:RightMotor</Name>
+    </ServiceRecordType>
+
+    <!--The following section creates the service that loads the COM configuration settings-->
+
+    <ServiceRecordType>
+      <dssp:Contract>http://schemas.sharplogic.com/robotics/2006/11/srv1.html</dssp:Contract>
+      <dssp:PartnerList>
+        <!--Initial state partner-->
+        <dssp:Partner>
+          <dssp:Service>Surveyor.SRV1.Controller.config.xml</dssp:Service>
+          <dssp:Name>dssp:StateService</dssp:Name>
+        </dssp:Partner>
+      </dssp:PartnerList>
+    </ServiceRecordType>
+
+    <ServiceRecordType>
+      <dssp:Contract>http://schemas.microsoft.com/2006/05/texttospeech.html</dssp:Contract>
+      <dssp:Service>http://hello/tts</dssp:Service>
+    </ServiceRecordType>
+
+  </CreateServiceList>
+
+</Manifest>

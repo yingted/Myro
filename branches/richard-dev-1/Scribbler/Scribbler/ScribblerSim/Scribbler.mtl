@@ -1,0 +1,23 @@
+# Title: Parallax Scribbler Robot Model
+# By: Ben Axelrod, Oct. 11 2006
+# For: IPRE (http://www.roboteducation.org/)
+# Georgia Institute of Technology
+# Notes: Modeled in SolidWorks, and rendered in Blender
+
+newmtl Blue
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.4 0.4 0.9
+Ks 0.6 0.6 0.9
+Ni 1.000000
+d 1.000000
+illum 2
+
+newmtl DarkGrey
+Ns 96.078431
+Ka 0.000000 0.000000 0.000000
+Kd 0.200784 0.200784 0.200784
+Ks 0.300000 0.300000 0.300000
+Ni 1.000000
+d 1.000000
+illum 2

@@ -1,0 +1,35 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LegoNxt", "LegoNxt\LegoNxt.csproj", "{63B90ACF-7610-4109-AA79-0842F7FAA290}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LegoNXTServices", "LegoNXTServices\LegoNXTServices.csproj", "{885CB38B-B7F4-4F82-A540-C79BA8CAAF24}"
+	ProjectSection(ProjectDependencies) = postProject
+		{63B90ACF-7610-4109-AA79-0842F7FAA290} = {63B90ACF-7610-4109-AA79-0842F7FAA290}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LegoHelper", "LegoNxt\LegoHelper\LegoHelper.csproj", "{F2AC37DB-CA61-4BA0-ADA2-BFB60918074B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{63B90ACF-7610-4109-AA79-0842F7FAA290}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{63B90ACF-7610-4109-AA79-0842F7FAA290}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{63B90ACF-7610-4109-AA79-0842F7FAA290}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{63B90ACF-7610-4109-AA79-0842F7FAA290}.Release|Any CPU.Build.0 = Release|Any CPU
+		{885CB38B-B7F4-4F82-A540-C79BA8CAAF24}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{885CB38B-B7F4-4F82-A540-C79BA8CAAF24}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{885CB38B-B7F4-4F82-A540-C79BA8CAAF24}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{885CB38B-B7F4-4F82-A540-C79BA8CAAF24}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F2AC37DB-CA61-4BA0-ADA2-BFB60918074B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F2AC37DB-CA61-4BA0-ADA2-BFB60918074B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F2AC37DB-CA61-4BA0-ADA2-BFB60918074B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F2AC37DB-CA61-4BA0-ADA2-BFB60918074B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Srv1CameraState xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://schemas.sharplogic.com/robotics/2006/11/srv1camera.html">
+  <Cameras/>
+  <CaptureFile>C:\WebCam.Stream</CaptureFile>
+  <Quality>0.75</Quality>
+</Srv1CameraState>

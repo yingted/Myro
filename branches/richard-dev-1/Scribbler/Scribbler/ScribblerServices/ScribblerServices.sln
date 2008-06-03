@@ -1,0 +1,30 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScribblerServices", "ScribblerServices.csproj", "{7642E562-01BF-4385-B821-7B1637BAEDA1}"
+EndProject
+Global
+	GlobalSection(TeamFoundationVersionControl) = preSolution
+		SccNumberOfProjects = 1
+		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccTeamFoundationServer = http://ipre-server.brynmawr.edu:8080/
+		SccProjectUniqueName0 = ScribblerServices.csproj
+		SccProjectName0 = ../../ScribblerServices
+		SccAuxPath0 = http://ipre-server.brynmawr.edu:8080
+		SccLocalPath0 = .
+		SccProvider0 = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7642E562-01BF-4385-B821-7B1637BAEDA1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7642E562-01BF-4385-B821-7B1637BAEDA1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7642E562-01BF-4385-B821-7B1637BAEDA1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7642E562-01BF-4385-B821-7B1637BAEDA1}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

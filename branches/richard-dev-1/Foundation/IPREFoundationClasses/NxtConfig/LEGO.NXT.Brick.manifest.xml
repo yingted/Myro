@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Manifest 
+    xmlns="http://schemas.microsoft.com/xw/2004/10/manifest.html"
+    xmlns:dssp="http://schemas.microsoft.com/xw/2004/10/dssp.html"
+    xmlns:nxt="http://schemas.microsoft.com/robotics/2006/05/legonxt.html" 
+    >
+  <!-- Start the LEGO NXT Brick service with Direct Commands and System Commands. -->
+  <CreateServiceList>
+
+    <!--Start LegoNXT Brick -->
+    <ServiceRecordType>
+      <dssp:Contract>http://schemas.microsoft.com/robotics/2006/05/legonxt.html</dssp:Contract>
+      <dssp:PartnerList>
+        <!--Initial LegoNXT config file -->
+        <dssp:Partner>
+          <dssp:Service>LEGO.NXT.Brick.Config.xml</dssp:Service>
+          <dssp:Name>dssp:StateService</dssp:Name>
+        </dssp:Partner>
+      </dssp:PartnerList>
+      <Name>nxt:LegoNxtBrick</Name>
+    </ServiceRecordType>
+
+  </CreateServiceList>
+
+</Manifest>

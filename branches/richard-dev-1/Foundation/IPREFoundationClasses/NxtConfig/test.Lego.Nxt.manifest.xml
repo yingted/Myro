@@ -1,0 +1,29 @@
+<?xml version="1.0" ?>
+<m:Manifest 
+    xmlns:m="http://schemas.microsoft.com/xw/2004/10/manifest.html"
+    xmlns:dssp="http://schemas.microsoft.com/xw/2004/10/dssp.html"
+    xmlns:test="http://schemas.microsoft.com/xw/2005/03/testbase.html">  
+  <m:CreateServiceList>
+      <m:ServiceRecordType>
+          <dssp:Contract>http://schemas.microsoft.com/robotics/2006/09/testlegonxt.html</dssp:Contract>
+        <dssp:PartnerList>
+          <dssp:Partner>
+            <dssp:Name>test:Directory</dssp:Name>
+          </dssp:Partner>
+        </dssp:PartnerList>
+      </m:ServiceRecordType>
+      <m:ServiceRecordType>
+        <dssp:Contract>http://schemas.microsoft.com/xw/2004/10/directory.html</dssp:Contract>
+        <dssp:Service xmlns="http://schemas.microsoft.com/xw/2004/10/dssp.html">http://localhost/testdirectory</dssp:Service>
+        <m:Name>test:Directory</m:Name>
+      </m:ServiceRecordType>    
+      <m:ServiceRecordType>
+        <dssp:Contract>http://schemas.microsoft.com/xw/2005/03/testaggregator.html</dssp:Contract>
+        <dssp:PartnerList>
+          <dssp:Partner>
+            <dssp:Name>test:Directory</dssp:Name>
+          </dssp:Partner>
+        </dssp:PartnerList>
+      </m:ServiceRecordType>    
+    </m:CreateServiceList>
+</m:Manifest>
