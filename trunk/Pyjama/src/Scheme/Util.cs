@@ -123,6 +123,9 @@ namespace Scheme
                 while (Char.IsNumber((char) str.Peek()) || ((char) str.Peek()).Equals('.'))
                     numstr += (char) str.Read();
 		
+		if (numstr == "+" || numstr == "-")
+		    return Symbol.Create(numstr);
+
 		if (((char)str.Peek()).Equals('/')) {
 		    str.Read(); // read the /
 		    
