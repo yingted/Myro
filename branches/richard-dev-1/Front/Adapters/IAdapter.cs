@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Microsoft.Dss.ServiceModel.Dssp;
+using Myro;
 
 namespace Myro.Adapters
 {
@@ -41,15 +42,6 @@ namespace Myro.Adapters
         }
     }
 
-    public static class Strings
-    {
-        public static string FaultReceived = "Fault received.";
-        public static string IndexOutOfBounds(int requested, int max) { return "Index \"" + requested + "\" is out of bounds.  Indices must be >= 0.  The maximum index in this case " + max + "."; }
-        public static string NotReady = "The sensor or actuator is not ready yet.";
-        public static string VectorTooShort = "The vector from this service is shorter than expected, this probably indicates a bug in the service.";
-        public static string NameNotFound(string tag) { return "The element name \"" + tag + "\" was not found in this vector"; }
-    }
-
     /// <summary>
     /// Every adapter class must implement this IAdapter interface
     /// </summary>
@@ -63,8 +55,6 @@ namespace Myro.Adapters
         S get();
         void set(S state);
     }
-
-
 
 
     ///// <summary>

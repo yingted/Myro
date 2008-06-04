@@ -14,7 +14,7 @@ using scribblersim = IPRE.ScribblerSim;
 using Microsoft.Dss.Core.DsspHttp;
 
 
-namespace IPRE.ScribblerSim
+namespace Myro.Services.ScribblerSim
 {
     [DataContract()]
     public class ScribblerSimState

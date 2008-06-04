@@ -66,17 +66,24 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <None Include=".svn\all-wcprops" />
-    <None Include=".svn\dir-props" />
-    <None Include=".svn\entries" />
-    <None Include=".svn\format" />
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="Adapters\AdapterBank.cs" />
-    <Compile Include="Adapters\AdapterFactory.cs" />
+    <Compile Include="Adapters\AdapterSpec.cs" />
     <Compile Include="Adapters\DriveAdapter.cs" />
     <Compile Include="Adapters\IAdapter.cs" />
     <Compile Include="Adapters\VectorAdapter.cs" />
+    <Compile Include="MyroAPI\AbstractMovement.cs" />
+    <Compile Include="MyroAPI\IMyroLED.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="MyroAPI\IMyroMovement.cs" />
+    <Compile Include="MyroAPI\IMyroRobotData.cs" />
+    <Compile Include="MyroAPI\IMyroSensor.cs" />
+    <Compile Include="MyroAPI\IMyroSound.cs" />
+    <Compile Include="MyroAPI\IMyroSpeech.cs" />
+    <Compile Include="MyroAPI\IMyroUtility.cs" />
+    <Compile Include="MyroAPI\MyroSensors.cs" />
+    <Compile Include="MyroAPI\MyroUtilities.cs" />
+    <Compile Include="Strings.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Services\Generic\Vector\Vector.csproj">
@@ -86,15 +93,6 @@
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Service References\" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include=".svn\prop-base\" />
-    <Folder Include=".svn\props\" />
-    <Folder Include=".svn\text-base\" />
-    <Folder Include=".svn\tmp\prop-base\" />
-    <Folder Include=".svn\tmp\props\" />
-    <Folder Include=".svn\tmp\text-base\" />
-    <Folder Include="MyroAPI\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSHARP.Targets" />
   <ProjectExtensions>

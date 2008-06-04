@@ -35,7 +35,7 @@ using valuearray = Robotics.ValueArrayStorage.Proxy;
 
 #endregion
 
-namespace IPRE.ScribblerSim
+namespace Myro.Services.ScribblerSim
 {
     
     [DisplayName("ScribblerSim")]

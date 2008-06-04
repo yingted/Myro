@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-//using System.Collections;
 using System.Xml.XPath;
 using System.Xml;
 using Microsoft.Dss.ServiceModel.Dssp;
@@ -14,15 +13,47 @@ using dirProxy = Microsoft.Dss.Services.Directory.Proxy;
 
 namespace Myro.Adapters
 {
+    /// <summary>
+    /// This exception is thrown when there is a problem with the content of
+    /// the config file.  The exception will print a line containing the 
+    /// reason for the exception.
+    /// </summary>
     public class ConfigException : Exception
     {
         public ConfigException(string reason)
             : base(reason)
         {
-            Console.WriteLine("EXCEPTION: ConfigException " + reason);
+            Console.WriteLine("*** Config Exception *** " + reason);
         }
     }
 
+    /// <summary>
+    /// This exception is thrown if an unknown adapter is requested from the
+    /// AdapterBank.
+    /// </summary>
+    public class UnknownAdapterNameException : Exception
+    {
+        public UnknownAdapterNameException(string name) : base("Unknown adapter name: \"" + name + "\"")
+        {
+        }
+    }
+
+
+    /// <summary>
+    /// This class is the main interface between the higher-level Myro API
+    /// and the service adapters.
+    /// 
+    /// This class deals with managing the "bank" of adapters at runtime.  It
+    /// parses the config file, creating AdapterSpec's for each Adapter
+    /// section, and plain ServiceInfoType's for each StartService section.
+    /// 
+    /// It subscribes to the DSS directory, watching for services to start
+    /// that match those from the config file, attaching adapters as soon as
+    /// they do start.  It can also automatically start the services from the
+    /// config file.
+    /// 
+    /// It also allows AdapterSpec's to be retrieved by name.
+    /// </summary>
     public class AdapterBank
     {
         protected List<ServiceInfoType> services;
@@ -35,6 +66,24 @@ namespace Myro.Adapters
             subscribeDirectory();
             if (autoStartServices)
                 startServices();
+        }
+
+        /// <summary>
+        /// Return the AdapterSpec associated with the name, as specified in
+        /// the config file.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public AdapterSpec GetAdapterSpec(string name)
+        {
+            try
+            {
+                return adapterNames[name];
+            }
+            catch (KeyNotFoundException e)
+            {
+                throw new UnknownAdapterNameException(name);
+            }
         }
 
         protected void readConfig(string configFile)
