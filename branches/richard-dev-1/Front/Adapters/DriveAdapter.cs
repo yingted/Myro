@@ -15,7 +15,7 @@ using drive = Microsoft.Robotics.Services.Drive.Proxy;
 
 namespace Myro.Adapters
 {
-    public class DriveAdapter : MyroInterfaces.AbstractMovement, IAdapter<drive.DriveDifferentialTwoWheelState>
+    public class DriveAdapter : IAdapter<drive.DriveDifferentialTwoWheelState>
     {
         public ServiceInfoType ServiceInfo { get; private set; }
         protected drive.DriveOperations drivePort;

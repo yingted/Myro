@@ -24,7 +24,6 @@ using contact = Microsoft.Robotics.Services.ContactSensor.Proxy;
 using analogArray = Microsoft.Robotics.Services.AnalogSensorArray.Proxy;
 using tts = Microsoft.Robotics.Technologies.Speech.TextToSpeech.Proxy;
 
-#if false
 namespace IPREFoundationClasses
 {
     public partial class RobotBrain : MyroInterfaces.IMyroSensor, MyroInterfaces.IMyroMovement, MyroInterfaces.IMyroSound, MyroInterfaces.IMyroLED, MyroInterfaces.IMyroSpeech
@@ -477,4 +476,3 @@ namespace IPREFoundationClasses
         #endregion
     }
 }
-#endif

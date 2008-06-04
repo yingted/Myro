@@ -24,13 +24,30 @@ namespace Myro.Adapters
         {
         }
         public AdapterOperationException(W3C.Soap.Fault failure)
-            : base("Fault received", failure.ToException())
+            : base(Strings.FaultReceived, failure.ToException())
         {
         }
         public AdapterOperationException(string reason, Exception innerException)
             : base(reason, innerException)
         {
         }
+    }
+
+    public class AdapterArgumentException : Exception
+    {
+        public AdapterArgumentException(string reason)
+            : base(reason)
+        {
+        }
+    }
+
+    public static class Strings
+    {
+        public static string FaultReceived = "Fault received.";
+        public static string IndexOutOfBounds(int requested, int max) { return "Index \"" + requested + "\" is out of bounds.  Indices must be >= 0.  The maximum index in this case " + max + "."; }
+        public static string NotReady = "The sensor or actuator is not ready yet.";
+        public static string VectorTooShort = "The vector from this service is shorter than expected, this probably indicates a bug in the service.";
+        public static string NameNotFound(string tag) { return "The element name \"" + tag + "\" was not found in this vector"; }
     }
 
     /// <summary>

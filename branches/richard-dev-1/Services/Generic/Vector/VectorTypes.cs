@@ -44,6 +44,8 @@ namespace Myro.Services.Generic.Vector
         public List<string> Tags { get; set; }
         [DataMember()]
         public DateTime Timestamp { get; set; }
+        [DataMember()]
+        public DateTime TagTimestamp { get; set; }
         public VectorState()
             : this(null, null, DateTime.Now)
         {
@@ -61,6 +63,7 @@ namespace Myro.Services.Generic.Vector
             Values = values;
             Tags = tags;
             Timestamp = timestamp;
+            TagTimestamp = DateTime.Now;
         }
     }
 

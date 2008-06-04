@@ -103,9 +103,6 @@
     <AppDesigner Include="Properties" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Vector.manifest.xml" />
-  </ItemGroup>
-  <ItemGroup>
     <Folder Include="Properties\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSHARP.Targets" />

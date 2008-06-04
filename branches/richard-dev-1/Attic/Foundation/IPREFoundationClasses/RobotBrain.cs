@@ -29,7 +29,6 @@ using ledarray = IPREGenericContracts.LEDarray.Proxy;
 using sonar = Microsoft.Robotics.Services.Sonar.Proxy;
 using tts = Microsoft.Robotics.Technologies.Speech.TextToSpeech.Proxy;
 
-#if false
 namespace IPREFoundationClasses
 {
 
@@ -482,4 +481,3 @@ namespace IPREFoundationClasses
 
     }
 }
-#endif
