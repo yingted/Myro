@@ -282,9 +282,9 @@ namespace SimTestSuite
             drawCircleMeters(contactSensorImg, Color.MediumVioletRed, contacts, 0.0f, 1.0f);
             float[] stall = rbt.get("stall");
             drawCircleMeters(stallSensorImg, Color.Red, stall, 0.0f, 1.0f);
-            float[] light = rbt.get("light");
+            //float[] light = rbt.get("light");
             //Console.WriteLine("light: " + light[0]);
-            drawCircleMeters(lightSensorImg, Color.DeepSkyBlue, light, 2000.0f, 0.0f);
+            //drawCircleMeters(lightSensorImg, Color.DeepSkyBlue, light, 2000.0f, 0.0f);
             //float[] ir = rbt.get("ir");
             //Console.WriteLine("ir: " + ir[0]);
             //drawCircleMeters(IRSensorImg, ir, 0.0f, 1.0f);

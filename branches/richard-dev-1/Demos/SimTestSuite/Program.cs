@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
+using Microsoft.Dss.Hosting;
 
 using IPREFoundationClasses;
 
@@ -16,9 +17,13 @@ namespace SimTestSuite
 
         public void start()
         {
-            Console.WriteLine("Opening Scribbler...");
-            scribbler = new ScribblerBrain("Config\\IPRE.Scribbler.standard.config.xml");
-            Console.WriteLine("Scribbler is ready!");
+            Console.WriteLine("Starting DSS environment...");
+            DssEnvironment.Initialize(50000, 50001);
+            AdapterBank adapters = new AdapterBank("Config\\Scribbler.config.xml", true);
+
+            //Console.WriteLine("Opening Scribbler...");
+            //scribbler = new ScribblerBrain("Config\\IPRE.Scribbler.standard.config.xml");
+            //Console.WriteLine("Scribbler is ready!");
 
             //new Thread(new ThreadStart(bumperLoop)).Start();
             //new Thread(new ThreadStart(driveLoop)).Start();
