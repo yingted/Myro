@@ -18,39 +18,44 @@ using Gtk;
 
 namespace PyjamaInterfaces
 {
-    public interface IDocument
+    public interface IEditable
     {
-	// Defines the Document interface
-	string GetShortName();
-	bool GetModified();
-	void SetModified(bool value);
-	void Save();
-	void SaveAs(string value);
-	void SetFilename(string value);
-	string GetFilename();
-	Widget GetView();
-        bool GetDirty();
-	int GetPage();
-	void SetPage(int page);
-	int GetSize();
+        TextBuffer Buffer { get; }
         void Cut();
         void Copy();
         void Paste();
         void Delete();
+    }
+    
+    public interface IDocument: IEditable
+    {
+        // Defines the Document interface
+        string GetShortName();
+        bool GetModified();
+        void SetModified(bool value);
+        void Save();
+        void SaveAs(string value);
+        void SetFilename(string value);
+        string GetFilename();
+        Widget GetView();
+        bool GetDirty();
+        int GetPage();
+        void SetPage(int page);
+        int GetSize();
         void Print();
         bool Untitled { get; }
     }
 
     public interface IShell
     {
-	// Defines the Shell interface
-	void ExecuteFile(string filename);
-	void EvaluateExp(string expression);
-	void Restart();
-	void Quit();
-	void Print();
-	Widget GetView();
-	string command(string line);
+        // Defines the Shell interface
+        void ExecuteFile(string filename);
+        void EvaluateExp(string expression);
+        void Restart();
+        void Quit();
+        void Print();
+        Widget GetView();
+        string command(string line);
     }
 }
 

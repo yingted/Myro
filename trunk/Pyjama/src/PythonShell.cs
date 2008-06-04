@@ -39,7 +39,7 @@ public class PythonShell: BaseShell, PyjamaInterfaces.IShell
     
     public PythonShell() : base()
     {
-	mgr = new SourceLanguagesManager();
+        mgr = new SourceLanguagesManager();
         language = mgr.GetLanguageFromMimeType("text/x-python");
         
         // Set up syntax highlighting
@@ -109,4 +109,3 @@ public class PythonShell: BaseShell, PyjamaInterfaces.IShell
     }
 
 }
-

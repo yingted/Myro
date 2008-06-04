@@ -31,9 +31,11 @@ public class PyjamaGUI
     [Widget] Notebook notebook;
     
     List <IDocument> documents = new List <IDocument>();
+    FindDialog find;
     
     public PyjamaGUI(string[] args)
     {
+        find = new FindDialog(this);
         XML ui = new XML("main-default.glade", "main_window", null);
         ui.Autoconnect(this);
         
@@ -46,13 +48,13 @@ public class PyjamaGUI
         }
         
         main_window.DeleteEvent += File_Exit;
-    
+        
         if (shell_container != null)
         {
             IShell shell = new PythonShell();
             shell_container.Add(shell.GetView());
         }
-    
+        
         // Open files on the command line
         if (args.Length > 0)
         {
@@ -306,6 +308,25 @@ public class PyjamaGUI
     public void Edit_Delete()
     {
         CurrentDocument.Delete();
+    }
+    
+    public void Edit_Find(object obj, EventArgs args)
+    {
+        Edit_Find();
+    }
+    
+    public void Edit_Find()
+    {
+        find.Run(CurrentDocument.Buffer);
+    }
+    
+    public void Edit_Replace(object obj, EventArgs args)
+    {
+        Edit_Replace();
+    }
+    
+    public void Edit_Replace()
+    {
     }
     
     public void Help_About(object obj, EventArgs args)

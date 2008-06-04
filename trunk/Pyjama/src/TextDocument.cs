@@ -16,6 +16,7 @@
 
 using Gtk;
 using GtkSourceView;
+using Glade;
 using System.IO;
 using System;
 using System.Collections.Generic;
@@ -218,6 +219,14 @@ public class TextDocument: PyjamaInterfaces.IDocument
     	return buffer.CharCount;
     }
     
+    public TextBuffer Buffer
+    {
+        get
+        {
+            return buffer;
+        }
+    }
+    
     public void Cut()
     {
         Clipboard clipboard = Clipboard.Get(Gdk.Atom.Intern("CLIPBOARD", true));
@@ -245,5 +254,4 @@ public class TextDocument: PyjamaInterfaces.IDocument
     {
         PrintText print = new PrintText(source_view);
     }
-
 }
