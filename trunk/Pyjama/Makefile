@@ -1,5 +1,4 @@
 PROJECT=pyjama
-HOSTINGVER=2
 
 #PATH=/opt/mono-1.9.1/bin
 
@@ -18,7 +17,9 @@ DLLS=-r:Mono.Posix.dll -r:IronPython.dll -r:IronPython.Modules.dll \
 SRCS=src/Pyjama.cs src/PyjamaInterfaces.cs src/Utils.cs \
 	src/TextDocument.cs src/Print.cs src/Shell.cs \
 	src/PythonShell.cs src/PyjamaGUI.cs src/FindDialog.cs
-CSFLAGS=-d:HOSTINGVER$(HOSTINGVER) -pkg:gtksourceview-sharp-2.0 -pkg:gtk-sharp-2.0 -pkg:glade-sharp-2.0 
+# FIXME: can we tell which NEWSOURCE we have?
+DEFINES=-d:NEWSOURCEVIEW
+CSFLAGS=-pkg:gtksourceview-sharp-2.0 -pkg:gtk-sharp-2.0 -pkg:glade-sharp-2.0 
 CS=gmcs
 MONO=mono
 
@@ -30,7 +31,7 @@ run:	$(PROJECT).exe
 	MONO_PATH=$(IPPATH) IRONPYTHON_PATH=$(IPSITE) $(MONO) ./$(PROJECT).exe
 
 $(PROJECT).exe:	$(SRCS) Makefile DLLs/Graphics.dll
-	$(CS) $(CSFLAGS) $(SRCS) $(DLLS) -lib:$(IPPATH) -out:$@
+	$(CS) $(DEFINES) $(CSFLAGS) $(SRCS) $(DLLS) -lib:$(IPPATH) -out:$@
 
 Config.exe: src/Config.cs
 	$(CS) src/Config.cs -out:$@

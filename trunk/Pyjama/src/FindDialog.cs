@@ -28,7 +28,13 @@ class FindDialog
         {
             XML ui = new XML("main-default.glade", "find_dialog", null);
             ui.Autoconnect(this);
+#if NEWSOURCEVIEW
             find_pos = buffer.CursorPosition;
+#else
+	TextMark mark = buffer.InsertMark;
+	TextIter iter = buffer.GetIterAtMark(mark);
+	find_pos = iter.Offset;
+#endif
         }
     }
     
