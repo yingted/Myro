@@ -23,14 +23,17 @@ namespace Myro.Adapters
         public AdapterOperationException(string reason)
             : base(reason)
         {
+            Console.WriteLine("*** AdapterOperationException *** " + reason);
         }
         public AdapterOperationException(W3C.Soap.Fault failure)
             : base(Strings.FaultReceived, failure.ToException())
         {
+            Console.WriteLine("*** AdapterOperationException *** " + failure.Reason[0]);
         }
         public AdapterOperationException(string reason, Exception innerException)
             : base(reason, innerException)
         {
+            Console.WriteLine("*** AdapterOperationException *** " + reason);
         }
     }
 
@@ -45,15 +48,12 @@ namespace Myro.Adapters
     /// <summary>
     /// Every adapter class must implement this IAdapter interface
     /// </summary>
-    public interface IAdapter<S>
+    public interface IAdapter
     {
         /// <summary>
         /// Returns the ServiceInfoType (containing the service URI, among other things)
         /// </summary>
         ServiceInfoType ServiceInfo { get; }
-
-        S get();
-        void set(S state);
     }
 
 

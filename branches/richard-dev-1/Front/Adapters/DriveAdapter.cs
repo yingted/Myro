@@ -9,13 +9,14 @@ using Microsoft.Dss.ServiceModel.Dssp;
 using Microsoft.Dss.ServiceModel.DsspServiceBase;
 using System.Threading;
 using W3C.Soap;
+using Myro.Utilities;
 
 using drive = Microsoft.Robotics.Services.Drive.Proxy;
 
 
 namespace Myro.Adapters
 {
-    public class DriveAdapter : IAdapter<drive.DriveDifferentialTwoWheelState>
+    public class DriveAdapter : IAdapter
     {
         public ServiceInfoType ServiceInfo { get; private set; }
         protected drive.DriveOperations drivePort;
@@ -41,7 +42,7 @@ namespace Myro.Adapters
                 );
         }
 
-        public override void SetMotors(float leftPower, float rightPower)
+        public void SetMotors(float leftPower, float rightPower)
         {
             if (!motorsOn)
                 EnableMotors();
@@ -55,7 +56,7 @@ namespace Myro.Adapters
             bool done = false;
             Arbiter.Activate(DssEnvironment.TaskQueue,
                 Arbiter.Receive<DefaultUpdateResponseType>(false,
-                    setDrivePower.ResponsePort, 
+                    setDrivePower.ResponsePort,
                     delegate(DefaultUpdateResponseType state)
                     {
                         done = true;
@@ -65,7 +66,7 @@ namespace Myro.Adapters
             while (!done) ;
         }
 
-        public override void SetMotorsFor(float leftPower, float rightPower, float seconds)
+        public void SetMotorsFor(float leftPower, float rightPower, float seconds)
         {
             SetMotors(leftPower, rightPower);
             Thread.Sleep((int)(seconds * 1000));
@@ -95,7 +96,7 @@ namespace Myro.Adapters
                 return String.Equals(this.ServiceInfo.Service, ((DriveAdapter)obj).ServiceInfo.Service);
         }
 
-        public override void Stop()
+        public void Stop()
         {
             drive.AllStopRequest allStopReq = new drive.AllStopRequest();
             drive.AllStop allStop = new drive.AllStop(allStopReq);
@@ -114,24 +115,32 @@ namespace Myro.Adapters
             while (!done) ;
         }
 
-        public drive.DriveDifferentialTwoWheelState get()
+        public drive.DriveDifferentialTwoWheelState Get()
         {
             drive.DriveDifferentialTwoWheelState ret = null;
-            Arbiter.ExecuteToCompletion(DssEnvironment.TaskQueue,
+            Fault error = null;
+            Signal signal = new Signal();
+            Arbiter.Activate(DssEnvironment.TaskQueue,
                 Arbiter.Choice<drive.DriveDifferentialTwoWheelState, Fault>(
                     drivePort.Get(),
                     delegate(drive.DriveDifferentialTwoWheelState state)
                     {
                         ret = state;
+                        signal.Raise();
                     },
                     delegate(Fault failure)
                     {
-                        throw new AdapterOperationException(failure);
+                        error = failure;
+                        signal.Raise();
                     }));
-            return ret;
+            signal.Wait();
+            if (error != null)
+                throw new AdapterOperationException(error);
+            else
+                return ret;
         }
 
-        public void set(drive.DriveDifferentialTwoWheelState state)
+        public void Set(drive.DriveDifferentialTwoWheelState state)
         {
             throw new NotSupportedException("Setting the entire state is not supported on a drive.  Try the other forms of \"set\".");
         }

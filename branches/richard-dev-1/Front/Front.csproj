@@ -11,6 +11,8 @@
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <RootNamespace>Front</RootNamespace>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>myroKey.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -58,6 +60,7 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
     <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="Vector.Y2008.M06.Proxy, Version=0.0.0.0, Culture=neutral, PublicKeyToken=8b70575c4d29de37, processorArchitecture=MSIL">
@@ -70,6 +73,8 @@
     <Compile Include="Adapters\AdapterSpec.cs" />
     <Compile Include="Adapters\DriveAdapter.cs" />
     <Compile Include="Adapters\IAdapter.cs" />
+    <Compile Include="Adapters\ImageAdapter.cs" />
+    <Compile Include="Adapters\SpeechAdapter.cs" />
     <Compile Include="Adapters\VectorAdapter.cs" />
     <Compile Include="MyroAPI\AbstractMovement.cs" />
     <Compile Include="MyroAPI\IMyroLED.cs">
@@ -83,6 +88,7 @@
     <Compile Include="MyroAPI\IMyroUtility.cs" />
     <Compile Include="MyroAPI\MyroSensors.cs" />
     <Compile Include="MyroAPI\MyroUtilities.cs" />
+    <Compile Include="Robot.cs" />
     <Compile Include="Strings.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -90,9 +96,16 @@
       <Project>{6BF981B1-88CF-4497-967D-0E4F39F5B440}</Project>
       <Name>Vector</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Utilities\Utilities.csproj">
+      <Project>{481FEFE3-E033-464C-A1D4-7C95C5AC95C5}</Project>
+      <Name>Utilities</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="myroKey.snk" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSHARP.Targets" />
   <ProjectExtensions>

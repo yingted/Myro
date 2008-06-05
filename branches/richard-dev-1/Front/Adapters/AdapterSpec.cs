@@ -51,13 +51,13 @@ namespace Myro.Adapters
         public ServiceInfoType ServiceConfig { get; private set; }
 
         private ReaderWriterLock adapterLock = new ReaderWriterLock();
-        private IAdapter<Object> adapterObject;
-        private IAdapter<Object> Adapter
+        private IAdapter adapterObject;
+        private IAdapter Adapter
         {
             get
             {
                 adapterLock.AcquireReaderLock(-1);
-                IAdapter<Object> ret = adapterObject;
+                IAdapter ret = adapterObject;
                 adapterLock.ReleaseReaderLock();
                 return ret;
             }
@@ -107,45 +107,59 @@ namespace Myro.Adapters
         /// directory query.
         /// </summary>
         /// <param name="serviceRecord">This should contain a full URI to an MSRDS service, such as from a directory query.</param>
-        public void AttachAdapterIfNeeded(ServiceInfoType serviceRecord)
+        /// <returns>Whether the adapter was actually attached.  False if it was already attached.</returns>
+        public bool AttachAdapterIfNeeded(ServiceInfoType serviceRecord)
         {
-            Monitor.Enter(adapterSpec);
+            Monitor.Enter(this);
             try
             {
-                if (adapterSpec.Adapter == null)
+                if (Adapter == null)
                 {
-                    switch (adapterSpec.Type)
+                    switch (Type)
                     {
                         case AdapterTypeEnum.Vector:
-                            adapterSpec.Adapter = (IAdapter<Object>)(new Adapters.VectorAdapter(serviceRecord));
+                            Adapter = (IAdapter)(new Adapters.VectorAdapter(serviceRecord));
                             break;
                         case AdapterTypeEnum.Drive:
-                            adapterSpec.Adapter = (IAdapter<Object>)(new Adapters.DriveAdapter(serviceRecord));
+                            Adapter = (IAdapter)(new Adapters.DriveAdapter(serviceRecord));
                             break;
                         default:
-                            throw new Exception("Adapter type " + GetTypeName(adapterSpec.Type) + " not yet supported");
+                            throw new Exception("Adapter type " + GetTypeName(Type) + " not yet supported");
                     }
+                    Console.WriteLine("Attached to " + serviceRecord.Service);
+                    return true;
                 }
                 else
                 {
                     //Console.WriteLine("*** ERROR *** Adapter for this AdapterSpec already has been created");
+                    return false;
                 }
             }
             catch (Exception e)
             {
                 Console.WriteLine("*** ERROR *** " + e);
+                return (Adapter != null);
             }
             finally
             {
                 //Console.WriteLine("Unlocking");
-                Monitor.Exit(adapterSpec);
+                Monitor.Exit(this);
             }
+        }
+
+        /// <summary>
+        /// Tests whether this adapter is attached.
+        /// </summary>
+        /// <returns></returns>
+        public bool isAttached()
+        {
+            return Adapter != null;
         }
 
         /// <summary>
         /// Returns the Vector adapter contained in this AdapterSpec, but only
         /// if the adapter is in fact a Vector type.  If it is not a
-        /// VectorAdapter, an InvalidCastException will be thrown.  This is
+        /// VectorAdapter, an AdapterOperation exception will be thrown.  This is
         /// essentially a "safe cast".
         /// </summary>
         /// <returns></returns>
@@ -153,6 +167,8 @@ namespace Myro.Adapters
         {
             if (Type == AdapterTypeEnum.Vector)
                 return (VectorAdapter)adapterIfAttached();
+            else
+                throw new AdapterOperationException("Tried to safe cast to a VectorAdapter");
         }
 
         /// <summary>
@@ -166,6 +182,8 @@ namespace Myro.Adapters
         {
             if (Type == AdapterTypeEnum.Drive)
                 return (DriveAdapter)adapterIfAttached();
+            else
+                throw new AdapterOperationException("Tried to safe cast to a DriveAdapter");
         }
 
         /// <summary>
@@ -179,6 +197,8 @@ namespace Myro.Adapters
         {
             if (Type == AdapterTypeEnum.Image)
                 return (ImageAdapter)adapterIfAttached();
+            else
+                throw new AdapterOperationException("Tried to safe cast to an ImageAdapter");
         }
 
         /// <summary>
@@ -192,12 +212,14 @@ namespace Myro.Adapters
         {
             if (Type == AdapterTypeEnum.Speech)
                 return (SpeechAdapter)adapterIfAttached();
+            else
+                throw new AdapterOperationException("Tried to safe cast to a SpeechAdapter");
         }
 
-        private IAdapter<Object> adapterIfAttached()
+        private IAdapter adapterIfAttached()
         {
             // Only access Adapter once because it is read/write lock-protected.
-            IAdapter<Object> adapter = Adapter;
+            IAdapter adapter = Adapter;
             if (adapter == null)
                 throw new UnattachedAdapter();
             else
@@ -253,11 +275,14 @@ namespace Myro.Adapters
         /// <returns>The runtime adapter type</returns>
         public static AdapterTypeEnum GetType(string name)
         {
-            AdapterTypeEnum ret = byName[name];
-            if (ret != null)
-                return ret;
-            else
+            try
+            {
+                return byName[name];
+            }
+            catch (KeyNotFoundException e)
+            {
                 throw new NoSuchAdapter("Adapter name invalid");
+            }
         }
 
     }

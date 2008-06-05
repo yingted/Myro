@@ -23,6 +23,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Generic", "Generic", "{DB43
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vector", "Services\Generic\Vector\Vector.csproj", "{6BF981B1-88CF-4497-967D-0E4F39F5B440}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Utilities", "Utilities\Utilities.csproj", "{481FEFE3-E033-464C-A1D4-7C95C5AC95C5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,6 +59,10 @@ Global
 		{6BF981B1-88CF-4497-967D-0E4F39F5B440}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6BF981B1-88CF-4497-967D-0E4F39F5B440}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6BF981B1-88CF-4497-967D-0E4F39F5B440}.Release|Any CPU.Build.0 = Release|Any CPU
+		{481FEFE3-E033-464C-A1D4-7C95C5AC95C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{481FEFE3-E033-464C-A1D4-7C95C5AC95C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{481FEFE3-E033-464C-A1D4-7C95C5AC95C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{481FEFE3-E033-464C-A1D4-7C95C5AC95C5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

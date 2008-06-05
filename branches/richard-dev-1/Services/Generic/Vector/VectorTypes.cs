@@ -14,6 +14,7 @@ using Microsoft.Dss.Core.Attributes;
 using Microsoft.Dss.ServiceModel.Dssp;
 using Microsoft.Dss.Core.DsspHttp;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using W3C.Soap;
 
@@ -58,12 +59,40 @@ namespace Myro.Services.Generic.Vector
             : this(values, null, DateTime.Now)
         {
         }
-        public VectorState(List<double> values, List<string> tags, DateTime timestamp)
+        public VectorState(bool[] values, DateTime timestamp)
         {
-            Values = values;
-            Tags = tags;
+            List<double> ret = new List<double>(values.Length);
+            foreach (bool v in values)
+                ret.Add(v ? 1.0 : 0.0);
+            Values = ret;
+            Tags = new List<string>();
             Timestamp = timestamp;
             TagTimestamp = DateTime.Now;
+        }
+        public VectorState(List<double> values, List<string> tags, DateTime timestamp)
+        {
+            Values = (values == null ? new List<double>() : values);
+            Tags = (tags == null ? new List<string>() : tags);
+            Timestamp = (timestamp == null ? DateTime.Now : timestamp);
+            TagTimestamp = DateTime.Now;
+        }
+        public void setValues(double[] values, DateTime timestamp)
+        {
+            Values = new List<double>(values);
+            Timestamp = timestamp;
+        }
+        public void setValues(bool[] values, DateTime timestamp)
+        {
+            Values = new List<double>(values.Length);
+            foreach (bool v in values)
+                Values.Add(v ? 1.0 : 0.0);
+            Timestamp = timestamp;
+        }
+        public IEnumerable<bool> getValuesBool()
+        {
+            return
+                from v in Values
+                select (v >= 0.5 ? true : false);
         }
     }
 
@@ -133,7 +162,8 @@ namespace Myro.Services.Generic.Vector
         public int Index { get; private set; }
         public double Value { get; private set; }
         public DateTime Timestamp { get; private set; }
-        public SetRequestType() : this(0, 0.0, DateTime.Now)
+        public SetRequestType()
+            : this(0, 0.0, DateTime.Now)
         {
         }
         public SetRequestType(int index, double value, DateTime timestamp)

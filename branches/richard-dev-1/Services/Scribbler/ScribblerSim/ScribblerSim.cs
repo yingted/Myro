@@ -12,7 +12,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Security.Permissions;
-using scribblersim = IPRE.ScribblerSim;
 using xml = System.Xml;
 using System.Threading;
 

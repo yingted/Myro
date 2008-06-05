@@ -10,6 +10,7 @@ using W3C.Soap;
 using Microsoft.Ccr.Core;
 using System.Threading;
 using dirProxy = Microsoft.Dss.Services.Directory.Proxy;
+using Myro.Utilities;
 
 namespace Myro.Adapters
 {
@@ -33,7 +34,8 @@ namespace Myro.Adapters
     /// </summary>
     public class UnknownAdapterNameException : Exception
     {
-        public UnknownAdapterNameException(string name) : base("Unknown adapter name: \"" + name + "\"")
+        public UnknownAdapterNameException(string name)
+            : base("Unknown adapter name: \"" + name + "\"")
         {
         }
     }
@@ -59,6 +61,7 @@ namespace Myro.Adapters
         protected List<ServiceInfoType> services;
         protected Dictionary<string, AdapterSpec> adapterNames;
         //protected Dictionary<string, AdapterSpec> adapterServices;
+        Signal adaptersReady = new Signal();
 
         public AdapterBank(string configFile, bool autoStartServices)
         {
@@ -70,7 +73,7 @@ namespace Myro.Adapters
 
         /// <summary>
         /// Return the AdapterSpec associated with the name, as specified in
-        /// the config file.
+        /// the config file.  Throws UnknownAdapterNameException.
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
@@ -84,6 +87,12 @@ namespace Myro.Adapters
             {
                 throw new UnknownAdapterNameException(name);
             }
+        }
+
+        public void WaitForAdapters(TimeSpan timeout)
+        {
+            if (adaptersReady.Wait(timeout) == false)
+                throw new TimeoutException("Timed out waiting for adapters to attach");
         }
 
         protected void readConfig(string configFile)
@@ -108,7 +117,7 @@ namespace Myro.Adapters
 
                 // Attributes
                 string sType = node.GetAttribute("type", "");
-                AdapterTypeEnum type = AdapterFactory.GetType(sType);
+                AdapterTypeEnum type = AdapterSpec.GetType(sType);
                 string name = node.GetAttribute("name", "");
 
                 // Children
@@ -134,17 +143,24 @@ namespace Myro.Adapters
         {
             var dirPort = DssEnvironment.ServiceForwarder<dirProxy.DirectoryPort>(new Uri("http://localhost:50000/directory"));
             var resPort = new dirProxy.DirectoryPort();
-            Arbiter.ExecuteToCompletion(DssEnvironment.TaskQueue,
+            Fault error = null;
+            Signal signal = new Signal();
+            Arbiter.Activate(DssEnvironment.TaskQueue,
                 Arbiter.Choice<SubscribeResponseType, Fault>(
                     dirPort.Subscribe(resPort, null),
                     delegate(SubscribeResponseType success)
                     {
                         Console.WriteLine("AdapterBank subscribed to directory service");
+                        signal.Raise();
                     },
                     delegate(Fault failure)
                     {
-                        throw new Exception("Could not subscribe to directory service: " + failure.Reason);
+                        error = failure;
+                        signal.Raise();
                     }));
+            signal.Wait();
+            if (error != null)
+                throw new Exception("Could not subscribe to directory service: " + error.Reason);
             Arbiter.Activate(DssEnvironment.TaskQueue,
                 Arbiter.Receive<dirProxy.Insert>(true, resPort, directoryInsertHandler));
         }
@@ -161,7 +177,7 @@ namespace Myro.Adapters
             //Console.WriteLine("Querying directory");
             //dirProxy.QueryRequest request = new dirProxy.QueryRequest();
             //request.QueryRecord = new ServiceInfoType();
-            Arbiter.ExecuteToCompletion(DssEnvironment.TaskQueue,
+            Arbiter.Activate(DssEnvironment.TaskQueue,
                 Arbiter.Choice<dirProxy.GetResponse, Fault>(
                     dirPort.Get(),
                     delegate(dirProxy.GetResponse success)
@@ -189,9 +205,10 @@ namespace Myro.Adapters
                             }
                             if (adapterSpec != null)
                             {
-                                AdapterFactory.CreateAdapterIfNeeded(adapterSpec, rec);
+                                adapterSpec.AttachAdapterIfNeeded(rec);
                             }
                         }
+                        checkAllAttached();
                     },
                     delegate(Fault fault)
                     {
@@ -199,7 +216,7 @@ namespace Myro.Adapters
                     }));
         }
 
-        private void startServices()
+        public void startServices()
         {
             // Build a list of the "StartService"s and the "Adapter" services
             List<ServiceInfoType> allServices = new List<ServiceInfoType>(services);
@@ -221,7 +238,16 @@ namespace Myro.Adapters
                         {
                             Console.WriteLine("*** FAULT *** creating " + service.Service + ": " + failure.Reason);
                         }));
+        }
 
+        private void checkAllAttached()
+        {
+            bool ret = true;
+            foreach (var adapter in adapterNames.Values)
+                if (adapter.isAttached() == false)
+                    ret = false;
+            if (ret == true)
+                adaptersReady.Raise();
         }
 
         private static string getChild(XPathNavigator node, string name, bool missingok)

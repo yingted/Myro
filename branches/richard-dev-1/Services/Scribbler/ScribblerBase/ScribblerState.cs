@@ -13,7 +13,7 @@ using Microsoft.Dss.Core.Attributes;
 using W3C.Soap;
 
 
-namespace IPRE.ScribblerBase
+namespace Myro.Services.Scribbler.ScribblerBase
 {
 
     /// <summary>

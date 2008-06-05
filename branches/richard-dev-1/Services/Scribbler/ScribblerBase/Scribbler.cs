@@ -28,7 +28,7 @@ using submgr = Microsoft.Dss.Services.SubscriptionManager;
 using dssp = Microsoft.Dss.ServiceModel.Dssp;
 
 
-namespace IPRE.ScribblerBase
+namespace Myro.Services.Scribbler.ScribblerBase
 {
     
     [DisplayName("Scribbler Base")]
@@ -157,7 +157,7 @@ namespace IPRE.ScribblerBase
             else
             {
                 //no scribbler found. Open state page for manual settings.
-                OpenServiceInBrowser();
+                //OpenServiceInBrowser();
             }
 
             //add custom handlers to interleave

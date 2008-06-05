@@ -10,7 +10,6 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Dss.Core.Attributes;
 using W3C.Soap;
-using scribblersim = IPRE.ScribblerSim;
 using Microsoft.Dss.Core.DsspHttp;
 
 

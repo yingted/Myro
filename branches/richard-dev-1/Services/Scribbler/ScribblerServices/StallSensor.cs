@@ -18,25 +18,21 @@ using System.Security.Permissions;
 using System.Threading;
 using xml = System.Xml;
 using soap = W3C.Soap;
-using IPREFoundationClasses;
 using Myro.Services;
 
-using submgr = Microsoft.Dss.Services.SubscriptionManager;
-
-using brick = Myro.Services.Scribbler.Proxy;
+using brick = Myro.Services.Scribbler.ScribblerBase.Proxy;
 using vector = Myro.Services.Generic.Vector;
-using Myro.Utilities;
 
-namespace Myro.Services.Scribbler.Stall
+namespace Myro.Services.Scribbler.StallSensor
 {
 
     public static class Contract
     {
-        public const string Identifier = "http://www.roboteducation.org/scribblerirbumper.html";
+        public const string Identifier = "http://www.roboteducation.org/scribblerstall.html";
     }
 
-    [DisplayName("Scribbler Bumper")]
-    [Description("The Scribbler Bumper Service")]
+    [DisplayName("Scribbler Stall")]
+    [Description("The Scribbler Stall Service")]
     [Contract(Contract.Identifier)]
     [AlternateContract(vector.Contract.Identifier)] //implementing the generic contract
     public class StallService : vector.VectorService
@@ -56,7 +52,10 @@ namespace Myro.Services.Scribbler.Stall
         public StallService(DsspServiceCreationPort creationPort) :
             base(creationPort)
         {
-
+            _state = new vector.VectorState(
+                new List<double> { 0.0 },
+                new List<string>(),
+                DateTime.Now);
         }
 
         /// <summary>
@@ -97,7 +96,7 @@ namespace Myro.Services.Scribbler.Stall
                         //update our state with subscription status
                         _subscribed = true;
 
-                        LogInfo("ScribblerBumper subscription success");
+                        LogInfo("ScribblerStall subscription success");
 
                         //Subscription was successful, start listening for sensor change notifications
                         Activate(
@@ -106,7 +105,7 @@ namespace Myro.Services.Scribbler.Stall
                     },
                     delegate(soap.Fault F)
                     {
-                        LogError("ScribblerBumper subscription failed");
+                        LogError("ScribblerStall subscription failed");
                     }
                 )
             );
@@ -117,8 +116,8 @@ namespace Myro.Services.Scribbler.Stall
         /// </summary>
         public void SensorNotificationHandler(brick.Replace notify)
         {
-            bool[] values = { notify.Body.Stall };
-            _mainPort.Post(new vector.Replace(MSRDSUtils.vectorOfBools(values, DateTime.Now)));
+            double[] values = { (notify.Body.Stall ? 1.0 : 0.0) };
+            _mainPort.Post(new vector.SetAll(new List<double>(values)));
         }
     }
 

@@ -8,20 +8,20 @@ using System.Text;
 using System.Windows.Forms;
 using System.Threading;
 
-using IPREFoundationClasses;
+using Myro;
 
 namespace SimTestSuite
 {
     public partial class TestPanel : Form
     {
         // Drive control taken from Form1 in IPREFoundationClasses
-        RobotBrain rbt;
+        Robot rbt;
 
         int rectX = 20, rectY = 20, rectWidth = 150, rectHeight = 150, lengthTick = 5, fontSpacing = 5;
         Graphics g;
         bool mouseDown = false;
 
-        public TestPanel(RobotBrain rbt)
+        public TestPanel(Robot rbt)
         {
             this.rbt = rbt;
             InitializeComponent();
@@ -58,7 +58,7 @@ namespace SimTestSuite
             {
                 //Console.WriteLine("update");
                 this.update();
-                Thread.Sleep(400);
+                Thread.Sleep(250);
             }
         }
 
@@ -158,7 +158,8 @@ namespace SimTestSuite
 
             driveBox.Refresh();
 
-            rbt.Stop();
+            //rbt.Stop();
+
             //Console.WriteLine("All Stop");
             //Console.WriteLine();
         }
@@ -232,7 +233,8 @@ namespace SimTestSuite
                 right_wheel = -1.0 * temp;
             }
 
-            rbt.SetMotors((float)left_wheel, (float)right_wheel);
+            //rbt.SetMotors((float)left_wheel, (float)right_wheel);
+
             //Console.WriteLine("Power:" + left_wheel + "," + right_wheel);
             //Console.WriteLine();
         }
@@ -247,7 +249,7 @@ namespace SimTestSuite
             return ret;
         }
 
-        private void drawCircleMeters(PictureBox control, Color color, float[] vals, float min, float max)
+        private void drawCircleMeters(PictureBox control, Color color, double[] vals, double min, double max)
         {
             Bitmap bmp = new Bitmap(control.Width, control.Height);
             Graphics g = Graphics.FromImage(bmp);
@@ -260,7 +262,7 @@ namespace SimTestSuite
             IEnumerable<int> radii = from v in vals
                                      let normalized = (v - min) / (max - min)
                                      let normalizedBounded = (normalized > 0 ? normalized : 0)
-                                     select (int)(normalizedBounded * (float)maxCircleRadius);
+                                     select (int)(normalizedBounded * (double)maxCircleRadius);
             StringFormat format = StringFormat.GenericDefault;
             format.Alignment = StringAlignment.Center;
             Font font = new Font("Sans Serif", 7);
@@ -277,20 +279,20 @@ namespace SimTestSuite
 
         private void update()
         {
-            float[] contacts = rbt.getContact();
+            double[] contacts = rbt.Sensors.get("ir");
             //Console.WriteLine("contact: " + contacts[0] + ", " + contacts[1]);
-            drawCircleMeters(contactSensorImg, Color.MediumVioletRed, contacts, 0.0f, 1.0f);
-            float[] stall = rbt.get("stall");
-            drawCircleMeters(stallSensorImg, Color.Red, stall, 0.0f, 1.0f);
-            //float[] light = rbt.get("light");
+            drawCircleMeters(contactSensorImg, Color.MediumVioletRed, contacts, 0.0, 1.0);
+            double[] stall = rbt.Sensors.get("stall");
+            drawCircleMeters(stallSensorImg, Color.Red, stall, 0.0, 1.0);
+            double[] light = rbt.Sensors.get("light");
             //Console.WriteLine("light: " + light[0]);
-            //drawCircleMeters(lightSensorImg, Color.DeepSkyBlue, light, 2000.0f, 0.0f);
-            //float[] ir = rbt.get("ir");
+            drawCircleMeters(lightSensorImg, Color.DeepSkyBlue, light, 2000.0, 0.0);
+            //double[] ir = rbt.get("ir");
             //Console.WriteLine("ir: " + ir[0]);
-            //drawCircleMeters(IRSensorImg, ir, 0.0f, 1.0f);
-            //float[] line = rbt.get("line");
+            //drawCircleMeters(IRSensorImg, ir, 0.0, 1.0);
+            double[] line = rbt.Sensors.get("line");
             //Console.WriteLine("line: " + line[0]);
-            //drawCircleMeters(lineSensorImg, line, 0.0f, 100.0f);
+            drawCircleMeters(lineSensorImg, Color.DarkGray, line, 0.0, 1.0);
         }
 
         private void TestPanel_Load(object sender, EventArgs e)
@@ -330,7 +332,7 @@ namespace SimTestSuite
 
         private void tone_MouseUp(object sender, MouseEventArgs e)
         {
-            rbt.beep(durBar.Value, freqBar1.Value, freqBar2.Value);
+            //rbt.beep(durBar.Value, freqBar1.Value, freqBar2.Value);
         }
     }
 }

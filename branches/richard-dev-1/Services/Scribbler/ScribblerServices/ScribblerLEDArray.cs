@@ -4,7 +4,7 @@
 //  Implements the generic LEDArray1D contract
 //
 //------------------------------------------------------------------------------
-
+#if false
 using Microsoft.Ccr.Core;
 using Microsoft.Dss.Core;
 using Microsoft.Dss.Core.Attributes;
@@ -19,7 +19,7 @@ using soap = W3C.Soap;
 using submgr = Microsoft.Dss.Services.SubscriptionManager;
 using W3C.Soap;
 
-using brick = IPRE.ScribblerBase.Proxy;
+using brick = Myro.Services.Scribbler.ScribblerBase.Proxy;
 using led = IPREGenericContracts.LEDarray.Proxy;
 using myro = MyroInterfaces;
 
@@ -341,3 +341,4 @@ namespace IPRE.ScribblerLEDArray
 
 
 }
+#endif

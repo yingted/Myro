@@ -23,7 +23,7 @@ using Microsoft.Dss.ServiceModel.DsspServiceBase;
 using System.Threading;
 
 
-namespace IPRE.ScribblerBase
+namespace Myro.Services.Scribbler.ScribblerBase
 {
     internal class ScribblerCom
     {

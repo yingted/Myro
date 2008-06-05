@@ -20,7 +20,7 @@ using W3C.Soap;
 // * renumber message type commands to be in order
 // * send the low byte first
 
-namespace IPRE.ScribblerBase
+namespace Myro.Services.Scribbler.ScribblerBase
 {
     internal class ScribblerHelper
     {

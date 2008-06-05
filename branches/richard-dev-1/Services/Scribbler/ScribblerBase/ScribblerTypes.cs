@@ -14,7 +14,7 @@ using W3C.Soap;
 using Microsoft.Dss.Core.DsspHttp;
 
 //[assembly: ContractNamespace(IPRE.ScribblerBase.Contract.Identifier, ClrNamespace = "IPRE.ScribblerBase")]
-namespace IPRE.ScribblerBase
+namespace Myro.Services.Scribbler.ScribblerBase
 {
     
     public static class Contract

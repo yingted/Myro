@@ -17,7 +17,7 @@ using xml = System.Xml;
 using soap = W3C.Soap;
 
 using submgr = Microsoft.Dss.Services.SubscriptionManager;
-using brick = IPRE.ScribblerBase.Proxy;
+using brick = Myro.Services.Scribbler.ScribblerBase.Proxy;
 using drive = Microsoft.Robotics.Services.Drive.Proxy;
 using W3C.Soap;
 
