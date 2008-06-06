@@ -2,16 +2,17 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace MyroInterfaces
+namespace Myro.API
 {
     
     public interface IMyroSensor
     {
-        float[] get(string sensorID);
-        float get(string sensorID, int position);
-        float getLight(int position);
-        float getIR(int position);
-        float getLine(int position);
-        float getStall();
+        double[] get(string sensorID);
+        double get(string sensorID, int position);
+        double get(string sensorID, string position);
+        //float getLight(int position);
+        //float getIR(int position);
+        //float getLine(int position);
+        //float getStall();
     }
 }

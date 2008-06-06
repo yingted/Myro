@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using Myro.Adapters;
 
-namespace Myro
+namespace Myro.API
 {
     /// <summary>
     /// From these methods, the following exceptions may be thrown:
@@ -12,10 +12,10 @@ namespace Myro
     /// AdapterArgumentException if the tag or index is invalid.
     /// AdapterOperationException if something goes wrong internally.
     /// </summary>
-    public class Sensors
+    public class MyroSensors : IMyroSensor
     {
         AdapterBank bank;
-        public Sensors(AdapterBank bank)
+        public MyroSensors(AdapterBank bank)
         {
             this.bank = bank;
         }

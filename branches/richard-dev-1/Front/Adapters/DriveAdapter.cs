@@ -66,13 +66,6 @@ namespace Myro.Adapters
             while (!done) ;
         }
 
-        public void SetMotorsFor(float leftPower, float rightPower, float seconds)
-        {
-            SetMotors(leftPower, rightPower);
-            Thread.Sleep((int)(seconds * 1000));
-            Stop();
-        }
-
         protected void EnableMotors()
         {
             drive.EnableDriveRequest enableDriveMessage = new drive.EnableDriveRequest();

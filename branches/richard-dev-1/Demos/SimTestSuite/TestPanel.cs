@@ -158,7 +158,7 @@ namespace SimTestSuite
 
             driveBox.Refresh();
 
-            //rbt.Stop();
+            rbt.Movement.Stop();
 
             //Console.WriteLine("All Stop");
             //Console.WriteLine();
@@ -233,7 +233,7 @@ namespace SimTestSuite
                 right_wheel = -1.0 * temp;
             }
 
-            //rbt.SetMotors((float)left_wheel, (float)right_wheel);
+            rbt.Movement.SetMotors((float)left_wheel, (float)right_wheel);
 
             //Console.WriteLine("Power:" + left_wheel + "," + right_wheel);
             //Console.WriteLine();
@@ -279,20 +279,36 @@ namespace SimTestSuite
 
         private void update()
         {
-            double[] contacts = rbt.Sensors.get("ir");
-            //Console.WriteLine("contact: " + contacts[0] + ", " + contacts[1]);
-            drawCircleMeters(contactSensorImg, Color.MediumVioletRed, contacts, 0.0, 1.0);
-            double[] stall = rbt.Sensors.get("stall");
-            drawCircleMeters(stallSensorImg, Color.Red, stall, 0.0, 1.0);
-            double[] light = rbt.Sensors.get("light");
-            //Console.WriteLine("light: " + light[0]);
-            drawCircleMeters(lightSensorImg, Color.DeepSkyBlue, light, 2000.0, 0.0);
+            try
+            {
+                double[] contacts = rbt.Sensors.get("ir");
+                //Console.WriteLine("contact: " + contacts[0] + ", " + contacts[1]);
+                drawCircleMeters(contactSensorImg, Color.MediumVioletRed, contacts, 0.0, 1.0);
+            }
+            catch (Myro.Adapters.UnknownAdapterNameException) { }
+            try
+            {
+                double[] stall = rbt.Sensors.get("stall");
+                drawCircleMeters(stallSensorImg, Color.Red, stall, 0.0, 1.0);
+            }
+            catch (Myro.Adapters.UnknownAdapterNameException) { }
+            try
+            {
+                double[] light = rbt.Sensors.get("light");
+                //Console.WriteLine("light: " + light[0]);
+                drawCircleMeters(lightSensorImg, Color.DeepSkyBlue, light, 2000.0, 0.0);
+            }
+            catch (Myro.Adapters.UnknownAdapterNameException) { }
             //double[] ir = rbt.get("ir");
             //Console.WriteLine("ir: " + ir[0]);
             //drawCircleMeters(IRSensorImg, ir, 0.0, 1.0);
-            double[] line = rbt.Sensors.get("line");
-            //Console.WriteLine("line: " + line[0]);
-            drawCircleMeters(lineSensorImg, Color.DarkGray, line, 0.0, 1.0);
+            try
+            {
+                double[] line = rbt.Sensors.get("line");
+                //Console.WriteLine("line: " + line[0]);
+                drawCircleMeters(lineSensorImg, Color.DarkGray, line, 0.0, 1.0);
+            }
+            catch (Myro.Adapters.UnknownAdapterNameException) { }
         }
 
         private void TestPanel_Load(object sender, EventArgs e)
@@ -332,7 +348,7 @@ namespace SimTestSuite
 
         private void tone_MouseUp(object sender, MouseEventArgs e)
         {
-            //rbt.beep(durBar.Value, freqBar1.Value, freqBar2.Value);
+            rbt.Sound.beep(durBar.Value, freqBar1.Value, freqBar2.Value);
         }
     }
 }

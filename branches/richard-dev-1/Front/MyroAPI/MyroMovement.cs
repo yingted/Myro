@@ -1,12 +1,20 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 
-namespace MyroInterfaces
+namespace Myro.API
 {
     
-    public abstract class AbstractMovement : IMyroMovement
+    public class MyroMovement : IMyroMovement
     {
+        Myro.Adapters.AdapterSpec driveAdapter;
+
+        public MyroMovement(Myro.Adapters.AdapterSpec driveAdapter)
+        {
+            this.driveAdapter = driveAdapter;
+        }
+
         public enum Direction { LEFT, RIGHT };
 
         public void Move(float translate, float rotate)
@@ -85,9 +93,17 @@ namespace MyroInterfaces
             SetMotors(0f, 0f);
         }
 
-        public abstract void SetMotors(float leftPower, float rightPower);
+        public void SetMotorsFor(float leftPower, float rightPower, float seconds)
+        {
+            SetMotors(leftPower, rightPower);
+            Thread.Sleep((int)(seconds * 1000));
+            Stop();
+        }
 
-        public abstract void SetMotorsFor(float leftPower, float rightPower, float seconds);
+        public void SetMotors(float leftPower, float rightPower)
+        {
+            driveAdapter.GetDriveAdapter().SetMotors(leftPower, rightPower);
+        }
 
         private void CheckPowerRange(float power)
         {

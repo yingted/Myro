@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace MyroInterfaces
+namespace Myro.API
 {
     public interface IMyroMovement
     {

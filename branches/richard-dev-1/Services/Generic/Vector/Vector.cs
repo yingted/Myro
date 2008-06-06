@@ -42,13 +42,14 @@ namespace Myro.Services.Generic.Vector
         /// _main Port
         /// </summary>
         [ServicePort("/vector", AllowMultipleInstances = false)]
-        protected VectorOperations _mainPort = new VectorOperations();
+        protected VectorOperations _operationsPort = new VectorOperations();
+        protected VectorOperations OperationsPort { get { return _operationsPort; } private set { _operationsPort = value; } }
 
         [Partner("SubMgr",
             Contract = submgr.Contract.Identifier,
             CreationPolicy = PartnerCreationPolicy.CreateAlways,
             Optional = false)]
-        protected submgr.SubscriptionManagerPort _subMgrPort = new submgr.SubscriptionManagerPort();
+        private submgr.SubscriptionManagerPort _subMgrPort = new submgr.SubscriptionManagerPort();
 
         /// <summary>
         /// Default Service Constructor
@@ -70,16 +71,29 @@ namespace Myro.Services.Generic.Vector
         public virtual IEnumerator<ITask> ReplaceHandler(Replace replace)
         {
             _state = replace.Body;
-            base.SendNotification<Replace>(_subMgrPort, replace);
+            replace.ResponsePort.Post(DefaultReplaceResponseType.Instance);
+            SendNotification<Replace>(replace);
             yield break;
         }
 
         [ServiceHandler(ServiceHandlerBehavior.Exclusive)]
         public virtual IEnumerator<ITask> SetHandler(Set set)
         {
-            _state.Values[set.Body.Index] = set.Body.Value;
-            _state.Timestamp = set.Body.Timestamp;
-            base.SendNotification<Set>(_subMgrPort, set);
+            if (set.Body.Index >= 0 && set.Body.Index < _state.Values.Count)
+            {
+                _state.Values[set.Body.Index] = set.Body.Value;
+                _state.Timestamp = set.Body.Timestamp;
+                set.ResponsePort.Post(DefaultUpdateResponseType.Instance);
+                SendNotification<Set>(set);
+            }
+            else
+            {
+                Fault fault = new Fault();
+                fault.Reason = new ReasonText[1];
+                fault.Reason[0] = new ReasonText();
+                fault.Reason[0].Value = "Vector element index out of bounds";
+                set.ResponsePort.Post(fault);
+            }
             yield break;
         }
 
@@ -88,7 +102,8 @@ namespace Myro.Services.Generic.Vector
         {
             _state.Values = setAll.Body.Values;
             _state.Timestamp = setAll.Body.Timestamp;
-            base.SendNotification<SetAll>(_subMgrPort, setAll);
+            setAll.ResponsePort.Post(DefaultUpdateResponseType.Instance);
+            SendNotification<SetAll>(setAll);
             yield break;
         }
 
@@ -105,6 +120,11 @@ namespace Myro.Services.Generic.Vector
                 {
                     base.LogError("Error adding subscriber " + subscribe.Body.Subscriber, error);
                 });
+        }
+
+        protected void SendNotification<T>(T message) where T:DsspOperation
+        {
+            base.SendNotification<T>(_subMgrPort, message);
         }
 
     }

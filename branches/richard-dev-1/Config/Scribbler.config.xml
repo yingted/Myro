@@ -35,5 +35,15 @@
     <Contract>http://www.roboteducation.org/scribblerlinesensor.html</Contract>
     <Service>/scribblerline</Service>
   </Adapter>
+
+  <Adapter type="Drive" name="drive">
+    <Contract>http://www.roboteducation.org/scribblerdrive.html</Contract>
+    <Service>/scribblerdrive</Service>
+  </Adapter>
+
+  <Adapter type="Vector" name="tonegen">
+    <Contract>http://www.roboteducation.org/scribblertonegenerator.html</Contract>
+    <Service>/scribblertonegen</Service>
+  </Adapter>
   
 </RobotConfig>

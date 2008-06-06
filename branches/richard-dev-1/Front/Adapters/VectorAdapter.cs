@@ -122,9 +122,85 @@ namespace Myro.Adapters
             return state.Values[index];
         }
 
-        public void Set(vector.VectorState state)
+        /// <summary>
+        /// Set a single element in the vector by name.
+        /// </summary>
+        /// <param name="tag"></param>
+        /// <param name="value"></param>
+        public void Set(string tag, double value)
         {
-            throw new NotImplementedException();
+            // Kind of a hack, get the state and build dictionary if haven't
+            // done a Get yet.
+            if (indexCache == null)
+                CheckIndexCache(GetState());
+            int index;
+            try
+            {
+                index = indexCache[tag];
+            }
+            catch (KeyNotFoundException)
+            {
+                throw new AdapterArgumentException(Strings.TagNotFound(tag));
+            }
+            Set(index, value);
+        }
+
+        /// <summary>
+        /// Set a single element in the vector by index.
+        /// </summary>
+        /// <param name="index"></param>
+        /// <param name="value"></param>
+        public void Set(int index, double value)
+        {
+            Fault error = null;
+            Signal signal = new Signal();
+            Arbiter.Activate(DssEnvironment.TaskQueue,
+                Arbiter.Choice<DefaultUpdateResponseType, Fault>(
+                    opPort.Set(index, value, DateTime.Now),
+                    delegate(DefaultUpdateResponseType success)
+                    {
+                        signal.Raise();
+                    },
+                    delegate(Fault failure)
+                    {
+                        error = failure;
+                        signal.Raise();
+                    }));
+            signal.Wait();
+            if (error != null)
+            {
+                String msg = "Fault in setting vector: ";
+                foreach (var r in error.Reason)
+                    msg += r.Value;
+                DssEnvironment.LogError(msg);
+                throw new AdapterArgumentException(Strings.IndexOutOfBounds(index, 9999));
+            }
+        }
+
+        public void SetAll(double[] values)
+        {
+            Fault error = null;
+            Signal signal = new Signal();
+            Arbiter.Activate(DssEnvironment.TaskQueue,
+                Arbiter.Choice<DefaultUpdateResponseType, Fault>(
+                    opPort.SetAll(new List<double>(values), DateTime.Now),
+                    delegate(DefaultUpdateResponseType success)
+                    {
+                        signal.Raise();
+                    },
+                    delegate(Fault failure)
+                    {
+                        error = failure;
+                        signal.Raise();
+                    }));
+            signal.Wait();
+            if (error != null)
+            {
+                String msg = "Fault in setting vector: ";
+                foreach (var r in error.Reason)
+                    msg += r.Value;
+                Console.WriteLine(msg);
+            }
         }
 
         private void CheckIndexCache(vector.VectorState state)

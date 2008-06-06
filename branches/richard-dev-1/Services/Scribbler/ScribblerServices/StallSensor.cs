@@ -117,7 +117,7 @@ namespace Myro.Services.Scribbler.StallSensor
         public void SensorNotificationHandler(brick.Replace notify)
         {
             double[] values = { (notify.Body.Stall ? 1.0 : 0.0) };
-            _mainPort.Post(new vector.SetAll(new List<double>(values)));
+            OperationsPort.Post(new vector.SetAll(new List<double>(values)));
         }
     }
 

@@ -96,7 +96,10 @@ namespace Myro.Utilities
                 // list.  It is ok if another thread tries to lock this call's
                 // monitor after it is removed from the list, because it will lock
                 // immediately.
-                signals.Remove(signal);
+                lock (this)
+                {
+                    signals.Remove(signal);
+                }
                 if (raised == true)
                     return true;
                 else

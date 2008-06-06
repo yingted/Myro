@@ -227,17 +227,22 @@ namespace Myro.Adapters
             // Start them all
             foreach (var service in allServices)
                 if (service.Contract != null)
+                {
+                    var thisService = service;
                     Arbiter.Activate(DssEnvironment.TaskQueue,
                         Arbiter.Choice<CreateResponse, Fault>(
                         DssEnvironment.CreateService(service),
                         delegate(CreateResponse success)
                         {
-                            Console.WriteLine("* Created * " + success.Service);
+                            Console.WriteLine("* Created * " + thisService.Service);
                         },
                         delegate(Fault failure)
                         {
-                            Console.WriteLine("*** FAULT *** creating " + service.Service + ": " + failure.Reason);
+                            Console.WriteLine("*** FAULT *** creating " + thisService.Service);
+                            foreach (var reason in failure.Reason)
+                                Console.WriteLine("*** " + reason.Value);
                         }));
+                }
         }
 
         private void checkAllAttached()

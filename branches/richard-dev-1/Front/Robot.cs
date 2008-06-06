@@ -10,7 +10,9 @@ namespace Myro
     public class Robot
     {
         AdapterBank bank;
-        public Sensors Sensors { get; private set; }
+        public Myro.API.MyroSensors Sensors { get; private set; }
+        public Myro.API.MyroMovement Movement { get; private set; }
+        public Myro.API.IMyroSound Sound { get; private set; }
 
         public Robot(string configFile)
         {
@@ -20,7 +22,16 @@ namespace Myro
             bank = new AdapterBank(configFile, true);
             bank.WaitForAdapters(TimeSpan.FromMilliseconds(10000));
             Console.WriteLine("All adapters are attached!");
-            Sensors = new Sensors(bank);
+            Sensors = new Myro.API.MyroSensors(bank);
+            Movement = new Myro.API.MyroMovement(bank.GetAdapterSpec("drive"));
+            try
+            {
+                Sound = new Myro.API.MyroSound(bank.GetAdapterSpec("tonegen"));
+            }
+            catch (UnknownAdapterNameException)
+            {
+                Sound = null;
+            }
         }
     }
 }

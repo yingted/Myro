@@ -126,7 +126,7 @@ namespace Myro.Adapters
                         default:
                             throw new Exception("Adapter type " + GetTypeName(Type) + " not yet supported");
                     }
-                    Console.WriteLine("Attached to " + serviceRecord.Service);
+                    Console.WriteLine("Attached to " + serviceRecord.Service + " as \"" + Name + "\"");
                     return true;
                 }
                 else

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace MyroInterfaces
+namespace Myro.API
 {
     public interface IMyroSong
     {
@@ -15,8 +15,8 @@ namespace MyroInterfaces
         IMyroSong MakeSong(string text); // TODO (jaredj): Return type should be song data
         void SaveSong(string text, string fileName);
         void PlaySong(IMyroSong song);
-        void beep(float duration, float frequency);
-        void beep(float duration, float frequency1, float frequency2);
+        void beep(double duration, double frequency);
+        void beep(double duration, double frequency1, double frequency2);
         // TODO (jaredj): Add a void SaveSong(MyroSong song, string fileName);
     }
 }

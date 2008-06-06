@@ -157,11 +157,17 @@ namespace Myro.Services.Generic.Vector
         }
     }
 
+    [DataContract]
+    [DataMemberConstructor]
     public class SetRequestType
     {
-        public int Index { get; private set; }
-        public double Value { get; private set; }
-        public DateTime Timestamp { get; private set; }
+        private int index;
+        [DataMember]
+        public int Index { get; set; }
+        [DataMember]
+        public double Value { get; set; }
+        [DataMember]
+        public DateTime Timestamp { get; set; }
         public SetRequestType()
             : this(0, 0.0, DateTime.Now)
         {
@@ -178,7 +184,7 @@ namespace Myro.Services.Generic.Vector
         }
     }
 
-    public class Set : Replace<SetRequestType, DsspResponsePort<DefaultReplaceResponseType>>
+    public class Set : Update<SetRequestType, DsspResponsePort<DefaultUpdateResponseType>>
     {
         public Set()
             : base()
@@ -196,16 +202,20 @@ namespace Myro.Services.Generic.Vector
             : base(new SetRequestType(index, value, timestamp))
         {
         }
-        public Set(SetRequestType body, DsspResponsePort<DefaultReplaceResponseType> responsePort)
+        public Set(SetRequestType body, DsspResponsePort<DefaultUpdateResponseType> responsePort)
             : base(body, responsePort)
         {
         }
     }
 
+    [DataContract]
+    [DataMemberConstructor]
     public class SetAllRequestType
     {
-        public List<double> Values { get; private set; }
-        public DateTime Timestamp { get; private set; }
+        [DataMember]
+        public List<double> Values { get; set; }
+        [DataMember]
+        public DateTime Timestamp { get; set; }
         public SetAllRequestType()
             : this(null, DateTime.Now)
         {
@@ -221,7 +231,7 @@ namespace Myro.Services.Generic.Vector
         }
     }
 
-    public class SetAll : Replace<SetAllRequestType, DsspResponsePort<DefaultReplaceResponseType>>
+    public class SetAll : Update<SetAllRequestType, DsspResponsePort<DefaultUpdateResponseType>>
     {
         public SetAll()
             : base()
@@ -239,7 +249,7 @@ namespace Myro.Services.Generic.Vector
             : base(new SetAllRequestType(values, timestamp))
         {
         }
-        public SetAll(SetAllRequestType body, DsspResponsePort<DefaultReplaceResponseType> responsePort)
+        public SetAll(SetAllRequestType body, DsspResponsePort<DefaultUpdateResponseType> responsePort)
             : base(body, responsePort)
         {
         }
