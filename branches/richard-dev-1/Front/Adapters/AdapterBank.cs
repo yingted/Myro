@@ -7,10 +7,12 @@ using System.Xml;
 using Microsoft.Dss.ServiceModel.Dssp;
 using Microsoft.Dss.Hosting;
 using W3C.Soap;
+using System.IO;
 using Microsoft.Ccr.Core;
 using System.Threading;
 using dirProxy = Microsoft.Dss.Services.Directory.Proxy;
 using Myro.Utilities;
+using manif = Microsoft.Dss.Services.ManifestLoader.Proxy;
 
 namespace Myro.Adapters
 {
@@ -58,17 +60,29 @@ namespace Myro.Adapters
     /// </summary>
     public class AdapterBank
     {
-        protected List<ServiceInfoType> services;
-        protected Dictionary<string, AdapterSpec> adapterNames;
+        protected List<ServiceInfoType> services = new List<ServiceInfoType>();
+        protected List<string> manifests = new List<string>();
+        protected Dictionary<string, AdapterSpec> adapterNames = new Dictionary<string, AdapterSpec>();
         //protected Dictionary<string, AdapterSpec> adapterServices;
-        Signal adaptersReady = new Signal();
+        ManualResetEvent adaptersReady = new ManualResetEvent(false);
 
         public AdapterBank(string configFile, bool autoStartServices)
         {
             readConfig(configFile);
+            Console.WriteLine("Initializing DSS environment...");
+            if (manifests.Count > 0)
+            {
+                IEnumerable<string> manifestFullPaths =
+                    from m in manifests
+                    select "file://" + Path.GetFullPath(m);
+                DssEnvironment.Initialize(50000, 50001, manifestFullPaths.ToArray());
+            }
+            else
+                DssEnvironment.Initialize(50000, 50001);
+            Console.WriteLine("DSS environment initialized");
             subscribeDirectory();
-            if (autoStartServices)
-                startServices();
+            //if (autoStartServices)
+            //    startServices();
         }
 
         /// <summary>
@@ -91,22 +105,23 @@ namespace Myro.Adapters
 
         public void WaitForAdapters(TimeSpan timeout)
         {
-            if (adaptersReady.Wait(timeout) == false)
+            if (adaptersReady.WaitOne(timeout) == false)
                 throw new TimeoutException("Timed out waiting for adapters to attach");
         }
 
         protected void readConfig(string configFile)
         {
-            services = new List<ServiceInfoType>();
-            //adapterTypes = new Dictionary<AdapterTypes,ArrayList>();
-            adapterNames = new Dictionary<string, AdapterSpec>();
-
             XPathNavigator nav = new XPathDocument(configFile).CreateNavigator();
 
             // Add plain services to list
             XPathNodeIterator startservices = nav.Select("//StartService");
             foreach (XPathNavigator node in startservices)
                 services.Add(new ServiceInfoType(getChild(node, "Contract"), getChild(node, "Service")));
+
+            // Add manifests to list
+            XPathNodeIterator manifestNodes = nav.Select("//Manifest");
+            foreach (XPathNavigator node in manifestNodes)
+                manifests.Add(node.GetAttribute("file", ""));
 
             // Add adapters to list, and to dictionary
             XPathNodeIterator adapters = nav.Select("//Adapter");
@@ -144,25 +159,26 @@ namespace Myro.Adapters
             var dirPort = DssEnvironment.ServiceForwarder<dirProxy.DirectoryPort>(new Uri("http://localhost:50000/directory"));
             var resPort = new dirProxy.DirectoryPort();
             Fault error = null;
-            Signal signal = new Signal();
+            EventWaitHandle signal = new EventWaitHandle(false, EventResetMode.ManualReset);
             Arbiter.Activate(DssEnvironment.TaskQueue,
                 Arbiter.Choice<SubscribeResponseType, Fault>(
                     dirPort.Subscribe(resPort, null),
                     delegate(SubscribeResponseType success)
                     {
                         Console.WriteLine("AdapterBank subscribed to directory service");
-                        signal.Raise();
+                        signal.Set();
                     },
                     delegate(Fault failure)
                     {
                         error = failure;
-                        signal.Raise();
+                        signal.Set();
                     }));
-            signal.Wait();
+            signal.WaitOne();
             if (error != null)
                 throw new Exception("Could not subscribe to directory service: " + error.Reason);
             Arbiter.Activate(DssEnvironment.TaskQueue,
                 Arbiter.Receive<dirProxy.Insert>(true, resPort, directoryInsertHandler));
+            updateAdapters();
         }
 
         protected void directoryInsertHandler(dirProxy.Insert insert)
@@ -194,7 +210,8 @@ namespace Myro.Adapters
                                 //Console.WriteLine("Comparing " + rec.Service + " to " + adapter.ServiceInfo.Service);
                                 //Uri testUri = new Uri(adapter.ServiceInfo.Service);
                                 //if (Uri.Compare(foundUri, testUri, UriComponents.Path, UriFormat.UriEscaped, StringComparison.InvariantCultureIgnoreCase) == 0)
-                                if (rec.Service.EndsWith(adapter.ServiceConfig.Service))
+                                if (rec.Contract.ToLower().CompareTo(adapter.ServiceConfig.Contract.ToLower()) == 0)
+                                    //rec.Service.EndsWith(adapter.ServiceConfig.Service))
                                 {
                                     //Console.WriteLine("* Assigned * " + rec.Service + " to " + adapter.ServiceInfo.Service);
                                     if (adapterSpec == null)
@@ -218,6 +235,30 @@ namespace Myro.Adapters
 
         public void startServices()
         {
+            //string manifestLoader = null;
+            //ManualResetEvent signal = new ManualResetEvent(false);
+            //Arbiter.Activate(DssEnvironment.TaskQueue,
+            //    Arbiter.Choice<ServiceInfoType,Fault>(
+            //        DssEnvironment.DirectoryQuery(manif.Contract.Identifier),
+            //        delegate(ServiceInfoType record) {
+            //            manifestLoader = record.Service;
+            //            signal.Set();
+            //        },
+            //        delegate(Fault failure)
+            //        {
+            //            Console.WriteLine("*** Fault finding manifest loader *** " + failure.Reason[0].Value);
+            //            signal.Set();
+            //        }));
+            //signal.WaitOne();
+            //if(manifestLoader != null) {
+            //    manif.ManifestLoaderPort mPort = DssEnvironment.ServiceForwarder<manif.ManifestLoaderPort>(new Uri(manifestLoader));
+            //    manif.InsertRequest req = new manif.InsertRequest();
+            //    req.Manifest = Microsoft.Dss.Services.ManifestLoaderClient.ValidateManifest
+            //    req.Manifest.C
+            //    mPort.Insert(
+            //foreach(var manifest in manifests)
+            //    mPort.Post(
+
             // Build a list of the "StartService"s and the "Adapter" services
             List<ServiceInfoType> allServices = new List<ServiceInfoType>(services);
             foreach (var adapter in adapterNames.Values)
@@ -252,7 +293,7 @@ namespace Myro.Adapters
                 if (adapter.isAttached() == false)
                     ret = false;
             if (ret == true)
-                adaptersReady.Raise();
+                adaptersReady.Set();
         }
 
         private static string getChild(XPathNavigator node, string name, bool missingok)

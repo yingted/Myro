@@ -251,64 +251,51 @@ namespace SimTestSuite
 
         private void drawCircleMeters(PictureBox control, Color color, double[] vals, double min, double max)
         {
-            Bitmap bmp = new Bitmap(control.Width, control.Height);
-            Graphics g = Graphics.FromImage(bmp);
-            Brush brush = new SolidBrush(color);
-            Brush black = new SolidBrush(Color.Black);
-
-            int maxCircleRadius = 15;
-            int[] xs = layout(control.Width, maxCircleRadius * 2, vals.Length);
-            //Console.WriteLine("L: " + vals[0] + "  R: " + vals[1]);
-            IEnumerable<int> radii = from v in vals
-                                     let normalized = (v - min) / (max - min)
-                                     let normalizedBounded = (normalized > 0 ? normalized : 0)
-                                     select (int)(normalizedBounded * (double)maxCircleRadius);
-            StringFormat format = StringFormat.GenericDefault;
-            format.Alignment = StringAlignment.Center;
-            Font font = new Font("Sans Serif", 7);
-            for (int i = 0; i < xs.Length; i++)
+            if (control.IsHandleCreated)
             {
-                //Console.WriteLine("Radius: " + radii.ElementAt(i));
-                int offset = maxCircleRadius - radii.ElementAt(i);
-                g.FillEllipse(brush, xs[i] + offset, offset, 2 * radii.ElementAt(i), 2 * radii.ElementAt(i));
-                g.DrawString(vals[i].ToString(), font, black, xs[i] + maxCircleRadius, (float)maxCircleRadius * 1.8f, format);
+                Bitmap bmp = new Bitmap(control.Width, control.Height);
+                Graphics g = Graphics.FromImage(bmp);
+                Brush brush = new SolidBrush(color);
+                Brush black = new SolidBrush(Color.Black);
+
+                int maxCircleRadius = 15;
+                int[] xs = layout(control.Width, maxCircleRadius * 2, vals.Length);
+                //Console.WriteLine("L: " + vals[0] + "  R: " + vals[1]);
+                IEnumerable<int> radii = from v in vals
+                                         let normalized = (v - min) / (max - min)
+                                         let normalizedBounded = (normalized > 0 ? normalized : 0)
+                                         select (int)(normalizedBounded * (double)maxCircleRadius);
+                StringFormat format = StringFormat.GenericDefault;
+                format.Alignment = StringAlignment.Center;
+                Font font = new Font("Sans Serif", 7);
+                for (int i = 0; i < xs.Length; i++)
+                {
+                    //Console.WriteLine("Radius: " + radii.ElementAt(i));
+                    int offset = maxCircleRadius - radii.ElementAt(i);
+                    g.FillEllipse(brush, xs[i] + offset, offset, 2 * radii.ElementAt(i), 2 * radii.ElementAt(i));
+                    g.DrawString(vals[i].ToString(), font, black, xs[i] + maxCircleRadius, (float)maxCircleRadius * 1.8f, format);
+                }
+                control.Image = bmp;
+                control.Invoke(new Action(delegate() { control.Refresh(); }));
             }
-            control.Image = bmp;
-            control.Invoke(new Action(delegate() { control.Refresh(); }));
         }
 
         private void update()
         {
-            try
-            {
-                double[] contacts = rbt.Sensors.get("ir");
-                //Console.WriteLine("contact: " + contacts[0] + ", " + contacts[1]);
-                drawCircleMeters(contactSensorImg, Color.MediumVioletRed, contacts, 0.0, 1.0);
-            }
-            catch (Myro.Adapters.UnknownAdapterNameException) { }
-            try
-            {
-                double[] stall = rbt.Sensors.get("stall");
-                drawCircleMeters(stallSensorImg, Color.Red, stall, 0.0, 1.0);
-            }
-            catch (Myro.Adapters.UnknownAdapterNameException) { }
-            try
-            {
-                double[] light = rbt.Sensors.get("light");
-                //Console.WriteLine("light: " + light[0]);
-                drawCircleMeters(lightSensorImg, Color.DeepSkyBlue, light, 2000.0, 0.0);
-            }
-            catch (Myro.Adapters.UnknownAdapterNameException) { }
+            double[] contacts = rbt.Sensors.get("ir");
+            //Console.WriteLine("contact: " + contacts[0] + ", " + contacts[1]);
+            drawCircleMeters(contactSensorImg, Color.MediumVioletRed, contacts, 0.0, 1.0);
+            double[] stall = rbt.Sensors.get("stall");
+            drawCircleMeters(stallSensorImg, Color.Red, stall, 0.0, 1.0);
+            double[] light = rbt.Sensors.get("light");
+            //Console.WriteLine("light: " + light[0]);
+            drawCircleMeters(lightSensorImg, Color.DeepSkyBlue, light, 2000.0, 0.0);
             //double[] ir = rbt.get("ir");
             //Console.WriteLine("ir: " + ir[0]);
             //drawCircleMeters(IRSensorImg, ir, 0.0, 1.0);
-            try
-            {
-                double[] line = rbt.Sensors.get("line");
-                //Console.WriteLine("line: " + line[0]);
-                drawCircleMeters(lineSensorImg, Color.DarkGray, line, 0.0, 1.0);
-            }
-            catch (Myro.Adapters.UnknownAdapterNameException) { }
+            double[] line = rbt.Sensors.get("line");
+            //Console.WriteLine("line: " + line[0]);
+            drawCircleMeters(lineSensorImg, Color.DarkGray, line, 0.0, 1.0);
         }
 
         private void TestPanel_Load(object sender, EventArgs e)

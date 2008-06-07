@@ -22,17 +22,38 @@ namespace Myro.API
 
         public double[] get(string name)
         {
-            return bank.GetAdapterSpec(name).GetVectorAdapter().Get();
+            try
+            {
+                return bank.GetAdapterSpec(name).GetVectorAdapter().Get();
+            }
+            catch (UnknownAdapterNameException)
+            {
+                return new double[] { 0.0 };
+            }
         }
 
         public double get(string name, int index)
         {
-            return bank.GetAdapterSpec(name).GetVectorAdapter().Get(index);
+            try
+            {
+                return bank.GetAdapterSpec(name).GetVectorAdapter().Get(index);
+            }
+            catch (UnknownAdapterNameException)
+            {
+                return 0.0;
+            }
         }
 
         public double get(string name, string tag)
         {
-            return bank.GetAdapterSpec(name).GetVectorAdapter().Get(tag);
+            try
+            {
+                return bank.GetAdapterSpec(name).GetVectorAdapter().Get(tag);
+            }
+            catch (UnknownAdapterNameException)
+            {
+                return 0.0;
+            }
         }
 
     }

@@ -1,28 +1,13 @@
-<?xml version="1.0" encoding="utf-8"?>
-
-<RobotConfig>
-  <DssEnvironment>
-    <HttpPort>50000</HttpPort>
-    <SoapPort>50001</SoapPort>
-  </DssEnvironment>
-
-  <!-- Verbosity Level from 1-5 -->
-  <Verbosity>
-    <Level>2</Level>
-  </Verbosity>
-
-  <StartService>
-    <Contract>http://schemas.microsoft.com/robotics/2007/01/irobot.html</Contract>
-    <Service>/irobot</Service>
-  </StartService>
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RoombaState xmlns:s="http://www.w3.org/2003/05/soap-envelope" xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing" xmlns:d="http://schemas.microsoft.com/xw/2004/10/dssp.html" xmlns="http://schemas.microsoft.com/robotics/2007/01/irobot.html">
+  <Name>Johnny</Name>
+  <FirmwareDate>0001-01-01T00:00:00</FirmwareDate>
+  <SerialPort>5</SerialPort>
+  <BaudRate>57600</BaudRate>
+  <IRobotModel>Create</IRobotModel>
+  <ConnectionType>CreateSerialPort</ConnectionType>
+  <StopOnResync>false</StopOnResync>
+  <Mode>Uninitialized</Mode>
+  <MaintainMode>Full</MaintainMode>
   
-  <Adapter type="Vector" name="ir">
-    <Contract>http://schemas.microsoft.com/robotics/2006/12/irobot/roomba/bumper.html</Contract>
-    <Service>/createbumper</Service>
-  </Adapter>
-
-  <Adapter type="Drive" name="drive">
-    <Contract>http://schemas.microsoft.com/robotics/2006/12/irobot/drive.html</Contract>
-    <Service>/createdrive</Service>
-  </Adapter>
-</RobotConfig>
+</RoombaState>

@@ -42,57 +42,57 @@ namespace Myro.Services.Generic.Vector
         [DataMember()]
         public List<double> Values { get; set; }
         [DataMember()]
-        public List<string> Tags { get; set; }
+        public List<string> Keys { get; set; }
         [DataMember()]
         public DateTime Timestamp { get; set; }
         [DataMember()]
-        public DateTime TagTimestamp { get; set; }
-        public VectorState()
-            : this(null, null, DateTime.Now)
+        public Dictionary<string, int> indexCache { get; set; }
+
+        public VectorState() :
+            this(null, null, DateTime.Now) { }
+        public VectorState(List<Double> values, DateTime timestamp) :
+            this(values, null, timestamp) { }
+        public VectorState(List<Double> values) :
+            this(values, null, DateTime.Now) { }
+        public VectorState(bool[] values, DateTime timestamp) :
+            this(from v in values select (v ? 1.0 : 0.0), new List<string>(), timestamp) { }
+
+        public VectorState(IEnumerable<double> values, IEnumerable<string> keys, DateTime timestamp)
         {
-        }
-        public VectorState(List<Double> values, DateTime timestamp)
-            : this(values, null, timestamp)
-        {
-        }
-        public VectorState(List<Double> values)
-            : this(values, null, DateTime.Now)
-        {
-        }
-        public VectorState(bool[] values, DateTime timestamp)
-        {
-            List<double> ret = new List<double>(values.Length);
-            foreach (bool v in values)
-                ret.Add(v ? 1.0 : 0.0);
-            Values = ret;
-            Tags = new List<string>();
-            Timestamp = timestamp;
-            TagTimestamp = DateTime.Now;
-        }
-        public VectorState(List<double> values, List<string> tags, DateTime timestamp)
-        {
-            Values = (values == null ? new List<double>() : values);
-            Tags = (tags == null ? new List<string>() : tags);
+            Values = (values == null ? new List<double>() : new List<double>(values));
+            Keys = (keys == null ? new List<string>() : new List<string>(keys));
             Timestamp = (timestamp == null ? DateTime.Now : timestamp);
-            TagTimestamp = DateTime.Now;
+            RebuildIndexCache();
         }
-        public void setValues(double[] values, DateTime timestamp)
+
+        public double Get(int index) { return Values[index]; }
+        public double Get(string key) { return Values[indexCache[key]]; }
+        public IList<double> GetValues() { return Values; }
+        public IList<bool> GetValuesBool() { return new List<bool>(from v in Values select (v >= 0.5 ? true : false)); }
+        public void Set(int index, double value) { Values[index] = value; }
+        public void Set(string key, double value) { Set(indexCache[key], value); }
+        public void SetAll(IEnumerable<bool> values) { SetAll(from v in values select (v ? 1.0 : 0.0)); }
+        public void SetAll(IEnumerable<double> values)
         {
-            Values = new List<double>(values);
-            Timestamp = timestamp;
+            List<double> newValues = new List<double>(values);
+            // If the length of the vector changes, rebuild the index cache
+            // because the number of elements accessible by key is the lesser
+            // of the number of elements and the number of keys.
+            if (Values.Count != newValues.Count)
+            {
+                Values = newValues;
+                RebuildIndexCache();
+            }
+            else
+                Values = new List<double>(values);
         }
-        public void setValues(bool[] values, DateTime timestamp)
+
+        private void RebuildIndexCache()
         {
-            Values = new List<double>(values.Length);
-            foreach (bool v in values)
-                Values.Add(v ? 1.0 : 0.0);
-            Timestamp = timestamp;
-        }
-        public IEnumerable<bool> getValuesBool()
-        {
-            return
-                from v in Values
-                select (v >= 0.5 ? true : false);
+            indexCache = new Dictionary<string, int>(Keys.Count);
+            int max = Keys.Count > Values.Count ? Values.Count : Keys.Count;
+            for (int i = 0; i < max; i++)
+                indexCache.Add(Keys[i], i);
         }
     }
 
@@ -100,45 +100,22 @@ namespace Myro.Services.Generic.Vector
     /// Vector Main Operations Port
     /// </summary>
     [ServicePort()]
-    public class VectorOperations : PortSet<DsspDefaultLookup, DsspDefaultDrop, HttpGet, Get, Replace, Set, SetAll, Subscribe>
+    public class VectorOperations : PortSet<DsspDefaultLookup, DsspDefaultDrop, HttpGet, Get, Replace, SetByIndex, SetAll, Subscribe>
     {
     }
 
-    /// <summary>
-    /// Vector Get Operation
-    /// </summary>
     public class Get : Get<GetRequestType, PortSet<VectorState, Fault>>
     {
-        public Get()
-            : base()
-        {
-        }
-
-        public Get(GetRequestType body) :
-            base(body)
-        {
-        }
-
-        public Get(GetRequestType body, PortSet<VectorState, Fault> responsePort) :
-            base(body, responsePort)
-        {
-        }
+        public Get() : base() { }
+        public Get(GetRequestType body) : base(body) { }
+        public Get(GetRequestType body, PortSet<VectorState, Fault> responsePort) : base(body, responsePort) { }
     }
 
     public class Subscribe : Subscribe<SubscribeRequestType, DsspResponsePort<SubscribeResponseType>>
     {
-        public Subscribe()
-            : base()
-        {
-        }
-        public Subscribe(SubscribeRequestType body)
-            : base(body)
-        {
-        }
-        public Subscribe(SubscribeRequestType body, DsspResponsePort<SubscribeResponseType> responsePort)
-            : base(body, responsePort)
-        {
-        }
+        public Subscribe() : base() { }
+        public Subscribe(SubscribeRequestType body) : base(body) { }
+        public Subscribe(SubscribeRequestType body, DsspResponsePort<SubscribeResponseType> responsePort) : base(body, responsePort) { }
     }
 
     public class Replace : Replace<VectorState, DsspResponsePort<DefaultReplaceResponseType>>
@@ -159,53 +136,52 @@ namespace Myro.Services.Generic.Vector
 
     [DataContract]
     [DataMemberConstructor]
-    public class SetRequestType
+    public class SetByIndexRequestType
     {
-        private int index;
         [DataMember]
         public int Index { get; set; }
         [DataMember]
         public double Value { get; set; }
         [DataMember]
         public DateTime Timestamp { get; set; }
-        public SetRequestType()
-            : this(0, 0.0, DateTime.Now)
+        public SetByIndexRequestType()
         {
-        }
-        public SetRequestType(int index, double value, DateTime timestamp)
-        {
-            Index = index;
-            Value = value;
-            Timestamp = timestamp;
-        }
-        public SetRequestType(int index, double value)
-            : this(index, value, DateTime.Now)
-        {
+            Index = 0;
+            Value = 0.0;
+            Timestamp = DateTime.Now;
         }
     }
 
-    public class Set : Update<SetRequestType, DsspResponsePort<DefaultUpdateResponseType>>
+    public class SetByIndex : Update<SetByIndexRequestType, DsspResponsePort<DefaultUpdateResponseType>>
     {
-        public Set()
-            : base()
+        public SetByIndex() : base() { }
+        public SetByIndex(SetByIndexRequestType body) : base(body) { }
+        public SetByIndex(SetByIndexRequestType body, DsspResponsePort<DefaultUpdateResponseType> responsePort) : base(body, responsePort) { }
+    }
+
+    [DataContract]
+    [DataMemberConstructor]
+    public class SetByKeyRequestType
+    {
+        [DataMember]
+        public string Key { get; set; }
+        [DataMember]
+        public double Value { get; set; }
+        [DataMember]
+        public DateTime Timestamp { get; set; }
+        public SetByKeyRequestType()
         {
+            Key = "";
+            Value = 0.0;
+            Timestamp = DateTime.Now;
         }
-        public Set(SetRequestType body)
-            : base(body)
-        {
-        }
-        public Set(int index, double value)
-            : base(new SetRequestType(index, value))
-        {
-        }
-        public Set(int index, double value, DateTime timestamp)
-            : base(new SetRequestType(index, value, timestamp))
-        {
-        }
-        public Set(SetRequestType body, DsspResponsePort<DefaultUpdateResponseType> responsePort)
-            : base(body, responsePort)
-        {
-        }
+    }
+
+    public class SetByKey : Update<SetByKeyRequestType, DsspResponsePort<DefaultUpdateResponseType>>
+    {
+        public SetByKey() : base() { }
+        public SetByKey(SetByKeyRequestType body) : base(body) { }
+        public SetByKey(SetByKeyRequestType body, DsspResponsePort<DefaultUpdateResponseType> responsePort) : base(body, responsePort) { }
     }
 
     [DataContract]
@@ -217,42 +193,17 @@ namespace Myro.Services.Generic.Vector
         [DataMember]
         public DateTime Timestamp { get; set; }
         public SetAllRequestType()
-            : this(null, DateTime.Now)
         {
-        }
-        public SetAllRequestType(List<double> values, DateTime timestamp)
-        {
-            Values = values;
-            Timestamp = timestamp;
-        }
-        public SetAllRequestType(List<double> values)
-            : this(values, DateTime.Now)
-        {
+            Values = new List<double>();
+            Timestamp = DateTime.Now;
         }
     }
 
     public class SetAll : Update<SetAllRequestType, DsspResponsePort<DefaultUpdateResponseType>>
     {
-        public SetAll()
-            : base()
-        {
-        }
-        public SetAll(SetAllRequestType body)
-            : base(body)
-        {
-        }
-        public SetAll(List<double> values)
-            : base(new SetAllRequestType(values))
-        {
-        }
-        public SetAll(List<double> values, DateTime timestamp)
-            : base(new SetAllRequestType(values, timestamp))
-        {
-        }
-        public SetAll(SetAllRequestType body, DsspResponsePort<DefaultUpdateResponseType> responsePort)
-            : base(body, responsePort)
-        {
-        }
+        public SetAll() : base() { }
+        public SetAll(SetAllRequestType body) : base(body) { }
+        public SetAll(SetAllRequestType body, DsspResponsePort<DefaultUpdateResponseType> responsePort) : base(body, responsePort) { }
     }
 
 }

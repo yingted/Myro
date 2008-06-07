@@ -54,11 +54,11 @@ namespace IPRE.ToneGenerator
                 DateTime.Now);
         }
 
-        public override IEnumerator<ITask> SetHandler(vector.Set set)
+        public override IEnumerator<ITask> SetHandler(vector.SetByIndex set)
         {
             _state.Values[set.Body.Index] = set.Body.Value;
             _state.Timestamp = set.Body.Timestamp;
-            SendNotification<vector.Set>(set);
+            SendNotification<vector.SetByIndex>(set);
             IEnumerator<ITask> ts = PlayTone(set.ResponsePort);
             do
             {

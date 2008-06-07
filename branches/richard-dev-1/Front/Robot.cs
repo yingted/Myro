@@ -16,11 +16,11 @@ namespace Myro
 
         public Robot(string configFile)
         {
-            Console.Write("Starting DSS environment...");
-            DssEnvironment.Initialize(50000, 50001);
-            Console.WriteLine("Done");
+            //Console.Write("Starting DSS environment...");
+            //DssEnvironment.Initialize(50000, 50001);
+            //Console.WriteLine("Done");
             bank = new AdapterBank(configFile, true);
-            bank.WaitForAdapters(TimeSpan.FromMilliseconds(10000));
+            bank.WaitForAdapters(TimeSpan.FromMilliseconds(100000));
             Console.WriteLine("All adapters are attached!");
             Sensors = new Myro.API.MyroSensors(bank);
             Movement = new Myro.API.MyroMovement(bank.GetAdapterSpec("drive"));

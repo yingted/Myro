@@ -53,17 +53,22 @@ namespace Myro.Adapters
             drive.SetDrivePower setDrivePower = new drive.SetDrivePower(drivePowerReq);
             drivePort.Post(setDrivePower);
 
-            bool done = false;
+            ManualResetEvent signal = new ManualResetEvent(false);
             Arbiter.Activate(DssEnvironment.TaskQueue,
-                Arbiter.Receive<DefaultUpdateResponseType>(false,
-                    setDrivePower.ResponsePort,
+                Arbiter.Choice<DefaultUpdateResponseType, Fault>(
+                    drivePort.SetDrivePower((double)leftPower, (double)rightPower),
                     delegate(DefaultUpdateResponseType state)
                     {
-                        done = true;
-                    }
-            ));
-
-            while (!done) ;
+                        signal.Set();
+                    },
+                    delegate(Fault failure)
+                    {
+                        Console.WriteLine("*** Fault in SetMotors: ");
+                        foreach (var r in failure.Reason)
+                            Console.WriteLine("***    " + r.Value);
+                        signal.Set();
+                    }));
+            signal.WaitOne();
         }
 
         protected void EnableMotors()
@@ -71,6 +76,7 @@ namespace Myro.Adapters
             drive.EnableDriveRequest enableDriveMessage = new drive.EnableDriveRequest();
             enableDriveMessage.Enable = true;
             drivePort.EnableDrive(enableDriveMessage);
+            Console.WriteLine("Enabling motors");
         }
 
         protected void NotifyDriveUpdate(drive.Update notification)
@@ -112,21 +118,21 @@ namespace Myro.Adapters
         {
             drive.DriveDifferentialTwoWheelState ret = null;
             Fault error = null;
-            Signal signal = new Signal();
+            ManualResetEvent signal = new ManualResetEvent(false);
             Arbiter.Activate(DssEnvironment.TaskQueue,
                 Arbiter.Choice<drive.DriveDifferentialTwoWheelState, Fault>(
                     drivePort.Get(),
                     delegate(drive.DriveDifferentialTwoWheelState state)
                     {
                         ret = state;
-                        signal.Raise();
+                        signal.Set();
                     },
                     delegate(Fault failure)
                     {
                         error = failure;
-                        signal.Raise();
+                        signal.Set();
                     }));
-            signal.Wait();
+            signal.WaitOne();
             if (error != null)
                 throw new AdapterOperationException(error);
             else

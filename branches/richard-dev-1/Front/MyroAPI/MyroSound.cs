@@ -5,6 +5,7 @@ using System.Text;
 using Microsoft.Ccr.Core;
 using Microsoft.Dss.Hosting;
 using Myro.Utilities;
+using Myro.Adapters;
 
 namespace Myro.API
 {
@@ -45,7 +46,13 @@ namespace Myro.API
         public void beep(double duration, double frequency1, double frequency2)
         {
             double[] values = { frequency1, frequency2, duration };
-            soundAdapter.GetVectorAdapter().SetAll(values);
+            try
+            {
+                soundAdapter.GetVectorAdapter().SetAll(values);
+            }
+            catch (UnknownAdapterNameException)
+            {
+            }
         }
     }
 }

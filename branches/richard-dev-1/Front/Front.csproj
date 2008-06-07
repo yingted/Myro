@@ -90,7 +90,6 @@
     <Compile Include="MyroAPI\MyroSound.cs" />
     <Compile Include="MyroAPI\MyroUtilities.cs" />
     <Compile Include="Robot.cs" />
-    <Compile Include="Strings.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Services\Generic\Vector\Vector.csproj">

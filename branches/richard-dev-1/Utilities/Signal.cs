@@ -17,8 +17,9 @@ namespace Myro.Utilities
     /// Wait() will return immediately if the flag is already raised, and you
     /// should not have to worry about Wait getting stuck when it should
     /// return (I hope).  Multiple threads can call Wait(), Raise(), and
-    /// Cancel().
+    /// Cancel().  NOTE: doesn't reall work, use ManualResetEvent instead!
     /// </summary>
+    [Obsolete]
     public class Signal
     {
         bool raised = false;

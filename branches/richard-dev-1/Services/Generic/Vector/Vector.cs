@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Xml;
 using W3C.Soap;
+using Myro.Utilities;
 
 namespace Myro.Services.Generic.Vector
 {
@@ -77,22 +78,46 @@ namespace Myro.Services.Generic.Vector
         }
 
         [ServiceHandler(ServiceHandlerBehavior.Exclusive)]
-        public virtual IEnumerator<ITask> SetHandler(Set set)
+        public virtual IEnumerator<ITask> SetByIndexHandler(SetByIndex set)
         {
-            if (set.Body.Index >= 0 && set.Body.Index < _state.Values.Count)
+            try
             {
-                _state.Values[set.Body.Index] = set.Body.Value;
+                _state.Set(set.Body.Index, set.Body.Value);
                 _state.Timestamp = set.Body.Timestamp;
                 set.ResponsePort.Post(DefaultUpdateResponseType.Instance);
-                SendNotification<Set>(set);
+                SendNotification<SetByIndex>(set);
             }
-            else
+            catch (ArgumentOutOfRangeException e)
             {
-                Fault fault = new Fault();
-                fault.Reason = new ReasonText[1];
-                fault.Reason[0] = new ReasonText();
-                fault.Reason[0].Value = "Vector element index out of bounds";
-                set.ResponsePort.Post(fault);
+                Fault error = new Fault()
+                {
+                    Detail = new Detail { Any = new object[] { e } },
+                    Reason = new ReasonText[]{new ReasonText{
+                        Value=Strings.IndexOutOfBounds(set.Body.Index, _state.Values.Count)}}
+                };
+                set.ResponsePort.Post(error);
+            }
+            yield break;
+        }
+
+        [ServiceHandler(ServiceHandlerBehavior.Exclusive)]
+        public virtual IEnumerator<ITask> SetByKeyHandler(SetByKey set)
+        {
+            try
+            {
+                _state.Set(set.Body.Key, set.Body.Value);
+                _state.Timestamp = set.Body.Timestamp;
+                set.ResponsePort.Post(DefaultUpdateResponseType.Instance);
+                SendNotification<SetByKey>(set);
+            }
+            catch (KeyNotFoundException e)
+            {
+                Fault error = new Fault()
+                {
+                    Reason = new ReasonText[]{new ReasonText{
+                        Value=Strings.KeyNotFound(set.Body.Key)}}
+                };
+                set.ResponsePort.Post(error);
             }
             yield break;
         }
@@ -122,7 +147,7 @@ namespace Myro.Services.Generic.Vector
                 });
         }
 
-        protected void SendNotification<T>(T message) where T:DsspOperation
+        protected void SendNotification<T>(T message) where T : DsspOperation
         {
             base.SendNotification<T>(_subMgrPort, message);
         }

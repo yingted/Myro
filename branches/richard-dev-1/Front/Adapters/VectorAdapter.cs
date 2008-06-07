@@ -45,21 +45,21 @@ namespace Myro.Adapters
             vector.VectorState ret = null;
             Fault error = null;
             Object monitor = new Object();
-            Signal signal = new Signal();
+            ManualResetEvent signal = new ManualResetEvent(false);
             Arbiter.Activate(DssEnvironment.TaskQueue,
                 Arbiter.Choice<vector.VectorState, Fault>(
                     opPort.Get(),
                     delegate(vector.VectorState state)
                     {
                         ret = state;
-                        signal.Raise();
+                        signal.Set();
                     },
                     delegate(Fault failure)
                     {
                         error = failure;
-                        signal.Raise();
+                        signal.Set();
                     }));
-            signal.Wait();
+            signal.WaitOne();
             if (error != null)
                 throw new AdapterOperationException(error);
             else
@@ -115,7 +115,7 @@ namespace Myro.Adapters
             }
             catch (KeyNotFoundException e)
             {
-                throw new AdapterArgumentException(Strings.TagNotFound(tag));
+                throw new AdapterArgumentException(Strings.KeyNotFound(tag));
             }
             if (index > state.Values.Count)
                 throw new AdapterOperationException(Strings.VectorTooShort);
@@ -140,7 +140,7 @@ namespace Myro.Adapters
             }
             catch (KeyNotFoundException)
             {
-                throw new AdapterArgumentException(Strings.TagNotFound(tag));
+                throw new AdapterArgumentException(Strings.KeyNotFound(tag));
             }
             Set(index, value);
         }
@@ -153,20 +153,20 @@ namespace Myro.Adapters
         public void Set(int index, double value)
         {
             Fault error = null;
-            Signal signal = new Signal();
+            ManualResetEvent signal = new ManualResetEvent(false);
             Arbiter.Activate(DssEnvironment.TaskQueue,
                 Arbiter.Choice<DefaultUpdateResponseType, Fault>(
-                    opPort.Set(index, value, DateTime.Now),
+                    opPort.SetByIndex(index, value, DateTime.Now),
                     delegate(DefaultUpdateResponseType success)
                     {
-                        signal.Raise();
+                        signal.Set();
                     },
                     delegate(Fault failure)
                     {
                         error = failure;
-                        signal.Raise();
+                        signal.Set();
                     }));
-            signal.Wait();
+            signal.WaitOne();
             if (error != null)
             {
                 String msg = "Fault in setting vector: ";
@@ -180,20 +180,20 @@ namespace Myro.Adapters
         public void SetAll(double[] values)
         {
             Fault error = null;
-            Signal signal = new Signal();
+            ManualResetEvent signal = new ManualResetEvent(false);
             Arbiter.Activate(DssEnvironment.TaskQueue,
                 Arbiter.Choice<DefaultUpdateResponseType, Fault>(
                     opPort.SetAll(new List<double>(values), DateTime.Now),
                     delegate(DefaultUpdateResponseType success)
                     {
-                        signal.Raise();
+                        signal.Set();
                     },
                     delegate(Fault failure)
                     {
                         error = failure;
-                        signal.Raise();
+                        signal.Set();
                     }));
-            signal.Wait();
+            signal.WaitOne();
             if (error != null)
             {
                 String msg = "Fault in setting vector: ";
