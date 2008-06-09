@@ -69,13 +69,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Adapters\AdapterBank.cs" />
-    <Compile Include="Adapters\AdapterSpec.cs" />
-    <Compile Include="Adapters\DriveAdapter.cs" />
-    <Compile Include="Adapters\IAdapter.cs" />
-    <Compile Include="Adapters\ImageAdapter.cs" />
-    <Compile Include="Adapters\SpeechAdapter.cs" />
-    <Compile Include="Adapters\VectorAdapter.cs" />
     <Compile Include="MyroAPI\IMyroLED.cs">
       <SubType>Code</SubType>
     </Compile>

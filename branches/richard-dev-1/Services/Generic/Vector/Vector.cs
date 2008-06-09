@@ -101,10 +101,7 @@ namespace Myro.Services.Generic.Vector
         /// <summary>
         /// Default Service Constructor
         /// </summary>
-        public VectorService(DsspServiceCreationPort creationPort) :
-            base(creationPort)
-        {
-        }
+        public VectorService(DsspServiceCreationPort creationPort) : base(creationPort) { }
 
         /// <summary>
         /// Service Start
@@ -173,7 +170,7 @@ namespace Myro.Services.Generic.Vector
                 {
                     RequestType = RequestType.ByIndex,
                     Index = get.Body.Index,
-                    Key = (_state.Keys.Count >= get.Body.Index + 1 ? _state.Keys[get.Body.Index] : "")
+                    Key = ((_state.Keys.Count >= (get.Body.Index + 1)) ? _state.Keys[get.Body.Index] : "")
                 });
                 get.ResponsePort.Post(response);
             }
@@ -194,7 +191,7 @@ namespace Myro.Services.Generic.Vector
                 response.Timestamp = _state.Timestamp;
                 GetCallback(new GetElementRequestInfo()
                 {
-                    RequestType = RequestType.Key,
+                    RequestType = RequestType.ByKey,
                     Index = _state.indexCache[get.Body.Key],
                     Key = get.Body.Key
                 });
@@ -218,7 +215,7 @@ namespace Myro.Services.Generic.Vector
                 {
                     RequestType = RequestType.ByIndex,
                     Index = set.Body.Index,
-                    Key = ((_state.Keys.Count >= (get.Body.Index + 1)) ? _state.Keys[get.Body.Index] : ""),
+                    Key = ((_state.Keys.Count >= (set.Body.Index + 1)) ? _state.Keys[set.Body.Index] : ""),
                     Timestamp = set.Body.Timestamp,
                     Value = set.Body.Value
                 });
@@ -289,12 +286,26 @@ namespace Myro.Services.Generic.Vector
         }
     }
 
+    /// <summary>
+    /// For the RequestType member of GetElementRequestInfo and
+    /// SetElementRequestInfo, this indicates whether the service request was
+    /// (Get/Set)ByIndex, or (Get/Set)ByKey.
+    /// </summary>
     protected enum RequestType { ByIndex, ByKey }
 
+    /// <summary>
+    /// The abstract base class for GetElementRequestInfo and GetAllRequestInfo
+    /// </summary>
     protected abstract class GetRequestInfo
     {
     }
 
+    /// <summary>
+    /// Passed into GetCallback, provides information about the actual service
+    /// request, if the request was either GetByIndex and GetByKey.  The
+    /// RequestType property indicates whether the request was GetByIndex or
+    /// GetByKey.
+    /// </summary>
     protected class GetElementRequestInfo : GetRequestInfo
     {
         public RequestType RequestType { get; private set; }
@@ -302,15 +313,29 @@ namespace Myro.Services.Generic.Vector
         public string Key { get; private set; }
     }
 
+    /// <summary>
+    /// Passed into GetCallback, if the request was GetState.  This does not
+    /// contain any members, but only indicates that the service request was
+    /// GetState.
+    /// </summary>
     protected class GetAllRequestInfo : GetRequestInfo
     {
     }
 
+    /// <summary>
+    /// The abstract base class for SetElementRequestInfo and SetAllRequestInfo
+    /// </summary>
     protected abstract class SetRequestInfo
     {
         public DateTime Timestamp { get; private set; }
     }
 
+    /// <summary>
+    /// Passed into SetCallback, provides information about the actual service
+    /// request, if the request was either SetByIndex and SetByKey.  The
+    /// RequestType property indicates whether the request was SetByIndex or
+    /// SetByKey.
+    /// </summary>
     protected class SetElementRequestInfo : SetRequestInfo
     {
         public RequestType RequestType { get; private set; }
@@ -319,6 +344,10 @@ namespace Myro.Services.Generic.Vector
         public double Value { get; private set; }
     }
 
+    /// <summary>
+    /// Passed into SetCallback, if the request was SetAll.  This contains the
+    /// values that were set in the state.
+    /// </summary>
     protected class SetAllRequestInfo : SetRequestInfo
     {
         public List<double> Values { get; private set; }

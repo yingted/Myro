@@ -10,39 +10,13 @@ using W3C.Soap;
 using System.IO;
 using Microsoft.Ccr.Core;
 using System.Threading;
+using System.Xml.Serialization;
 using dirProxy = Microsoft.Dss.Services.Directory.Proxy;
 using Myro.Utilities;
 using manif = Microsoft.Dss.Services.ManifestLoader.Proxy;
 
 namespace Myro.Adapters
 {
-    #region Exception Definitions
-    /// <summary>
-    /// This exception is thrown when there is a problem with the content of
-    /// the config file.  The exception will print a line containing the 
-    /// reason for the exception.
-    /// </summary>
-    public class ConfigException : Exception
-    {
-        public ConfigException(string reason)
-            : base(reason)
-        {
-            Console.WriteLine("*** Config Exception *** " + reason);
-        }
-    }
-
-    /// <summary>
-    /// This exception is thrown if an unknown adapter is requested from the
-    /// AdapterBank.
-    /// </summary>
-    public class UnknownAdapterNameException : Exception
-    {
-        public UnknownAdapterNameException(string name)
-            : base("Unknown adapter name: \"" + name + "\"")
-        {
-        }
-    }
-    #endregion
 
     /// <summary>
     /// This class is the main interface between the higher-level Myro API
@@ -110,7 +84,7 @@ namespace Myro.Adapters
                 throw new TimeoutException("Timed out waiting for adapters to attach");
         }
 
-        protected void readConfig(string configFile)
+        private void readConfig(string configFile)
         {
             XPathNavigator nav = new XPathDocument(configFile).CreateNavigator();
 
@@ -155,7 +129,7 @@ namespace Myro.Adapters
             }
         }
 
-        protected void subscribeDirectory()
+        private void subscribeDirectory()
         {
             var dirPort = DssEnvironment.ServiceForwarder<dirProxy.DirectoryPort>(new Uri("http://localhost:50000/directory"));
             var resPort = new dirProxy.DirectoryPort();
@@ -182,18 +156,15 @@ namespace Myro.Adapters
             updateAdapters();
         }
 
-        protected void directoryInsertHandler(dirProxy.Insert insert)
+        private void directoryInsertHandler(dirProxy.Insert insert)
         {
             //Console.WriteLine("AdapterBank got directory insert: " + insert.Body.Record.Service);
             updateAdapters();
         }
 
-        protected void updateAdapters()
+        private void updateAdapters()
         {
             var dirPort = DssEnvironment.ServiceForwarder<dirProxy.DirectoryPort>(new Uri("http://localhost:50000/directory"));
-            //Console.WriteLine("Querying directory");
-            //dirProxy.QueryRequest request = new dirProxy.QueryRequest();
-            //request.QueryRecord = new ServiceInfoType();
             Arbiter.Activate(DssEnvironment.TaskQueue,
                 Arbiter.Choice<dirProxy.GetResponse, Fault>(
                     dirPort.Get(),
@@ -323,4 +294,33 @@ namespace Myro.Adapters
             return getChild(node, name, false);
         }
     }
+
+    #region Exception Definitions
+    /// <summary>
+    /// This exception is thrown when there is a problem with the content of
+    /// the config file.  The exception will print a line containing the 
+    /// reason for the exception.
+    /// </summary>
+    public class ConfigException : Exception
+    {
+        public ConfigException(string reason)
+            : base(reason)
+        {
+            Console.WriteLine("*** Config Exception *** " + reason);
+        }
+    }
+
+    /// <summary>
+    /// This exception is thrown if an unknown adapter is requested from the
+    /// AdapterBank.
+    /// </summary>
+    public class UnknownAdapterNameException : Exception
+    {
+        public UnknownAdapterNameException(string name)
+            : base("Unknown adapter name: \"" + name + "\"")
+        {
+        }
+    }
+    #endregion
+
 }
