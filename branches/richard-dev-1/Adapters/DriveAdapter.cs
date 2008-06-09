@@ -97,46 +97,12 @@ namespace Myro.Adapters
 
         public void Stop()
         {
-            drive.AllStopRequest allStopReq = new drive.AllStopRequest();
-            drive.AllStop allStop = new drive.AllStop(allStopReq);
-            drivePort.Post(allStop);
-
-            bool done = false;
-            Arbiter.Activate(DssEnvironment.TaskQueue,
-                Arbiter.Receive<DefaultUpdateResponseType>(false,
-                    allStop.ResponsePort,
-                    delegate(DefaultUpdateResponseType state)
-                    {
-                        done = true;
-                    }
-            ));
-
-            while (!done) ;
+            RSUtils.RecieveSync<DefaultUpdateResponseType>(drivePort.AllStop());
         }
 
         public drive.DriveDifferentialTwoWheelState Get()
         {
-            drive.DriveDifferentialTwoWheelState ret = null;
-            Fault error = null;
-            ManualResetEvent signal = new ManualResetEvent(false);
-            Arbiter.Activate(DssEnvironment.TaskQueue,
-                Arbiter.Choice<drive.DriveDifferentialTwoWheelState, Fault>(
-                    drivePort.Get(),
-                    delegate(drive.DriveDifferentialTwoWheelState state)
-                    {
-                        ret = state;
-                        signal.Set();
-                    },
-                    delegate(Fault failure)
-                    {
-                        error = failure;
-                        signal.Set();
-                    }));
-            signal.WaitOne();
-            if (error != null)
-                throw new AdapterOperationException(error);
-            else
-                return ret;
+            return RSUtils.RecieveSync<drive.DriveDifferentialTwoWheelState>(drivePort.Get());
         }
 
         public void Set(drive.DriveDifferentialTwoWheelState state)

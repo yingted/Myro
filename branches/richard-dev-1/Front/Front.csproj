@@ -32,41 +32,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Ccr.Core, Version=2.0.730.3, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Microsoft Robotics Dev Studio 2008\bin\Ccr.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="DssBase, Version=2.0.730.3, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Microsoft Robotics Dev Studio 2008\bin\DssBase.dll</HintPath>
-    </Reference>
-    <Reference Include="DssEnvironment, Version=2.0.730.3, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Microsoft Robotics Dev Studio 2008\bin\DssEnvironment.dll</HintPath>
-    </Reference>
-    <Reference Include="DssRuntime, Version=2.0.730.3, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Microsoft Robotics Dev Studio 2008\bin\DssRuntime.dll</HintPath>
-    </Reference>
-    <Reference Include="DssRuntime.proxy, Version=2.0.730.3, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Microsoft Robotics Dev Studio 2008\bin\DssRuntime.proxy.dll</HintPath>
-    </Reference>
-    <Reference Include="RoboticsCommon.proxy, Version=2.0.730.3, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Microsoft Robotics Dev Studio 2008\bin\RoboticsCommon.proxy.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
     <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
-    <Reference Include="Vector.Y2008.M06.Proxy, Version=0.0.0.0, Culture=neutral, PublicKeyToken=8b70575c4d29de37, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Microsoft Robotics Dev Studio 2008\bin\Vector.Y2008.M06.Proxy.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MyroAPI\IMyroLED.cs">
@@ -85,13 +56,15 @@
     <Compile Include="Robot.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Services\Generic\Vector\Vector.csproj">
-      <Project>{6BF981B1-88CF-4497-967D-0E4F39F5B440}</Project>
-      <Name>Vector</Name>
+    <ProjectReference Include="..\Adapters\Adapters.csproj">
+      <Project>{01EDA09F-EDD7-488F-B512-48FA7E32AAB2}</Project>
+      <Name>Adapters</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\Utilities\Utilities.csproj">
       <Project>{481FEFE3-E033-464C-A1D4-7C95C5AC95C5}</Project>
       <Name>Utilities</Name>
+      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

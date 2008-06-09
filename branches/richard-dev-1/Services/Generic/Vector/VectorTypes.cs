@@ -167,7 +167,7 @@ namespace Myro.Services.Generic.Vector
     /// </summary>
     [ServicePort()]
     public class VectorOperations : PortSet<DsspDefaultLookup, DsspDefaultDrop,
-        HttpGet, Get, Replace, GetByIndex, GetByKey, SetByIndex, SetByKey, SetAll, Subscribe>
+        HttpGet, Get, Replace, GetByIndex, GetByKey, GetAllElements, SetByIndex, SetByKey, SetAllElements, Subscribe>
     {
     }
 
@@ -238,7 +238,7 @@ namespace Myro.Services.Generic.Vector
             Index = 0;
         }
     }
-    public class GetByIndex : Update<GetByIndexRequestType, DsspResponsePort<GetElementResponseType>>
+    public class GetByIndex : Get<GetByIndexRequestType, DsspResponsePort<GetElementResponseType>>
     {
         public GetByIndex() : base() { }
         public GetByIndex(GetByIndexRequestType body) : base(body) { }
@@ -264,11 +264,42 @@ namespace Myro.Services.Generic.Vector
             Key = "";
         }
     }
-    public class GetByKey : Update<GetByKeyRequestType, DsspResponsePort<GetElementResponseType>>
+    public class GetByKey : Get<GetByKeyRequestType, DsspResponsePort<GetElementResponseType>>
     {
         public GetByKey() : base() { }
         public GetByKey(GetByKeyRequestType body) : base(body) { }
         public GetByKey(GetByKeyRequestType body, DsspResponsePort<GetElementResponseType> responsePort) : base(body, responsePort) { }
+    }
+
+
+    /// <summary>
+    /// A request to retrieve the values of all elements in the vector at once.
+    /// The values and the last modification timestamp will be returned in a
+    /// GetAllResponseType.
+    /// </summary>
+    public class GetAllRequestType
+    {
+        public GetAllRequestType() { }
+    }
+    [DataContract]
+    [DataMemberConstructor]
+    public class GetAllResponseType
+    {
+        [DataMember]
+        public List<double> Values { get; set; }
+        [DataMember]
+        public DateTime Timestamp { get; set; }
+        public GetAllResponseType()
+        {
+            Values = new List<double>();
+            Timestamp = DateTime.Now;
+        }
+    }
+    public class GetAllElements : Get<GetAllRequestType, DsspResponsePort<GetAllResponseType>>
+    {
+        public GetAllElements() : base() { }
+        public GetAllElements(GetAllRequestType body) : base(body) { }
+        public GetAllElements(GetAllRequestType body, DsspResponsePort<GetAllResponseType> responsePort) : base(body, responsePort) { }
     }
 
 
@@ -366,11 +397,12 @@ namespace Myro.Services.Generic.Vector
             Timestamp = DateTime.Now;
         }
     }
-    public class SetAll : Update<SetAllRequestType, DsspResponsePort<DefaultUpdateResponseType>>
+    public class SetAllElements : Update<SetAllRequestType, DsspResponsePort<DefaultUpdateResponseType>>
     {
-        public SetAll() : base() { }
-        public SetAll(SetAllRequestType body) : base(body) { }
-        public SetAll(SetAllRequestType body, DsspResponsePort<DefaultUpdateResponseType> responsePort) : base(body, responsePort) { }
+        public SetAllElements() : base() { }
+        public SetAllElements(SetAllRequestType body) : base(body) { }
+        public SetAllElements(SetAllRequestType body, DsspResponsePort<DefaultUpdateResponseType> responsePort) : base(body, responsePort) { }
+        public SetAllElements(List<double> values) : base(new SetAllRequestType() { Values = values, Timestamp = DateTime.Now }) { }
     }
     #endregion
 

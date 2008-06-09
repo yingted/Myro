@@ -83,6 +83,15 @@ namespace Myro.Adapters
         }
 
         /// <summary>
+        /// Retrieve all vector elements at once.
+        /// </summary>
+        /// <returns></returns>
+        public List<double> GetAllElements()
+        {
+            return RSUtils.RecieveSync<vector.GetAllResponseType>(opPort.GetAllElements()).Values;
+        }
+
+        /// <summary>
         /// Set a single element in the vector by index.
         /// </summary>
         /// <param name="index"></param>
@@ -121,9 +130,9 @@ namespace Myro.Adapters
         /// Set all elements in the vector.
         /// </summary>
         /// <param name="values"></param>
-        public void SetAll(IList<double> values)
+        public void SetAllElements(List<double> values)
         {
-            RSUtils.RecieveSync<DefaultUpdateResponseType>(opPort.SetAll(values, DateTime.Now));
+            RSUtils.RecieveSync<DefaultUpdateResponseType>(opPort.SetAllElements(values, DateTime.Now));
         }
     }
 }

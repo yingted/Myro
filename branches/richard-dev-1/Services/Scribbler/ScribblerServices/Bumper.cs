@@ -119,7 +119,7 @@ namespace Myro.Services.Scribbler.Bumper
         public void SensorNotificationHandler(brick.Replace notify)
         {
             bool[] values = { notify.Body.IRLeft, notify.Body.IRRight };
-            OperationsPort.Post(new vector.SetAll(new List<double>(
+            OperationsPort.Post(new vector.SetAllElements(new List<double>(
                 from v in values
                 select (!v ? 1.0 : 0.0)))); // NOTE: v is being inverted here
         }

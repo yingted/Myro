@@ -98,7 +98,7 @@ namespace Myro.Utilities
         {
             Fault = fault;
         }
-        public string ToString()
+        public override string ToString()
         {
             return Strings.FromFault(Fault);
         }

@@ -11,6 +11,7 @@ using System.IO;
 using Microsoft.Ccr.Core;
 using System.Threading;
 using System.Xml.Serialization;
+using Microsoft.Dss.Core.Manifest;
 using dirProxy = Microsoft.Dss.Services.Directory.Proxy;
 using Myro.Utilities;
 using manif = Microsoft.Dss.Services.ManifestLoader.Proxy;
@@ -56,8 +57,8 @@ namespace Myro.Adapters
                 DssEnvironment.Initialize(50000, 50001);
             Console.WriteLine("DSS environment initialized");
             subscribeDirectory();
-            //if (autoStartServices)
-            //    startServices();
+            if (autoStartServices)
+                startServices();
         }
 
         /// <summary>
@@ -113,6 +114,16 @@ namespace Myro.Adapters
                 // Children
                 string contract = getChild(node, "Contract", true);
                 string service = getChild(node, "Service");
+                //NameTable names = new NameTable();
+                //XmlNamespaceManager nsman = new XmlNamespaceManager(new NameTable());
+                //nsman.AddNamespace("mani", "http://schemas.microsoft.com/xw/2004/10/manifest.html");
+                //XPathNavigator srNav = node.SelectSingleNode(XPathExpression.Compile("./mani:ServiceRecordType", nsman));
+                //if (srNav != null)
+                //{
+                //    XmlReader reader = srNav.ReadSubtree();
+                //    XmlSerializer ser = new XmlSerializer(typeof(ServiceRecordType));
+                //    ServiceRecordType record = (ServiceRecordType)ser.Deserialize(reader);
+                //}
 
                 // Add elements to the service array and dictionary
                 if (adapterNames.ContainsKey(name))

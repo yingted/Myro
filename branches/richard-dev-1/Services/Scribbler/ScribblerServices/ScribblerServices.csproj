@@ -196,14 +196,17 @@
     <ProjectReference Include="..\..\..\Utilities\Utilities.csproj">
       <Project>{481FEFE3-E033-464C-A1D4-7C95C5AC95C5}</Project>
       <Name>Utilities</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\..\Generic\Vector\Vector.csproj">
       <Project>{6BF981B1-88CF-4497-967D-0E4F39F5B440}</Project>
       <Name>Vector</Name>
+      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\ScribblerBase\ScribblerBase.csproj">
       <Project>{90C2F23D-A2DD-4EAB-9923-CAAC83BE5416}</Project>
       <Name>ScribblerBase</Name>
+      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

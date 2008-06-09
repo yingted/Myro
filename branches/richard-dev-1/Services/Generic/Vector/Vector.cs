@@ -163,9 +163,11 @@ namespace Myro.Services.Generic.Vector
         {
             try
             {
-                GetElementResponseType response = new GetElementResponseType();
-                response.Value = _state.Get(get.Body.Index);
-                response.Timestamp = _state.Timestamp;
+                GetElementResponseType response = new GetElementResponseType()
+                {
+                    Value = _state.Get(get.Body.Index),
+                    Timestamp = _state.Timestamp
+                };
                 GetCallback(new GetElementRequestInfo()
                 {
                     RequestType = RequestType.ByIndex,
@@ -186,9 +188,11 @@ namespace Myro.Services.Generic.Vector
         {
             try
             {
-                GetElementResponseType response = new GetElementResponseType();
-                response.Value = _state.Get(get.Body.Key);
-                response.Timestamp = _state.Timestamp;
+                GetElementResponseType response = new GetElementResponseType()
+                {
+                    Value = _state.Get(get.Body.Key),
+                    Timestamp = _state.Timestamp
+                };
                 GetCallback(new GetElementRequestInfo()
                 {
                     RequestType = RequestType.ByKey,
@@ -201,6 +205,19 @@ namespace Myro.Services.Generic.Vector
             {
                 get.ResponsePort.Post(RSUtils.FaultOfException(e));
             }
+            yield break;
+        }
+
+        [ServiceHandler(ServiceHandlerBehavior.Concurrent)]
+        public IEnumerator<ITask> GetAllHandler(GetAllElements get)
+        {
+            // No exception check here - none can be thrown
+            GetCallback(new GetAllRequestInfo() { });
+            get.ResponsePort.Post(new GetAllResponseType()
+                {
+                    Values = _state.Values,
+                    Timestamp = _state.Timestamp
+                });
             yield break;
         }
 
@@ -255,13 +272,13 @@ namespace Myro.Services.Generic.Vector
         }
 
         [ServiceHandler(ServiceHandlerBehavior.Exclusive)]
-        public IEnumerator<ITask> SetAllHandler(SetAll setAll)
+        public IEnumerator<ITask> SetAllHandler(SetAllElements setAll)
         {
             _state.Values = setAll.Body.Values;
             _state.Timestamp = setAll.Body.Timestamp;
             SetCallback(new SetAllRequestInfo() { Values = setAll.Body.Values, Timestamp = setAll.Body.Timestamp });
             setAll.ResponsePort.Post(DefaultUpdateResponseType.Instance);
-            SendNotification<SetAll>(setAll);
+            SendNotification<SetAllElements>(setAll);
             yield break;
         }
 
@@ -291,12 +308,12 @@ namespace Myro.Services.Generic.Vector
     /// SetElementRequestInfo, this indicates whether the service request was
     /// (Get/Set)ByIndex, or (Get/Set)ByKey.
     /// </summary>
-    protected enum RequestType { ByIndex, ByKey }
+    public enum RequestType { ByIndex, ByKey }
 
     /// <summary>
     /// The abstract base class for GetElementRequestInfo and GetAllRequestInfo
     /// </summary>
-    protected abstract class GetRequestInfo
+    public abstract class GetRequestInfo
     {
     }
 
@@ -306,11 +323,11 @@ namespace Myro.Services.Generic.Vector
     /// RequestType property indicates whether the request was GetByIndex or
     /// GetByKey.
     /// </summary>
-    protected class GetElementRequestInfo : GetRequestInfo
+    public class GetElementRequestInfo : GetRequestInfo
     {
-        public RequestType RequestType { get; private set; }
-        public int Index { get; private set; }
-        public string Key { get; private set; }
+        public RequestType RequestType { get; set; }
+        public int Index { get; set; }
+        public string Key { get; set; }
     }
 
     /// <summary>
@@ -318,16 +335,16 @@ namespace Myro.Services.Generic.Vector
     /// contain any members, but only indicates that the service request was
     /// GetState.
     /// </summary>
-    protected class GetAllRequestInfo : GetRequestInfo
+    public class GetAllRequestInfo : GetRequestInfo
     {
     }
 
     /// <summary>
     /// The abstract base class for SetElementRequestInfo and SetAllRequestInfo
     /// </summary>
-    protected abstract class SetRequestInfo
+    public abstract class SetRequestInfo
     {
-        public DateTime Timestamp { get; private set; }
+        public DateTime Timestamp { get; set; }
     }
 
     /// <summary>
@@ -336,20 +353,20 @@ namespace Myro.Services.Generic.Vector
     /// RequestType property indicates whether the request was SetByIndex or
     /// SetByKey.
     /// </summary>
-    protected class SetElementRequestInfo : SetRequestInfo
+    public class SetElementRequestInfo : SetRequestInfo
     {
-        public RequestType RequestType { get; private set; }
-        public int Index { get; private set; }
-        public string Key { get; private set; }
-        public double Value { get; private set; }
+        public RequestType RequestType { get; set; }
+        public int Index { get; set; }
+        public string Key { get; set; }
+        public double Value { get; set; }
     }
 
     /// <summary>
     /// Passed into SetCallback, if the request was SetAll.  This contains the
     /// values that were set in the state.
     /// </summary>
-    protected class SetAllRequestInfo : SetRequestInfo
+    public class SetAllRequestInfo : SetRequestInfo
     {
-        public List<double> Values { get; private set; }
+        public List<double> Values { get; set; }
     }
 }

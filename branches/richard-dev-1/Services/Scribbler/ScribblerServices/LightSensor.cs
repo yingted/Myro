@@ -113,7 +113,7 @@ namespace Myro.Services.Scribbler.LightSensor
         /// </summary>
         public void SensorNotificationHandler(brick.Replace notify)
         {
-            OperationsPort.Post(new vector.SetAll(new List<double> { notify.Body.LightLeft, notify.Body.LightCenter, notify.Body.LightRight }));
+            OperationsPort.Post(new vector.SetAllElements(new List<double> { notify.Body.LightLeft, notify.Body.LightCenter, notify.Body.LightRight }));
         }
     }
 

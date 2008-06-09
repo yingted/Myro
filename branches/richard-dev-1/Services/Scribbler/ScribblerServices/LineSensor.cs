@@ -110,7 +110,7 @@ namespace Myro.Services.Scribbler.LineSensor
         public void SensorNotificationHandler(brick.Replace notify)
         {
             double[] vals = { notify.Body.LineLeft ? 1.0 : 0.0, notify.Body.LineRight ? 1.0 : 0.0 };
-            OperationsPort.Post(new vector.SetAll(new List<double>(vals)));
+            OperationsPort.Post(new vector.SetAllElements(new List<double>(vals)));
         }
     }
 

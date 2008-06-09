@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<RobotConfig>
+<RobotConfig
+xmlns:dssp="http://schemas.microsoft.com/xw/2004/10/dssp.html"
+xmlns:mani="http://schemas.microsoft.com/xw/2004/10/manifest.html">
+
   <DssEnvironment>
     <HttpPort>50000</HttpPort>
     <SoapPort>50001</SoapPort>

@@ -24,7 +24,7 @@ namespace Myro.API
         {
             try
             {
-                return bank.GetAdapterSpec(name).GetVectorAdapter().Get();
+                return bank.GetAdapterSpec(name).GetVectorAdapter().GetAllElements().ToArray();
             }
             catch (UnknownAdapterNameException)
             {

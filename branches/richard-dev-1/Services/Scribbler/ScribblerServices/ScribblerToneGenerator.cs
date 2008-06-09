@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Xml;
 using W3C.Soap;
+using Myro.Utilities;
 
 using brick = Myro.Services.Scribbler.ScribblerBase.Proxy;
 using vector = Myro.Services.Generic.Vector;
@@ -54,59 +55,23 @@ namespace IPRE.ToneGenerator
                 DateTime.Now);
         }
 
-        public override IEnumerator<ITask> SetHandler(vector.SetByIndex set)
+        protected override void SetCallback(Myro.Services.Generic.Vector.SetRequestInfo request)
         {
-            _state.Values[set.Body.Index] = set.Body.Value;
-            _state.Timestamp = set.Body.Timestamp;
-            SendNotification<vector.SetByIndex>(set);
-            IEnumerator<ITask> ts = PlayTone(set.ResponsePort);
-            do
-            {
-                yield return ts.Current;
-            } while (ts.MoveNext());
-            yield break;
+            playTone();
         }
 
-        public override IEnumerator<ITask> SetAllHandler(Myro.Services.Generic.Vector.SetAll setAll)
+        private void playTone()
         {
-            _state.Values = setAll.Body.Values;
-            _state.Timestamp = setAll.Body.Timestamp;
-            SendNotification<vector.SetAll>(setAll);
-            IEnumerator<ITask> ts = PlayTone(setAll.ResponsePort);
-            while (ts.MoveNext())
+            brick.PlayToneBody play = new brick.PlayToneBody()
             {
-                yield return ts.Current;
+                Frequency1 = (int)Math.Round(_state.Values[0]),
+                Frequency2 = (int)Math.Round(_state.Values[1]),
+                Duration = (int)Math.Round(_state.Values[2])
             };
-            yield break;
-        }
-
-        private IEnumerator<ITask> PlayTone(PortSet<DefaultUpdateResponseType,Fault> responsePort)
-        {
-            int frequency1 = (int)Math.Round(_state.Values[0]);
-            int frequency2 = (int)Math.Round(_state.Values[1]);
-            int duration = (int)Math.Round(_state.Values[2]);
-            if (frequency1 < 0 || frequency2 < 0 || duration < 0)
-            {
-                LogError("Improper PlayTone Frequency or Duration");
-                yield break;
-            }
+            if (play.Frequency1 < 0 || play.Frequency2 < 0 || play.Duration < 0)
+                throw new ArgumentOutOfRangeException();
             else
-            {
-                brick.PlayToneBody play = new brick.PlayToneBody();
-                play.Frequency1 = frequency1;
-                play.Frequency2 = frequency2;
-                play.Duration = duration;
-                yield return Arbiter.Choice(_scribblerPort.PlayTone(play),
-                    delegate(DefaultUpdateResponseType response)
-                    {
-                        responsePort.Post(DefaultUpdateResponseType.Instance);
-                    },
-                    delegate(Fault fault)
-                    {
-                        responsePort.Post(fault);
-                    }
-                );
-            }
+                RSUtils.RecieveSync<DefaultUpdateResponseType>(_scribblerPort.PlayTone(play));
         }
     }
 }
