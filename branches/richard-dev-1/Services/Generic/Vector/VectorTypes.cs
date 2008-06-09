@@ -100,7 +100,8 @@ namespace Myro.Services.Generic.Vector
     /// Vector Main Operations Port
     /// </summary>
     [ServicePort()]
-    public class VectorOperations : PortSet<DsspDefaultLookup, DsspDefaultDrop, HttpGet, Get, Replace, SetByIndex, SetAll, Subscribe>
+    public class VectorOperations : PortSet<DsspDefaultLookup, DsspDefaultDrop,
+        HttpGet, Get, Replace, GetByIndex, GetByKey, SetByIndex, SetByKey, SetAll, Subscribe>
     {
     }
 
@@ -132,6 +133,58 @@ namespace Myro.Services.Generic.Vector
             : base(body, responsePort)
         {
         }
+    }
+
+    [DataContract]
+    [DataMemberConstructor]
+    public class GetElementResponseType
+    {
+        [DataMember]
+        public double Value { get; set; }
+        [DataMember]
+        public DateTime Timestamp { get; set; }
+        public GetElementResponseType()
+        {
+            Value = 0.0;
+            Timestamp = DateTime.Now;
+        }
+    }
+
+
+    [DataContract]
+    [DataMemberConstructor]
+    public class GetByIndexRequestType
+    {
+        [DataMember]
+        public int Index { get; set; }
+        public GetByIndexRequestType()
+        {
+            Index = 0;
+        }
+    }
+    public class GetByIndex : Update<GetByIndexRequestType, DsspResponsePort<GetElementResponseType>>
+    {
+        public GetByIndex() : base() { }
+        public GetByIndex(GetByIndexRequestType body) : base(body) { }
+        public GetByIndex(GetByIndexRequestType body, DsspResponsePort<GetElementResponseType> responsePort) : base(body, responsePort) { }
+    }
+
+    [DataContract]
+    [DataMemberConstructor]
+    public class GetByKeyRequestType
+    {
+        [DataMember]
+        public String Key { get; set; }
+        public GetByKeyRequestType()
+        {
+            Key = "";
+        }
+    }
+    public class GetByKey : Update<GetByKeyRequestType, DsspResponsePort<GetElementResponseType>>
+    {
+        public GetByKey() : base() { }
+        public GetByKey(GetByKeyRequestType body) : base(body) { }
+        public GetByKey(GetByKeyRequestType body, DsspResponsePort<GetElementResponseType> responsePort) : base(body, responsePort) { }
     }
 
     [DataContract]

@@ -25,9 +25,6 @@ namespace Myro.Adapters
 
         vector.VectorOperations opPort;
 
-        Dictionary<string, int> indexCache = null;
-        DateTime indexCacheTime = DateTime.Now;
-
         public VectorAdapter(ServiceInfoType serviceRecord)
         {
             ServiceInfo = serviceRecord;
@@ -42,38 +39,7 @@ namespace Myro.Adapters
         /// <returns></returns>
         public vector.VectorState GetState()
         {
-            vector.VectorState ret = null;
-            Fault error = null;
-            Object monitor = new Object();
-            ManualResetEvent signal = new ManualResetEvent(false);
-            Arbiter.Activate(DssEnvironment.TaskQueue,
-                Arbiter.Choice<vector.VectorState, Fault>(
-                    opPort.Get(),
-                    delegate(vector.VectorState state)
-                    {
-                        ret = state;
-                        signal.Set();
-                    },
-                    delegate(Fault failure)
-                    {
-                        error = failure;
-                        signal.Set();
-                    }));
-            signal.WaitOne();
-            if (error != null)
-                throw new AdapterOperationException(error);
-            else
-                return ret;
-        }
-
-        /// <summary>
-        /// Return only the values from the vector state.
-        /// </summary>
-        /// <returns></returns>
-        public double[] Get()
-        {
-            vector.VectorState state = GetState();
-            return state.Values.ToArray();
+            return RSUtils.RecieveSync<vector.VectorState>(opPort.Get());
         }
 
         /// <summary>
@@ -85,16 +51,15 @@ namespace Myro.Adapters
         /// <returns></returns>
         public double Get(int index)
         {
-            vector.VectorState state = GetState();
-            if (state.Values != null)
+            try
             {
-                if (index < 0 || index >= state.Values.Count)
-                    throw new AdapterArgumentException(Strings.IndexOutOfBounds(index, state.Values.Count));
-                else
-                    return state.Values[index];
+                var resp = RSUtils.RecieveSync<vector.GetElementResponseType>(opPort.GetByIndex(index));
+                return resp.Value;
             }
-            else
-                throw new AdapterOperationException(Strings.NotReady);
+            catch (ArgumentOutOfRangeException e)
+            {
+                throw new AdapterArgumentException(Strings.IndexOutOfBounds(index));
+            }
         }
 
         /// <summary>
@@ -104,45 +69,17 @@ namespace Myro.Adapters
         /// </summary>
         /// <param name="tag"></param>
         /// <returns></returns>
-        public double Get(string tag)
+        public double Get(string key)
         {
-            vector.VectorState state = GetState();
-            CheckIndexCache(state);
-            int index;
             try
             {
-                index = indexCache[tag];
+                var resp = RSUtils.RecieveSync<vector.GetElementResponseType>(opPort.GetByKey(key));
+                return resp.Value;
             }
-            catch (KeyNotFoundException e)
+            catch (ArgumentOutOfRangeException e)
             {
-                throw new AdapterArgumentException(Strings.KeyNotFound(tag));
+                throw new AdapterArgumentException(Strings.KeyNotFound(key));
             }
-            if (index > state.Values.Count)
-                throw new AdapterOperationException(Strings.VectorTooShort);
-            return state.Values[index];
-        }
-
-        /// <summary>
-        /// Set a single element in the vector by name.
-        /// </summary>
-        /// <param name="tag"></param>
-        /// <param name="value"></param>
-        public void Set(string tag, double value)
-        {
-            // Kind of a hack, get the state and build dictionary if haven't
-            // done a Get yet.
-            if (indexCache == null)
-                CheckIndexCache(GetState());
-            int index;
-            try
-            {
-                index = indexCache[tag];
-            }
-            catch (KeyNotFoundException)
-            {
-                throw new AdapterArgumentException(Strings.KeyNotFound(tag));
-            }
-            Set(index, value);
         }
 
         /// <summary>
@@ -152,66 +89,41 @@ namespace Myro.Adapters
         /// <param name="value"></param>
         public void Set(int index, double value)
         {
-            Fault error = null;
-            ManualResetEvent signal = new ManualResetEvent(false);
-            Arbiter.Activate(DssEnvironment.TaskQueue,
-                Arbiter.Choice<DefaultUpdateResponseType, Fault>(
-                    opPort.SetByIndex(index, value, DateTime.Now),
-                    delegate(DefaultUpdateResponseType success)
-                    {
-                        signal.Set();
-                    },
-                    delegate(Fault failure)
-                    {
-                        error = failure;
-                        signal.Set();
-                    }));
-            signal.WaitOne();
-            if (error != null)
+            try
             {
-                String msg = "Fault in setting vector: ";
-                foreach (var r in error.Reason)
-                    msg += r.Value;
-                DssEnvironment.LogError(msg);
-                throw new AdapterArgumentException(Strings.IndexOutOfBounds(index, 9999));
+                RSUtils.RecieveSync<DefaultUpdateResponseType>(opPort.SetByIndex(index, value, DateTime.Now));
+            }
+            catch (KeyNotFoundException e)
+            {
+                throw new AdapterArgumentException(Strings.IndexOutOfBounds(index));
+            }
+
+        }
+
+        /// <summary>
+        /// Set a single element in the vector by name.
+        /// </summary>
+        /// <param name="tag"></param>
+        /// <param name="value"></param>
+        public void Set(string key, double value)
+        {
+            try
+            {
+                RSUtils.RecieveSync<DefaultUpdateResponseType>(opPort.SetByKey(key, value, DateTime.Now));
+            }
+            catch (KeyNotFoundException e)
+            {
+                throw new AdapterArgumentException(Strings.KeyNotFound(key));
             }
         }
 
-        public void SetAll(double[] values)
+        /// <summary>
+        /// Set all elements in the vector.
+        /// </summary>
+        /// <param name="values"></param>
+        public void SetAll(IList<double> values)
         {
-            Fault error = null;
-            ManualResetEvent signal = new ManualResetEvent(false);
-            Arbiter.Activate(DssEnvironment.TaskQueue,
-                Arbiter.Choice<DefaultUpdateResponseType, Fault>(
-                    opPort.SetAll(new List<double>(values), DateTime.Now),
-                    delegate(DefaultUpdateResponseType success)
-                    {
-                        signal.Set();
-                    },
-                    delegate(Fault failure)
-                    {
-                        error = failure;
-                        signal.Set();
-                    }));
-            signal.WaitOne();
-            if (error != null)
-            {
-                String msg = "Fault in setting vector: ";
-                foreach (var r in error.Reason)
-                    msg += r.Value;
-                Console.WriteLine(msg);
-            }
-        }
-
-        private void CheckIndexCache(vector.VectorState state)
-        {
-            if (indexCache == null || state.TagTimestamp.CompareTo(indexCacheTime) > 0)
-            {
-                indexCache = new Dictionary<string, int>(state.Tags.Count);
-                int max = state.Tags.Count > state.Values.Count ? state.Values.Count : state.Tags.Count;
-                for (int i = 0; i < max; i++)
-                    indexCache.Add(state.Tags[i], i);
-            }
+            RSUtils.RecieveSync<DefaultUpdateResponseType>(opPort.SetAll(values, DateTime.Now));
         }
     }
 }

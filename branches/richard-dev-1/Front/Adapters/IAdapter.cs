@@ -25,11 +25,11 @@ namespace Myro.Adapters
         {
             Console.WriteLine("*** AdapterOperationException *** " + reason);
         }
-        public AdapterOperationException(W3C.Soap.Fault failure)
-            : base(Strings.FaultReceived, failure.ToException())
-        {
-            Console.WriteLine("*** AdapterOperationException *** " + failure.Reason[0]);
-        }
+        //public AdapterOperationException(W3C.Soap.Fault failure)
+        //    : base(Strings.FaultReceived, failure.ToException())
+        //{
+        //    Console.WriteLine("*** AdapterOperationException *** " + failure.Reason[0]);
+        //}
         public AdapterOperationException(string reason, Exception innerException)
             : base(reason, innerException)
         {

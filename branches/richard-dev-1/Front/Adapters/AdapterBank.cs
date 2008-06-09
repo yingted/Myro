@@ -16,6 +16,7 @@ using manif = Microsoft.Dss.Services.ManifestLoader.Proxy;
 
 namespace Myro.Adapters
 {
+    #region Exception Definitions
     /// <summary>
     /// This exception is thrown when there is a problem with the content of
     /// the config file.  The exception will print a line containing the 
@@ -41,7 +42,7 @@ namespace Myro.Adapters
         {
         }
     }
-
+    #endregion
 
     /// <summary>
     /// This class is the main interface between the higher-level Myro API
