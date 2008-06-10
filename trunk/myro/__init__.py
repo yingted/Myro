@@ -1113,7 +1113,7 @@ def makeArray(*args, **kwargs):
     """ Returns an array of the given dimensions. """
     return Array(*args, **kwargs)
 
-def takePicture(mode="color"):
+def takePicture(mode="jpeg-fast"):
     """ Takes a picture using the camera. Mode can be 'color', 'gray', or 'blob' """
     if myro.globvars.robot:
         return myro.globvars.robot.takePicture(mode)
