@@ -17,7 +17,7 @@ namespace SimTestSuite
 
         public void start()
         {
-            scribbler = new Robot("Config\\Scribbler.config.xml");
+            scribbler = new Robot("Config\\ScribblerSim.config.xml");
 
             //Console.WriteLine("Opening Scribbler...");
             //scribbler = new ScribblerBrain("Config\\IPRE.Scribbler.standard.config.xml");

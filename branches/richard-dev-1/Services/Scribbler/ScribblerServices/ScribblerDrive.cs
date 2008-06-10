@@ -21,9 +21,7 @@ using brick = Myro.Services.Scribbler.ScribblerBase.Proxy;
 using drive = Microsoft.Robotics.Services.Drive.Proxy;
 using W3C.Soap;
 
-using myro = MyroInterfaces;
-
-namespace IPRE.ScribblerDrive
+namespace Myro.Services.Scribbler.Drive
 {
     public static class Contract
     {
@@ -35,7 +33,7 @@ namespace IPRE.ScribblerDrive
     [Contract(Contract.Identifier)]
     [AlternateContract(drive.Contract.Identifier)] //implementing the generic motor contract
 
-    public class ScribblerDrive : DsspServiceBase, myro.IMyroMovement
+    public class ScribblerDrive : DsspServiceBase
     {
         private drive.DriveDifferentialTwoWheelState _state = null;
 
@@ -292,6 +290,7 @@ namespace IPRE.ScribblerDrive
 
         #endregion
 
+#if false
         #region IMyroMovement Members
 
         public void Backward(float power)
@@ -392,6 +391,7 @@ namespace IPRE.ScribblerDrive
         }
 
         #endregion
+#endif
     }
 
 

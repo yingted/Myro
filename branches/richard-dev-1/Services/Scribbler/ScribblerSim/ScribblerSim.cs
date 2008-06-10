@@ -30,8 +30,6 @@ using System.ComponentModel;
 using Microsoft.Dss.Core.DsspHttp;
 using System.Net;
 
-using valuearray = Robotics.ValueArrayStorage.Proxy;
-
 #endregion
 
 namespace Myro.Services.ScribblerSim

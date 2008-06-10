@@ -132,10 +132,10 @@ namespace Myro.Services.Generic.Vector
         public double Get(string key) { return Values[indexCache[key]]; }
         public IList<double> GetValues() { return Values; }
         public IList<bool> GetValuesBool() { return new List<bool>(from v in Values select (v >= 0.5 ? true : false)); }
-        public void Set(int index, double value) { Values[index] = value; }
-        public void Set(string key, double value) { Set(indexCache[key], value); }
-        public void SetAll(IEnumerable<bool> values) { SetAll(from v in values select (v ? 1.0 : 0.0)); }
-        public void SetAll(IEnumerable<double> values)
+        public void Set(int index, double value, DateTime timestamp) { Values[index] = value; Timestamp = timestamp; }
+        public void Set(string key, double value, DateTime timestamp) { Set(indexCache[key], value, timestamp); }
+        public void SetAll(IEnumerable<bool> values, DateTime timestamp) { SetAll(from v in values select (v ? 1.0 : 0.0), timestamp); }
+        public void SetAll(IEnumerable<double> values, DateTime timestamp)
         {
             List<double> newValues = new List<double>(values);
             // If the length of the vector changes, rebuild the index cache
@@ -157,7 +157,8 @@ namespace Myro.Services.Generic.Vector
             indexCache = new Dictionary<string, int>(Keys.Count);
             int max = Keys.Count > Values.Count ? Values.Count : Keys.Count;
             for (int i = 0; i < max; i++)
-                indexCache.Add(Keys[i], i);
+                if (Keys[i].Length > 0)
+                    indexCache.Add(Keys[i], i);
         }
         #endregion
     }

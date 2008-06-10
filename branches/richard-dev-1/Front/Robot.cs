@@ -3,15 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Myro.Adapters;
+using Myro.API;
 
 namespace Myro
 {
     public class Robot
     {
         AdapterBank bank;
-        public Myro.API.MyroSensors Sensors { get; private set; }
-        public Myro.API.MyroMovement Movement { get; private set; }
-        public Myro.API.IMyroSound Sound { get; private set; }
+        public MyroSensors Sensors { get; private set; }
+        public MyroMovement Movement { get; private set; }
+        public IMyroSound Sound { get; private set; }
 
         public Robot(string configFile)
         {
@@ -21,16 +22,15 @@ namespace Myro
             bank = new AdapterBank(configFile, true);
             bank.WaitForAdapters(TimeSpan.FromMilliseconds(100000));
             Console.WriteLine("All adapters are attached!");
-            Sensors = new Myro.API.MyroSensors(bank);
-            Movement = new Myro.API.MyroMovement(bank.GetAdapterSpec("drive"));
-            try
-            {
-                Sound = new Myro.API.MyroSound(bank.GetAdapterSpec("tonegen"));
-            }
-            catch (UnknownAdapterNameException)
-            {
-                Sound = null;
-            }
+
+            Sensors = new MyroSensors(bank);
+
+            // Doing this so this class still works when these services are not present
+            try { Movement = new MyroMovement(bank.GetAdapterSpec("drive")); }
+            catch (UnknownAdapterNameException) { Movement = new MyroMovement(new AdapterSpec(AdapterTypeEnum.Drive, "drive")); }
+
+            try { Sound = new MyroSound(bank.GetAdapterSpec("tonegen")); }
+            catch (UnknownAdapterNameException) { Sound = new MyroSound(new AdapterSpec(AdapterTypeEnum.Vector, "tonegen")); }
         }
     }
 }

@@ -96,6 +96,16 @@ namespace Myro.Adapters
         {
         }
 
+        /// <summary>
+        /// Create an unattachable AdapterSpec.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <param name="name"></param>
+        public AdapterSpec(AdapterTypeEnum type, string name)
+            : this(type, name, new ServiceInfoType("nocontract"))
+        {
+        }
+
 
         /// <summary>
         /// This methods attaches the adapter to an MSRDS service if it is not

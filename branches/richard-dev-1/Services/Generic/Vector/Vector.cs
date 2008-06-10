@@ -226,8 +226,7 @@ namespace Myro.Services.Generic.Vector
         {
             try
             {
-                _state.Set(set.Body.Index, set.Body.Value);
-                _state.Timestamp = set.Body.Timestamp;
+                _state.Set(set.Body.Index, set.Body.Value, set.Body.Timestamp);
                 SetCallback(new SetElementRequestInfo()
                 {
                     RequestType = RequestType.ByIndex,
@@ -251,8 +250,7 @@ namespace Myro.Services.Generic.Vector
         {
             try
             {
-                _state.Set(set.Body.Key, set.Body.Value);
-                _state.Timestamp = set.Body.Timestamp;
+                _state.Set(set.Body.Key, set.Body.Value, set.Body.Timestamp);
                 SetCallback(new SetElementRequestInfo()
                 {
                     RequestType = RequestType.ByKey,
