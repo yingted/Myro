@@ -188,13 +188,16 @@ int main (void)
 	      else if (ch == SET_UART0)		   serve_set_uart0();
 	      else if (ch == SET_PASS_BYTE)	   serve_send_byte();
 	      else if (ch == SET_PASSTHROUGH)	   serve_set_passthrough();
+	      else if (ch == SET_PASS_N_BYTES)	   serve_set_pass_n_bytes();
+	      else if (ch == GET_PASS_N_BYTES)	   serve_get_pass_n_bytes();
+	      else if (ch == GET_PASS_BYTES_UNTIL) serve_get_pass_bytes_until();
 	      else if (ch == SET_FORWARDNESS)	   serve_set_forwardness();
 	      else if (ch == SET_WHITE_BALANCE)	   serve_set_wb();
 	      else if (ch == SET_NO_WHITE_BALANCE) serve_unset_wb();
 	      else if (ch == GET_CAM_PARAM)	   serve_read_camera();	      
 	      else if (ch == SET_CAM_PARAM)	   serve_write_camera();
 	      else if (ch == SAVE_EEPROM)	   serve_save_eeprom();
-	      else if (ch == RESTORE_EEPROM)	   serve_restore_eeprom();	      
+	      else if (ch == RESTORE_EEPROM)	   serve_restore_eeprom(); 
 	      else if (ch == UPDATE_FIRMWARE)	   serve_update_firmware();
 	      else if (ch == WATCHDOG_RESET)	   serve_fluke_reset();
 	      else if (ch == GET_JPEG_GRAY_HEADER) serve_jpeg_gray_header();

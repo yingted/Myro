@@ -521,6 +521,7 @@ void serve_set_passthrough()
 	      uart0Putch(ch);
 	    }
 	  
+	  // receive from DB9 send to bluetooth
 	  ch = uart0Getch();
 	  if (ch != -1)
 	    {
@@ -531,6 +532,64 @@ void serve_set_passthrough()
     }  
 }
 
+
+// Send N Bytes from Bluetooth to DB9
+void serve_set_pass_n_bytes()
+{
+  int ch, n, i;
+  
+  n = getchblock();
+  i = 0;
+  while (i < n) 
+    {
+      // receive from bluetooth send to DB9
+      ch = getch();
+      if (ch != -1)
+	{
+	  uart0Putch(ch);
+	  i++;
+	}
+    }
+}
+
+// Send N Bytes from Bluetooth to DB9
+void serve_get_pass_n_bytes()
+{
+  int ch, n, i;
+  
+  n = getchblock();
+  i = 0;
+  while (i < n)
+    {
+      // receive from DB9 send to bluetooth
+      ch = uart0Getch();
+      if (ch != -1)
+	{
+	  putch(ch);
+	}
+    }
+}
+
+// Send N Bytes from Bluetooth to DB9
+void serve_get_pass_bytes_until()
+{
+  int ch, until;
+  
+  until = getchblock();
+  while (1) 
+    {
+      // receive from DB9 send to bluetooth
+      ch = uart0Getch();
+      if (ch != -1)
+	{
+	  putch(ch);
+	  if (ch == until) {
+	    break;
+	  }
+	}
+      
+    }
+}
 
 /*
  * Set the orientation of the scribbler
