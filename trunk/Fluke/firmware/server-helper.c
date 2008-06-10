@@ -552,7 +552,7 @@ void serve_set_pass_n_bytes()
     }
 }
 
-// Send N Bytes from Bluetooth to DB9
+// Get N Bytes from DB9
 void serve_get_pass_n_bytes()
 {
   int ch, n, i;
@@ -570,7 +570,7 @@ void serve_get_pass_n_bytes()
     }
 }
 
-// Send N Bytes from Bluetooth to DB9
+// Get Bytes from DB9 until BYTE
 void serve_get_pass_bytes_until()
 {
   int ch, until;
