@@ -30,10 +30,13 @@ dl3:
 
 main.hex: main.out
 	$(CP) $(CPFLAGS) main.out main.hex
-	$(OD) $(ODFLAGS) main.out > main.dmp
+	#$(OD) $(ODFLAGS) main.out > main.dmp
 
 main.out: $(OBJFILES) ldscript.cmd
 	$(LD) $(LDFLAGS) -o main.out $(OBJFILES) $(LIBGCC)
+
+lpc2lisp: lpc2lisp-ipre.c
+	/usr/bin/gcc lpc21isp-ipre.c -o lpc2lisp
 
 clean:
 	-rm -f crt.lst a.lst main.lst grab_frame.lst usleep.lst interrupts.lst main.out main.hex main.map main.dmp $(OBJFILES) *.pyc
