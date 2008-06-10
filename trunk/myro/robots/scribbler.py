@@ -684,7 +684,7 @@ class Scribbler(Robot):
             self.lock.release()
         return jpeg
         
-    def takePicture(self, mode="color"):
+    def takePicture(self, mode="jpeg-fast"):
         width = 256
         height = 192
         p = Picture()
