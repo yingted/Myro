@@ -1,11 +1,11 @@
 from myro import *
 
-robot = Scribbler("/dev/tty.scribbler")
+#robot = Scribbler("/dev/tty.scribbler5844")
 
 GO=True
 TOO_LEFT = 90.0
 TOO_RIGHT = 154.0
-GAIN = 0.45
+GAIN = 0.4
 
 #robot.darkenCamera()
 #robot.conf_rle(y_low=100, y_high = 255, u_low=0, u_high = 255, v_low=0, v_high =255)
@@ -30,7 +30,7 @@ for i in range(60):
     
     print px_cnt, avg_x
     
-    if (px_cnt < 10):
+    if (px_cnt < 1):
         if GO:
             if lastdir == 'l':
                 turnLeft(GAIN)

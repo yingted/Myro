@@ -6,7 +6,7 @@ Distributed under a Shared Source License
 """
 
 __REVISION__ = "$Revision$"
-__VERSION__  = "2.8.1"
+__VERSION__  = "2.8.2"
 __AUTHOR__   = "Doug Blank <dblank@cs.brynmawr.edu>"
 
 import sys, atexit, time, random, pickle, threading, os, types, copy
@@ -1113,7 +1113,7 @@ def makeArray(*args, **kwargs):
     """ Returns an array of the given dimensions. """
     return Array(*args, **kwargs)
 
-def takePicture(mode="jpeg-fast"):
+def takePicture(mode="jpeg"):
     """ Takes a picture using the camera. Mode can be 'color', 'gray', or 'blob' """
     if myro.globvars.robot:
         return myro.globvars.robot.takePicture(mode)
