@@ -84,16 +84,16 @@ namespace Myro.Adapters
             motorsOn = notification.Body.IsEnabled;
         }
 
-        public override bool Equals(Object obj)
-        {
-            if (obj is String)
-            {
-                string truncUri = ServiceInfo.Service.Substring(ServiceInfo.Service.IndexOf('/', ServiceInfo.Service.IndexOf("//") + 2));
-                return String.Equals(truncUri, obj);
-            }
-            else
-                return String.Equals(this.ServiceInfo.Service, ((DriveAdapter)obj).ServiceInfo.Service);
-        }
+        //public override bool Equals(Object obj)
+        //{
+        //    if (obj is String)
+        //    {
+        //        string truncUri = ServiceInfo.Service.Substring(ServiceInfo.Service.IndexOf('/', ServiceInfo.Service.IndexOf("//") + 2));
+        //        return String.Equals(truncUri, obj);
+        //    }
+        //    else
+        //        return String.Equals(this.ServiceInfo.Service, ((DriveAdapter)obj).ServiceInfo.Service);
+        //}
 
         public void Stop()
         {

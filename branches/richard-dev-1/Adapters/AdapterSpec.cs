@@ -289,7 +289,7 @@ namespace Myro.Adapters
             {
                 return byName[name];
             }
-            catch (KeyNotFoundException e)
+            catch (KeyNotFoundException)
             {
                 throw new NoSuchAdapter("Adapter name invalid");
             }

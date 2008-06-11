@@ -48,7 +48,7 @@ namespace Myro.API
             {
                 soundAdapter.GetVectorAdapter().SetAllElements(values);
             }
-            catch (UnknownAdapterNameException)
+            catch (UnattachedAdapter)
             {
             }
         }

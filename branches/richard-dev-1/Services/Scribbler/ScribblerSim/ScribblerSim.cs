@@ -132,10 +132,10 @@ namespace Myro.Services.ScribblerSim
             robotBaseEntity.State.Name = "ScribblerRobot";  //"\ScribblerRobot";
 
             // Start simulated motor service
-            /*drive.Contract.CreateService(ConstructorPort,
+            drive.Contract.CreateService(ConstructorPort,
                 Microsoft.Robotics.Simulation.Partners.CreateEntityPartner(
                     "http://localhost/" + robotBaseEntity.State.Name)
-            );*/
+            );
             return robotBaseEntity;
         }
 
@@ -198,10 +198,10 @@ namespace Myro.Services.ScribblerSim
 
             // start simulated bumper service
 
-            /*bumper.Contract.CreateService(
+            bumper.Contract.CreateService(
                 ConstructorPort,
                 Microsoft.Robotics.Simulation.Partners.CreateEntityPartner(
-                "http://localhost/" + bumperArray.State.Name)); */
+                "http://localhost/" + bumperArray.State.Name));
 
             return bumperArray;
         }

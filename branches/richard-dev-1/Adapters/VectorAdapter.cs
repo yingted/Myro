@@ -56,7 +56,7 @@ namespace Myro.Adapters
                 var resp = RSUtils.RecieveSync<vector.GetElementResponseType>(opPort.GetByIndex(index));
                 return resp.Value;
             }
-            catch (ArgumentOutOfRangeException e)
+            catch (ArgumentOutOfRangeException)
             {
                 throw new AdapterArgumentException(Strings.IndexOutOfBounds(index));
             }
@@ -76,7 +76,7 @@ namespace Myro.Adapters
                 var resp = RSUtils.RecieveSync<vector.GetElementResponseType>(opPort.GetByKey(key));
                 return resp.Value;
             }
-            catch (ArgumentOutOfRangeException e)
+            catch (ArgumentOutOfRangeException)
             {
                 throw new AdapterArgumentException(Strings.KeyNotFound(key));
             }
@@ -102,7 +102,7 @@ namespace Myro.Adapters
             {
                 RSUtils.RecieveSync<DefaultUpdateResponseType>(opPort.SetByIndex(index, value, DateTime.Now));
             }
-            catch (KeyNotFoundException e)
+            catch (KeyNotFoundException)
             {
                 throw new AdapterArgumentException(Strings.IndexOutOfBounds(index));
             }
@@ -120,7 +120,7 @@ namespace Myro.Adapters
             {
                 RSUtils.RecieveSync<DefaultUpdateResponseType>(opPort.SetByKey(key, value, DateTime.Now));
             }
-            catch (KeyNotFoundException e)
+            catch (KeyNotFoundException)
             {
                 throw new AdapterArgumentException(Strings.KeyNotFound(key));
             }

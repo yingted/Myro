@@ -73,7 +73,7 @@ namespace Myro.Adapters
             {
                 return adapterNames[name];
             }
-            catch (KeyNotFoundException e)
+            catch (KeyNotFoundException)
             {
                 throw new UnknownAdapterNameException(name);
             }

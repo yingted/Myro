@@ -102,7 +102,11 @@ namespace Myro.API
 
         public void SetMotors(float leftPower, float rightPower)
         {
-            driveAdapter.GetDriveAdapter().SetMotors(leftPower, rightPower);
+            try
+            {
+                driveAdapter.GetDriveAdapter().SetMotors(leftPower, rightPower);
+            }
+            catch (Myro.Adapters.UnattachedAdapter) { }
         }
 
         private void CheckPowerRange(float power)
