@@ -7,7 +7,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <OutputType>Library</OutputType>
     <NoStandardLibraries>false</NoStandardLibraries>
-    <AssemblyName>ClassLibrary</AssemblyName>
+    <AssemblyName>MyroAdapters</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <RootNamespace>Adapters</RootNamespace>
@@ -94,7 +94,6 @@
     <None Include=".svn\text-base\ImageAdapter.cs.svn-base" />
     <None Include=".svn\text-base\SpeechAdapter.cs.svn-base" />
     <None Include=".svn\text-base\VectorAdapter.cs.svn-base" />
-    <None Include="ClassDiagram1.cd" />
     <None Include="myroKey.snk" />
   </ItemGroup>
   <ItemGroup>

@@ -241,12 +241,18 @@ namespace SimTestSuite
 
         private int[] layout(int widthTotal, int widthOne, int count)
         {
-            int widthEach = widthTotal / count;
-            int offset = (widthEach - widthOne) / 2;
-            int[] ret = new int[count];
-            for (int i = 0; i < count; i++)
-                ret[i] = widthEach * i + offset;
-            return ret;
+            if (count > 0)
+            {
+                int widthEach = widthTotal / count;
+                int offset = (widthEach - widthOne) / 2;
+                int[] ret = new int[count];
+                for (int i = 0; i < count; i++)
+                    ret[i] = widthEach * i + offset;
+                return ret;
+            }
+            else {
+                return new int[0];
+            }
         }
 
         private void drawCircleMeters(PictureBox control, Color color, double[] vals, double min, double max)

@@ -20,7 +20,7 @@ using Myro.Utilities;
 using brick = Myro.Services.Scribbler.ScribblerBase.Proxy;
 using vector = Myro.Services.Generic.Vector;
 
-namespace IPRE.ToneGenerator
+namespace Myro.Services.Scribbler.ToneGenerator
 {
     public static class Contract
     {

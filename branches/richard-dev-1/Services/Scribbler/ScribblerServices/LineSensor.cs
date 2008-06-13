@@ -30,6 +30,7 @@ namespace Myro.Services.Scribbler.LineSensor
     [DisplayName("Scribbler Line Sensor")]
     [Description("The Scribbler Line Sensor Service")]
     [Contract(Contract.Identifier)]
+    [AlternateContract(vector.Contract.Identifier)]
     public class ScribblerLineSensor : vector.VectorService
     {
         [Partner("ScribblerBase", Contract = brick.Contract.Identifier, CreationPolicy = PartnerCreationPolicy.UseExistingOrCreate, Optional = false)]

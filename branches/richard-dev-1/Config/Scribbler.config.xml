@@ -14,7 +14,9 @@ xmlns:mani="http://schemas.microsoft.com/xw/2004/10/manifest.html">
     <Level>2</Level>
   </Verbosity>
 
-  <StartService>
+  <Manifest file=".\Config\Scribbler.manifest\Scribbler.manifest.xml" />
+
+  <!--<StartService>
     <Contract>http://www.roboteducation.org/scribblerbase.html</Contract>
     <Service>/scribbler</Service>
   </StartService>
@@ -47,6 +49,6 @@ xmlns:mani="http://schemas.microsoft.com/xw/2004/10/manifest.html">
   <Adapter type="Vector" name="tonegen">
     <Contract>http://www.roboteducation.org/scribblertonegenerator.html</Contract>
     <Service>/scribblertonegen</Service>
-  </Adapter>
+  </Adapter>-->
   
 </RobotConfig>

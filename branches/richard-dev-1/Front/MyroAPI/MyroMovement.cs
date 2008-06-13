@@ -8,11 +8,27 @@ namespace Myro.API
     
     public class MyroMovement : IMyroMovement
     {
-        Myro.Adapters.AdapterSpec driveAdapter;
-
-        public MyroMovement(Myro.Adapters.AdapterSpec driveAdapter)
+        Myro.Adapters.AdapterBank bank;
+        Myro.Adapters.AdapterSpec _driveAdapter = null;
+        Myro.Adapters.AdapterSpec DriveAdapter
         {
-            this.driveAdapter = driveAdapter;
+            get
+            {
+                if (_driveAdapter == null)
+                    try
+                    {
+                        _driveAdapter = bank.GetAdapterSpec("drive");
+                    }
+                    catch (Myro.Adapters.UnknownAdapterNameException)
+                    {
+                    }
+                return _driveAdapter;
+            }
+        }
+
+        public MyroMovement(Myro.Adapters.AdapterBank bank)
+        {
+            this.bank = bank;
         }
 
         public enum Direction { LEFT, RIGHT };
@@ -104,7 +120,7 @@ namespace Myro.API
         {
             try
             {
-                driveAdapter.GetDriveAdapter().SetMotors(leftPower, rightPower);
+                DriveAdapter.GetDriveAdapter().SetMotors(leftPower, rightPower);
             }
             catch (Myro.Adapters.UnattachedAdapter) { }
         }

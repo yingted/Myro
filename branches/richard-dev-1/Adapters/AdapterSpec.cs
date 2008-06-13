@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using Microsoft.Dss.ServiceModel.Dssp;
+using Myro.Utilities;
+using Microsoft.Dss.Hosting;
 
 namespace Myro.Adapters
 {
@@ -84,17 +86,28 @@ namespace Myro.Adapters
             ServiceConfig = serviceConfig;
         }
 
-        /// <summary>
-        /// Alternate constructor taking a string adapter type name, the Myro 
-        /// name, and the service record from the config file.
-        /// </summary>
-        /// <param name="type">The string adapter type name</param>
-        /// <param name="name">The Myro name</param>
-        /// <param name="serviceConfig">The service record from the config file</param>
-        public AdapterSpec(string type, string name, ServiceInfoType serviceConfig)
-            : this(GetType(type), name, serviceConfig)
+        public AdapterSpec(string name)
         {
+            ServiceInfoType serviceInfoResponse = RSUtils.RecieveSync(
+                RSUtils.FindCompatibleContract(DssEnvironment.TaskQueue, new Uri("dssp.tcp://localhost/" + name), AdapterSpec.KnownContracts));
+            Type = byContract[serviceInfoResponse.Contract];
+            Name = name;
+            Adapter = null;
+            ServiceConfig = serviceInfoResponse;
+            AttachAdapterIfNeeded(ServiceConfig);
         }
+
+        ///// <summary>
+        ///// Alternate constructor taking a string adapter type name, the Myro 
+        ///// name, and the service record from the config file.
+        ///// </summary>
+        ///// <param name="type">The string adapter type name</param>
+        ///// <param name="name">The Myro name</param>
+        ///// <param name="serviceConfig">The service record from the config file</param>
+        //public AdapterSpec(string type, string name, ServiceInfoType serviceConfig)
+        //    : this(GetType(type), name, serviceConfig)
+        //{
+        //}
 
         /// <summary>
         /// Create an unattachable AdapterSpec.
@@ -134,7 +147,7 @@ namespace Myro.Adapters
                             Adapter = (IAdapter)(new Adapters.DriveAdapter(serviceRecord));
                             break;
                         default:
-                            throw new Exception("Adapter type " + GetTypeName(Type) + " not yet supported");
+                            throw new Exception("Adapter type " + Type.ToString() + " not yet supported");
                     }
                     Console.WriteLine("Attached to " + serviceRecord.Service + " as \"" + Name + "\"");
                     return true;
@@ -211,20 +224,20 @@ namespace Myro.Adapters
                 throw new AdapterOperationException("Tried to safe cast to an ImageAdapter");
         }
 
-        /// <summary>
-        /// Returns the Speech adapter contained in this AdapterSpec, but only
-        /// if the adapter is in fact a Speech type.  If it is not a
-        /// SpeechAdapter, an InvalidCastException will be thrown.  This is
-        /// essentially a "safe cast".
-        /// </summary>
-        /// <returns></returns>
-        public SpeechAdapter GetSpeechAdapter()
-        {
-            if (Type == AdapterTypeEnum.Speech)
-                return (SpeechAdapter)adapterIfAttached();
-            else
-                throw new AdapterOperationException("Tried to safe cast to a SpeechAdapter");
-        }
+        ///// <summary>
+        ///// Returns the Speech adapter contained in this AdapterSpec, but only
+        ///// if the adapter is in fact a Speech type.  If it is not a
+        ///// SpeechAdapter, an InvalidCastException will be thrown.  This is
+        ///// essentially a "safe cast".
+        ///// </summary>
+        ///// <returns></returns>
+        //public SpeechAdapter GetSpeechAdapter()
+        //{
+        //    if (Type == AdapterTypeEnum.Speech)
+        //        return (SpeechAdapter)adapterIfAttached();
+        //    else
+        //        throw new AdapterOperationException("Tried to safe cast to a SpeechAdapter");
+        //}
 
         private IAdapter adapterIfAttached()
         {
@@ -236,64 +249,71 @@ namespace Myro.Adapters
                 return adapter;
         }
 
-        private static string[] adapterTypeNames = 
-        {
-            "Vector",
-            "Drive",
-            "Image",
-            "Speech"
-        };
+        //private static string[] adapterTypeNames = 
+        //{
+        //    "Vector",
+        //    "Drive",
+        //    "Image",
+        //};
+        ///// <summary>
+        ///// The list of string adapter type names
+        ///// </summary>
+        //public static string[] AdapterTypeNames { get { return adapterTypeNames; } }
 
-        private static Dictionary<AdapterTypeEnum, string> byType;
-        private static Dictionary<string, AdapterTypeEnum> byName;
+        private static string[] knownContracts = 
+        {
+            Myro.Services.Generic.Vector.Proxy.Contract.Identifier,
+            Microsoft.Robotics.Services.Drive.Proxy.Contract.Identifier,
+            Microsoft.Robotics.Services.WebCam.Proxy.Contract.Identifier,
+        };
+        public static string[] KnownContracts { get { return knownContracts; } }
+
+        //private static Dictionary<AdapterTypeEnum, string> byType = new Dictionary<AdapterTypeEnum, string>();
+        //private static Dictionary<string, AdapterTypeEnum> byName = new Dictionary<string, AdapterTypeEnum>();
+        private static Dictionary<string, AdapterTypeEnum> byContract = new Dictionary<string,AdapterTypeEnum>();
 
         //public static AdapterTypeEnum[] AdapterTypes { get; private set; }
-        /// <summary>
-        /// The list of string adapter type names
-        /// </summary>
-        public static string[] AdapterTypeNames { get; private set; }
 
         static AdapterSpec()
         {
-            byType = new Dictionary<AdapterTypeEnum, string>();
-            byName = new Dictionary<string, AdapterTypeEnum>();
-            for (int i = 0; i < adapterTypeNames.Length; i++)
+            for (int i = 0; i < knownContracts.Length; i++)
             {
-                byType.Add((AdapterTypeEnum)i, adapterTypeNames[i]);
-                byName.Add(adapterTypeNames[i], (AdapterTypeEnum)i);
+                //byType.Add((AdapterTypeEnum)i, adapterTypeNames[i]);
+                //byName.Add(adapterTypeNames[i], (AdapterTypeEnum)i);
+                byContract.Add(knownContracts[i], (AdapterTypeEnum)i);
             }
         }
 
-        /// <summary>
-        /// Convert a runtime adapter type to a string adapter type name.
-        /// </summary>
-        /// <param name="type">The runtime adapter type</param>
-        /// <returns>The string adapter type name</returns>
-        public static string GetTypeName(AdapterTypeEnum type)
-        {
-            string ret = byType[type];
-            if (ret != null)
-                return ret;
-            else
-                throw new NoSuchAdapter("Adapter type invalid");
-        }
+        ///// <summary>
+        ///// Convert a runtime adapter type to a string adapter type name.
+        ///// </summary>
+        ///// <param name="type">The runtime adapter type</param>
+        ///// <returns>The string adapter type name</returns>
+        //public static string GetTypeName(AdapterTypeEnum type)
+        //{
+        //    string ret = byType[type];
+        //    if (ret != null)
+        //        return ret;
+        //    else
+        //        throw new NoSuchAdapter("Adapter type invalid");
+        //}
 
-        /// <summary>
-        /// Convert a string adapter type name to a runtime adapter type.
-        /// </summary>
-        /// <param name="name">The string adapter type name</param>
-        /// <returns>The runtime adapter type</returns>
-        public static AdapterTypeEnum GetType(string name)
-        {
-            try
-            {
-                return byName[name];
-            }
-            catch (KeyNotFoundException)
-            {
-                throw new NoSuchAdapter("Adapter name invalid");
-            }
-        }
+        ///// <summary>
+        ///// Convert a string adapter type name to a runtime adapter type.
+        ///// </summary>
+        ///// <param name="name">The string adapter type name</param>
+        ///// <returns>The runtime adapter type</returns>
+        //public static AdapterTypeEnum GetType(string name)
+        //{
+        //    try
+        //    {
+        //        return byName[name];
+        //    }
+        //    catch (KeyNotFoundException)
+        //    {
+        //        throw new NoSuchAdapter("Adapter name invalid");
+        //    }
+        //}
 
     }
 
@@ -330,8 +350,7 @@ namespace Myro.Adapters
     {
         Vector,
         Drive,
-        Image,
-        Speech
+        Image
     }
 
 }

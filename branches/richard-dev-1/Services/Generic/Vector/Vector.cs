@@ -19,8 +19,13 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Xml;
+using System.Linq;
 using W3C.Soap;
 using Myro.Utilities;
+using partnerList = Microsoft.Dss.Services.PartnerListManager;
+using analog = Microsoft.Robotics.Services.AnalogSensor.Proxy;
+using analogArray = Microsoft.Robotics.Services.AnalogSensorArray.Proxy;
+using contact = Microsoft.Robotics.Services.ContactSensor.Proxy;
 
 namespace Myro.Services.Generic.Vector
 {
@@ -71,13 +76,21 @@ namespace Myro.Services.Generic.Vector
     /// that you do not even have to use the keys at all if clients will
     /// always access elements by index.
     /// 
-    /// If all else fails, see the Scribbler services for examples :)
+    /// Also, auto-subscription is a way of hooking this service up to 
+    /// automatically get its state from one or more generic contract services,
+    /// which must be either Analog, AnalogArray, or Contact.  You set up auto-
+    /// subscription using partners whose names start with "auto-".  See the
+    /// developers manual for instructions on how to do this (this is how you
+    /// make Myro work with pre-made generic robot services).
+    /// 
+    /// If all else fails, see the Myro Developer's Manual.
     /// </summary>
     [DisplayName("Vector")]
     [Description("A Generic Vector Service")]
     [Contract(Contract.Identifier)]
     public class VectorService : DsspServiceBase
     {
+        #region Member variables
 
         /// <summary>
         /// _state
@@ -92,11 +105,16 @@ namespace Myro.Services.Generic.Vector
         protected VectorOperations _operationsPort = new VectorOperations();
         protected VectorOperations OperationsPort { get { return _operationsPort; } private set { _operationsPort = value; } }
 
+        /// <summary>
+        /// Subscription manager port
+        /// </summary>
         [Partner("SubMgr",
             Contract = submgr.Contract.Identifier,
             CreationPolicy = PartnerCreationPolicy.CreateAlways,
             Optional = false)]
         private submgr.SubscriptionManagerPort _subMgrPort = new submgr.SubscriptionManagerPort();
+
+        #endregion
 
         /// <summary>
         /// Default Service Constructor
@@ -109,8 +127,10 @@ namespace Myro.Services.Generic.Vector
         protected override void Start()
         {
             base.Start();
+            subscribeAutos();
         }
 
+        #region Vector service handlers
         /// <summary>
         /// Callback giving you the opportunity to set the state before it is
         /// retrieved due to a request.  The requestInfo parameter will be
@@ -295,12 +315,225 @@ namespace Myro.Services.Generic.Vector
                 });
         }
 
+        #endregion
+
+        #region Private and protected methods
         protected void SendNotification<T>(T message) where T : DsspOperation
         {
             base.SendNotification<T>(_subMgrPort, message);
         }
+        #endregion
+
+        #region Auto subscription methods
+        /// <summary>
+        /// Subscribes to any services specified in the partner list to
+        /// automatically update the state.
+        /// </summary>
+        private void subscribeAutos()
+        {
+            // Get the list of partners whose names start with "auto:"
+            var request = new partnerList.GetOperation()
+            {
+                Body = new GetRequestType(),
+                ResponsePort = new DsspResponsePort<PartnerListType>()
+            };
+            base.PartnerListManagerPort.Post(request);
+            Activate(Arbiter.Choice<PartnerListType, Fault>(
+                request.ResponsePort,
+                delegate(PartnerListType partners)
+                {
+                    string autoPrefix = "auto-";
+                    List<PartnerType> autoPartners = new List<PartnerType>(
+                        from partner in partners.PartnerList
+                        where partner.Name.Name.StartsWith(autoPrefix)
+                        select partner);
+
+                    // This method will take care of subscribing and updating state
+                    if (autoPartners.Count > 0)
+                        subscribeAutos2(autoPartners, autoPrefix.Length);
+                },
+                delegate(Fault failure)
+                {
+                    LogError("Fault while getting partner list to subscribe to autos", failure);
+                }));
+        }
+
+        /// <summary>
+        /// Once we have a list of auto partners, this method creates AutoDefiniton
+        /// objects for each auto partner, and calls subscribeAutoSingle to subscribe
+        /// to each one.
+        /// </summary>
+        /// <param name="partList"></param>
+        /// <param name="removeFromName"></param>
+        private void subscribeAutos2(IList<PartnerType> partList, int removeFromName)
+        {
+            // Create AutoDefinition objects
+            List<AutoDefinition> autoDefs = new List<AutoDefinition>(partList.Count);
+            int lastIndex = 0;
+            List<string> allKeys = new List<string>();
+            foreach (var part in partList)
+            {
+                // Create AutoDefinition object and add to list
+                string[] keys = part.Name.Name.Substring(0, removeFromName).Split(',');
+                AutoDefinition autoDef = new AutoDefinition()
+                {
+                    infoAsPartner = part,
+                    startIndex = lastIndex,
+                    count = keys.Length,
+                    keys = keys
+                };
+                autoDefs.Add(autoDef);
+
+                // Update loop variables
+                lastIndex += keys.Length;
+                allKeys.AddRange(keys);
+            }
+
+            // Create the new vector state reflecting the keys
+            List<double> allValues = new List<double>(from k in allKeys select 0.0);
+            VectorState newState = new VectorState(allValues, allKeys, DateTime.Now);
+            var responsePort = new DsspResponsePort<DefaultReplaceResponseType>();
+            OperationsPort.Post(new Replace(newState, responsePort));
+            Activate(Arbiter.Choice(responsePort,
+                delegate(DefaultReplaceResponseType r) { },
+                delegate(Fault f) { LogError("Fault while replacing initial vector state", f); }));
+
+            // Try to subscribe to compatible contracts with the AutoDefinition objects
+            foreach (var autoDef in autoDefs)
+            {
+                Activate(Arbiter.Choice(
+                    RSUtils.FindCompatibleContract(TaskQueue, new Uri(autoDef.infoAsPartner.Service), new List<string>() { 
+                        analog.Contract.Identifier, analogArray.Contract.Identifier, contact.Contract.Identifier }),
+                    delegate(ServiceInfoType serviceInfoResponse)
+                    {
+                        try
+                        {
+                            subscribeAutoSingle(autoDef, serviceInfoResponse);
+                            autoDef.infoAsConnected = serviceInfoResponse;
+                        }
+                        catch (Exception e)
+                        {
+                            LogError("Exception while subscribing to auto partner", e);
+                        }
+                    },
+                    delegate(Fault failure)
+                    {
+                        Exception e = RSUtils.ExceptionOfFault(failure);
+                        if (e is NoContractFoundException)
+                        {
+                            LogError("Could not subscribe to auto partner " + autoDef.infoAsPartner.Name + ".  Could not find a supported contract.");
+                        }
+                        else if (e is Exception)
+                        {
+                            LogError("Fault while searching for compatible contract", failure);
+                        }
+                    }));
+            }
+        }
+
+        /// <summary>
+        /// Tries to subscribe to an auto partner single contract, or throws an exception
+        /// if we don't support the contract.
+        /// </summary>
+        /// <param name="def"></param>
+        /// <param name="serviceInfo"></param>
+        private void subscribeAutoSingle(AutoDefinition def, ServiceInfoType serviceInfo)
+        {
+            Console.WriteLine("Trying to subscribe " + def.infoAsPartner.Name + " to " + serviceInfo.Service + " with contract " + serviceInfo.Contract);
+            // Check for each contract we know about and subscribe.
+            if (serviceInfo.Contract.Equals(analog.Contract.Identifier))
+            {
+                var partnerPort = ServiceForwarder<analog.AnalogSensorOperations>(new Uri(serviceInfo.Service));
+                var notifyPort = new Port<analog.Replace>();
+                try
+                {
+                    RSUtils.RecieveSync(TaskQueue, partnerPort.Subscribe(notifyPort, typeof(analog.Replace)));
+                    Activate(Arbiter.Receive(true, notifyPort,
+                        delegate(analog.Replace replace)
+                        {
+                            OperationsPort.Post(new SetByIndex(new SetByIndexRequestType()
+                            {
+                                Index = def.startIndex,
+                                Value = replace.Body.RawMeasurement,
+                                Timestamp = replace.Body.TimeStamp
+                            }));
+                        }));
+                }
+                catch (FaultReceivedException)
+                {
+                    // If the subscribe failed, throw this.
+                    throw new UnrecognizedContractException();
+                }
+            }
+            else if (serviceInfo.Contract.Equals(analogArray.Contract.Identifier))
+            {
+                var partnerPort = ServiceForwarder<analogArray.AnalogSensorOperations>(new Uri(serviceInfo.Service));
+                var notifyPort = new Port<analogArray.Replace>();
+                try
+                {
+                    RSUtils.RecieveSync(TaskQueue, partnerPort.Subscribe(notifyPort, typeof(analogArray.Replace)));
+                    Activate(Arbiter.Receive(true, notifyPort,
+                        delegate(analogArray.Replace replace)
+                        {
+                            int maxCount = replace.Body.Sensors.Count > def.count ? def.count : replace.Body.Sensors.Count;
+                            for (int i = 0; i < maxCount; i++)
+                                OperationsPort.Post(new SetByIndex(new SetByIndexRequestType()
+                                {
+                                    Index = def.startIndex + i,
+                                    Value = replace.Body.Sensors[i].RawMeasurement,
+                                    Timestamp = replace.Body.Sensors[i].TimeStamp
+                                }));
+                        }));
+                }
+                catch (FaultReceivedException)
+                {
+                    // If the subscribe failed, throw this.
+                    throw new UnrecognizedContractException();
+                }
+            }
+            else if (serviceInfo.Contract.Equals(contact.Contract.Identifier))
+            {
+                var partnerPort = ServiceForwarder<contact.ContactSensorArrayOperations>(new Uri(serviceInfo.Service));
+                var notifyPort = new PortSet<contact.Replace, contact.Update>();
+                RSUtils.RecieveSync(TaskQueue, partnerPort.Subscribe(notifyPort, typeof(contact.Replace), typeof(contact.Update)));
+                Activate<Receiver>(
+                    Arbiter.Receive<contact.Replace>(true, notifyPort,
+                    delegate(contact.Replace replace)
+                    {
+                        int maxCount = replace.Body.Sensors.Count > def.count ? def.count : replace.Body.Sensors.Count;
+                        for (int i = 0; i < maxCount; i++)
+                            OperationsPort.Post(new SetByIndex(new SetByIndexRequestType()
+                            {
+                                Index = def.startIndex + i,
+                                Value = replace.Body.Sensors[i].Pressed ? 1.0 : 0.0,
+                                Timestamp = replace.Body.Sensors[i].TimeStamp
+                            }));
+                    }),
+                    Arbiter.Receive<contact.Update>(true, notifyPort,
+                    delegate(contact.Update update)
+                    {
+                        LogError("Vector got update and not updating!!!");
+                    }));
+            }
+            else
+                throw new UnrecognizedContractException();
+        }
+
+        class UnrecognizedContractException : Exception { }
+        class AutoDefinition
+        {
+            public PartnerType infoAsPartner;
+            public int startIndex;
+            public int count;
+            public string[] keys;
+
+            public ServiceInfoType infoAsConnected = null;
+        }
+        #endregion
+
     }
 
+    #region Callback request info types
     /// <summary>
     /// For the RequestType member of GetElementRequestInfo and
     /// SetElementRequestInfo, this indicates whether the service request was
@@ -367,4 +600,7 @@ namespace Myro.Services.Generic.Vector
     {
         public List<double> Values { get; set; }
     }
+    #endregion
+
+
 }

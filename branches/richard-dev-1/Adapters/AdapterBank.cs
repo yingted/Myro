@@ -51,14 +51,16 @@ namespace Myro.Adapters
                 IEnumerable<string> manifestFullPaths =
                     from m in manifests
                     select "file://" + Path.GetFullPath(m);
+                foreach (var m in manifestFullPaths)
+                    Console.WriteLine("Manifest: " + m);
                 DssEnvironment.Initialize(50000, 50001, manifestFullPaths.ToArray());
             }
             else
                 DssEnvironment.Initialize(50000, 50001);
             Console.WriteLine("DSS environment initialized");
-            subscribeDirectory();
-            if (autoStartServices)
-                startServices();
+            //subscribeDirectory();
+            //if (autoStartServices)
+            //    startServices();
         }
 
         /// <summary>
@@ -75,7 +77,19 @@ namespace Myro.Adapters
             }
             catch (KeyNotFoundException)
             {
-                throw new UnknownAdapterNameException(name);
+                DssEnvironment.LogError("Adapter " + name + " not found, trying to connect...");
+                try
+                {
+                    AdapterSpec adapterSpec = new AdapterSpec(name);
+                    adapterNames.Add(name, adapterSpec);
+                    //Console.WriteLine("Connected to " + adapterSpec.ServiceConfig.Service);
+                    return adapterSpec;
+                }
+                catch (Exception e)
+                {
+                    DssEnvironment.LogError("Could not connect to " + name + ": " + e.ToString());
+                    throw new UnknownAdapterNameException(name);
+                }
             }
         }
 
@@ -83,66 +97,72 @@ namespace Myro.Adapters
         {
             if (adaptersReady.WaitOne(timeout) == false)
                 throw new TimeoutException("Timed out waiting for adapters to attach");
+            //var dirPort = DssEnvironment.ServiceForwarder<dirProxy.DirectoryPort>(new Uri("dssp.tcp://localhost/directory"));
+            //var resp = RSUtils.RecieveSync(dirPort.Query(new dirProxy.QueryRequest()
+            //{
+            //    QueryRecord = new ServiceInfoType(Myro.Services.Generic.Vector.Proxy.Contract.Identifier)
+            //}));
+            //Console.WriteLine("Length " + resp.RecordList.Length);
         }
 
         private void readConfig(string configFile)
         {
             XPathNavigator nav = new XPathDocument(configFile).CreateNavigator();
 
-            // Add plain services to list
-            XPathNodeIterator startservices = nav.Select("//StartService");
-            foreach (XPathNavigator node in startservices)
-                services.Add(new ServiceInfoType(getChild(node, "Contract"), getChild(node, "Service")));
+            //// Add plain services to list
+            //XPathNodeIterator startservices = nav.Select("//StartService");
+            //foreach (XPathNavigator node in startservices)
+            //    services.Add(new ServiceInfoType(getChild(node, "Contract"), getChild(node, "Service")));
 
             // Add manifests to list
             XPathNodeIterator manifestNodes = nav.Select("//Manifest");
             foreach (XPathNavigator node in manifestNodes)
                 manifests.Add(node.GetAttribute("file", ""));
 
-            // Add adapters to list, and to dictionary
-            XPathNodeIterator adapters = nav.Select("//Adapter");
-            Console.WriteLine(adapters.Count + " adapters in config");
-            foreach (XPathNavigator node in adapters)
-            {
-                // Get the relevant info for this adapter
+            //// Add adapters to list, and to dictionary
+            //XPathNodeIterator adapters = nav.Select("//Adapter");
+            //Console.WriteLine(adapters.Count + " adapters in config");
+            //foreach (XPathNavigator node in adapters)
+            //{
+            //    // Get the relevant info for this adapter
 
-                // Attributes
-                string sType = node.GetAttribute("type", "");
-                AdapterTypeEnum type = AdapterSpec.GetType(sType);
-                string name = node.GetAttribute("name", "");
+            //    // Attributes
+            //    string sType = node.GetAttribute("type", "");
+            //    AdapterTypeEnum type = AdapterSpec.GetType(sType);
+            //    string name = node.GetAttribute("name", "");
 
-                // Children
-                string contract = getChild(node, "Contract", true);
-                string service = getChild(node, "Service");
-                //NameTable names = new NameTable();
-                //XmlNamespaceManager nsman = new XmlNamespaceManager(new NameTable());
-                //nsman.AddNamespace("mani", "http://schemas.microsoft.com/xw/2004/10/manifest.html");
-                //XPathNavigator srNav = node.SelectSingleNode(XPathExpression.Compile("./mani:ServiceRecordType", nsman));
-                //if (srNav != null)
-                //{
-                //    XmlReader reader = srNav.ReadSubtree();
-                //    XmlSerializer ser = new XmlSerializer(typeof(ServiceRecordType));
-                //    ServiceRecordType record = (ServiceRecordType)ser.Deserialize(reader);
-                //}
+            //    // Children
+            //    string contract = getChild(node, "Contract", true);
+            //    string service = getChild(node, "Service");
+            //    //NameTable names = new NameTable();
+            //    //XmlNamespaceManager nsman = new XmlNamespaceManager(new NameTable());
+            //    //nsman.AddNamespace("mani", "http://schemas.microsoft.com/xw/2004/10/manifest.html");
+            //    //XPathNavigator srNav = node.SelectSingleNode(XPathExpression.Compile("./mani:ServiceRecordType", nsman));
+            //    //if (srNav != null)
+            //    //{
+            //    //    XmlReader reader = srNav.ReadSubtree();
+            //    //    XmlSerializer ser = new XmlSerializer(typeof(ServiceRecordType));
+            //    //    ServiceRecordType record = (ServiceRecordType)ser.Deserialize(reader);
+            //    //}
 
-                // Add elements to the service array and dictionary
-                if (adapterNames.ContainsKey(name))
-                    throw new ConfigException("Duplicate adapter name \"" + name + "\"");
-                else
-                {
-                    // Add a null adapter for now.  An adapter will be created when the service is actually started
-                    ServiceInfoType serviceInfo = new ServiceInfoType(contract, service);
-                    AdapterSpec adapterInfo = new AdapterSpec(type, name, serviceInfo);
-                    adapterNames.Add(name, adapterInfo);
-                    //adapterServices.Add(service, adapterInfo);
-                    //services.Add(serviceInfo);
-                }
-            }
+            //    // Add elements to the service array and dictionary
+            //    if (adapterNames.ContainsKey(name))
+            //        throw new ConfigException("Duplicate adapter name \"" + name + "\"");
+            //    else
+            //    {
+            //        // Add a null adapter for now.  An adapter will be created when the service is actually started
+            //        ServiceInfoType serviceInfo = new ServiceInfoType(contract, service);
+            //        AdapterSpec adapterInfo = new AdapterSpec(type, name, serviceInfo);
+            //        adapterNames.Add(name, adapterInfo);
+            //        //adapterServices.Add(service, adapterInfo);
+            //        //services.Add(serviceInfo);
+            //    }
+            //}
         }
 
         private void subscribeDirectory()
         {
-            var dirPort = DssEnvironment.ServiceForwarder<dirProxy.DirectoryPort>(new Uri("http://localhost:50000/directory"));
+            var dirPort = DssEnvironment.ServiceForwarder<dirProxy.DirectoryPort>(new Uri("http://localhost/directory"));
             var resPort = new dirProxy.DirectoryPort();
             Fault error = null;
             EventWaitHandle signal = new EventWaitHandle(false, EventResetMode.ManualReset);
@@ -169,13 +189,21 @@ namespace Myro.Adapters
 
         private void directoryInsertHandler(dirProxy.Insert insert)
         {
+            Console.WriteLine("Directory insert for " + insert.Body.Record.Service);
+            foreach (var partner in insert.Body.Record.PartnerList)
+            {
+                if (partner.Name.Name == "PrimaryContractService")
+                    Console.WriteLine("Service " + insert.Body.Record.Service + " has primary contract service " + partner.Service);
+                if (partner.Name.Name == "AlternateContractService")
+                    Console.WriteLine("Service " + insert.Body.Record.Service + " has alternate contract service " + partner.Service);
+            }
             //Console.WriteLine("AdapterBank got directory insert: " + insert.Body.Record.Service);
             updateAdapters();
         }
 
         private void updateAdapters()
         {
-            var dirPort = DssEnvironment.ServiceForwarder<dirProxy.DirectoryPort>(new Uri("http://localhost:50000/directory"));
+            var dirPort = DssEnvironment.ServiceForwarder<dirProxy.DirectoryPort>(new Uri("http://localhost/directory"));
             Arbiter.Activate(DssEnvironment.TaskQueue,
                 Arbiter.Choice<dirProxy.GetResponse, Fault>(
                     dirPort.Get(),
@@ -194,7 +222,7 @@ namespace Myro.Adapters
                                 //Uri testUri = new Uri(adapter.ServiceInfo.Service);
                                 //if (Uri.Compare(foundUri, testUri, UriComponents.Path, UriFormat.UriEscaped, StringComparison.InvariantCultureIgnoreCase) == 0)
                                 if (rec.Contract.ToLower().CompareTo(adapter.ServiceConfig.Contract.ToLower()) == 0)
-                                    //rec.Service.EndsWith(adapter.ServiceConfig.Service))
+                                //rec.Service.EndsWith(adapter.ServiceConfig.Service))
                                 {
                                     //Console.WriteLine("* Assigned * " + rec.Service + " to " + adapter.ServiceInfo.Service);
                                     if (adapterSpec == null)
