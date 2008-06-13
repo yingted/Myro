@@ -1,10 +1,12 @@
 import myro.globvars
 import os, sys, re, random
-try:
-    import pygame
-    pygame.mixer.init(16000)
-except:
-    pass
+
+if not "darwin" in sys.platform:
+    try:
+        import pygame
+        pygame.mixer.init(16000)
+    except:
+        pass
 
 class TTSEngine:
     def __init__(self, name = None, echo = 1):

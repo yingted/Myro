@@ -683,11 +683,24 @@ class Scribbler(Robot):
         finally:
             self.lock.release()
         return jpeg
-        
+
+    # for older versions of fluke without jpeg
+    # use this lookup table to decide what picture to grab
+    image_codes = {"jpeg": "color",
+                   "jpeg-fast": "color",
+                   "grayjpeg": "gray",
+                   "grayjpeg-fast": "gray"}
+    
     def takePicture(self, mode="jpeg"):
         width = 256
         height = 192
         p = Picture()
+
+        version = map(int, info["fluke"].split("."))
+    
+        if version < [2, 7, 8]:
+            mode = image_codes[mode]
+            
         if mode == "color":
             a = self._grab_array()
             p.set(width, height, a)
