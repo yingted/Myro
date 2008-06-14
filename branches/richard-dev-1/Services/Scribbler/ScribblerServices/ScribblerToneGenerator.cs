@@ -71,7 +71,7 @@ namespace Myro.Services.Scribbler.ToneGenerator
             if (play.Frequency1 < 0 || play.Frequency2 < 0 || play.Duration < 0)
                 throw new ArgumentOutOfRangeException();
             else
-                RSUtils.RecieveSync<DefaultUpdateResponseType>(_scribblerPort.PlayTone(play));
+                RSUtils.RecieveSync<DefaultUpdateResponseType>(_scribblerPort.PlayTone(play), Myro.Utilities.Params.defaultRecieveTimeout);
         }
     }
 }

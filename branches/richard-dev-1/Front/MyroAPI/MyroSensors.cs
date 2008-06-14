@@ -24,9 +24,9 @@ namespace Myro.API
         {
             try
             {
-                return bank.GetAdapterSpec(name).GetVectorAdapter().GetAllElements().ToArray();
+                return ((Myro.Adapters.VectorAdapter)bank.GetAdapterSpec(name).Adapter).GetAllElements().ToArray();
             }
-            catch (UnknownAdapterNameException)
+            catch (Exception)
             {
                 return new double[] { 0.0 };
             }
@@ -36,9 +36,9 @@ namespace Myro.API
         {
             try
             {
-                return bank.GetAdapterSpec(name).GetVectorAdapter().Get(index);
+                return ((Myro.Adapters.VectorAdapter)bank.GetAdapterSpec(name).Adapter).Get(index);
             }
-            catch (UnknownAdapterNameException)
+            catch (Exception)
             {
                 return 0.0;
             }
@@ -48,9 +48,9 @@ namespace Myro.API
         {
             try
             {
-                return bank.GetAdapterSpec(name).GetVectorAdapter().Get(tag);
+                return ((Myro.Adapters.VectorAdapter)bank.GetAdapterSpec(name).Adapter).Get(tag);
             }
-            catch (UnknownAdapterNameException)
+            catch (Exception)
             {
                 return 0.0;
             }

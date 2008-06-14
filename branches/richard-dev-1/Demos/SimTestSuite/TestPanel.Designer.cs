@@ -37,7 +37,7 @@
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.lightSensorImg = new System.Windows.Forms.PictureBox();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
-            this.IRSensorImg = new System.Windows.Forms.PictureBox();
+            this.SonarImg = new System.Windows.Forms.PictureBox();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.lineSensorImg = new System.Windows.Forms.PictureBox();
             this.groupBox6 = new System.Windows.Forms.GroupBox();
@@ -57,7 +57,7 @@
             this.groupBox3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.lightSensorImg)).BeginInit();
             this.groupBox5.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.IRSensorImg)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.SonarImg)).BeginInit();
             this.groupBox4.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.lineSensorImg)).BeginInit();
             this.groupBox6.SuspendLayout();
@@ -148,21 +148,22 @@
             // 
             // groupBox5
             // 
-            this.groupBox5.Controls.Add(this.IRSensorImg);
+            this.groupBox5.Controls.Add(this.SonarImg);
             this.groupBox5.Location = new System.Drawing.Point(219, 216);
             this.groupBox5.Name = "groupBox5";
             this.groupBox5.Size = new System.Drawing.Size(206, 62);
             this.groupBox5.TabIndex = 4;
             this.groupBox5.TabStop = false;
-            this.groupBox5.Text = "IR Sensors";
+            this.groupBox5.Text = "Sonar";
+            this.groupBox5.Enter += new System.EventHandler(this.groupBox5_Enter);
             // 
-            // IRSensorImg
+            // SonarImg
             // 
-            this.IRSensorImg.Location = new System.Drawing.Point(6, 19);
-            this.IRSensorImg.Name = "IRSensorImg";
-            this.IRSensorImg.Size = new System.Drawing.Size(194, 37);
-            this.IRSensorImg.TabIndex = 0;
-            this.IRSensorImg.TabStop = false;
+            this.SonarImg.Location = new System.Drawing.Point(6, 19);
+            this.SonarImg.Name = "SonarImg";
+            this.SonarImg.Size = new System.Drawing.Size(194, 37);
+            this.SonarImg.TabIndex = 0;
+            this.SonarImg.TabStop = false;
             // 
             // groupBox4
             // 
@@ -313,7 +314,7 @@
             this.groupBox3.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.lightSensorImg)).EndInit();
             this.groupBox5.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.IRSensorImg)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.SonarImg)).EndInit();
             this.groupBox4.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.lineSensorImg)).EndInit();
             this.groupBox6.ResumeLayout(false);
@@ -339,7 +340,7 @@
         private System.Windows.Forms.GroupBox groupBox3;
         private System.Windows.Forms.PictureBox lightSensorImg;
         private System.Windows.Forms.GroupBox groupBox5;
-        private System.Windows.Forms.PictureBox IRSensorImg;
+        private System.Windows.Forms.PictureBox SonarImg;
         private System.Windows.Forms.GroupBox groupBox4;
         private System.Windows.Forms.PictureBox lineSensorImg;
         private System.Windows.Forms.GroupBox groupBox6;

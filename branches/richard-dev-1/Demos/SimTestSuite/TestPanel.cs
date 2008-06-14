@@ -296,9 +296,9 @@ namespace SimTestSuite
             double[] light = rbt.Sensors.get("light");
             //Console.WriteLine("light: " + light[0]);
             drawCircleMeters(lightSensorImg, Color.DeepSkyBlue, light, 2000.0, 0.0);
-            //double[] ir = rbt.get("ir");
+            double[] sonar = rbt.Sensors.get("sonar");
             //Console.WriteLine("ir: " + ir[0]);
-            //drawCircleMeters(IRSensorImg, ir, 0.0, 1.0);
+            drawCircleMeters(SonarImg, Color.Tan, sonar, 40.0, 0.0);
             double[] line = rbt.Sensors.get("line");
             //Console.WriteLine("line: " + line[0]);
             drawCircleMeters(lineSensorImg, Color.DarkGray, line, 0.0, 1.0);
@@ -342,6 +342,11 @@ namespace SimTestSuite
         private void tone_MouseUp(object sender, MouseEventArgs e)
         {
             rbt.Sound.beep(durBar.Value, freqBar1.Value, freqBar2.Value);
+        }
+
+        private void groupBox5_Enter(object sender, EventArgs e)
+        {
+
         }
     }
 }

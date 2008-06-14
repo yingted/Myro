@@ -132,10 +132,10 @@ namespace Myro.Services.ScribblerSim
             robotBaseEntity.State.Name = "ScribblerRobot";  //"\ScribblerRobot";
 
             // Start simulated motor service
-            drive.Contract.CreateService(ConstructorPort,
-                Microsoft.Robotics.Simulation.Partners.CreateEntityPartner(
-                    "http://localhost/" + robotBaseEntity.State.Name)
-            );
+            //drive.Contract.CreateService(ConstructorPort,
+            //    Microsoft.Robotics.Simulation.Partners.CreateEntityPartner(
+            //        "http://localhost/" + robotBaseEntity.State.Name)
+            //);
             return robotBaseEntity;
         }
 
@@ -143,7 +143,7 @@ namespace Myro.Services.ScribblerSim
         {
             // low resolution, wide Field of View
             CameraEntity cam = new CameraEntity(320, 240, ((float)Math.PI * 0.4f));
-            cam.State.Name = "robocam";
+            cam.State.Name = "ScribblerCamera";
             // just on top of the bot
             cam.State.Pose.Position = new Vector3(0.0f, 0.127f, 0.0f);
             // camera renders in an offline buffer at each frame
@@ -151,11 +151,11 @@ namespace Myro.Services.ScribblerSim
             cam.IsRealTimeCamera = true;
 
             // Start simulated webcam service
-            simwebcam.Contract.CreateService(
-                ConstructorPort,
-                Microsoft.Robotics.Simulation.Partners.CreateEntityPartner(
-                    "http://localhost/" + cam.State.Name)
-            );
+            //simwebcam.Contract.CreateService(
+            //    ConstructorPort,
+            //    Microsoft.Robotics.Simulation.Partners.CreateEntityPartner(
+            //        "http://localhost/" + cam.State.Name)
+            //);
 
             return cam;
         }
@@ -194,14 +194,14 @@ namespace Myro.Services.ScribblerSim
             BumperArrayEntity
                 bumperArray = new BumperArrayEntity(leftBumper, rightBumper);
             // entity name, must match manifest partner name
-            bumperArray.State.Name = "ScribblerIRBumpers";
+            bumperArray.State.Name = "ScribblerBumpers";
 
             // start simulated bumper service
 
-            bumper.Contract.CreateService(
-                ConstructorPort,
-                Microsoft.Robotics.Simulation.Partners.CreateEntityPartner(
-                "http://localhost/" + bumperArray.State.Name));
+            //bumper.Contract.CreateService(
+            //    ConstructorPort,
+            //    Microsoft.Robotics.Simulation.Partners.CreateEntityPartner(
+            //    "http://localhost/" + bumperArray.State.Name));
 
             return bumperArray;
         }

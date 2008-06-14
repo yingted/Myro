@@ -21,7 +21,7 @@ namespace Myro.Utilities
         /// <typeparam name="T"></typeparam>
         /// <param name="port"></param>
         /// <returns></returns>
-        public static T RecieveSync<T>(DispatcherQueue taskQueue, PortSet<T, Fault> port)
+        public static T RecieveSync<T>(DispatcherQueue taskQueue, PortSet<T, Fault> port, int timeout)
         {
             T ret = default(T);
             Fault error = null;
@@ -40,10 +40,15 @@ namespace Myro.Utilities
                         error = failure;
                         signal.Set();
                     }));
-            signal.WaitOne();
-
-            ThrowIfFaultNotNull(error);
-            return ret;
+            if (signal.WaitOne(timeout))
+            {
+                ThrowIfFaultNotNull(error);
+                return ret;
+            }
+            else
+            {
+                throw (new ReceiveTimedOutException());
+            }
         }
 
         /// <summary>
@@ -56,7 +61,33 @@ namespace Myro.Utilities
         /// <returns></returns>
         public static T RecieveSync<T>(PortSet<T, Fault> port)
         {
-            return RecieveSync(DssEnvironment.TaskQueue, port);
+            return RecieveSync(port, -1);
+        }
+
+        /// <summary>
+        /// Synchronous receive, using DssEnvironment.TaskQueue.
+        /// Waits for a response, returning T on success, and throwing an
+        /// exception created by ExceptionOfFault on failure.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="port"></param>
+        /// <returns></returns>
+        public static T RecieveSync<T>(PortSet<T, Fault> port, int timeout)
+        {
+            return RecieveSync(DssEnvironment.TaskQueue, port, timeout);
+        }
+
+        /// <summary>
+        /// Synchronous receive.
+        /// Waits for a response, returning T on success, and throwing an
+        /// exception created by ExceptionOfFault on failure.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="port"></param>
+        /// <returns></returns>
+        public static T RecieveSync<T>(DispatcherQueue taskQueue, PortSet<T, Fault> port)
+        {
+            return RecieveSync(taskQueue, port, -1);
         }
 
 
@@ -104,7 +135,7 @@ namespace Myro.Utilities
         /// This method searches for a primary or alternate contract of the
         /// service that is present in the contracts list.  Requires a 
         /// taskQueue to activate tasks on.  Throws NoContractFoundException
-        /// if one cannot be found.
+        /// in a Fault if one cannot be found.
         /// </summary>
         /// <param name="taskQueue"></param>
         /// <param name="service"></param>
@@ -121,43 +152,14 @@ namespace Myro.Utilities
                 responsePort,
                 delegate(LookupResponse resp)
                 {
-                    ServiceInfoType ret = null;
-                    int retIndex = Int32.MaxValue;
-
-                    // See if we can understand the primary contract
                     try
                     {
-                        int i = contracts.IndexOf(
-                            contracts.First(
-                                (s => resp.Contract.Equals(s, StringComparison.OrdinalIgnoreCase))
-                            ));
-                        if (i < retIndex)
-                        {
-                            ret = resp;
-                            retIndex = i;
-                        }
+                        returnPort.Post(FindCompatibleContract(resp, contracts));
                     }
-                    catch (InvalidOperationException) { }
-
-                    // Now try each alternate contract
-                    foreach (var part in resp.PartnerList)
-                        // Alternate contract services have a name of "AlternateContractService".
-                        if (part.Name.Name.StartsWith("AlternateContractService"))
-                            try
-                            {
-                                int i = contracts.IndexOf(contracts.First((s => part.Contract.Equals(s, StringComparison.OrdinalIgnoreCase))));
-                                if (i < retIndex)
-                                {
-                                    ret = part;
-                                    retIndex = i;
-                                }
-                            }
-                            catch (InvalidOperationException) { }
-
-                    if (ret != null)
-                        returnPort.Post(ret);
-                    else
-                        returnPort.Post(FaultOfException(new NoContractFoundException()));
+                    catch (NoContractFoundException e)
+                    {
+                        returnPort.Post(FaultOfException(e));
+                    }
                 },
                 delegate(Fault failure)
                 {
@@ -165,6 +167,59 @@ namespace Myro.Utilities
                 }));
 
             return returnPort;
+        }
+
+        /// <summary>
+        /// This method searches for a primary or alternate contract of the
+        /// service that is present in the contracts list.  Requires a 
+        /// taskQueue to activate tasks on.  Throws NoContractFoundException
+        /// if one cannot be found.
+        /// </summary>
+        /// <param name="taskQueue"></param>
+        /// <param name="service"></param>
+        /// <param name="contracts"></param>
+        /// <returns></returns>
+        public static ServiceInfoType FindCompatibleContract(ServiceInfoType serviceRecord, IList<string> contracts)
+        {
+            ServiceInfoType ret = null;
+            int retIndex = Int32.MaxValue;
+
+            // See if we can understand the primary contract
+            try
+            {
+                int i = contracts.IndexOf(
+                    contracts.First(
+                        (s => serviceRecord.Contract.Equals(s, StringComparison.OrdinalIgnoreCase))
+                    ));
+                if (i < retIndex)
+                {
+                    ret = serviceRecord;
+                    retIndex = i;
+                }
+            }
+            catch (InvalidOperationException) { }
+
+            // Now try each alternate contract
+            foreach (var part in serviceRecord.PartnerList)
+                // Alternate contract services have a name of "AlternateContractService".
+                if (part.Name.Name.StartsWith("AlternateContractService"))
+                    try
+                    {
+                        int i = contracts.IndexOf(contracts.First((s => part.Contract.Equals(s, StringComparison.OrdinalIgnoreCase))));
+                        if (i < retIndex)
+                        {
+                            ret = part;
+                            retIndex = i;
+                        }
+                    }
+                    catch (InvalidOperationException)
+                    { // This just means the alternate contract did not match
+                    }
+
+            if (ret != null)
+                return ret;
+            else
+                throw new NoContractFoundException();
         }
     }
 
@@ -192,4 +247,9 @@ namespace Myro.Utilities
     /// cannot be found.
     /// </summary>
     public class NoContractFoundException : Exception { }
+
+    /// <summary>
+    /// This is thrown when a ReceiveSync call times out.
+    /// </summary>
+    public class ReceiveTimedOutException : Exception { }
 }

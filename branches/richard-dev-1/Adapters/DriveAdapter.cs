@@ -16,6 +16,24 @@ using drive = Microsoft.Robotics.Services.Drive.Proxy;
 
 namespace Myro.Adapters
 {
+    public class DriveAdapterFactory : IAdapterFactory
+    {
+        #region IAdapterFactory Members
+
+        private List<string> supportedContracts = new List<string>() { drive.Contract.Identifier };
+        public IList<string> SupportedContracts
+        {
+            get { return supportedContracts; }
+        }
+
+        public IAdapter Create(ServiceInfoType service)
+        {
+            return new DriveAdapter(service);
+        }
+
+        #endregion
+    }
+
     public class DriveAdapter : IAdapter
     {
         public ServiceInfoType ServiceInfo { get; private set; }
@@ -97,12 +115,12 @@ namespace Myro.Adapters
 
         public void Stop()
         {
-            RSUtils.RecieveSync<DefaultUpdateResponseType>(drivePort.AllStop());
+            RSUtils.RecieveSync<DefaultUpdateResponseType>(drivePort.AllStop(), Myro.Utilities.Params.defaultRecieveTimeout);
         }
 
         public drive.DriveDifferentialTwoWheelState Get()
         {
-            return RSUtils.RecieveSync<drive.DriveDifferentialTwoWheelState>(drivePort.Get());
+            return RSUtils.RecieveSync<drive.DriveDifferentialTwoWheelState>(drivePort.Get(), Myro.Utilities.Params.defaultRecieveTimeout);
         }
 
         public void Set(drive.DriveDifferentialTwoWheelState state)

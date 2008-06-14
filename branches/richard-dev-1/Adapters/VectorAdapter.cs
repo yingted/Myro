@@ -12,6 +12,24 @@ using Myro.Utilities;
 
 namespace Myro.Adapters
 {
+    public class VectorAdapterFactory : IAdapterFactory
+    {
+        #region IAdapterFactory Members
+
+        private List<string> supportedContracts = new List<string>() { vector.Contract.Identifier };
+        public IList<string> SupportedContracts
+        {
+            get { return supportedContracts; }
+        }
+
+        public IAdapter Create(ServiceInfoType service)
+        {
+            return new VectorAdapter(service);
+        }
+
+        #endregion
+    }
+
     /// <summary>
     /// This class provides access to a Vector service.  It also allows lookup
     /// of values by tag, by caching a local dictionary of tags and values.
@@ -29,8 +47,8 @@ namespace Myro.Adapters
         {
             ServiceInfo = serviceRecord;
             opPort = DssEnvironment.ServiceForwarder<vector.VectorOperations>(new Uri(serviceRecord.Service));
-            if (opPort == null)
-                throw new AdapterCreationException("Service forwarder port was null");
+            //if (opPort == null)
+            //    throw new AdapterCreationException("Service forwarder port was null");
         }
 
         /// <summary>
@@ -39,7 +57,7 @@ namespace Myro.Adapters
         /// <returns></returns>
         public vector.VectorState GetState()
         {
-            return RSUtils.RecieveSync<vector.VectorState>(opPort.Get());
+            return RSUtils.RecieveSync<vector.VectorState>(opPort.Get(), Myro.Utilities.Params.defaultRecieveTimeout);
         }
 
         /// <summary>
@@ -53,7 +71,7 @@ namespace Myro.Adapters
         {
             try
             {
-                var resp = RSUtils.RecieveSync<vector.GetElementResponseType>(opPort.GetByIndex(index));
+                var resp = RSUtils.RecieveSync<vector.GetElementResponseType>(opPort.GetByIndex(index), Myro.Utilities.Params.defaultRecieveTimeout);
                 return resp.Value;
             }
             catch (ArgumentOutOfRangeException)
@@ -73,10 +91,10 @@ namespace Myro.Adapters
         {
             try
             {
-                var resp = RSUtils.RecieveSync<vector.GetElementResponseType>(opPort.GetByKey(key));
+                var resp = RSUtils.RecieveSync<vector.GetElementResponseType>(opPort.GetByKey(key), Myro.Utilities.Params.defaultRecieveTimeout);
                 return resp.Value;
             }
-            catch (ArgumentOutOfRangeException)
+            catch (KeyNotFoundException)
             {
                 throw new AdapterArgumentException(Strings.KeyNotFound(key));
             }
@@ -88,7 +106,7 @@ namespace Myro.Adapters
         /// <returns></returns>
         public List<double> GetAllElements()
         {
-            return RSUtils.RecieveSync<vector.GetAllResponseType>(opPort.GetAllElements()).Values;
+            return RSUtils.RecieveSync<vector.GetAllResponseType>(opPort.GetAllElements(), Myro.Utilities.Params.defaultRecieveTimeout).Values;
         }
 
         /// <summary>
@@ -100,9 +118,9 @@ namespace Myro.Adapters
         {
             try
             {
-                RSUtils.RecieveSync<DefaultUpdateResponseType>(opPort.SetByIndex(index, value, DateTime.Now));
+                RSUtils.RecieveSync<DefaultUpdateResponseType>(opPort.SetByIndex(index, value, DateTime.Now), Myro.Utilities.Params.defaultRecieveTimeout);
             }
-            catch (KeyNotFoundException)
+            catch (ArgumentOutOfRangeException)
             {
                 throw new AdapterArgumentException(Strings.IndexOutOfBounds(index));
             }
@@ -118,7 +136,7 @@ namespace Myro.Adapters
         {
             try
             {
-                RSUtils.RecieveSync<DefaultUpdateResponseType>(opPort.SetByKey(key, value, DateTime.Now));
+                RSUtils.RecieveSync<DefaultUpdateResponseType>(opPort.SetByKey(key, value, DateTime.Now), Myro.Utilities.Params.defaultRecieveTimeout);
             }
             catch (KeyNotFoundException)
             {
@@ -132,7 +150,7 @@ namespace Myro.Adapters
         /// <param name="values"></param>
         public void SetAllElements(List<double> values)
         {
-            RSUtils.RecieveSync<DefaultUpdateResponseType>(opPort.SetAllElements(values, DateTime.Now));
+            RSUtils.RecieveSync<DefaultUpdateResponseType>(opPort.SetAllElements(values, DateTime.Now), Myro.Utilities.Params.defaultRecieveTimeout);
         }
     }
 }

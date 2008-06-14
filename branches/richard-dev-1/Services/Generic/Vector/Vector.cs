@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Xml;
 using System.Linq;
+using System.Threading;
 using W3C.Soap;
 using Myro.Utilities;
 using partnerList = Microsoft.Dss.Services.PartnerListManager;
@@ -342,7 +343,7 @@ namespace Myro.Services.Generic.Vector
                 request.ResponsePort,
                 delegate(PartnerListType partners)
                 {
-                    string autoPrefix = "auto-";
+                    string autoPrefix = "auto_";
                     List<PartnerType> autoPartners = new List<PartnerType>(
                         from partner in partners.PartnerList
                         where partner.Name.Name.StartsWith(autoPrefix)
@@ -374,7 +375,7 @@ namespace Myro.Services.Generic.Vector
             foreach (var part in partList)
             {
                 // Create AutoDefinition object and add to list
-                string[] keys = part.Name.Name.Substring(0, removeFromName).Split(',');
+                string[] keys = part.Name.Name.Substring(removeFromName).Split('_');
                 AutoDefinition autoDef = new AutoDefinition()
                 {
                     infoAsPartner = part,
@@ -401,32 +402,47 @@ namespace Myro.Services.Generic.Vector
             // Try to subscribe to compatible contracts with the AutoDefinition objects
             foreach (var autoDef in autoDefs)
             {
-                Activate(Arbiter.Choice(
-                    RSUtils.FindCompatibleContract(TaskQueue, new Uri(autoDef.infoAsPartner.Service), new List<string>() { 
-                        analog.Contract.Identifier, analogArray.Contract.Identifier, contact.Contract.Identifier }),
-                    delegate(ServiceInfoType serviceInfoResponse)
+                AutoDefinition myAutoDef = autoDef;
+                //Console.WriteLine("Waiting 10 seconds before subscribing to partner list...");
+                //Thread.Sleep(10000);
+                var partRespPort = base.IssuePartnerSubscribe(autoDef.infoAsPartner.Name);
+                Activate(Arbiter.Choice(partRespPort,
+                    delegate(PartnerListType partListResponse)
                     {
-                        try
+                        foreach (var partner in partListResponse.PartnerList)
                         {
-                            subscribeAutoSingle(autoDef, serviceInfoResponse);
-                            autoDef.infoAsConnected = serviceInfoResponse;
-                        }
-                        catch (Exception e)
-                        {
-                            LogError("Exception while subscribing to auto partner", e);
+                            if (myAutoDef.infoAsConnected == null)
+                            {
+                                try
+                                {
+                                    ServiceInfoType serviceInfoResponse = RSUtils.RecieveSync(
+                                        RSUtils.FindCompatibleContract(TaskQueue, new Uri(partner.Service), new List<string>() { 
+                                    analog.Contract.Identifier, analogArray.Contract.Identifier, contact.Contract.Identifier }), Myro.Utilities.Params.defaultRecieveTimeout);
+                                    try
+                                    {
+                                        subscribeAutoSingle(myAutoDef, serviceInfoResponse);
+                                        myAutoDef.infoAsConnected = serviceInfoResponse;
+                                        LogInfo("Vector service " + base.ServiceInfo.Service + " subscribed auto update to " + serviceInfoResponse.Service + " with contract " + serviceInfoResponse.Contract);
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        LogError("Exception while subscribing to auto partner", e);
+                                    }
+                                }
+                                catch (NoContractFoundException)
+                                {
+                                    LogError("Could not subscribe to auto partner " + myAutoDef.infoAsPartner.Name + ".  Could not find a supported contract.");
+                                }
+                                catch (Exception e)
+                                {
+                                    LogError("Fault while searching for compatible contract", e);
+                                }
+                            }
                         }
                     },
                     delegate(Fault failure)
                     {
-                        Exception e = RSUtils.ExceptionOfFault(failure);
-                        if (e is NoContractFoundException)
-                        {
-                            LogError("Could not subscribe to auto partner " + autoDef.infoAsPartner.Name + ".  Could not find a supported contract.");
-                        }
-                        else if (e is Exception)
-                        {
-                            LogError("Fault while searching for compatible contract", failure);
-                        }
+                        LogError("Fault from subscription to partner list service", failure);
                     }));
             }
         }
@@ -439,7 +455,7 @@ namespace Myro.Services.Generic.Vector
         /// <param name="serviceInfo"></param>
         private void subscribeAutoSingle(AutoDefinition def, ServiceInfoType serviceInfo)
         {
-            Console.WriteLine("Trying to subscribe " + def.infoAsPartner.Name + " to " + serviceInfo.Service + " with contract " + serviceInfo.Contract);
+            //Console.WriteLine("Trying to subscribe " + def.infoAsPartner.Name + " to " + serviceInfo.Service + " with contract " + serviceInfo.Contract);
             // Check for each contract we know about and subscribe.
             if (serviceInfo.Contract.Equals(analog.Contract.Identifier))
             {
@@ -447,7 +463,7 @@ namespace Myro.Services.Generic.Vector
                 var notifyPort = new Port<analog.Replace>();
                 try
                 {
-                    RSUtils.RecieveSync(TaskQueue, partnerPort.Subscribe(notifyPort, typeof(analog.Replace)));
+                    RSUtils.RecieveSync(TaskQueue, partnerPort.Subscribe(notifyPort, typeof(analog.Replace)), Myro.Utilities.Params.defaultRecieveTimeout);
                     Activate(Arbiter.Receive(true, notifyPort,
                         delegate(analog.Replace replace)
                         {
@@ -471,7 +487,7 @@ namespace Myro.Services.Generic.Vector
                 var notifyPort = new Port<analogArray.Replace>();
                 try
                 {
-                    RSUtils.RecieveSync(TaskQueue, partnerPort.Subscribe(notifyPort, typeof(analogArray.Replace)));
+                    RSUtils.RecieveSync(TaskQueue, partnerPort.Subscribe(notifyPort, typeof(analogArray.Replace)), Myro.Utilities.Params.defaultRecieveTimeout);
                     Activate(Arbiter.Receive(true, notifyPort,
                         delegate(analogArray.Replace replace)
                         {
@@ -495,25 +511,46 @@ namespace Myro.Services.Generic.Vector
             {
                 var partnerPort = ServiceForwarder<contact.ContactSensorArrayOperations>(new Uri(serviceInfo.Service));
                 var notifyPort = new PortSet<contact.Replace, contact.Update>();
-                RSUtils.RecieveSync(TaskQueue, partnerPort.Subscribe(notifyPort, typeof(contact.Replace), typeof(contact.Update)));
-                Activate<Receiver>(
-                    Arbiter.Receive<contact.Replace>(true, notifyPort,
-                    delegate(contact.Replace replace)
-                    {
-                        int maxCount = replace.Body.Sensors.Count > def.count ? def.count : replace.Body.Sensors.Count;
-                        for (int i = 0; i < maxCount; i++)
-                            OperationsPort.Post(new SetByIndex(new SetByIndexRequestType()
+                RSUtils.RecieveSync(TaskQueue, partnerPort.Subscribe(notifyPort, typeof(contact.Replace), typeof(contact.Update)), Myro.Utilities.Params.defaultRecieveTimeout);
+
+                var contactNameMap = new Dictionary<int, int>();
+                Activate<Interleave>(new Interleave(
+                    new ExclusiveReceiverGroup(
+                        Arbiter.Receive<contact.Replace>(true, notifyPort,
+                        delegate(contact.Replace replace)
+                        {
+                            int maxCount = replace.Body.Sensors.Count > def.count ? def.count : replace.Body.Sensors.Count;
+                            contactNameMap.Clear();
+                            for (int i = 0; i < maxCount; i++)
                             {
-                                Index = def.startIndex + i,
-                                Value = replace.Body.Sensors[i].Pressed ? 1.0 : 0.0,
-                                Timestamp = replace.Body.Sensors[i].TimeStamp
-                            }));
-                    }),
-                    Arbiter.Receive<contact.Update>(true, notifyPort,
-                    delegate(contact.Update update)
-                    {
-                        LogError("Vector got update and not updating!!!");
-                    }));
+                                contactNameMap.Add(replace.Body.Sensors[i].HardwareIdentifier, i);
+                                OperationsPort.Post(new SetByIndex(new SetByIndexRequestType()
+                                {
+                                    Index = def.startIndex + i,
+                                    Value = replace.Body.Sensors[i].Pressed ? 1.0 : 0.0,
+                                    Timestamp = replace.Body.Sensors[i].TimeStamp
+                                }));
+                            }
+                        }),
+                        Arbiter.Receive<contact.Update>(true, notifyPort,
+                        delegate(contact.Update update)
+                        {
+                            try
+                            {
+                                int i = contactNameMap[update.Body.HardwareIdentifier];
+                                OperationsPort.Post(new SetByIndex(new SetByIndexRequestType()
+                                {
+                                    Index = def.startIndex + i,
+                                    Value = update.Body.Pressed ? 1.0 : 0.0,
+                                    Timestamp = update.Body.TimeStamp
+                                }));
+                            }
+                            catch (KeyNotFoundException)
+                            {
+                                LogError("Vector got update for contact sensor hardware identifier " + update.Body.HardwareIdentifier + " and doesn't know about this hardware ID.");
+                            }
+                        })),
+                    new ConcurrentReceiverGroup()));
             }
             else
                 throw new UnrecognizedContractException();

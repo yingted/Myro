@@ -9,27 +9,11 @@ namespace Myro.API
 {
     class MyroSound : IMyroSound
     {
-        Myro.Adapters.AdapterBank bank;
-        Myro.Adapters.AdapterSpec _soundAdapter = null;
-        Myro.Adapters.AdapterSpec SoundAdapter
-        {
-            get
-            {
-                if (_soundAdapter == null)
-                    try
-                    {
-                        _soundAdapter = bank.GetAdapterSpec("tonegen");
-                    }
-                    catch (Myro.Adapters.UnknownAdapterNameException)
-                    {
-                    }
-                return _soundAdapter;
-            }
-        }
+        Myro.Adapters.AdapterSpec soundAdapter;
 
         public MyroSound(Myro.Adapters.AdapterBank bank)
         {
-            this.bank = bank;
+            soundAdapter = bank.GetAdapterSpec("tonegen");
         }
 
         public IMyroSong ReadSong(string fileName)
@@ -59,12 +43,12 @@ namespace Myro.API
 
         public void beep(double duration, double frequency1, double frequency2)
         {
-            var values = new List<double>(){ frequency1, frequency2, duration };
+            var values = new List<double>() { frequency1, frequency2, duration };
             try
             {
-                SoundAdapter.GetVectorAdapter().SetAllElements(values);
+                ((Myro.Adapters.VectorAdapter)soundAdapter.Adapter).SetAllElements(values);
             }
-            catch (UnattachedAdapter)
+            catch (Exception)
             {
             }
         }
