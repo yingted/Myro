@@ -15,6 +15,7 @@ using Microsoft.Dss.Core.Attributes;
 using Microsoft.Dss.ServiceModel.Dssp;
 using Microsoft.Dss.ServiceModel.DsspServiceBase;
 using submgr = Microsoft.Dss.Services.SubscriptionManager;
+using Microsoft.Dss.Core.DsspHttp;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -96,7 +97,7 @@ namespace Myro.Services.Generic.Vector
         /// <summary>
         /// _state
         /// </summary>
-        [ServiceState(), InitialStatePartner(Optional = true)]
+        [InitialStatePartner(Optional = true)]
         protected VectorState _state = new VectorState();
 
         // NOTE: These are only used to get auto partners to show up in the
@@ -181,6 +182,38 @@ namespace Myro.Services.Generic.Vector
         /// </summary>
         protected virtual void SetCallback(SetRequestInfo request)
         {
+        }
+
+        [ServiceHandler(ServiceHandlerBehavior.Concurrent)]
+        public IEnumerator<ITask> GetHandler(Get get)
+        {
+            VectorState response = _state;
+            try
+            {
+                GetCallback(new GetAllRequestInfo());
+                get.ResponsePort.Post(_state);
+            }
+            catch (Exception e)
+            {
+                get.ResponsePort.Post(RSUtils.FaultOfException(e));
+            }
+            yield break;
+        }
+
+        [ServiceHandler(ServiceHandlerBehavior.Concurrent)]
+        public IEnumerator<ITask> HttpGetHandler(HttpGet get)
+        {
+            VectorState response = _state;
+            try
+            {
+                GetCallback(new GetAllRequestInfo());
+                get.ResponsePort.Post(new HttpResponseType(_state));
+            }
+            catch (Exception e)
+            {
+                get.ResponsePort.Post(RSUtils.FaultOfException(e));
+            }
+            yield break;
         }
 
         [ServiceHandler(ServiceHandlerBehavior.Exclusive)]

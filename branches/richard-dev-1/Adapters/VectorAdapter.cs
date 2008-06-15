@@ -57,8 +57,7 @@ namespace Myro.Adapters
         /// <returns></returns>
         public vector.VectorState GetState()
         {
-            lock (this)
-                return RSUtils.ReceiveSync<vector.VectorState>(opPort.Get(), Myro.Utilities.Params.defaultRecieveTimeout);
+            return RSUtils.ReceiveSync<vector.VectorState>(opPort.Get(), Myro.Utilities.Params.defaultRecieveTimeout);
         }
 
         /// <summary>
@@ -70,16 +69,15 @@ namespace Myro.Adapters
         /// <returns></returns>
         public double Get(int index)
         {
-            lock (this)
-                try
-                {
-                    var resp = RSUtils.ReceiveSync<vector.GetElementResponseType>(opPort.GetByIndex(index), Myro.Utilities.Params.defaultRecieveTimeout);
-                    return resp.Value;
-                }
-                catch (ArgumentOutOfRangeException)
-                {
-                    throw new AdapterArgumentException(Strings.IndexOutOfBounds(index));
-                }
+            try
+            {
+                var resp = RSUtils.ReceiveSync<vector.GetElementResponseType>(opPort.GetByIndex(index), Myro.Utilities.Params.defaultRecieveTimeout);
+                return resp.Value;
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                throw new AdapterArgumentException(Strings.IndexOutOfBounds(index));
+            }
         }
 
         /// <summary>
@@ -91,16 +89,15 @@ namespace Myro.Adapters
         /// <returns></returns>
         public double Get(string key)
         {
-            lock (this)
-                try
-                {
-                    var resp = RSUtils.ReceiveSync<vector.GetElementResponseType>(opPort.GetByKey(key), Myro.Utilities.Params.defaultRecieveTimeout);
-                    return resp.Value;
-                }
-                catch (KeyNotFoundException)
-                {
-                    throw new AdapterArgumentException(Strings.KeyNotFound(key));
-                }
+            try
+            {
+                var resp = RSUtils.ReceiveSync<vector.GetElementResponseType>(opPort.GetByKey(key), Myro.Utilities.Params.defaultRecieveTimeout);
+                return resp.Value;
+            }
+            catch (KeyNotFoundException)
+            {
+                throw new AdapterArgumentException(Strings.KeyNotFound(key));
+            }
         }
 
         /// <summary>
@@ -109,8 +106,7 @@ namespace Myro.Adapters
         /// <returns></returns>
         public List<double> GetAllElements()
         {
-            lock (this)
-                return RSUtils.ReceiveSync<vector.GetAllElementsResponseType>(opPort.GetAllElements(), Myro.Utilities.Params.defaultRecieveTimeout).Values;
+            return RSUtils.ReceiveSync<vector.GetAllElementsResponseType>(opPort.GetAllElements(), Myro.Utilities.Params.defaultRecieveTimeout).Values;
         }
 
         /// <summary>
@@ -120,15 +116,14 @@ namespace Myro.Adapters
         /// <param name="value"></param>
         public void Set(int index, double value)
         {
-            lock (this)
-                try
-                {
-                    RSUtils.ReceiveSync<DefaultUpdateResponseType>(opPort.SetByIndex(index, value, DateTime.Now), Myro.Utilities.Params.defaultRecieveTimeout);
-                }
-                catch (ArgumentOutOfRangeException)
-                {
-                    throw new AdapterArgumentException(Strings.IndexOutOfBounds(index));
-                }
+            try
+            {
+                RSUtils.ReceiveSync<DefaultUpdateResponseType>(opPort.SetByIndex(index, value, DateTime.Now), Myro.Utilities.Params.defaultRecieveTimeout);
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                throw new AdapterArgumentException(Strings.IndexOutOfBounds(index));
+            }
 
         }
 
@@ -139,15 +134,14 @@ namespace Myro.Adapters
         /// <param name="value"></param>
         public void Set(string key, double value)
         {
-            lock (this)
-                try
-                {
-                    RSUtils.ReceiveSync<DefaultUpdateResponseType>(opPort.SetByKey(key, value, DateTime.Now), Myro.Utilities.Params.defaultRecieveTimeout);
-                }
-                catch (KeyNotFoundException)
-                {
-                    throw new AdapterArgumentException(Strings.KeyNotFound(key));
-                }
+            try
+            {
+                RSUtils.ReceiveSync<DefaultUpdateResponseType>(opPort.SetByKey(key, value, DateTime.Now), Myro.Utilities.Params.defaultRecieveTimeout);
+            }
+            catch (KeyNotFoundException)
+            {
+                throw new AdapterArgumentException(Strings.KeyNotFound(key));
+            }
         }
 
         /// <summary>
@@ -156,8 +150,7 @@ namespace Myro.Adapters
         /// <param name="values"></param>
         public void SetAllElements(List<double> values)
         {
-            lock (this)
-                RSUtils.ReceiveSync<DefaultUpdateResponseType>(opPort.SetAllElements(values, DateTime.Now), Myro.Utilities.Params.defaultRecieveTimeout);
+            RSUtils.ReceiveSync<DefaultUpdateResponseType>(opPort.SetAllElements(values, DateTime.Now), Myro.Utilities.Params.defaultRecieveTimeout);
         }
     }
 }

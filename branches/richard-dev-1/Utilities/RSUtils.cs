@@ -28,14 +28,14 @@ namespace Myro.Utilities
                 T ret = default(T);
                 Fault error = null;
 
-                Console.WriteLine("ReceiveSync: starting");
+                //Console.WriteLine("ReceiveSync: starting");
                 ManualResetEvent signal = new ManualResetEvent(false);
                 Arbiter.Activate(taskQueue,
                     Arbiter.Choice<T, Fault>(
                         port,
                         delegate(T state)
                         {
-                            Console.WriteLine("ReceiveSync: got a " + state.GetType());
+                            //Console.WriteLine("ReceiveSync: got a " + state.GetType());
                             ret = state;
                             signal.Set();
                         },
@@ -46,13 +46,13 @@ namespace Myro.Utilities
                         }));
                 if (signal.WaitOne(timeout))
                 {
-                    Console.WriteLine("ReceiveSync: back!");
+                    //Console.WriteLine("ReceiveSync: back!");
                     ThrowIfFaultNotNull(error);
                     return ret;
                 }
                 else
                 {
-                    Console.WriteLine("ReceiveSync: timed out!");
+                    //Console.WriteLine("ReceiveSync: timed out!");
                     throw (new ReceiveTimedOutException());
                 }
             }
