@@ -250,12 +250,13 @@ namespace SimTestSuite
                     ret[i] = widthEach * i + offset;
                 return ret;
             }
-            else {
+            else
+            {
                 return new int[0];
             }
         }
 
-        private void drawCircleMeters(PictureBox control, Color color, double[] vals, double min, double max)
+        private void drawCircleMeters(PictureBox control, Color color, double[] vals, string[] labels, double min, double max)
         {
             if (control.IsHandleCreated)
             {
@@ -280,6 +281,12 @@ namespace SimTestSuite
                     int offset = maxCircleRadius - radii.ElementAt(i);
                     g.FillEllipse(brush, xs[i] + offset, offset, 2 * radii.ElementAt(i), 2 * radii.ElementAt(i));
                     g.DrawString(vals[i].ToString(), font, black, xs[i] + maxCircleRadius, (float)maxCircleRadius * 1.8f, format);
+                    Console.WriteLine(labels.Length + " labels");
+                    if (i < labels.Length)
+                    {
+                        g.DrawString(labels[i].ToString(), font, black, xs[i] + maxCircleRadius, 0, format);
+                        Console.WriteLine("Label: " + labels[i]);
+                    }
                 }
                 control.Image = bmp;
                 control.Invoke(new Action(delegate() { control.Refresh(); }));
@@ -289,19 +296,15 @@ namespace SimTestSuite
         private void update()
         {
             double[] contacts = rbt.Sensors.get("ir");
-            //Console.WriteLine("contact: " + contacts[0] + ", " + contacts[1]);
-            drawCircleMeters(contactSensorImg, Color.MediumVioletRed, contacts, 0.0, 1.0);
-            double[] stall = rbt.Sensors.get("stall");
-            drawCircleMeters(stallSensorImg, Color.Red, stall, 0.0, 1.0);
-            double[] light = rbt.Sensors.get("light");
-            //Console.WriteLine("light: " + light[0]);
-            drawCircleMeters(lightSensorImg, Color.DeepSkyBlue, light, 2000.0, 0.0);
-            double[] sonar = rbt.Sensors.get("sonar");
-            //Console.WriteLine("ir: " + ir[0]);
-            drawCircleMeters(SonarImg, Color.Tan, sonar, 40.0, 0.0);
-            double[] line = rbt.Sensors.get("line");
-            //Console.WriteLine("line: " + line[0]);
-            drawCircleMeters(lineSensorImg, Color.DarkGray, line, 0.0, 1.0);
+            drawCircleMeters(contactSensorImg, Color.MediumVioletRed, contacts, rbt.Sensors.getNames("ir"), 0.0, 1.0);
+            //double[] stall = rbt.Sensors.get("stall");
+            //drawCircleMeters(stallSensorImg, Color.Red, stall, rbt.Sensors.getNames("stall"), 0.0, 1.0);
+            //double[] light = rbt.Sensors.get("light");
+            //drawCircleMeters(lightSensorImg, Color.DeepSkyBlue, light, rbt.Sensors.getNames("light"), 2000.0, 0.0);
+            //double[] sonar = rbt.Sensors.get("sonar");
+            //drawCircleMeters(SonarImg, Color.Tan, sonar, rbt.Sensors.getNames("sonar"), 40.0, 0.0);
+            //double[] line = rbt.Sensors.get("line");
+            //drawCircleMeters(lineSensorImg, Color.DarkGray, line, rbt.Sensors.getNames("line"), 0.0, 1.0);
         }
 
         private void TestPanel_Load(object sender, EventArgs e)

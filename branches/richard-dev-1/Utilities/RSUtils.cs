@@ -21,33 +21,40 @@ namespace Myro.Utilities
         /// <typeparam name="T"></typeparam>
         /// <param name="port"></param>
         /// <returns></returns>
-        public static T RecieveSync<T>(DispatcherQueue taskQueue, PortSet<T, Fault> port, int timeout)
+        public static T ReceiveSync<T>(DispatcherQueue taskQueue, PortSet<T, Fault> port, int timeout)
         {
-            T ret = default(T);
-            Fault error = null;
+            lock (taskQueue)
+            {
+                T ret = default(T);
+                Fault error = null;
 
-            ManualResetEvent signal = new ManualResetEvent(false);
-            Arbiter.Activate(taskQueue,
-                Arbiter.Choice<T, Fault>(
-                    port,
-                    delegate(T state)
-                    {
-                        ret = state;
-                        signal.Set();
-                    },
-                    delegate(Fault failure)
-                    {
-                        error = failure;
-                        signal.Set();
-                    }));
-            if (signal.WaitOne(timeout))
-            {
-                ThrowIfFaultNotNull(error);
-                return ret;
-            }
-            else
-            {
-                throw (new ReceiveTimedOutException());
+                Console.WriteLine("ReceiveSync: starting");
+                ManualResetEvent signal = new ManualResetEvent(false);
+                Arbiter.Activate(taskQueue,
+                    Arbiter.Choice<T, Fault>(
+                        port,
+                        delegate(T state)
+                        {
+                            Console.WriteLine("ReceiveSync: got a " + state.GetType());
+                            ret = state;
+                            signal.Set();
+                        },
+                        delegate(Fault failure)
+                        {
+                            error = failure;
+                            signal.Set();
+                        }));
+                if (signal.WaitOne(timeout))
+                {
+                    Console.WriteLine("ReceiveSync: back!");
+                    ThrowIfFaultNotNull(error);
+                    return ret;
+                }
+                else
+                {
+                    Console.WriteLine("ReceiveSync: timed out!");
+                    throw (new ReceiveTimedOutException());
+                }
             }
         }
 
@@ -59,9 +66,9 @@ namespace Myro.Utilities
         /// <typeparam name="T"></typeparam>
         /// <param name="port"></param>
         /// <returns></returns>
-        public static T RecieveSync<T>(PortSet<T, Fault> port)
+        public static T ReceiveSync<T>(PortSet<T, Fault> port)
         {
-            return RecieveSync(port, -1);
+            return ReceiveSync(port, -1);
         }
 
         /// <summary>
@@ -72,9 +79,9 @@ namespace Myro.Utilities
         /// <typeparam name="T"></typeparam>
         /// <param name="port"></param>
         /// <returns></returns>
-        public static T RecieveSync<T>(PortSet<T, Fault> port, int timeout)
+        public static T ReceiveSync<T>(PortSet<T, Fault> port, int timeout)
         {
-            return RecieveSync(DssEnvironment.TaskQueue, port, timeout);
+            return ReceiveSync(DssEnvironment.TaskQueue, port, timeout);
         }
 
         /// <summary>
@@ -85,9 +92,9 @@ namespace Myro.Utilities
         /// <typeparam name="T"></typeparam>
         /// <param name="port"></param>
         /// <returns></returns>
-        public static T RecieveSync<T>(DispatcherQueue taskQueue, PortSet<T, Fault> port)
+        public static T ReceiveSync<T>(DispatcherQueue taskQueue, PortSet<T, Fault> port)
         {
-            return RecieveSync(taskQueue, port, -1);
+            return ReceiveSync(taskQueue, port, -1);
         }
 
 
@@ -146,6 +153,7 @@ namespace Myro.Utilities
             PortSet<ServiceInfoType, Fault> returnPort = new PortSet<ServiceInfoType, Fault>();
 
             PortSet<LookupResponse, Fault> responsePort = new PortSet<LookupResponse, Fault>();
+            //Console.WriteLine("RSUtils: Querying " + service);
             DssEnvironment.ServiceForwarderUnknownType(service).PostUnknownType(
                 new DsspDefaultLookup() { Body = new LookupRequestType(), ResponsePort = responsePort });
             Arbiter.Activate(taskQueue, Arbiter.Choice<LookupResponse, Fault>(
@@ -154,6 +162,7 @@ namespace Myro.Utilities
                 {
                     try
                     {
+                        //Console.WriteLine("RSUtils: Got response");
                         returnPort.Post(FindCompatibleContract(resp, contracts));
                     }
                     catch (NoContractFoundException e)

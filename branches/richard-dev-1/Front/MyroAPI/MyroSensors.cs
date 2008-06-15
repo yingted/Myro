@@ -32,6 +32,18 @@ namespace Myro.API
             }
         }
 
+        public string[] getNames(string name)
+        {
+            try
+            {
+                return ((Myro.Adapters.VectorAdapter)bank.GetAdapterSpec(name).Adapter).GetState().Keys.ToArray();
+            }
+            catch (Exception)
+            {
+                return new string[0];
+            }
+        }
+
         public double get(string name, int index)
         {
             try

@@ -19,7 +19,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
     
     public static class Contract
     {
-        public const string Identifier = "http://www.roboteducation.org/scribblerbase.html";
+        public const string Identifier = "http://www.roboteducation.org/schemas/2008/06/scribblerbase.html";
     }
 
     /// <summary>

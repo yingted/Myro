@@ -29,7 +29,7 @@ namespace Myro.Services.Generic.Vector
         /// The Dss Service contract
         /// </summary>
         [DataMember()]
-        public const String Identifier = "http://schemas.tempuri.org/2008/06/vector.html";
+        public const String Identifier = "http://www.roboteducation.org/schemas/2008/06/vector.html";
     }
 
     /// <summary>
@@ -69,7 +69,7 @@ namespace Myro.Services.Generic.Vector
         /// <summary>
         /// A cache to make key lookups faster.  Do not modify this.
         /// </summary>
-        [DataMember()]
+        //[DataMember()]
         public Dictionary<string, int> indexCache { get; set; }
 
         /// <summary>
@@ -77,6 +77,10 @@ namespace Myro.Services.Generic.Vector
         /// </summary>
         [DataMember()]
         public DateTime Timestamp { get; set; }
+
+        [DataMember()]
+        public List<AutoSubset> AutoSubsets { get; set; }
+
         #endregion
 
         #region VectorState Constructors
@@ -124,6 +128,7 @@ namespace Myro.Services.Generic.Vector
             Keys = (keys == null ? new List<string>() : new List<string>(keys));
             Timestamp = (timestamp == null ? DateTime.Now : timestamp);
             rebuildIndexCache();
+            AutoSubsets = new List<AutoSubset>();
         }
         #endregion
 
@@ -149,9 +154,44 @@ namespace Myro.Services.Generic.Vector
             else
                 Values = new List<double>(values);
         }
+        public void SetKeys(IEnumerable<string> keys)
+        {
+            Keys = new List<string>(keys);
+            rebuildIndexCache();
+        }
+        public void SetKey(int index, string key)
+        {
+            if (index < Keys.Count)
+            {
+                if (!Keys[index].Equals(key))
+                {
+                    Keys[index] = key;
+                    rebuildIndexCache();
+                }
+            }
+            else
+            {
+                for (int i = Keys.Count; i < index; i++)
+                    Keys.Add("");
+                if (Keys.Count != index)
+                    Console.WriteLine("*** VectorState Keys length inconsistency ***");
+                Keys.Add(key);
+                rebuildIndexCache();
+            }
+        }
         #endregion
 
         #region Private methods
+        internal void Validate()
+        {
+            if (Values == null)
+                Values = new List<double>();
+            if (Keys == null)
+                Keys = new List<string>();
+            if (AutoSubsets == null)
+                AutoSubsets = new List<AutoSubset>();
+            rebuildIndexCache();
+        }
         private void rebuildIndexCache()
         {
             indexCache = new Dictionary<string, int>(Keys.Count);
@@ -161,6 +201,19 @@ namespace Myro.Services.Generic.Vector
                     indexCache.Add(Keys[i], i);
         }
         #endregion
+    }
+
+    [DataContract]
+    public class AutoSubset
+    {
+        [DataMember(IsRequired = true)]
+        public string PartnerName;
+        [DataMember(IsRequired = true)]
+        public int startIndex;
+        [DataMember(IsRequired = true)]
+        public int length;
+        [DataMember(IsRequired = true)]
+        public List<string> keys;
     }
 
     /// <summary>
@@ -278,29 +331,29 @@ namespace Myro.Services.Generic.Vector
     /// The values and the last modification timestamp will be returned in a
     /// GetAllResponseType.
     /// </summary>
-    public class GetAllRequestType
+    public class GetAllElementsRequestType
     {
-        public GetAllRequestType() { }
+        public GetAllElementsRequestType() { }
     }
     [DataContract]
     [DataMemberConstructor]
-    public class GetAllResponseType
+    public class GetAllElementsResponseType
     {
         [DataMember]
         public List<double> Values { get; set; }
         [DataMember]
         public DateTime Timestamp { get; set; }
-        public GetAllResponseType()
+        public GetAllElementsResponseType()
         {
             Values = new List<double>();
             Timestamp = DateTime.Now;
         }
     }
-    public class GetAllElements : Get<GetAllRequestType, DsspResponsePort<GetAllResponseType>>
+    public class GetAllElements : Get<GetAllElementsRequestType, DsspResponsePort<GetAllElementsResponseType>>
     {
         public GetAllElements() : base() { }
-        public GetAllElements(GetAllRequestType body) : base(body) { }
-        public GetAllElements(GetAllRequestType body, DsspResponsePort<GetAllResponseType> responsePort) : base(body, responsePort) { }
+        public GetAllElements(GetAllElementsRequestType body) : base(body) { }
+        public GetAllElements(GetAllElementsRequestType body, DsspResponsePort<GetAllElementsResponseType> responsePort) : base(body, responsePort) { }
     }
 
 

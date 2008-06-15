@@ -27,7 +27,7 @@ namespace Myro.Services.ScribblerSim
     /// </summary>
     public static class Contract
     {
-        public const string Identifier = "http://www.roboteducation.org/scribblersim.html";
+        public const string Identifier = "http://www.roboteducation.org/schemas/2008/06/scribblersim.html";
     }
 
     public class ScribblerSimOperations : PortSet<

@@ -26,7 +26,7 @@ namespace Myro.Services.Scribbler.LightSensor
 {
     public static class Contract
     {
-        public const string Identifier = "http://www.roboteducation.org/scribblerlightsensor.html";
+        public const string Identifier = "http://www.roboteducation.org/schemas/2008/06/scribblerlightsensor.html";
     }
 
     [DisplayName("Scribbler Light Sensors")]

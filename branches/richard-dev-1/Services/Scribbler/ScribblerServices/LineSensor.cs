@@ -24,7 +24,7 @@ namespace Myro.Services.Scribbler.LineSensor
 {
     public static class Contract
     {
-        public const string Identifier = "http://www.roboteducation.org/scribblerlinesensor.html";
+        public const string Identifier = "http://www.roboteducation.org/schemas/2008/06/scribblerlinesensor.html";
     }
 
     [DisplayName("Scribbler Line Sensor")]

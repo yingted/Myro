@@ -115,12 +115,12 @@ namespace Myro.Adapters
 
         public void Stop()
         {
-            RSUtils.RecieveSync<DefaultUpdateResponseType>(drivePort.AllStop(), Myro.Utilities.Params.defaultRecieveTimeout);
+            RSUtils.ReceiveSync<DefaultUpdateResponseType>(drivePort.AllStop(), Myro.Utilities.Params.defaultRecieveTimeout);
         }
 
         public drive.DriveDifferentialTwoWheelState Get()
         {
-            return RSUtils.RecieveSync<drive.DriveDifferentialTwoWheelState>(drivePort.Get(), Myro.Utilities.Params.defaultRecieveTimeout);
+            return RSUtils.ReceiveSync<drive.DriveDifferentialTwoWheelState>(drivePort.Get(), Myro.Utilities.Params.defaultRecieveTimeout);
         }
 
         public void Set(drive.DriveDifferentialTwoWheelState state)

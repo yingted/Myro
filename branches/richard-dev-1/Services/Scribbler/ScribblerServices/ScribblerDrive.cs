@@ -25,7 +25,7 @@ namespace Myro.Services.Scribbler.Drive
 {
     public static class Contract
     {
-        public const string Identifier = "http://www.roboteducation.org/scribblerdrive.html";
+        public const string Identifier = "http://www.roboteducation.org/schemas/2008/06/scribblerdrive.html";
     }
 
     [DisplayName("Scribbler Drive")]

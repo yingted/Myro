@@ -28,7 +28,7 @@ namespace Myro.Services.Scribbler.StallSensor
 
     public static class Contract
     {
-        public const string Identifier = "http://www.roboteducation.org/scribblerstall.html";
+        public const string Identifier = "http://www.roboteducation.org/schemas/2008/06/scribblerstall.html";
     }
 
     [DisplayName("Scribbler Stall")]

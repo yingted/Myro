@@ -30,7 +30,7 @@ namespace Myro.Services.Scribbler.Bumper
 
     public static class Contract
     {
-        public const string Identifier = "http://www.roboteducation.org/scribblerirbumper.html";
+        public const string Identifier = "http://www.roboteducation.org/schemas/2008/06/scribblerirbumper.html";
     }
 
     [DisplayName("Scribbler Bumper")]

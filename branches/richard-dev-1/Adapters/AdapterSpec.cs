@@ -170,7 +170,7 @@ namespace Myro.Adapters
                     PortSet<LookupResponse, Fault> responsePort = new PortSet<LookupResponse, Fault>();
                     DssEnvironment.ServiceForwarderUnknownType(new Uri("dssp.tcp://localhost/" + Name)).PostUnknownType(
                         new DsspDefaultLookup() { Body = new LookupRequestType(), ResponsePort = responsePort });
-                    ServiceInfoType responseRecord = RSUtils.RecieveSync(responsePort, Myro.Utilities.Params.defaultRecieveTimeout);
+                    ServiceInfoType responseRecord = RSUtils.ReceiveSync(responsePort, Myro.Utilities.Params.defaultRecieveTimeout);
 
                     // Try to find a working contract for each adapter
                     foreach (var factory in adapterFactories)

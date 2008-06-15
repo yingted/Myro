@@ -24,7 +24,7 @@ namespace Myro.Services.Scribbler.ToneGenerator
 {
     public static class Contract
     {
-        public const string Identifier = "http://www.roboteducation.org/scribblertonegenerator.html";
+        public const string Identifier = "http://www.roboteducation.org/schemas/2008/06/scribblertonegenerator.html";
     }
 
     /// <summary>
@@ -71,7 +71,7 @@ namespace Myro.Services.Scribbler.ToneGenerator
             if (play.Frequency1 < 0 || play.Frequency2 < 0 || play.Duration < 0)
                 throw new ArgumentOutOfRangeException();
             else
-                RSUtils.RecieveSync<DefaultUpdateResponseType>(_scribblerPort.PlayTone(play), Myro.Utilities.Params.defaultRecieveTimeout);
+                RSUtils.ReceiveSync<DefaultUpdateResponseType>(_scribblerPort.PlayTone(play), Myro.Utilities.Params.defaultRecieveTimeout);
         }
     }
 }
