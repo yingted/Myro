@@ -25,6 +25,7 @@ using System.Threading;
 using W3C.Soap;
 using Myro.Utilities;
 using partnerList = Microsoft.Dss.Services.PartnerListManager;
+using partnerListS = Microsoft.Dss.Schemas.PartnerListManager;
 using analog = Microsoft.Robotics.Services.AnalogSensor.Proxy;
 using analogArray = Microsoft.Robotics.Services.AnalogSensorArray.Proxy;
 using contact = Microsoft.Robotics.Services.ContactSensor.Proxy;
@@ -137,6 +138,8 @@ namespace Myro.Services.Generic.Vector
 
         #endregion
 
+        #region Initialization
+
         /// <summary>
         /// Default Service Constructor
         /// </summary>
@@ -157,7 +160,10 @@ namespace Myro.Services.Generic.Vector
             subscribeAutos();
         }
 
+        #endregion
+
         #region Vector service handlers
+
         /// <summary>
         /// Callback giving you the opportunity to set the state before it is
         /// retrieved due to a request.  The requestInfo parameter will be
@@ -384,6 +390,7 @@ namespace Myro.Services.Generic.Vector
         #endregion
 
         #region Auto subscription methods
+
         /// <summary>
         /// Subscribes to any services specified in the partner list to
         /// automatically update the state.
@@ -407,29 +414,49 @@ namespace Myro.Services.Generic.Vector
                         where partner.Name.Name.StartsWith(autoPrefix)
                         select partner);
 
+                    foreach (var p in autoPartners)
+                        Console.WriteLine(p.Name);
+
                     // This method will take care of subscribing and updating state
-                    if (autoPartners.Count > 0)
-                        subscribeAutos2(autoPartners, autoPrefix.Length);
+                    //if (autoPartners.Count > 0)
+                    //    subscribeAutos2(autoPartners, autoPrefix.Length);
                 },
                 delegate(Fault failure)
                 {
                     LogError("Fault while getting partner list to subscribe to autos", failure);
                 }));
+
+            List<PartnerType> partnerList = new List<PartnerType>();
+            //var responsePort = new DsspResponsePort<DefaultUpsertResponseType>();
+            foreach (var subset in _state.AutoSubsets)
+            {
+                PartnerType partner = new PartnerType() { Name = new XmlQualifiedName(subset.PartnerName, Contract.Identifier) };
+                partnerList.Add(partner);
+                //base.PartnerListManagerPort.Post(new partnerList.Upsert() { Body = partner, ResponsePort = responsePort });
+            }
+            //Activate(Arbiter.MultipleItemReceive(responsePort, _state.AutoSubsets.Count,
+            //    delegate(ICollection<DefaultUpsertResponseType> successes, ICollection<Fault> failures)
+            //    {
+            //        foreach (Fault failure in failures)
+            //            LogError("Inserting partner failed", failure);
+            subscribeAutos2(partnerList);
+            //}));
         }
 
         /// <summary>
         /// Once we have a list of auto partners, this method creates AutoDefiniton
-        /// objects for each auto partner, and calls subscribeAutoSingle to subscribe
-        /// to each one.
+        /// objects for each auto partner.  It then waits for each partner to be
+        /// found, and calls subscribeAutoSingle to subscribe to each one.
         /// </summary>
         /// <param name="partList"></param>
         /// <param name="removeFromName"></param>
-        private void subscribeAutos2(IList<PartnerType> partList, int removeFromName)
+        private void subscribeAutos2(IList<PartnerType> partList)
         {
             // Create AutoDefinition objects
             autoDefs = new List<AutoDefinition>(partList.Count);
             //int lastIndex = 0;
             //List<string> allKeys = new List<string>();
+            List<double> allValues = new List<double>();
             foreach (var part in partList)
             {
                 // Create AutoDefinition object and add to list
@@ -446,17 +473,62 @@ namespace Myro.Services.Generic.Vector
                 {
                     infoAsPartner = part,
                     startIndex = 0,
-                    count = 0,
+                    count = (subset == default(AutoSubset) || subset.length < 1 ? 0 : subset.length),
                     subsetStart = (subset == default(AutoSubset) ? 0 : subset.startIndex),
-                    subsetCount = (subset == default(AutoSubset) ? Int32.MaxValue : subset.length),
+                    subsetCount = (subset == default(AutoSubset) ? 0 : subset.length),
                     keys = (subset == default(AutoSubset) ? new List<string>() : subset.keys)
                 };
                 autoDefs.Add(autoDef);
+
+                if (autoDef.subsetCount >= 1)
+                    // Also build a default vector
+                    for (int i = 0; i < autoDef.subsetCount; i++)
+                        allValues.Add(0.0);
 
                 // Update loop variables
                 //lastIndex += keys.Length;
                 //allKeys.AddRange(keys);
             }
+
+            // Set values, and take keys provided in subset defs by user
+            _state.Values = allValues;
+            applyKeysFromSubsets();
+
+            //var upsertRespPort = new DsspResponsePort<DefaultUpsertResponseType>();
+            //PartnerListManagerPort.Post(new partnerList.Upsert() { Body = new PartnerType() { Name = new XmlQualifiedName("iRobotGenericDrive", Microsoft.Dss.ServiceModel.Dssp.Contract.Identifier) }, ResponsePort = upsertRespPort });
+            //Activate(Arbiter.Choice(upsertRespPort,
+            //    delegate(DefaultUpsertResponseType suc)
+            //    {
+            //        //var queryRespPort = new DsspResponsePort<Microsoft.Dss.Schemas.PartnerListManager.QueryResponseType>();
+            //        //PartnerListManagerPort.Post(new partnerList.Query() { Body = new partnerListS.QueryRequestType() { Name = new XmlQualifiedName("iRobotGenericDrive", Contract.Identifier) }, ResponsePort = queryRespPort });
+            //        //Activate(Arbiter.Choice(queryRespPort,
+            //        //    delegate(partnerListS.QueryResponseType qsuc)
+            //        //    {
+            //        //        Console.WriteLine(qsuc.Partner.Name + " : " + qsuc.Partner.Contract + " : " + qsuc.Partner.Service);
+            //        //    },
+            //        //    delegate(Fault failure)
+            //        //    {
+            //        //        Console.WriteLine("Fault querying");
+            //        //    }));
+            //        var partsRespPort = base.IssuePartnerSubscribe(new XmlQualifiedName("iRobotGenericDrive", Microsoft.Dss.ServiceModel.Dssp.Contract.Identifier));
+            //        Activate(Arbiter.Choice(partsRespPort,
+            //            delegate(PartnerListType partListResponse)
+            //            {
+            //                foreach (var partner in partListResponse.PartnerList)
+            //                {
+            //                    Console.WriteLine(partner.Name + " : " + partner.Contract + " : " + partner.Service);
+            //                }
+            //            },
+            //            delegate(Fault failure)
+            //            {
+            //                Console.WriteLine("Fault querying");
+            //            }));
+            //    },
+            //    delegate(Fault fail)
+            //    {
+            //        Console.WriteLine("Fault upserting");
+            //    }));
+
 
             // Create the new vector state reflecting the keys
             //List<double> allValues = new List<double>(from k in allKeys select 0.0);
@@ -470,13 +542,20 @@ namespace Myro.Services.Generic.Vector
             // Try to subscribe to compatible contracts with the AutoDefinition objects
             foreach (var autoDef in autoDefs)
             {
+
                 AutoDefinition myAutoDef = autoDef;
                 //Console.WriteLine("Waiting 10 seconds before subscribing to partner list...");
                 //Thread.Sleep(10000);
                 var partRespPort = base.IssuePartnerSubscribe(myAutoDef.infoAsPartner.Name);
+                Console.WriteLine("Looking for " + myAutoDef.infoAsPartner.Name);
                 Activate(Arbiter.Choice(partRespPort,
                     delegate(PartnerListType partListResponse)
                     {
+                        Console.WriteLine("Found " + partListResponse.PartnerList.Count + " for " + myAutoDef.infoAsPartner.Name);
+                        if (partListResponse.PartnerList.Count > 1)
+                            LogWarning("More than one partner found for " + myAutoDef.infoAsPartner.Name);
+                        else if (partListResponse.PartnerList.Count < 1)
+                            LogWarning("No partners found for " + myAutoDef.infoAsPartner.Name);
                         foreach (var partner in partListResponse.PartnerList)
                         {
                             if (myAutoDef.infoAsConnected == null)
@@ -514,6 +593,7 @@ namespace Myro.Services.Generic.Vector
                     },
                     delegate(Fault failure)
                     {
+                        Console.WriteLine("Fault for " + myAutoDef.infoAsPartner.Name);
                         LogError("Fault from subscription to partner list service", failure);
                     }));
                 //Thread.Sleep(2000);
@@ -593,18 +673,18 @@ namespace Myro.Services.Generic.Vector
                                 Arbiter.Receive<contact.Replace>(true, notifyPort,
                                     delegate(contact.Replace replace)
                                     {
-                                        if (def.keys.Count < replace.Body.Sensors.Count)
+                                        if (def.hwKeys.Count < replace.Body.Sensors.Count)
                                         {
-                                            def.keys.Capacity = replace.Body.Sensors.Count;
-                                            while (def.keys.Count < replace.Body.Sensors.Count) def.keys.Add("");
+                                            def.hwKeys.Capacity = replace.Body.Sensors.Count;
+                                            while (def.hwKeys.Count < replace.Body.Sensors.Count) def.hwKeys.Add("");
                                         }
                                         // Refresh the HW ID map
                                         contactHWIDMap.Clear();
                                         for (int i = 0; i < replace.Body.Sensors.Count; i++)
                                         {
                                             contactHWIDMap.Add(replace.Body.Sensors[i].HardwareIdentifier, i);
-                                            if (def.keys[i] == null || def.keys[i].Length <= 0)
-                                                def.keys[i] = replace.Body.Sensors[i].Name;
+                                            if (def.hwKeys[i] == null || def.hwKeys[i].Length <= 0)
+                                                def.hwKeys[i] = replace.Body.Sensors[i].Name;
                                         }
                                         autoSubscribeNotificationHelper(def,
                                             new List<double>(from s in replace.Body.Sensors select (s.Pressed ? 1.0 : 0.0)),
@@ -649,29 +729,37 @@ namespace Myro.Services.Generic.Vector
             // Figure out how many values we are actually using from this
             // publisher, based on the subset specification for this
             // subscription
-            int useableCount =
-                (((autoDef.subsetStart + autoDef.subsetCount) <= values.Count) ?
+            int useableValueCount =
+                ((autoDef.subsetStart + (autoDef.subsetCount >= 1 ? autoDef.subsetCount : Int32.MaxValue)) <= values.Count) ?
                 autoDef.subsetCount :
-                (values.Count - autoDef.subsetStart));
-            if (useableCount < 0)
-                useableCount = 0;
+                (values.Count - autoDef.subsetStart);
+            if (useableValueCount < 0)
+                useableValueCount = 0;
+            int vectorPartCount =
+                (autoDef.subsetCount >= 1) ?
+                autoDef.subsetCount :
+                useableValueCount;
             //Console.WriteLine("Vector: for " + autoDef.infoAsPartner.Name.Name + " got " + values.Count + " values with " + useableCount + " useable");
 
             // If the number of values has changed, we need to rearrange the vector
-            if (useableCount != autoDef.count)
+            if (vectorPartCount != autoDef.count)
             {
                 // Shift Vector elements (not calling SetAll because we'll call SetKeys later to rebuild index cache)
-                var newValues = new List<double>(_state.Values.Count + useableCount - autoDef.count);
+                var newValues = new List<double>(_state.Values.Count + vectorPartCount - autoDef.count);
                 newValues.AddRange(_state.Values.GetRange(0, autoDef.startIndex));
-                newValues.AddRange(values.GetRange(autoDef.subsetStart, useableCount));
+                newValues.AddRange(values.GetRange(autoDef.subsetStart, useableValueCount));
+                for (int i = useableValueCount; i < vectorPartCount; i++)
+                    newValues.Add(0.0);
                 newValues.AddRange(_state.Values.GetRange(autoDef.startIndex + autoDef.count, _state.Values.Count - (autoDef.startIndex + autoDef.count)));
+                if (newValues.Count != (_state.Values.Count + vectorPartCount - autoDef.count))
+                    LogError("Vector length consistency check No. 1 failed!!!");
                 _state.Values = newValues;
                 _state.Timestamp = timestamp;
 
                 // Update AutoDefinitions startIndex's
                 int firstChangedDef = autoDefs.IndexOf(autoDef) + 1;
-                autoDef.count = useableCount;
-                int lastIndex = autoDef.startIndex + useableCount;
+                autoDef.count = vectorPartCount;
+                int lastIndex = autoDef.startIndex + vectorPartCount;
                 for (int i = firstChangedDef; i < autoDefs.Count; i++)
                 {
                     autoDefs[i].startIndex = lastIndex;
@@ -680,29 +768,19 @@ namespace Myro.Services.Generic.Vector
 
                 // Consistency check
                 if (lastIndex != _state.Values.Count)
-                    LogError("Vector length consistency check failed!!!");
+                    LogError("Vector length consistency check No. 2 failed!!!");
 
                 // Reapply keys
-                var newKeys = new List<string>(_state.Values.Count);
-                foreach (var def in autoDefs)
-                    for (int i = 0; i < def.count; i++)
-                    {
-                        int defIndex = i + def.subsetStart;
-                        //int stateIndex = i + def.startIndex;
-                        if (defIndex < def.keys.Count)
-                            newKeys.Add(def.keys[defIndex]);
-                        else
-                            newKeys.Add("");
-                    }
-                _state.SetKeys(newKeys);
+                applyKeysFromSubsets();
 
                 // Send replace notification, a lot changed
+                LogInfo("Vector length changed");
                 SendNotification(new Replace(_state));
             }
             else
             {
                 // Just modify the affected elements
-                for (int i = 0; i < useableCount; i++)
+                for (int i = 0; i < useableValueCount; i++)
                     _state.Values[autoDef.startIndex + i] = values[autoDef.subsetStart + i];
                 _state.Timestamp = timestamp;
 
@@ -712,6 +790,27 @@ namespace Myro.Services.Generic.Vector
                 else
                     SendNotification(new SetAllElements(new SetAllRequestType() { Values = _state.Values, Timestamp = timestamp }));
             }
+        }
+
+        private void applyKeysFromSubsets()
+        {
+            // Reapply keys
+            var newKeys = new List<string>(_state.Values.Count);
+            foreach (var def in autoDefs)
+                for (int i = 0; i < def.count; i++)
+                {
+                    int defIndex = i + def.subsetStart;
+                    // Try to get a key, first from user, then from hardware, if nothing else just blank
+                    if (i < def.keys.Count)
+                        newKeys.Add(def.keys[i]);
+                    else if (defIndex < def.hwKeys.Count)
+                        newKeys.Add(def.hwKeys[defIndex]);
+                    else
+                        newKeys.Add("");
+                }
+            _state.SetKeys(newKeys);
+            if (newKeys.Count != _state.Values.Count)
+                LogError("Key length != vector length!!!");
         }
 
         /// <summary>
@@ -736,7 +835,8 @@ namespace Myro.Services.Generic.Vector
             public int count;
             public int subsetStart;
             public int subsetCount;
-            public List<string> keys;
+            public List<string> keys = new List<string>();
+            public List<string> hwKeys = new List<string>();
 
             public ServiceInfoType infoAsConnected = null;
         }
