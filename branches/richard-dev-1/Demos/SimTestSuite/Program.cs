@@ -17,7 +17,7 @@ namespace SimTestSuite
 
         public void start()
         {
-            scribbler = new Robot("C:\\Microsoft Robotics Dev Studio 2008\\config\\Create.manifest\\Create.manifest.xml");
+            scribbler = new Robot("C:\\Microsoft Robotics Dev Studio 2008\\config\\Create1.manifest\\Create1.manifest.xml");
 
             startGUI();
         }

@@ -58,7 +58,7 @@ namespace SimTestSuite
             {
                 //Console.WriteLine("update");
                 this.update();
-                Thread.Sleep(250);
+                Thread.Sleep(100);
             }
         }
 
@@ -295,10 +295,10 @@ namespace SimTestSuite
 
         private void update()
         {
-            double[] contacts = rbt.Sensors.get("ir");
-            drawCircleMeters(contactSensorImg, Color.MediumVioletRed, contacts, rbt.Sensors.getNames("ir"), 0.0, 1.0);
-            //double[] stall = rbt.Sensors.get("stall");
-            //drawCircleMeters(stallSensorImg, Color.Red, stall, rbt.Sensors.getNames("stall"), 0.0, 1.0);
+            double[] contacts = rbt.Sensors.get("bumpers");
+            drawCircleMeters(contactSensorImg, Color.MediumVioletRed, contacts, rbt.Sensors.getNames("bumpers"), 0.0, 1.0);
+            double[] stall = rbt.Sensors.get("stall");
+            drawCircleMeters(stallSensorImg, Color.Red, stall, rbt.Sensors.getNames("stall"), 0.0, 1.0);
             //double[] light = rbt.Sensors.get("light");
             //drawCircleMeters(lightSensorImg, Color.DeepSkyBlue, light, rbt.Sensors.getNames("light"), 2000.0, 0.0);
             //double[] sonar = rbt.Sensors.get("sonar");

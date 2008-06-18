@@ -36,15 +36,15 @@ namespace Myro.Services.Scribbler.ToneGenerator
     [AlternateContract(vector.Contract.Identifier)] //implementing the generic contract
     public class ScribblerToneGenerator : vector.VectorService
     {
-        [Partner("ScribblerBase",
-            Contract = brick.Contract.Identifier,
-            CreationPolicy = PartnerCreationPolicy.UseExistingOrCreate,
-            Optional = false)]
+        /// <summary>
+        /// Robot base partner
+        /// </summary>
+        [Partner("ScribblerBase", Contract = brick.Contract.Identifier,
+            CreationPolicy = PartnerCreationPolicy.UseExistingOrCreate, Optional = false)]
         private brick.ScribblerOperations _scribblerPort = new brick.ScribblerOperations();
 
-
         /// <summary>
-        /// Default Service Constructor
+        /// Constructor
         /// </summary>
         public ScribblerToneGenerator(DsspServiceCreationPort creationPort)
             : base(creationPort)
@@ -55,12 +55,10 @@ namespace Myro.Services.Scribbler.ToneGenerator
                 DateTime.Now);
         }
 
+        /// <summary>
+        /// Actuator callback
+        /// </summary>
         protected override void SetCallback(Myro.Services.Generic.Vector.SetRequestInfo request)
-        {
-            playTone();
-        }
-
-        private void playTone()
         {
             brick.PlayToneBody play = new brick.PlayToneBody()
             {
@@ -71,7 +69,9 @@ namespace Myro.Services.Scribbler.ToneGenerator
             if (play.Frequency1 < 0 || play.Frequency2 < 0 || play.Duration < 0)
                 throw new ArgumentOutOfRangeException();
             else
-                RSUtils.ReceiveSync<DefaultUpdateResponseType>(_scribblerPort.PlayTone(play), Myro.Utilities.Params.defaultRecieveTimeout);
+                Activate(Arbiter.Choice(_scribblerPort.PlayTone(play),
+                    delegate(DefaultUpdateResponseType success) { },
+                    delegate(Fault failure) { LogError("Fault playing tone", failure); }));
         }
     }
 }

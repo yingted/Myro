@@ -198,7 +198,7 @@ namespace Myro.Services.Generic.Vector
             int max = Keys.Count > Values.Count ? Values.Count : Keys.Count;
             for (int i = 0; i < max; i++)
                 if (Keys[i].Length > 0)
-                    indexCache.Add(Keys[i], i);
+                    indexCache[Keys[i]] = i;
         }
         #endregion
     }
