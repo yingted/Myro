@@ -1012,8 +1012,8 @@ class Picture(object):
         else: # "gray", "blob"
             self.image = PyImage.frombuffer("L", (self.width, self.height),
                                             data, 'raw', "L", 0, 1)
-        if self.image.mode != "RGB": # palette
-             self.image = self.image.convert("RGB")
+        if self.image.mode != "RGBA": # palette
+             self.image = self.image.convert("RGBA")
         self.pixels = self.image.load()
         self.palette = self.image.getpalette()
         self.filename = 'Camera Image'
@@ -1024,8 +1024,8 @@ class Picture(object):
     def load(self, filename):
         #self.image = tk.PhotoImage(file=filename, master=_root)
         self.image = PyImage.open(filename)
-        if self.image.mode != "RGB": # palette
-             self.image = self.image.convert("RGB")
+        if self.image.mode != "RGBA": # palette
+             self.image = self.image.convert("RGBA")
         self.pixels = self.image.load()
         self.width = self.image.size[0]
         self.height = self.image.size[1]
@@ -1039,46 +1039,17 @@ class Picture(object):
         return Pixel( x, y, self)
     def getColor(self, x, y):
         retval = self.pixels[x, y]
-        if self.image.mode == "P": # Palette
-            # gif, need to look up color in palette
-            return Color( self.palette[retval * 3 + 0],
-                          self.palette[retval * 3 + 1],
-                          self.palette[retval * 3 + 2])
-        elif self.image.mode == "RGB": # 3 bytes
-            return Color(retval)
-        elif self.image.mode == "L": # Grayscale
-            # gif, need to look up color in palette
-            return Color(retval, retval, retval)
+        return Color(retval)
     def setColor(self, x, y, newColor):
-        if self.image.mode == "P":
-            # first look up closest color, get index
-            minDistance = 10000000
-            minIndex = 0
-            for i in range(0, len(self.palette), 3):
-                d = distance(newColor, Color(self.palette[i + 0],
-                                             self.palette[i + 1],
-                                             self.palette[i + 2]))
-                if d < minDistance:
-                    minDistance, minIndex= d, i
-            # put that index in the position
-            self.pixels[x, y] = minIndex
-        elif self.image.mode == "RGB": # 3 tuple
-            self.pixels[x, y] = tuple(newColor.getRGB())
-        elif self.image.mode == "L": # 1 int
-            self.pixels[x, y] = sum(newColor.getRGB())/3 # avg or the three values
+        self.pixels[x, y] = tuple(newColor.getRGBA())
     def setRGB(self, x, y, rgb):
-         self.setColor(x, y, Color(*rgb))
+        self.setColor(x, y, Color(*rgb))
     def getRGB(self, x, y):
-        retval = self.pixels[x, y]
-        if self.image.mode == "P":
-            # gif, need to look up color in palette
-            return ( int(self.palette[retval * 3 + 0]),
-                     int(self.palette[retval * 3 + 1]),
-                     int(self.palette[retval * 3 + 2]))
-        elif self.image.mode == "RGB":
-            return retval
-        elif self.image.mode == "L":
-            return (retval, retval, retval)
+        return self.pixels[x, y][:3]
+    def getRGBA(self, x, y):
+        return self.pixels[x, y]
+    def getAlpha(self, x, y):
+        return self.pixels[x, y][3]
 
 class Pixel(object):
     def __init__(self, x, y, picture):
@@ -1089,54 +1060,40 @@ class Pixel(object):
         # we might need this, for gifs:
         self.palette = self.picture.image.getpalette()
     def __repr__(self):
-        return ("<Pixel instance (r=%d, g=%d, b=%d) " % tuple(self.getRGB())) + ("at (%d, %d)>" % (self.x, self.y))
+        rgba = self.getRGBA()
+        return ("<Pixel instance (r=%d, g=%d, b=%d, a=%d) at (%d, %d)>"  
+                % (rgba[0],
+                   rgba[1],
+                   rgba[2],
+                   rgba[3],
+                   self.x, 
+                   self.y))
     def getPixel(self, x, y):
         return Pixel( x, y, self.picture)
     def getColor(self):
         retval = self.pixels[self.x, self.y]
-        if self.picture.image.mode == "P":
-            # gif, need to look up color in palette
-            return Color( self.palette[retval * 3 + 0],
-                          self.palette[retval * 3 + 1],
-                          self.palette[retval * 3 + 2])
-        elif self.picture.image.mode == "RGB":
-            return Color(retval)
-        elif self.picture.image.mode == "L":
-            return Color(retval, retval, retval)
+        return Color(retval)
     def setColor(self, newColor):
-        if self.picture.image.mode == "P":
-            # first look up closest color, get index
-            minDistance = 10000000
-            minIndex = 0
-            for i in range(0, len(self.palette), 3):
-                d = distance(newColor, Color(self.palette[i + 0],
-                                             self.palette[i + 1],
-                                             self.palette[i + 2]))
-                if d < minDistance:
-                    minDistance, minIndex= d, i
-            # put that index in the position
-            self.pixels[self.x, self.y] = minIndex
-        elif self.picture.image.mode == "RGB":
-            self.pixels[self.x, self.y] = tuple(newColor.getRGB())
-        elif self.picture.image.mode == "L":
-            self.pixels[self.x, self.y] = sum(newColor.getRGB())/3 # avg
+         self.pixels[self.x, self.y] = tuple(newColor.getRGBA())
     def setRGB(self, rgb):
          self.setColor(Color(*rgb))
     def getRGB(self):
-        retval = self.pixels[self.x, self.y]
-        if self.picture.image.mode == "P":
-            # gif, need to look up color in palette
-            return ( int(self.palette[retval * 3 + 0]),
-                     int(self.palette[retval * 3 + 1]),
-                     int(self.palette[retval * 3 + 2]))
-        elif self.picture.image.mode == "RGB":
-            return retval
-        elif self.picture.image.mode == "L":
-            return retval, retval, retval
+        return self.pixels[self.x, self.y][:3]
+    def getRGBA(self):
+        return self.pixels[self.x, self.y]
+    def getAlpha(self):
+        return self.pixels[self.x, self.y][3]
+    def setAlpha(self, alpha):
+        rgba = self.pixels[self.x, self.y]
+        self.pixels[self.x, self.y] = (rgba[0], rgba[1], rgba[2], alpha)
+
     def __eq__(self, other):
-        o1 = self.getRGB()
-        o2 = other.getRGB()
-        return (o1[0] == o2[0] and o1[1] == o2[1] and o1[2] == o2[2])
+        o1 = self.getRGBA()
+        o2 = other.getRGBA()
+        return (o1[0] == o2[0] and 
+                o1[1] == o2[1] and 
+                o1[2] == o2[2] and
+                o1[3] == o2[3])
     def __sub__(self, other):
         o1 = self.getRGB()
         o2 = other.getRGB()
@@ -1160,27 +1117,47 @@ class Pixel(object):
 
 class Color(object):
     def __init__(self, *rgb):
+        """
+        Returns a Color object. Takes red, green, blue, and optionally
+        a transparency (called alpha). All values are between 0 and 255).
+        """
+        self.alpha = 255
         if len(rgb) == 1:
             self.rgb = rgb[0]
         elif len(rgb) == 3:
             self.rgb = rgb
+        elif len(rgb) == 4:
+            self.rgb = rgb[:-1]
+            self.alpha = rgb[-1]
         else:
-            raise AttributeError, "invalid colors to Color; need 3 integers: red, green, blue"
+            raise AttributeError, "invalid arguments to Color(); needs at least 3 integers: red, green, blue (transparency optional)"
         self.rgb = map(lambda v: int(max(min(v,255),0)), self.rgb)
     def __repr__(self):
-        return "<Color instance (r=%d, g=%d, b=%d)>)" % tuple(self.rgb)
+        return "<Color instance (r=%d, g=%d, b=%d, a=%d)>)" % (self.rgb[0],
+                                                               self.rgb[1],
+                                                               self.rgb[2],
+                                                               self.alpha)
     def getColor(self):
         return Color(self.rgb)
+    def getAlpha(self):
+         return self.alpha
+    def setAlpha(self, value):
+         self.alpha = value
     def setColor(self, color):
         self.rgb = color.getRGB()
     def setRGB(self, rgb):
         self.rgb = copy(rgb)
     def getRGB(self):
         return self.rgb
+    def getRGBA(self):
+        return (self.rgb[0], self.rgb[1], self.rgb[2], self.alpha)
     def __eq__(self, other):
-        o1 = self.getRGB()
-        o2 = other.getRGB()
-        return (o1[0] == o2[0] and o1[1] == o2[1] and o1[2] == o2[2])
+        o1 = self.getRGBA()
+        o2 = other.getRGBA()
+        return (o1[0] == o2[0] and 
+                o1[1] == o2[1] and 
+                o1[2] == o2[2] and 
+                o1[3] == o2[3])
     def __sub__(self, other):
         o1 = self.getRGB()
         o2 = other.getRGB()
@@ -1309,7 +1286,6 @@ class Pixmap:
         r,g,b are in range(256)
 
         """
-        
         value = _tkCall(self.image.get, x,y)
         if type(value) ==  int:
             return [value, value, value]

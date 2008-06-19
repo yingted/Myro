@@ -1185,9 +1185,9 @@ def _mouseCallback(point, name="default"):
     picture = myro.globvars.pictures[name]
     pixel = picture.getPixel(point.x, point.y)
     window.lastX, window.lastY = point.x, point.y
-    rgb = pixel.getRGB()
-    window.setStatusDirect("(%d, %d): (%d,%d,%d)" %
-                           (point.x, point.y, rgb[0], rgb[1], rgb[2]))
+    rgba = pixel.getRGBA()
+    window.setStatusDirect("(%d, %d): (%d,%d,%d,a=%d)" %
+                           (point.x, point.y, rgb[0], rgb[1], rgb[2], rgb[3]))
 
 def _mouseCallbackRelease(point, name="default"):
     window = myro.globvars.windows[name]
@@ -1304,8 +1304,14 @@ def getColor(pixel):
 def setRGB(pixel_or_color, rgb):
     return pixel_or_color.setRGB(rgb)
 
+def setRGBA(pixel_or_color, rgba):
+    return pixel_or_color.setRGBA(rgba)
+
 def getRGB(pixel_or_color):
     return pixel_or_color.getRGB()
+
+def getRGBA(pixel_or_color):
+    return pixel_or_color.getRGBA()
 
 def setRed(pixel, value):
     return pixel.setColor(Color(value, pixel.getRGB()[1], pixel.getRGB()[2]))
@@ -1316,11 +1322,17 @@ def setGreen(pixel, value):
 def setBlue(pixel, value):
     return pixel.setColor(Color(pixel.getRGB()[0], pixel.getRGB()[1], value))
 
+def setAlpha(pixel, value):
+    return pixel.setAlpha(value)
+
+def getAlpha(pixel):
+    return pixel.getAlpha()
+
 def setColor(pixel, color):
     return pixel.setColor(color)
 
-def makeColor(red, green, blue):
-    return Color(red, green, blue)
+def makeColor(red, green, blue, alpha=255):
+    return Color(red, green, blue, alpha)
 
 def makeDarker(color):
     return color.makeDarker()
