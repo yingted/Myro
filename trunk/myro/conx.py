@@ -22,17 +22,10 @@ except:
         raise ImportError, "The Python library Numeric or numpy is not installed"
 import math, random, time, sys, operator
 try:
-    import pyrobot.system.share as share
+    import psyco; psyco.full()
+    print "Conx, version %s (psyco enabled)" % __version__.split()[1]
 except:
-    class share: debug = 0
-if not share.debug:
-    try:
-        import psyco; psyco.full()
-        print "Conx, version %s (psyco enabled)" % __version__.split()[1]
-    except:
-        print "Conx, version %s (regular speed)" % __version__.split()[1]
-else:
-    print "Conx, version %s (debug; regular speed)" % __version__.split()[1]
+    print "Conx, version %s (regular speed)" % __version__.split()[1]
 
 def reverse(lyst):
     """ Returns a reversed list. """
