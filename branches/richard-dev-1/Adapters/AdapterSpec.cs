@@ -131,10 +131,10 @@ namespace Myro.Adapters
         //    ServiceConfig = serviceConfig;
         //}
 
-        public AdapterSpec(string name, IEnumerable<IAdapterFactory> adapterFactories)
+        public AdapterSpec(string name, List<IAdapterFactory> adapterFactories)
         {
             Name = name;
-            this.adapterFactories = new List<IAdapterFactory>(adapterFactories);
+            this.adapterFactories = adapterFactories;
         }
 
         ///// <summary>

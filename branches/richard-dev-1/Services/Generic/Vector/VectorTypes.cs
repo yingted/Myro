@@ -209,11 +209,11 @@ namespace Myro.Services.Generic.Vector
         [DataMember(IsRequired = true)]
         public string PartnerName;
         [DataMember(IsRequired = true)]
-        public int startIndex;
+        public int StartIndex;
         [DataMember(IsRequired = true)]
-        public int length;
+        public int Count;
         [DataMember(IsRequired = true)]
-        public List<string> keys;
+        public List<string> Keys;
     }
 
     /// <summary>

@@ -474,9 +474,9 @@ namespace Myro.Services.Generic.Vector
                     partnerName = subset.PartnerName,
                     startIndex = 0,
                     count = 0,
-                    subsetStart = (subset == default(AutoSubset) ? 0 : subset.startIndex),
-                    subsetCount = (subset == default(AutoSubset) ? 0 : subset.length),
-                    keys = (subset == default(AutoSubset) ? new List<string>() : subset.keys)
+                    subsetStart = (subset == default(AutoSubset) ? 0 : subset.StartIndex),
+                    subsetCount = (subset == default(AutoSubset) ? 0 : subset.Count),
+                    keys = (subset == default(AutoSubset) ? new List<string>() : subset.Keys)
                 };
                 autoDefs.Add(autoDef);
             }
