@@ -98,8 +98,10 @@ namespace Myro.Services.Generic.Vector
         /// <summary>
         /// _state
         /// </summary>
+        protected VectorState _state = null;
+
         [InitialStatePartner(Optional = true)]
-        protected VectorState _state = new VectorState();
+        protected VectorState initialState = new VectorState();
 
         // NOTE: These are only used to get auto partners to show up in the
         // manifest editor.  Any partner starting with "Auto_" will be used,
@@ -153,9 +155,11 @@ namespace Myro.Services.Generic.Vector
         /// </summary>
         protected override void Start()
         {
-            if (_state == null)
-                _state = new VectorState();
-            _state.Validate();
+            if (_state == null && initialState != null)
+            {
+                _state = initialState;
+                _state.Validate();
+            }
             base.Start();
             subscribeAutos();
         }
@@ -311,14 +315,20 @@ namespace Myro.Services.Generic.Vector
         {
             try
             {
-                _state.Set(set.Body.Index, set.Body.Value, set.Body.Timestamp);
-                SetCallback(new SetElementRequestInfo()
+                if (set.Body.Indices.Count != set.Body.Values.Count)
+                    throw new ArgumentException("Lengths of indices and values lists must match");
+                for (int i = 0; i < set.Body.Indices.Count; i++)
+                    _state.Values[set.Body.Indices[i]] = set.Body.Values[i];
+                _state.Timestamp = set.Body.Timestamp;
+                SetCallback(new SetElementsRequestInfo()
                 {
                     RequestType = RequestType.ByIndex,
-                    Index = set.Body.Index,
-                    Key = ((_state.Keys.Count >= (set.Body.Index + 1)) ? _state.Keys[set.Body.Index] : ""),
+                    Indices = set.Body.Indices,
+                    Keys = new List<string>(
+                        from i in set.Body.Indices
+                        select (i < _state.Keys.Count ? _state.Keys[i] : "")),
                     Timestamp = set.Body.Timestamp,
-                    Value = set.Body.Value
+                    Values = set.Body.Values
                 });
                 set.ResponsePort.Post(DefaultUpdateResponseType.Instance);
                 SendNotification<SetByIndex>(set);
@@ -335,14 +345,22 @@ namespace Myro.Services.Generic.Vector
         {
             try
             {
-                _state.Set(set.Body.Key, set.Body.Value, set.Body.Timestamp);
-                SetCallback(new SetElementRequestInfo()
+                if (set.Body.Keys.Count != set.Body.Values.Count)
+                    throw new ArgumentException("Lengths of indices and values lists must match");
+                var indices = new List<int>(set.Body.Keys.Count);
+                for (int i = 0; i < set.Body.Keys.Count; i++)
+                {
+                    int index = _state.indexCache[set.Body.Keys[i]];
+                    _state.Values[index] = set.Body.Values[i];
+                    indices.Add(index);
+                }
+                SetCallback(new SetElementsRequestInfo()
                 {
                     RequestType = RequestType.ByKey,
-                    Index = _state.indexCache[set.Body.Key],
-                    Key = set.Body.Key,
+                    Indices = indices,
+                    Keys = set.Body.Keys,
                     Timestamp = set.Body.Timestamp,
-                    Value = set.Body.Value
+                    Values = set.Body.Values
                 });
                 set.ResponsePort.Post(DefaultUpdateResponseType.Instance);
                 SendNotification<SetByKey>(set);
@@ -791,10 +809,15 @@ namespace Myro.Services.Generic.Vector
                     applyKeysFromSubsets();
 
                 // Send notification
-                if (values.Count == 1)
-                    SendNotification(new SetByIndex(new SetByIndexRequestType() { Index = autoDef.startIndex, Value = values[0], Timestamp = timestamp }));
-                else
-                    SendNotification(new SetAllElements(new SetAllRequestType() { Values = _state.Values, Timestamp = timestamp }));
+                var indices = new List<int>(autoDef.count);
+                for (int i = autoDef.startIndex; i < autoDef.startIndex + autoDef.count; i++)
+                    indices.Add(i);
+                SendNotification(new SetByIndex(new SetByIndexRequestType()
+                {
+                    Indices = indices,
+                    Values = _state.Values.GetRange(autoDef.startIndex, autoDef.count),
+                    Timestamp = timestamp
+                }));
             }
         }
 
@@ -890,7 +913,7 @@ namespace Myro.Services.Generic.Vector
                 _state.Set(index - autoDef.subsetStart + autoDef.startIndex, value, timestamp);
                 //Console.WriteLine("Updating " + index + " with start " + autoDef.startIndex + " and subset start " + autoDef.subsetStart + ".  State index " + (index - autoDef.subsetStart + autoDef.startIndex));
             }
-            SendNotification(new SetByIndex(new SetByIndexRequestType() { Index = autoDef.startIndex + index, Value = value, Timestamp = timestamp }));
+            SendNotification(new SetByIndex(new SetByIndexRequestType() { Indices = new List<int>() { autoDef.startIndex + index }, Values = new List<double>() { value }, Timestamp = timestamp }));
         }
 
         class UnrecognizedContractException : Exception { }
@@ -961,12 +984,12 @@ namespace Myro.Services.Generic.Vector
     /// RequestType property indicates whether the request was SetByIndex or
     /// SetByKey.
     /// </summary>
-    public class SetElementRequestInfo : SetRequestInfo
+    public class SetElementsRequestInfo : SetRequestInfo
     {
         public RequestType RequestType { get; set; }
-        public int Index { get; set; }
-        public string Key { get; set; }
-        public double Value { get; set; }
+        public List<int> Indices { get; set; }
+        public List<string> Keys { get; set; }
+        public List<double> Values { get; set; }
     }
 
     /// <summary>

@@ -347,9 +347,9 @@ namespace SimTestSuite
             rbt.Sound.beep(durBar.Value, freqBar1.Value, freqBar2.Value);
         }
 
-        private void groupBox5_Enter(object sender, EventArgs e)
+        private void loudCheckBox_CheckedChanged(object sender, EventArgs e)
         {
-
+            rbt.Sound.SetLoud(loudCheckBox.Checked);
         }
     }
 }

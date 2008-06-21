@@ -112,15 +112,6 @@ namespace Myro.Services.Scribbler.ScribblerBase
                 SaveState(_state);
             }
 
-            // Listen on the main port for requests and call the appropriate handler.
-            Interleave mainInterleave = ActivateDsspOperationHandlers();
-
-            //for HttpPost
-            _httpUtilities = DsspHttpUtilitiesService.Create(Environment);
-
-            // Publish the service to the local Node Directory
-            DirectoryInsert();
-
             // display HTTP service Uri
             LogInfo(LogGroups.Console, "Service uri: ");
 
@@ -159,6 +150,16 @@ namespace Myro.Services.Scribbler.ScribblerBase
                 //no scribbler found. Open state page for manual settings.
                 //OpenServiceInBrowser();
             }
+
+
+            // Listen on the main port for requests and call the appropriate handler.
+            Interleave mainInterleave = ActivateDsspOperationHandlers();
+
+            //for HttpPost
+            _httpUtilities = DsspHttpUtilitiesService.Create(Environment);
+
+            // Publish the service to the local Node Directory
+            DirectoryInsert();
 
             //add custom handlers to interleave
             mainInterleave.CombineWith(new Interleave(
@@ -364,6 +365,23 @@ namespace Myro.Services.Scribbler.ScribblerBase
             );
 
             yield break;
+        }
+
+        [ServiceHandler(ServiceHandlerBehavior.Exclusive)]
+        public IEnumerator<ITask> SetLoudHandler(SetLoud message)
+        {
+            if (!_state.Connected)
+            {
+                LogError("trying to set loudness, but not connected");
+                message.ResponsePort.Post(new Fault());
+                yield break;
+            }
+            ScribblerCommand cmd = new ScribblerCommand((byte)
+                (message.Body.IsLoud ? ScribblerHelper.Commands.SET_LOUD : ScribblerHelper.Commands.SET_QUIET));
+            SendScribblerCommand sendcmd = new SendScribblerCommand(cmd);
+            _scribblerComPort.Post(sendcmd);
+            yield return Arbiter.Receive<ScribblerResponse>(false, sendcmd.ResponsePort,
+                delegate(ScribblerResponse response) { message.ResponsePort.Post(DefaultUpdateResponseType.Instance); });
         }
 
 
@@ -755,7 +773,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
                     Console.Write("\n");
                     break;
                 default:
-                    LogError(LogGroups.Console, "Update State command missmatch");
+                    LogError(LogGroups.Console, "Update State command missmatch, got " + response.Body.CommandType);
                     break;
             }
 

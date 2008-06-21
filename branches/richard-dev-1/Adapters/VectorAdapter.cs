@@ -118,13 +118,32 @@ namespace Myro.Adapters
         {
             try
             {
-                RSUtils.ReceiveSync<DefaultUpdateResponseType>(opPort.SetByIndex(index, value, DateTime.Now), Myro.Utilities.Params.defaultRecieveTimeout);
+                RSUtils.ReceiveSync<DefaultUpdateResponseType>(opPort.SetByIndex(new List<int>() { index }, new List<double>() { value }, DateTime.Now), Myro.Utilities.Params.defaultRecieveTimeout);
             }
             catch (ArgumentOutOfRangeException)
             {
                 throw new AdapterArgumentException(Strings.IndexOutOfBounds(index));
             }
+        }
 
+        /// <summary>
+        /// Set a group of elements in the vector by index.
+        /// </summary>
+        /// <param name="index"></param>
+        /// <param name="value"></param>
+        public void Set(List<int> indices, List<double> values)
+        {
+            try
+            {
+                RSUtils.ReceiveSync<DefaultUpdateResponseType>(opPort.SetByIndex(indices, values, DateTime.Now), Myro.Utilities.Params.defaultRecieveTimeout);
+            }
+            catch (ArgumentOutOfRangeException e)
+            {
+                throw new AdapterArgumentException(
+                    e.ActualValue is Int32 ?
+                    Strings.IndexOutOfBounds((Int32)e.ActualValue) :
+                    Strings.IndexOutOfBounds());
+            }
         }
 
         /// <summary>
@@ -136,13 +155,31 @@ namespace Myro.Adapters
         {
             try
             {
-                RSUtils.ReceiveSync<DefaultUpdateResponseType>(opPort.SetByKey(key, value, DateTime.Now), Myro.Utilities.Params.defaultRecieveTimeout);
+                RSUtils.ReceiveSync<DefaultUpdateResponseType>(opPort.SetByKey(new List<string>() { key }, new List<double>() { value }, DateTime.Now), Myro.Utilities.Params.defaultRecieveTimeout);
             }
             catch (KeyNotFoundException)
             {
                 throw new AdapterArgumentException(Strings.KeyNotFound(key));
             }
         }
+
+        /// <summary>
+        /// Set a group of elements in the vector by name.
+        /// </summary>
+        /// <param name="index"></param>
+        /// <param name="value"></param>
+        public void Set(List<string> keys, List<double> values)
+        {
+            try
+            {
+                RSUtils.ReceiveSync<DefaultUpdateResponseType>(opPort.SetByKey(keys, values, DateTime.Now), Myro.Utilities.Params.defaultRecieveTimeout);
+            }
+            catch (KeyNotFoundException)
+            {
+                throw new AdapterArgumentException(Strings.KeyNotFound());
+            }
+        }
+
 
         /// <summary>
         /// Set all elements in the vector.

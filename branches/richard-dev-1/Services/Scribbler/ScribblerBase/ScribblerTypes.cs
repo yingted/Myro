@@ -36,6 +36,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
         SetLED,
         SetAllLEDs,
         PlayTone,
+        SetLoud,
         SetName,
         ScribblerResponseMessage,
         SelectiveSubscribe, //IMPORTANT: Because SelectiveSubscribe inherits from Subscribe, it must go on top.
@@ -114,6 +115,16 @@ namespace Myro.Services.Scribbler.ScribblerBase
         {
             base.Body = b;
         }
+    }
+
+    /// <summary>
+    /// Turns loudness on or off
+    /// </summary>
+    public class SetLoud : Update<SetLoudBody, DsspResponsePort<DefaultUpdateResponseType>>
+    {
+        public SetLoud() : base() { }
+        public SetLoud(SetLoudBody body) : base(body) { }
+        public SetLoud(SetLoudBody body, DsspResponsePort<DefaultUpdateResponseType> respPort) : base(body, respPort) { }
     }
 
     /// <summary>

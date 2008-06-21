@@ -403,4 +403,12 @@ namespace Myro.Services.Scribbler.ScribblerBase
         }
     }
 
+    [DataContract]
+    [DataMemberConstructor]
+    public class SetLoudBody
+    {
+        [DataMember]
+        public bool IsLoud;
+    }
+
 }

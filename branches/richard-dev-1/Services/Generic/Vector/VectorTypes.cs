@@ -135,6 +135,7 @@ namespace Myro.Services.Generic.Vector
         #region VectorState public accessor and modifier methods
         public double Get(int index) { return Values[index]; }
         public double Get(string key) { return Values[indexCache[key]]; }
+        public bool GetBool(int index) { return Values[index] >= 0.5 ? true : false; }
         public IList<double> GetValues() { return Values; }
         public IList<bool> GetValuesBool() { return new List<bool>(from v in Values select (v >= 0.5 ? true : false)); }
         public void Set(int index, double value, DateTime timestamp) { Values[index] = value; Timestamp = timestamp; }
@@ -373,15 +374,15 @@ namespace Myro.Services.Generic.Vector
     public class SetByIndexRequestType
     {
         [DataMember]
-        public int Index { get; set; }
+        public List<int> Indices { get; set; }
         [DataMember]
-        public double Value { get; set; }
+        public List<double> Values { get; set; }
         [DataMember]
         public DateTime Timestamp { get; set; }
         public SetByIndexRequestType()
         {
-            Index = 0;
-            Value = 0.0;
+            Indices = new List<int>();
+            Values = new List<double>();
             Timestamp = DateTime.Now;
         }
     }
@@ -409,15 +410,15 @@ namespace Myro.Services.Generic.Vector
     public class SetByKeyRequestType
     {
         [DataMember]
-        public string Key { get; set; }
+        public List<string> Keys { get; set; }
         [DataMember]
-        public double Value { get; set; }
+        public List<double> Values { get; set; }
         [DataMember]
         public DateTime Timestamp { get; set; }
         public SetByKeyRequestType()
         {
-            Key = "";
-            Value = 0.0;
+            Keys = new List<string>();
+            Values = new List<double>();
             Timestamp = DateTime.Now;
         }
     }

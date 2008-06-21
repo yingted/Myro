@@ -43,6 +43,7 @@
             this.groupBox6 = new System.Windows.Forms.GroupBox();
             this.stallSensorImg = new System.Windows.Forms.PictureBox();
             this.groupBox7 = new System.Windows.Forms.GroupBox();
+            this.loudCheckBox = new System.Windows.Forms.CheckBox();
             this.durationLabel = new System.Windows.Forms.Label();
             this.durBar = new System.Windows.Forms.TrackBar();
             this.frequency2Label = new System.Windows.Forms.Label();
@@ -149,13 +150,12 @@
             // groupBox5
             // 
             this.groupBox5.Controls.Add(this.SonarImg);
-            this.groupBox5.Location = new System.Drawing.Point(219, 216);
+            this.groupBox5.Location = new System.Drawing.Point(219, 284);
             this.groupBox5.Name = "groupBox5";
             this.groupBox5.Size = new System.Drawing.Size(346, 62);
             this.groupBox5.TabIndex = 4;
             this.groupBox5.TabStop = false;
-            this.groupBox5.Text = "Sonar";
-            this.groupBox5.Enter += new System.EventHandler(this.groupBox5_Enter);
+            this.groupBox5.Text = "LEDs";
             // 
             // SonarImg
             // 
@@ -168,7 +168,7 @@
             // groupBox4
             // 
             this.groupBox4.Controls.Add(this.lineSensorImg);
-            this.groupBox4.Location = new System.Drawing.Point(219, 284);
+            this.groupBox4.Location = new System.Drawing.Point(219, 216);
             this.groupBox4.Name = "groupBox4";
             this.groupBox4.Size = new System.Drawing.Size(346, 62);
             this.groupBox4.TabIndex = 5;
@@ -204,6 +204,7 @@
             // 
             // groupBox7
             // 
+            this.groupBox7.Controls.Add(this.loudCheckBox);
             this.groupBox7.Controls.Add(this.durationLabel);
             this.groupBox7.Controls.Add(this.durBar);
             this.groupBox7.Controls.Add(this.frequency2Label);
@@ -217,6 +218,19 @@
             this.groupBox7.TabIndex = 3;
             this.groupBox7.TabStop = false;
             this.groupBox7.Text = "Tone";
+            // 
+            // loudCheckBox
+            // 
+            this.loudCheckBox.AutoSize = true;
+            this.loudCheckBox.Checked = true;
+            this.loudCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.loudCheckBox.Location = new System.Drawing.Point(6, 131);
+            this.loudCheckBox.Name = "loudCheckBox";
+            this.loudCheckBox.Size = new System.Drawing.Size(50, 17);
+            this.loudCheckBox.TabIndex = 7;
+            this.loudCheckBox.Text = "Loud";
+            this.loudCheckBox.UseVisualStyleBackColor = true;
+            this.loudCheckBox.CheckedChanged += new System.EventHandler(this.loudCheckBox_CheckedChanged);
             // 
             // durationLabel
             // 
@@ -353,5 +367,6 @@
         private System.Windows.Forms.TrackBar durBar;
         private System.Windows.Forms.Label frequency2Label;
         private System.Windows.Forms.TrackBar freqBar2;
+        private System.Windows.Forms.CheckBox loudCheckBox;
     }
 }

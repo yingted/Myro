@@ -17,6 +17,7 @@ namespace Myro.API
         void PlaySong(IMyroSong song);
         void beep(double duration, double frequency);
         void beep(double duration, double frequency1, double frequency2);
+        void SetLoud(bool loud);
         // TODO (jaredj): Add a void SaveSong(MyroSong song, string fileName);
     }
 }

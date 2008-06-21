@@ -43,14 +43,14 @@ namespace Myro.API
 
         public void beep(double duration, double frequency1, double frequency2)
         {
-            var values = new List<double>() { frequency1, frequency2, duration };
-            try
-            {
-                ((Myro.Adapters.VectorAdapter)soundAdapter.Adapter).SetAllElements(values);
-            }
-            catch (Exception)
-            {
-            }
+            ((VectorAdapter)soundAdapter.Adapter).Set(
+                new List<int>() { 0, 1, 2 },
+                new List<double>() { frequency1, frequency2, duration });
+        }
+
+        public void SetLoud(bool loud)
+        {
+            ((VectorAdapter)soundAdapter.Adapter).Set(3, loud ? 1.0 : 0.0);
         }
     }
 }

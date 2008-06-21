@@ -374,7 +374,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
                 }
                 catch
                 {
-                    Console.WriteLine("Serial Port Timeout.  Turn on Scribbler.");
+                    Console.WriteLine("Serial Port Timeout.  Lost connection with Scribbler.");
                     //throw new IOException();
                 }
 

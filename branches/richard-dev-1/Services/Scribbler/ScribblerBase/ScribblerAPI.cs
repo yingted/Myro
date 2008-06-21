@@ -85,10 +85,10 @@ namespace Myro.Services.Scribbler.ScribblerBase
             SET_SPEAKER         = 113,
             SET_SPEAKER_2       = 114,
 
-/*
+
             SET_DONGLE_LED_ON   = 116,
             SET_DONGLE_LED_OFF  = 117,
-            SET_RLE             = 118,
+/*            SET_RLE             = 118,
             SET_NAME2           = 119,  // Format: 110 char1 char2 char3 char4 char5 char6 char7 char8
             SET_DONGLE_IR       = 120,
             SET_SERIAL_MEM      = 121,

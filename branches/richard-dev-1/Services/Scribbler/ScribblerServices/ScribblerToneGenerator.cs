@@ -50,8 +50,8 @@ namespace Myro.Services.Scribbler.ToneGenerator
             : base(creationPort)
         {
             _state = new vector.VectorState(
-                new List<double> { 0.0, 0.0, 0.0 },
-                new List<string> { "tone1", "tone2", "duration" },
+                new List<double> { 0.0, 0.0, 0.0, 1.0 },
+                new List<string> { "tone1", "tone2", "duration", "loud" },
                 DateTime.Now);
         }
 
@@ -59,6 +59,29 @@ namespace Myro.Services.Scribbler.ToneGenerator
         /// Actuator callback
         /// </summary>
         protected override void SetCallback(Myro.Services.Generic.Vector.SetRequestInfo request)
+        {
+            var req = request as vector.SetElementsRequestInfo;
+            if (req != null)
+            {
+                bool play = false;
+                bool loud = false;
+                foreach (var i in req.Indices)
+                    if (i == 0 || i == 1 || i == 2)
+                        play = true;
+                    else if (i == 3)
+                        loud = true;
+                if (loud) setLoud();
+                if (play) playTone();
+            }
+            else
+            {
+                // Otherwise it was a SetAllRequestInfo
+                setLoud();
+                playTone();
+            }
+        }
+
+        private void playTone()
         {
             brick.PlayToneBody play = new brick.PlayToneBody()
             {
@@ -73,5 +96,13 @@ namespace Myro.Services.Scribbler.ToneGenerator
                     delegate(DefaultUpdateResponseType success) { },
                     delegate(Fault failure) { LogError("Fault playing tone", failure); }));
         }
+
+        private void setLoud()
+        {
+            Activate(Arbiter.Choice(_scribblerPort.SetLoud(_state.GetBool(3)),
+                delegate(DefaultUpdateResponseType success) { },
+                delegate(Fault failure) { LogError("Fault setting loud", failure); }));
+        }
+
     }
 }

@@ -120,8 +120,8 @@ namespace Myro.Utilities
         public static Exception ExceptionOfFault(Fault fault)
         {
             if (fault.Detail != null && fault.Detail.Any != null &&
-                    fault.Detail.Any.Length > 0 && (fault.Detail.Any[0] is Exception))
-                return (Exception)fault.Detail.Any[0];
+                    fault.Detail.Any.Length > 0 && (fault.Detail.Any[0] is CloneableException))
+                return ((CloneableException)fault.Detail.Any[0]).Exception;
             else
                 return new FaultReceivedException(fault);
         }
@@ -135,7 +135,7 @@ namespace Myro.Utilities
         /// <returns></returns>
         public static Fault FaultOfException(Exception exception)
         {
-            return new Fault() { Detail = new Detail() { Any = new object[] { exception } } };
+            return new Fault() { Detail = new Detail() { Any = new object[] { new CloneableException(exception) } } };
         }
 
         /// <summary>
@@ -248,6 +248,19 @@ namespace Myro.Utilities
         public override string ToString()
         {
             return Strings.FromFault(Fault);
+        }
+    }
+
+    class CloneableException : ICloneable
+    {
+        public Exception Exception { get; private set; }
+        public CloneableException(Exception e)
+        {
+            Exception = e;
+        }
+        public object Clone()
+        {
+            return new CloneableException(Exception);
         }
     }
 
