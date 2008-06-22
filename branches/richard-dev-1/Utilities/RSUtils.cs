@@ -44,7 +44,7 @@ namespace Myro.Utilities
                             error = failure;
                             signal.Set();
                         }));
-                if (signal.WaitOne(timeout))
+                if (signal.WaitOne(timeout, false))
                 {
                     //Console.WriteLine("ReceiveSync: back!");
                     ThrowIfFaultNotNull(error);
@@ -148,7 +148,7 @@ namespace Myro.Utilities
         /// <param name="service"></param>
         /// <param name="contracts"></param>
         /// <returns></returns>
-        public static PortSet<ServiceInfoType, Fault> FindCompatibleContract(DispatcherQueue taskQueue, Uri service, IList<string> contracts)
+        public static PortSet<ServiceInfoType, Fault> FindCompatibleContract(DispatcherQueue taskQueue, Uri service, List<string> contracts)
         {
             PortSet<ServiceInfoType, Fault> returnPort = new PortSet<ServiceInfoType, Fault>();
 
@@ -188,47 +188,37 @@ namespace Myro.Utilities
         /// <param name="service"></param>
         /// <param name="contracts"></param>
         /// <returns></returns>
-        public static ServiceInfoType FindCompatibleContract(ServiceInfoType serviceRecord, IList<string> contracts)
+        public static ServiceInfoType FindCompatibleContract(ServiceInfoType serviceRecord, List<string> contracts)
         {
             ServiceInfoType ret = null;
             int retIndex = Int32.MaxValue;
 
             // See if we can understand the primary contract
-            try
+            int i = contracts.FindIndex(
+                (s => serviceRecord.Contract.Equals(s, StringComparison.Ordinal)));
+            if (i >= 0 && i < retIndex)
             {
-                int i = contracts.IndexOf(
-                    contracts.First(
-                        (s => serviceRecord.Contract.Equals(s, StringComparison.OrdinalIgnoreCase))
-                    ));
-                if (i < retIndex)
-                {
-                    ret = serviceRecord;
-                    retIndex = i;
-                }
+                ret = serviceRecord;
+                retIndex = i;
             }
-            catch (InvalidOperationException) { }
 
             // Now try each alternate contract
             foreach (var part in serviceRecord.PartnerList)
                 // Alternate contract services have a name of "AlternateContractService".
                 if (part.Name.Name.StartsWith("AlternateContractService"))
-                    try
+                {
+                    i = contracts.FindIndex(
+                        (s => part.Contract.Equals(s, StringComparison.Ordinal)));
+                    if (i >= 0 && i < retIndex)
                     {
-                        int i = contracts.IndexOf(contracts.First((s => part.Contract.Equals(s, StringComparison.OrdinalIgnoreCase))));
-                        if (i < retIndex)
-                        {
-                            ret = part;
-                            retIndex = i;
-                        }
+                        ret = part;
+                        retIndex = i;
                     }
-                    catch (InvalidOperationException)
-                    { // This just means the alternate contract did not match
-                    }
-
+                }
             if (ret != null)
                 return ret;
             else
-                throw new NoContractFoundException();
+                throw new NoContractFoundException(serviceRecord, contracts);
         }
     }
 
@@ -244,6 +234,7 @@ namespace Myro.Utilities
         public FaultReceivedException(Fault fault)
         {
             Fault = fault;
+            Console.WriteLine("***" + this.ToString());
         }
         public override string ToString()
         {
@@ -268,7 +259,16 @@ namespace Myro.Utilities
     /// This is thrown by FindCompatibleContract when a compatible contract
     /// cannot be found.
     /// </summary>
-    public class NoContractFoundException : Exception { }
+    public class NoContractFoundException : Exception
+    {
+        public NoContractFoundException(ServiceInfoType goal, List<string> targets) :
+            base("Could not find a contract of service " + goal.Service + " matching any compatible contracts: " +
+                String.Concat((from t in targets
+                select t + "   ").ToArray()))
+        {
+            Console.WriteLine("***" + this.ToString());
+        }
+    }
 
     /// <summary>
     /// This is thrown when a ReceiveSync call times out.

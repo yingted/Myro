@@ -23,17 +23,18 @@ namespace MyroControlPanel
     public partial class Window1 : Window
     {
         Robot rbt;
+        bool shouldExit = false;
 
         public Window1()
         {
             InitializeComponent();
-            rbt = new Robot("C:\\Microsoft Robotics Dev Studio 2008\\config\\Scribbler.manifest\\Scribbler.manifest.xml");
+            rbt = new Robot("C:\\Microsoft Robotics Dev Studio 2008\\config\\Generic.manifest\\Generic.manifest.xml");
             new Thread(new ThreadStart(updateLoop)).Start();
         }
 
         private void updateLoop()
         {
-            while (true)
+            while (!shouldExit)
             {
                 //Console.WriteLine("update");
                 Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new ThreadStart(update));
@@ -53,6 +54,17 @@ namespace MyroControlPanel
             //drawCircleMeters(SonarImg, Color.Tan, sonar, rbt.Sensors.getNames("sonar"), 40.0, 0.0);
             //double[] line = rbt.Sensors.get("line");
             //drawCircleMeters(lineSensorImg, Color.DarkGray, line, rbt.Sensors.getNames("line"), 0.0, 1.0);
+        }
+
+        private void BumperValueChange(object sender, Myro.WPFControls.CircleMeters.ValueChangeArgs e)
+        {
+            rbt.Sensors.set("bumpers", e.Index, e.Value);
+        }
+
+        private void OnClosed(object sender, EventArgs e)
+        {
+            shouldExit = true;
+            rbt.Shutdown();
         }
 
     }

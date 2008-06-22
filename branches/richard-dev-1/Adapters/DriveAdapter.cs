@@ -21,7 +21,7 @@ namespace Myro.Adapters
         #region IAdapterFactory Members
 
         private List<string> supportedContracts = new List<string>() { drive.Contract.Identifier };
-        public IList<string> SupportedContracts
+        public List<string> SupportedContracts
         {
             get { return supportedContracts; }
         }

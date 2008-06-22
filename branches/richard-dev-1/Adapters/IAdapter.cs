@@ -64,7 +64,7 @@ namespace Myro.Adapters
         /// This should contain the list of contracts to which this adapter
         /// can connect.
         /// </summary>
-        IList<string> SupportedContracts { get; }
+        List<string> SupportedContracts { get; }
 
         /// <summary>
         /// This method should create the adapter from the given service 

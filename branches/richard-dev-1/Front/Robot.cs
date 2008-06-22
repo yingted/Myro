@@ -30,5 +30,10 @@ namespace Myro
             Movement = new MyroMovement(bank);
             Sound = new MyroSound(bank);
         }
+
+        public void Shutdown()
+        {
+            DssEnvironment.Shutdown();
+        }
     }
 }

@@ -2,18 +2,18 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="clr-namespace:Myro.WPFControls;assembly=MyroWPFControls"
-    Name="window1" Title="Myro Control Panel" Height="301" Width="522">
+    Name="window1" Title="Myro Control Panel" Height="301" Width="522" Closed="OnClosed">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="auto" />
             <ColumnDefinition Width="auto"/>
         </Grid.ColumnDefinitions>
-        <GroupBox Header="Drive" Name="driveBox" Height="auto" VerticalAlignment="Top">
+        <GroupBox Header="Drive" Name="driveBox" Height="auto" VerticalAlignment="Top" Margin="5">
             <local:DriveControl />
         </GroupBox>
         <StackPanel Grid.Column="1" Name="stackPanel1">
-            <GroupBox Header="Bumpers/IR/Sonar" HorizontalAlignment="Left" Name="groupBox1" VerticalAlignment="Top">
-                <local:CircleMeters Name="bumperMeters" Width="200" Height="30" />
+            <GroupBox Header="Bumpers/IR/Sonar" HorizontalAlignment="Left" Name="groupBox1" VerticalAlignment="Top" Margin="5">
+                <local:CircleMeters ValueChange="BumperValueChange" Name="bumperMeters" Width="200" Height="30" />
             </GroupBox>
         </StackPanel>
     </Grid>

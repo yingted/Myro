@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30428</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{1C0C4EE2-450C-4C5F-8934-76449DA445AC}</ProjectGuid>
     <OutputType>WinExe</OutputType>
@@ -113,7 +113,7 @@
       <Project>{4A2F2891-310B-4690-8224-20C58A6676E2}</Project>
       <Name>Front</Name>
     </ProjectReference>
-    <ProjectReference Include="..\..\MyroWPFControls\MyroWPFControls.csproj">
+    <ProjectReference Include="..\MyroWPFControls\MyroWPFControls.csproj">
       <Project>{957BB0C6-567B-47E3-8754-0FD14B35ACCC}</Project>
       <Name>MyroWPFControls</Name>
     </ProjectReference>
