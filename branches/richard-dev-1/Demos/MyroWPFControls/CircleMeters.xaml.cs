@@ -37,7 +37,7 @@ namespace Myro.WPFControls
             //AddLogicalChild(mainVisual);
         }
 
-        public void setColor(Color color)
+        public void SetColor(Color color)
         {
             curColor = color;
             layoutVisuals(canvases.Count);

@@ -56,8 +56,7 @@ namespace Myro.Adapters
 
             // Set up notifications
             Arbiter.Activate(DssEnvironment.TaskQueue,
-                Arbiter.Receive<drive.Update>(true, driveNotificationPort, NotifyDriveUpdate)
-                );
+                Arbiter.Receive<drive.Update>(true, driveNotificationPort, NotifyDriveUpdate));
         }
 
         public void SetMotors(float leftPower, float rightPower)
