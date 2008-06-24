@@ -11,7 +11,7 @@
     <AssemblyKeyContainerName>
     </AssemblyKeyContainerName>
     <AssemblyName>ScribblerBase</AssemblyName>
-    <RootNamespace>IPRE.ScribblerBase</RootNamespace>
+    <RootNamespace>Myro.Services.Scribbler.ScribblerBase</RootNamespace>
     <AssemblyOriginatorKeyFile>myroKey.snk</AssemblyOriginatorKeyFile>
     <DefaultClientScript>JScript</DefaultClientScript>
     <DefaultHTMLPageLayout>Grid</DefaultHTMLPageLayout>

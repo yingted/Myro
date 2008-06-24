@@ -56,6 +56,8 @@ namespace Myro.Adapters
         ServiceInfoType ServiceInfo { get; }
 
         //AdapterTypeEnum AdapterType { get; }
+
+        void Dispose();
     }
 
     public interface IAdapterFactory

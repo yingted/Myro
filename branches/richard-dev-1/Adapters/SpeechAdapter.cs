@@ -10,14 +10,8 @@ namespace Myro.Adapters
     {
         public ServiceInfoType ServiceInfo { get; private set; }
 
-        public string Get()
+        public void Dispose()
         {
-            throw new NotImplementedException();
-        }
-
-        public void Set(string state)
-        {
-            throw new NotImplementedException();
         }
     }
 }

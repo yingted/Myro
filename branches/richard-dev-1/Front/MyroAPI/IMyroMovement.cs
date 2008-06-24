@@ -6,26 +6,26 @@ namespace Myro.API
 {
     public interface IMyroMovement
     {
-        void Move(float translate, float rotate); 
+        void Move(double translate, double rotate); 
         
-        void Forward(float power);
-        void ForwardFor(float power, float seconds);
+        void Forward(double power);
+        void ForwardFor(double power, double seconds);
         
-        void Backward(float power);
-        void BackwardFor(float power, float seconds);
+        void Backward(double power);
+        void BackwardFor(double power, double seconds);
 
-        void Turn(string direction, float power);
-        void TurnFor(string direction, float power, float seconds);
+        void Turn(string direction, double power);
+        void TurnFor(string direction, double power, double seconds);
 
-        void TurnLeft(float power);
-        void TurnLeftFor(float power, float seconds);
+        void TurnLeft(double power);
+        void TurnLeftFor(double power, double seconds);
 
-        void TurnRight(float power);
-        void TurnRightFor(float power, float seconds);
+        void TurnRight(double power);
+        void TurnRightFor(double power, double seconds);
 
         void Stop();
 
-        void SetMotors(float leftPower, float rightPower);
-        void SetMotorsFor(float leftPower, float rightPower, float seconds);
+        void SetMotors(double leftPower, double rightPower);
+        void SetMotorsFor(double leftPower, double rightPower, double seconds);
     }
 }

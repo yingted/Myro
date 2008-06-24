@@ -25,6 +25,7 @@ namespace MyroControlPanel
     {
         Robot rbt;
         bool shouldExit = false;
+        Thread updateThread = null;
 
         List<ServicePanelInfo> panelList = new List<ServicePanelInfo>()
         {
@@ -33,15 +34,16 @@ namespace MyroControlPanel
             new ServicePanelInfo() { Description="Stall", Name="stall", Min=0.0, Max=1.0, Color=Colors.Red },
             new ServicePanelInfo() { Description="Light sensors", Name="light", Min=2000.0, Max=0.0, Color=Colors.DeepSkyBlue },
             new ServicePanelInfo() { Description="Line sensors", Name="line", Min=0.0, Max=1.0, Color=Colors.DarkGray },
-            new ServicePanelInfo() { Description="LEDs", Name="led", Min=0.0, Max=1.0, Color=Colors.OrangeRed }
+            new ServicePanelInfo() { Description="LEDs", Name="led", Min=0.0, Max=1.0, Color=Colors.Chartreuse }
         };
         List<ServicePanelInfo> livePanelList = new List<ServicePanelInfo>();
 
         public Window1()
         {
             InitializeComponent();
-            rbt = new Robot("C:\\Microsoft Robotics Dev Studio 2008\\config\\Generic.manifest\\Generic.manifest.xml");
-            new Thread(new ThreadStart(updateLoop)).Start();
+            rbt = new Robot("C:\\Microsoft Robotics Dev Studio 2008\\config\\Scribbler.manifest\\Scribbler.manifest.xml");
+            updateThread = new Thread(new ThreadStart(updateLoop));
+            updateThread.Start();
         }
 
         private void updateLoop()
@@ -49,12 +51,19 @@ namespace MyroControlPanel
             int delayMs = 100;
             int updateCounter = 0;
             Thread checker = null;
+            bool driveSet = false;
             while (!shouldExit)
             {
+                if (!driveSet && drive != null)
+                {
+                    drive.SetDrive(rbt.Movement);
+                    driveSet = true;
+                }
                 if (updateCounter++ > (2000 / delayMs))
                 {
                     updateCounter = 0;
-                    if (checker == null || checker.IsAlive == false) {
+                    if (checker == null || checker.IsAlive == false)
+                    {
                         checker = new Thread(new ThreadStart(checkNewPanels));
                         checker.Start();
                     }
@@ -67,10 +76,11 @@ namespace MyroControlPanel
 
         private void update()
         {
+            //Console.WriteLine("************** Update ****************");
             foreach (var pi in livePanelList)
             {
                 try { pi.Meters.setData(rbt.Sensors.get(pi.Name), rbt.Sensors.getNames(pi.Name), pi.Min, pi.Max); }
-                catch (Exception e) { }
+                catch (Exception) { }
             }
             //bumperMeters.setData(rbt.Sensors.get("bumpers"), rbt.Sensors.getNames("bumpers"), 0.0, 1.0);
             //drawCircleMeters(contactSensorImg, Color.MediumVioletRed, contacts, rbt.Sensors.getNames("bumpers"), 0.0, 1.0);
@@ -87,48 +97,67 @@ namespace MyroControlPanel
         private void checkNewPanels()
         {
             List<ServicePanelInfo> toRemove = new List<ServicePanelInfo>();
+            List<Thread> threads = new List<Thread>();
             foreach (var pi in panelList)
             {
-                try
-                {
-                    rbt.Sensors.getNames(pi.Name);
-
-                    toRemove.Add(pi);
-                    //servicePanel.Children.Add(grp);
-                }
-                catch (Exception e) { }
+                var myPi = pi;
+                Thread t = new Thread(new ThreadStart(
+                    delegate()
+                    {
+                        try
+                        {
+                            //Console.WriteLine("Adding " + myPi.Name);
+                            rbt.Sensors.getNames(myPi.Name);
+                            lock (toRemove) { toRemove.Add(myPi); }
+                        }
+                        catch (Exception) { }
+                    }));
+                t.Start();
+                threads.Add(t);
             }
+            foreach (var t in threads)
+                t.Join();
+            ManualResetEvent signal = new ManualResetEvent(false);
             Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal,
                 new ThreadStart(delegate()
                     {
-                        foreach (var pi in toRemove)
+                        try
                         {
-                            pi.Meters = new CircleMeters()
+                            foreach (var pi in toRemove)
                             {
-                                Width = 200,
-                                Height = 30,
-                            };
-                            var myPi = pi;
-                            pi.Meters.ValueChange += (CircleMeters.ValueChangeHandler)
-                                delegate(object sender, Myro.WPFControls.CircleMeters.ValueChangeArgs e)
+                                pi.Meters = new CircleMeters()
                                 {
-                                    rbt.Sensors.set(myPi.Name, e.Index, e.Value);
+                                    Width = 200,
+                                    Height = 30,
                                 };
-                            pi.Meters.SetColor(pi.Color);
-                            pi.Group = new GroupBox()
-                            {
-                                Header = pi.Description,
-                                Margin = new Thickness(5.0, 5.0, 5.0, 10.0),
-                                HorizontalAlignment = HorizontalAlignment.Left,
-                                VerticalAlignment = VerticalAlignment.Top,
-                                Content = pi.Meters
-                            };
-                            livePanelList.Add(pi);
-                            panelList.Remove(pi);
-                            servicePanel.Children.Add(pi.Group);
+                                var myPi = pi;
+                                pi.Meters.ValueChange += (CircleMeters.ValueChangeHandler)
+                                    delegate(object sender, Myro.WPFControls.CircleMeters.ValueChangeArgs e)
+                                    {
+                                        rbt.Sensors.set(myPi.Name, e.Index, e.Value);
+                                    };
+                                pi.Meters.SetColor(pi.Color);
+                                pi.Group = new GroupBox()
+                                {
+                                    Header = pi.Description,
+                                    Margin = new Thickness(5.0, 5.0, 5.0, 10.0),
+                                    HorizontalAlignment = HorizontalAlignment.Left,
+                                    VerticalAlignment = VerticalAlignment.Top,
+                                    Content = pi.Meters
+                                };
+                                livePanelList.Add(pi);
+                                panelList.Remove(pi);
+                                servicePanel.Children.Add(pi.Group);
+                            }
                         }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e.ToString());
+                            throw;
+                        }
+                        finally { signal.Set(); }
                     }));
-
+            signal.WaitOne();
         }
 
         private void BumperValueChange(object sender, Myro.WPFControls.CircleMeters.ValueChangeArgs e)
@@ -139,6 +168,10 @@ namespace MyroControlPanel
         private void OnClosed(object sender, EventArgs e)
         {
             shouldExit = true;
+            if (updateThread != null)
+                updateThread.Join();
+            if (drive != null)
+                drive.Dispose();
             rbt.Shutdown();
         }
 
@@ -170,9 +203,11 @@ namespace MyroControlPanel
         {
             try
             {
+                Console.WriteLine("beep");
                 rbt.Sound.beep(durSlider.Value,
                     (freq1Slider.Value == freq1Slider.Minimum ? 0.0 : freq1Slider.Value),
                     (freq2Slider.Value == freq2Slider.Minimum ? 0.0 : freq2Slider.Value));
+                Console.WriteLine("beep2");
             }
             catch (Exception) { }
         }

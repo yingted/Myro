@@ -17,36 +17,36 @@ namespace Myro.API
 
         public enum Direction { LEFT, RIGHT };
 
-        public void Move(float translate, float rotate)
+        public void Move(double translate, double rotate)
         {
             throw new NotImplementedException("Move not yet implemented");
         }
 
-        public void Forward(float power)
+        public void Forward(double power)
         {
             CheckPowerRange(power);
             SetMotors(power, power);
         }
 
-        public void ForwardFor(float power, float seconds)
+        public void ForwardFor(double power, double seconds)
         {
             CheckPowerRange(power);
             SetMotorsFor(power, power, seconds);
         }
 
-        public void Backward(float power)
+        public void Backward(double power)
         {
             CheckPowerRange(power);
             SetMotors(-power, -power);
         }
 
-        public void BackwardFor(float power, float seconds)
+        public void BackwardFor(double power, double seconds)
         {
             CheckPowerRange(power);
             SetMotorsFor(-power, -power, seconds);
         }
 
-        public void Turn(string direction, float power)
+        public void Turn(string direction, double power)
         {
             Direction dir = checkDirection(direction);
             if (dir == Direction.LEFT)
@@ -55,7 +55,7 @@ namespace Myro.API
                 TurnRight(power);
         }
 
-        public void TurnFor(string direction, float power, float seconds)
+        public void TurnFor(string direction, double power, double seconds)
         {
             Direction dir = checkDirection(direction);
             if (dir == Direction.LEFT)
@@ -64,25 +64,25 @@ namespace Myro.API
                 TurnRightFor(power, seconds);
         }
 
-        public void TurnLeft(float power)
+        public void TurnLeft(double power)
         {
             CheckPowerRange(power);
             SetMotors(-power, power);
         }
 
-        public void TurnLeftFor(float power, float seconds)
+        public void TurnLeftFor(double power, double seconds)
         {
             CheckPowerRange(power);
             SetMotorsFor(-power, power, seconds);
         }
 
-        public void TurnRight(float power)
+        public void TurnRight(double power)
         {
             CheckPowerRange(power);
             SetMotors(power, -power);
         }
 
-        public void TurnRightFor(float power, float seconds)
+        public void TurnRightFor(double power, double seconds)
         {
             CheckPowerRange(power);
             SetMotorsFor(power, -power, seconds);
@@ -93,14 +93,14 @@ namespace Myro.API
             SetMotors(0f, 0f);
         }
 
-        public void SetMotorsFor(float leftPower, float rightPower, float seconds)
+        public void SetMotorsFor(double leftPower, double rightPower, double seconds)
         {
             SetMotors(leftPower, rightPower);
             Thread.Sleep((int)(seconds * 1000));
             Stop();
         }
 
-        public void SetMotors(float leftPower, float rightPower)
+        public void SetMotors(double leftPower, double rightPower)
         {
             try
             {
@@ -109,7 +109,7 @@ namespace Myro.API
             catch (Exception) { }
         }
 
-        private void CheckPowerRange(float power)
+        private void CheckPowerRange(double power)
         {
             if (power < -1.0f || power > 1.0f)
                 throw new ArgumentException("Motor power settings must be in the range of -1.0 to 1.0");

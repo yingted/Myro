@@ -10,14 +10,9 @@ namespace Myro.Adapters
     {
         public ServiceInfoType ServiceInfo { get; private set; }
 
-        public System.Drawing.Image Get()
+        public void Dispose()
         {
-            throw new NotImplementedException();
         }
 
-        public void Set(System.Drawing.Image state)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

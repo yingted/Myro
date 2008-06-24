@@ -116,6 +116,30 @@ namespace Myro.Adapters
             //}
         }
 
+
+        /// <summary>
+        /// Returns the adapter object, if it is attached.  If not attached, it returns null.
+        /// </summary>
+        /// <returns></returns>
+        public IAdapter AdapterIfAttached
+        {
+            get
+            {
+                adapterLock.AcquireReaderLock(-1);
+                try
+                {
+                    if (adapterObject != null)
+                        return adapterObject;
+                    else
+                        return null;
+                }
+                finally
+                {
+                    adapterLock.ReleaseReaderLock();
+                }
+            }
+        }
+
         ///// <summary>
         ///// Constructor, with the runtime adapter type, the Myro name, and the
         ///// service record from the config file.

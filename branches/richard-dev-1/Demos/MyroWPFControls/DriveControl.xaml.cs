@@ -12,6 +12,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using game = Microsoft.Robotics.Services.GameController.Proxy;
+using Microsoft.Ccr.Core;
 
 namespace Myro.WPFControls
 {
@@ -20,9 +21,27 @@ namespace Myro.WPFControls
     /// </summary>
     public partial class DriveControl : UserControl
     {
+        Myro.API.MyroMovement drive = null;
+
+        Port<Tuple<double, double>> drivePort = new Port<Tuple<double, double>>();
+        DispatcherQueue taskQueue = new DispatcherQueue("DriveControl", new Dispatcher(1, "DriveControl"),
+            TaskExecutionPolicy.ConstrainQueueDepthDiscardTasks, 1);
+
         public DriveControl()
         {
+            Arbiter.Activate(taskQueue, Arbiter.Receive(true, drivePort, driveHandler));
             InitializeComponent();
+        }
+
+        public void SetDrive(Myro.API.MyroMovement drive)
+        {
+            this.drive = drive;
+        }
+
+        public void driveHandler(Tuple<double, double> motors)
+        {
+            if (drive != null)
+                drive.SetMotors(motors.Item0, motors.Item1);
         }
 
         /// <summary>
@@ -33,21 +52,26 @@ namespace Myro.WPFControls
         {
             DrawJoystick(axes.X, -axes.Y);
 
-            int left;
-            int right;
+            double left;
+            double right;
 
             if (axes.Y < 100)
             {
-                left = -axes.Y + axes.X / 4;
-                right = -axes.Y - axes.X / 4;
+                left = (-axes.Y + axes.X / 4) / 1000.0;
+                right = (-axes.Y - axes.X / 4) / 1000.0;
             }
             else
             {
-                left = -axes.Y - axes.X / 4;
-                right = -axes.Y + axes.X / 4;
+                left = (-axes.Y - axes.X / 4) / 1000.0;
+                right = (-axes.Y + axes.X / 4) / 1000.0;
             }
-            DrawMotors(left / 1000.0, right / 1000.0);
-            //_eventsPort.Post(new OnMove(this, left, right));
+            if (left > 1.0) left = 1.0;
+            if (left < -1.0) left = -1.0;
+            if (right > 1.0) right = 1.0;
+            if (right < -1.0) right = -1.0;
+
+            DrawMotors(left, right);
+            drivePort.Post(new Tuple<double, double>(left, right));
         }
 
         private void DrawJoystick(int x, int y)
@@ -115,25 +139,21 @@ namespace Myro.WPFControls
                 double halfHeight = height / 2.0;
                 if (left > 0.0)
                 {
-                    if (left > 1.0) left = 1.0;
                     l1 = (1.0 - left) * halfHeight;
                     l2 = halfHeight;
                 }
                 else
                 {
-                    if (left < -1.0) left = -1.0;
                     l1 = halfHeight;
                     l2 = -left * halfHeight + halfHeight;
                 }
                 if (right > 0.0)
                 {
-                    if (right > 1.0) right = 1.0;
                     r1 = (1.0 - right) * halfHeight;
                     r2 = halfHeight;
                 }
                 else
                 {
-                    if (right < -1.0) right = -1.0;
                     r1 = halfHeight;
                     r2 = -right * halfHeight + halfHeight;
                 }
@@ -182,6 +202,12 @@ namespace Myro.WPFControls
         private void onMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             driveCanvas.CaptureMouse();
+        }
+
+        public void Dispose()
+        {
+            //Console.WriteLine("****** Unloading ********");
+            taskQueue.Dispose();
         }
     }
 }

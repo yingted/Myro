@@ -44,7 +44,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
         //NOTE: format: /resources/ServicePortName/Namespace.File
         //const string _transform = "/resources/scribbler/IPRE.ScribblerBase.Scribbler.xslt";
 
-        [EmbeddedResource("IPRE.ScribblerBase.Scribbler.xslt")]
+        [EmbeddedResource("Myro.Services.Scribbler.ScribblerBase.Scribbler.xslt")]
         string _transform = null;
 
 
@@ -807,6 +807,10 @@ namespace Myro.Services.Scribbler.ScribblerBase
         [ServiceHandler(ServiceHandlerBehavior.Concurrent)]
         public IEnumerator<ITask> HttpGetHandler(HttpGet httpGet)
         {
+            if (_transform == null)
+                Console.WriteLine("TRANSFORM NULL");
+            else
+                Console.WriteLine("TRANSFORM NOT NULL");
             httpGet.ResponsePort.Post(new HttpResponseType(
                     System.Net.HttpStatusCode.OK, _state, _transform));
             yield break;

@@ -64,7 +64,7 @@ namespace Myro.Services.Scribbler.StallSensor
         protected override void Start()
         {
             base.Start();
-            LogInfo(LogGroups.Console, "Service uri: ");
+            //LogInfo(LogGroups.Console, "Service uri: ");
 
             SubscribeToScribblerBase();
         }

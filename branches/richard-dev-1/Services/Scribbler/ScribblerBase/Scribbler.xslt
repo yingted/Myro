@@ -8,7 +8,7 @@
 -->
 <xsl:stylesheet version="1.0"
     xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-    xmlns:scrb="http://www.roboteducation.org/scribblerbase.html"
+    xmlns:scrb="http://www.roboteducation.org/schemas/2008/06/scribblerbase.html"
     xmlns:fn="http://www.w3.org/2005/02/xpath-functions/"
     >
 

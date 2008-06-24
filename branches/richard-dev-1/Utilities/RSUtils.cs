@@ -234,7 +234,7 @@ namespace Myro.Utilities
         public FaultReceivedException(Fault fault)
         {
             Fault = fault;
-            Console.WriteLine("***" + this.ToString());
+            //Console.WriteLine("***" + this.ToString());
         }
         public override string ToString()
         {
@@ -266,7 +266,7 @@ namespace Myro.Utilities
                 String.Concat((from t in targets
                 select t + "   ").ToArray()))
         {
-            Console.WriteLine("***" + this.ToString());
+            //Console.WriteLine("***" + this.ToString());
         }
     }
 

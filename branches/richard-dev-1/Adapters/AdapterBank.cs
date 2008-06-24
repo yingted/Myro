@@ -66,6 +66,16 @@ namespace Myro.Adapters
             //    startServices();
         }
 
+        public void Dispose()
+        {
+            foreach (var a in adapterNames.Values)
+            {
+                IAdapter adapter = a.AdapterIfAttached;
+                if (adapter != null)
+                    adapter.Dispose();
+            }
+        }
+
         /// <summary>
         /// Return the AdapterSpec associated with the name, as specified in
         /// the config file.  Throws UnknownAdapterNameException.

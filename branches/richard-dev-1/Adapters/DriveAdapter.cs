@@ -40,10 +40,17 @@ namespace Myro.Adapters
         protected drive.DriveOperations drivePort;
         protected bool motorsOn;
 
+        DispatcherQueue taskQueue = new DispatcherQueue("VectorAdapter", new Dispatcher(1, "VectorAdapter"));
+
         public DriveAdapter(ServiceInfoType serviceRecord)
         {
             ServiceInfo = serviceRecord;
             Initialize();
+        }
+
+        public void Dispose()
+        {
+            taskQueue.Dispose();
         }
 
         protected virtual void Initialize()
@@ -59,33 +66,34 @@ namespace Myro.Adapters
                 Arbiter.Receive<drive.Update>(true, driveNotificationPort, NotifyDriveUpdate));
         }
 
-        public void SetMotors(float leftPower, float rightPower)
+        public void SetMotors(double leftPower, double rightPower)
         {
             if (!motorsOn)
                 EnableMotors();
 
-            drive.SetDrivePowerRequest drivePowerReq = new drive.SetDrivePowerRequest();
-            drivePowerReq.LeftWheelPower = leftPower;
-            drivePowerReq.RightWheelPower = rightPower;
-            drive.SetDrivePower setDrivePower = new drive.SetDrivePower(drivePowerReq);
-            drivePort.Post(setDrivePower);
+            //drive.SetDrivePowerRequest drivePowerReq = new drive.SetDrivePowerRequest();
+            //drivePowerReq.LeftWheelPower = leftPower;
+            //drivePowerReq.RightWheelPower = rightPower;
+            //drive.SetDrivePower setDrivePower = new drive.SetDrivePower(drivePowerReq);
+            //drivePort.Post(setDrivePower);
 
-            ManualResetEvent signal = new ManualResetEvent(false);
-            Arbiter.Activate(DssEnvironment.TaskQueue,
-                Arbiter.Choice<DefaultUpdateResponseType, Fault>(
-                    drivePort.SetDrivePower((double)leftPower, (double)rightPower),
-                    delegate(DefaultUpdateResponseType state)
-                    {
-                        signal.Set();
-                    },
-                    delegate(Fault failure)
-                    {
-                        Console.WriteLine("*** Fault in SetMotors: ");
-                        foreach (var r in failure.Reason)
-                            Console.WriteLine("***    " + r.Value);
-                        signal.Set();
-                    }));
-            signal.WaitOne();
+            //ManualResetEvent signal = new ManualResetEvent(false);
+            //Arbiter.Activate(DssEnvironment.TaskQueue,
+            //    Arbiter.Choice<DefaultUpdateResponseType, Fault>(
+            //        drivePort.SetDrivePower((double)leftPower, (double)rightPower),
+            //        delegate(DefaultUpdateResponseType state)
+            //        {
+            //            signal.Set();
+            //        },
+            //        delegate(Fault failure)
+            //        {
+            //            Console.WriteLine("*** Fault in SetMotors: ");
+            //            foreach (var r in failure.Reason)
+            //                Console.WriteLine("***    " + r.Value);
+            //            signal.Set();
+            //        }));
+            //signal.WaitOne();
+            RSUtils.ReceiveSync(taskQueue, drivePort.SetDrivePower(leftPower, rightPower), Myro.Utilities.Params.defaultRecieveTimeout);
         }
 
         protected void EnableMotors()
@@ -114,12 +122,12 @@ namespace Myro.Adapters
 
         public void Stop()
         {
-            RSUtils.ReceiveSync<DefaultUpdateResponseType>(drivePort.AllStop(), Myro.Utilities.Params.defaultRecieveTimeout);
+            RSUtils.ReceiveSync<DefaultUpdateResponseType>(taskQueue, drivePort.AllStop(), Myro.Utilities.Params.defaultRecieveTimeout);
         }
 
         public drive.DriveDifferentialTwoWheelState Get()
         {
-            return RSUtils.ReceiveSync<drive.DriveDifferentialTwoWheelState>(drivePort.Get(), Myro.Utilities.Params.defaultRecieveTimeout);
+            return RSUtils.ReceiveSync<drive.DriveDifferentialTwoWheelState>(taskQueue, drivePort.Get(), Myro.Utilities.Params.defaultRecieveTimeout);
         }
 
         public void Set(drive.DriveDifferentialTwoWheelState state)
