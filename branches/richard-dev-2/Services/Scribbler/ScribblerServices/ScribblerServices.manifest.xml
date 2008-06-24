@@ -1,0 +1,58 @@
+<?xml version="1.0" ?>
+<Manifest 
+    xmlns="http://schemas.microsoft.com/xw/2004/10/manifest.html"
+    xmlns:dssp="http://schemas.microsoft.com/xw/2004/10/dssp.html"
+	xmlns:drive="http://schemas.microsoft.com/robotics/2006/05/drive.html" 
+    >
+	
+	<!-- Starts the scribbler services -->
+	
+    <CreateServiceList>
+
+		<!--Start Dashboard-->
+		<ServiceRecordType>
+			<dssp:Contract>http://schemas.microsoft.com/robotics/2006/01/simpledashboard.html</dssp:Contract>
+		</ServiceRecordType>
+
+		<!--Start Scribbler Base -->
+		<ServiceRecordType>
+			<dssp:Contract>http://www.roboteducation.org/scribblerbase.html</dssp:Contract>
+		</ServiceRecordType>
+
+		<!--Start Scribbler Bumper service -->
+		<ServiceRecordType>
+			<dssp:Contract>http://www.roboteducation.org/scribblerbumper.html</dssp:Contract>
+		</ServiceRecordType>
+
+		<!--Start Scribbler Light Sensors service -->
+		<ServiceRecordType>
+			<dssp:Contract>http://www.roboteducation.org/scribblerlightsensor.html</dssp:Contract>
+		</ServiceRecordType>
+
+		<!--Start Scribbler Heart Beat service -->
+    <!--<ServiceRecordType>
+			<dssp:Contract>http://www.roboteducation.org/scribblerheartbeat.html</dssp:Contract>
+		</ServiceRecordType>-->
+      
+      <!--Start Scribbler Backup Monitor service -->
+		<!--<ServiceRecordType>
+			<dssp:Contract>http://www.roboteducation.org/scribblerbackupmonitor.html</dssp:Contract>
+		</ServiceRecordType>-->
+      
+      <!--Start Scribbler Drive service -->
+      <ServiceRecordType>
+        <dssp:Contract>http://www.roboteducation.org/scribblerdrive.html</dssp:Contract>
+      </ServiceRecordType>
+
+      <!--Start Scribbler LED Array -->
+      <ServiceRecordType>
+        <dssp:Contract>http://www.roboteducation.org/scribblerledarray.html</dssp:Contract>
+      </ServiceRecordType>
+
+      <!--Start Scribbler Tone Generator -->
+      <ServiceRecordType>
+        <dssp:Contract>http://www.roboteducation.org/scribblertonegenerator.html</dssp:Contract>
+      </ServiceRecordType>
+      
+    </CreateServiceList>
+</Manifest>

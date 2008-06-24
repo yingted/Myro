@@ -1,0 +1,305 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> 
+<html xmlns="http://www.w3.org/1999/xhtml"> 
+<head> 
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" /> 
+<title>Scribbler Services for Microsoft Robotics Studio Readme</title> 
+<style type="text/css"> 
+        Body 
+        { 
+	       font-family: Verdana; 
+	        font-size: smaller; 
+	        background-image: url('readme_files/ipre.png'); 
+	        background-repeat: no-repeat; 
+	        background-position: 90% 90%;  
+	        background-attachment: fixed; 
+        } 
+		ul  
+		{ 
+			list-style-image: url('readme_files/bullet.png') 
+		} 
+		ul ul 
+		{ 
+			list-style-image: url('readme_files/bullet2.png') 
+		} 
+		/*p:first-letter 
+		{ 
+			color:#951A06; 
+			font-size:larger; 
+			font-weight:bold; 
+		}*/ 
+
+		/*H2:first-letter 
+		{ 
+			color:#951A06; 
+		}*/ 
+
+.path {font-family: "Courier New", Courier, monospace} 
+</style> 
+</head> 
+<body> 
+<h1>IPRE Scribbler Services for Microsoft Robotics Studio  Readme</h1> 
+<p>	This set of services is part of the IPRE Myro package. See <a href="http://www.roboteducation.org">http://www.roboteducation.org</a>, and <a href="http://myro.roboteducation.org">http://myro.roboteducation.org</a> for more information. Note: this readme is just for the Scribbler services and assumes the reader already has a working knowledge of Microsoft Robotics Studio. For more information on MSRS, please see: <a href="http://www.microsoft.com/robotics">http://www.microsoft.com/robotics</a><a href="http://robotics.microsoft.com"></a>. </p> 
+<p>&nbsp;</p> 
+<h2>Table of contents</h2> 
+<ol> 
+  <li><a href="#WhatsIncluded">What's Included</a></li> 
+  <li><a href="#HardwareRequirements">Hardware Requirements</a></li> 
+  <li><a href="#Installation">Installation</a></li> 
+  <li><a href="#HardwareSetup">Hardware Setup</a></li> 
+  <li><a href="#ServiceArchitectureOverview">Service Architecture Overview</a></li> 
+  <li><a href="#IncludedServices">Included Services</a></li> 
+  <li><a href="#IncludedBatchFiles">Included Batch Files</a></li> 
+  <li><a href="#AboutMyro">About IPRE / Myro</a></li>
+  <li><a href="#NotableFeatures">Notable Features</a></li> 
+  <li><a href="#Troubleshooting">Troubleshooting</a></li> 
+</ol> 
+<p>&nbsp;</p> 
+<h2>What's Included<a name="WhatsIncluded" id="WhatsIncluded"></a></h2> 
+<p>This package includes a set of services to fully integrate your Scribbler robot into the MSRS system and also a preview of IPRE in MSRS. More specifically, this includes: </p> 
+<ul> 
+  <li>A Scribbler base service that handles the Bluetooth link to the robot </li> 
+  <li>A realistic simulation entity of robot, which can be used interchangeably with the physical hardware</li> 
+  <li>A set of sensor services faithfully implement the Robotics Studio generic robot contracts</li> 
+  <li>Three high level example services in C# (Wander, LightSeek, DrawSquare)</li> 
+  <li>The MSRS supported version of Iron Python (RC1) </li> 
+  <li>Batch files for each service for quick and easy evaluation and testing
+ 
+    <ul> 
+      <li>This includes batch files for C# robotics tutorials 1, 3, and 4, and Python robotics tutorials 1 and 2 </li> 
+    </ul> 
+  </li> 
+  <li>A Myro interface and it's implementation for the Scribbler</li>
+  <li>A preliminary Myro programming environment  </li>
+</ul> 
+<p>&nbsp;</p> 
+<h2>Hardware Requirements<a name="HardwareRequirements" id="HardwareRequirements"></a></h2> 
+<ul> 
+  <li>A Parallax Scribbler robot. Available from: <a href="http://www.scribblerrobot.com">http://www.scribblerrobot.com</a></li> 
+  <li>A MSRS capable PC. This requires: 
+    <ul> 
+      <li> Windows XP or Server 2003</li> 
+      <li>.NET 2.0 or 3.0, redistributable or SDK</li> 
+      <li>Visual Studio 2005 or Visual C# 2005 Express</li> 
+    </ul> 
+  </li> 
+  <li>Optional: A video card that can support the MSRS simulator. See: for <a href="http://channel9.msdn.com/wiki/default.aspx/Channel9.SimulationFAQ">http://channel9.msdn.com/wiki/default.aspx/Channel9.SimulationFAQ</a> more info. </li> 
+  <li>A serial or Bluetooth link to robot. 
+    <ul> 
+      <li>Parani SD100 (recommended), Promi SD202, or SerialIO Standard BlueSnap </li> 
+      <li>Note: These  serial to Bluetooth adaptors require a special cable to power the device from the robot:<br /> 
+        <img src="readme_files/pinout.png" alt="Serial to Bluetooth adaptor cable pinout" width="167" height="208" border="1" /></li> 
+    </ul> 
+  </li> 
+</ul> 
+<h2>&nbsp;</h2> 
+<h2>Installation<a name="Installation" id="Installation"></a></h2> 
+<p>A windows installer is provided for ease of installation. To install:</p> 
+<ol> 
+  <li>Install Visual Studio </li> 
+  <li>Install MSRS 1.0 
+    <ol> 
+      <li>Note, it is important to run the Robotics Studio Command Prompt at least once before using the system</li> 
+    </ol> 
+  </li> 
+  <li>Run the IPRE Scribbler Services installer. When prompted for the installation directory, choose the default Microsoft Robotics Studio (1.0) installation folder.  
+    <ol> 
+      <li>This is: <span class="path">C:\Microsoft Robotics Studio (1.0)</span></li> 
+    </ol> 
+  </li> 
+</ol> 
+<p>The Scribbler services will be placed under: <span class="path">C:\Microsoft Robotics Studio (1.0)\samples\IPRE\Scribbler</span>. </p>
+<p>Behind the scenes:</p>
+<ul>
+  <li>Pre-compiled .dlls will be placed under <span class="path">C:\Microsoft Robotics Studio (1.0)\bin\services</span> so you can run the services right away without having to compile first. </li>
+  <li>Python .dlls will be placed under <span class="path">C:\Microsoft Robotics Studio (1.0)\bin</span> so there are no extra steps required to run the Python examples.  </li>
+  <li>Mesh files for the simulated Scribbler will be placed under <span class="path">C:\Microsoft Robotics Studio (1.0)\store\media</span> </li>
+</ul>
+<p>&nbsp;</p> 
+<h2>Hardware Setup<a name="HardwareSetup" id="HardwareSetup"></a></h2> 
+<p>Before you can use your Scribbler robot with Microsoft Robotics Studio, you must first upload a special server program to the robot. Connect the Scribbler robot to the computer using a serial cable and run the installation utility located at: <span class="path">C:\Microsoft Robotics Studio (1.0)\samples\IPRE\Scribbler\Basic Stamp Code\InstallServer.exe</span>. The source code for this can be found in the same directory. </p> 
+<p>If you are using a serial to Bluetooth adaptor, it will need to be configured as well. Here are setup instructions for a few adaptors:</p> 
+<ul> 
+  <li><a href="readme_files\PromiSetup.html">Promi SD202</a></li> 
+  <li><a href="readme_files\ParaniSetup.html">Parani SD100</a></li> 
+  <li><a href="readme_files\BlueSnapSetup.html">SerialIO Standard BlueSnap</a></li> 
+</ul> 
+<p>&nbsp;</p> 
+<h2>Service Architecture Overview<a name="ServiceArchitectureOverview" id="ServiceArchitectureOverview"></a></h2> 
+<p>The service architecture for the Scribbler robot follows MSRS standards and can be seen in the diagram below.</p> 
+<p><img src="readme_files/overview.png" alt="Service Architecture Diagram" /></p> 
+<p>In this diagram, the green box represents high level user code, the gray boxes are generic contracts provided by MSRS, and the blue boxes represent the   code in this package. Typically, they are the only code that needs to be Scribbler robot dependant. </p> 
+<p>In general, users will want to write high level services such as a wander routine. This is easily accomplished through the use of generic contracts. These generic contracts allow the robot specific hardware  to be abstracted away. So your code should work on different robot platforms, as well as in the MSRS simulator! </p> 
+<p>The high level service communicates to the generic contracts through standard notifications and 'Get' type messages. The Scribbler sensor services communicate to the ScribblerBase service though custom subscriptions. The ScribblerBase service handles all the communication to the actual robot and serves as the state of the entire robot in MSRS. </p> 
+<p>&nbsp;</p> 
+<h2>Included Services<a name="IncludedServices" id="IncludedServices"></a></h2> 
+<p>These services can be found under: <span class="path">C:\Microsoft Robotics Studio (1.0)\samples\IPRE\Scribbler</span>. They can be run by opening the Visual Studio project file and pressing F5. Although, it may be easier to use the batch files detailed in the next section. </p> 
+<ul> 
+  <li><strong>ScribblerBase</strong> - This is the lowest level Scribbler service that handles all the communication with the actual robot.</li> 
+  <li><strong>ScribblerSim</strong> - Stands as the ScribblerBase service for the MSRS simulator. </li> 
+  <li><strong>ScribblerServices</strong> 
+    -  
+    These are the sensor services as well as a few small fun  
+      services 
+      <ul> 
+      <li><strong>ScribblerBumper</strong> - Implements the generic ContactSensor contract. Monitors the IR obstacle detectors and the stall sensor. </li> 
+      <li><strong>ScribblerDrive</strong> - Implements the generic Drive contract. Handles all motor commands. Note, there are some high level drive functions such as DriveDistance, and RotateDegrees that are not implemented for the Scribbler. This is because the Scribbler robot has no wheel encoders. </li> 
+      <li><strong>ScribblerLightSensor</strong> - Monitors the 3 light sensors. Implements its own contract, but uses the generic AnalogSensorState.</li> 
+      <li><strong>ScribblerLineSensor</strong> - Monitors Scribbler's line sensors. Implements its own contract.</li> 
+      <li><strong>ScribblerBackupMonitor</strong> - Makes the Scribbler beep like a big truck when it backs up. </li> 
+      <li><strong>ScribblerHeartBeat</strong> - Flashes an LED once per second. </li> 
+      <li><strong>ScribblerLEDArray</strong> - Implements a new LED array generic contract.</li>
+      <li><strong>ScribblerToneGenerator</strong> - Implements a new tone generator generic contract. </li>
+    </ul> 
+  </li> 
+  <li><strong>DrawSquare </strong>- An example of a high level service. Makes the Scribbler draw a square.</li> 
+  <li><strong>LightSeek</strong> -  An example of a high level service. Makes the Scribbler drive to the brightest light it sees.</li> 
+  <li><strong>Wander</strong> - An example of a high level service.  The robot will drive around and try not to bump into anything. Will also speak when it bumps into something. </li> 
+</ul> 
+<p>&nbsp;</p> 
+<h2>Included Batch Files<a name="IncludedBatchFiles" id="IncludedBatchFiles"></a></h2> 
+<p>These batch files are included so that you can quickly and easily run the services above. To use, open a MSRS command prompt and navigate to <span class="path">C:\Microsoft Robotics Studio (1.0)\samples\IPRE\Scribbler\Batch Files</span>. Then just execute the desired file. </p> 
+<ul> 
+  <li><strong>DrawSquare.bat 
+    </strong> 
+    <ul> 
+      <li>Turn the robot on before running this example. Will make the robot drive in a square pattern. </li> 
+      <li>NOTE: The robot's path is highly dependant on battery state, floor surface, and the individual robot. </li> 
+    </ul> 
+  </li> 
+  <li><strong>DrawSquareSim.bat 
+    </strong> 
+    <ul> 
+      <li>No need for a real robot. This will make the simulated robot draw a square. </li> 
+    </ul> 
+  </li> 
+  <li><strong>LightSeek.bat 
+    </strong> 
+    <ul> 
+      <li>Will make the robot drive towards the brightest light it sees. </li> 
+      <li>NOTE: There is currently no simulated light sensor, so this does not work in the simulator. </li> 
+    </ul> 
+  </li> 
+  <li><strong>RoboticsTutorial1.bat 
+    </strong> 
+    <ul> 
+      <li>Runs the standard C# Robotics Tutorial 1 with the Scribbler. Put your hand in front of the scribbler and it puts some text on the console. </li> 
+    </ul> 
+  </li> 
+  <li><strong>RoboticsTutorial1Python.bat 
+    </strong> 
+    <ul> 
+      <li>Runs the Python version of Robotics Tutorial 1 with the Scribbler </li> 
+    </ul> 
+  </li> 
+  <li><strong>RoboticsTutorial2Python.bat 
+    </strong> 
+    <ul> 
+      <li>Runs the Python version of Robotics Tutorial 2 with the Scribbler. Put your hand in front of the Scribbler and it turns on and off the motors. </li> 
+      <li>NOTE: There is no version of this tutorial in C# that can work with the Scribbler. This is because it requires a generic motor contract which the Scribbler does not have. The Python tutorial 2 file used here has been modified to use the Scribblers generic drive contract instead. </li> 
+    </ul> 
+  </li> 
+  <li><strong>RoboticsTutorial3.bat</strong> 
+    <ul> 
+      <li>Runs the standard C# Robotics Tutorial 3 with the Scribbler. Put your hand in front of the robot to start the service. It will then drive around trying not to bump into things. </li> 
+    </ul> 
+  </li> 
+  <li><strong>RoboticsTutorial4.bat</strong> 
+    <ul> 
+      <li>Runs the standard C# Robotics Tutorial 4 with the Scribbler. An example of a win form to control the robot. </li> 
+    </ul> 
+  </li> 
+  <li><strong>ScribblerBase.bat</strong> 
+    <ul> 
+      <li>Starts only the Scribbler base service. Not too exciting on its own. </li> 
+    </ul> 
+  </li> 
+  <li><strong>ScribblerServices.bat</strong> 
+    <ul> 
+      <li>Starts  the Scribbler base service with a bunch of extra  services. Drive the Scribbler around with the  Dashboard and you will notice the Scribbler's BackupMonitor beeping when you drive in reverse. </li> 
+    </ul> 
+  </li> 
+  <li><strong>ScribblerSim.bat</strong> 
+    <ul> 
+      <li>Starts the simulated Scribbler. </li> 
+    </ul> 
+  </li> 
+  <li><strong>Wander.bat</strong> 
+    <ul> 
+      <li>A version of Robotics Tutorial 3 that is geared towards the scribbler. Should make it turn left, or right depending on the sensor pressed. </li> 
+      <li>Put your hand in front of the Scribbler to start it going. </li> 
+    </ul> 
+  </li> 
+  <li><strong>WanderSim.bat</strong> 
+    <ul> 
+      <li>Simulated version of the Wander service. </li> 
+      <li>NOTE: you must drive robot into a wall to get the  wander service going</li> 
+    </ul> 
+  </li> 
+</ul> 
+<p>&nbsp;</p>
+<h2>About IPRE / Myro<a name="AboutMyro" id="AboutMyro"></a></h2>
+<p>The <strong>Institute for Personal Robots in Education</strong> (IPRE) is a partnership between Georgia Tech, Bryn Mawr College, and Microsoft Research to apply and evaluate robots as a context for computer science education.</p>
+<p><strong>Myro</strong>, short for My Robotics, is software that enables its user to program their own personal robot. It will be used as a tool of  IPRE in the classroom to help boost enrollment and retainment in computer science classes. In this release, a C# interface is used to provide all the .NET languages the same Myro API . Please see the ScribblerControl project. An example program is provided that makes the Scribbler drive in a square. This can be seen in the <span class="path">ScribblerControl.cs</span> file. To run this example, run the <span class="path">ScribblerControl.exe</span> program located in the <span class="path">C:\Microsoft Robotics Studio (1.0)\bin</span> directory. </p>
+<p>&nbsp;</p>
+<h2>Notable Features<a name="NotableFeatures" id="NotableFeatures"></a></h2> 
+<ul> 
+  <li>Scribbler base service will remember com port and robot name last connected to. The first time service is run, it scans all ports for a Scribbler robot.</li> 
+  <li>In any of the ScribblerSim examples, navigate a browser to <span class="path">http://localhost:50000/scribblersim</span>. Then refresh the page to drop cubes into the simulation.</li> 
+  <li>In any of the ScribblerSim examples, you can view the world from the perspective of the robot by selecting &quot;robocam&quot; from the camera menu in the lower left of the simulator window. </li> 
+  <li>In any of the real-world Scribbler examples,  navigate a browser to <span class="path">http://localhost:50000/scribbler</span> to inspect the state of the robot. </li> 
+  <li>The Scribbler will make a distinctive chirp when it turns on. This helps you know when the batteries are getting low because the robot will reset itself.</li> 
+  <li>The Scribbler will beep once when MSRS connects to it. </li> 
+  <li>The Scribbler will toggle the center LED every time a command is received. When the robot is not connected to MSRS, it will blink slowly (on for one second, off for one second). When the robot is connected to MSRS, it will blink faster, (on for half a second, off for half a second). </li> 
+</ul> 
+<p>&nbsp;</p> 
+<h2>Troubleshooting<a name="Troubleshooting" id="Troubleshooting"></a></h2> 
+<ul> 
+  <li><strong>I can't connect to the robot (first time connection) 
+    </strong>
+    <ul> 
+      <li>Make sure you gave the Bluetooth pairing a serial port profile. Go to Bluetooth devices, click on the device, click Properties, then go to the services tab. Make sure (SPP) &quot;Generic Serial&quot; is checked. </li> 
+      <li>Make sure robot is on and has the scribbler_server.bs2 running</li> 
+    </ul> 
+  </li> 
+  <li><strong>I can't connect to the robot 
+    (it worked before) 
+    </strong>
+    <ul> 
+      <li>Reset the robot before starting your services</li> 
+    </ul> 
+  </li> 
+  <li><strong>I can't connect to the robot (service hangs trying first port) 
+    </strong>
+    <ul> 
+      <li>Remove, then re-insert the Bluetooth dongle on the PC. If you have built in Bluetooth on a laptop, there should be a way to turn off the Bluetooth antenna, then turn it back on. </li> 
+    </ul> 
+  </li> 
+  <li><strong>The Scribbler resets itself when I drive it 
+    </strong>
+    <ul> 
+      <li>Replace the batteries on the robot</li> 
+    </ul> 
+  </li> 
+  <li><strong>The Scribbler seems to have a large lag 
+    </strong>
+    <ul> 
+      <li>Unfortunately, there is not much that can be done about this. The lag can mostly be attributed to the Bluetooth delay, but it is also partly our communication scheme. Because the BASICStamp in the Scribbler does not buffer incoming commands, we have to use an echo-based flow control. </li> 
+    </ul> 
+  </li> 
+  <li><strong>How do I use the  Dashboard? 
+    </strong>
+    <ul> 
+      <li>Type &quot;localhost&quot; without the quotes in the &quot;Machine&quot; text box. Then press &quot;Connect&quot;. Double click &quot;simulateddifferentialdrive/...&quot; or &quot;scribblerdrive/drive&quot;. If you have a joystick connected to your computer, you can use that to drive the robot by holding the trigger button and moving the stick. If you do not have a joystick, press the &quot;Drive&quot; button then click and drag on the sphere with the mouse. </li> 
+    </ul> 
+  </li> 
+  <li><span style="font-weight: bold">Who do I contact for more help?
+  </span>
+    <ul>
+  <li>If it is a Microsoft Robotics Studio related question, then the <a href="http://forums.microsoft.com/MSDN/default.aspx?ForumGroupID=383&SiteID=1">MSRS forums</a> are a good place to go. If it is about IPRE / Myro, then the <a href="http://myro.roboteducation.org/mailman/listinfo/myro-users">myro-users email list</a> is best. </li>
+  </ul>
+  </li>
+</ul> 
+<p>&nbsp;</p> 
+<p>&nbsp;</p> 
+</body> 
+</html> 

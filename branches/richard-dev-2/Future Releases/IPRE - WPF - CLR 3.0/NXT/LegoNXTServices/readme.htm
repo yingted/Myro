@@ -1,0 +1,119 @@
+<html>
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<meta name=Generator content="Microsoft Word 11 (filtered)">
+<title>Lego NXT Services Readme</title>
+<style>
+<!--
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin:0in;
+	margin-bottom:.0001pt;
+	font-size:12.0pt;
+	font-family:"Times New Roman";}
+h1
+	{margin-top:12.0pt;
+	margin-right:0in;
+	margin-bottom:3.0pt;
+	margin-left:0in;
+	page-break-after:avoid;
+	font-size:16.0pt;
+	font-family:Arial;}
+a:link, span.MsoHyperlink
+	{color:blue;
+	text-decoration:underline;}
+a:visited, span.MsoHyperlinkFollowed
+	{color:purple;
+	text-decoration:underline;}
+@page Section1
+	{size:8.5in 11.0in;
+	margin:1.0in 1.25in 1.0in 1.25in;}
+div.Section1
+	{page:Section1;}
+ /* List Definitions */
+ ol
+	{margin-bottom:0in;}
+ul
+	{margin-bottom:0in;}
+-->
+</style>
+
+</head>
+
+<body lang=EN-US link=blue vlink=purple>
+
+<div class=Section1>
+
+<h1>Lego NXT Services Readme</h1>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>This project contains several services that implement the
+generic contracts defined in Robotics Common for the Lego NXT.&nbsp; See <a
+href="../../../../RoboticsTutorials/Tutorial6/CSharp/Robotics%20Tutorial%206.htm">Robotics
+Tutorial 6</a> for further information on how to implement for your own robot.</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<ul style='margin-top:0in' type=disc>
+ <li class=MsoNormal><b>LegoNXTBackupBeep</b></li>
+ <ul style='margin-top:0in' type=circle>
+  <li class=MsoNormal>A simple service that subscribes to two motors and tells
+      the brick to play a tone when both motors are turning in reverse.&nbsp;
+      This service does not implement a Robotics Common generic contract.</li>
+ </ul>
+ <li class=MsoNormal><b>LegoNXTBattery</b></li>
+ <ul style='margin-top:0in' type=circle>
+  <li class=MsoNormal>Implements the generic battery contract in Robotics
+      Common.&nbsp; Polls for the NXT brick’s battery level every 10 seconds.</li>
+ </ul>
+ <li class=MsoNormal><b>LegoNXTBumper</b></li>
+ <ul style='margin-top:0in' type=circle>
+  <li class=MsoNormal>Implements the generic contact sensor array contract in
+      Robotics Common.&nbsp; </li>
+ </ul>
+ <li class=MsoNormal><b>LegoNXTEncoder</b></li>
+ <ul style='margin-top:0in' type=circle>
+  <li class=MsoNormal>Implements the generic encoder contract in Robotics
+      Common.&nbsp; </li>
+ </ul>
+ <li class=MsoNormal><b>LegoNXTLightSensor</b></li>
+ <ul style='margin-top:0in' type=circle>
+  <li class=MsoNormal>Implements the generic light sensor contract in Robotics
+      Common.&nbsp; </li>
+ </ul>
+ <li class=MsoNormal><b>LegoNXTMotor</b></li>
+ <ul style='margin-top:0in' type=circle>
+  <li class=MsoNormal>Implements the generic motor contract in Robotics
+      Common.&nbsp; </li>
+ </ul>
+ <li class=MsoNormal><b>LegoNXTSonar</b></li>
+ <ul style='margin-top:0in' type=circle>
+  <li class=MsoNormal>Implements the generic sonar contract in Robotics
+      Common.&nbsp; </li>
+ </ul>
+ <li class=MsoNormal><b>LegoNXTSonarAsBumper</b></li>
+ <ul style='margin-top:0in' type=circle>
+  <li class=MsoNormal>Implements the generic contact sensor array contract in
+      Robotics Common.&nbsp; Behind the scenes, it subscribes to a sonar sensor
+      on the NXT brick, and sets its state as ‘pressed’ when the sonar reading
+      is below a threshold.&nbsp; (See <a
+      href="../../../../RoboticsTutorials/Tutorial3/CSharp/Robotics%20Tutorial%203.htm">Robotics
+      Tutorial 3</a> for usage).</li>
+ </ul>
+ <li class=MsoNormal><b>LegoNXTSound</b></li>
+ <ul style='margin-top:0in' type=circle>
+  <li class=MsoNormal>Does not implement a generic contract in Robotics Common.</li>
+ </ul>
+</ul>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+</div>
+
+</body>
+
+</html>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type='text/xsl' href='_UpgradeReport_Files/UpgradeReport.xslt'?><UpgradeLog>
+<Properties><Property Name="Solution" Value="Myro">
+</Property><Property Name="Solution File" Value="C:\Microsoft Robotics Studio (1.5)\samples\IPRE - Copy\Myro.sln">
+</Property><Property Name="Date" Value="Friday, July 27, 2007">
+</Property><Property Name="Time" Value="14:55 PM">
+</Property></Properties><Event ErrorLevel="0" Project="IPREFoundationClasses" Source="Foundation\IPREFoundationClasses\IPREFoundationClasses\IPREFoundationClasses.csproj" Description="Project converted successfully">
+</Event><Event ErrorLevel="3" Project="IPREFoundationClasses" Source="Foundation\IPREFoundationClasses\IPREFoundationClasses\IPREFoundationClasses.csproj" Description="Converted">
+</Event><Event ErrorLevel="0" Project="MyroInterfaces" Source="Foundation\MyroInterfaces\MyroInterfaces.csproj" Description="Project converted successfully">
+</Event><Event ErrorLevel="3" Project="MyroInterfaces" Source="Foundation\MyroInterfaces\MyroInterfaces.csproj" Description="Converted">
+</Event><Event ErrorLevel="0" Project="LEDarray" Source="Foundation\IPREGenericContracts\LEDarray\LEDarray.csproj" Description="Project converted successfully">
+</Event><Event ErrorLevel="3" Project="LEDarray" Source="Foundation\IPREGenericContracts\LEDarray\LEDarray.csproj" Description="Converted">
+</Event><Event ErrorLevel="0" Project="ToneGenerator" Source="Foundation\IPREGenericContracts\ToneGenerator\ToneGenerator.csproj" Description="Project converted successfully">
+</Event><Event ErrorLevel="3" Project="ToneGenerator" Source="Foundation\IPREGenericContracts\ToneGenerator\ToneGenerator.csproj" Description="Converted">
+</Event><Event ErrorLevel="0" Project="ScribblerBase" Source="Scribbler\Scribbler\ScribblerBase\ScribblerBase.csproj" Description="Project converted successfully">
+</Event><Event ErrorLevel="3" Project="ScribblerBase" Source="Scribbler\Scribbler\ScribblerBase\ScribblerBase.csproj" Description="Converted">
+</Event><Event ErrorLevel="0" Project="ScribblerServices" Source="Scribbler\Scribbler\ScribblerServices\ScribblerServices.csproj" Description="Project converted successfully">
+</Event><Event ErrorLevel="3" Project="ScribblerServices" Source="Scribbler\Scribbler\ScribblerServices\ScribblerServices.csproj" Description="Converted">
+</Event><Event ErrorLevel="0" Project="ScribblerSim" Source="Scribbler\Scribbler\ScribblerSim\ScribblerSim.csproj" Description="Project converted successfully">
+</Event><Event ErrorLevel="3" Project="ScribblerSim" Source="Scribbler\Scribbler\ScribblerSim\ScribblerSim.csproj" Description="Converted">
+</Event><Event ErrorLevel="0" Project="DrawSquare" Source="Scribbler\Scribbler\Examples\DrawSquare\DrawSquare.csproj" Description="Project converted successfully">
+</Event><Event ErrorLevel="3" Project="DrawSquare" Source="Scribbler\Scribbler\Examples\DrawSquare\DrawSquare.csproj" Description="Converted">
+</Event><Event ErrorLevel="0" Project="LightSeek" Source="Scribbler\Scribbler\Examples\LightSeek\LightSeek.csproj" Description="Project converted successfully">
+</Event><Event ErrorLevel="3" Project="LightSeek" Source="Scribbler\Scribbler\Examples\LightSeek\LightSeek.csproj" Description="Converted">
+</Event><Event ErrorLevel="0" Project="Wander" Source="Scribbler\Scribbler\Examples\Wander\Wander.csproj" Description="Project converted successfully">
+</Event><Event ErrorLevel="3" Project="Wander" Source="Scribbler\Scribbler\Examples\Wander\Wander.csproj" Description="Converted">
+</Event><Event ErrorLevel="0" Project="ScribblerControl" Source="Scribbler\Scribbler\ScribblerControl\ScribblerControl.csproj" Description="Project converted successfully">
+</Event><Event ErrorLevel="3" Project="ScribblerControl" Source="Scribbler\Scribbler\ScribblerControl\ScribblerControl.csproj" Description="Converted">
+</Event><Event ErrorLevel="0" Project="Srv1" Source="Surveyor\SRV-1\Srv1\Srv1.csproj" Description="Project converted successfully">
+</Event><Event ErrorLevel="3" Project="Srv1" Source="Surveyor\SRV-1\Srv1\Srv1.csproj" Description="Converted">
+</Event><Event ErrorLevel="0" Project="Srv1Controller" Source="Surveyor\SRV-1\Srv1Controller\Srv1Controller.csproj" Description="Project converted successfully">
+</Event><Event ErrorLevel="3" Project="Srv1Controller" Source="Surveyor\SRV-1\Srv1Controller\Srv1Controller.csproj" Description="Converted">
+</Event><Event ErrorLevel="0" Project="SurveyorSrv1Services" Source="Surveyor\SRV-1\Srv1Services\SurveyorSrv1Services.csproj" Description="Project converted successfully">
+</Event><Event ErrorLevel="3" Project="SurveyorSrv1Services" Source="Surveyor\SRV-1\Srv1Services\SurveyorSrv1Services.csproj" Description="Converted">
+</Event><Event ErrorLevel="0" Project="MyProgram" Source="Foundation\IPREFoundationClasses\MyProgram\MyProgram.csproj" Description="Project converted successfully">
+</Event><Event ErrorLevel="3" Project="MyProgram" Source="Foundation\IPREFoundationClasses\MyProgram\MyProgram.csproj" Description="Converted">
+</Event><Event ErrorLevel="0" Project="LegoNxt" Source="NXT\LegoNxt\LegoNxt.csproj" Description="Project converted successfully">
+</Event><Event ErrorLevel="3" Project="LegoNxt" Source="NXT\LegoNxt\LegoNxt.csproj" Description="Converted">
+</Event><Event ErrorLevel="0" Project="LegoNXTServices" Source="NXT\LegoNXTServices\LegoNXTServices.csproj" Description="Project converted successfully">
+</Event><Event ErrorLevel="3" Project="LegoNXTServices" Source="NXT\LegoNXTServices\LegoNXTServices.csproj" Description="Converted">
+</Event><Event ErrorLevel="0" Project="LegoHelper" Source="NXT\LegoNxt\LegoHelper\LegoHelper.csproj" Description="Project converted successfully">
+</Event><Event ErrorLevel="3" Project="LegoHelper" Source="NXT\LegoNxt\LegoHelper\LegoHelper.csproj" Description="Converted">
+</Event><Event ErrorLevel="0" Project="" Source="Myro.sln" Description="Solution converted successfully">
+</Event><Event ErrorLevel="3" Project="" Source="Myro.sln" Description="Converted">
+</Event><Event ErrorLevel="0" Project="LEDarray" Source="Foundation\IPREGenericContracts\LEDarray\LEDarray.csproj" Description="Scan complete: Upgrade not required for project files.">
+</Event><Event ErrorLevel="0" Project="ToneGenerator" Source="Foundation\IPREGenericContracts\ToneGenerator\ToneGenerator.csproj" Description="Scan complete: Upgrade not required for project files.">
+</Event><Event ErrorLevel="0" Project="IPREFoundationClasses" Source="Foundation\IPREFoundationClasses\IPREFoundationClasses\IPREFoundationClasses.csproj" Description="Scan complete: Upgrade not required for project files.">
+</Event><Event ErrorLevel="0" Project="MyroInterfaces" Source="Foundation\MyroInterfaces\MyroInterfaces.csproj" Description="Scan complete: Upgrade not required for project files.">
+</Event><Event ErrorLevel="0" Project="MyProgram" Source="Foundation\IPREFoundationClasses\MyProgram\MyProgram.csproj" Description="Scan complete: Upgrade not required for project files.">
+</Event><Event ErrorLevel="0" Project="DrawSquare" Source="Scribbler\Scribbler\Examples\DrawSquare\DrawSquare.csproj" Description="Scan complete: Upgrade not required for project files.">
+</Event><Event ErrorLevel="0" Project="LightSeek" Source="Scribbler\Scribbler\Examples\LightSeek\LightSeek.csproj" Description="Scan complete: Upgrade not required for project files.">
+</Event><Event ErrorLevel="0" Project="Wander" Source="Scribbler\Scribbler\Examples\Wander\Wander.csproj" Description="Scan complete: Upgrade not required for project files.">
+</Event><Event ErrorLevel="0" Project="ScribblerBase" Source="Scribbler\Scribbler\ScribblerBase\ScribblerBase.csproj" Description="Scan complete: Upgrade not required for project files.">
+</Event><Event ErrorLevel="0" Project="ScribblerServices" Source="Scribbler\Scribbler\ScribblerServices\ScribblerServices.csproj" Description="Scan complete: Upgrade not required for project files.">
+</Event><Event ErrorLevel="0" Project="ScribblerSim" Source="Scribbler\Scribbler\ScribblerSim\ScribblerSim.csproj" Description="Scan complete: Upgrade not required for project files.">
+</Event><Event ErrorLevel="0" Project="ScribblerControl" Source="Scribbler\Scribbler\ScribblerControl\ScribblerControl.csproj" Description="Scan complete: Upgrade not required for project files.">
+</Event><Event ErrorLevel="0" Project="Srv1" Source="Surveyor\SRV-1\Srv1\Srv1.csproj" Description="Scan complete: Upgrade not required for project files.">
+</Event><Event ErrorLevel="0" Project="Srv1Controller" Source="Surveyor\SRV-1\Srv1Controller\Srv1Controller.csproj" Description="Scan complete: Upgrade not required for project files.">
+</Event><Event ErrorLevel="0" Project="SurveyorSrv1Services" Source="Surveyor\SRV-1\Srv1Services\SurveyorSrv1Services.csproj" Description="Scan complete: Upgrade not required for project files.">
+</Event><Event ErrorLevel="0" Project="LegoNxt" Source="NXT\LegoNxt\LegoNxt.csproj" Description="Scan complete: Upgrade not required for project files.">
+</Event><Event ErrorLevel="0" Project="LegoNXTServices" Source="NXT\LegoNXTServices\LegoNXTServices.csproj" Description="Scan complete: Upgrade not required for project files.">
+</Event><Event ErrorLevel="0" Project="LegoHelper" Source="NXT\LegoNxt\LegoHelper\LegoHelper.csproj" Description="Scan complete: Upgrade not required for project files.">
+</Event></UpgradeLog>

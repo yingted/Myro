@@ -1,0 +1,1 @@
+"..\..\..\..\bin\DssHost.exe" -p:50000 -m:"..\Examples\Wander\Wander.manifest.xml"

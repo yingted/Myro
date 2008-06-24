@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<RobotConfig>
+
+  <ManifestFile>
+    <URI>C:\Microsoft Robotics Studio (1.5)\samples\IPRE\Foundation\IPREFoundationClasses\IPREFoundationClasses\NxtConfig\IPRE.LEGO.NXT.TriBot.manifest.xml</URI>
+  </ManifestFile>
+
+  <DssEnvironment>
+    <HttpPort>50000</HttpPort>
+    <SoapPort>50001</SoapPort>
+  </DssEnvironment>
+
+  <!-- Verbosity Level from 1-5 -->
+  <Verbosity>
+    <Level>2</Level>
+  </Verbosity>
+  
+  <Sensor type="drive" class="differential">
+    <Service>/1/drive</Service>
+    <Container>Element</Container>
+    <FinalOrder>0</FinalOrder>
+  </Sensor>
+  
+  <Sensor type="analog" class="sound">
+    <Service>/3/analog</Service>
+    <Container>Element</Container>
+    <FinalOrder>0</FinalOrder>
+  </Sensor>
+
+  <Sensor type="sonar" class="ultrasonic">
+    <Service>/4/sonar</Service>
+    <Container>Element</Container>
+    <FinalOrder>0</FinalOrder>
+  </Sensor>
+
+  <Sensor type="analog" class="light">
+    <Service>/5/analogsensor</Service>
+    <Container>Element</Container>
+    <FinalOrder>0</FinalOrder>
+  </Sensor>
+  
+</RobotConfig>

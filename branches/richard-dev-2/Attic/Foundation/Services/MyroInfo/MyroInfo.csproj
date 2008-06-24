@@ -1,0 +1,120 @@
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+ <PropertyGroup>
+    <ProjectType>Local</ProjectType>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{FB2DBCA5-7337-4067-80EE-2E79507118FA}</ProjectGuid>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ApplicationIcon>
+    </ApplicationIcon>
+    <AssemblyKeyContainerName>
+    </AssemblyKeyContainerName>
+    <AssemblyName>MyroInfo.Y2008.M05</AssemblyName>
+    <RootNamespace>Robotics.MyroInfo</RootNamespace>
+    <AssemblyOriginatorKeyFile>C:\Microsoft Robotics Dev Studio 2008\samples\mrisamples.snk</AssemblyOriginatorKeyFile>
+    <DefaultClientScript>JScript</DefaultClientScript>
+    <DefaultHTMLPageLayout>Grid</DefaultHTMLPageLayout>
+    <DefaultTargetSchema>IE50</DefaultTargetSchema>
+    <DelaySign>false</DelaySign>
+    <SignAssembly>true</SignAssembly>
+    <OutputType>Library</OutputType>
+    <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
+    <StartupObject>
+    </StartupObject>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>2.0</OldToolsVersion>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <OutputPath>C:\Microsoft Robotics Dev Studio 2008\bin\</OutputPath>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <BaseAddress>285212672</BaseAddress>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>DEBUG;TRACE;INSTRUMENTED</DefineConstants>
+    <DocumentationFile></DocumentationFile>
+    <DebugSymbols>true</DebugSymbols>
+    <FileAlignment>4096</FileAlignment>
+    <NoStdLib>false</NoStdLib>
+    <NoWarn>3003</NoWarn>
+    <Optimize>false</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>1</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <OutputPath>C:\Microsoft Robotics Dev Studio 2008\bin\</OutputPath>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <BaseAddress>285212672</BaseAddress>
+    <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
+    <ConfigurationOverrideFile>
+    </ConfigurationOverrideFile>
+    <DefineConstants>TRACE;INSTRUMENTED</DefineConstants>
+    <DocumentationFile></DocumentationFile>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>pdbonly</DebugType>
+    <FileAlignment>4096</FileAlignment>
+    <NoStdLib>false</NoStdLib>
+    <NoWarn>3003</NoWarn>
+    <Optimize>false</Optimize>
+    <RegisterForComInterop>false</RegisterForComInterop>
+    <RemoveIntegerChecks>false</RemoveIntegerChecks>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningLevel>1</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="DssRuntime">
+        <SpecificVersion>False</SpecificVersion>
+        <Private>False</Private>
+    </Reference>
+    <Reference Include="mscorlib">
+        <SpecificVersion>False</SpecificVersion>
+        <Private>False</Private>
+    </Reference>
+    <Reference Include="Ccr.Core">
+        <SpecificVersion>False</SpecificVersion>
+        <Private>False</Private>
+    </Reference>
+    <Reference Include="DssBase">
+        <SpecificVersion>False</SpecificVersion>
+        <Private>False</Private>
+    </Reference>
+    <Reference Include="System">
+        <SpecificVersion>False</SpecificVersion>
+        <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Xml">
+        <SpecificVersion>False</SpecificVersion>
+        <Private>False</Private>
+    </Reference>
+
+  </ItemGroup>
+<ItemGroup>
+  <Compile Include="AssemblyInfo.cs" />
+  <Compile Include="MyroInfo.cs" />
+  <Compile Include="MyroInfoTypes.cs" />
+  <AppDesigner Include="Properties" />
+</ItemGroup>
+  <ItemGroup>
+    <Content Include="MyroInfo.manifest.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Properties" />
+  </ItemGroup>
+
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSHARP.Targets" />
+  <PropertyGroup Condition="'$(DelaySign)'!=''">
+    <ProxyDelaySign>/delaysign+</ProxyDelaySign>
+  </PropertyGroup>
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+    <PostBuildEvent>"C:\Microsoft Robotics Dev Studio 2008\bin\dssproxy.exe" /dll:"$(TargetPath)" /vstarget:VS2008 /proxyprojectpath:"$(ProjectDir)Proxy " /keyfile:"$(AssemblyOriginatorKeyFile)" $(ProxyDelaySign) $(CompactFrameworkProxyGen) /binpath:". " /referencepath:"C:\Microsoft Robotics Dev Studio 2008\bin\ " /referencepath:"C:\Microsoft Robotics Dev Studio 2008\bin\ " </PostBuildEvent>
+  </PropertyGroup>
+</Project>

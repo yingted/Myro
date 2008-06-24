@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<ProjectSettings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://schemas.microsoft.com/robotics/2007/06/manifesteditor/settings.html">
+  <TcpPort>50001</TcpPort>
+  <HttpPort>50000</HttpPort>
+  <Year>2008</Year>
+  <Month>6</Month>
+  <UseSpecifiedContractDate>false</UseSpecifiedContractDate>
+  <IsServiceCompiled>false</IsServiceCompiled>
+  <PackageDeployerPort>55555</PackageDeployerPort>
+</ProjectSettings>

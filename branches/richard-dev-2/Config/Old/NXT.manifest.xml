@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<!--This file was created with the Microsoft Visual Programming Language.-->
+<Manifest xmlns:brick="http://schemas.microsoft.com/robotics/2007/07/lego/nxt/brick.html" xmlns:this="urn:uuid:da5430cc-0c07-49bc-afe5-e2b84057caf6" xmlns:touchsensor="http://schemas.microsoft.com/robotics/2007/07/lego/nxt/touchsensor.html" xmlns:dssp="http://schemas.microsoft.com/xw/2004/10/dssp.html" xmlns:drive="http://schemas.microsoft.com/robotics/2007/07/lego/nxt/drive.html" xmlns="http://schemas.microsoft.com/xw/2004/10/manifest.html">
+  <CreateServiceList>
+    <ServiceRecordType>
+      <dssp:Contract>http://schemas.microsoft.com/robotics/2007/07/lego/nxt/brick.html</dssp:Contract>
+      <dssp:PartnerList>
+        <!--<dssp:Partner>
+          <dssp:Contract>http://schemas.microsoft.com/robotics/2007/07/lego/nxt/brick.html</dssp:Contract>
+          <dssp:Service>legonxtbrickv2.config.xml</dssp:Service>
+          <dssp:PartnerList />
+          <dssp:Name>dssp:StateService</dssp:Name>
+        </dssp:Partner>-->
+      </dssp:PartnerList>
+      <Name>this:LegoNXTBrickv2</Name>
+    </ServiceRecordType>
+    <ServiceRecordType>
+      <dssp:Contract>http://schemas.microsoft.com/robotics/2007/07/lego/nxt/drive.html</dssp:Contract>
+      <dssp:PartnerList>
+        <!--<dssp:Partner>
+          <dssp:Contract>http://schemas.microsoft.com/robotics/2007/07/lego/nxt/drive.html</dssp:Contract>
+          <dssp:Service>legonxtdrivev2.config.xml</dssp:Service>
+          <dssp:PartnerList />
+          <dssp:Name>dssp:StateService</dssp:Name>
+        </dssp:Partner>-->
+        <dssp:Partner>
+          <dssp:Contract>http://schemas.microsoft.com/robotics/2007/07/lego/nxt/brick.html</dssp:Contract>
+          <dssp:PartnerList />
+          <dssp:Name>drive:brick</dssp:Name>
+          <dssp:ServiceName>this:LegoNXTBrickv2</dssp:ServiceName>
+        </dssp:Partner>
+      </dssp:PartnerList>
+      <Name>this:LegoNXTDrivev2</Name>
+    </ServiceRecordType>
+    <ServiceRecordType>
+      <dssp:Contract>http://schemas.microsoft.com/robotics/2007/07/lego/nxt/touchsensor.html</dssp:Contract>
+      <dssp:PartnerList>
+        <!--<dssp:Partner>
+          <dssp:Contract>http://schemas.microsoft.com/robotics/2007/07/lego/nxt/touchsensor.html</dssp:Contract>
+          <dssp:Service>legonxttouchsensorv2.config.xml</dssp:Service>
+          <dssp:PartnerList />
+          <dssp:Name>dssp:StateService</dssp:Name>
+        </dssp:Partner>-->
+        <dssp:Partner>
+          <dssp:Contract>http://schemas.microsoft.com/robotics/2007/07/lego/nxt/brick.html</dssp:Contract>
+          <dssp:PartnerList />
+          <dssp:Name>touchsensor:brick</dssp:Name>
+          <dssp:ServiceName>this:LegoNXTBrickv2</dssp:ServiceName>
+        </dssp:Partner>
+      </dssp:PartnerList>
+      <Name>this:LegoNXTTouchSensorv2</Name>
+    </ServiceRecordType>
+  </CreateServiceList>
+</Manifest>

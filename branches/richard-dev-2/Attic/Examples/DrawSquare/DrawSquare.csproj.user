@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <StartAction>Program</StartAction>
+    <StartProgram>C:\Microsoft Robotics Dev Studio 2008\bin\DssHost.exe</StartProgram>
+    <StartWorkingDirectory>C:\Microsoft Robotics Studio (1.5)\</StartWorkingDirectory>
+    <StartArguments>-p:50000 -t:50001 -m:"samples\IPRE\Scribbler\Scribbler\Examples\DrawSquare\DrawSquare.manifest.xml"</StartArguments>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+    <StartWorkingDirectory>C:\Microsoft Robotics Studio (1.5)\</StartWorkingDirectory>
+    <StartProgram>C:\Microsoft Robotics Studio (1.5)\bin\DssHost.exe</StartProgram>
+    <StartAction>Program</StartAction>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ReferencePath>C:\Microsoft Robotics Dev Studio 2008\bin\</ReferencePath>
+    <PublishUrlHistory>
+    </PublishUrlHistory>
+    <InstallUrlHistory>
+    </InstallUrlHistory>
+    <SupportUrlHistory>
+    </SupportUrlHistory>
+    <UpdateUrlHistory>
+    </UpdateUrlHistory>
+    <BootstrapperUrlHistory>
+    </BootstrapperUrlHistory>
+    <FallbackCulture>en-US</FallbackCulture>
+    <VerifyUploadedFiles>false</VerifyUploadedFiles>
+  </PropertyGroup>
+</Project>
