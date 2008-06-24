@@ -1,0 +1,88 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<LegoNxtBumperState xmlns:s="http://www.w3.org/2003/05/soap-envelope" xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing" xmlns:d="http://schemas.microsoft.com/xw/2004/10/dssp.html" xmlns="http://schemas.microsoft.com/2006/06/lego.nxt.bumper.html">
+  <BumperConfigList>
+    <LegoNxtBumperConfig>
+      <HardwareIdentifier>1</HardwareIdentifier>
+      <Name>Front Bumper (Touch Sensor 1)</Name>
+      <SensorType>Touch</SensorType>
+      <ThresholdLow>1</ThresholdLow>
+      <ThresholdHigh>1</ThresholdHigh>
+    </LegoNxtBumperConfig>
+    <LegoNxtBumperConfig>
+      <HardwareIdentifier>2</HardwareIdentifier>
+      <Name>Sound Sensor 2</Name>
+      <SensorType>Sound</SensorType>
+      <ThresholdLow>20</ThresholdLow>
+      <ThresholdHigh>90</ThresholdHigh>
+    </LegoNxtBumperConfig>
+    <LegoNxtBumperConfig>
+      <HardwareIdentifier>4</HardwareIdentifier>
+      <Name>Rear Bumper (Sonar 4)</Name>
+      <SensorType>Sonar</SensorType>
+      <ThresholdLow>0</ThresholdLow>
+      <ThresholdHigh>15</ThresholdHigh>
+    </LegoNxtBumperConfig>
+  </BumperConfigList>
+  <ContactSensorArrayState>
+    <Sensors xmlns="http://schemas.microsoft.com/2006/06/contactsensor.html">
+      <ContactSensor>
+        <Name>Front Bumper (Touch Sensor 1)</Name>
+        <HardwareIdentifier>1</HardwareIdentifier>
+        <TimeStamp>0001-01-01T00:00:00</TimeStamp>
+        <Pressed>false</Pressed>
+        <Pose>
+          <Position xmlns="http://schemas.microsoft.com/robotics/2006/07/physicalmodel.html">
+            <X>0</X>
+            <Y>0</Y>
+            <Z>0</Z>
+          </Position>
+          <Orientation xmlns="http://schemas.microsoft.com/robotics/2006/07/physicalmodel.html">
+            <X>0</X>
+            <Y>0</Y>
+            <Z>0</Z>
+            <W>0</W>
+          </Orientation>
+        </Pose>
+      </ContactSensor>
+      <ContactSensor>
+        <Name>Sound Sensor 2</Name>
+        <HardwareIdentifier>2</HardwareIdentifier>
+        <TimeStamp>0001-01-01T00:00:00</TimeStamp>
+        <Pressed>false</Pressed>
+        <Pose>
+          <Position xmlns="http://schemas.microsoft.com/robotics/2006/07/physicalmodel.html">
+            <X>0</X>
+            <Y>0</Y>
+            <Z>0</Z>
+          </Position>
+          <Orientation xmlns="http://schemas.microsoft.com/robotics/2006/07/physicalmodel.html">
+            <X>0</X>
+            <Y>0</Y>
+            <Z>0</Z>
+            <W>0</W>
+          </Orientation>
+        </Pose>
+      </ContactSensor>
+      <ContactSensor>
+        <Name>Rear Bumper (Sonar 4)</Name>
+        <HardwareIdentifier>4</HardwareIdentifier>
+        <TimeStamp>0001-01-01T00:00:00</TimeStamp>
+        <Pressed>false</Pressed>
+        <Pose>
+          <Position xmlns="http://schemas.microsoft.com/robotics/2006/07/physicalmodel.html">
+            <X>0</X>
+            <Y>0</Y>
+            <Z>0</Z>
+          </Position>
+          <Orientation xmlns="http://schemas.microsoft.com/robotics/2006/07/physicalmodel.html">
+            <X>0</X>
+            <Y>0</Y>
+            <Z>0</Z>
+            <W>0</W>
+          </Orientation>
+        </Pose>
+      </ContactSensor>
+    </Sensors>
+  </ContactSensorArrayState>
+  <Status>Uninitialized</Status>
+</LegoNxtBumperState>

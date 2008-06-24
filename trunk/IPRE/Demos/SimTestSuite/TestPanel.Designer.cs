@@ -37,12 +37,13 @@
             this.groupBox3 = new System.Windows.Forms.GroupBox();
             this.lightSensorImg = new System.Windows.Forms.PictureBox();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
-            this.IRSensorImg = new System.Windows.Forms.PictureBox();
+            this.SonarImg = new System.Windows.Forms.PictureBox();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.lineSensorImg = new System.Windows.Forms.PictureBox();
             this.groupBox6 = new System.Windows.Forms.GroupBox();
             this.stallSensorImg = new System.Windows.Forms.PictureBox();
             this.groupBox7 = new System.Windows.Forms.GroupBox();
+            this.loudCheckBox = new System.Windows.Forms.CheckBox();
             this.durationLabel = new System.Windows.Forms.Label();
             this.durBar = new System.Windows.Forms.TrackBar();
             this.frequency2Label = new System.Windows.Forms.Label();
@@ -57,7 +58,7 @@
             this.groupBox3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.lightSensorImg)).BeginInit();
             this.groupBox5.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.IRSensorImg)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.SonarImg)).BeginInit();
             this.groupBox4.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.lineSensorImg)).BeginInit();
             this.groupBox6.SuspendLayout();
@@ -114,7 +115,7 @@
             this.groupBox2.Controls.Add(this.contactSensorImg);
             this.groupBox2.Location = new System.Drawing.Point(219, 12);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(206, 62);
+            this.groupBox2.Size = new System.Drawing.Size(346, 62);
             this.groupBox2.TabIndex = 2;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Contact Sensors / IR Bumpers";
@@ -124,7 +125,7 @@
             // 
             this.contactSensorImg.Location = new System.Drawing.Point(6, 19);
             this.contactSensorImg.Name = "contactSensorImg";
-            this.contactSensorImg.Size = new System.Drawing.Size(194, 37);
+            this.contactSensorImg.Size = new System.Drawing.Size(334, 37);
             this.contactSensorImg.TabIndex = 0;
             this.contactSensorImg.TabStop = false;
             // 
@@ -133,7 +134,7 @@
             this.groupBox3.Controls.Add(this.lightSensorImg);
             this.groupBox3.Location = new System.Drawing.Point(219, 148);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(206, 62);
+            this.groupBox3.Size = new System.Drawing.Size(346, 62);
             this.groupBox3.TabIndex = 3;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Light Sensors";
@@ -142,34 +143,34 @@
             // 
             this.lightSensorImg.Location = new System.Drawing.Point(6, 19);
             this.lightSensorImg.Name = "lightSensorImg";
-            this.lightSensorImg.Size = new System.Drawing.Size(194, 37);
+            this.lightSensorImg.Size = new System.Drawing.Size(334, 37);
             this.lightSensorImg.TabIndex = 0;
             this.lightSensorImg.TabStop = false;
             // 
             // groupBox5
             // 
-            this.groupBox5.Controls.Add(this.IRSensorImg);
-            this.groupBox5.Location = new System.Drawing.Point(219, 216);
+            this.groupBox5.Controls.Add(this.SonarImg);
+            this.groupBox5.Location = new System.Drawing.Point(219, 284);
             this.groupBox5.Name = "groupBox5";
-            this.groupBox5.Size = new System.Drawing.Size(206, 62);
+            this.groupBox5.Size = new System.Drawing.Size(346, 62);
             this.groupBox5.TabIndex = 4;
             this.groupBox5.TabStop = false;
-            this.groupBox5.Text = "IR Sensors";
+            this.groupBox5.Text = "LEDs";
             // 
-            // IRSensorImg
+            // SonarImg
             // 
-            this.IRSensorImg.Location = new System.Drawing.Point(6, 19);
-            this.IRSensorImg.Name = "IRSensorImg";
-            this.IRSensorImg.Size = new System.Drawing.Size(194, 37);
-            this.IRSensorImg.TabIndex = 0;
-            this.IRSensorImg.TabStop = false;
+            this.SonarImg.Location = new System.Drawing.Point(6, 19);
+            this.SonarImg.Name = "SonarImg";
+            this.SonarImg.Size = new System.Drawing.Size(334, 37);
+            this.SonarImg.TabIndex = 0;
+            this.SonarImg.TabStop = false;
             // 
             // groupBox4
             // 
             this.groupBox4.Controls.Add(this.lineSensorImg);
-            this.groupBox4.Location = new System.Drawing.Point(219, 284);
+            this.groupBox4.Location = new System.Drawing.Point(219, 216);
             this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(206, 62);
+            this.groupBox4.Size = new System.Drawing.Size(346, 62);
             this.groupBox4.TabIndex = 5;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Line Sensors";
@@ -178,7 +179,7 @@
             // 
             this.lineSensorImg.Location = new System.Drawing.Point(6, 19);
             this.lineSensorImg.Name = "lineSensorImg";
-            this.lineSensorImg.Size = new System.Drawing.Size(194, 37);
+            this.lineSensorImg.Size = new System.Drawing.Size(334, 37);
             this.lineSensorImg.TabIndex = 0;
             this.lineSensorImg.TabStop = false;
             // 
@@ -187,7 +188,7 @@
             this.groupBox6.Controls.Add(this.stallSensorImg);
             this.groupBox6.Location = new System.Drawing.Point(219, 80);
             this.groupBox6.Name = "groupBox6";
-            this.groupBox6.Size = new System.Drawing.Size(206, 62);
+            this.groupBox6.Size = new System.Drawing.Size(346, 62);
             this.groupBox6.TabIndex = 3;
             this.groupBox6.TabStop = false;
             this.groupBox6.Text = "Stall Sensor";
@@ -197,12 +198,13 @@
             // 
             this.stallSensorImg.Location = new System.Drawing.Point(6, 19);
             this.stallSensorImg.Name = "stallSensorImg";
-            this.stallSensorImg.Size = new System.Drawing.Size(194, 37);
+            this.stallSensorImg.Size = new System.Drawing.Size(334, 37);
             this.stallSensorImg.TabIndex = 0;
             this.stallSensorImg.TabStop = false;
             // 
             // groupBox7
             // 
+            this.groupBox7.Controls.Add(this.loudCheckBox);
             this.groupBox7.Controls.Add(this.durationLabel);
             this.groupBox7.Controls.Add(this.durBar);
             this.groupBox7.Controls.Add(this.frequency2Label);
@@ -210,12 +212,25 @@
             this.groupBox7.Controls.Add(this.frequencyLabel);
             this.groupBox7.Controls.Add(this.freqBar1);
             this.groupBox7.Controls.Add(this.pictureBox1);
-            this.groupBox7.Location = new System.Drawing.Point(431, 12);
+            this.groupBox7.Location = new System.Drawing.Point(571, 12);
             this.groupBox7.Name = "groupBox7";
             this.groupBox7.Size = new System.Drawing.Size(206, 152);
             this.groupBox7.TabIndex = 3;
             this.groupBox7.TabStop = false;
             this.groupBox7.Text = "Tone";
+            // 
+            // loudCheckBox
+            // 
+            this.loudCheckBox.AutoSize = true;
+            this.loudCheckBox.Checked = true;
+            this.loudCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.loudCheckBox.Location = new System.Drawing.Point(6, 131);
+            this.loudCheckBox.Name = "loudCheckBox";
+            this.loudCheckBox.Size = new System.Drawing.Size(50, 17);
+            this.loudCheckBox.TabIndex = 7;
+            this.loudCheckBox.Text = "Loud";
+            this.loudCheckBox.UseVisualStyleBackColor = true;
+            this.loudCheckBox.CheckedChanged += new System.EventHandler(this.loudCheckBox_CheckedChanged);
             // 
             // durationLabel
             // 
@@ -294,7 +309,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(647, 354);
+            this.ClientSize = new System.Drawing.Size(789, 354);
             this.Controls.Add(this.groupBox7);
             this.Controls.Add(this.groupBox6);
             this.Controls.Add(this.groupBox4);
@@ -313,7 +328,7 @@
             this.groupBox3.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.lightSensorImg)).EndInit();
             this.groupBox5.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.IRSensorImg)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.SonarImg)).EndInit();
             this.groupBox4.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.lineSensorImg)).EndInit();
             this.groupBox6.ResumeLayout(false);
@@ -339,7 +354,7 @@
         private System.Windows.Forms.GroupBox groupBox3;
         private System.Windows.Forms.PictureBox lightSensorImg;
         private System.Windows.Forms.GroupBox groupBox5;
-        private System.Windows.Forms.PictureBox IRSensorImg;
+        private System.Windows.Forms.PictureBox SonarImg;
         private System.Windows.Forms.GroupBox groupBox4;
         private System.Windows.Forms.PictureBox lineSensorImg;
         private System.Windows.Forms.GroupBox groupBox6;
@@ -352,5 +367,6 @@
         private System.Windows.Forms.TrackBar durBar;
         private System.Windows.Forms.Label frequency2Label;
         private System.Windows.Forms.TrackBar freqBar2;
+        private System.Windows.Forms.CheckBox loudCheckBox;
     }
 }

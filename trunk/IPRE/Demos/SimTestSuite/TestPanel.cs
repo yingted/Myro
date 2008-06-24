@@ -8,20 +8,20 @@ using System.Text;
 using System.Windows.Forms;
 using System.Threading;
 
-using IPREFoundationClasses;
+using Myro;
 
 namespace SimTestSuite
 {
     public partial class TestPanel : Form
     {
         // Drive control taken from Form1 in IPREFoundationClasses
-        RobotBrain rbt;
+        Robot rbt;
 
         int rectX = 20, rectY = 20, rectWidth = 150, rectHeight = 150, lengthTick = 5, fontSpacing = 5;
         Graphics g;
         bool mouseDown = false;
 
-        public TestPanel(RobotBrain rbt)
+        public TestPanel(Robot rbt)
         {
             this.rbt = rbt;
             InitializeComponent();
@@ -58,7 +58,7 @@ namespace SimTestSuite
             {
                 //Console.WriteLine("update");
                 this.update();
-                Thread.Sleep(400);
+                Thread.Sleep(100);
             }
         }
 
@@ -158,7 +158,8 @@ namespace SimTestSuite
 
             driveBox.Refresh();
 
-            rbt.Stop();
+            rbt.Movement.Stop();
+
             //Console.WriteLine("All Stop");
             //Console.WriteLine();
         }
@@ -232,65 +233,78 @@ namespace SimTestSuite
                 right_wheel = -1.0 * temp;
             }
 
-            rbt.SetMotors((float)left_wheel, (float)right_wheel);
+            rbt.Movement.SetMotors((float)left_wheel, (float)right_wheel);
+
             //Console.WriteLine("Power:" + left_wheel + "," + right_wheel);
             //Console.WriteLine();
         }
 
         private int[] layout(int widthTotal, int widthOne, int count)
         {
-            int widthEach = widthTotal / count;
-            int offset = (widthEach - widthOne) / 2;
-            int[] ret = new int[count];
-            for (int i = 0; i < count; i++)
-                ret[i] = widthEach * i + offset;
-            return ret;
+            if (count > 0)
+            {
+                int widthEach = widthTotal / count;
+                int offset = (widthEach - widthOne) / 2;
+                int[] ret = new int[count];
+                for (int i = 0; i < count; i++)
+                    ret[i] = widthEach * i + offset;
+                return ret;
+            }
+            else
+            {
+                return new int[0];
+            }
         }
 
-        private void drawCircleMeters(PictureBox control, Color color, float[] vals, float min, float max)
+        private void drawCircleMeters(PictureBox control, Color color, double[] vals, string[] labels, double min, double max)
         {
-            Bitmap bmp = new Bitmap(control.Width, control.Height);
-            Graphics g = Graphics.FromImage(bmp);
-            Brush brush = new SolidBrush(color);
-            Brush black = new SolidBrush(Color.Black);
-
-            int maxCircleRadius = 15;
-            int[] xs = layout(control.Width, maxCircleRadius * 2, vals.Length);
-            //Console.WriteLine("L: " + vals[0] + "  R: " + vals[1]);
-            IEnumerable<int> radii = from v in vals
-                                     let normalized = (v - min) / (max - min)
-                                     let normalizedBounded = (normalized > 0 ? normalized : 0)
-                                     select (int)(normalizedBounded * (float)maxCircleRadius);
-            StringFormat format = StringFormat.GenericDefault;
-            format.Alignment = StringAlignment.Center;
-            Font font = new Font("Sans Serif", 7);
-            for (int i = 0; i < xs.Length; i++)
+            if (control.IsHandleCreated)
             {
-                //Console.WriteLine("Radius: " + radii.ElementAt(i));
-                int offset = maxCircleRadius - radii.ElementAt(i);
-                g.FillEllipse(brush, xs[i] + offset, offset, 2 * radii.ElementAt(i), 2 * radii.ElementAt(i));
-                g.DrawString(vals[i].ToString(), font, black, xs[i] + maxCircleRadius, (float)maxCircleRadius * 1.8f, format);
+                Bitmap bmp = new Bitmap(control.Width, control.Height);
+                Graphics g = Graphics.FromImage(bmp);
+                Brush brush = new SolidBrush(color);
+                Brush black = new SolidBrush(Color.Black);
+
+                int maxCircleRadius = 15;
+                int[] xs = layout(control.Width, maxCircleRadius * 2, vals.Length);
+                //Console.WriteLine("L: " + vals[0] + "  R: " + vals[1]);
+                IEnumerable<int> radii = from v in vals
+                                         let normalized = (v - min) / (max - min)
+                                         let normalizedBounded = (normalized > 0 ? normalized : 0)
+                                         select (int)(normalizedBounded * (double)maxCircleRadius);
+                StringFormat format = StringFormat.GenericDefault;
+                format.Alignment = StringAlignment.Center;
+                Font font = new Font("Sans Serif", 7);
+                for (int i = 0; i < xs.Length; i++)
+                {
+                    //Console.WriteLine("Radius: " + radii.ElementAt(i));
+                    int offset = maxCircleRadius - radii.ElementAt(i);
+                    g.FillEllipse(brush, xs[i] + offset, offset, 2 * radii.ElementAt(i), 2 * radii.ElementAt(i));
+                    g.DrawString(vals[i].ToString(), font, black, xs[i] + maxCircleRadius, (float)maxCircleRadius * 1.8f, format);
+                    //Console.WriteLine(labels.Length + " labels");
+                    if (i < labels.Length)
+                    {
+                        g.DrawString(labels[i].ToString(), font, black, xs[i] + maxCircleRadius, 0, format);
+                        //Console.WriteLine("Label: " + labels[i]);
+                    }
+                }
+                control.Image = bmp;
+                control.Invoke(new Action(delegate() { control.Refresh(); }));
             }
-            control.Image = bmp;
-            control.Invoke(new Action(delegate() { control.Refresh(); }));
         }
 
         private void update()
         {
-            float[] contacts = rbt.getContact();
-            //Console.WriteLine("contact: " + contacts[0] + ", " + contacts[1]);
-            drawCircleMeters(contactSensorImg, Color.MediumVioletRed, contacts, 0.0f, 1.0f);
-            float[] stall = rbt.get("stall");
-            drawCircleMeters(stallSensorImg, Color.Red, stall, 0.0f, 1.0f);
-            float[] light = rbt.get("light");
-            //Console.WriteLine("light: " + light[0]);
-            drawCircleMeters(lightSensorImg, Color.DeepSkyBlue, light, 2000.0f, 0.0f);
-            //float[] ir = rbt.get("ir");
-            //Console.WriteLine("ir: " + ir[0]);
-            //drawCircleMeters(IRSensorImg, ir, 0.0f, 1.0f);
-            //float[] line = rbt.get("line");
-            //Console.WriteLine("line: " + line[0]);
-            //drawCircleMeters(lineSensorImg, line, 0.0f, 100.0f);
+            double[] contacts = rbt.Sensors.get("bumpers");
+            drawCircleMeters(contactSensorImg, Color.MediumVioletRed, contacts, rbt.Sensors.getNames("bumpers"), 0.0, 1.0);
+            double[] stall = rbt.Sensors.get("stall");
+            drawCircleMeters(stallSensorImg, Color.Red, stall, rbt.Sensors.getNames("stall"), 0.0, 1.0);
+            //double[] light = rbt.Sensors.get("light");
+            //drawCircleMeters(lightSensorImg, Color.DeepSkyBlue, light, rbt.Sensors.getNames("light"), 2000.0, 0.0);
+            //double[] sonar = rbt.Sensors.get("sonar");
+            //drawCircleMeters(SonarImg, Color.Tan, sonar, rbt.Sensors.getNames("sonar"), 40.0, 0.0);
+            //double[] line = rbt.Sensors.get("line");
+            //drawCircleMeters(lineSensorImg, Color.DarkGray, line, rbt.Sensors.getNames("line"), 0.0, 1.0);
         }
 
         private void TestPanel_Load(object sender, EventArgs e)
@@ -330,7 +344,12 @@ namespace SimTestSuite
 
         private void tone_MouseUp(object sender, MouseEventArgs e)
         {
-            rbt.beep(durBar.Value, freqBar1.Value, freqBar2.Value);
+            rbt.Sound.beep(durBar.Value, freqBar1.Value, freqBar2.Value);
+        }
+
+        private void loudCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            rbt.Sound.SetLoud(loudCheckBox.Checked);
         }
     }
 }

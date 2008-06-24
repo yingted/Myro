@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<!--This file was created with the Microsoft Visual Programming Language.-->
+<Manifest xmlns:scribblerirbumper="http://www.roboteducation.org/scribblerirbumper.html" xmlns:dssp="http://schemas.microsoft.com/xw/2004/10/dssp.html" xmlns:this="urn:uuid:9ea92b8a-6cba-4fd0-8d64-0a495e2eca4d" xmlns:scribblertonegenerator="http://www.roboteducation.org/scribblertonegenerator.html" xmlns:scribblerlightsensor="http://www.roboteducation.org/scribblerlightsensor.html" xmlns:scribblerbase="http://www.roboteducation.org/scribblerbase.html" xmlns:scribblerstall="http://www.roboteducation.org/scribblerstall.html" xmlns:scribblerdrive="http://www.roboteducation.org/scribblerdrive.html" xmlns:scribblerlinesensor="http://www.roboteducation.org/scribblerlinesensor.html" xmlns="http://schemas.microsoft.com/xw/2004/10/manifest.html">
+  <CreateServiceList>
+    <ServiceRecordType>
+      <dssp:Contract>http://www.roboteducation.org/scribblerbase.html</dssp:Contract>
+      <dssp:PartnerList />
+      <Name>this:ScribblerBase</Name>
+    </ServiceRecordType>
+    <ServiceRecordType>
+      <dssp:Contract>http://www.roboteducation.org/scribblerdrive.html</dssp:Contract>
+      <dssp:Service>http://localhost:80/drive</dssp:Service>
+      <dssp:PartnerList />
+      <Name>this:ScribblerDrive</Name>
+    </ServiceRecordType>
+    <ServiceRecordType>
+      <dssp:Contract>http://www.roboteducation.org/scribblerirbumper.html</dssp:Contract>
+      <dssp:Service>http://localhost:80/ir</dssp:Service>
+      <dssp:PartnerList />
+      <Name>this:ScribblerBumper</Name>
+    </ServiceRecordType>
+    <ServiceRecordType>
+      <dssp:Contract>http://www.roboteducation.org/scribblerlinesensor.html</dssp:Contract>
+      <dssp:Service>http://localhost:80/line</dssp:Service>
+      <dssp:PartnerList />
+      <Name>this:ScribblerLineSensor</Name>
+    </ServiceRecordType>
+    <ServiceRecordType>
+      <dssp:Contract>http://www.roboteducation.org/scribblerlightsensor.html</dssp:Contract>
+      <dssp:Service>http://localhost:80/light</dssp:Service>
+      <dssp:PartnerList />
+      <Name>this:ScribblerLightSensors</Name>
+    </ServiceRecordType>
+    <ServiceRecordType>
+      <dssp:Contract>http://www.roboteducation.org/scribblertonegenerator.html</dssp:Contract>
+      <dssp:Service>http://localhost:80/tonegen</dssp:Service>
+      <dssp:PartnerList />
+      <Name>this:ScribblerToneGenerator</Name>
+    </ServiceRecordType>
+    <ServiceRecordType>
+      <dssp:Contract>http://www.roboteducation.org/scribblerstall.html</dssp:Contract>
+      <dssp:Service>http://localhost:80/stall</dssp:Service>
+      <dssp:PartnerList />
+      <Name>this:ScribblerStall</Name>
+    </ServiceRecordType>
+  </CreateServiceList>
+</Manifest>

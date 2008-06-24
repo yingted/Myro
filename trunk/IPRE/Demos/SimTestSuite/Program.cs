@@ -4,40 +4,22 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
+using Microsoft.Dss.Hosting;
 
-using IPREFoundationClasses;
+using Myro;
 
 namespace SimTestSuite
 {
     class SimTestSuite
     {
-        ScribblerBrain scribbler;
+        Robot scribbler;
         TestPanel panel;
 
         public void start()
         {
-            Console.WriteLine("Opening Scribbler...");
-            scribbler = new ScribblerBrain("Config\\IPRE.Scribbler.standard.config.xml");
-            Console.WriteLine("Scribbler is ready!");
-
-            //new Thread(new ThreadStart(bumperLoop)).Start();
-            //new Thread(new ThreadStart(driveLoop)).Start();
+            scribbler = new Robot("C:\\Microsoft Robotics Dev Studio 2008\\config\\Scribbler.manifest\\Scribbler.manifest.xml");
 
             startGUI();
-        }
-
-        void bumperLoop()
-        {
-            while (true)
-            {
-                Console.WriteLine("[ " + scribbler.getContact(0) + ", " + scribbler.getContact(1) + " ]");
-                Thread.Sleep(500);
-            }
-        }
-
-        void driveLoop()
-        {
-            scribbler.ForwardFor(1.0f, 10.0f);
         }
 
         void startGUI()

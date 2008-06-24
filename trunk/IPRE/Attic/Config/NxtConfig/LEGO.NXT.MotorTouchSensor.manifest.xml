@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Manifest 
+    xmlns="http://schemas.microsoft.com/xw/2004/10/manifest.html"
+    xmlns:dssp="http://schemas.microsoft.com/xw/2004/10/dssp.html"
+    xmlns:nxt="http://schemas.microsoft.com/robotics/2006/05/legonxt.html"
+    >
+  <!-- Start the LEGO NXT with a motor and touch sensors. -->
+  <!-- Useful in Robotics Tutorials 1 & 2                 -->
+  <CreateServiceList>
+
+    <!-- ****************************************************************************************** -->
+    <!--Start LegoNXT Brick -->
+    
+    <ServiceRecordType>
+      <dssp:Contract>http://schemas.microsoft.com/robotics/2006/05/legonxt.html</dssp:Contract>
+      <dssp:PartnerList>
+        <!--Initial LegoNXT config file -->
+        <dssp:Partner>
+          <dssp:Service>LEGO.NXT.Brick.Config.xml</dssp:Service>
+          <dssp:Name>dssp:StateService</dssp:Name>
+        </dssp:Partner>
+      </dssp:PartnerList>
+      <Name>nxt:Brick</Name>
+    </ServiceRecordType>
+
+    <!-- ****************************************************************************************** -->
+    <!-- Start the NXT Motor -->
+    
+    <ServiceRecordType>
+      <dssp:Contract>http://schemas.microsoft.com/2006/06/legonxtmotor.html</dssp:Contract>
+      <dssp:PartnerList>
+        <!--Initial state partner-->
+        <dssp:Partner>
+          <dssp:Service>LEGO.NXT.MotorTouchSensor.Motor.Config.xml</dssp:Service>
+          <dssp:Name>dssp:StateService</dssp:Name>
+        </dssp:Partner>
+        <dssp:Partner>
+          <dssp:Name>nxt:Brick</dssp:Name>
+        </dssp:Partner>
+      </dssp:PartnerList>
+    </ServiceRecordType>
+
+    <!-- ****************************************************************************************** -->
+    <!-- Start the NXT Bumper with an initial configuration -->
+
+    <ServiceRecordType>
+      <dssp:Contract>http://schemas.microsoft.com/2006/06/lego.nxt.bumper.html</dssp:Contract>
+      <dssp:PartnerList>
+        <dssp:Partner>
+          <dssp:Service>LEGO.NXT.MotorTouchSensor.Bumper.Config.xml</dssp:Service>
+          <dssp:Name>dssp:StateService</dssp:Name>
+        </dssp:Partner>
+        <dssp:Partner>
+          <dssp:Name>nxt:Brick</dssp:Name>
+        </dssp:Partner>
+      </dssp:PartnerList>
+    </ServiceRecordType>
+
+    <!-- ****************************************************************************************** -->
+    
+  </CreateServiceList>
+
+</Manifest>
