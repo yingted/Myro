@@ -380,8 +380,10 @@ namespace Myro.Services.Scribbler.ScribblerBase
                 (message.Body.IsLoud ? ScribblerHelper.Commands.SET_LOUD : ScribblerHelper.Commands.SET_QUIET));
             SendScribblerCommand sendcmd = new SendScribblerCommand(cmd);
             _scribblerComPort.Post(sendcmd);
-            yield return Arbiter.Receive<ScribblerResponse>(false, sendcmd.ResponsePort,
-                delegate(ScribblerResponse response) { message.ResponsePort.Post(DefaultUpdateResponseType.Instance); });
+            yield return Arbiter.Choice(sendcmd.ResponsePort,
+                delegate(ScribblerResponse f) { message.ResponsePort.Post(DefaultUpdateResponseType.Instance); },
+                delegate(Fault f) { message.ResponsePort.Post(f); });
+            yield break;
         }
 
 
@@ -452,6 +454,56 @@ namespace Myro.Services.Scribbler.ScribblerBase
             yield break;
         }
 
+        [ServiceHandler(ServiceHandlerBehavior.Exclusive)]
+        public IEnumerator<ITask> SetLEDFrontHandler(SetLEDFront set)
+        {
+            if (!_state.Connected)
+            {
+                LogError("Trying to set LED, but not connected");
+                set.ResponsePort.Post(new Fault());
+                yield break;
+            }
+
+            ScribblerCommand cmd;
+            if (set.Body.FrontLED == true)
+                cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.SET_DONGLE_LED_ON);
+            else
+                cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.SET_DONGLE_LED_OFF);
+
+            SendScribblerCommand sendcmd = new SendScribblerCommand(cmd);
+            _scribblerComPort.Post(sendcmd);
+
+            _state.LEDFront = set.Body.FrontLED;
+
+            yield return Arbiter.Choice(sendcmd.ResponsePort,
+                delegate(ScribblerResponse r) { set.ResponsePort.Post(DefaultUpdateResponseType.Instance); },
+                delegate(Fault f) { set.ResponsePort.Post(f); });
+            yield break;
+        }
+
+
+        [ServiceHandler(ServiceHandlerBehavior.Exclusive)]
+        public IEnumerator<ITask> SetLEDBackHandler(SetLEDBack set)
+        {
+            if (!_state.Connected)
+            {
+                LogError("Trying to set LED, but not connected");
+                set.ResponsePort.Post(new Fault());
+                yield break;
+            }
+
+            ScribblerCommand cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.SET_DIMMER_LED, set.Body.BackLED);
+
+            SendScribblerCommand sendcmd = new SendScribblerCommand(cmd);
+            _scribblerComPort.Post(sendcmd);
+
+            _state.LEDBack = set.Body.BackLED;
+
+            yield return Arbiter.Choice(sendcmd.ResponsePort,
+                delegate(ScribblerResponse r) { set.ResponsePort.Post(DefaultUpdateResponseType.Instance); },
+                delegate(Fault f) { set.ResponsePort.Post(f); });
+            yield break;
+        }
 
         /// <summary>
         /// Handles incoming SetAllLEDs requests
@@ -771,6 +823,10 @@ namespace Myro.Services.Scribbler.ScribblerBase
                     foreach (byte b in response.Body.Data)
                         Console.Write(b);
                     Console.Write("\n");
+                    break;
+                case 0:
+                    Console.WriteLine("Got 0 command");
+                    // Do nothing
                     break;
                 default:
                     LogError(LogGroups.Console, "Update State command missmatch, got " + response.Body.CommandType);

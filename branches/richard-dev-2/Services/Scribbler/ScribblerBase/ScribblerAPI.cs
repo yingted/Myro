@@ -26,6 +26,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
     {
 
         private static int SetMessageReturnLength = 12;
+        private const int ScribblerOutMessageSize = 9;
 
         /// <summary>
         /// enumeration of Scribbler API commands
@@ -34,6 +35,17 @@ namespace Myro.Services.Scribbler.ScribblerBase
         {
             SOFT_RESET          = 33,
 
+            //UPDATE_FIRMWARE	    = 40,
+            //SAVE_EEPROM	        = 41,
+            //RESTORE_EEPROM	    = 42,
+            //WATCHDOG_RESET	    = 43,
+
+            //GET_PASS1           = 50,
+            //GET_PASS2           = 51,
+            //SET_PASS1           = 55,
+            //SET_PASS2           = 56,
+
+            //GET_NAME2           = 64,
             GET_ALL             = 65,
             GET_ALL_BINARY      = 66,
             GET_LIGHT_LEFT      = 67,
@@ -51,7 +63,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
             GET_STALL           = 79,
             GET_INFO            = 80,
             GET_DATA            = 81,
-/*
+            /*
             GET_RLE             = 82,  // a segmented and run-length encoded image
             GET_IMAGE           = 83,  // the entire 256 x 192 image in YUYV format
             GET_WINDOW          = 84,  // the windowed image (followed by which window)
@@ -64,8 +76,10 @@ namespace Myro.Services.Scribbler.ScribblerBase
             GET_SCRIB_PROGRAM   = 91,  // with offset, returns the scribbler program buffer
             GET_CAM_PARAM       = 92,  // get the camera parameter at specified address
             GET_IMAGE_COMPRESSED= 93,
+            GET_BLOB_WINDOW     = 94,
+            GET_BLOB            = 95,
             SET_SINGLE_DATA     = 96,  // Sets a single byte of data in flash memory//
-*/
+            */
             SET_DATA            = 97,
             SET_ECHO_MODE       = 98,
             SET_LED_LEFT_ON     = 99,
@@ -88,21 +102,29 @@ namespace Myro.Services.Scribbler.ScribblerBase
 
             SET_DONGLE_LED_ON   = 116,
             SET_DONGLE_LED_OFF  = 117,
-/*            SET_RLE             = 118,
-            SET_NAME2           = 119,  // Format: 110 char1 char2 char3 char4 char5 char6 char7 char8
-            SET_DONGLE_IR       = 120,
-            SET_SERIAL_MEM      = 121,
-            SET_SCRIB_PROGRAM   = 122,
-            SET_START_PROGRAM   = 123,
-            SET_RESET_SCRIBBLER = 124,
-            SET_SERIAL_ERASE    = 125,
-            SET_DIMMER_LED      = 126,
-            SET_WINDOW          = 127,
-            SET_FORWARDNESS     = 128,
-            SET_WHITE_BALANCE   = 129,
-            SET_NO_WHITE_BALANCE= 130,
-            SET_CAM_PARAM       = 131  // set the camera parameter at specified address to a value
-*/
+            //SET_RLE             = 118,
+            //SET_NAME2           = 119,  // Format: 110 char1 char2 char3 char4 char5 char6 char7 char8
+            //SET_DONGLE_IR       = 120,
+            //SET_SERIAL_MEM      = 121,
+            //SET_SCRIB_PROGRAM   = 122,
+            //SET_START_PROGRAM   = 123,
+            //SET_RESET_SCRIBBLER = 124,
+            //SET_SERIAL_ERASE    = 125,
+            SET_DIMMER_LED        = 126,
+            //SET_WINDOW          = 127,
+            //SET_FORWARDNESS     = 128,
+            //SET_WHITE_BALANCE   = 129,
+            //SET_NO_WHITE_BALANCE= 130,
+            //SET_CAM_PARAM       = 131  // set the camera parameter at specified address to a value
+
+            //SET_UART0           = 132,
+            //SET_PASS_BYTE       = 133,
+            //SET_PASSTHROUGH     = 134,
+
+            //GET_JPEG_GRAY_HEADER= 135,
+            //GET_JPEG_GRAY_SCAN  = 136,
+            //GET_JPEG_COLOR_HEADER=137,
+            //GET_JPEG_COLOR_SCAN = 138
             // NOTE: If you add or modify these commands, you will also need to modify the functions below
             // as well as ScribblerResponseHandler in Scribbler.cs
         }
@@ -190,12 +212,129 @@ namespace Myro.Services.Scribbler.ScribblerBase
                 case Commands.SET_ECHO_MODE:
                     return SetMessageReturnLength;
                     break;
+                case Commands.SET_DONGLE_LED_OFF:
+                case Commands.SET_DONGLE_LED_ON:
+                case Commands.SET_DIMMER_LED:
                 case Commands.SOFT_RESET:
                     return 0;
                     break;
                 default:
-                    Console.WriteLine("Command missmatch");
+                    Console.WriteLine("Command missmatch - return size");
                     return 1;
+                    break;
+            }
+        }
+
+        public int CommandSize(Commands cmd)
+        {
+            switch (cmd)
+            {
+                case Commands.GET_STATE:
+                case Commands.GET_IR_LEFT:
+                case Commands.GET_IR_RIGHT:
+                case Commands.GET_STALL:
+                case Commands.GET_LIGHT_LEFT:
+                case Commands.GET_LIGHT_CENTER:
+                case Commands.GET_LIGHT_RIGHT:
+                case Commands.GET_LINE_RIGHT:
+                case Commands.GET_LINE_LEFT:
+                case Commands.GET_NAME:
+                case Commands.GET_LIGHT_ALL:
+                case Commands.GET_IR_ALL:
+                case Commands.GET_LINE_ALL:
+                case Commands.GET_ALL:
+                case Commands.GET_ALL_BINARY:
+                case Commands.GET_INFO:
+                case Commands.GET_DATA:
+                case Commands.SET_MOTORS_OFF:
+                case Commands.SET_MOTORS:
+                case Commands.SET_LED_LEFT_ON:
+                case Commands.SET_LED_LEFT_OFF:
+                case Commands.SET_LED_CENTER_ON:
+                case Commands.SET_LED_CENTER_OFF:
+                case Commands.SET_LED_RIGHT_ON:
+                case Commands.SET_LED_RIGHT_OFF:
+                case Commands.SET_SPEAKER:
+                case Commands.SET_SPEAKER_2:
+                case Commands.SET_NAME:
+                case Commands.SET_LED_ALL_ON:
+                case Commands.SET_LED_ALL_OFF:
+                case Commands.SET_LOUD:
+                case Commands.SET_QUIET:
+                case Commands.SET_LED_ALL:
+                case Commands.SET_DATA:
+                case Commands.SET_ECHO_MODE:
+                    return ScribblerOutMessageSize;
+                    break;
+
+                case Commands.SET_DONGLE_LED_OFF:
+                case Commands.SET_DONGLE_LED_ON:
+                    return 1;
+                    break;
+                case Commands.SET_DIMMER_LED:
+                    return 2;
+                    break;
+                case Commands.SOFT_RESET:
+                    return 1;
+                    break;
+                default:
+                    Console.WriteLine("Command missmatch - command size");
+                    return 0;
+                    break;
+            }
+        }
+
+        public bool HasEcho(Commands cmd)
+        {
+            switch (cmd)
+            {
+                case Commands.GET_STATE:
+                case Commands.GET_IR_LEFT:
+                case Commands.GET_IR_RIGHT:
+                case Commands.GET_STALL:
+                case Commands.GET_LIGHT_LEFT:
+                case Commands.GET_LIGHT_CENTER:
+                case Commands.GET_LIGHT_RIGHT:
+                case Commands.GET_LINE_RIGHT:
+                case Commands.GET_LINE_LEFT:
+                case Commands.GET_NAME:
+                case Commands.GET_LIGHT_ALL:
+                case Commands.GET_IR_ALL:
+                case Commands.GET_LINE_ALL:
+                case Commands.GET_ALL:
+                case Commands.GET_ALL_BINARY:
+                case Commands.GET_INFO:
+                case Commands.GET_DATA:
+                case Commands.SET_MOTORS_OFF:
+                case Commands.SET_MOTORS:
+                case Commands.SET_LED_LEFT_ON:
+                case Commands.SET_LED_LEFT_OFF:
+                case Commands.SET_LED_CENTER_ON:
+                case Commands.SET_LED_CENTER_OFF:
+                case Commands.SET_LED_RIGHT_ON:
+                case Commands.SET_LED_RIGHT_OFF:
+                case Commands.SET_SPEAKER:
+                case Commands.SET_SPEAKER_2:
+                case Commands.SET_NAME:
+                case Commands.SET_LED_ALL_ON:
+                case Commands.SET_LED_ALL_OFF:
+                case Commands.SET_LOUD:
+                case Commands.SET_QUIET:
+                case Commands.SET_LED_ALL:
+                case Commands.SET_DATA:
+                case Commands.SET_ECHO_MODE:
+                    return true;
+                    break;
+
+                case Commands.SET_DONGLE_LED_OFF:
+                case Commands.SET_DONGLE_LED_ON:
+                case Commands.SET_DIMMER_LED:
+                case Commands.SOFT_RESET:
+                    return false;
+                    break;
+                default:
+                    Console.WriteLine("Command missmatch - command echo");
+                    return false;
                     break;
             }
         }

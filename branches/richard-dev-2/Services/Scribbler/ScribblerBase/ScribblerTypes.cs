@@ -16,7 +16,7 @@ using Microsoft.Dss.Core.DsspHttp;
 //[assembly: ContractNamespace(IPRE.ScribblerBase.Contract.Identifier, ClrNamespace = "IPRE.ScribblerBase")]
 namespace Myro.Services.Scribbler.ScribblerBase
 {
-    
+
     public static class Contract
     {
         public const string Identifier = "http://www.roboteducation.org/schemas/2008/06/scribblerbase.html";
@@ -26,8 +26,8 @@ namespace Myro.Services.Scribbler.ScribblerBase
     /// Main operations port
     /// </summary>
     public class ScribblerOperations : PortSet<
-        DsspDefaultLookup, 
-        DsspDefaultDrop, 
+        DsspDefaultLookup,
+        DsspDefaultDrop,
         Get,
         HttpGet,
         HttpPost,
@@ -35,6 +35,8 @@ namespace Myro.Services.Scribbler.ScribblerBase
         SetMotors,
         SetLED,
         SetAllLEDs,
+        SetLEDFront,
+        SetLEDBack,
         PlayTone,
         SetLoud,
         SetName,
@@ -98,16 +100,33 @@ namespace Myro.Services.Scribbler.ScribblerBase
     {
         public SetAllLEDs() { }
 
-        public SetAllLEDs(SetAllLedsBody b)
-        {
-            base.Body = b;
-        }
+        public SetAllLEDs(SetAllLedsBody b) : base(b) { }
+    }
+
+    /// <summary>
+    /// sends an LED Front message to Scribbler
+    /// </summary>
+    public class SetLEDFront : Update<SetLEDFrontBody, PortSet<DefaultUpdateResponseType, Fault>>
+    {
+        public SetLEDFront() { }
+
+        public SetLEDFront(SetLEDFrontBody b) : base(b) { }
+    }
+
+    /// <summary>
+    /// sends an LED Back message to Scribbler
+    /// </summary>
+    public class SetLEDBack : Update<SetLEDBackBody, PortSet<DefaultUpdateResponseType, Fault>>
+    {
+        public SetLEDBack() { }
+
+        public SetLEDBack(SetLEDBackBody b) : base(b) { }
     }
 
     /// <summary>
     /// Plays a tone on the scribbler
     /// </summary>
-    public class PlayTone : Update<PlayToneBody, PortSet<DefaultUpdateResponseType, Fault>> 
+    public class PlayTone : Update<PlayToneBody, PortSet<DefaultUpdateResponseType, Fault>>
     {
         public PlayTone() { }
 
@@ -130,7 +149,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
     /// <summary>
     /// Sets the Scribbler's name
     /// </summary>
-    public class SetName : Update<SetNameBody, PortSet<DefaultUpdateResponseType, Fault>> 
+    public class SetName : Update<SetNameBody, PortSet<DefaultUpdateResponseType, Fault>>
     {
         public SetName() { }
 

@@ -220,6 +220,31 @@ namespace Myro.Utilities
             else
                 throw new NoContractFoundException(serviceRecord, contracts);
         }
+
+        /// <summary>
+        /// Convert a byte in the range 0-255, to a double in the range 0-1
+        /// </summary>
+        /// <param name="b"></param>
+        /// <returns></returns>
+        public static double NormalizeByte(byte b)
+        {
+            return (double)b / 255.0;
+        }
+
+        /// <summary>
+        /// Convert a double in the range 0-1, to a byte in the range 0-255
+        /// </summary>
+        /// <param name="d"></param>
+        /// <returns></returns>
+        public static byte UnnormalizeDouble(double d)
+        {
+            if (d > 1.0)
+                return (byte)255;
+            if (d < 0.0)
+                return (byte)0;
+            else
+                return (byte)(d * 255.0);
+        }
     }
 
     /// <summary>

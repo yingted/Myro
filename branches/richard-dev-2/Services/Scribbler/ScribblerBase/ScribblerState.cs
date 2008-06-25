@@ -95,6 +95,12 @@ namespace Myro.Services.Scribbler.ScribblerBase
         [DataMember]
         public bool LEDCenter;
 
+        [DataMember]
+        public bool LEDFront;
+
+        [DataMember]
+        public byte LEDBack;
+
         /// <summary>
         /// Whether or not service is connected to the physical robot through a COM port
         /// </summary>
@@ -181,6 +187,13 @@ namespace Myro.Services.Scribbler.ScribblerBase
         {
             _data = new byte[8];
             _commandType = command;
+        }
+
+        public ScribblerCommand(byte command, byte data)
+        {
+            _data = new byte[8];
+            _commandType = command;
+            _data[0] = data;
         }
 
         /// <summary>
@@ -353,6 +366,23 @@ namespace Myro.Services.Scribbler.ScribblerBase
             RightLED = right;
         }
     }
+
+    [DataContract]
+    [DataMemberConstructor]
+    public class SetLEDFrontBody
+    {
+        [DataMember]
+        public bool FrontLED;
+    }
+
+    [DataContract]
+    [DataMemberConstructor]
+    public class SetLEDBackBody
+    {
+        [DataMember]
+        public byte BackLED;
+    }
+
 
 
     [DataContract]

@@ -7,6 +7,7 @@ using System.ComponentModel;
 using Microsoft.Dss.Core.Attributes;
 using Microsoft.Ccr.Core;
 using W3C.Soap;
+using Myro.Utilities;
 
 using vector = Myro.Services.Generic.Vector;
 using brick = Myro.Services.Scribbler.ScribblerBase.Proxy;
@@ -34,8 +35,8 @@ namespace Myro.Services.Scribbler.LED
             : base(creationPort)
         {
             _state = new vector.VectorState(
-                new List<double>() { 0.0, 0.0, 0.0 },
-                new List<string>() { "left", "middle", "right" },
+                new List<double>() { 0.0, 0.0, 0.0, 0.0, 0.0 },
+                new List<string>() { "left", "middle", "right", "front", "back" },
                 DateTime.Now);
         }
 
@@ -49,16 +50,34 @@ namespace Myro.Services.Scribbler.LED
             else if (request is vector.SetElementsRequestInfo)
             {
                 vector.SetElementsRequestInfo info = (vector.SetElementsRequestInfo)request;
-                if (info.Indices.Count > 1)
-                    Activate(Arbiter.Choice(
-                        _scribblerPort.SetAllLEDs(new brick.SetAllLedsBody() { LeftLED = _state.GetBool(0), CenterLED = _state.GetBool(1), RightLED = _state.GetBool(2) }),
-                    delegate(DefaultUpdateResponseType success) { },
-                    delegate(Fault failure) { LogError(failure); }));
-                else if (info.Indices.Count == 1)
-                    Activate(Arbiter.Choice(
-                        _scribblerPort.SetLED(new brick.SetLedBody() { LED = info.Indices[0], State = _state.GetBool(info.Indices[0]) }),
-                    delegate(DefaultUpdateResponseType success) { },
-                    delegate(Fault failure) { LogError(failure); }));
+                int setLEDScribblerIndex = -1; // will be set to -2 for set all
+                foreach (int i in info.Indices)
+                {
+                    if (i >= 0)
+                        if (i <= 2)
+                            if (setLEDScribblerIndex > 0)
+                                setLEDScribblerIndex = -2;
+                            else
+                                setLEDScribblerIndex = i;
+                        else if (i == 3)
+                            Activate(Arbiter.Choice(_scribblerPort.SetLEDFront(_state.GetBool(3)),
+                                delegate(DefaultUpdateResponseType s) { },
+                                delegate(Fault f) { LogError(f); }));
+                        else if (i == 4)
+                            Activate(Arbiter.Choice(_scribblerPort.SetLEDBack(RSUtils.UnnormalizeDouble(_state.Get(4))),
+                                delegate(DefaultUpdateResponseType s) { },
+                                delegate(Fault f) { LogError(f); }));
+                    if (setLEDScribblerIndex == -2)
+                        Activate(Arbiter.Choice(
+                            _scribblerPort.SetAllLEDs(new brick.SetAllLedsBody() { LeftLED = _state.GetBool(0), CenterLED = _state.GetBool(1), RightLED = _state.GetBool(2) }),
+                            delegate(DefaultUpdateResponseType success) { },
+                            delegate(Fault failure) { LogError(failure); }));
+                    else if (setLEDScribblerIndex >= 0)
+                        Activate(Arbiter.Choice(
+                            _scribblerPort.SetLED(new brick.SetLedBody() { LED = setLEDScribblerIndex, State = _state.GetBool(setLEDScribblerIndex) }),
+                            delegate(DefaultUpdateResponseType success) { },
+                            delegate(Fault failure) { LogError(failure); }));
+                }
             }
         }
     }
