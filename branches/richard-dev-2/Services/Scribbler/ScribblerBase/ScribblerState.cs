@@ -42,6 +42,15 @@ namespace Myro.Services.Scribbler.ScribblerBase
         public bool IRRight;
 
         [DataMember]
+        public short ObstacleLeft;
+
+        [DataMember]
+        public short ObstacleCenter;
+
+        [DataMember]
+        public short ObstacleRight;
+
+        [DataMember]
         public bool LineLeft;
 
         [DataMember]

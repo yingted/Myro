@@ -177,8 +177,10 @@ namespace Myro.Services.Generic.Vector
         /// information about the specific request.  See the Vector class
         /// description for more information.
         /// </summary>
-        protected virtual void GetCallback(GetRequestInfo request)
+        protected virtual IEnumerator<ITask> GetCallback(GetRequestInfo request, PortSet<CallbackResponseType, Fault> responsePort)
         {
+            responsePort.Post(CallbackResponseType.Instance);
+            yield break;
         }
 
         /// <summary>
@@ -190,110 +192,133 @@ namespace Myro.Services.Generic.Vector
         /// information about the specific request.  See the Vector class
         /// description for more information.
         /// </summary>
-        protected virtual void SetCallback(SetRequestInfo request)
+        protected virtual IEnumerator<ITask> SetCallback(SetRequestInfo request, PortSet<CallbackResponseType, Fault> responsePort)
         {
+            responsePort.Post(CallbackResponseType.Instance);
+            yield break;
         }
 
         [ServiceHandler(ServiceHandlerBehavior.Concurrent)]
         public IEnumerator<ITask> GetHandler(Get get)
         {
-            VectorState response = _state;
-            try
-            {
-                GetCallback(new GetAllRequestInfo());
-                get.ResponsePort.Post(_state);
-            }
-            catch (Exception e)
-            {
-                get.ResponsePort.Post(RSUtils.FaultOfException(e));
-            }
-            yield break;
+            var responsePort = new DsspResponsePort<CallbackResponseType>();
+            Activate(Arbiter.Choice(responsePort,
+                delegate(CallbackResponseType s) { get.ResponsePort.Post(_state); },
+                delegate(Fault f) { get.ResponsePort.Post(f); }));
+
+            return GetCallback(new GetAllRequestInfo(), responsePort);
         }
 
         [ServiceHandler(ServiceHandlerBehavior.Concurrent)]
         public IEnumerator<ITask> HttpGetHandler(HttpGet get)
         {
-            VectorState response = _state;
-            try
-            {
-                GetCallback(new GetAllRequestInfo());
-                get.ResponsePort.Post(new HttpResponseType(_state));
-            }
-            catch (Exception e)
-            {
-                get.ResponsePort.Post(RSUtils.FaultOfException(e));
-            }
-            yield break;
+            var responsePort = new DsspResponsePort<CallbackResponseType>();
+            Activate(Arbiter.Choice(responsePort,
+                delegate(CallbackResponseType s) { get.ResponsePort.Post(new HttpResponseType(_state)); },
+                delegate(Fault f) { get.ResponsePort.Post(f); }));
+
+            return GetCallback(new GetAllRequestInfo(), responsePort);
         }
 
         [ServiceHandler(ServiceHandlerBehavior.Exclusive)]
         public IEnumerator<ITask> ReplaceHandler(Replace replace)
         {
             _state = replace.Body;
-            try
-            {
-                SetCallback(new SetAllRequestInfo()
+            var responsePort = new DsspResponsePort<CallbackResponseType>();
+            Activate(Arbiter.Choice(responsePort,
+                delegate(CallbackResponseType s)
+                {
+                    replace.ResponsePort.Post(DefaultReplaceResponseType.Instance);
+                    SendNotification<Replace>(replace);
+                },
+                delegate(Fault f)
+                {
+                    replace.ResponsePort.Post(f);
+                }));
+
+            return SetCallback(new SetAllRequestInfo()
                 {
                     Timestamp = replace.Body.Timestamp,
                     Values = replace.Body.Values
-                });
-                replace.ResponsePort.Post(DefaultReplaceResponseType.Instance);
-                SendNotification<Replace>(replace);
-            }
-            catch (Exception e)
-            {
-                replace.ResponsePort.Post(RSUtils.FaultOfException(e));
-            }
-            yield break;
+                },
+                responsePort);
         }
 
         [ServiceHandler(ServiceHandlerBehavior.Concurrent)]
         public IEnumerator<ITask> GetByIndexHandler(GetByIndex get)
         {
-            try
-            {
-                GetElementResponseType response = new GetElementResponseType()
+            var responsePort = new DsspResponsePort<CallbackResponseType>();
+            Activate(Arbiter.Choice(responsePort,
+                delegate(CallbackResponseType s)
                 {
-                    Value = _state.Get(get.Body.Index),
-                    Timestamp = _state.Timestamp
-                };
-                GetCallback(new GetElementRequestInfo()
+                    try
+                    {
+                        get.ResponsePort.Post(new GetElementResponseType()
+                        {
+                            Value = _state.Get(get.Body.Index),
+                            Timestamp = _state.Timestamp
+                        });
+                    }
+                    catch (Exception e)
+                    {
+                        get.ResponsePort.Post(RSUtils.FaultOfException(e));
+                    }
+                },
+                delegate(Fault f)
+                {
+                    get.ResponsePort.Post(f);
+                }));
+
+            return GetCallback(new GetElementRequestInfo()
                 {
                     RequestType = RequestType.ByIndex,
                     Index = get.Body.Index,
-                    Key = ((_state.Keys.Count >= (get.Body.Index + 1)) ? _state.Keys[get.Body.Index] : "")
-                });
-                get.ResponsePort.Post(response);
-            }
-            catch (Exception e)
-            {
-                get.ResponsePort.Post(RSUtils.FaultOfException(e));
-            }
-            yield break;
+                    Key = ((get.Body.Index < _state.Keys.Count) ? _state.Keys[get.Body.Index] : "")
+                },
+                responsePort);
         }
 
         [ServiceHandler(ServiceHandlerBehavior.Concurrent)]
         public IEnumerator<ITask> GetByKeyHandler(GetByKey get)
         {
-            try
-            {
-                GetElementResponseType response = new GetElementResponseType()
-                {
-                    Value = _state.Get(get.Body.Key),
-                    Timestamp = _state.Timestamp
-                };
-                GetCallback(new GetElementRequestInfo()
-                {
-                    RequestType = RequestType.ByKey,
-                    Index = _state.indexCache[get.Body.Key],
-                    Key = get.Body.Key
-                });
-                get.ResponsePort.Post(response);
-            }
+            int index;
+            try { index = _state.indexCache[get.Body.Key]; }
             catch (Exception e)
             {
                 get.ResponsePort.Post(RSUtils.FaultOfException(e));
+                yield break;
             }
+
+            var responsePort = new DsspResponsePort<CallbackResponseType>();
+            Activate(Arbiter.Choice(responsePort,
+                delegate(CallbackResponseType s)
+                {
+                    try
+                    {
+                        get.ResponsePort.Post(new GetElementResponseType()
+                        {
+                            Value = _state.Get(index),
+                            Timestamp = _state.Timestamp
+                        });
+                    }
+                    catch (Exception e)
+                    {
+                        get.ResponsePort.Post(RSUtils.FaultOfException(e));
+                    }
+                },
+                delegate(Fault f)
+                {
+                    get.ResponsePort.Post(f);
+                }));
+
+            foreach (var task in RSUtils.CreateEnumerable(GetCallback(new GetElementRequestInfo()
+                    {
+                        RequestType = RequestType.ByKey,
+                        Index = index,
+                        Key = get.Body.Key
+                    },
+                    responsePort)))
+                yield return task;
             yield break;
         }
 

@@ -160,6 +160,15 @@ namespace Myro.Services.Scribbler.ScribblerBase
     }
 
     /// <summary>
+    /// Get one of the Fluke obstacle sensors
+    /// </summary>
+    public class GetObstacle : Get<Int32, PortSet<UInt16, Fault>>
+    {
+        public GetObstacle() { }
+        public GetObstacle(Int32 b) : base(b) { }
+    }
+
+    /// <summary>
     /// updates the state after a return packet from robot
     /// </summary>
     public class ScribblerResponseMessage : Update<ScribblerResponse, PortSet<DefaultUpdateResponseType, Fault>>

@@ -459,6 +459,16 @@ namespace Myro.Services.Generic.Vector
         public SetAllElements(SetAllRequestType body, DsspResponsePort<DefaultUpdateResponseType> responsePort) : base(body, responsePort) { }
         public SetAllElements(List<double> values) : base(new SetAllRequestType() { Values = values, Timestamp = DateTime.Now }) { }
     }
+
+    /// <summary>
+    /// This class should be posted by Get and Set callbacks upon success.
+    /// </summary>
+    [DataContract]
+    public class CallbackResponseType
+    {
+        public const CallbackResponseType Instance = new CallbackResponseType();
+    }
+
     #endregion
 
 }

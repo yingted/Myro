@@ -63,23 +63,23 @@ namespace Myro.Services.Scribbler.ScribblerBase
             GET_STALL           = 79,
             GET_INFO            = 80,
             GET_DATA            = 81,
-            /*
-            GET_RLE             = 82,  // a segmented and run-length encoded image
-            GET_IMAGE           = 83,  // the entire 256 x 192 image in YUYV format
-            GET_WINDOW          = 84,  // the windowed image (followed by which window)
-            GET_DONGLE_L_IR     = 85,  // number of returned pulses when left emitter is turned on
-            GET_DONGLE_C_IR     = 86,  // number of returned pulses when center emitter is turned on
-            GET_DONGLE_R_IR     = 87,  // number of returned pulses when right emitter is turned on
-            GET_WINDOW_LIGHT    = 88,  // average intensity in the user defined region
-            GET_BATTERY         = 89,  // battery voltage
-            GET_SERIAL_MEM      = 90,  // with the address returns the value in serial memory
-            GET_SCRIB_PROGRAM   = 91,  // with offset, returns the scribbler program buffer
-            GET_CAM_PARAM       = 92,  // get the camera parameter at specified address
-            GET_IMAGE_COMPRESSED= 93,
-            GET_BLOB_WINDOW     = 94,
-            GET_BLOB            = 95,
-            SET_SINGLE_DATA     = 96,  // Sets a single byte of data in flash memory//
-            */
+            
+            //GET_RLE             = 82,  // a segmented and run-length encoded image
+            //GET_IMAGE           = 83,  // the entire 256 x 192 image in YUYV format
+            //GET_WINDOW          = 84,  // the windowed image (followed by which window)
+            GET_DONGLE_L_IR       = 85,  // number of returned pulses when left emitter is turned on
+            GET_DONGLE_C_IR       = 86,  // number of returned pulses when center emitter is turned on
+            GET_DONGLE_R_IR       = 87,  // number of returned pulses when right emitter is turned on
+            //GET_WINDOW_LIGHT    = 88,  // average intensity in the user defined region
+            //GET_BATTERY         = 89,  // battery voltage
+            //GET_SERIAL_MEM      = 90,  // with the address returns the value in serial memory
+            //GET_SCRIB_PROGRAM   = 91,  // with offset, returns the scribbler program buffer
+            //GET_CAM_PARAM       = 92,  // get the camera parameter at specified address
+            //GET_IMAGE_COMPRESSED= 93,
+            //GET_BLOB_WINDOW     = 94,
+            //GET_BLOB            = 95,
+            //SET_SINGLE_DATA     = 96,  // Sets a single byte of data in flash memory//
+            
             SET_DATA            = 97,
             SET_ECHO_MODE       = 98,
             SET_LED_LEFT_ON     = 99,
@@ -218,6 +218,11 @@ namespace Myro.Services.Scribbler.ScribblerBase
                 case Commands.SOFT_RESET:
                     return 0;
                     break;
+                case Commands.GET_DONGLE_C_IR:
+                case Commands.GET_DONGLE_L_IR:
+                case Commands.GET_DONGLE_R_IR:
+                    return 2;
+                    break;
                 default:
                     Console.WriteLine("Command missmatch - return size");
                     return 1;
@@ -269,6 +274,9 @@ namespace Myro.Services.Scribbler.ScribblerBase
 
                 case Commands.SET_DONGLE_LED_OFF:
                 case Commands.SET_DONGLE_LED_ON:
+                case Commands.GET_DONGLE_C_IR:
+                case Commands.GET_DONGLE_L_IR:
+                case Commands.GET_DONGLE_R_IR:
                     return 1;
                     break;
                 case Commands.SET_DIMMER_LED:
@@ -329,6 +337,9 @@ namespace Myro.Services.Scribbler.ScribblerBase
                 case Commands.SET_DONGLE_LED_OFF:
                 case Commands.SET_DONGLE_LED_ON:
                 case Commands.SET_DIMMER_LED:
+                case Commands.GET_DONGLE_C_IR:
+                case Commands.GET_DONGLE_L_IR:
+                case Commands.GET_DONGLE_R_IR:
                 case Commands.SOFT_RESET:
                     return false;
                     break;

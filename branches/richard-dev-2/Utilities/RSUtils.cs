@@ -245,6 +245,31 @@ namespace Myro.Utilities
             else
                 return (byte)(d * 255.0);
         }
+
+        public static IEnumerable<T> CreateEnumerable<T>(IEnumerator<T> enumerator)
+        {
+            return new TheEnum<T>(enumerator);
+        }
+
+        class TheEnum<T> : IEnumerable<T>
+        {
+            private IEnumerator<T> enumerator;
+
+            public TheEnum(IEnumerator<T> e)
+            {
+                this.enumerator = e;
+            }
+
+            public IEnumerator<T> GetEnumerator()
+            {
+                return enumerator;
+            }
+
+            System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+            {
+                return enumerator;
+            }
+        }
     }
 
     /// <summary>
