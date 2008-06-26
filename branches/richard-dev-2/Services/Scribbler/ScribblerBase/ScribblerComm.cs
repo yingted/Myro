@@ -5,8 +5,8 @@
 //
 //-----------------------------------------------------------------------
 
-#define DEBUG
-//#undef DEBUG
+//#define DEBUG
+#undef DEBUG
 
 using System;
 
@@ -167,7 +167,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
                 // we are receiving data.
 #if DEBUG
                 Console.WriteLine("we are receiving data."); //DEBUG
-                Console.WriteLine("received: \"" + s +"\"");
+                Console.WriteLine("received: \"" + s + "\"");
 #endif
 
                 int index = s.IndexOf(characteristicString);
@@ -355,15 +355,15 @@ namespace Myro.Services.Scribbler.ScribblerBase
 
 
 #if DEBUG
-                    Console.Write("\nSent: ");
-                    foreach (byte b in buffer)
-                    {
-                        if (b != 0)
-                            Console.Write(b + " ");
-                        else
-                            Console.Write("` ");
-                    }
-                    Console.Write("\n");
+                Console.Write("\nSent: ");
+                foreach (byte b in buffer)
+                {
+                    if (b != 0)
+                        Console.Write(b + " ");
+                    else
+                        Console.Write("` ");
+                }
+                Console.Write("\n");
 #endif
 
 
@@ -384,7 +384,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
                 if (helper.HasEcho((ScribblerHelper.Commands)cmd.CommandType))
                     echo = GetEcho(buffer, outMessageSize);
 
-                response = GetCommandResponse(helper.ReturnSize((ScribblerHelper.Commands)cmd.CommandType));
+                response = GetCommandResponse(helper.ReturnSize((ScribblerHelper.Commands)cmd.CommandType), helper.HasEcho((ScribblerHelper.Commands)cmd.CommandType));
             }
             return response;
         }
@@ -425,15 +425,15 @@ namespace Myro.Services.Scribbler.ScribblerBase
                 response.Data = (byte[])inBuff.Clone();
 
 #if DEBUG
-                    Console.Write("Echo: ");
-                    foreach (byte b in response.Data)
-                    {
-                        if (b != 0)
-                            Console.Write(b + " ");
-                        else
-                            Console.Write("` ");
-                    }
-                    Console.Write("\n");
+                Console.Write("Echo: ");
+                foreach (byte b in response.Data)
+                {
+                    if (b != 0)
+                        Console.Write(b + " ");
+                    else
+                        Console.Write("` ");
+                }
+                Console.Write("\n");
 #endif
             }
             catch (Exception ex)
@@ -460,7 +460,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
         /// </summary>
         /// <param name="nBytes">number of bytes to read (includes the command type byte)</param>
         /// <returns>ScribblerResponse</returns>
-        private ScribblerResponse GetCommandResponse(int nBytes)
+        private ScribblerResponse GetCommandResponse(int nBytes, bool cmdEcho)
         {
             //Console.WriteLine("GetCommandResponse: creating buffer");
             byte[] inBuff = new Byte[Math.Abs(nBytes)];
@@ -511,10 +511,10 @@ namespace Myro.Services.Scribbler.ScribblerBase
                 }
 
 
-                response = new ScribblerResponse(Math.Max(0, Math.Abs(nBytes) - 1));
-                response.CommandType = (nBytes == 0 ? (byte)0 : inBuff[inBuff.Length - 1]);
-                for (int i = 0; i < inBuff.Length - 1; i++)
-                    response.Data[i] = inBuff[i];
+                int dataBytes = (cmdEcho ? Math.Abs(nBytes) - 1 : Math.Abs(nBytes));
+                response = new ScribblerResponse(Math.Max(0, dataBytes));
+                response.CommandType = (cmdEcho ? inBuff[inBuff.Length-1] : (byte)0);
+                Array.Copy(inBuff, response.Data, dataBytes);
 
 #if DEBUG
                     Console.Write("Got: ");

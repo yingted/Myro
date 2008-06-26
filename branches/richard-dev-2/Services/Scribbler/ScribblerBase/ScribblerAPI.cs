@@ -33,7 +33,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
         /// </summary>
         public enum Commands
         {
-            SOFT_RESET          = 33,
+            SOFT_RESET = 33,
 
             //UPDATE_FIRMWARE	    = 40,
             //SAVE_EEPROM	        = 41,
@@ -46,30 +46,30 @@ namespace Myro.Services.Scribbler.ScribblerBase
             //SET_PASS2           = 56,
 
             //GET_NAME2           = 64,
-            GET_ALL             = 65,
-            GET_ALL_BINARY      = 66,
-            GET_LIGHT_LEFT      = 67,
-            GET_LIGHT_CENTER    = 68,
-            GET_LIGHT_RIGHT     = 69,
-            GET_LIGHT_ALL       = 70,
-            GET_IR_LEFT         = 71,
-            GET_IR_RIGHT        = 72,
-            GET_IR_ALL          = 73,
-            GET_LINE_LEFT       = 74,
-            GET_LINE_RIGHT      = 75,
-            GET_LINE_ALL        = 76,
-            GET_STATE           = 77,
-            GET_NAME            = 78,
-            GET_STALL           = 79,
-            GET_INFO            = 80,
-            GET_DATA            = 81,
-            
+            GET_ALL = 65,
+            GET_ALL_BINARY = 66,
+            GET_LIGHT_LEFT = 67,
+            GET_LIGHT_CENTER = 68,
+            GET_LIGHT_RIGHT = 69,
+            GET_LIGHT_ALL = 70,
+            GET_IR_LEFT = 71,
+            GET_IR_RIGHT = 72,
+            GET_IR_ALL = 73,
+            GET_LINE_LEFT = 74,
+            GET_LINE_RIGHT = 75,
+            GET_LINE_ALL = 76,
+            GET_STATE = 77,
+            GET_NAME = 78,
+            GET_STALL = 79,
+            GET_INFO = 80,
+            GET_DATA = 81,
+
             //GET_RLE             = 82,  // a segmented and run-length encoded image
             //GET_IMAGE           = 83,  // the entire 256 x 192 image in YUYV format
             //GET_WINDOW          = 84,  // the windowed image (followed by which window)
-            GET_DONGLE_L_IR       = 85,  // number of returned pulses when left emitter is turned on
-            GET_DONGLE_C_IR       = 86,  // number of returned pulses when center emitter is turned on
-            GET_DONGLE_R_IR       = 87,  // number of returned pulses when right emitter is turned on
+            GET_DONGLE_L_IR = 85,  // number of returned pulses when left emitter is turned on
+            GET_DONGLE_C_IR = 86,  // number of returned pulses when center emitter is turned on
+            GET_DONGLE_R_IR = 87,  // number of returned pulses when right emitter is turned on
             //GET_WINDOW_LIGHT    = 88,  // average intensity in the user defined region
             //GET_BATTERY         = 89,  // battery voltage
             //GET_SERIAL_MEM      = 90,  // with the address returns the value in serial memory
@@ -79,29 +79,29 @@ namespace Myro.Services.Scribbler.ScribblerBase
             //GET_BLOB_WINDOW     = 94,
             //GET_BLOB            = 95,
             //SET_SINGLE_DATA     = 96,  // Sets a single byte of data in flash memory//
-            
-            SET_DATA            = 97,
-            SET_ECHO_MODE       = 98,
-            SET_LED_LEFT_ON     = 99,
-            SET_LED_LEFT_OFF    = 100,
-            SET_LED_CENTER_ON   = 101,
-            SET_LED_CENTER_OFF  = 102,
-            SET_LED_RIGHT_ON    = 103,
-            SET_LED_RIGHT_OFF   = 104,
-            SET_LED_ALL_ON      = 105,
-            SET_LED_ALL_OFF     = 106,
-            SET_LED_ALL         = 107,
-            SET_MOTORS_OFF      = 108,
-            SET_MOTORS          = 109,
-            SET_NAME            = 110,
-            SET_LOUD            = 111,
-            SET_QUIET           = 112,
-            SET_SPEAKER         = 113,
-            SET_SPEAKER_2       = 114,
+
+            SET_DATA = 97,
+            SET_ECHO_MODE = 98,
+            SET_LED_LEFT_ON = 99,
+            SET_LED_LEFT_OFF = 100,
+            SET_LED_CENTER_ON = 101,
+            SET_LED_CENTER_OFF = 102,
+            SET_LED_RIGHT_ON = 103,
+            SET_LED_RIGHT_OFF = 104,
+            SET_LED_ALL_ON = 105,
+            SET_LED_ALL_OFF = 106,
+            SET_LED_ALL = 107,
+            SET_MOTORS_OFF = 108,
+            SET_MOTORS = 109,
+            SET_NAME = 110,
+            SET_LOUD = 111,
+            SET_QUIET = 112,
+            SET_SPEAKER = 113,
+            SET_SPEAKER_2 = 114,
 
 
-            SET_DONGLE_LED_ON   = 116,
-            SET_DONGLE_LED_OFF  = 117,
+            SET_DONGLE_LED_ON = 116,
+            SET_DONGLE_LED_OFF = 117,
             //SET_RLE             = 118,
             //SET_NAME2           = 119,  // Format: 110 char1 char2 char3 char4 char5 char6 char7 char8
             //SET_DONGLE_IR       = 120,
@@ -110,7 +110,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
             //SET_START_PROGRAM   = 123,
             //SET_RESET_SCRIBBLER = 124,
             //SET_SERIAL_ERASE    = 125,
-            SET_DIMMER_LED        = 126,
+            SET_DIMMER_LED = 126,
             //SET_WINDOW          = 127,
             //SET_FORWARDNESS     = 128,
             //SET_WHITE_BALANCE   = 129,
@@ -187,7 +187,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
                     return 2;
                     break;
                 case Commands.GET_INFO:
-                    return -101;              
+                    return -101;
                     break;
                 case Commands.GET_DATA:
                     return 9;
@@ -348,6 +348,11 @@ namespace Myro.Services.Scribbler.ScribblerBase
                     return false;
                     break;
             }
+        }
+
+        public static UInt16 GetShort(byte[] data, int offset)
+        {
+            return (UInt16)((data[offset] << 8) | data[offset + 1]);
         }
 
 

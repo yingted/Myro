@@ -40,6 +40,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
         PlayTone,
         SetLoud,
         SetName,
+        GetObstacle,
         ScribblerResponseMessage,
         SelectiveSubscribe, //IMPORTANT: Because SelectiveSubscribe inherits from Subscribe, it must go on top.
         Subscribe>
@@ -159,13 +160,33 @@ namespace Myro.Services.Scribbler.ScribblerBase
         }
     }
 
+    [DataContract]
+    [DataMemberConstructor]
+    public class Int32Body
+    {
+        [DataMember]
+        public Int32 Value;
+        public Int32Body() {  }
+        public Int32Body(Int32 value) { Value = value; }
+    }
+
+    [DataContract]
+    [DataMemberConstructor]
+    public class UInt16Body
+    {
+        [DataMember]
+        public UInt16 Value;
+        public UInt16Body() {  }
+        public UInt16Body(UInt16 value) { Value = value; }
+    }
+
     /// <summary>
     /// Get one of the Fluke obstacle sensors
     /// </summary>
-    public class GetObstacle : Get<Int32, PortSet<UInt16, Fault>>
+    public class GetObstacle : Get<Int32Body, PortSet<UInt16Body, Fault>>
     {
         public GetObstacle() { }
-        public GetObstacle(Int32 b) : base(b) { }
+        public GetObstacle(Int32Body b) : base(b) { }
     }
 
     /// <summary>

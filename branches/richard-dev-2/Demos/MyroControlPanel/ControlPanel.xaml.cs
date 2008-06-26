@@ -30,6 +30,7 @@ namespace MyroControlPanel
         List<ServicePanelInfo> panelList = new List<ServicePanelInfo>()
         {
             new ServicePanelInfo() { Description="Bumpers / IR", Name="bumpers", Min=0.0, Max=1.0, Color=Colors.Blue },
+            new ServicePanelInfo() { Description="IR Sensors", Name="ir", Min=0.0, Max=0.2, Color=Colors.DarkRed },
             new ServicePanelInfo() { Description="Sonar", Name="sonar", Min=20.0, Max=0.0, Color=Colors.Tan },
             new ServicePanelInfo() { Description="Stall", Name="stall", Min=0.0, Max=1.0, Color=Colors.Red },
             new ServicePanelInfo() { Description="Light sensors", Name="light", Min=2000.0, Max=0.0, Color=Colors.DeepSkyBlue },
@@ -48,7 +49,7 @@ namespace MyroControlPanel
 
         private void updateLoop()
         {
-            int delayMs = 100;
+            int delayMs = 200;
             int updateCounter = 0;
             Thread checker = null;
             bool driveSet = false;
@@ -69,7 +70,17 @@ namespace MyroControlPanel
                     }
                 }
                 //Console.WriteLine("update");
-                Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new ThreadStart(update));
+                foreach (var pi in livePanelList)
+                {
+                    var myPi = pi;
+                    double[] values;
+                    string[] names;
+                    try {
+                        rbt.Sensors.getPairs(pi.Name, out values, out names);
+                        Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal,
+                            new ThreadStart(delegate() { myPi.Meters.setData(values, names, myPi.Min, myPi.Max); }));
+                    }catch (Exception) { }
+                }
                 Thread.Sleep(delayMs);
             }
         }

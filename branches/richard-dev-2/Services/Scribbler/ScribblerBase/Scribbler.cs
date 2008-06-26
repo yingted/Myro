@@ -23,6 +23,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Security.Permissions;
 using W3C.Soap;
+using Myro.Utilities;
 
 using submgr = Microsoft.Dss.Services.SubscriptionManager;
 using dssp = Microsoft.Dss.ServiceModel.Dssp;
@@ -601,6 +602,38 @@ namespace Myro.Services.Scribbler.ScribblerBase
                 get.ResponsePort.Post(new Fault() { Reason = new ReasonText[] { new ReasonText() { Value = "Not connected" } } });
                 yield break;
             }
+
+            ScribblerCommand cmd;
+            switch (get.Body.Value)
+            {
+                case 0:
+                    cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.GET_DONGLE_L_IR);
+                    break;
+                case 1:
+                    cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.GET_DONGLE_C_IR);
+                    break;
+                case 2:
+                    cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.GET_DONGLE_R_IR);
+                    break;
+                default:
+                    get.ResponsePort.Post(RSUtils.FaultOfException(
+                        new ArgumentOutOfRangeException("DONGLE_IR", get.Body, "Dongle IR sensor must be 0, 1, or 2")));
+                    yield break;
+                    break;
+            }
+
+            SendScribblerCommand sendcmd = new SendScribblerCommand(cmd);
+            _scribblerComPort.Post(sendcmd);
+            yield return Arbiter.Choice(sendcmd.ResponsePort,
+                delegate(ScribblerResponse r)
+                {
+                    get.ResponsePort.Post(new UInt16Body(ScribblerHelper.GetShort(r.Data, 0)));
+                },
+                delegate(Fault f)
+                {
+                    get.ResponsePort.Post(f);
+                });
+            yield break;
         }
 
 
@@ -836,7 +869,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
                     Console.Write("\n");
                     break;
                 case 0:
-                    Console.WriteLine("Got 0 command");
+                    //Console.WriteLine("Got 0 command");
                     // Do nothing
                     break;
                 default:

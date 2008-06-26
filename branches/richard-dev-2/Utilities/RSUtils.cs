@@ -246,9 +246,25 @@ namespace Myro.Utilities
                 return (byte)(d * 255.0);
         }
 
+        /// <summary>
+        /// Convert an unsigned short in the range 0-UInt16.MaxValue, to a double in the range 0-1
+        /// </summary>
+        /// <param name="b"></param>
+        /// <returns></returns>
+
+        public static double NormalizeUShort(UInt16 s)
+        {
+            return (double)s / (double)UInt16.MaxValue;
+        }
+
         public static IEnumerable<T> CreateEnumerable<T>(IEnumerator<T> enumerator)
         {
             return new TheEnum<T>(enumerator);
+        }
+
+        public static IEnumerator<T> EmptyEnumerator<T>()
+        {
+            yield break;
         }
 
         class TheEnum<T> : IEnumerable<T>
@@ -270,6 +286,7 @@ namespace Myro.Utilities
                 return enumerator;
             }
         }
+
     }
 
     /// <summary>

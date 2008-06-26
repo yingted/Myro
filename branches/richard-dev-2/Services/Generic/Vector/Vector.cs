@@ -231,10 +231,7 @@ namespace Myro.Services.Generic.Vector
                     replace.ResponsePort.Post(DefaultReplaceResponseType.Instance);
                     SendNotification<Replace>(replace);
                 },
-                delegate(Fault f)
-                {
-                    replace.ResponsePort.Post(f);
-                }));
+                delegate(Fault f) { replace.ResponsePort.Post(f); }));
 
             return SetCallback(new SetAllRequestInfo()
                 {
@@ -264,10 +261,7 @@ namespace Myro.Services.Generic.Vector
                         get.ResponsePort.Post(RSUtils.FaultOfException(e));
                     }
                 },
-                delegate(Fault f)
-                {
-                    get.ResponsePort.Post(f);
-                }));
+                delegate(Fault f) { get.ResponsePort.Post(f); }));
 
             return GetCallback(new GetElementRequestInfo()
                 {
@@ -281,14 +275,6 @@ namespace Myro.Services.Generic.Vector
         [ServiceHandler(ServiceHandlerBehavior.Concurrent)]
         public IEnumerator<ITask> GetByKeyHandler(GetByKey get)
         {
-            int index;
-            try { index = _state.indexCache[get.Body.Key]; }
-            catch (Exception e)
-            {
-                get.ResponsePort.Post(RSUtils.FaultOfException(e));
-                yield break;
-            }
-
             var responsePort = new DsspResponsePort<CallbackResponseType>();
             Activate(Arbiter.Choice(responsePort,
                 delegate(CallbackResponseType s)
@@ -297,7 +283,7 @@ namespace Myro.Services.Generic.Vector
                     {
                         get.ResponsePort.Post(new GetElementResponseType()
                         {
-                            Value = _state.Get(index),
+                            Value = _state.Get(_state.indexCache[get.Body.Key]),
                             Timestamp = _state.Timestamp
                         });
                     }
@@ -306,33 +292,42 @@ namespace Myro.Services.Generic.Vector
                         get.ResponsePort.Post(RSUtils.FaultOfException(e));
                     }
                 },
-                delegate(Fault f)
-                {
-                    get.ResponsePort.Post(f);
-                }));
+                delegate(Fault f) { get.ResponsePort.Post(f); }));
 
-            foreach (var task in RSUtils.CreateEnumerable(GetCallback(new GetElementRequestInfo()
-                    {
-                        RequestType = RequestType.ByKey,
-                        Index = index,
-                        Key = get.Body.Key
-                    },
-                    responsePort)))
-                yield return task;
-            yield break;
+            IEnumerator<ITask> tasks;
+            try
+            {
+                return GetCallback(new GetElementRequestInfo()
+                {
+                    RequestType = RequestType.ByKey,
+                    Index = _state.indexCache[get.Body.Key],
+                    Key = get.Body.Key
+                }, responsePort);
+            }
+            catch (Exception e)
+            {
+                get.ResponsePort.Post(RSUtils.FaultOfException(e));
+                return RSUtils.EmptyEnumerator<ITask>();
+            }
         }
 
         [ServiceHandler(ServiceHandlerBehavior.Concurrent)]
         public IEnumerator<ITask> GetAllHandler(GetAllElements get)
         {
-            // No exception check here - none can be thrown
-            GetCallback(new GetAllRequestInfo() { });
-            get.ResponsePort.Post(new GetAllElementsResponseType()
+            var responsePort = new DsspResponsePort<CallbackResponseType>();
+            Activate(Arbiter.Choice(responsePort,
+                delegate(CallbackResponseType s)
                 {
-                    Values = _state.Values,
-                    Timestamp = _state.Timestamp
-                });
-            yield break;
+                    get.ResponsePort.Post(new GetAllElementsResponseType()
+                        {
+                            Values = _state.Values,
+                            Timestamp = _state.Timestamp
+                        });
+                },
+                delegate(Fault f)
+                { get.ResponsePort.Post(f); }));
+
+            return GetCallback(new GetAllRequestInfo(), responsePort);
         }
 
         [ServiceHandler(ServiceHandlerBehavior.Exclusive)]
@@ -345,67 +340,91 @@ namespace Myro.Services.Generic.Vector
                 for (int i = 0; i < set.Body.Indices.Count; i++)
                     _state.Values[set.Body.Indices[i]] = set.Body.Values[i];
                 _state.Timestamp = set.Body.Timestamp;
-                SetCallback(new SetElementsRequestInfo()
-                {
-                    RequestType = RequestType.ByIndex,
-                    Indices = set.Body.Indices,
-                    Keys = new List<string>(
-                        from i in set.Body.Indices
-                        select (i < _state.Keys.Count ? _state.Keys[i] : "")),
-                    Timestamp = set.Body.Timestamp,
-                    Values = set.Body.Values
-                });
-                set.ResponsePort.Post(DefaultUpdateResponseType.Instance);
-                SendNotification<SetByIndex>(set);
             }
             catch (Exception e)
             {
                 set.ResponsePort.Post(RSUtils.FaultOfException(e));
+                return RSUtils.EmptyEnumerator<ITask>();
             }
-            yield break;
+
+            var responsePort = new DsspResponsePort<CallbackResponseType>();
+            Activate(Arbiter.Choice(responsePort,
+                delegate(CallbackResponseType s)
+                {
+                    set.ResponsePort.Post(DefaultUpdateResponseType.Instance);
+                    SendNotification<SetByIndex>(set);
+                },
+                delegate(Fault f) { set.ResponsePort.Post(f); }));
+            return SetCallback(new SetElementsRequestInfo()
+            {
+                RequestType = RequestType.ByIndex,
+                Indices = set.Body.Indices,
+                Keys = new List<string>(
+                    from i in set.Body.Indices
+                    select (i < _state.Keys.Count ? _state.Keys[i] : "")),
+                Timestamp = set.Body.Timestamp,
+                Values = set.Body.Values
+            }, responsePort);
         }
 
         [ServiceHandler(ServiceHandlerBehavior.Exclusive)]
         public IEnumerator<ITask> SetByKeyHandler(SetByKey set)
         {
+            List<int> indices;
             try
             {
                 if (set.Body.Keys.Count != set.Body.Values.Count)
                     throw new ArgumentException("Lengths of indices and values lists must match");
-                var indices = new List<int>(set.Body.Keys.Count);
+                indices = new List<int>(set.Body.Keys.Count);
                 for (int i = 0; i < set.Body.Keys.Count; i++)
                 {
                     int index = _state.indexCache[set.Body.Keys[i]];
                     _state.Values[index] = set.Body.Values[i];
                     indices.Add(index);
                 }
-                SetCallback(new SetElementsRequestInfo()
-                {
-                    RequestType = RequestType.ByKey,
-                    Indices = indices,
-                    Keys = set.Body.Keys,
-                    Timestamp = set.Body.Timestamp,
-                    Values = set.Body.Values
-                });
-                set.ResponsePort.Post(DefaultUpdateResponseType.Instance);
-                SendNotification<SetByKey>(set);
             }
             catch (Exception e)
             {
                 set.ResponsePort.Post(RSUtils.FaultOfException(e));
+                return RSUtils.EmptyEnumerator<ITask>();
             }
-            yield break;
+
+            var responsePort = new DsspResponsePort<CallbackResponseType>();
+            Activate(Arbiter.Choice(responsePort,
+                delegate(CallbackResponseType s)
+                {
+                    set.ResponsePort.Post(DefaultUpdateResponseType.Instance);
+                    SendNotification<SetByKey>(set);
+                },
+                delegate(Fault f) { set.ResponsePort.Post(f); }));
+            return SetCallback(new SetElementsRequestInfo()
+            {
+                RequestType = RequestType.ByKey,
+                Indices = indices,
+                Keys = set.Body.Keys,
+                Timestamp = set.Body.Timestamp,
+                Values = set.Body.Values
+            }, responsePort);
         }
 
         [ServiceHandler(ServiceHandlerBehavior.Exclusive)]
         public IEnumerator<ITask> SetAllHandler(SetAllElements setAll)
         {
-            _state.Values = setAll.Body.Values;
-            _state.Timestamp = setAll.Body.Timestamp;
-            SetCallback(new SetAllRequestInfo() { Values = setAll.Body.Values, Timestamp = setAll.Body.Timestamp });
-            setAll.ResponsePort.Post(DefaultUpdateResponseType.Instance);
-            SendNotification<SetAllElements>(setAll);
-            yield break;
+            _state.SetAll(setAll.Body.Values, setAll.Body.Timestamp);
+
+            var responsePort = new DsspResponsePort<CallbackResponseType>();
+            Activate(Arbiter.Choice(responsePort,
+                delegate(CallbackResponseType s)
+                {
+                    setAll.ResponsePort.Post(DefaultUpdateResponseType.Instance);
+                    SendNotification<SetAllElements>(setAll);
+                },
+                delegate(Fault f) { setAll.ResponsePort.Post(f); }));
+            return SetCallback(new SetAllRequestInfo()
+            {
+                Values = setAll.Body.Values,
+                Timestamp = setAll.Body.Timestamp
+            }, responsePort);
         }
 
         [ServiceHandler(ServiceHandlerBehavior.Exclusive)]

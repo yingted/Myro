@@ -40,6 +40,13 @@ namespace Myro.API
             //{ return new string[0]; }
         }
 
+        public void getPairs(string name, out double[] values, out string[] names)
+        {
+            var state = ((Myro.Adapters.VectorAdapter)bank.GetAdapterSpec(name).Adapter).GetState();
+            values = state.Values.ToArray();
+            names = state.Keys.ToArray();
+        }
+
         public double get(string name, int index)
         {
             //try
