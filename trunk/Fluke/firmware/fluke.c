@@ -666,7 +666,7 @@ void grab_image_vote(int times, unsigned char* img, int delay)
 
 void emit_on(uint8_t emitters)
 {
-  TIMER1_PR =  0x22;     // Load Prescalar - around 1 Khz 
+  TIMER1_PR =  0x22;     // Load Prescalar
   TIMER1_TCR = 0x2;      // Reset Counter  
   TIMER1_MR1 = 0x14;     // set MR1 to 40Khz
   TIMER1_MCR = (1 << 4); // On match (MR1) reset the counter
