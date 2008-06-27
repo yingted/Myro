@@ -12,7 +12,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace Myro.WPFControls
+namespace Myro.GUI.WPFControls
 {
     /// <summary>
     /// Interaction logic for CircleMeters.xaml
@@ -91,7 +91,8 @@ namespace Myro.WPFControls
             List<double> radii = new List<double>(
                 from v in values
                 let normalized = (v - min) / (max - min)
-                let normalizedBounded = (normalized > 0 ? normalized : 0)
+                let normalizedBoundedM = (normalized > 0 ? normalized : 0)
+                let normalizedBounded = (normalizedBoundedM < 1 ? normalizedBoundedM : 1)
                 select normalizedBounded * maxCircleRadius);
             //StringFormat format = StringFormat.GenericDefault;
             //format.Alignment = StringAlignment.Center;

@@ -19,7 +19,7 @@ namespace Myro
         public Robot(string manifestFile)
         {
             Console.Write("Starting DSS environment...");
-            DssEnvironment.Initialize(50000, 50001, "file://" + Path.GetFullPath(manifestFile));
+            DssEnvironment.Initialize(50000, 50001, "file://" + manifestFile);
             Console.WriteLine("Done");
             bank = new AdapterBank(new List<IAdapterFactory>() {
                 new Myro.Adapters.DriveAdapterFactory(),

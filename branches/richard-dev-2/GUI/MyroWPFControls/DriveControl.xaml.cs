@@ -14,7 +14,7 @@ using System.Windows.Shapes;
 using game = Microsoft.Robotics.Services.GameController.Proxy;
 using Microsoft.Ccr.Core;
 
-namespace Myro.WPFControls
+namespace Myro.GUI.WPFControls
 {
     /// <summary>
     /// Interaction logic for DriveControl.xaml
@@ -208,6 +208,11 @@ namespace Myro.WPFControls
         {
             //Console.WriteLine("****** Unloading ********");
             taskQueue.Dispose();
+        }
+
+        private void OnUnloaded(object sender, RoutedEventArgs e)
+        {
+            this.Dispose();
         }
     }
 }

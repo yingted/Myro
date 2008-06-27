@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>9.0.30428</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{1C0C4EE2-450C-4C5F-8934-76449DA445AC}</ProjectGuid>
+    <ProjectGuid>{81B3CA9F-6F49-408D-84D9-4427B710836E}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MyroControlPanel</RootNamespace>
-    <AssemblyName>MyroControlPanel</AssemblyName>
+    <RootNamespace>SimpleIDE</RootNamespace>
+    <AssemblyName>SimpleIDE</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -33,14 +33,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DssBase, Version=2.0.730.3, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\Microsoft Robotics Dev Studio 2008\bin\DssBase.dll</HintPath>
-    </Reference>
-    <Reference Include="GameController.Y2006.M09.proxy, Version=0.0.0.0, Culture=neutral, PublicKeyToken=8b70575c4d29de37, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\Microsoft Robotics Dev Studio 2008\bin\GameController.Y2006.M09.proxy.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -53,25 +45,16 @@
     </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="UIAutomationProvider">
-      <RequiredTargetFramework>3.0</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="WindowsBase">
-      <RequiredTargetFramework>3.0</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="PresentationCore">
-      <RequiredTargetFramework>3.0</RequiredTargetFramework>
-    </Reference>
-    <Reference Include="PresentationFramework">
-      <RequiredTargetFramework>3.0</RequiredTargetFramework>
-    </Reference>
+    <Reference Include="WindowsBase" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Page Include="ControlPanel.xaml">
+    <Page Include="Window1.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -79,8 +62,8 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="ControlPanel.xaml.cs">
-      <DependentUpon>ControlPanel.xaml</DependentUpon>
+    <Compile Include="Window1.xaml.cs">
+      <DependentUpon>Window1.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
@@ -113,10 +96,23 @@
       <Project>{4A2F2891-310B-4690-8224-20C58A6676E2}</Project>
       <Name>Front</Name>
     </ProjectReference>
+    <ProjectReference Include="..\MyroControlPanel\MyroControlPanel.csproj">
+      <Project>{1C0C4EE2-450C-4C5F-8934-76449DA445AC}</Project>
+      <Name>MyroControlPanel</Name>
+    </ProjectReference>
     <ProjectReference Include="..\MyroWPFControls\MyroWPFControls.csproj">
       <Project>{957BB0C6-567B-47E3-8754-0FD14B35ACCC}</Project>
       <Name>MyroWPFControls</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="disconnect.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="connected.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="page_white_stack.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

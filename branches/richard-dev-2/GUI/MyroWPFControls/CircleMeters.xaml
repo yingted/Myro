@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="Myro.WPFControls.CircleMeters"
+﻿<UserControl x:Class="Myro.GUI.WPFControls.CircleMeters"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Canvas MouseLeftButtonDown="MouseLeftButtonDown" Name="mainCanvas" SizeChanged="onSizeChanged">

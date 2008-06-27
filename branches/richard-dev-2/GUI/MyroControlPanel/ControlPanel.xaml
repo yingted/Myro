@@ -1,8 +1,7 @@
-﻿<Window x:Class="MyroControlPanel.Window1"
+﻿<UserControl x:Class="Myro.GUI.ControlPanel.ControlPanel"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="clr-namespace:Myro.WPFControls;assembly=MyroWPFControls"
-    Name="window1" Title="Myro Control Panel" Height="416" Width="505" Closed="OnClosed">
+    xmlns:local="clr-namespace:Myro.GUI.WPFControls;assembly=MyroWPFControls">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="auto" MinWidth="182" />
@@ -14,11 +13,11 @@
             </GroupBox>
             <GroupBox Header="Tone generator" Margin="5" Name="groupBox1" VerticalAlignment="Top">
                 <StackPanel Name="stackPanel1">
-                    <Slider MouseLeftButtonUp="PlayTone" ValueChanged="Frequency1Changed" Name="freq1Slider" Minimum="200" Maximum="800" TickPlacement="BottomRight" TickFrequency="0" />
+                    <Slider ValueChanged="Frequency1Changed" Name="freq1Slider" Minimum="200" Maximum="800" TickPlacement="BottomRight" TickFrequency="0" LostMouseCapture="PlayTone" />
                     <Label Name="freq1Label" HorizontalAlignment="Right">Frequency 1</Label>
-                    <Slider MouseLeftButtonUp="PlayTone" ValueChanged="Frequency2Changed" Name="freq2Slider" Minimum="200" Maximum="800" TickPlacement="BottomRight" TickFrequency="0" />
+                    <Slider ValueChanged="Frequency2Changed" Name="freq2Slider" Minimum="200" Maximum="800" TickPlacement="BottomRight" TickFrequency="0" LostMouseCapture="PlayTone" />
                     <Label Name="freq2Label" HorizontalAlignment="Right">Frequency 2</Label>
-                    <Slider MouseLeftButtonUp="PlayTone" ValueChanged="DurationChanged" Name="durSlider" Maximum="1000" TickPlacement="BottomRight" TickFrequency="0" />
+                    <Slider ValueChanged="DurationChanged" Name="durSlider" Maximum="1000" TickPlacement="BottomRight" TickFrequency="0" LostMouseCapture="PlayTone" />
                     <Grid>
                         <CheckBox Checked="SetLoud" Unchecked="SetLoud" Name="loudCheck" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Left" IsChecked="True" ClickMode="Press">Loud</CheckBox>
                         <Label Name="durLabel" Padding="5" HorizontalAlignment="Right">Tone duration</Label>
@@ -26,6 +25,6 @@
                 </StackPanel>
             </GroupBox>
         </StackPanel>
-        <StackPanel Grid.Column="2" Width="auto" Height="auto" HorizontalAlignment="Left" Name="servicePanel" VerticalAlignment="Top" />
+        <StackPanel Grid.Column="2" MinWidth="200" Height="auto" HorizontalAlignment="Left" Name="servicePanel" VerticalAlignment="Top" />
     </Grid>
-</Window>
+</UserControl>

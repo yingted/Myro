@@ -1,0 +1,74 @@
+﻿<Window x:Class="SimpleIDE.Window1"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:Myro.GUI.ControlPanel;assembly=MyroControlPanel"
+    xmlns:controls="clr-namespace:Myro.GUI.WPFControls;assembly=MyroWPFControls"
+    Title="Myro Simple IDE" Height="650" Width="950" Closed="OnClosed">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <Border Grid.Row="0" BorderBrush="DarkGray" BorderThickness="0,0,0,1" Background="AliceBlue" SnapsToDevicePixels="True" >
+            <Grid HorizontalAlignment="Stretch">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" MinWidth="68" />
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="Auto" MinWidth="4" />
+                    <ColumnDefinition Width="Auto" MinWidth="15" />
+                </Grid.ColumnDefinitions>
+                <Menu Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Center" Background="Transparent">
+                    <MenuItem Header="File">
+                        <MenuItem Header="New" />
+                        <MenuItem Header="Open" />
+                        <MenuItem Header="Save" />
+                        <Separator />
+                        <MenuItem Header="Exit" />
+                    </MenuItem>
+                    <MenuItem Header="Edit">
+                        <MenuItem Header="Copy" />
+                        <MenuItem Header="Cut" />
+                        <MenuItem Header="Paste" />
+                    </MenuItem>
+                </Menu>
+                <TextBox Grid.Column="1" HorizontalAlignment="Stretch" Margin="20,0,0,0" Name="manifestBox" IsReadOnly="True" Background="Transparent" BorderThickness="0" TextAlignment="Right" VerticalAlignment="Center">Click one of these buttons to load a new manifest file</TextBox>
+                <Button Grid.Column="2" Background="Transparent" BorderBrush="Transparent" Click="BrowseManifest" Focusable="False" HorizontalAlignment="Left" VerticalAlignment="Center">
+                    <Image Source="/SimpleIDE;component/page_white_stack.png" Stretch="None" />
+                </Button>
+                <Button Name="connectButton" Grid.Column="3" Background="Transparent" BorderBrush="Transparent" Click="ToggleConnect" Focusable="False" Padding="0" VerticalAlignment="Center" HorizontalAlignment="Left">
+                    <Image Source="/SimpleIDE;component/disconnect.png" Stretch="None" Width="16" Height="16" />
+                </Button>
+            </Grid>
+        </Border>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition Width="auto" />
+            </Grid.ColumnDefinitions>
+            <Border Grid.Column="0" Padding="0,2,0,0" SnapsToDevicePixels="True" Background="#FFF0F0F0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="342*" />
+                        <RowDefinition Height="128.04*" />
+                    </Grid.RowDefinitions>
+                    <TabControl Grid.Row="0" Name="tabControl1" BorderThickness="0,1,0,1" SnapsToDevicePixels="True">
+                        <TabItem Header="Editor" Name="tabItem1">
+                            <Grid />
+                        </TabItem>
+                        <TabItem Header="Simulator" Name="tabItem2">
+                            <Grid />
+                        </TabItem>
+                    </TabControl>
+                    <controls:CommandWindow Grid.Row="1" />
+                    <GridSplitter Grid.Row="0" HorizontalAlignment="Stretch" Name="gridSplitter3" VerticalAlignment="Bottom" Height="5" ShowsPreview="False" ResizeBehavior="CurrentAndNext" Background="Transparent" />
+                    <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" Name="gridSplitter4" VerticalAlignment="Top" Height="5" ShowsPreview="False" ResizeBehavior="PreviousAndCurrent" Background="Transparent" />
+                </Grid>
+            </Border>
+            <Border Grid.Column="1" BorderBrush="Black" Padding="0,0,0,0" BorderThickness="1,0,0,0" SnapsToDevicePixels="True">
+                <local:ControlPanel Name="controlPanel" SnapsToDevicePixels="True" Background="#FFF9F9F9" IsEnabled="False" />
+            </Border>
+            <GridSplitter Grid.Column="0" HorizontalAlignment="Right" Name="gridSplitter1" VerticalAlignment="Stretch" Width="5" ShowsPreview="False" ResizeBehavior="CurrentAndNext" Background="Transparent" />
+            <GridSplitter Grid.Column="1" HorizontalAlignment="Left" Name="gridSplitter2" VerticalAlignment="Stretch" Width="5" ShowsPreview="False" ResizeBehavior="PreviousAndCurrent" Background="Transparent" />
+        </Grid>
+    </Grid>
+</Window>

@@ -8,7 +8,7 @@
     <ProjectGuid>{957BB0C6-567B-47E3-8754-0FD14B35ACCC}</ProjectGuid>
     <OutputType>library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MyroWPFControls</RootNamespace>
+    <RootNamespace>Myro.GUI.WPFControls</RootNamespace>
     <AssemblyName>MyroWPFControls</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -75,6 +75,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="CommandWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="DriveControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -83,6 +87,9 @@
   <ItemGroup>
     <Compile Include="CircleMeters.xaml.cs">
       <DependentUpon>CircleMeters.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="CommandWindow.xaml.cs">
+      <DependentUpon>CommandWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="DriveControl.xaml.cs">
       <DependentUpon>DriveControl.xaml</DependentUpon>
