@@ -37,6 +37,7 @@ namespace SimpleIDE
         private void OnClosed(object sender, EventArgs e)
         {
             controlPanel.Dispose();
+            commandWindow.Dispose();
             if (robot != null)
                 robot.Shutdown();
         }
@@ -139,6 +140,11 @@ namespace SimpleIDE
                     connectionThread.Start();
                 }
             }
+        }
+
+        private void OnInitialized(object sender, EventArgs e)
+        {
+            commandWindow.StartScripting();
         }
     }
 }

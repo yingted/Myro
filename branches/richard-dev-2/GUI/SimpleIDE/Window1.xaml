@@ -3,7 +3,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="clr-namespace:Myro.GUI.ControlPanel;assembly=MyroControlPanel"
     xmlns:controls="clr-namespace:Myro.GUI.WPFControls;assembly=MyroWPFControls"
-    Title="Myro Simple IDE" Height="650" Width="950" Closed="OnClosed">
+    Title="Myro Simple IDE" Height="650" Width="950" Closed="OnClosed" Initialized="OnInitialized">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
@@ -32,11 +32,11 @@
                     </MenuItem>
                 </Menu>
                 <TextBox Grid.Column="1" HorizontalAlignment="Stretch" Margin="20,0,0,0" Name="manifestBox" IsReadOnly="True" Background="Transparent" BorderThickness="0" TextAlignment="Right" VerticalAlignment="Center">Click one of these buttons to load a new manifest file</TextBox>
-                <Button Grid.Column="2" Background="Transparent" BorderBrush="Transparent" Click="BrowseManifest" Focusable="False" HorizontalAlignment="Left" VerticalAlignment="Center">
-                    <Image Source="/SimpleIDE;component/page_white_stack.png" Stretch="None" />
+                <Button Grid.Column="2" Background="Transparent" BorderBrush="Transparent" Click="BrowseManifest" Focusable="False" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0">
+                    <Image Source="/SimpleIDE;component/page_white_stack.png" Stretch="None" SnapsToDevicePixels="True" />
                 </Button>
                 <Button Name="connectButton" Grid.Column="3" Background="Transparent" BorderBrush="Transparent" Click="ToggleConnect" Focusable="False" Padding="0" VerticalAlignment="Center" HorizontalAlignment="Left">
-                    <Image Source="/SimpleIDE;component/disconnect.png" Stretch="None" Width="16" Height="16" />
+                    <Image Source="/SimpleIDE;component/disconnect.png" Stretch="None" SnapsToDevicePixels="True" />
                 </Button>
             </Grid>
         </Border>
@@ -59,7 +59,7 @@
                             <Grid />
                         </TabItem>
                     </TabControl>
-                    <controls:CommandWindow Grid.Row="1" />
+                    <controls:CommandWindow Name="commandWindow" Grid.Row="1" />
                     <GridSplitter Grid.Row="0" HorizontalAlignment="Stretch" Name="gridSplitter3" VerticalAlignment="Bottom" Height="5" ShowsPreview="False" ResizeBehavior="CurrentAndNext" Background="Transparent" />
                     <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" Name="gridSplitter4" VerticalAlignment="Top" Height="5" ShowsPreview="False" ResizeBehavior="PreviousAndCurrent" Background="Transparent" />
                 </Grid>
