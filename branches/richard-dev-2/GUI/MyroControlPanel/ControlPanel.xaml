@@ -25,6 +25,6 @@
                 </StackPanel>
             </GroupBox>
         </StackPanel>
-        <StackPanel Grid.Column="2" MinWidth="200" Height="auto" HorizontalAlignment="Left" Name="servicePanel" VerticalAlignment="Top" />
+        <StackPanel Grid.Column="2" MinWidth="222" Height="auto" HorizontalAlignment="Left" Name="servicePanel" VerticalAlignment="Top" />
     </Grid>
 </UserControl>

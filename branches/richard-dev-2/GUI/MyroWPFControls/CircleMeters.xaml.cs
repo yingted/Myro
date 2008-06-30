@@ -66,8 +66,8 @@ namespace Myro.GUI.WPFControls
                     if (curColor != null)
                     {
                         p.Fill = Brushes.Transparent;
-                        p.Stroke = new SolidColorBrush(curColor);
-                        p.StrokeThickness = 0.5;
+                        p.Stroke = new SolidColorBrush(Color.FromArgb(128, curColor.R, curColor.G, curColor.B));
+                        p.StrokeThickness = -1.0;
                     }
                     c.Children.Add(p);
                     p = new Path();

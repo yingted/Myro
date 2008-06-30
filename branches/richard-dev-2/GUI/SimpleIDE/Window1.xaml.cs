@@ -42,29 +42,29 @@ namespace SimpleIDE
                 robot.Shutdown();
         }
 
-        private void disconnect()
-        {
-            Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal,
-                new ThreadStart(delegate()
-                {
-                    manifestBox.Text = "Disconnecting from robot...";
-                }));
-            controlPanel.SetRobot(null);
-            if (robot != null)
-                robot.Shutdown();
-            robot = null;
-            Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal,
-                new ThreadStart(delegate()
-                {
-                    controlPanel.IsEnabled = false;
-                    try
-                    {
-                        ((Image)connectButton.Content).Source = new BitmapImage(new Uri("disconnect.png", UriKind.Relative));
-                        manifestBox.Text = (curManifest == null ? "Disconnected" : curManifest + " (disconnected)");
-                    }
-                    catch (Exception e) { Console.WriteLine(e); }
-                }));
-        }
+        //private void disconnect()
+        //{
+        //    Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal,
+        //        new ThreadStart(delegate()
+        //        {
+        //            manifestBox.Text = "Disconnecting from robot...";
+        //        }));
+        //    controlPanel.SetRobot(null);
+        //    if (robot != null)
+        //        robot.Shutdown();
+        //    robot = null;
+        //    Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal,
+        //        new ThreadStart(delegate()
+        //        {
+        //            controlPanel.IsEnabled = false;
+        //            try
+        //            {
+        //                ((Image)connectButton.Content).Source = new BitmapImage(new Uri("disconnect.png", UriKind.Relative));
+        //                manifestBox.Text = (curManifest == null ? "Disconnected" : curManifest + " (disconnected)");
+        //            }
+        //            catch (Exception e) { Console.WriteLine(e); }
+        //        }));
+        //}
 
         private void connect()
         {
@@ -83,7 +83,7 @@ namespace SimpleIDE
                         controlPanel.IsEnabled = true;
                         try
                         {
-                            ((Image)connectButton.Content).Source = new BitmapImage(new Uri("connected.png", UriKind.Relative));
+                            //((Image)connectButton.Content).Source = new BitmapImage(new Uri("connected.png", UriKind.Relative));
                             manifestBox.Text = (curManifest == null ? "" : curManifest);
                         }
                         catch (Exception e) { Console.WriteLine(e); }
@@ -91,19 +91,19 @@ namespace SimpleIDE
             }
         }
 
-        private void cycle()
-        {
-            disconnect();
-            connect();
-        }
+        //private void cycle()
+        //{
+        //    disconnect();
+        //    connect();
+        //}
 
-        private void toggle()
-        {
-            if (robot == null)
-                connect();
-            else
-                disconnect();
-        }
+        //private void toggle()
+        //{
+        //    if (robot == null)
+        //        connect();
+        //    else
+        //        disconnect();
+        //}
 
         private void BrowseManifest(object sender, RoutedEventArgs e)
         {
@@ -120,7 +120,7 @@ namespace SimpleIDE
                     curManifest = dlg.FileName;
                     if (connectionThread == null || connectionThread.IsAlive == false)
                     {
-                        connectionThread = new Thread(new ThreadStart(delegate() { cycle(); }));
+                        connectionThread = new Thread(new ThreadStart(delegate() { connect(); }));
                         connectionThread.Start();
                     }
                 }
@@ -136,7 +136,7 @@ namespace SimpleIDE
             {
                 if (connectionThread == null || connectionThread.IsAlive == false)
                 {
-                    connectionThread = new Thread(new ThreadStart(delegate() { toggle(); }));
+                    connectionThread = new Thread(new ThreadStart(delegate() { connect(); }));
                     connectionThread.Start();
                 }
             }

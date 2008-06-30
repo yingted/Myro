@@ -33,8 +33,9 @@ namespace Myro
 
         public void Shutdown()
         {
-            DssEnvironment.Shutdown();
             bank.Dispose();
+            DssEnvironment.Shutdown();
+            DssEnvironment.WaitForShutdown();
         }
     }
 }

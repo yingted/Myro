@@ -12,10 +12,10 @@
         <Border Grid.Row="0" BorderBrush="DarkGray" BorderThickness="0,0,0,1" Background="AliceBlue" SnapsToDevicePixels="True" >
             <Grid HorizontalAlignment="Stretch">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" MinWidth="68" />
+                    <ColumnDefinition Width="Auto" />
                     <ColumnDefinition />
-                    <ColumnDefinition Width="Auto" MinWidth="4" />
-                    <ColumnDefinition Width="Auto" MinWidth="15" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <Menu Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Center" Background="Transparent">
                     <MenuItem Header="File">
@@ -31,13 +31,13 @@
                         <MenuItem Header="Paste" />
                     </MenuItem>
                 </Menu>
-                <TextBox Grid.Column="1" HorizontalAlignment="Stretch" Margin="20,0,0,0" Name="manifestBox" IsReadOnly="True" Background="Transparent" BorderThickness="0" TextAlignment="Right" VerticalAlignment="Center">Click one of these buttons to load a new manifest file</TextBox>
+                <TextBox Grid.Column="1" HorizontalAlignment="Stretch" Margin="20,0,0,0" Name="manifestBox" IsReadOnly="True" Background="Transparent" BorderThickness="0" TextAlignment="Right" VerticalAlignment="Center">Click this button to choose a manifest file and connect</TextBox>
                 <Button Grid.Column="2" Background="Transparent" BorderBrush="Transparent" Click="BrowseManifest" Focusable="False" HorizontalAlignment="Left" VerticalAlignment="Center" Padding="0">
                     <Image Source="/SimpleIDE;component/page_white_stack.png" Stretch="None" SnapsToDevicePixels="True" />
                 </Button>
-                <Button Name="connectButton" Grid.Column="3" Background="Transparent" BorderBrush="Transparent" Click="ToggleConnect" Focusable="False" Padding="0" VerticalAlignment="Center" HorizontalAlignment="Left">
+                <!--<Button Name="connectButton" Grid.Column="3" Background="Transparent" BorderBrush="Transparent" Click="ToggleConnect" Focusable="False" Padding="0" VerticalAlignment="Center" HorizontalAlignment="Left">
                     <Image Source="/SimpleIDE;component/disconnect.png" Stretch="None" SnapsToDevicePixels="True" />
-                </Button>
+                </Button>-->
             </Grid>
         </Border>
         <Grid Grid.Row="1">
@@ -45,7 +45,7 @@
                 <ColumnDefinition />
                 <ColumnDefinition Width="auto" />
             </Grid.ColumnDefinitions>
-            <Border Grid.Column="0" Padding="0,2,0,0" SnapsToDevicePixels="True" Background="#FFF0F0F0">
+            <Border Grid.Column="0" Padding="0,2,0,0" BorderThickness="0,0,1,0" BorderBrush="Black" SnapsToDevicePixels="True" Background="#FFF0F0F0">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="342*" />
@@ -64,8 +64,8 @@
                     <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch" Name="gridSplitter4" VerticalAlignment="Top" Height="5" ShowsPreview="False" ResizeBehavior="PreviousAndCurrent" Background="Transparent" />
                 </Grid>
             </Border>
-            <Border Grid.Column="1" BorderBrush="Black" Padding="0,0,0,0" BorderThickness="1,0,0,0" SnapsToDevicePixels="True">
-                <local:ControlPanel Name="controlPanel" SnapsToDevicePixels="True" Background="#FFF9F9F9" IsEnabled="False" />
+            <Border Grid.Column="1" BorderBrush="Black" Padding="0,0,0,0" BorderThickness="0,0,0,0">
+                <local:ControlPanel Name="controlPanel" Background="#FFF9F9F9" IsEnabled="False" />
             </Border>
             <GridSplitter Grid.Column="0" HorizontalAlignment="Right" Name="gridSplitter1" VerticalAlignment="Stretch" Width="5" ShowsPreview="False" ResizeBehavior="CurrentAndNext" Background="Transparent" />
             <GridSplitter Grid.Column="1" HorizontalAlignment="Left" Name="gridSplitter2" VerticalAlignment="Stretch" Width="5" ShowsPreview="False" ResizeBehavior="PreviousAndCurrent" Background="Transparent" />

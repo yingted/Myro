@@ -78,7 +78,7 @@ namespace Myro.GUI.WPFControls
                 catch (Exception err)
                 {
                     if (err.Message != null && err.Message.Length > 0)
-                        historyBlock.AppendText("*** " + err.Message);
+                        historyBlock.AppendText("*** " + err.Message + "\n");
                     else
                         historyBlock.AppendText(err.ToString() + "\n");
                 }
