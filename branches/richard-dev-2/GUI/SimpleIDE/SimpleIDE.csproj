@@ -92,9 +92,9 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Front\Front.csproj">
+    <ProjectReference Include="..\..\Frontend\Front\Robot.csproj">
       <Project>{4A2F2891-310B-4690-8224-20C58A6676E2}</Project>
-      <Name>Front</Name>
+      <Name>Robot</Name>
     </ProjectReference>
     <ProjectReference Include="..\MyroControlPanel\MyroControlPanel.csproj">
       <Project>{1C0C4EE2-450C-4C5F-8934-76449DA445AC}</Project>
