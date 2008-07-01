@@ -20,7 +20,7 @@ namespace Myro.GUI.ControlPanel
 {
     public partial class ControlPanel : UserControl
     {
-        Robot rbt = null;
+        //Robot rbt = null;
         bool shouldExit = false;
         Thread updateThread = null;
 
@@ -63,20 +63,20 @@ namespace Myro.GUI.ControlPanel
             livePanelList.Clear();
         }
 
-        public void SetRobot(Robot robot)
+        public void SetRobot()
         {
             shouldExit = true;
             if (updateThread != null && updateThread.IsAlive)
                 updateThread.Join();
             reset();
 
-            if (robot != null)
-            {
+            //if (robot != null)
+            //{
                 shouldExit = false;
-                this.rbt = robot;
+                //this.rbt = robot;
                 updateThread = new Thread(new ThreadStart(updateLoop));
                 updateThread.Start();
-            }
+            //}
         }
 
         private void updateLoop()
@@ -84,14 +84,14 @@ namespace Myro.GUI.ControlPanel
             int delayMs = 200;
             int updateCounter = 0;
             Thread checker = null;
-            bool driveSet = false;
+            //bool driveSet = false;
             while (!shouldExit)
             {
-                if (!driveSet && drive != null)
-                {
-                    drive.SetDrive(rbt.Movement);
-                    driveSet = true;
-                }
+                //if (!driveSet && drive != null)
+                //{
+                //    drive.SetDrive(rbt.Movement);
+                //    driveSet = true;
+                //}
                 if (updateCounter++ > (2000 / delayMs))
                 {
                     updateCounter = 0;
@@ -111,7 +111,7 @@ namespace Myro.GUI.ControlPanel
                     string[] names;
                     try
                     {
-                        rbt.Sensors.getPairs(pi.Name, out values, out names);
+                        Robot.GetPairs(pi.Name, out names, out values);
                         Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal,
                             new ThreadStart(delegate() { myPi.Meters.setData(values, names, myPi.Min, myPi.Max); }));
                     }
@@ -134,7 +134,7 @@ namespace Myro.GUI.ControlPanel
                         try
                         {
                             //Console.WriteLine("Adding " + myPi.Name);
-                            rbt.Sensors.getNames(myPi.Name);
+                            Robot.GetNames(myPi.Name);
                             lock (toRemove) { toRemove.Add(myPi); }
                         }
                         catch (Exception) { }
@@ -162,7 +162,7 @@ namespace Myro.GUI.ControlPanel
                                 pi.Meters.ValueChange += (CircleMeters.ValueChangeHandler)
                                     delegate(object sender, Myro.GUI.WPFControls.CircleMeters.ValueChangeArgs e)
                                     {
-                                        rbt.Sensors.set(myPi.Name, e.Index, e.Value);
+                                        Robot.Set(myPi.Name, e.Index, e.Value);
                                     };
                                 pi.Meters.SetColor(pi.Color);
                                 pi.Group = new GroupBox()
@@ -191,10 +191,10 @@ namespace Myro.GUI.ControlPanel
             signal.WaitOne();
         }
 
-        private void BumperValueChange(object sender, Myro.GUI.WPFControls.CircleMeters.ValueChangeArgs e)
-        {
-            rbt.Sensors.set("bumpers", e.Index, e.Value);
-        }
+        //private void BumperValueChange(object sender, Myro.GUI.WPFControls.CircleMeters.ValueChangeArgs e)
+        //{
+        //    Robot.Set("bumpers", e.Index, e.Value);
+        //}
 
         public void Dispose()
         {
@@ -233,7 +233,7 @@ namespace Myro.GUI.ControlPanel
         {
             try
             {
-                rbt.Sound.beep(durSlider.Value,
+                Robot.Beep(durSlider.Value,
                     (freq1Slider.Value == freq1Slider.Minimum ? 0.0 : freq1Slider.Value),
                     (freq2Slider.Value == freq2Slider.Minimum ? 0.0 : freq2Slider.Value));
             }
@@ -244,8 +244,8 @@ namespace Myro.GUI.ControlPanel
         {
             try
             {
-                if (loudCheck != null && rbt != null)
-                    rbt.Sound.SetLoud(loudCheck.IsChecked.HasValue ? loudCheck.IsChecked.Value : true);
+                if (loudCheck != null)
+                    Robot.SetLoud(loudCheck.IsChecked.HasValue ? loudCheck.IsChecked.Value : true);
             }
             catch (Exception) { }
         }

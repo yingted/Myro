@@ -7,7 +7,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <OutputType>Library</OutputType>
     <NoStandardLibraries>false</NoStandardLibraries>
-    <AssemblyName>MyroFront</AssemblyName>
+    <AssemblyName>MyroRobot</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <RootNamespace>Front</RootNamespace>
@@ -18,11 +18,11 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\..\..\..\..\Microsoft Robotics Dev Studio 2008\bin\</OutputPath>
+    <OutputPath>..\..\bin\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>..\bin\MyroFront.XML</DocumentationFile>
+    <DocumentationFile>MyroFront.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -63,6 +63,7 @@
     <Compile Include="MyroAPI\MyroSound.cs" />
     <Compile Include="MyroAPI\MyroUtilities.cs" />
     <Compile Include="Robot.cs" />
+    <Compile Include="Static.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Adapters\Adapters.csproj">

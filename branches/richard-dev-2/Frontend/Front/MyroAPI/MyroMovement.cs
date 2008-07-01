@@ -5,14 +5,14 @@ using System.Threading;
 
 namespace Myro.API
 {
-    
+
     public class MyroMovement : IMyroMovement
     {
-        Myro.Adapters.AdapterSpec driveAdapter;
+        Myro.Adapters.AdapterSpec<Myro.Adapters.DriveAdapter> driveAdapter;
 
         public MyroMovement(Myro.Adapters.AdapterBank bank)
         {
-            this.driveAdapter = bank.GetAdapterSpec("drive");
+            this.driveAdapter = bank.GetAdapterSpec<Myro.Adapters.DriveAdapter>("drive");
         }
 
         public enum Direction { LEFT, RIGHT };
@@ -24,25 +24,25 @@ namespace Myro.API
 
         public void Forward(double power)
         {
-            CheckPowerRange(power);
+            checkPowerRange(power);
             SetMotors(power, power);
         }
 
         public void ForwardFor(double power, double seconds)
         {
-            CheckPowerRange(power);
+            checkPowerRange(power);
             SetMotorsFor(power, power, seconds);
         }
 
         public void Backward(double power)
         {
-            CheckPowerRange(power);
+            checkPowerRange(power);
             SetMotors(-power, -power);
         }
 
         public void BackwardFor(double power, double seconds)
         {
-            CheckPowerRange(power);
+            checkPowerRange(power);
             SetMotorsFor(-power, -power, seconds);
         }
 
@@ -66,25 +66,25 @@ namespace Myro.API
 
         public void TurnLeft(double power)
         {
-            CheckPowerRange(power);
+            checkPowerRange(power);
             SetMotors(-power, power);
         }
 
         public void TurnLeftFor(double power, double seconds)
         {
-            CheckPowerRange(power);
+            checkPowerRange(power);
             SetMotorsFor(-power, power, seconds);
         }
 
         public void TurnRight(double power)
         {
-            CheckPowerRange(power);
+            checkPowerRange(power);
             SetMotors(power, -power);
         }
 
         public void TurnRightFor(double power, double seconds)
         {
-            CheckPowerRange(power);
+            checkPowerRange(power);
             SetMotorsFor(power, -power, seconds);
         }
 
@@ -104,12 +104,12 @@ namespace Myro.API
         {
             try
             {
-                ((Myro.Adapters.DriveAdapter)driveAdapter.Adapter).SetMotors(leftPower, rightPower);
+                driveAdapter.Adapter.SetMotors(leftPower, rightPower);
             }
             catch (Exception) { }
         }
 
-        private void CheckPowerRange(double power)
+        private void checkPowerRange(double power)
         {
             if (power < -1.0f || power > 1.0f)
                 throw new ArgumentException("Motor power settings must be in the range of -1.0 to 1.0");

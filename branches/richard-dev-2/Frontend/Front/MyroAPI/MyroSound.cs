@@ -9,11 +9,11 @@ namespace Myro.API
 {
     class MyroSound : IMyroSound
     {
-        Myro.Adapters.AdapterSpec soundAdapter;
+        AdapterSpec<VectorAdapter> soundAdapter;
 
         public MyroSound(Myro.Adapters.AdapterBank bank)
         {
-            soundAdapter = bank.GetAdapterSpec("tonegen");
+            soundAdapter = bank.GetAdapterSpec<VectorAdapter>("tonegen");
         }
 
         public IMyroSong ReadSong(string fileName)

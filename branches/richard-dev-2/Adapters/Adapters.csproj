@@ -10,7 +10,7 @@
     <AssemblyName>MyroAdapters</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <RootNamespace>Adapters</RootNamespace>
+    <RootNamespace>Myro.Adapters</RootNamespace>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>myroKey.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
@@ -79,6 +79,7 @@
   <ItemGroup>
     <Compile Include="AdapterBank.cs" />
     <Compile Include="AdapterSpec.cs" />
+    <Compile Include="AdapterSpecN.cs" />
     <Compile Include="DriveAdapter.cs" />
     <Compile Include="IAdapter.cs" />
     <Compile Include="ImageAdapter.cs" />

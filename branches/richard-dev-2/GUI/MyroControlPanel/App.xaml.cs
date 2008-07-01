@@ -15,7 +15,7 @@ namespace MyroControlPanel
     /// </summary>
     public partial class App : Application
     {
-        Robot rbt;
+        //Robot rbt;
 
         public App()
             : base()

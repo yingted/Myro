@@ -20,71 +20,41 @@ namespace Myro.API
             this.bank = bank;
         }
 
-        public double[] get(string name)
+        public double[] Get(string name)
         {
-            //try
-            //{ 
-                return ((Myro.Adapters.VectorAdapter)bank.GetAdapterSpec(name).Adapter).GetAllElements().ToArray();
-            //}
-            //catch (Exception)
-            //{ return new double[] { 0.0 }; }
+                return bank.GetAdapterSpec<VectorAdapter>(name).Adapter.GetAllElements().ToArray();
         }
 
-        public string[] getNames(string name)
+        public string[] GetNames(string name)
         {
-            //try
-            //{
-                return ((Myro.Adapters.VectorAdapter)bank.GetAdapterSpec(name).Adapter).GetState().Keys.ToArray();
-            //}
-            //catch (Exception)
-            //{ return new string[0]; }
+            return bank.GetAdapterSpec<VectorAdapter>(name).Adapter.GetState().Keys.ToArray();
         }
 
-        public void getPairs(string name, out double[] values, out string[] names)
+        public void GetPairs(string name, out double[] values, out string[] names)
         {
-            var state = ((Myro.Adapters.VectorAdapter)bank.GetAdapterSpec(name).Adapter).GetState();
+            var state = bank.GetAdapterSpec<VectorAdapter>(name).Adapter.GetState();
             values = state.Values.ToArray();
             names = state.Keys.ToArray();
         }
 
-        public double get(string name, int index)
+        public double Get(string name, int index)
         {
-            //try
-            //{
-                return ((Myro.Adapters.VectorAdapter)bank.GetAdapterSpec(name).Adapter).Get(index);
-            //}
-            //catch (Exception)
-            //{ return 0.0; }
+            return bank.GetAdapterSpec<VectorAdapter>(name).Adapter.Get(index);
         }
 
-        public double get(string name, string tag)
+        public double Get(string name, string tag)
         {
-            //try
-            //{
-                return ((Myro.Adapters.VectorAdapter)bank.GetAdapterSpec(name).Adapter).Get(tag);
-            //}
-            //catch (Exception)
-            //{ return 0.0; }
+            return bank.GetAdapterSpec<VectorAdapter>(name).Adapter.Get(tag);
         }
 
-        public void set(string name, int index, double value)
+        public void Set(string name, int index, double value)
         {
-            //try
-            //{
-                ((VectorAdapter)bank.GetAdapterSpec(name).Adapter).Set(index, value);
-            //}
-            //catch (Exception)
-            //{ }
+            bank.GetAdapterSpec<VectorAdapter>(name).Adapter.Set(index, value);
         }
 
-        public void set(string name, string tag, double value)
+        public void Set(string name, string tag, double value)
         {
-            //try
-            //{
-                ((VectorAdapter)bank.GetAdapterSpec(name).Adapter).Set(tag, value);
-            //}
-            //catch (Exception)
-            //{ }
+            bank.GetAdapterSpec<VectorAdapter>(name).Adapter.Set(tag, value);
         }
 
 

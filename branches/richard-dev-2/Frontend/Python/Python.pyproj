@@ -4,8 +4,8 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{5f60c63e-fda5-4924-aad8-57bd896b6d9f}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <RootNamespace>Python</RootNamespace>
-    <AssemblyName>Python</AssemblyName>
+    <RootNamespace>Myro</RootNamespace>
+    <AssemblyName>MyroPython</AssemblyName>
     <MainFile>myro.py</MainFile>
     <Name>Python</Name>
     <TargetPlatform>v2</TargetPlatform>
@@ -32,13 +32,6 @@
     <Compile Include="myro.py">
       <SubType>Code</SubType>
     </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Front\Robot.csproj">
-      <Name>Robot</Name>
-      <Project>{4a2f2891-310b-4690-8224-20c58a6676e2}</Project>
-      <Private>True</Private>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\IronPython Studio\1.0\IronPython.targets" />
 </Project>

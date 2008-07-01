@@ -24,7 +24,8 @@ namespace SimpleIDE
     public partial class Window1 : Window
     {
         string curManifest = null;
-        Robot robot = null;
+        bool connected = false;
+        //Robot robot = null;
         Object connectedLock = new Object();
         Thread connectionThread = null;
         Object connectionThreadLock = new Object();
@@ -38,8 +39,7 @@ namespace SimpleIDE
         {
             controlPanel.Dispose();
             commandWindow.Dispose();
-            if (robot != null)
-                robot.Shutdown();
+            Robot.Shutdown();
         }
 
         //private void disconnect()
@@ -68,15 +68,17 @@ namespace SimpleIDE
 
         private void connect()
         {
-            if (robot == null && curManifest != null)
+            if (connected == false && curManifest != null)
             {
                 Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal,
                     new ThreadStart(delegate()
                     {
                         manifestBox.Text = "Connecting to robot...";
+                        commandWindow.ExecuteCommand("from myro import *");
+                        commandWindow.LogText("> init('" + curManifest + "')\n", Colors.MediumBlue);
                     }));
-                robot = new Robot(curManifest);
-                controlPanel.SetRobot(robot);
+                Robot.Init(curManifest);
+                controlPanel.SetRobot();
                 Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal,
                     new ThreadStart(delegate()
                     {

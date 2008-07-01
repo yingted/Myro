@@ -13,6 +13,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using game = Microsoft.Robotics.Services.GameController.Proxy;
 using Microsoft.Ccr.Core;
+using Myro;
 
 namespace Myro.GUI.WPFControls
 {
@@ -21,7 +22,7 @@ namespace Myro.GUI.WPFControls
     /// </summary>
     public partial class DriveControl : UserControl
     {
-        Myro.API.MyroMovement drive = null;
+        //Myro.API.MyroMovement drive = null;
 
         Port<Tuple<double, double>> drivePort = new Port<Tuple<double, double>>();
         DispatcherQueue taskQueue = new DispatcherQueue("DriveControl", new Dispatcher(1, "DriveControl"),
@@ -33,15 +34,18 @@ namespace Myro.GUI.WPFControls
             InitializeComponent();
         }
 
-        public void SetDrive(Myro.API.MyroMovement drive)
-        {
-            this.drive = drive;
-        }
+        //public void SetDrive(Myro.API.MyroMovement drive)
+        //{
+        //    Robot.drive = drive;
+        //}
 
         public void driveHandler(Tuple<double, double> motors)
         {
-            if (drive != null)
-                drive.SetMotors(motors.Item0, motors.Item1);
+            try
+            {
+                Robot.SetMotors(motors.Item0, motors.Item1);
+            }
+            catch (Exception) { }
         }
 
         /// <summary>

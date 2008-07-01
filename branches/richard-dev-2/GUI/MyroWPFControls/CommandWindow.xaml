@@ -6,7 +6,14 @@
             <RowDefinition />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <ScrollViewer Name="historyScroller" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"><TextBox Grid.Row="0" Name="historyBlock" VerticalAlignment="Stretch" Background="White" IsReadOnly="True" TextChanged="OnHistoryChanged"></TextBox></ScrollViewer>
+        <RichTextBox Grid.Row="0" Name="historyBlock" VerticalAlignment="Stretch" Background="White" IsReadOnly="True" TextChanged="OnHistoryChanged" MinWidth="100" FontFamily="Courier" FontSize="11" BorderThickness="0" BorderBrush="Transparent" IsEnabled="False" IsUndoEnabled="False" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                <RichTextBox.Resources>
+                    <Style TargetType="{x:Type Paragraph}">
+                        <Setter Property="Margin" Value="0" />
+                        <Setter Property="Padding" Value="0,0,0,6" />
+                    </Style>
+                </RichTextBox.Resources>
+            </RichTextBox>
         <TextBox Grid.Row="1" HorizontalAlignment="Stretch" Name="commandLineBox" PreviewTextInput="OnTextInput" MaxLines="1" />
     </Grid>
 </UserControl>

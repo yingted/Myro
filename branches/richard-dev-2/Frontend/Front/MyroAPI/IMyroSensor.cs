@@ -7,9 +7,9 @@ namespace Myro.API
     
     public interface IMyroSensor
     {
-        double[] get(string sensorID);
-        double get(string sensorID, int position);
-        double get(string sensorID, string position);
+        double[] Get(string sensorID);
+        double Get(string sensorID, int position);
+        double Get(string sensorID, string position);
         //float getLight(int position);
         //float getIR(int position);
         //float getLine(int position);
