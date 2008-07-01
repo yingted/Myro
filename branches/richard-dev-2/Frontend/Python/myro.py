@@ -49,19 +49,18 @@ def saveSong(text, filename):
     Robot.SaveSong(text, filename)
 def playSong(song):
     Robot.PlaySong(song)
-def beep(duration, frequency):
-    Robot.Beep(duration, frequency)
-def beep(duration, frequency1, frequency2):
+def beep(duration, frequency1, frequency2=0):
     Robot.Beep(duration, frequency1, frequency2)
 def setLoud(loud):
     if loud != 0 and loud != 1:
         raise System.ArgumentException("Loudness must be 0 or 1")
     else:
         Robot.setLoud(loud)
-def get(name):
-    return tuple(Robot.Get(name))
-def get(name, pos):
-    return Robot.Get(name, pos)
+def get(name, pos="all"):
+    if pos == "all":
+	    return tuple(Robot.Get(name))
+    else:
+        return Robot.Get(name, pos)
 def getNames(name):
     return tuple(Robot.GetNames(name))
 def getPairs(name):

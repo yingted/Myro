@@ -11,12 +11,13 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Media.Effects;
 using Microsoft.Win32;
 using System.Threading;
 
 using Myro;
 
-namespace SimpleIDE
+namespace Myro.GUI.SimpleIDE
 {
     /// <summary>
     /// Interaction logic for Window1.xaml
@@ -29,10 +30,24 @@ namespace SimpleIDE
         Object connectedLock = new Object();
         Thread connectionThread = null;
         Object connectionThreadLock = new Object();
+        Editor editor = null;
 
         public Window1()
         {
             InitializeComponent();
+        }
+
+        private void OnClosing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            try
+            {
+                if (editor.RequestCloseAll() == false)
+                    e.Cancel = true;
+            }
+            catch (Exception)
+            {
+                e.Cancel = true;
+            }
         }
 
         private void OnClosed(object sender, EventArgs e)
@@ -147,6 +162,188 @@ namespace SimpleIDE
         private void OnInitialized(object sender, EventArgs e)
         {
             commandWindow.StartScripting();
+            commandWindow.PythonExecuting +=
+                delegate(object source, EventArgs e2)
+                {
+                    Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal,
+                        new ThreadStart(delegate() { runButton.BitmapEffect = new OuterGlowBitmapEffect() { GlowColor = Colors.Yellow, GlowSize = 5 }; }));
+                };
+            commandWindow.PythonFinished +=
+                delegate(object source, EventArgs e2)
+                {
+                    Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal,
+                        new ThreadStart(delegate() { runButton.BitmapEffect = null; }));
+                };
+            editor = new Editor(this);
+            editor.InsertedEditor += OnEditorInserted;
+            editor.RemovedEditor += OnEditorRemoved;
+            editor.ActivatedEditor += OnEditorActivated;
+            editor.ModifiedChanged += OnEditorNameChanged;
+            editor.NameChanged += OnEditorNameChanged;
+            SetButtonsEnabled();
+        }
+
+        private void OnNew(object sender, RoutedEventArgs e)
+        {
+            try { editor.RequestNewDocument(); }
+            catch (Exception) { }
+        }
+
+        private void OnSave(object sender, RoutedEventArgs e)
+        {
+            var doc = GetCurrentDocument();
+            if (doc != null)
+                try { editor.RequestSaveDocument(doc); }
+                catch (Exception) { }
+        }
+
+        private void OnOpen(object sender, RoutedEventArgs e)
+        {
+            try { editor.RequestOpen(); }
+            catch (Exception) { }
+        }
+
+        private void OnSaveAll(object sender, RoutedEventArgs e)
+        {
+            try { editor.RequestSaveAll(); }
+            catch (Exception) { }
+        }
+
+        private void OnExit(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+
+        private void OnRun(object sender, RoutedEventArgs e)
+        {
+            var editor = GetCurrentEditor();
+            if (editor != null)
+                commandWindow.ExecuteCommandSilently(editor.Text);
+        }
+
+        private int FindEditor(Editor.EditorDocument doc)
+        {
+            for (int i = 0; i < mainTabs.Items.Count; i++)
+                if (((TabItem)mainTabs.Items[i]).Content == doc.EditorControl)
+                    return i;
+            throw new ArgumentException("Editor document not found in tabs");
+        }
+
+        private Editor.EditorDocument GetCurrentDocument()
+        {
+            if (mainTabs.SelectedIndex >= 0)
+            {
+                var content = GetCurrentEditor();
+                if (content != null)
+                    foreach (var doc in editor.Documents)
+                        if (content == doc.EditorControl)
+                            return doc;
+                return null;
+            }
+            else
+                return null;
+        }
+
+        private TextBox GetCurrentEditor()
+        {
+            if (mainTabs.SelectedIndex >= 0)
+                // This returns the textbox if the currently-selected tab contains
+                // one, or null if it doesn't.
+                return ((TabItem)mainTabs.Items[mainTabs.SelectedIndex]).Content as TextBox;
+            else
+                return null;
+        }
+
+        private void OnEditorInserted(object sender, Editor.EditorEventArgs e)
+        {
+            var item = new TabItem()
+            {
+                Header = e.Document.FileName,
+                Content = e.Document.EditorControl
+            };
+            item.GotFocus +=
+                delegate(object sender2, RoutedEventArgs e2)
+                {
+                    FocusManager.SetFocusedElement(mainTabs, e.Document.EditorControl);
+                };
+            mainTabs.Items.Add(item);
+            mainTabs.SelectedIndex = mainTabs.Items.Count - 1;
+        }
+
+        private void OnEditorRemoved(object sender, Editor.EditorEventArgs e)
+        {
+            mainTabs.Items.RemoveAt(FindEditor(e.Document));
+        }
+
+        private void OnEditorActivated(object sender, Editor.EditorEventArgs e)
+        {
+            mainTabs.SelectedIndex = FindEditor(e.Document);
+            //if (mainTabs.SelectedItem != null && GetCurrentEditor() != null)
+            //    FocusManager.SetFocusedElement((TabItem)mainTabs.SelectedItem, GetCurrentEditor());
+        }
+
+        private void OnEditorNameChanged(object sender, Editor.EditorEventArgs e)
+        {
+            if (e.Document.IsModified)
+                ((TabItem)mainTabs.Items[FindEditor(e.Document)]).Header = e.Document.FileName + " *";
+            else
+                ((TabItem)mainTabs.Items[FindEditor(e.Document)]).Header = e.Document.FileName;
+        }
+
+        private void SetButtonsEnabled()
+        {
+            if (GetCurrentEditor() == null)
+                saveItem.IsEnabled =
+                    saveAllItem.IsEnabled =
+                    saveButton.IsEnabled =
+                    saveAllButton.IsEnabled =
+                    copyItem.IsEnabled =
+                    cutItem.IsEnabled =
+                    pasteItem.IsEnabled =
+                    copyButton.IsEnabled =
+                    cutButton.IsEnabled =
+                    pasteButton.IsEnabled =
+                    false;
+            else
+                saveItem.IsEnabled =
+                    saveAllItem.IsEnabled =
+                    saveButton.IsEnabled =
+                    saveAllButton.IsEnabled =
+                    copyItem.IsEnabled =
+                    cutItem.IsEnabled =
+                    pasteItem.IsEnabled =
+                    copyButton.IsEnabled =
+                    cutButton.IsEnabled =
+                    pasteButton.IsEnabled =
+                    true;
+        }
+
+        private void OnTabChanged(object sender, SelectionChangedEventArgs e)
+        {
+            SetButtonsEnabled();
+            if (mainTabs.SelectedItem != null && GetCurrentEditor() != null)
+                FocusManager.SetFocusedElement((TabItem)mainTabs.SelectedItem, GetCurrentEditor());
+        }
+
+        private void OnCut(object sender, RoutedEventArgs e)
+        {
+            var editor = GetCurrentEditor();
+            if (editor != null)
+                editor.Cut();
+        }
+
+        private void OnCopy(object sender, RoutedEventArgs e)
+        {
+            var editor = GetCurrentEditor();
+            if (editor != null)
+                editor.Copy();
+        }
+
+        private void OnPaste(object sender, RoutedEventArgs e)
+        {
+            var editor = GetCurrentEditor();
+            if (editor != null)
+                editor.Paste();
         }
     }
 }

@@ -14,6 +14,7 @@ using System.Windows.Shapes;
 using System.IO;
 using System.IO.Pipes;
 using System.Threading;
+using Microsoft.Ccr.Core;
 
 using IronPython.Hosting;
 using IronPython.Compiler;
@@ -25,6 +26,9 @@ namespace Myro.GUI.WPFControls
     /// </summary>
     public partial class CommandWindow : UserControl
     {
+        public event EventHandler PythonExecuting;
+        public event EventHandler PythonFinished;
+
         PythonEngine pe;
         Stream stdout;
         AnonymousPipeClientStream stdoutpipe;
@@ -32,6 +36,9 @@ namespace Myro.GUI.WPFControls
         AnonymousPipeClientStream stderrpipe;
         Thread readThreadOut;
         Thread readThreadErr;
+
+        Port<string> commandQueue;
+        DispatcherQueue commandDispatcherQueue;
 
         Paragraph paragraph;
         bool lastNewlineTrimmed = false;
@@ -54,13 +61,11 @@ namespace Myro.GUI.WPFControls
                 stderrpipe.Close();
             }
             if (readThreadOut != null && readThreadOut.IsAlive)
-            {
                 readThreadOut.Join();
-            }
             if (readThreadErr != null && readThreadErr.IsAlive)
-            {
                 readThreadErr.Join();
-            }
+            if (commandDispatcherQueue != null)
+                commandDispatcherQueue.Dispose();
         }
 
         public void StartScripting()
@@ -82,11 +87,14 @@ namespace Myro.GUI.WPFControls
             readThreadErr = new Thread(new ThreadStart(delegate() { readLoop(stderr, Colors.Crimson); }));
             readThreadErr.Start();
 
+            commandQueue = new Port<string>();
+            commandDispatcherQueue = new DispatcherQueue("Python command queue", new Dispatcher(1, "Python command queue"));
+            Arbiter.Activate(commandDispatcherQueue, Arbiter.Receive(true, commandQueue, commandHandler));
+
             pe.SetStandardOutput(stdoutpipe);
             pe.SetStandardError(stderrpipe);
 
-            historyBlock.Document.PageWidth = 10000;
-            //historyBlock.ViewportWidth = historyBlock.Document.PageWidth;
+            historyBlock.Document.PageWidth = historyBlock.ViewportWidth;
             historyBlock.Document.Blocks.Clear();
             paragraph = new Paragraph();
             historyBlock.Document.Blocks.Add(paragraph);
@@ -141,17 +149,12 @@ namespace Myro.GUI.WPFControls
         public void ExecuteCommand(string command)
         {
             LogText("> " + command + "\n");
-            try
-            {
-                pe.Execute(command);
-            }
-            catch (Exception err)
-            {
-                if (err.Message != null && err.Message.Length > 0)
-                    LogText(err.Message + "\n", ErrColor);
-                else
-                    LogText(err.ToString() + "\n", ErrColor);
-            }
+            ExecuteCommandSilently(command);
+        }
+
+        public void ExecuteCommandSilently(string command)
+        {
+            commandQueue.Post(command);
         }
 
         private void OnTextInput(object sender, TextCompositionEventArgs e)
@@ -185,6 +188,38 @@ namespace Myro.GUI.WPFControls
                 else
                     shouldStay = false;
             }
+        }
+
+        private void commandHandler(string command)
+        {
+            PythonExecuting.Invoke(this, new EventArgs());
+            try
+            {
+                pe.Execute(command);
+            }
+            catch (Exception err)
+            {
+                if (err.Message != null && err.Message.Length > 0)
+                    LogText(err.Message + "\n", ErrColor);
+                else
+                    LogText(err.ToString() + "\n", ErrColor);
+            }
+            PythonFinished.Invoke(this, new EventArgs());
+        }
+
+        private void OnSizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            historyBlock.Document.PageWidth = historyBlock.ViewportWidth;
+        }
+
+        private void OnGotFocus(object sender, RoutedEventArgs e)
+        {
+            FocusManager.SetFocusedElement(this, commandLineBox);
+        }
+
+        private void OnLayoutUpdated(object sender, EventArgs e)
+        {
+            historyBlock.Document.PageWidth = historyBlock.ViewportWidth;
         }
     }
 }

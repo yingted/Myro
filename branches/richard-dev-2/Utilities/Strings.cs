@@ -16,6 +16,7 @@ namespace Myro.Utilities
         public static string KeyNotFound(string key) { return "The element name \"" + key + "\" was not found in this vector"; }
         public static string KeyNotFound() { return "The element name was not found"; }
         public static string NotInitialized = "Myro is not initialized.";
+        public static string SavePrompt(string file) { return "Do you want to save the file '" + file + "'?"; }
         public static string FromFault(W3C.Soap.Fault fault)
         {
             string msg = "Fault received:";
