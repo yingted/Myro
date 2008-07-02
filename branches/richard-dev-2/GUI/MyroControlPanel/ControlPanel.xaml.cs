@@ -81,7 +81,7 @@ namespace Myro.GUI.ControlPanel
 
         private void updateLoop()
         {
-            int delayMs = 200;
+            int delayMs = 1000;
             int updateCounter = 0;
             Thread checker = null;
             //bool driveSet = false;

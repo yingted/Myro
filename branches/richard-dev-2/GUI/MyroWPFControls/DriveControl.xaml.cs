@@ -59,15 +59,15 @@ namespace Myro.GUI.WPFControls
             double left;
             double right;
 
-            if (axes.Y < 100)
+            if (axes.Y < 0)
             {
-                left = (-axes.Y + axes.X / 4) / 1000.0;
-                right = (-axes.Y - axes.X / 4) / 1000.0;
+                left = (-axes.Y + axes.X / 1) / 1000.0;
+                right = (-axes.Y - axes.X / 1) / 1000.0;
             }
             else
             {
-                left = (-axes.Y - axes.X / 4) / 1000.0;
-                right = (-axes.Y + axes.X / 4) / 1000.0;
+                left = (-axes.Y + axes.X / 1) / 1000.0;
+                right = (-axes.Y - axes.X / 1) / 1000.0;
             }
             if (left > 1.0) left = 1.0;
             if (left < -1.0) left = -1.0;

@@ -7,6 +7,6 @@ namespace Myro.Utilities
 {
     public class Params
     {
-        public static int defaultRecieveTimeout = 3000;
+        public static int defaultRecieveTimeout = 5000;
     }
 }

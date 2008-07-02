@@ -34,9 +34,10 @@
                 <Menu Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Center" Background="Transparent">
                     <MenuItem Header="File">
                         <MenuItem Header="New" Click="OnNew" />
-                        <MenuItem Header="Open" Click="OnOpen" />
+                        <MenuItem Header="Open..." Click="OnOpen" />
                         <MenuItem Name="saveItem" Header="Save" Click="OnSave" />
                         <MenuItem Name="saveAllItem" Header="Save All" Click="OnSaveAll" />
+                        <MenuItem Name="saveAsItem" Header="Save As..." Click="OnSaveAs" />
                         <Separator />
                         <MenuItem Header="Exit" Click="OnExit" />
                     </MenuItem>

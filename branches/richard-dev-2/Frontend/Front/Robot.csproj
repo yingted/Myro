@@ -10,7 +10,7 @@
     <AssemblyName>MyroRobot</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <RootNamespace>Front</RootNamespace>
+    <RootNamespace>Myro</RootNamespace>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>myroKey.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
@@ -63,7 +63,6 @@
     <Compile Include="MyroAPI\MyroSound.cs" />
     <Compile Include="MyroAPI\MyroUtilities.cs" />
     <Compile Include="Robot.cs" />
-    <Compile Include="Static.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Adapters\Adapters.csproj">

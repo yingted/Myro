@@ -180,72 +180,7 @@ namespace Myro.GUI.SimpleIDE
         /// False if the user cancels.</returns>
         public bool RequestSaveDocument(EditorDocument document)
         {
-            if (documents.Contains(document))
-            {
-                // Choose location if first save.  Also sets IsModified to true.
-                bool cancelled;
-                bool locationChosen;
-                if (!document.HasLocation)
-                {
-                    ActivatedEditor.Invoke(this, new EditorEventArgs() { Document = document });
-
-                    var dlg = new SaveFileDialog()
-                    {
-                        DefaultExt = ".py",
-                        Filter = fileFilter
-                    };
-                    if (dlg.ShowDialog(this.owner) == true)
-                    {
-                        document.FullName = dlg.FileName;
-                        document.HasLocation = true;
-                        document.IsModified = true;
-                        cancelled = false;
-                    }
-                    else
-                        cancelled = true;
-                    locationChosen = true;
-                }
-                else
-                {
-                    cancelled = false;
-                    locationChosen = false;
-                }
-
-                // If selecting a path was not cancelled, and document is modified
-                // (IsModified was set to true if the file did not have a path).
-                if (cancelled == true)
-                    return false;
-                else
-                {
-                    if (document.IsModified)
-                    {
-                        try
-                        {
-                            using (var stream = File.CreateText(document.FullName))
-                            {
-                                stream.Write(document.EditorControl.Text);
-                                document.IsModified = false;
-                                if (locationChosen)
-                                    NameChanged.Invoke(this, new EditorEventArgs() { Document = document });
-                                ModifiedChanged.Invoke(this, new EditorEventArgs() { Document = document });
-                            }
-                        }
-                        catch (Exception e)
-                        {
-                            if (locationChosen)
-                                document.HasLocation = false;
-                            if (e.Message != null && e.Message.Length > 0)
-                                MessageBox.Show(this.owner, e.Message, "Error saving file",
-                                    MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK);
-                        }
-                    }
-                    return true;
-                }
-            }
-            else
-            {
-                throw new ArgumentException("This document is not one of the editor's open documents");
-            }
+            return saveHelper(document, false);
         }
 
         /// <summary>
@@ -275,6 +210,92 @@ namespace Myro.GUI.SimpleIDE
                 }
             else
                 return true;
+        }
+
+        public bool RequestSaveAs(EditorDocument document)
+        {
+            return saveHelper(document, true);
+        }
+
+        private bool saveHelper(EditorDocument document, bool isSaveAs)
+        {
+            if (documents.Contains(document))
+            {
+                // Choose location if first save.  Also sets IsModified to true.
+                bool cancelled;
+                string newLocation;
+                if (isSaveAs || !document.HasLocation)
+                {
+                    ActivatedEditor.Invoke(this, new EditorEventArgs() { Document = document });
+
+                    var dlg = new SaveFileDialog()
+                    {
+                        DefaultExt = ".py",
+                        Filter = fileFilter
+                    };
+                    if (document.HasLocation && document.FullName != null)
+                        dlg.FileName = document.FullName;
+                    if (dlg.ShowDialog(this.owner) == true)
+                    {
+                        newLocation = dlg.FileName;
+                        cancelled = false;
+                    }
+                    else
+                    {
+                        newLocation = null;
+                        cancelled = true;
+                    }
+                }
+                else
+                {
+                    cancelled = false;
+                    newLocation = null;
+                }
+
+                // If selecting a path was not cancelled, and document is modified
+                // (IsModified was set to true if the file did not have a path).
+                if (cancelled == true)
+                    return false;
+                else
+                {
+                    if (newLocation != null || document.IsModified)
+                    {
+                        try
+                        {
+                            using (var stream =
+                                (newLocation != null ?
+                                File.CreateText(newLocation) :
+                                File.CreateText(document.FullName)))
+                            {
+                                stream.Write(document.EditorControl.Text);
+                                document.IsModified = false;
+                                // If there is a new location, either due to save as
+                                // or first save, update properties and invoke the
+                                // name change event.
+                                if (newLocation != null)
+                                {
+                                    document.FullName = newLocation;
+                                    document.FileName = System.IO.Path.GetFileName(newLocation);
+                                    document.HasLocation = true;
+                                    NameChanged.Invoke(this, new EditorEventArgs() { Document = document });
+                                }
+                                ModifiedChanged.Invoke(this, new EditorEventArgs() { Document = document });
+                            }
+                        }
+                        catch (Exception e)
+                        {
+                            if (e.Message != null && e.Message.Length > 0)
+                                MessageBox.Show(this.owner, e.Message, "Error saving file",
+                                    MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK);
+                        }
+                    }
+                    return true;
+                }
+            }
+            else
+            {
+                throw new ArgumentException("This document is not one of the editor's open documents");
+            }
         }
 
         /// <summary>
@@ -366,6 +387,21 @@ namespace Myro.GUI.SimpleIDE
                 if (RequestClose(document) == false)
                     return false;
             return true;
+        }
+
+        private string chooseSaveLocation(EditorDocument document)
+        {
+            var dlg = new SaveFileDialog()
+            {
+                DefaultExt = ".py",
+                Filter = fileFilter
+            };
+            if (document.HasLocation && document.FullName != null)
+                dlg.FileName = document.FullName;
+            if (dlg.ShowDialog(this.owner) == true)
+                return dlg.FileName;
+            else
+                return null;
         }
     }
 }

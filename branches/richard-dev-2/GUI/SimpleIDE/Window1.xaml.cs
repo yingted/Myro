@@ -197,6 +197,14 @@ namespace Myro.GUI.SimpleIDE
                 catch (Exception) { }
         }
 
+        private void OnSaveAs(object sender, RoutedEventArgs e)
+        {
+            var doc = GetCurrentDocument();
+            if(doc != null)
+                try { editor.RequestSaveAs(doc); }
+                catch (Exception) { }
+        }
+
         private void OnOpen(object sender, RoutedEventArgs e)
         {
             try { editor.RequestOpen(); }
@@ -295,6 +303,7 @@ namespace Myro.GUI.SimpleIDE
             if (GetCurrentEditor() == null)
                 saveItem.IsEnabled =
                     saveAllItem.IsEnabled =
+                    saveAsItem.IsEnabled =
                     saveButton.IsEnabled =
                     saveAllButton.IsEnabled =
                     copyItem.IsEnabled =
@@ -307,6 +316,7 @@ namespace Myro.GUI.SimpleIDE
             else
                 saveItem.IsEnabled =
                     saveAllItem.IsEnabled =
+                    saveAsItem.IsEnabled =
                     saveButton.IsEnabled =
                     saveAllButton.IsEnabled =
                     copyItem.IsEnabled =

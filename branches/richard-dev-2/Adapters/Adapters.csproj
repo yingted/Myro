@@ -96,9 +96,6 @@
     <None Include=".svn\text-base\ImageAdapter.cs.svn-base" />
     <None Include=".svn\text-base\SpeechAdapter.cs.svn-base" />
     <None Include=".svn\text-base\VectorAdapter.cs.svn-base" />
-    <None Include="ClassDiagram1.cd" />
-    <None Include="ClassDiagram2.cd" />
-    <None Include="ClassDiagram3.cd" />
     <None Include="myroKey.snk" />
   </ItemGroup>
   <ItemGroup>
