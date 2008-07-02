@@ -696,7 +696,7 @@ class Scribbler(Robot):
         height = 192
         p = Picture()
 
-        version = map(int, info["fluke"].split("."))
+        version = map(int, self.dongle.split("."))
     
         if version < [2, 7, 8]:
             mode = image_codes[mode]
