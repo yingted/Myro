@@ -19,7 +19,8 @@ namespace Myro.GUI.WPFControls
     /// </summary>
     public partial class CircleMeters : UserControl
     {
-        public class ValueChangeArgs {
+        public class ValueChangeArgs
+        {
             public int Index { get; internal set; }
             public double Value { get; internal set; }
         }
@@ -27,6 +28,7 @@ namespace Myro.GUI.WPFControls
         public event ValueChangeHandler ValueChange;
 
         List<Canvas> canvases = new List<Canvas>();
+        List<TextBlock> labels = new List<TextBlock>();
         Color curColor = Brushes.DarkGray.Color;
         double[] curValues = null;
 
@@ -47,8 +49,12 @@ namespace Myro.GUI.WPFControls
         {
             //double[] centers = new double[count];
             double widthOne = this.ActualHeight;
-            mainCanvas.Children.Clear();
+            mainGrid.Children.Clear();
+            mainGrid.ColumnDefinitions.Clear();
+            for (int i = 0; i < count; i++)
+                mainGrid.ColumnDefinitions.Add(new ColumnDefinition());
             canvases.Clear();
+            labels.Clear();
             if (count > 0)
             {
                 double widthEach = this.ActualWidth / (double)count;
@@ -57,11 +63,16 @@ namespace Myro.GUI.WPFControls
                 {
                     double left = widthEach * i + offset;
                     //mainVisual.Children.Add(new DrawingVisual());
-                    Canvas c = new Canvas();
-                    c.SetValue(Canvas.LeftProperty, left);
-                    c.SetValue(Canvas.TopProperty, 0.0);
-                    c.Width = widthOne;
-                    c.Height = widthOne;
+                    Canvas c = new Canvas()
+                    {
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        VerticalAlignment = VerticalAlignment.Center,
+                        Width = widthOne,
+                        Height = widthOne,
+                    };
+                    //c.SetValue(Canvas.LeftProperty, left);
+                    //c.SetValue(Canvas.TopProperty, 0.0);
+                    c.SetValue(Grid.ColumnProperty, i);
                     Path p = new Path();
                     if (curColor != null)
                     {
@@ -74,9 +85,28 @@ namespace Myro.GUI.WPFControls
                     if (curColor != null)
                         p.Fill = new SolidColorBrush(curColor);
                     c.Children.Add(p);
-                    c.MouseLeftButtonDown += MouseLeftButtonDown;
+                    int myI = i;
+                    c.MouseLeftButtonDown += delegate(object sender, MouseButtonEventArgs e) { valueChangeHelper(myI, e); };
                     canvases.Add(c);
-                    mainCanvas.Children.Add(c);
+                    mainGrid.Children.Add(c);
+
+                    TextBlock l = new TextBlock()
+                    {
+                        VerticalAlignment = VerticalAlignment.Top,
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        TextAlignment = TextAlignment.Center,
+                        TextWrapping = TextWrapping.WrapWithOverflow,
+                        Margin = new Thickness(0),
+                        Padding = new Thickness(0),
+                        Foreground=Brushes.CadetBlue,
+                    };
+                    //l.SetValue(Canvas.TopProperty, 0.0);
+                    //l.SetValue(Canvas.LeftProperty, 0.0);
+                    l.SetValue(Grid.ColumnProperty, i);
+                    l.MouseLeftButtonDown += delegate(object sender, MouseButtonEventArgs e) { valueChangeHelper(myI, e); };
+                    labels.Add(l);
+
+                    mainGrid.Children.Add(l);
                 }
             }
         }
@@ -105,6 +135,8 @@ namespace Myro.GUI.WPFControls
                     new Point(canvases[i].ActualWidth / 2.0, canvases[i].ActualHeight / 2.0), maxCircleRadius, maxCircleRadius);
                 ((Path)canvases[i].Children[1]).Data = new EllipseGeometry(
                     new Point(canvases[i].ActualWidth / 2.0, canvases[i].ActualHeight / 2.0), radii[i], radii[i]);
+                if (i < labels.Length)
+                    this.labels[i].Text = labels[i];
                 //g.FillEllipse(brush, xs[i] + offset, offset, 2 * radii.ElementAt(i), 2 * radii.ElementAt(i));
                 //g.DrawString(vals[i].ToString(), font, black, xs[i] + maxCircleRadius, (float)maxCircleRadius * 1.8f, format);
                 //Console.WriteLine(labels.Length + " labels");
@@ -116,21 +148,14 @@ namespace Myro.GUI.WPFControls
             }
         }
 
-        private void onSizeChanged(object sender, SizeChangedEventArgs e)
+        private void valueChangeHelper(int index, MouseButtonEventArgs e)
         {
-            layoutVisuals(canvases.Count);
-        }
-
-        private void MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            int i = canvases.IndexOf((Canvas)sender);
-            if (i >= 0)
-                if (curValues != null && i < curValues.Length)
-                    ValueChange.Invoke(canvases[i], new ValueChangeArgs()
-                    {
-                        Index = i,
-                        Value = (curValues[i] > 0.5 ? 0.0 : 1.0)
-                    });
+            if (curValues != null && index >= 0 && index < curValues.Length)
+                ValueChange.Invoke(canvases[index], new ValueChangeArgs()
+                {
+                    Index = index,
+                    Value = (curValues[index] > 0.5 ? 0.0 : 1.0)
+                });
         }
     }
 }

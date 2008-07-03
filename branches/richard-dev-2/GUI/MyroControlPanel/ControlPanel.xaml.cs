@@ -37,6 +37,9 @@ namespace Myro.GUI.ControlPanel
         List<ServicePanelInfo> panelList;
         List<ServicePanelInfo> livePanelList = new List<ServicePanelInfo>();
 
+        int delayMs = 500;
+        bool shouldUpdate = true;
+
         public ControlPanel()
         {
             InitializeComponent();
@@ -72,16 +75,15 @@ namespace Myro.GUI.ControlPanel
 
             //if (robot != null)
             //{
-                shouldExit = false;
-                //this.rbt = robot;
-                updateThread = new Thread(new ThreadStart(updateLoop));
-                updateThread.Start();
+            shouldExit = false;
+            //this.rbt = robot;
+            updateThread = new Thread(new ThreadStart(updateLoop));
+            updateThread.Start();
             //}
         }
 
         private void updateLoop()
         {
-            int delayMs = 1000;
             int updateCounter = 0;
             Thread checker = null;
             //bool driveSet = false;
@@ -92,30 +94,34 @@ namespace Myro.GUI.ControlPanel
                 //    drive.SetDrive(rbt.Movement);
                 //    driveSet = true;
                 //}
-                if (updateCounter++ > (2000 / delayMs))
-                {
-                    updateCounter = 0;
-                    if (checker == null || checker.IsAlive == false)
-                    {
-                        checker = new Thread(new ThreadStart(checkNewPanels));
-                        checker.Start();
-                    }
-                }
 
-                // Copy the reference because checkNewPanels might swap this list for a new one
-                var myLivePanelList = livePanelList;
-                foreach (var pi in myLivePanelList)
+                if (shouldUpdate)
                 {
-                    var myPi = pi;
-                    double[] values;
-                    string[] names;
-                    try
+                    if (updateCounter++ > (2000 / delayMs))
                     {
-                        Robot.GetPairs(pi.Name, out names, out values);
-                        Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal,
-                            new ThreadStart(delegate() { myPi.Meters.setData(values, names, myPi.Min, myPi.Max); }));
+                        updateCounter = 0;
+                        if (checker == null || checker.IsAlive == false)
+                        {
+                            checker = new Thread(new ThreadStart(checkNewPanels));
+                            checker.Start();
+                        }
                     }
-                    catch (Exception) { }
+
+                    // Copy the reference because checkNewPanels might swap this list for a new one
+                    var myLivePanelList = livePanelList;
+                    foreach (var pi in myLivePanelList)
+                    {
+                        var myPi = pi;
+                        double[] values;
+                        string[] names;
+                        try
+                        {
+                            Robot.GetPairs(pi.Name, out names, out values);
+                            Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal,
+                                new ThreadStart(delegate() { myPi.Meters.setData(values, names, myPi.Min, myPi.Max); }));
+                        }
+                        catch (Exception) { }
+                    }
                 }
                 Thread.Sleep(delayMs);
             }
@@ -155,7 +161,7 @@ namespace Myro.GUI.ControlPanel
                             {
                                 pi.Meters = new CircleMeters()
                                 {
-                                    Width = 200,
+                                    //Width = 200,
                                     Height = 30,
                                 };
                                 var myPi = pi;
@@ -169,8 +175,9 @@ namespace Myro.GUI.ControlPanel
                                 {
                                     Header = pi.Description,
                                     Margin = new Thickness(5.0, 5.0, 5.0, 10.0),
-                                    HorizontalAlignment = HorizontalAlignment.Left,
+                                    HorizontalAlignment = HorizontalAlignment.Stretch,
                                     VerticalAlignment = VerticalAlignment.Top,
+                                    HorizontalContentAlignment = HorizontalAlignment.Stretch,
                                     Content = pi.Meters
                                 };
                                 newLivePanelList.Add(pi);
@@ -250,6 +257,40 @@ namespace Myro.GUI.ControlPanel
             catch (Exception) { }
         }
 
+        private void OnPollValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (PollSliderGlow != null && pollingSlider != null)
+            {
+                //PollSliderGlow.Duration = TimeSpan.FromMilliseconds(pollingSlider.Value);
+                if (reversePollValue(pollingSlider.Value) == pollingSlider.Maximum)
+                {
+                    PollSliderGlow.Seek(pollingSlider, TimeSpan.FromMilliseconds(0), System.Windows.Media.Animation.TimeSeekOrigin.BeginTime);
+                    PollSliderGlow.Pause(pollingSlider);
+                }
+                else
+                {
+                    PollSliderGlow.Resume(pollingSlider);
+                    PollSliderGlow.SetSpeedRatio(pollingSlider, 1.0 / reversePollValue(pollingSlider.Value));
+                }
+            }
+        }
+
+        private void OnPollLostMouse(object sender, MouseEventArgs e)
+        {
+            if (pollingSlider != null)
+            {
+                delayMs = (int)(reversePollValue(pollingSlider.Value) * 1000.0);
+                if (reversePollValue(pollingSlider.Value) == pollingSlider.Maximum)
+                    shouldUpdate = false;
+                else
+                    shouldUpdate = true;
+            }
+        }
+
+        private double reversePollValue(double value)
+        {
+            return pollingSlider.Maximum - pollingSlider.Value + pollingSlider.Minimum;
+        }
     }
 
     class ServicePanelInfo

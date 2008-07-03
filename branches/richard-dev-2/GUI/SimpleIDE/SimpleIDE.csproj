@@ -101,6 +101,10 @@
       <Project>{481FEFE3-E033-464C-A1D4-7C95C5AC95C5}</Project>
       <Name>Utilities</Name>
     </ProjectReference>
+    <ProjectReference Include="..\CloseableTabItemDemo\CloseableTabItemDemo.csproj">
+      <Project>{A85D297F-260F-4E55-8E7A-E03D24A2625D}</Project>
+      <Name>CloseableTabItemDemo</Name>
+    </ProjectReference>
     <ProjectReference Include="..\MyroControlPanel\MyroControlPanel.csproj">
       <Project>{1C0C4EE2-450C-4C5F-8934-76449DA445AC}</Project>
       <Name>MyroControlPanel</Name>
@@ -148,6 +152,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="page_add.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="cross.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

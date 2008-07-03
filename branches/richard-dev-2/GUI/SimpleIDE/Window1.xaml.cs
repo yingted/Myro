@@ -24,6 +24,11 @@ namespace Myro.GUI.SimpleIDE
     /// </summary>
     public partial class Window1 : Window
     {
+        public static RoutedCommand SaveAll = new RoutedCommand();
+        public static RoutedCommand CloseDocument = new RoutedCommand();
+        public static RoutedCommand CloseAll = new RoutedCommand();
+        public static RoutedCommand Run = new RoutedCommand();
+
         string curManifest = null;
         bool connected = false;
         //Robot robot = null;
@@ -31,6 +36,14 @@ namespace Myro.GUI.SimpleIDE
         Thread connectionThread = null;
         Object connectionThreadLock = new Object();
         Editor editor = null;
+
+        static Window1()
+        {
+            SaveAll.InputGestures.Add(new KeyGesture(Key.S, ModifierKeys.Control | ModifierKeys.Shift));
+            CloseDocument.InputGestures.Add(new KeyGesture(Key.W, ModifierKeys.Control));
+            CloseAll.InputGestures.Add(new KeyGesture(Key.W, ModifierKeys.Control | ModifierKeys.Shift));
+            Run.InputGestures.Add(new KeyGesture(Key.F5));
+        }
 
         public Window1()
         {
@@ -166,7 +179,7 @@ namespace Myro.GUI.SimpleIDE
                 delegate(object source, EventArgs e2)
                 {
                     Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal,
-                        new ThreadStart(delegate() { runButton.BitmapEffect = new OuterGlowBitmapEffect() { GlowColor = Colors.Yellow, GlowSize = 5 }; }));
+                        new ThreadStart(delegate() { runButton.BitmapEffect = new OuterGlowBitmapEffect() { GlowColor = Colors.Orange, GlowSize = 5 }; }));
                 };
             commandWindow.PythonFinished +=
                 delegate(object source, EventArgs e2)
@@ -180,16 +193,16 @@ namespace Myro.GUI.SimpleIDE
             editor.ActivatedEditor += OnEditorActivated;
             editor.ModifiedChanged += OnEditorNameChanged;
             editor.NameChanged += OnEditorNameChanged;
-            SetButtonsEnabled();
+            //SetButtonsEnabled();
         }
 
-        private void OnNew(object sender, RoutedEventArgs e)
+        private void OnNew(object sender, ExecutedRoutedEventArgs e)
         {
             try { editor.RequestNewDocument(); }
             catch (Exception) { }
         }
 
-        private void OnSave(object sender, RoutedEventArgs e)
+        private void OnSave(object sender, ExecutedRoutedEventArgs e)
         {
             var doc = GetCurrentDocument();
             if (doc != null)
@@ -197,24 +210,36 @@ namespace Myro.GUI.SimpleIDE
                 catch (Exception) { }
         }
 
-        private void OnSaveAs(object sender, RoutedEventArgs e)
+        private void OnSaveAs(object sender, ExecutedRoutedEventArgs e)
         {
             var doc = GetCurrentDocument();
-            if(doc != null)
+            if (doc != null)
                 try { editor.RequestSaveAs(doc); }
                 catch (Exception) { }
         }
 
-        private void OnOpen(object sender, RoutedEventArgs e)
+        private void OnOpen(object sender, ExecutedRoutedEventArgs e)
         {
             try { editor.RequestOpen(); }
             catch (Exception) { }
         }
 
-        private void OnSaveAll(object sender, RoutedEventArgs e)
+        private void OnSaveAll(object sender, ExecutedRoutedEventArgs e)
         {
             try { editor.RequestSaveAll(); }
             catch (Exception) { }
+        }
+
+        private void OnCloseCurrent(object sender, ExecutedRoutedEventArgs e)
+        {
+            var doc = GetCurrentDocument();
+            if (doc != null)
+                editor.RequestClose(doc);
+        }
+
+        private void OnCloseAll(object sender, ExecutedRoutedEventArgs e)
+        {
+            editor.RequestCloseAll();
         }
 
         private void OnExit(object sender, RoutedEventArgs e)
@@ -222,7 +247,7 @@ namespace Myro.GUI.SimpleIDE
             this.Close();
         }
 
-        private void OnRun(object sender, RoutedEventArgs e)
+        private void OnRun(object sender, ExecutedRoutedEventArgs e)
         {
             var editor = GetCurrentEditor();
             if (editor != null)
@@ -254,17 +279,23 @@ namespace Myro.GUI.SimpleIDE
 
         private TextBox GetCurrentEditor()
         {
-            if (mainTabs.SelectedIndex >= 0)
-                // This returns the textbox if the currently-selected tab contains
-                // one, or null if it doesn't.
-                return ((TabItem)mainTabs.Items[mainTabs.SelectedIndex]).Content as TextBox;
+            if (mainTabs != null)
+                if (mainTabs.SelectedIndex >= 0)
+                    // This returns the textbox if the currently-selected tab contains
+                    // one, or null if it doesn't.
+                    return ((TabItem)mainTabs.Items[mainTabs.SelectedIndex]).Content as TextBox;
+                else
+                    return null;
             else
                 return null;
         }
 
         private void OnEditorInserted(object sender, Editor.EditorEventArgs e)
         {
-            var item = new TabItem()
+            var header = new Grid();
+            header.Children.Add(new Label() { Content = e.Document.FileName });
+            header.Children.Add(new Button() { Content = new Image() { Source = new BitmapImage(new Uri("cross.png", UriKind.Relative)) } });
+            var item = new CloseableTabItemDemo.CloseableTabItem()
             {
                 Header = e.Document.FileName,
                 Content = e.Document.EditorControl
@@ -273,6 +304,11 @@ namespace Myro.GUI.SimpleIDE
                 delegate(object sender2, RoutedEventArgs e2)
                 {
                     FocusManager.SetFocusedElement(mainTabs, e.Document.EditorControl);
+                };
+            item.CloseTab +=
+                delegate(object sender2, RoutedEventArgs e2)
+                {
+                    editor.RequestClose(e.Document);
                 };
             mainTabs.Items.Add(item);
             mainTabs.SelectedIndex = mainTabs.Items.Count - 1;
@@ -298,62 +334,67 @@ namespace Myro.GUI.SimpleIDE
                 ((TabItem)mainTabs.Items[FindEditor(e.Document)]).Header = e.Document.FileName;
         }
 
-        private void SetButtonsEnabled()
-        {
-            if (GetCurrentEditor() == null)
-                saveItem.IsEnabled =
-                    saveAllItem.IsEnabled =
-                    saveAsItem.IsEnabled =
-                    saveButton.IsEnabled =
-                    saveAllButton.IsEnabled =
-                    copyItem.IsEnabled =
-                    cutItem.IsEnabled =
-                    pasteItem.IsEnabled =
-                    copyButton.IsEnabled =
-                    cutButton.IsEnabled =
-                    pasteButton.IsEnabled =
-                    false;
-            else
-                saveItem.IsEnabled =
-                    saveAllItem.IsEnabled =
-                    saveAsItem.IsEnabled =
-                    saveButton.IsEnabled =
-                    saveAllButton.IsEnabled =
-                    copyItem.IsEnabled =
-                    cutItem.IsEnabled =
-                    pasteItem.IsEnabled =
-                    copyButton.IsEnabled =
-                    cutButton.IsEnabled =
-                    pasteButton.IsEnabled =
-                    true;
-        }
+        //private void SetButtonsEnabled()
+        //{
+        //    if (GetCurrentEditor() == null)
+        //        saveItem.IsEnabled =
+        //            saveAllItem.IsEnabled =
+        //            saveAsItem.IsEnabled =
+        //            saveButton.IsEnabled =
+        //            saveAllButton.IsEnabled =
+        //            //copyItem.IsEnabled =
+        //            //cutItem.IsEnabled =
+        //            //pasteItem.IsEnabled =
+        //            //copyButton.IsEnabled =
+        //            //cutButton.IsEnabled =
+        //            //pasteButton.IsEnabled =
+        //            false;
+        //    else
+        //        saveItem.IsEnabled =
+        //            saveAllItem.IsEnabled =
+        //            saveAsItem.IsEnabled =
+        //            saveButton.IsEnabled =
+        //            saveAllButton.IsEnabled =
+        //            //copyItem.IsEnabled =
+        //            //cutItem.IsEnabled =
+        //            //pasteItem.IsEnabled =
+        //            //copyButton.IsEnabled =
+        //            //cutButton.IsEnabled =
+        //            //pasteButton.IsEnabled =
+        //            true;
+        //}
 
         private void OnTabChanged(object sender, SelectionChangedEventArgs e)
         {
-            SetButtonsEnabled();
+            //SetButtonsEnabled();
             if (mainTabs.SelectedItem != null && GetCurrentEditor() != null)
                 FocusManager.SetFocusedElement((TabItem)mainTabs.SelectedItem, GetCurrentEditor());
         }
 
-        private void OnCut(object sender, RoutedEventArgs e)
+        private void HasCurrentDocument(object sender, CanExecuteRoutedEventArgs e)
         {
-            var editor = GetCurrentEditor();
-            if (editor != null)
-                editor.Cut();
+            e.CanExecute = (GetCurrentEditor() != null);
         }
 
-        private void OnCopy(object sender, RoutedEventArgs e)
-        {
-            var editor = GetCurrentEditor();
-            if (editor != null)
-                editor.Copy();
-        }
+        //private void OnCut(object sender, RoutedEventArgs e)
+        //{
+        //    var editor = GetCurrentEditor();
+        //    if (editor != null)
+        //        editor.Cut();
+        //}
 
-        private void OnPaste(object sender, RoutedEventArgs e)
-        {
-            var editor = GetCurrentEditor();
-            if (editor != null)
-                editor.Paste();
-        }
+        //private void OnCopy(object sender, RoutedEventArgs e)
+        //{
+        //    var editor = GetCurrentEditor();
+        //    if (editor != null)
+        //        editor.Copy();
+        //}
+
+        //private void OnPaste(object sender, RoutedEventArgs e)
+        //{
+        //    var editor = GetCurrentEditor();
+        //    if (editor != null)
+        //        editor.Paste();
+        //}
     }
 }

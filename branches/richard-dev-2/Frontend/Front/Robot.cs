@@ -31,7 +31,7 @@ namespace Myro
                 new Myro.Adapters.VectorAdapterFactory()
             });
             driveAdapter = bank.GetAdapterSpec<DriveAdapter>("drive");
-            soundAdapter = bank.GetAdapterSpec<VectorAdapter>("sound");
+            soundAdapter = bank.GetAdapterSpec<VectorAdapter>("tonegen");
         }
 
         public static void Shutdown()

@@ -180,7 +180,10 @@ namespace Myro.GUI.SimpleIDE
         /// False if the user cancels.</returns>
         public bool RequestSaveDocument(EditorDocument document)
         {
-            return saveHelper(document, false);
+            if (documents.Contains(document))
+                return saveHelper(document, false);
+            else
+                throw new ArgumentException("This document is not one of the editor's open documents");
         }
 
         /// <summary>
@@ -192,40 +195,47 @@ namespace Myro.GUI.SimpleIDE
         /// want to save it.  False if the user cancelled the operation.</returns>
         public bool RequestSaveWithPrompt(EditorDocument document)
         {
-            if (document.IsModified || !document.HasLocation)
-                switch (MessageBox.Show(this.owner, Strings.SavePrompt(document.FileName), "Myro",
-                    MessageBoxButton.YesNoCancel, MessageBoxImage.Question, MessageBoxResult.Cancel))
-                {
-                    case MessageBoxResult.Yes:
-                        if (RequestSaveDocument(document) == false)
-                            return false;
-                        else
+            if (documents.Contains(document))
+                if (document.IsModified)
+                    switch (MessageBox.Show(this.owner, Strings.SavePrompt(document.FileName), "Myro",
+                        MessageBoxButton.YesNoCancel, MessageBoxImage.Question, MessageBoxResult.Cancel))
+                    {
+                        case MessageBoxResult.Yes:
+                            if (RequestSaveDocument(document) == false)
+                                return false;
+                            else
+                                return true;
+                        case MessageBoxResult.No:
                             return true;
-                    case MessageBoxResult.No:
-                        return true;
-                    case MessageBoxResult.Cancel:
-                        return false;
-                    default:
-                        return false;
-                }
+                        case MessageBoxResult.Cancel:
+                            return false;
+                        default:
+                            return false;
+                    }
+                else
+                    return true;
             else
-                return true;
+                throw new ArgumentException("This document is not one of the editor's open documents");
         }
 
         public bool RequestSaveAs(EditorDocument document)
         {
-            return saveHelper(document, true);
+            if (documents.Contains(document))
+                return saveHelper(document, true);
+            else
+                throw new ArgumentException("This document is not one of the editor's open documents");
         }
 
         private bool saveHelper(EditorDocument document, bool isSaveAs)
         {
-            if (documents.Contains(document))
+            if (document.IsModified || isSaveAs)
             {
                 // Choose location if first save.  Also sets IsModified to true.
                 bool cancelled;
                 string newLocation;
                 if (isSaveAs || !document.HasLocation)
                 {
+                    #region Prompt for location
                     ActivatedEditor.Invoke(this, new EditorEventArgs() { Document = document });
 
                     var dlg = new SaveFileDialog()
@@ -245,6 +255,7 @@ namespace Myro.GUI.SimpleIDE
                         newLocation = null;
                         cancelled = true;
                     }
+                    #endregion
                 }
                 else
                 {
@@ -258,44 +269,42 @@ namespace Myro.GUI.SimpleIDE
                     return false;
                 else
                 {
-                    if (newLocation != null || document.IsModified)
+                    try
                     {
-                        try
+                        #region Write file and store new location
+                        using (var stream =
+                            (newLocation != null ?
+                            File.CreateText(newLocation) :
+                            File.CreateText(document.FullName)))
                         {
-                            using (var stream =
-                                (newLocation != null ?
-                                File.CreateText(newLocation) :
-                                File.CreateText(document.FullName)))
+                            stream.Write(document.EditorControl.Text);
+                            document.IsModified = false;
+                            // If there is a new location, either due to save as
+                            // or first save, update properties and invoke the
+                            // name change event.
+                            if (newLocation != null)
                             {
-                                stream.Write(document.EditorControl.Text);
-                                document.IsModified = false;
-                                // If there is a new location, either due to save as
-                                // or first save, update properties and invoke the
-                                // name change event.
-                                if (newLocation != null)
-                                {
-                                    document.FullName = newLocation;
-                                    document.FileName = System.IO.Path.GetFileName(newLocation);
-                                    document.HasLocation = true;
-                                    NameChanged.Invoke(this, new EditorEventArgs() { Document = document });
-                                }
-                                ModifiedChanged.Invoke(this, new EditorEventArgs() { Document = document });
+                                document.FullName = newLocation;
+                                document.FileName = System.IO.Path.GetFileName(newLocation);
+                                document.HasLocation = true;
+                                NameChanged.Invoke(this, new EditorEventArgs() { Document = document });
                             }
+                            ModifiedChanged.Invoke(this, new EditorEventArgs() { Document = document });
                         }
-                        catch (Exception e)
-                        {
-                            if (e.Message != null && e.Message.Length > 0)
-                                MessageBox.Show(this.owner, e.Message, "Error saving file",
-                                    MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK);
-                        }
+                        #endregion
+                        return true;
                     }
-                    return true;
+                    catch (Exception e)
+                    {
+                        if (e.Message != null && e.Message.Length > 0)
+                            MessageBox.Show(this.owner, e.Message, "Error saving file",
+                                MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK);
+                        throw e;
+                    }
                 }
             }
             else
-            {
-                throw new ArgumentException("This document is not one of the editor's open documents");
-            }
+                return false;
         }
 
         /// <summary>
@@ -366,13 +375,17 @@ namespace Myro.GUI.SimpleIDE
         /// the operation.</returns>
         public bool RequestClose(EditorDocument document)
         {
-            if (RequestSaveWithPrompt(document) == false)
-                return false;
+            if (documents.Contains(document))
+                if (RequestSaveWithPrompt(document) == false)
+                    return false;
+                else
+                {
+                    documents.Remove(document);
+                    RemovedEditor.Invoke(this, new EditorEventArgs() { Document = document });
+                    return true;
+                }
             else
-            {
-                RemovedEditor.Invoke(this, new EditorEventArgs() { Document = document });
-                return true;
-            }
+                throw new ArgumentException("This document is not one of the editor's open documents");
         }
 
         /// <summary>
@@ -383,8 +396,8 @@ namespace Myro.GUI.SimpleIDE
         /// the operation.</returns>
         public bool RequestCloseAll()
         {
-            foreach (EditorDocument document in documents)
-                if (RequestClose(document) == false)
+            while (documents.Count > 0)
+                if (RequestClose(documents[documents.Count - 1]) == false)
                     return false;
             return true;
         }

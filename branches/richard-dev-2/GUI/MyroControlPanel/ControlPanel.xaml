@@ -3,11 +3,15 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="clr-namespace:Myro.GUI.WPFControls;assembly=MyroWPFControls">
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="auto" MinWidth="182" />
-            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <StackPanel>
+        <StackPanel Grid.RowSpan="2" Grid.Column="0">
             <GroupBox Header="Drive" Name="driveBox" Height="auto" VerticalAlignment="Top" Margin="5">
                 <local:DriveControl Name="drive" />
             </GroupBox>
@@ -25,6 +29,34 @@
                 </StackPanel>
             </GroupBox>
         </StackPanel>
-        <StackPanel Grid.Column="2" MinWidth="222" Height="auto" HorizontalAlignment="Left" Name="servicePanel" VerticalAlignment="Top" />
+        <StackPanel Grid.Row="0" Grid.Column="1" MinWidth="200" Name="servicePanel" />
+        <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Label>Polling</Label>
+            <Slider Name="pollingSlider" Width="100" IsSnapToTickEnabled="False" TickPlacement="BottomRight" ValueChanged="OnPollValueChanged" Minimum="0.1" Maximum="1.1" TickFrequency="0" Value="0.5" LostMouseCapture="OnPollLostMouse" LargeChange="0.2">
+                <Slider.BitmapEffect>
+                    <OuterGlowBitmapEffect x:Name="PollSliderGlowEffect" GlowColor="Cyan" GlowSize="5" Opacity="0" />
+                </Slider.BitmapEffect>
+                <Slider.Triggers>
+                    <EventTrigger RoutedEvent="Slider.GotMouseCapture">
+                        <BeginStoryboard Name="PollSliderGlowBegin">
+                            <Storyboard Name="PollSliderGlow">
+                                <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PollSliderGlowEffect"
+                                                               Storyboard.TargetProperty="Opacity"
+                                                               Duration="0:0:1"
+                                                               RepeatBehavior="Forever">
+                                    <LinearDoubleKeyFrame Value="0.0" KeyTime="0:0:0" />
+                                    <LinearDoubleKeyFrame Value="1.0" KeyTime="0:0:0.15" />
+                                    <LinearDoubleKeyFrame Value="1.0" KeyTime="0:0:0.20" />
+                                    <LinearDoubleKeyFrame Value="0.0" KeyTime="0:0:0.35" />
+                                </DoubleAnimationUsingKeyFrames>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </EventTrigger>
+                    <EventTrigger RoutedEvent="Slider.LostMouseCapture">
+                        <StopStoryboard BeginStoryboardName="PollSliderGlowBegin" />
+                    </EventTrigger>
+                </Slider.Triggers>
+            </Slider>
+        </StackPanel>
     </Grid>
 </UserControl>

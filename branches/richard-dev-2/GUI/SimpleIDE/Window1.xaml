@@ -3,10 +3,24 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="clr-namespace:Myro.GUI.ControlPanel;assembly=MyroControlPanel"
     xmlns:controls="clr-namespace:Myro.GUI.WPFControls;assembly=MyroWPFControls"
+    xmlns:wnd="clr-namespace:Myro.GUI.SimpleIDE"
     Title="Myro Simple IDE" Height="650" Width="950" Closed="OnClosed" Initialized="OnInitialized" Closing="OnClosing">
-    <Window.Resources>
-
-    </Window.Resources>
+    <Window.InputBindings>
+        <KeyBinding Command="{x:Static wnd:Window1.SaveAll}" Key="A" Modifiers="Control+Shift" />
+        <KeyBinding Command="{x:Static wnd:Window1.CloseDocument}" Key="W" Modifiers="Control" />
+        <KeyBinding Command="{x:Static wnd:Window1.CloseAll}" Key="W" Modifiers="Control+Shift" />
+        <KeyBinding Command="{x:Static wnd:Window1.Run}" Key="F5" />
+    </Window.InputBindings>
+    <Window.CommandBindings>
+        <CommandBinding Command="ApplicationCommands.New" Executed="OnNew" />
+        <CommandBinding Command="ApplicationCommands.Open" Executed="OnOpen" />
+        <CommandBinding Command="ApplicationCommands.Save" Executed="OnSave" CanExecute="HasCurrentDocument" />
+        <CommandBinding Command="ApplicationCommands.SaveAs" Executed="OnSaveAs" CanExecute="HasCurrentDocument" />
+        <CommandBinding Command="{x:Static wnd:Window1.SaveAll}" Executed="OnSaveAll" />
+        <CommandBinding Command="{x:Static wnd:Window1.CloseDocument}" Executed="OnCloseCurrent" CanExecute="HasCurrentDocument" />
+        <CommandBinding Command="{x:Static wnd:Window1.CloseAll}" Executed="OnCloseAll" />
+        <CommandBinding Command="{x:Static wnd:Window1.Run}" Executed="OnRun" CanExecute="HasCurrentDocument" />
+    </Window.CommandBindings>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
@@ -32,44 +46,50 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <Menu Grid.Column="0" HorizontalAlignment="Left" VerticalAlignment="Center" Background="Transparent">
-                    <MenuItem Header="File">
-                        <MenuItem Header="New" Click="OnNew" />
-                        <MenuItem Header="Open..." Click="OnOpen" />
-                        <MenuItem Name="saveItem" Header="Save" Click="OnSave" />
-                        <MenuItem Name="saveAllItem" Header="Save All" Click="OnSaveAll" />
-                        <MenuItem Name="saveAsItem" Header="Save As..." Click="OnSaveAs" />
+                    <MenuItem Header="_File">
+                        <MenuItem Header="_New" Command="ApplicationCommands.New" />
+                        <MenuItem Header="_Open..." Command="ApplicationCommands.Open" />
                         <Separator />
-                        <MenuItem Header="Exit" Click="OnExit" />
+                        <MenuItem Header="_Save" Command="ApplicationCommands.Save" />
+                        <MenuItem Header="Save A_ll" Command="{x:Static wnd:Window1.SaveAll}" />
+                        <MenuItem Header="Save _As..." Command="ApplicationCommands.SaveAs" />
+                        <Separator />
+                        <MenuItem Header="_Close" Command="{x:Static wnd:Window1.CloseDocument}" />
+                        <MenuItem Header="Close All" Command="{x:Static wnd:Window1.CloseAll}" />
+                        <MenuItem Header="E_xit" Click="OnExit" />
                     </MenuItem>
-                    <MenuItem Header="Edit">
-                        <MenuItem Name="cutItem" Header="Cut" Click="OnCut" />
-                        <MenuItem Name="copyItem" Header="Copy" Click="OnCopy" />
-                        <MenuItem Name="pasteItem" Header="Paste" Click="OnPaste" />
+                    <MenuItem Header="_Edit">
+                        <MenuItem Header="Cut" Command="ApplicationCommands.Cut" />
+                        <MenuItem Header="Copy" Command="ApplicationCommands.Copy" />
+                        <MenuItem Header="Paste" Command="ApplicationCommands.Paste" />
+                    </MenuItem>
+                    <MenuItem Header="_Help">
+                        <MenuItem Header="About" />
                     </MenuItem>
                 </Menu>
                 <StackPanel Grid.Column="1" Margin="40,0,0,0" Orientation="Horizontal">
-                    <Button Click="OnNew">
+                    <Button Command="ApplicationCommands.New">
                         <Image Source="/SimpleIDE;component/page_add.png" Stretch="None" SnapsToDevicePixels="True" />
                     </Button>
-                    <Button Click="OnOpen">
+                    <Button Command="ApplicationCommands.Open">
                         <Image Source="/SimpleIDE;component/folder_page.png" Stretch="None" SnapsToDevicePixels="True" />
                     </Button>
-                    <Button Name="saveButton" Click="OnSave">
+                    <Button Command="ApplicationCommands.Save">
                         <Image Source="/SimpleIDE;component/disk.png" Stretch="None" />
                     </Button>
-                    <Button Name="saveAllButton" Click="OnSaveAll">
+                    <Button Command="ApplicationCommands.New">
                         <Image Source="/SimpleIDE;component/disk_multiple.png" Stretch="None" />
                     </Button>
-                    <Button Name="cutButton" Margin="40,0,0,0" Click="OnCut">
+                    <Button Margin="40,0,0,0" Command="ApplicationCommands.Cut">
                         <Image Source="/SimpleIDE;component/cut.png" Stretch="None" />
                     </Button>
-                    <Button Name="copyButton" Click="OnCopy">
+                    <Button Command="ApplicationCommands.Copy">
                         <Image Source="/SimpleIDE;component/page_copy.png" Stretch="None" />
                     </Button>
-                    <Button Name="pasteButton" Click="OnPaste">
+                    <Button Command="ApplicationCommands.Paste">
                         <Image Source="/SimpleIDE;component/page_paste.png" Stretch="None" />
                     </Button>
-                    <Button Name="runButton" Click="OnRun" Margin="40,0,0,0">
+                    <Button Name="runButton" Command="{x:Static wnd:Window1.Run}" Margin="40,0,0,0">
                         <Image Source="/SimpleIDE;component/cog_go.png" Stretch="None" />
                     </Button>
                 </StackPanel>

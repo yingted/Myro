@@ -61,13 +61,13 @@ namespace Myro.GUI.WPFControls
 
             if (axes.Y < 0)
             {
-                left = (-axes.Y + axes.X / 1) / 1000.0;
-                right = (-axes.Y - axes.X / 1) / 1000.0;
+                left = (-axes.Y + axes.X / 2) / 1000.0;
+                right = (-axes.Y - axes.X / 2) / 1000.0;
             }
             else
             {
-                left = (-axes.Y + axes.X / 1) / 1000.0;
-                right = (-axes.Y - axes.X / 1) / 1000.0;
+                left = (-axes.Y + axes.X / 2) / 1000.0;
+                right = (-axes.Y - axes.X / 2) / 1000.0;
             }
             if (left > 1.0) left = 1.0;
             if (left < -1.0) left = -1.0;
@@ -172,11 +172,24 @@ namespace Myro.GUI.WPFControls
             {
                 double x, y;
                 var pos = e.GetPosition(driveCanvas);
-                x = Math.Min(driveCanvas.ActualWidth, Math.Max(pos.X, 0.0));
-                y = Math.Min(driveCanvas.ActualHeight, Math.Max(pos.Y, 0.0));
+                //x = Math.Min(driveCanvas.ActualWidth, Math.Max(pos.X, 0.0));
+                //y = Math.Min(driveCanvas.ActualHeight, Math.Max(pos.Y, 0.0));
 
-                x = x * 2000.0 / driveCanvas.ActualWidth - 1000.0;
-                y = y * 2000.0 / driveCanvas.ActualHeight - 1000.0;
+                x = pos.X * 2000.0 / driveCanvas.ActualWidth - 1000.0;
+                y = pos.Y * 2000.0 / driveCanvas.ActualHeight - 1000.0;
+
+                if (Math.Abs(x) > 1000.0)
+                {
+                    double f = 1000.0 / Math.Abs(x);
+                    x *= f;
+                    y *= f;
+                }
+                if (Math.Abs(y) > 1000.0)
+                {
+                    double f = 1000.0 / Math.Abs(y);
+                    x *= f;
+                    y *= f;
+                }
 
                 game.Axes axes = new game.Axes();
                 axes.X = (int)x;

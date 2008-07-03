@@ -43,6 +43,9 @@ namespace Myro.GUI.WPFControls
         Paragraph paragraph;
         bool lastNewlineTrimmed = false;
 
+        LinkedList<string> commandHistory = new LinkedList<string>();
+        LinkedListNode<string> currentHistPos = null;
+
         public static readonly Color TextColor = Colors.Black;
         public static readonly Color ErrColor = Colors.Crimson;
 
@@ -164,8 +167,14 @@ namespace Myro.GUI.WPFControls
             if (e.Text.EndsWith("\n") || e.Text.EndsWith("\r"))
             {
                 ExecuteCommand(commandLineBox.Text);
-                //historyBlock.SelectionStart = historyBlock.Text.Length - 1;
-                //historyScroller.ScrollToBottom();
+
+                // If the user went up in the history and came back down to the in-progress command,
+                // update the in-progress command in the history, otherwise, add a new history item.
+                if (currentHistPos != null && currentHistPos == commandHistory.First)
+                    currentHistPos.Value = commandLineBox.Text;
+                else
+                    commandHistory.AddFirst(commandLineBox.Text);
+                currentHistPos = null;
                 commandLineBox.Text = "";
             }
         }
@@ -220,6 +229,35 @@ namespace Myro.GUI.WPFControls
         private void OnLayoutUpdated(object sender, EventArgs e)
         {
             historyBlock.Document.PageWidth = historyBlock.ViewportWidth;
+        }
+
+        private void OnKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Up)
+            {
+                // If going up through the history for the first time since entering
+                // a complete command, save the partially-typed (or empty) command
+                // in the history.
+                if (currentHistPos == null)
+                    currentHistPos = commandHistory.AddFirst(commandLineBox.Text);
+                else if (currentHistPos == commandHistory.First)
+                    currentHistPos.Value = commandLineBox.Text;
+                if (currentHistPos.Next != null)
+                {
+                    currentHistPos = currentHistPos.Next;
+                    commandLineBox.Text = currentHistPos.Value;
+                    commandLineBox.SelectionStart = commandLineBox.Text.Length;
+                }
+            }
+            else if (e.Key == Key.Down)
+            {
+                if (currentHistPos != null && currentHistPos.Previous != null)
+                {
+                    currentHistPos = currentHistPos.Previous;
+                    commandLineBox.Text = currentHistPos.Value;
+                    commandLineBox.SelectionStart = commandLineBox.Text.Length;
+                }
+            }
         }
     }
 }
