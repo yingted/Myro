@@ -93,7 +93,7 @@ namespace Myro.Adapters
             //            signal.Set();
             //        }));
             //signal.WaitOne();
-            RSUtils.ReceiveSync(taskQueue, drivePort.SetDrivePower(leftPower, rightPower), Myro.Utilities.Params.defaultRecieveTimeout);
+            RSUtils.ReceiveSync(taskQueue, drivePort.SetDrivePower(leftPower, rightPower), Myro.Utilities.Params.DefaultRecieveTimeout);
         }
 
         protected void EnableMotors()
@@ -122,12 +122,12 @@ namespace Myro.Adapters
 
         public void Stop()
         {
-            RSUtils.ReceiveSync<DefaultUpdateResponseType>(taskQueue, drivePort.AllStop(), Myro.Utilities.Params.defaultRecieveTimeout);
+            RSUtils.ReceiveSync<DefaultUpdateResponseType>(taskQueue, drivePort.AllStop(), Myro.Utilities.Params.DefaultRecieveTimeout);
         }
 
         public drive.DriveDifferentialTwoWheelState Get()
         {
-            return RSUtils.ReceiveSync<drive.DriveDifferentialTwoWheelState>(taskQueue, drivePort.Get(), Myro.Utilities.Params.defaultRecieveTimeout);
+            return RSUtils.ReceiveSync<drive.DriveDifferentialTwoWheelState>(taskQueue, drivePort.Get(), Myro.Utilities.Params.DefaultRecieveTimeout);
         }
 
         public void Set(drive.DriveDifferentialTwoWheelState state)

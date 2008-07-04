@@ -28,6 +28,8 @@ namespace Myro.GUI.SimpleIDE
         public static RoutedCommand CloseDocument = new RoutedCommand();
         public static RoutedCommand CloseAll = new RoutedCommand();
         public static RoutedCommand Run = new RoutedCommand();
+        public static RoutedCommand ConfigEditor = new RoutedCommand();
+        public static RoutedCommand BrowseManifest = new RoutedCommand();
 
         string curManifest = null;
         bool connected = false;
@@ -101,7 +103,7 @@ namespace Myro.GUI.SimpleIDE
                 Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal,
                     new ThreadStart(delegate()
                     {
-                        manifestBox.Text = "Connecting to robot...";
+                        //manifestBox.Text = "Connecting to robot...";
                         commandWindow.ExecuteCommand("from myro import *");
                         commandWindow.LogText("> init('" + curManifest + "')\n", Colors.MediumBlue);
                     }));
@@ -114,7 +116,7 @@ namespace Myro.GUI.SimpleIDE
                         try
                         {
                             //((Image)connectButton.Content).Source = new BitmapImage(new Uri("connected.png", UriKind.Relative));
-                            manifestBox.Text = (curManifest == null ? "" : curManifest);
+                            //manifestBox.Text = (curManifest == null ? "" : curManifest);
                         }
                         catch (Exception e) { Console.WriteLine(e); }
                     }));
@@ -135,15 +137,14 @@ namespace Myro.GUI.SimpleIDE
         //        disconnect();
         //}
 
-        private void BrowseManifest(object sender, RoutedEventArgs e)
+        private void OnBrowseManifest(object sender, ExecutedRoutedEventArgs e)
         {
             var dlg = new OpenFileDialog();
             if (curManifest != null && curManifest.Length > 0)
                 dlg.FileName = curManifest;
             dlg.DefaultExt = ".manifest.xml";
             dlg.Filter = "DSS Manifest (.manifest.xml)|*.manifest.xml";
-            Nullable<bool> result = dlg.ShowDialog(this);
-            if (result == true)
+            if (dlg.ShowDialog(this) == true)
             {
                 lock (connectionThreadLock)
                 {
@@ -157,20 +158,20 @@ namespace Myro.GUI.SimpleIDE
             }
         }
 
-        private void ToggleConnect(object sender, RoutedEventArgs e)
-        {
-            if (curManifest == null || curManifest.Length <= 0)
-                BrowseManifest(sender, e);
+        //private void ToggleConnect(object sender, RoutedEventArgs e)
+        //{
+        //    if (curManifest == null || curManifest.Length <= 0)
+        //        BrowseManifest(sender, e);
 
-            lock (connectionThreadLock)
-            {
-                if (connectionThread == null || connectionThread.IsAlive == false)
-                {
-                    connectionThread = new Thread(new ThreadStart(delegate() { connect(); }));
-                    connectionThread.Start();
-                }
-            }
-        }
+        //    lock (connectionThreadLock)
+        //    {
+        //        if (connectionThread == null || connectionThread.IsAlive == false)
+        //        {
+        //            connectionThread = new Thread(new ThreadStart(delegate() { connect(); }));
+        //            connectionThread.Start();
+        //        }
+        //    }
+        //}
 
         private void OnInitialized(object sender, EventArgs e)
         {
@@ -178,14 +179,14 @@ namespace Myro.GUI.SimpleIDE
             commandWindow.PythonExecuting +=
                 delegate(object source, EventArgs e2)
                 {
-                    Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal,
-                        new ThreadStart(delegate() { runButton.BitmapEffect = new OuterGlowBitmapEffect() { GlowColor = Colors.Orange, GlowSize = 5 }; }));
+                    //Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal,
+                    //    new ThreadStart(delegate() { runButton.BitmapEffect = new OuterGlowBitmapEffect() { GlowColor = Colors.Orange, GlowSize = 5 }; }));
                 };
             commandWindow.PythonFinished +=
                 delegate(object source, EventArgs e2)
                 {
-                    Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal,
-                        new ThreadStart(delegate() { runButton.BitmapEffect = null; }));
+                    //Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal,
+                    //    new ThreadStart(delegate() { runButton.BitmapEffect = null; }));
                 };
             editor = new Editor(this);
             editor.InsertedEditor += OnEditorInserted;
@@ -374,6 +375,11 @@ namespace Myro.GUI.SimpleIDE
         private void HasCurrentDocument(object sender, CanExecuteRoutedEventArgs e)
         {
             e.CanExecute = (GetCurrentEditor() != null);
+        }
+
+        private void OnConfigEditor(object sender, ExecutedRoutedEventArgs e)
+        {
+            new ConfigEditor().Show();
         }
 
         //private void OnCut(object sender, RoutedEventArgs e)

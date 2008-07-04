@@ -25,12 +25,10 @@ namespace Myro.GUI.WPFControls
         //Myro.API.MyroMovement drive = null;
 
         Port<Tuple<double, double>> drivePort = new Port<Tuple<double, double>>();
-        DispatcherQueue taskQueue = new DispatcherQueue("DriveControl", new Dispatcher(1, "DriveControl"),
-            TaskExecutionPolicy.ConstrainQueueDepthDiscardTasks, 1);
+        DispatcherQueue taskQueue;
 
         public DriveControl()
         {
-            Arbiter.Activate(taskQueue, Arbiter.Receive(true, drivePort, driveHandler));
             InitializeComponent();
         }
 
@@ -202,6 +200,9 @@ namespace Myro.GUI.WPFControls
 
         private void onInitialized(object sender, EventArgs e)
         {
+            taskQueue = new DispatcherQueue("DriveControl", new Dispatcher(1, "DriveControl"),
+                TaskExecutionPolicy.ConstrainQueueDepthDiscardTasks, 1);
+            Arbiter.Activate(taskQueue, Arbiter.Receive(true, drivePort, driveHandler));
             UpdateJoystickAxes(new game.Axes());
         }
 
@@ -229,7 +230,8 @@ namespace Myro.GUI.WPFControls
 
         private void OnUnloaded(object sender, RoutedEventArgs e)
         {
-            this.Dispose();
+            // This was sometimes causing taskQueue to be disposed twice
+            //this.Dispose();
         }
     }
 }
