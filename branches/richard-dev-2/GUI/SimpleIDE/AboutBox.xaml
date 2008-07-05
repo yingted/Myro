@@ -20,13 +20,13 @@
             The Institute for Personal Robots in Education (IPRE)
             applies and evaluates robots as a context for computer
             science education. IPRE is a joint effort between
-            <Hyperlink NavigateUri="http://robotics.gatech.edu">Georgia Tech</Hyperlink>
-            and <Hyperlink NavigateUri="http://mainline.brynmawr.edu">Bryn Mawr College</Hyperlink>
-            sponsored by <Hyperlink NavigateUri="http://research.microsoft.com">Microsoft Research</Hyperlink>.
+            <Hyperlink RequestNavigate="OnNavigate" NavigateUri="http://robotics.gatech.edu">Georgia Tech</Hyperlink>
+            and <Hyperlink RequestNavigate="OnNavigate" NavigateUri="http://mainline.brynmawr.edu">Bryn Mawr College</Hyperlink>
+            sponsored by <Hyperlink RequestNavigate="OnNavigate" NavigateUri="http://research.microsoft.com">Microsoft Research</Hyperlink>.
         </TextBlock>
         <TextBlock>
-            Please visit our web site at <Hyperlink NavigateUri="http://www.roboteducation.org">www.roboteducation.org</Hyperlink>,
-            or our <Hyperlink NavigateUri="http://wiki.roboteducation.org">wiki</Hyperlink>.
+            Please visit our web site at <Hyperlink RequestNavigate="OnNavigate" NavigateUri="http://www.roboteducation.org">www.roboteducation.org</Hyperlink>,
+            or our <Hyperlink RequestNavigate="OnNavigate" NavigateUri="http://wiki.roboteducation.org">wiki</Hyperlink>.
         </TextBlock>
         <Button Click="OnCloseClick" Margin="0,0,5,5" Padding="10,0,10,0" HorizontalAlignment="Right" Foreground="MistyRose" Background="Transparent" BorderThickness="0" BorderBrush="Transparent" Focusable="False" IsTabStop="False" IsCancel="True" IsDefault="False" ClickMode="Release">Close</Button>
     </StackPanel>

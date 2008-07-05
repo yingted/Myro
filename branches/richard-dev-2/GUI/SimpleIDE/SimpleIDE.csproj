@@ -73,7 +73,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="OriginalTopBar.xaml">
+    <None Include="OriginalTopBar.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </None>
+    <Page Include="IDEOptions.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -102,10 +106,13 @@
       <DependentUpon>ConfigEditor.xaml</DependentUpon>
     </Compile>
     <Compile Include="Editor.cs" />
-    <Compile Include="MyroConfig.cs" />
-    <Compile Include="OriginalTopBar.xaml.cs">
-      <DependentUpon>OriginalTopBar.xaml</DependentUpon>
+    <Compile Include="IDEOptions.xaml.cs">
+      <DependentUpon>IDEOptions.xaml</DependentUpon>
     </Compile>
+    <Compile Include="MyroConfig.cs" />
+    <None Include="OriginalTopBar.xaml.cs">
+      <DependentUpon>OriginalTopBar.xaml</DependentUpon>
+    </None>
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

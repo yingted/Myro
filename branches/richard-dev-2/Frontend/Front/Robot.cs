@@ -16,15 +16,19 @@ namespace Myro
         private static AdapterBank bank = null;
         private static AdapterSpec<DriveAdapter> driveAdapter = null;
         private static AdapterSpec<VectorAdapter> soundAdapter = null;
+        private static int httpPort;
+        private static int dsspPort;
 
         #region Startup and shutdown
-        public static void Init(string manifestFile)
+        public static void Init(string manifestFile, int httpPort, int dsspPort)
         {
+            Robot.httpPort = httpPort;
+            Robot.dsspPort = dsspPort;
             FileAttributes att = File.GetAttributes(manifestFile);
             if ((att & (FileAttributes.Device | FileAttributes.Directory | FileAttributes.Offline)) != 0)
                 throw new IOException("Manifest file is not a normal file");
             Console.Write("Starting DSS environment...");
-            DssEnvironment.Initialize(50000, 50001, "file://" + manifestFile);
+            DssEnvironment.Initialize(httpPort, dsspPort, "file://" + manifestFile);
             Console.WriteLine("Done");
             bank = new AdapterBank(new List<IAdapterFactory>() {
                 new Myro.Adapters.DriveAdapterFactory(),

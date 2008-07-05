@@ -10,6 +10,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using System.Diagnostics;
 
 namespace Myro.GUI.SimpleIDE
 {
@@ -26,6 +27,13 @@ namespace Myro.GUI.SimpleIDE
         private void OnCloseClick(object sender, RoutedEventArgs e)
         {
             this.Close();
+        }
+
+        private void OnNavigate(object sender, System.Windows.Navigation.RequestNavigateEventArgs e)
+        {
+            Hyperlink link = sender as Hyperlink;
+            if (link != null)
+                Process.Start(new ProcessStartInfo(link.NavigateUri.ToString()));
         }
     }
 }

@@ -29,10 +29,12 @@ namespace Myro.GUI.SimpleIDE
         public static RoutedCommand CloseAll = new RoutedCommand();
         public static RoutedCommand Run = new RoutedCommand();
         public static RoutedCommand ConfigEditor = new RoutedCommand();
-        public static RoutedCommand BrowseManifest = new RoutedCommand();
+        public static RoutedCommand IDEOptions = new RoutedCommand();
+        //public static RoutedCommand BrowseManifest = new RoutedCommand();
         public static RoutedCommand About = new RoutedCommand();
 
-        string curManifest = null;
+        //string curManifest = null;
+        MyroConfigFiles currentConfig = null;
         bool connected = false;
         //Robot robot = null;
         Object connectedLock = new Object();
@@ -99,16 +101,18 @@ namespace Myro.GUI.SimpleIDE
 
         private void connect()
         {
-            if (connected == false && curManifest != null)
+            if (connected == false && currentConfig != null)
             {
                 Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal,
                     new ThreadStart(delegate()
                     {
                         //manifestBox.Text = "Connecting to robot...";
                         commandWindow.ExecuteCommand("from myro import *");
-                        commandWindow.LogText("> init('" + curManifest + "')\n", Colors.MediumBlue);
+                        commandWindow.LogText("> init('" + currentConfig.BaseName + "')\n", Colors.MediumBlue);
                     }));
-                Robot.Init(curManifest);
+                Robot.Init(currentConfig.ManifestFilePath,
+                    currentConfig.MyroConfiguration.HttpPort,
+                    currentConfig.MyroConfiguration.DsspPort);
                 controlPanel.SetRobot();
                 Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal,
                     new ThreadStart(delegate()
@@ -138,26 +142,26 @@ namespace Myro.GUI.SimpleIDE
         //        disconnect();
         //}
 
-        private void OnBrowseManifest(object sender, ExecutedRoutedEventArgs e)
-        {
-            var dlg = new OpenFileDialog();
-            if (curManifest != null && curManifest.Length > 0)
-                dlg.FileName = curManifest;
-            dlg.DefaultExt = ".manifest.xml";
-            dlg.Filter = "DSS Manifest (.manifest.xml)|*.manifest.xml";
-            if (dlg.ShowDialog(this) == true)
-            {
-                lock (connectionThreadLock)
-                {
-                    curManifest = dlg.FileName;
-                    if (connectionThread == null || connectionThread.IsAlive == false)
-                    {
-                        connectionThread = new Thread(new ThreadStart(delegate() { connect(); }));
-                        connectionThread.Start();
-                    }
-                }
-            }
-        }
+        //private void OnBrowseManifest(object sender, ExecutedRoutedEventArgs e)
+        //{
+        //    var dlg = new OpenFileDialog();
+        //    if (curManifest != null && curManifest.Length > 0)
+        //        dlg.FileName = curManifest;
+        //    dlg.DefaultExt = ".manifest.xml";
+        //    dlg.Filter = "DSS Manifest (.manifest.xml)|*.manifest.xml";
+        //    if (dlg.ShowDialog(this) == true)
+        //    {
+        //        lock (connectionThreadLock)
+        //        {
+        //            curManifest = dlg.FileName;
+        //            if (connectionThread == null || connectionThread.IsAlive == false)
+        //            {
+        //                connectionThread = new Thread(new ThreadStart(delegate() { connect(); }));
+        //                connectionThread.Start();
+        //            }
+        //        }
+        //    }
+        //}
 
         //private void ToggleConnect(object sender, RoutedEventArgs e)
         //{
@@ -387,7 +391,7 @@ namespace Myro.GUI.SimpleIDE
         {
             if (connectionThread == null || connectionThread.IsAlive == false)
             {
-                curManifest = e.ConfigFiles.ManifestFilePath;
+                currentConfig = e.ConfigFiles;
                 connectionThread = new Thread(new ThreadStart(delegate() { connect(); }));
                 connectionThread.Start();
             }
@@ -399,6 +403,11 @@ namespace Myro.GUI.SimpleIDE
         {
             AboutBox about = new AboutBox();
             about.ShowDialog();
+        }
+
+        private void OnIDEOptions(object sender, ExecutedRoutedEventArgs e)
+        {
+
         }
 
         //private void OnCut(object sender, RoutedEventArgs e)

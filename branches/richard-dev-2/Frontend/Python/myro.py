@@ -1,6 +1,7 @@
 import clr
 import System
-clr.AddReference("MyroRobot.dll")
+import sys
+clr.AddReferenceToFileAndPath("C:\\Microsoft Robotics Dev Studio 2008\\bin\\MyroRobot.dll")
 from Myro import Robot
 
 def init(robotType):

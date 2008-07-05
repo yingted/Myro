@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Media.Animation;
+using System.Diagnostics;
 
 namespace Myro.GUI.SimpleIDE
 {
@@ -85,6 +86,10 @@ namespace Myro.GUI.SimpleIDE
 
         #endregion
 
+        #region Commands
+        public static RoutedCommand ShowServices = new RoutedCommand();
+        #endregion
+
         #region Private variables
 
         ContextMenu robotChooserMenu;
@@ -114,6 +119,18 @@ namespace Myro.GUI.SimpleIDE
         {
             jewelAnimation = (Storyboard)JewelButton.FindResource("JewelGlow");
             jewelAnimation.Begin(JewelButton, true);
+        }
+
+        private void IsConfigLoaded(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = (CurrentConfig != null);
+        }
+
+        private void OnShowServices(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (CurrentConfig != null)
+                Process.Start(new ProcessStartInfo(
+                    "http://localhost:" + CurrentConfig.MyroConfiguration.HttpPort.ToString() + "/directory"));
         }
 
         #endregion

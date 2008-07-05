@@ -21,7 +21,8 @@
         <CommandBinding Command="{x:Static wnd:Window1.CloseAll}" Executed="OnCloseAll" />
         <CommandBinding Command="{x:Static wnd:Window1.Run}" Executed="OnRun" CanExecute="HasCurrentDocument" />
         <CommandBinding Command="{x:Static wnd:Window1.ConfigEditor}" Executed="OnConfigEditor" />
-        <CommandBinding Command="{x:Static wnd:Window1.BrowseManifest}" Executed="OnBrowseManifest" />
+        <!--<CommandBinding Command="{x:Static wnd:Window1.IDEOptions}" Executed="OnIDEOptions" />-->
+        <!--<CommandBinding Command="{x:Static wnd:Window1.BrowseManifest}" Executed="OnBrowseManifest" />-->
         <CommandBinding Command="{x:Static wnd:Window1.About}" Executed="OnAbout" />
     </Window.CommandBindings>
     <Grid>
