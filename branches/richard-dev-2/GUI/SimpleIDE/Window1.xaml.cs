@@ -30,6 +30,7 @@ namespace Myro.GUI.SimpleIDE
         public static RoutedCommand Run = new RoutedCommand();
         public static RoutedCommand ConfigEditor = new RoutedCommand();
         public static RoutedCommand BrowseManifest = new RoutedCommand();
+        public static RoutedCommand About = new RoutedCommand();
 
         string curManifest = null;
         bool connected = false;
@@ -304,7 +305,7 @@ namespace Myro.GUI.SimpleIDE
             item.GotFocus +=
                 delegate(object sender2, RoutedEventArgs e2)
                 {
-                    FocusManager.SetFocusedElement(mainTabs, e.Document.EditorControl);
+                    e.Document.EditorControl.Focus();
                 };
             item.CloseTab +=
                 delegate(object sender2, RoutedEventArgs e2)
@@ -369,7 +370,7 @@ namespace Myro.GUI.SimpleIDE
         {
             //SetButtonsEnabled();
             if (mainTabs.SelectedItem != null && GetCurrentEditor() != null)
-                FocusManager.SetFocusedElement((TabItem)mainTabs.SelectedItem, GetCurrentEditor());
+                GetCurrentEditor().Focus();
         }
 
         private void HasCurrentDocument(object sender, CanExecuteRoutedEventArgs e)
@@ -380,6 +381,24 @@ namespace Myro.GUI.SimpleIDE
         private void OnConfigEditor(object sender, ExecutedRoutedEventArgs e)
         {
             new ConfigEditor().Show();
+        }
+
+        private void OnRobotChange(object sender, TopBar.RobotChangeEventArgs e)
+        {
+            if (connectionThread == null || connectionThread.IsAlive == false)
+            {
+                curManifest = e.ConfigFiles.ManifestFilePath;
+                connectionThread = new Thread(new ThreadStart(delegate() { connect(); }));
+                connectionThread.Start();
+            }
+            else
+                e.Cancel = true;
+        }
+
+        private void OnAbout(object sender, ExecutedRoutedEventArgs e)
+        {
+            AboutBox about = new AboutBox();
+            about.ShowDialog();
         }
 
         //private void OnCut(object sender, RoutedEventArgs e)

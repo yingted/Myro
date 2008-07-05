@@ -1,12 +1,12 @@
 ﻿<UserControl x:Class="Myro.GUI.WPFControls.CommandWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" GotFocus="OnGotFocus">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <RichTextBox Grid.Row="0" Name="historyBlock" VerticalAlignment="Stretch" Background="White" IsReadOnly="True" TextChanged="OnHistoryChanged" MinWidth="100" FontFamily="Courier" FontSize="11" BorderThickness="0" BorderBrush="Transparent" IsEnabled="False" IsUndoEnabled="False" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto" SizeChanged="OnSizeChanged" LayoutUpdated="OnLayoutUpdated">
+        <RichTextBox GotFocus="OnGotFocus" Grid.Row="0" Name="historyBlock" VerticalAlignment="Stretch" Background="White" IsReadOnly="True" TextChanged="OnHistoryChanged" MinWidth="100" FontFamily="Courier" FontSize="11" BorderThickness="0" BorderBrush="Transparent" IsEnabled="False" IsUndoEnabled="False" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto" SizeChanged="OnSizeChanged" LayoutUpdated="OnLayoutUpdated">
                 <RichTextBox.Resources>
                     <Style TargetType="{x:Type Paragraph}">
                         <Setter Property="Margin" Value="0" />

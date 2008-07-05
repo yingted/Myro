@@ -74,9 +74,10 @@ namespace Myro.GUI.WPFControls
         public void StartScripting()
         {
             pe = new PythonEngine();
-            pe.Sys.path.Add("C:\\Microsoft Robotics Dev Studio 2008\\bin");
-            pe.Sys.path.Add("C:\\Users\\t-richr\\Myro-dev\\richard-dev-2\\Frontend\\Python");
-            pe.Import("site");
+            pe.Sys.path.Add(Myro.Utilities.Params.BinPath);
+            pe.Sys.path.Add(Myro.Utilities.Params.PythonPath);
+            //pe.Sys.path.Add("C:\\Users\\t-richr\\Myro-dev\\richard-dev-2\\Frontend\\Python");
+            //pe.Import("site");
 
             var s = new AnonymousPipeServerStream(PipeDirection.In);
             stdout = s;
@@ -223,7 +224,7 @@ namespace Myro.GUI.WPFControls
 
         private void OnGotFocus(object sender, RoutedEventArgs e)
         {
-            FocusManager.SetFocusedElement(this, commandLineBox);
+            commandLineBox.Focus();
         }
 
         private void OnLayoutUpdated(object sender, EventArgs e)

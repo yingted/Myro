@@ -1,11 +1,5 @@
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Demos", "Demos", "{488F0391-1D67-4259-BC8D-785C1A37A62B}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimTestSuite", "Demos\SimTestSuite\SimTestSuite.csproj", "{FFA6E712-D390-445B-8A74-D607C9C0BE64}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyProgram", "Demos\MyProgram\MyProgram.csproj", "{66AAF414-471B-46F0-BD0B-90F1A3D26D65}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{9A996F58-D2C2-4486-92D4-1F95CC60A210}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScribblerBase", "Services\Scribbler\ScribblerBase\ScribblerBase.csproj", "{90C2F23D-A2DD-4EAB-9923-CAAC83BE5416}"
@@ -27,7 +21,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Adapters", "Adapters\Adapte
 		{6BF981B1-88CF-4497-967D-0E4F39F5B440} = {6BF981B1-88CF-4497-967D-0E4F39F5B440}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameController", "..\..\..\..\Microsoft Robotics Dev Studio 2008\samples\Misc\GameController\GameController.csproj", "{2B91A604-A8BE-43DD-8A44-60B735C11184}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameController", "..\..\..\Microsoft Robotics Dev Studio 2008\samples\Misc\GameController\GameController.csproj", "{2B91A604-A8BE-43DD-8A44-60B735C11184}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GUI", "GUI", "{B6585165-7DA4-47D0-8B83-AFCF6F6AE4BF}"
 EndProject
@@ -54,14 +48,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{FFA6E712-D390-445B-8A74-D607C9C0BE64}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FFA6E712-D390-445B-8A74-D607C9C0BE64}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FFA6E712-D390-445B-8A74-D607C9C0BE64}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FFA6E712-D390-445B-8A74-D607C9C0BE64}.Release|Any CPU.Build.0 = Release|Any CPU
-		{66AAF414-471B-46F0-BD0B-90F1A3D26D65}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{66AAF414-471B-46F0-BD0B-90F1A3D26D65}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{66AAF414-471B-46F0-BD0B-90F1A3D26D65}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{66AAF414-471B-46F0-BD0B-90F1A3D26D65}.Release|Any CPU.Build.0 = Release|Any CPU
 		{90C2F23D-A2DD-4EAB-9923-CAAC83BE5416}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{90C2F23D-A2DD-4EAB-9923-CAAC83BE5416}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{90C2F23D-A2DD-4EAB-9923-CAAC83BE5416}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -119,8 +105,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{FFA6E712-D390-445B-8A74-D607C9C0BE64} = {488F0391-1D67-4259-BC8D-785C1A37A62B}
-		{66AAF414-471B-46F0-BD0B-90F1A3D26D65} = {488F0391-1D67-4259-BC8D-785C1A37A62B}
 		{2DFFEA88-4C49-41C6-9BE1-1E470E43E406} = {9A996F58-D2C2-4486-92D4-1F95CC60A210}
 		{DB437846-490E-49E4-983B-A5E7AFAEB071} = {9A996F58-D2C2-4486-92D4-1F95CC60A210}
 		{1219794A-FE7D-4312-B9A0-4877ACE3F7AC} = {2DFFEA88-4C49-41C6-9BE1-1E470E43E406}

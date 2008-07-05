@@ -1,7 +1,8 @@
 ﻿<UserControl x:Class="Myro.GUI.SimpleIDE.TopBar"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:wnd="clr-namespace:Myro.GUI.SimpleIDE">
+    xmlns:wnd="clr-namespace:Myro.GUI.SimpleIDE"
+             Initialized="OnInitialized">
     <Border BorderBrush="DarkGray" BorderThickness="0,0,0,1" Background="#FFE8F7FF" SnapsToDevicePixels="True" >
         <Grid Height="Auto">
             <Grid.ColumnDefinitions>
@@ -38,6 +39,7 @@
                 <Style x:Key="ButtonStyle" TargetType="Button">
                     <Setter Property="SnapsToDevicePixels" Value="true"/>
                     <Setter Property="OverridesDefaultStyle" Value="true"/>
+                    <Setter Property="Focusable" Value="false"/>
                     <Setter Property="Template">
                         <Setter.Value>
                             <ControlTemplate TargetType="Button">
@@ -73,6 +75,7 @@
                 <Style x:Key="JewelStyle" TargetType="Button">
                     <Setter Property="SnapsToDevicePixels" Value="false"/>
                     <Setter Property="OverridesDefaultStyle" Value="true"/>
+                    <Setter Property="Focusable" Value="false"/>
                     <Setter Property="Template">
                         <Setter.Value>
                             <ControlTemplate TargetType="Button">
@@ -97,6 +100,18 @@
                                             </Setter.Value>
                                         </Setter>-->
                                     </Trigger>
+                                    <Trigger Property="CheckBox.IsChecked" Value="true">
+                                        <Setter TargetName="Border" Property="BitmapEffect">
+                                            <Setter.Value>
+                                                <DropShadowBitmapEffect ShadowDepth="2" />
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Setter TargetName="Border" Property="RenderTransform">
+                                            <Setter.Value>
+                                                <TranslateTransform X="0.5" Y="0.5" />
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Trigger>
                                     <Trigger Property="IsPressed" Value="true">
                                         <Setter TargetName="Border" Property="BitmapEffect">
                                             <Setter.Value>
@@ -115,7 +130,24 @@
                     </Setter>
                 </Style>
             </Grid.Resources>
-            <Button Style="{StaticResource JewelStyle}" Grid.Column="0" Margin="0,0,10,0">
+            <Button Style="{StaticResource JewelStyle}" Grid.Column="0" Margin="0,0,10,0" Click="OnJewelClick" Name="JewelButton" ClickMode="Press" Focusable="False">
+                <Button.BitmapEffect>
+                    <OuterGlowBitmapEffect x:Name="JewelGlowEffect" GlowColor="OrangeRed" GlowSize="10" Opacity="0" />
+                </Button.BitmapEffect>
+                <Button.Resources>
+                    <Storyboard Name="JewelGlow" x:Key="JewelGlow">
+                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="JewelGlowEffect"
+                                                   Storyboard.TargetProperty="Opacity"
+                                                   Duration="0:0:6"
+                                                   RepeatBehavior="Forever">
+                            <LinearDoubleKeyFrame Value="0.1" KeyTime="0:0:0" />
+                            <LinearDoubleKeyFrame Value="0.8" KeyTime="0:0:3" />
+                            <LinearDoubleKeyFrame Value="1.0" KeyTime="0:0:3.5" />
+                            <LinearDoubleKeyFrame Value="0.8" KeyTime="0:0:5" />
+                            <LinearDoubleKeyFrame Value="0.1" KeyTime="0:0:6" />
+                        </DoubleAnimationUsingKeyFrames>
+                    </Storyboard>
+                </Button.Resources>
                 <Image Width="48" Height="48" Stretch="Uniform" Name="JewelImage" Source="/SimpleIDE;component/jewellogo.png" />
             </Button>
             <Grid Grid.Column="1">
@@ -130,6 +162,10 @@
                             <Setter Property="Height" Value="32" />
                         </Style>
                     </StackPanel.Resources>
+                    <StackPanel Orientation="Vertical">
+                        <Label Name="BaseNameLabel" Padding="0,0,4,0" MinWidth="70" />
+                        <Label Name="FriendlyNameLabel" Padding="0,0,4,0" MinWidth="70" />
+                    </StackPanel>
                     <Button Command="ApplicationCommands.New">
                         <Image Source="/SimpleIDE;component/page_add.png" Stretch="None" SnapsToDevicePixels="True" />
                     </Button>
@@ -157,7 +193,7 @@
                         <Image Source="/SimpleIDE;component/cog_go.png" Stretch="None" />
                     </Button>
                 </StackPanel>
-                <Menu VerticalAlignment="Bottom" HorizontalAlignment="Left" Background="Transparent" Height="20.96" Grid.RowSpan="2" Width="183.47">
+                <Menu VerticalAlignment="Bottom" HorizontalAlignment="Left" Background="Transparent" Height="20.96" Grid.RowSpan="2" Width="183.47" SnapsToDevicePixels="True">
                     <MenuItem Header="_File">
                         <MenuItem Header="_New" Command="ApplicationCommands.New" />
                         <MenuItem Header="_Open..." Command="ApplicationCommands.Open" />
@@ -175,11 +211,11 @@
                         <MenuItem Header="Copy" Command="ApplicationCommands.Copy" />
                         <MenuItem Header="Paste" Command="ApplicationCommands.Paste" />
                     </MenuItem>
-                    <MenuItem Header="Connection">
+                    <MenuItem Header="_Tools">
                         <MenuItem Header="Configuration Editor" Command="{x:Static wnd:Window1.ConfigEditor}" />
                     </MenuItem>
                     <MenuItem Header="_Help">
-                        <MenuItem Header="About" />
+                        <MenuItem Header="About" Command="{x:Static wnd:Window1.About}" />
                     </MenuItem>
                 </Menu>
             </Grid>

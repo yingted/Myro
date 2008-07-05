@@ -1,0 +1,33 @@
+﻿<Window x:Class="Myro.GUI.SimpleIDE.AboutBox"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="About Myro 3.0" Background="#FF002D78" ResizeMode="NoResize" SizeToContent="WidthAndHeight">
+    <StackPanel Width="500">
+        <StackPanel.Resources>
+            <Style TargetType="Hyperlink">
+                <Setter Property="Foreground" Value="LightSalmon" />
+            </Style>
+            <Style TargetType="TextBlock">
+                <Setter Property="Foreground" Value="White" />
+                <Setter Property="FontSize" Value="14" />
+                <Setter Property="TextWrapping" Value="Wrap" />
+                <Setter Property="TextAlignment" Value="Justify" />
+                <Setter Property="Padding" Value="10,0,10,15" />
+            </Style>
+        </StackPanel.Resources>
+        <Image Margin="0,0,0,20" Name="image1" Stretch="None" HorizontalAlignment="Left" Source="/SimpleIDE;component/fulllogo.png" Height="100" Width="392"/>
+        <TextBlock>
+            The Institute for Personal Robots in Education (IPRE)
+            applies and evaluates robots as a context for computer
+            science education. IPRE is a joint effort between
+            <Hyperlink NavigateUri="http://robotics.gatech.edu">Georgia Tech</Hyperlink>
+            and <Hyperlink NavigateUri="http://mainline.brynmawr.edu">Bryn Mawr College</Hyperlink>
+            sponsored by <Hyperlink NavigateUri="http://research.microsoft.com">Microsoft Research</Hyperlink>.
+        </TextBlock>
+        <TextBlock>
+            Please visit our web site at <Hyperlink NavigateUri="http://www.roboteducation.org">www.roboteducation.org</Hyperlink>,
+            or our <Hyperlink NavigateUri="http://wiki.roboteducation.org">wiki</Hyperlink>.
+        </TextBlock>
+        <Button Click="OnCloseClick" Margin="0,0,5,5" Padding="10,0,10,0" HorizontalAlignment="Right" Foreground="MistyRose" Background="Transparent" BorderThickness="0" BorderBrush="Transparent" Focusable="False" IsTabStop="False" IsCancel="True" IsDefault="False" ClickMode="Release">Close</Button>
+    </StackPanel>
+</Window>

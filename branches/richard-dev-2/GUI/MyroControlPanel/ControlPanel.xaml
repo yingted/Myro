@@ -8,10 +8,10 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="auto" MinWidth="182" />
-            <ColumnDefinition/>
+            <ColumnDefinition Width="auto" />
+            <ColumnDefinition Width="200*"/>
         </Grid.ColumnDefinitions>
-        <StackPanel Grid.RowSpan="2" Grid.Column="0">
+        <StackPanel Grid.Row="0" Grid.Column="0">
             <GroupBox Header="Drive" Name="driveBox" Height="auto" VerticalAlignment="Top" Margin="5">
                 <local:DriveControl Name="drive" />
             </GroupBox>
@@ -29,8 +29,8 @@
                 </StackPanel>
             </GroupBox>
         </StackPanel>
-        <StackPanel Grid.Row="0" Grid.Column="1" MinWidth="200" Name="servicePanel" />
-        <StackPanel Grid.Row="1" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right">
+        <StackPanel Grid.Row="0" Grid.Column="1" Name="servicePanel" />
+        <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right">
             <Label>Polling</Label>
             <Slider Name="pollingSlider" Width="100" IsSnapToTickEnabled="False" TickPlacement="BottomRight" ValueChanged="OnPollValueChanged" Minimum="0.1" Maximum="1.1" TickFrequency="0" Value="0.5" LostMouseCapture="OnPollLostMouse" LargeChange="0.2">
                 <Slider.BitmapEffect>

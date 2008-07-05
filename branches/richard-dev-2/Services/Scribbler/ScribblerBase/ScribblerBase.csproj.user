@@ -3,7 +3,8 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <StartAction>Program</StartAction>
     <StartProgram>C:\Microsoft Robotics Dev Studio 2008\bin\DssHost.exe</StartProgram>
-    <StartWorkingDirectory>C:\Microsoft Robotics Studio (1.5)\</StartWorkingDirectory>
+    <StartWorkingDirectory>
+    </StartWorkingDirectory>
     <StartArguments>-p:50000 -t:50001 -m:"samples\IPRE\Scribbler\Scribbler\ScribblerBase\Scribbler.manifest.xml"</StartArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
