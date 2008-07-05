@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!--This file was created with the Microsoft Visual Programming Language.-->
-<Manifest xmlns:irobot="http://schemas.microsoft.com/robotics/2007/01/irobot.html" xmlns:bumper="http://schemas.microsoft.com/robotics/2006/12/irobot/roomba/bumper.html" xmlns:vector="http://www.roboteducation.org/schemas/2008/06/vector.html" xmlns:this="urn:uuid:92023c90-4149-4e3e-b78d-6f3e902884f2" xmlns:dssp="http://schemas.microsoft.com/xw/2004/10/dssp.html" xmlns:drive="http://schemas.microsoft.com/robotics/2006/12/irobot/drive.html" xmlns="http://schemas.microsoft.com/xw/2004/10/manifest.html">
+<Manifest xmlns:irobot="http://schemas.microsoft.com/robotics/2007/01/irobot.html" xmlns:bumper="http://schemas.microsoft.com/robotics/2006/12/irobot/roomba/bumper.html" xmlns:vector="http://www.roboteducation.org/schemas/2008/06/vector.html" xmlns:this="urn:uuid:d46fe533-2c68-4602-a1e9-a24fe63d1edc" xmlns:dssp="http://schemas.microsoft.com/xw/2004/10/dssp.html" xmlns:drive="http://schemas.microsoft.com/robotics/2006/12/irobot/drive.html" xmlns="http://schemas.microsoft.com/xw/2004/10/manifest.html">
   <CreateServiceList>
     <ServiceRecordType>
       <dssp:Contract>http://schemas.microsoft.com/robotics/2007/01/irobot.html</dssp:Contract>
