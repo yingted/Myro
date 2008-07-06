@@ -75,7 +75,7 @@ namespace Myro.GUI.WPFControls
         {
             pe = new PythonEngine();
             pe.Sys.path.Add(Myro.Utilities.Params.BinPath);
-            pe.Sys.path.Add(Myro.Utilities.Params.PythonPath);
+            //pe.Sys.path.Add(Myro.Utilities.Params.PythonPath);
             //pe.Sys.path.Add("C:\\Users\\t-richr\\Myro-dev\\richard-dev-2\\Frontend\\Python");
             //pe.Import("site");
 

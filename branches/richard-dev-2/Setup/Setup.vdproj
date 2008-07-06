@@ -51,6 +51,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_0F04CC29A7414F28A22567E75BF7EAA8"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_10B5AA49D97D00E30AE53CDD560C745B"
         "OwnerKey" = "8:_D96DFE305AC743929D4F6D5771602FD5"
         "MsmSig" = "8:_UNDEFINED"
@@ -345,18 +351,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_34B3F1290A8010FE124EE964B962AAE9"
-        "OwnerKey" = "8:_C8285985FFBF982D091131315B21D151"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_34B3F1290A8010FE124EE964B962AAE9"
-        "OwnerKey" = "8:_8F0677244DB64C30B423BCB50223D71B"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_3A085A76EBB62D854E0C75E4A5361012"
         "OwnerKey" = "8:_540BE683025D75B4AD05F8BD305E0FE8"
         "MsmSig" = "8:_UNDEFINED"
@@ -507,6 +501,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_5A8328F23977481D9287FFF12F31B401"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_5EDF72BA93484E138EDD8C0797327C51"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -555,7 +555,19 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_6E7C857753A34BCF9F29235E833B517C"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_7102C436809947888F176D7B06FF33A7"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_7395E829609A4AE7A026B84A2FC6C859"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -639,6 +651,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_7EADA8BF28F94B2DB22E3EE2DBCB88CE"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_810E59659400278F81D1246D16939188"
         "OwnerKey" = "8:_8E418B5102CEF5FF6B79886D9B3C283B"
         "MsmSig" = "8:_UNDEFINED"
@@ -707,6 +725,18 @@
         {
         "MsmKey" = "8:_8653499D4F8B025C0E256683824B2639"
         "OwnerKey" = "8:_FEBD1BC0E75C003E3D31729CD5708BB1"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_889E9AD7718C98FAC063836E9221F232"
+        "OwnerKey" = "8:_8F0677244DB64C30B423BCB50223D71B"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_889E9AD7718C98FAC063836E9221F232"
+        "OwnerKey" = "8:_C8285985FFBF982D091131315B21D151"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -1215,7 +1245,19 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_B9784FFF52E14CF291592BAA9D72F5A6"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_BFD3BA9AB7804383B459250972BDD8CC"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_C197FECED4574D56B95AFD5C361621CC"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -1228,6 +1270,12 @@
         "Entry"
         {
         "MsmKey" = "8:_C6C318C8CFC84760A307885F6E8BB320"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_C7568FED20FC4FE783EAD30731B470FB"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -1318,19 +1366,13 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_8F0677244DB64C30B423BCB50223D71B"
+        "OwnerKey" = "8:_EC195F24AFA948B496A3B688D7767C80"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_E46DE5B07E684F11B1C5C1EF71243DAA"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_EC195F24AFA948B496A3B688D7767C80"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -1396,12 +1438,6 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_34B3F1290A8010FE124EE964B962AAE9"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_BFD3BA9AB7804383B459250972BDD8CC"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -1427,6 +1463,18 @@
         {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_A30F22874F4C4791AF37F19530349D69"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_8F0677244DB64C30B423BCB50223D71B"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_889E9AD7718C98FAC063836E9221F232"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -1670,6 +1718,19 @@
             "PrerequisitesLocation" = "2:1"
             "Url" = "8:"
             "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:Microsoft.Net.Framework.3.5"
+                    {
+                    "Name" = "8:.NET Framework 3.5"
+                    "ProductCode" = "8:Microsoft.Net.Framework.3.5"
+                    }
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:Microsoft.Windows.Installer.3.1"
+                    {
+                    "Name" = "8:Windows Installer 3.1"
+                    "ProductCode" = "8:Microsoft.Windows.Installer.3.1"
+                    }
+                }
             }
         }
         "Release"
@@ -1694,6 +1755,19 @@
             "PrerequisitesLocation" = "2:1"
             "Url" = "8:"
             "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:Microsoft.Net.Framework.3.5"
+                    {
+                    "Name" = "8:.NET Framework 3.5"
+                    "ProductCode" = "8:Microsoft.Net.Framework.3.5"
+                    }
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:Microsoft.Windows.Installer.3.1"
+                    {
+                    "Name" = "8:Windows Installer 3.1"
+                    "ProductCode" = "8:Microsoft.Windows.Installer.3.1"
+                    }
+                }
             }
         }
     }
@@ -1761,6 +1835,26 @@
             "TargetName" = "8:ScribblerBase.Config.xml"
             "Tag" = "8:"
             "Folder" = "8:_2FBFB865F7B74AAE953E1033FA88FBB3"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_0F04CC29A7414F28A22567E75BF7EAA8"
+            {
+            "SourcePath" = "8:..\\PythonDemos\\square-simulator.py"
+            "TargetName" = "8:square-simulator.py"
+            "Tag" = "8:"
+            "Folder" = "8:_739ED69F26534568BBAE3EA56CDA2C43"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -2105,37 +2199,6 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_34B3F1290A8010FE124EE964B962AAE9"
-            {
-            "AssemblyRegister" = "3:1"
-            "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:IronMath, Version=1.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL"
-                "ScatterAssemblies"
-                {
-                    "_34B3F1290A8010FE124EE964B962AAE9"
-                    {
-                    "Name" = "8:IronMath.DLL"
-                    "Attributes" = "3:512"
-                    }
-                }
-            "SourcePath" = "8:IronMath.DLL"
-            "TargetName" = "8:"
-            "Tag" = "8:"
-            "Folder" = "8:_EF495BDB49F240659BBB3500C4580A60"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:TRUE"
-            "IsDependency" = "11:TRUE"
-            "IsolateTo" = "8:"
-            }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_3A085A76EBB62D854E0C75E4A5361012"
             {
             "AssemblyRegister" = "3:1"
@@ -2393,6 +2456,26 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_5A8328F23977481D9287FFF12F31B401"
+            {
+            "SourcePath" = "8:..\\Config\\Create.icon.png"
+            "TargetName" = "8:Create.icon.png"
+            "Tag" = "8:"
+            "Folder" = "8:_323FF821F7E549C5A3FEF8C2210C6248"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_5EDF72BA93484E138EDD8C0797327C51"
             {
             "SourcePath" = "8:..\\Config\\ScribblerSim.manifest\\ScribblerSim.manifest.xml"
@@ -2475,6 +2558,26 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_6E7C857753A34BCF9F29235E833B517C"
+            {
+            "SourcePath" = "8:..\\PythonDemos\\square.py"
+            "TargetName" = "8:square.py"
+            "Tag" = "8:"
+            "Folder" = "8:_739ED69F26534568BBAE3EA56CDA2C43"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_7102C436809947888F176D7B06FF33A7"
             {
             "AssemblyRegister" = "3:1"
@@ -2492,6 +2595,26 @@
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_EF495BDB49F240659BBB3500C4580A60"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_7395E829609A4AE7A026B84A2FC6C859"
+            {
+            "SourcePath" = "8:..\\Config\\ScribblerSim.icon.png"
+            "TargetName" = "8:ScribblerSim.icon.png"
+            "Tag" = "8:"
+            "Folder" = "8:_323FF821F7E549C5A3FEF8C2210C6248"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -2630,6 +2753,26 @@
             "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_7EADA8BF28F94B2DB22E3EE2DBCB88CE"
+            {
+            "SourcePath" = "8:..\\Config\\Scribbler.icon.png"
+            "TargetName" = "8:Scribbler.icon.png"
+            "Tag" = "8:"
+            "Folder" = "8:_323FF821F7E549C5A3FEF8C2210C6248"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_810E59659400278F81D1246D16939188"
             {
             "AssemblyRegister" = "3:1"
@@ -2757,6 +2900,37 @@
                     }
                 }
             "SourcePath" = "8:Microsoft.Xna.Framework.dll"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_EF495BDB49F240659BBB3500C4580A60"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:TRUE"
+            "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_889E9AD7718C98FAC063836E9221F232"
+            {
+            "AssemblyRegister" = "3:1"
+            "AssemblyIsInGAC" = "11:FALSE"
+            "AssemblyAsmDisplayName" = "8:IronMath, Version=1.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL"
+                "ScatterAssemblies"
+                {
+                    "_889E9AD7718C98FAC063836E9221F232"
+                    {
+                    "Name" = "8:IronMath.DLL"
+                    "Attributes" = "3:512"
+                    }
+                }
+            "SourcePath" = "8:IronMath.DLL"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_EF495BDB49F240659BBB3500C4580A60"
@@ -3282,7 +3456,27 @@
             "SourcePath" = "8:..\\Frontend\\Python\\myro.py"
             "TargetName" = "8:myro.py"
             "Tag" = "8:"
-            "Folder" = "8:_6867F2B4048B421F9C94A9B342976F95"
+            "Folder" = "8:_EF495BDB49F240659BBB3500C4580A60"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_B9784FFF52E14CF291592BAA9D72F5A6"
+            {
+            "SourcePath" = "8:..\\PythonDemos\\square-nxt.py"
+            "TargetName" = "8:square-nxt.py"
+            "Tag" = "8:"
+            "Folder" = "8:_739ED69F26534568BBAE3EA56CDA2C43"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -3314,6 +3508,26 @@
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_EF495BDB49F240659BBB3500C4580A60"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_C197FECED4574D56B95AFD5C361621CC"
+            {
+            "SourcePath" = "8:..\\Config\\Create.myro.xml"
+            "TargetName" = "8:Create.myro.xml"
+            "Tag" = "8:"
+            "Folder" = "8:_323FF821F7E549C5A3FEF8C2210C6248"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -3376,6 +3590,26 @@
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_EF495BDB49F240659BBB3500C4580A60"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_C7568FED20FC4FE783EAD30731B470FB"
+            {
+            "SourcePath" = "8:..\\PythonDemos\\square-create.py"
+            "TargetName" = "8:square-create.py"
+            "Tag" = "8:"
+            "Folder" = "8:_739ED69F26534568BBAE3EA56CDA2C43"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -3761,6 +3995,17 @@
             "Property" = "8:TARGETDIR"
                 "Folders"
                 {
+                    "{9EF0B969-E518-4E46-987F-47570745A589}:_739ED69F26534568BBAE3EA56CDA2C43"
+                    {
+                    "Name" = "8:Python Demos"
+                    "AlwaysCreate" = "11:FALSE"
+                    "Condition" = "8:"
+                    "Transitive" = "11:FALSE"
+                    "Property" = "8:_64BB5D18E5A4415CA6EDF39D43FCFB91"
+                        "Folders"
+                        {
+                        }
+                    }
                 }
             }
             "{1525181F-901A-416C-8A58-119130FE478E}:_83800E08158F451D83B58D6B716AEAC0"
@@ -3881,7 +4126,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Myro 3.0-alpha"
         "ProductCode" = "8:{B9904039-8416-46B1-959B-2249CA7502B5}"
-        "PackageCode" = "8:{CDA0B71F-1420-435C-B98A-08733A0B2AF1}"
+        "PackageCode" = "8:{5FA05C53-F596-4C38-85C3-7B958291A19E}"
         "UpgradeCode" = "8:{DF5CEF93-C200-4AF1-AE7E-F69658924D04}"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
