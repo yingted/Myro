@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<!--This file was created with the Microsoft Visual Programming Language.-->
+<Manifest xmlns:irobot="http://schemas.microsoft.com/robotics/2007/01/irobot.html" xmlns:bumper="http://schemas.microsoft.com/robotics/2006/12/irobot/roomba/bumper.html" xmlns:vector="http://www.roboteducation.org/schemas/2008/06/vector.html" xmlns:this="urn:uuid:d46fe533-2c68-4602-a1e9-a24fe63d1edc" xmlns:dssp="http://schemas.microsoft.com/xw/2004/10/dssp.html" xmlns:drive="http://schemas.microsoft.com/robotics/2006/12/irobot/drive.html" xmlns="http://schemas.microsoft.com/xw/2004/10/manifest.html">
+  <CreateServiceList>
+    <ServiceRecordType>
+      <dssp:Contract>http://schemas.microsoft.com/robotics/2007/01/irobot.html</dssp:Contract>
+      <dssp:PartnerList>
+        <dssp:Partner>
+          <dssp:Contract>http://schemas.microsoft.com/robotics/2007/01/irobot.html</dssp:Contract>
+          <dssp:Service>irobotcreateroomba.config.xml</dssp:Service>
+          <dssp:PartnerList />
+          <dssp:Name>dssp:StateService</dssp:Name>
+        </dssp:Partner>
+      </dssp:PartnerList>
+      <Name>this:iRobotCreateRoomba</Name>
+    </ServiceRecordType>
+    <ServiceRecordType>
+      <dssp:Contract>http://schemas.microsoft.com/robotics/2006/12/irobot/drive.html</dssp:Contract>
+      <dssp:Service>http://localhost:80/drive</dssp:Service>
+      <dssp:PartnerList />
+      <Name>this:iRobotGenericDrive</Name>
+    </ServiceRecordType>
+    <ServiceRecordType>
+      <dssp:Contract>http://schemas.microsoft.com/robotics/2006/12/irobot/roomba/bumper.html</dssp:Contract>
+      <dssp:PartnerList />
+      <Name>this:iRobotGenericContactSensors</Name>
+    </ServiceRecordType>
+    <ServiceRecordType>
+      <dssp:Contract>http://www.roboteducation.org/schemas/2008/06/vector.html</dssp:Contract>
+      <dssp:Service>http://localhost:80/bumpers</dssp:Service>
+      <dssp:PartnerList>
+        <dssp:Partner>
+          <dssp:Contract>http://www.roboteducation.org/schemas/2008/06/vector.html</dssp:Contract>
+          <dssp:Service>vector.config.xml</dssp:Service>
+          <dssp:PartnerList />
+          <dssp:Name>dssp:StateService</dssp:Name>
+        </dssp:Partner>
+        <dssp:Partner>
+          <dssp:Contract>http://schemas.microsoft.com/2006/06/contactsensor.html</dssp:Contract>
+          <dssp:PartnerList />
+          <dssp:Name>vector:Auto_Contact_1</dssp:Name>
+          <dssp:ServiceName>this:iRobotGenericContactSensors</dssp:ServiceName>
+        </dssp:Partner>
+      </dssp:PartnerList>
+      <Name>this:Bumpers</Name>
+    </ServiceRecordType>
+    <ServiceRecordType>
+      <dssp:Contract>http://www.roboteducation.org/schemas/2008/06/vector.html</dssp:Contract>
+      <dssp:Service>http://localhost:80/stall</dssp:Service>
+      <dssp:PartnerList>
+        <dssp:Partner>
+          <dssp:Contract>http://www.roboteducation.org/schemas/2008/06/vector.html</dssp:Contract>
+          <dssp:Service>stall.config.xml</dssp:Service>
+          <dssp:PartnerList />
+          <dssp:Name>dssp:StateService</dssp:Name>
+        </dssp:Partner>
+        <dssp:Partner>
+          <dssp:Contract>http://schemas.microsoft.com/2006/06/contactsensor.html</dssp:Contract>
+          <dssp:PartnerList />
+          <dssp:Name>vector:Auto_Contact_1</dssp:Name>
+          <dssp:ServiceName>this:iRobotGenericContactSensors</dssp:ServiceName>
+        </dssp:Partner>
+      </dssp:PartnerList>
+      <Name>this:Stall</Name>
+    </ServiceRecordType>
+  </CreateServiceList>
+</Manifest>

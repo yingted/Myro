@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RobotConfig>
+
+  <DssEnvironment>
+    <HttpPort>50000</HttpPort>
+    <SoapPort>50001</SoapPort>
+  </DssEnvironment>
+
+  <!-- Verbosity Level from 1-5 -->
+  <Verbosity>
+    <Level>2</Level>
+  </Verbosity>
+
+  <StartService>
+    <Contract>http://www.roboteducation.org/scribblersim.html</Contract>
+    <Service>/scribblersim</Service>
+  </StartService>
+
+  
+</RobotConfig>

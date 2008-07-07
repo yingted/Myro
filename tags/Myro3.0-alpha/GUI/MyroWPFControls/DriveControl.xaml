@@ -1,0 +1,48 @@
+﻿<UserControl x:Class="Myro.GUI.WPFControls.DriveControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Unloaded="OnUnloaded">
+    <StackPanel Orientation="Horizontal" Margin="0">
+        <Canvas Name="leftCanvas" Height="120" Width="10" MaxHeight="120" MaxWidth="10" MinHeight="120" MinWidth="10" Margin="10,0">
+            <Path Name="leftPath">
+                <Path.Fill>
+                    <LinearGradientBrush StartPoint="0,60" EndPoint="0,0" SpreadMethod="Reflect" ColorInterpolationMode="SRgbLinearInterpolation" MappingMode="Absolute">
+                        <GradientStop Offset="0" Color="Green" />
+                        <GradientStop Offset="0.5" Color="Yellow" />
+                        <GradientStop Offset="1.0" Color="Red" />
+                    </LinearGradientBrush>
+                </Path.Fill>
+                <Path.Data>
+                    <RectangleGeometry Rect="0,0,10,120" />
+                </Path.Data>
+            </Path>
+        </Canvas>
+        <Canvas Name="driveCanvas" Height="100" Width="100" MaxHeight="100" MaxWidth="100" MinHeight="100" MinWidth="100" MouseMove="onMouseMove" Initialized="onInitialized" SizeChanged="onSizeChanged" MouseUp="onMouseUp" Background="Transparent" MouseLeftButtonDown="onMouseLeftButtonDown">
+            <Path Name="Path1" Stroke="Black" StrokeThickness="1.5">
+                <Path.Fill>
+                    <RadialGradientBrush GradientOrigin=".25,.25" RadiusX="1.0" RadiusY="1.0">
+                        <RadialGradientBrush.GradientStops>
+                            <GradientStop Offset="0" Color="White" />
+                            <GradientStop Offset="1" Color="LightBlue" />
+                        </RadialGradientBrush.GradientStops>
+                    </RadialGradientBrush>
+                </Path.Fill>
+            </Path>
+            <Path Name="Path2" Stroke="Black" StrokeThickness="1.2" />
+            <Path Name="Path3" Stroke="Black" StrokeThickness="1.2" />
+        </Canvas>
+        <Canvas Name="rightCanvas" Height="120" Width="10" MaxHeight="120" MaxWidth="10" MinHeight="120" MinWidth="10" Margin="10,0">
+            <Path Name="rightPath">
+                <Path.Fill>
+                    <LinearGradientBrush StartPoint="0,60" EndPoint="0,0" SpreadMethod="Reflect" ColorInterpolationMode="SRgbLinearInterpolation" MappingMode="Absolute">
+                        <GradientStop Offset="0" Color="Green" />
+                        <GradientStop Offset="0.5" Color="Yellow" />
+                        <GradientStop Offset="1.0" Color="Red" />
+                    </LinearGradientBrush>
+                </Path.Fill>
+                <Path.Data>
+                    <RectangleGeometry Rect="0,0,10,120" />
+                </Path.Data>
+            </Path>
+        </Canvas>
+    </StackPanel>
+</UserControl>

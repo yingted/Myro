@@ -1,0 +1,54 @@
+﻿<Window x:Class="Myro.GUI.SimpleIDE.IDEOptions"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="IDEOptions" Height="432" Width="525" Background="#FFE8F7FF">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <TabControl Name="tabControl1" Grid.Row="0">
+            <TabItem Header="Sensors and Actuators">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition />
+                    </Grid.RowDefinitions>
+                    <StackPanel>
+                        <StackPanel.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                                <GradientStop Color="#FFE2F5FF" Offset="0" />
+                                <GradientStop Color="White" Offset="1" />
+                            </LinearGradientBrush>
+                        </StackPanel.Background>
+                        <TextBlock Margin="7,7,7,0" TextWrapping="Wrap">
+                        <Bold>Supported service names:</Bold>
+                            </TextBlock>
+                        <TextBlock Margin="9,0,7,7" TextWrapping="Wrap">
+                        The Myro control panel will show these sensors and actuators if the currently-connected robot 
+                    </TextBlock>
+                    </StackPanel>
+                    <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                        <StackPanel Name="ServicesList" Background="White">
+                            <StackPanel.Resources>
+                                <Style TargetType="Border">
+                                    <Setter Property="BorderThickness" Value="1" />
+                                    <Setter Property="BorderBrush" Value="#FFC7D2DD" />
+                                </Style>
+                            </StackPanel.Resources>
+                            <Border MouseLeftButtonDown="OnAddService">
+                                <Grid Height="40">
+                                    <Label Cursor="Hand" HorizontalContentAlignment="Center" VerticalContentAlignment="Center">Click to add</Label>
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </TabItem>
+        </TabControl>
+        <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Padding="5,1,5,1" Margin="5,5,5,5" Width="{Binding ElementName=CancelButton, Path=ActualWidth}">Ok</Button>
+            <Button Padding="5,1,5,1" Margin="5,5,5,5" Name="CancelButton">Cancel</Button>
+        </StackPanel>
+    </Grid>
+</Window>

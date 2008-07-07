@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<VectorState xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.roboteducation.org/schemas/2008/06/vector.html">
+	<Values />
+	<Keys />
+	<Timestamp>2008-06-17T17:13:03.5790289-07:00</Timestamp>
+	<AutoSubsets>
+		<AutoSubset>
+			<PartnerName>Auto_Contact_1</PartnerName>
+			<StartIndex>8</StartIndex>
+			<Count>4</Count>
+			<Keys>
+				<string>Left</string>
+				<string>Right</string>
+				<string>Caster</string>
+				<string>Motors</string>
+			</Keys>
+		</AutoSubset>
+	</AutoSubsets>
+</VectorState>
