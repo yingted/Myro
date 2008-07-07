@@ -1,13 +1,17 @@
 import clr
 import System
+import System.IO
 import sys
 clr.AddReferenceToFileAndPath("C:\\Microsoft Robotics Dev Studio 2008\\bin\\MyroRobot.dll")
+clr.AddReferenceToFileAndPath("C:\\Microsoft Robotics Dev Studio 2008\\bin\\MyroUtilities.dll")
 from Myro import Robot
+from Myro.Utilities import Params
 
-def init(robotType):
-    f = str.Concat("C:\\Microsoft Robotics Dev Studio 2008\\config\\", robotType, ".manifest\\", robotType, ".manifest.xml")
+def init(baseName):
+    f = System.IO.Path.Combine(System.IO.Path.Combine(Params.ConfigPath, baseName + ".manifest"), baseName + ".manifest.xml")
+    #f = str.Concat("C:\\Microsoft Robotics Dev Studio 2008\\config\\", robotType, ".manifest\\", robotType, ".manifest.xml")
     try:
-        Robot.Init(f)
+        Robot.Init(baseName)
     except Exception, e:
         print "Error connecting with manifest file", f
         print e

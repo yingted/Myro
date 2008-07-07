@@ -38,6 +38,11 @@ namespace Myro
             soundAdapter = bank.GetAdapterSpec<VectorAdapter>("tonegen");
         }
 
+        public static void Init(string baseName)
+        {
+            Init(Path.Combine(Path.Combine(Params.ConfigPath, baseName + ".manifest"), baseName + ".manifest.xml"), Params.DefaultHttpPort, Params.DefaultDsspPort);
+        }
+
         public static void Shutdown()
         {
             if (bank != null)

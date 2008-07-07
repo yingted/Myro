@@ -21,7 +21,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Adapters", "Adapters\Adapte
 		{6BF981B1-88CF-4497-967D-0E4F39F5B440} = {6BF981B1-88CF-4497-967D-0E4F39F5B440}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameController", "..\..\..\Microsoft Robotics Dev Studio 2008\samples\Misc\GameController\GameController.csproj", "{2B91A604-A8BE-43DD-8A44-60B735C11184}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GameController", "..\..\..\..\Microsoft Robotics Dev Studio 2008\samples\Misc\GameController\GameController.csproj", "{2B91A604-A8BE-43DD-8A44-60B735C11184}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GUI", "GUI", "{B6585165-7DA4-47D0-8B83-AFCF6F6AE4BF}"
 EndProject
