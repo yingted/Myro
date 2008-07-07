@@ -1,0 +1,119 @@
+﻿<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{01EDA09F-EDD7-488F-B512-48FA7E32AAB2}</ProjectGuid>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <OutputType>Library</OutputType>
+    <NoStandardLibraries>false</NoStandardLibraries>
+    <AssemblyName>MyroAdapters</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <RootNamespace>Myro.Adapters</RootNamespace>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>myroKey.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Debug\MyroAdapters.XML</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Ccr.Core, Version=2.0.730.3, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\Microsoft Robotics Dev Studio 2008\bin\Ccr.Core.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="DssBase, Version=2.0.730.3, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\Microsoft Robotics Dev Studio 2008\bin\DssBase.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="DssEnvironment, Version=2.0.730.3, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\Microsoft Robotics Dev Studio 2008\bin\DssEnvironment.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="DssRuntime, Version=2.0.730.3, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\Microsoft Robotics Dev Studio 2008\bin\DssRuntime.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="DssRuntime.proxy, Version=2.0.730.3, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\Microsoft Robotics Dev Studio 2008\bin\DssRuntime.proxy.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="RoboticsCommon.proxy, Version=2.0.730.3, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\Microsoft Robotics Dev Studio 2008\bin\RoboticsCommon.proxy.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="Vector.Y2008.M06.Proxy, Version=0.0.0.0, Culture=neutral, PublicKeyToken=8b70575c4d29de37, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\Microsoft Robotics Dev Studio 2008\bin\Vector.Y2008.M06.Proxy.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AdapterBank.cs" />
+    <Compile Include="AdapterSpec.cs" />
+    <Compile Include="AdapterSpecN.cs" />
+    <Compile Include="DriveAdapter.cs" />
+    <Compile Include="IAdapter.cs" />
+    <Compile Include="ImageAdapter.cs" />
+    <Compile Include="SpeechAdapter.cs" />
+    <Compile Include="VectorAdapter.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include=".svn\entries" />
+    <None Include=".svn\format" />
+    <None Include=".svn\text-base\AdapterBank.cs.svn-base" />
+    <None Include=".svn\text-base\AdapterSpec.cs.svn-base" />
+    <None Include=".svn\text-base\DriveAdapter.cs.svn-base" />
+    <None Include=".svn\text-base\IAdapter.cs.svn-base" />
+    <None Include=".svn\text-base\ImageAdapter.cs.svn-base" />
+    <None Include=".svn\text-base\SpeechAdapter.cs.svn-base" />
+    <None Include=".svn\text-base\VectorAdapter.cs.svn-base" />
+    <None Include="myroKey.snk" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Utilities\Utilities.csproj">
+      <Project>{481FEFE3-E033-464C-A1D4-7C95C5AC95C5}</Project>
+      <Name>Utilities</Name>
+      <Private>False</Private>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include=".svn\prop-base\" />
+    <Folder Include=".svn\props\" />
+    <Folder Include=".svn\tmp\prop-base\" />
+    <Folder Include=".svn\tmp\props\" />
+    <Folder Include=".svn\tmp\text-base\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSHARP.Targets" />
+  <ProjectExtensions>
+    <VisualStudio AllowExistingFolder="true" />
+  </ProjectExtensions>
+</Project>

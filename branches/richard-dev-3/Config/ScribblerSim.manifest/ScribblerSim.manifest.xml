@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<!--This file was created with the Microsoft Visual Programming Language.-->
+<Manifest xmlns:simulatedbumper="http://schemas.microsoft.com/robotics/simulation/services/2006/05/simulatedbumper.html" xmlns:simulation="http://schemas.microsoft.com/robotics/2006/04/simulation.html" xmlns:scribblersim="http://www.roboteducation.org/schemas/2008/06/scribblersim.html" xmlns:this="urn:uuid:91c5eebc-d145-49b2-9241-059fe6ada81e" xmlns:simulateddifferentialdrive="http://schemas.microsoft.com/robotics/simulation/services/2006/05/simulateddifferentialdrive.html" xmlns:dssp="http://schemas.microsoft.com/xw/2004/10/dssp.html" xmlns:vector="http://www.roboteducation.org/schemas/2008/06/vector.html" xmlns="http://schemas.microsoft.com/xw/2004/10/manifest.html">
+  <CreateServiceList>
+    <ServiceRecordType>
+      <dssp:Contract>http://schemas.microsoft.com/robotics/simulation/services/2006/05/simulatedbumper.html</dssp:Contract>
+      <dssp:PartnerList>
+        <dssp:Partner>
+          <dssp:Service>http://localhost/ScribblerBumpers</dssp:Service>
+          <dssp:PartnerList />
+          <dssp:Name>simulation:Entity</dssp:Name>
+        </dssp:Partner>
+      </dssp:PartnerList>
+      <Name>this:SimulatedGenericContactSensors</Name>
+    </ServiceRecordType>
+    <ServiceRecordType>
+      <dssp:Contract>http://schemas.microsoft.com/robotics/simulation/services/2006/05/simulateddifferentialdrive.html</dssp:Contract>
+      <dssp:Service>http://localhost:80/drive</dssp:Service>
+      <dssp:PartnerList>
+        <dssp:Partner>
+          <dssp:Service>http://localhost/ScribblerRobot</dssp:Service>
+          <dssp:PartnerList />
+          <dssp:Name>simulation:Entity</dssp:Name>
+        </dssp:Partner>
+      </dssp:PartnerList>
+      <Name>this:SimulatedGenericDifferentialDrive</Name>
+    </ServiceRecordType>
+    <ServiceRecordType>
+      <dssp:Contract>http://www.roboteducation.org/schemas/2008/06/scribblersim.html</dssp:Contract>
+      <dssp:PartnerList />
+      <Name>this:ScribblerSim</Name>
+    </ServiceRecordType>
+    <ServiceRecordType>
+      <dssp:Contract>http://www.roboteducation.org/schemas/2008/06/vector.html</dssp:Contract>
+      <dssp:Service>http://localhost:80/bumpers</dssp:Service>
+      <dssp:PartnerList>
+        <dssp:Partner>
+          <dssp:Contract>http://www.roboteducation.org/schemas/2008/06/vector.html</dssp:Contract>
+          <dssp:Service>bumpers.config.xml</dssp:Service>
+          <dssp:PartnerList />
+          <dssp:Name>dssp:StateService</dssp:Name>
+        </dssp:Partner>
+        <dssp:Partner>
+          <dssp:Contract>http://schemas.microsoft.com/2006/06/contactsensor.html</dssp:Contract>
+          <dssp:PartnerList />
+          <dssp:Name>vector:Auto_Contact_1</dssp:Name>
+          <dssp:ServiceName>this:SimulatedGenericContactSensors</dssp:ServiceName>
+        </dssp:Partner>
+      </dssp:PartnerList>
+      <Name>this:Bumpers</Name>
+    </ServiceRecordType>
+  </CreateServiceList>
+</Manifest>
