@@ -38,9 +38,16 @@ namespace Myro.Adapters
     {
         //protected List<ServiceInfoType> services = new List<ServiceInfoType>();
         //protected List<string> manifests = new List<string>();
-        protected Dictionary<string, AdapterSpec> adapterNames = new Dictionary<string, AdapterSpec>();
+        private Dictionary<string, AdapterSpecN> adapterNames = new Dictionary<string, AdapterSpecN>();
         //protected Dictionary<string, AdapterSpec> adapterServices;
         //ManualResetEvent adaptersReady = new ManualResetEvent(false);
+        
+        /// <summary>
+        /// This is the list of adapter factories that will be tried in order
+        /// when connecting to a new service.  The Myro.Robot object will set
+        /// up several default adapters, but you may add new adapter factories
+        /// to this list at runtime if you create your own.
+        /// </summary>
         public List<IAdapterFactory> AdapterFactories { get; private set; }
 
         public AdapterBank(List<IAdapterFactory> adapterFactories)
@@ -82,18 +89,18 @@ namespace Myro.Adapters
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        public AdapterSpec GetAdapterSpec(string name)
+        public AdapterSpec<T> GetAdapterSpec<T>(string name) where T:IAdapter
         {
             lock (this)
             {
                 try
                 {
-                    return adapterNames[name];
+                    return (AdapterSpec<T>)adapterNames[name];
                 }
                 catch (KeyNotFoundException)
                 {
-                    AdapterSpec adapterSpec = new AdapterSpec(name, AdapterFactories);
-                    adapterNames.Add(name, adapterSpec);
+                    AdapterSpec<T> adapterSpec = new AdapterSpec<T>(name, AdapterFactories);
+                    adapterNames.Add(name, (AdapterSpecN)adapterSpec);
                     return adapterSpec;
                 }
             }

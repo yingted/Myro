@@ -35,7 +35,7 @@ namespace Myro.Adapters
     /// an AdapterSpec class contains a drive adapter, you can call
     /// GetDriveAdapter() to return the drive adapter.
     /// </summary>
-    public class AdapterSpec
+    public class AdapterSpec<T> : AdapterSpecN where T : IAdapter
     {
         ///// <summary>
         ///// The runtime type of the adapter.
@@ -48,13 +48,6 @@ namespace Myro.Adapters
         public string Name { get; private set; }
 
         private List<IAdapterFactory> adapterFactories;
-        /// <summary>
-        /// This is the list of adapter factories that will be tried in order
-        /// when connecting to a new service.  The Myro.Robot object will set
-        /// up several default adapters, but you may add new adapter factories
-        /// to this list at runtime if you create your own.
-        /// </summary>
-        public IList<IAdapterFactory> AdapterFactories { get; private set; }
 
         ///// <summary>
         ///// The DSS service record, as constructed from the config file.  This
@@ -64,7 +57,7 @@ namespace Myro.Adapters
         //public ServiceInfoType ServiceConfig { get; private set; }
 
         private ReaderWriterLock adapterLock = new ReaderWriterLock();
-        private IAdapter adapterObject = null;
+        private T adapterObject = default(T);
         /// <summary>
         /// This is the actual adapter encapsulated by this AdapterSpec.  If
         /// the adapter is not yet created, this class will try to create it
@@ -72,13 +65,14 @@ namespace Myro.Adapters
         /// adapter supports the service, this property will throw a
         /// NoAdapterFoundException.  If there is a fault or error while 
         /// connecting to the service, this property will throw a 
-        /// ServiceNotAvailableException.
+        /// ServiceNotAvailableException.  It can also throw an
+        /// InvalidCastException.
         /// </summary>
-        public IAdapter Adapter
+        public T Adapter
         {
             get
             {
-                IAdapter ret;
+                T ret;
                 adapterLock.AcquireReaderLock(-1);
                 if (adapterObject == null)
                 {
@@ -184,7 +178,7 @@ namespace Myro.Adapters
         //}
 
 
-        private IAdapter tryCreateAdapter()
+        private T tryCreateAdapter()
         {
             lock (this)
             {
@@ -194,7 +188,7 @@ namespace Myro.Adapters
                     PortSet<LookupResponse, Fault> responsePort = new PortSet<LookupResponse, Fault>();
                     DssEnvironment.ServiceForwarderUnknownType(new Uri("dssp.tcp://localhost/" + Name)).PostUnknownType(
                         new DsspDefaultLookup() { Body = new LookupRequestType(), ResponsePort = responsePort });
-                    ServiceInfoType responseRecord = RSUtils.ReceiveSync(responsePort, Myro.Utilities.Params.defaultRecieveTimeout);
+                    ServiceInfoType responseRecord = RSUtils.ReceiveSync(responsePort, Myro.Utilities.Params.DefaultRecieveTimeout);
 
                     // Try to find a working contract for each adapter
                     foreach (var factory in adapterFactories)
@@ -202,7 +196,7 @@ namespace Myro.Adapters
                         try
                         {
                             ServiceInfoType serviceRecord = RSUtils.FindCompatibleContract(responseRecord, factory.SupportedContracts);
-                            IAdapter ret = factory.Create(serviceRecord);
+                            T ret = (T)factory.Create(serviceRecord);
                             Console.WriteLine("Attached to " + serviceRecord.Service + " as \"" + Name + "\"");
                             return ret;
                         }

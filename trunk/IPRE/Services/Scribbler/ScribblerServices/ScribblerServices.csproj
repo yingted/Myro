@@ -146,6 +146,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="FlukeObstacle.cs" />
     <Compile Include="LightSensor.cs" />
     <Compile Include="LineSensor.cs" />
     <Compile Include="ScribblerDrive.cs" />

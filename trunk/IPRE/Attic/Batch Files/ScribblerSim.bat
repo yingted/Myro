@@ -1,1 +1,0 @@
-"C:\Microsoft Robotics Studio (1.5)\bin\DssHost.exe" -p:50000 -m:"C:\Microsoft Robotics Studio (1.5)\samples\IPRE\Scribbler\Scribbler\ScribblerSim\ScribblerSim.manifest.xml"

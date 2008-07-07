@@ -23,6 +23,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Security.Permissions;
 using W3C.Soap;
+using Myro.Utilities;
 
 using submgr = Microsoft.Dss.Services.SubscriptionManager;
 using dssp = Microsoft.Dss.ServiceModel.Dssp;
@@ -30,7 +31,7 @@ using dssp = Microsoft.Dss.ServiceModel.Dssp;
 
 namespace Myro.Services.Scribbler.ScribblerBase
 {
-    
+
     [DisplayName("Scribbler Base")]
     [Description("The IPRE Scribbler Base Service")]
     [Contract(Contract.Identifier)]
@@ -63,7 +64,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
         /// internal com port management
         /// </summary>
         private ScribblerCom _scribblerCom = new ScribblerCom();
-        
+
         /// <summary>
         /// internal port for sending data to scribbler
         /// </summary>
@@ -72,7 +73,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
         /// <summary>
         /// Main operations port
         /// </summary>
-        [ServicePort("/scribbler", AllowMultipleInstances=false)]
+        [ServicePort("/scribbler", AllowMultipleInstances = false)]
         private ScribblerOperations _mainPort = new ScribblerOperations();
 
         /// <summary>
@@ -88,7 +89,8 @@ namespace Myro.Services.Scribbler.ScribblerBase
         /// <summary>
         /// Default Service Constructor
         /// </summary>
-        public ScribblerService(DsspServiceCreationPort creationPort) : base(creationPort)
+        public ScribblerService(DsspServiceCreationPort creationPort)
+            : base(creationPort)
         {
 
         }
@@ -120,7 +122,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
             {
                 // Listen for a single Serial port request with an acknowledgement
                 Activate(Arbiter.ReceiveWithIterator<SendScribblerCommand>(false, _scribblerComPort, SendScribblerCommandHandler));
-                
+
                 PollTimer = new System.Timers.Timer();
                 PollTimer.Interval = TimerDelay;
                 PollTimer.AutoReset = true;
@@ -259,7 +261,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
             else
             {
                 //reset timer
-                PollTimer.Enabled = false; 
+                PollTimer.Enabled = false;
                 PollTimer.Enabled = true;
 
                 //Update our state with the scribbler's response
@@ -282,13 +284,13 @@ namespace Myro.Services.Scribbler.ScribblerBase
             try
             {
                 _state.Connected = false;
-    
+
                 //look for scribbler on last known Com port
                 if (_state.ComPort > 0)
                 {
                     _state.Connected = _scribblerCom.Open(_state.ComPort);
                 }
-                
+
                 //scan all ports for the name of our Robot
                 /*
                 if (_state.Connected == false)
@@ -380,8 +382,10 @@ namespace Myro.Services.Scribbler.ScribblerBase
                 (message.Body.IsLoud ? ScribblerHelper.Commands.SET_LOUD : ScribblerHelper.Commands.SET_QUIET));
             SendScribblerCommand sendcmd = new SendScribblerCommand(cmd);
             _scribblerComPort.Post(sendcmd);
-            yield return Arbiter.Receive<ScribblerResponse>(false, sendcmd.ResponsePort,
-                delegate(ScribblerResponse response) { message.ResponsePort.Post(DefaultUpdateResponseType.Instance); });
+            yield return Arbiter.Choice(sendcmd.ResponsePort,
+                delegate(ScribblerResponse f) { message.ResponsePort.Post(DefaultUpdateResponseType.Instance); },
+                delegate(Fault f) { message.ResponsePort.Post(f); });
+            yield break;
         }
 
 
@@ -452,6 +456,56 @@ namespace Myro.Services.Scribbler.ScribblerBase
             yield break;
         }
 
+        [ServiceHandler(ServiceHandlerBehavior.Exclusive)]
+        public IEnumerator<ITask> SetLEDFrontHandler(SetLEDFront set)
+        {
+            if (!_state.Connected)
+            {
+                LogError("Trying to set LED, but not connected");
+                set.ResponsePort.Post(new Fault());
+                yield break;
+            }
+
+            ScribblerCommand cmd;
+            if (set.Body.FrontLED == true)
+                cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.SET_DONGLE_LED_ON);
+            else
+                cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.SET_DONGLE_LED_OFF);
+
+            SendScribblerCommand sendcmd = new SendScribblerCommand(cmd);
+            _scribblerComPort.Post(sendcmd);
+
+            _state.LEDFront = set.Body.FrontLED;
+
+            yield return Arbiter.Choice(sendcmd.ResponsePort,
+                delegate(ScribblerResponse r) { set.ResponsePort.Post(DefaultUpdateResponseType.Instance); },
+                delegate(Fault f) { set.ResponsePort.Post(f); });
+            yield break;
+        }
+
+
+        [ServiceHandler(ServiceHandlerBehavior.Exclusive)]
+        public IEnumerator<ITask> SetLEDBackHandler(SetLEDBack set)
+        {
+            if (!_state.Connected)
+            {
+                LogError("Trying to set LED, but not connected");
+                set.ResponsePort.Post(new Fault());
+                yield break;
+            }
+
+            ScribblerCommand cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.SET_DIMMER_LED, set.Body.BackLED);
+
+            SendScribblerCommand sendcmd = new SendScribblerCommand(cmd);
+            _scribblerComPort.Post(sendcmd);
+
+            _state.LEDBack = set.Body.BackLED;
+
+            yield return Arbiter.Choice(sendcmd.ResponsePort,
+                delegate(ScribblerResponse r) { set.ResponsePort.Post(DefaultUpdateResponseType.Instance); },
+                delegate(Fault f) { set.ResponsePort.Post(f); });
+            yield break;
+        }
 
         /// <summary>
         /// Handles incoming SetAllLEDs requests
@@ -497,7 +551,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
         /// </summary>
         private IEnumerator<ITask> SetMotorHandler(SetMotors message)
         {
-            if ( !_state.Connected )
+            if (!_state.Connected)
             {
                 message.ResponsePort.Post(new Fault());
                 yield break;
@@ -537,6 +591,48 @@ namespace Myro.Services.Scribbler.ScribblerBase
                 }
             );
 
+            yield break;
+        }
+
+        [ServiceHandler(ServiceHandlerBehavior.Exclusive)]
+        public IEnumerator<ITask> GetObstacleHandler(GetObstacle get)
+        {
+            if (!_state.Connected)
+            {
+                get.ResponsePort.Post(new Fault() { Reason = new ReasonText[] { new ReasonText() { Value = "Not connected" } } });
+                yield break;
+            }
+
+            ScribblerCommand cmd;
+            switch (get.Body.Value)
+            {
+                case 0:
+                    cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.GET_DONGLE_L_IR);
+                    break;
+                case 1:
+                    cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.GET_DONGLE_C_IR);
+                    break;
+                case 2:
+                    cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.GET_DONGLE_R_IR);
+                    break;
+                default:
+                    get.ResponsePort.Post(RSUtils.FaultOfException(
+                        new ArgumentOutOfRangeException("DONGLE_IR", get.Body, "Dongle IR sensor must be 0, 1, or 2")));
+                    yield break;
+                    break;
+            }
+
+            SendScribblerCommand sendcmd = new SendScribblerCommand(cmd);
+            _scribblerComPort.Post(sendcmd);
+            yield return Arbiter.Choice(sendcmd.ResponsePort,
+                delegate(ScribblerResponse r)
+                {
+                    get.ResponsePort.Post(new UInt16Body(ScribblerHelper.GetShort(r.Data, 0)));
+                },
+                delegate(Fault f)
+                {
+                    get.ResponsePort.Post(f);
+                });
             yield break;
         }
 
@@ -599,7 +695,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
                     break;
                 case ScribblerHelper.Commands.GET_LIGHT_LEFT:
                     _state.LightLeft = BitConverter.ToUInt16(new byte[] { response.Body.Data[1], response.Body.Data[0] }, 0);
-                     notify.Add("LIGHTLEFT");
+                    notify.Add("LIGHTLEFT");
                     break;
                 case ScribblerHelper.Commands.GET_LIGHT_CENTER:
                     _state.LightCenter = BitConverter.ToUInt16(new byte[] { response.Body.Data[1], response.Body.Data[0] }, 0);
@@ -772,6 +868,10 @@ namespace Myro.Services.Scribbler.ScribblerBase
                         Console.Write(b);
                     Console.Write("\n");
                     break;
+                case 0:
+                    //Console.WriteLine("Got 0 command");
+                    // Do nothing
+                    break;
                 default:
                     LogError(LogGroups.Console, "Update State command missmatch, got " + response.Body.CommandType);
                     break;
@@ -852,7 +952,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
                                         })
                                 )
                             );
-                            
+
                         }
                         else if (parameters["buttonOk"] == "Connect" && _state.Connected)
                         {
@@ -866,7 +966,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
 
                             _state.Connected = false;
                         }
-                        
+
                         if (parameters["buttonOk"] == "Connect" && !_state.Connected)
                         {
                             int port = 0;
@@ -883,7 +983,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
                             {
                                 // Listen for a single Serial port request with an acknowledgement
                                 Activate(Arbiter.ReceiveWithIterator<SendScribblerCommand>(false, _scribblerComPort, SendScribblerCommandHandler));
-                                
+
                                 PollTimer = new System.Timers.Timer();
                                 PollTimer.Interval = TimerDelay;
                                 PollTimer.AutoReset = true;
@@ -1018,7 +1118,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
                                         })
                                 )
                             );
-                            
+
                         }
                     }
                     else if (!string.IsNullOrEmpty(parameters["Action"])

@@ -1,9 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<MotorState xmlns:s="http://www.w3.org/2003/05/soap-envelope" xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing" xmlns:d="http://schemas.microsoft.com/xw/2004/10/dssp.html" xmlns="http://schemas.microsoft.com/robotics/2006/05/motor.html">
-  <Name>Unconfigured Motor</Name>
-  <!-- 1=A  2=B  3=C -->
-  <HardwareIdentifier>1</HardwareIdentifier>
-  <CurrentPower>0</CurrentPower>
-  <PowerScalingFactor>100</PowerScalingFactor>
-  <ReversePolarity>false</ReversePolarity>
-</MotorState>

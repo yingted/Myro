@@ -1,1 +1,0 @@
-"..\..\..\..\..\bin\DssHost.exe" -p:50000 -m:"..\Examples\DrawSquare\DrawSquareSim.manifest.xml"

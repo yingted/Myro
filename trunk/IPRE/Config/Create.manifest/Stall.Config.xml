@@ -6,14 +6,14 @@
 	<AutoSubsets>
 		<AutoSubset>
 			<PartnerName>Auto_Contact_1</PartnerName>
-			<startIndex>8</startIndex>
-			<length>4</length>
-			<keys>
+			<StartIndex>8</StartIndex>
+			<Count>4</Count>
+			<Keys>
 				<string>Left</string>
 				<string>Right</string>
 				<string>Caster</string>
 				<string>Motors</string>
-			</keys>
+			</Keys>
 		</AutoSubset>
 	</AutoSubsets>
 </VectorState>

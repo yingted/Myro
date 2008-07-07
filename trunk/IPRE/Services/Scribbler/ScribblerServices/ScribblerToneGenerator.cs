@@ -58,7 +58,7 @@ namespace Myro.Services.Scribbler.ToneGenerator
         /// <summary>
         /// Actuator callback
         /// </summary>
-        protected override void SetCallback(Myro.Services.Generic.Vector.SetRequestInfo request)
+        protected override IEnumerator<ITask> SetCallback(Myro.Services.Generic.Vector.SetRequestInfo request, PortSet<vector.CallbackResponseType, Fault> responsePort)
         {
             var req = request as vector.SetElementsRequestInfo;
             if (req != null)
@@ -70,19 +70,41 @@ namespace Myro.Services.Scribbler.ToneGenerator
                         play = true;
                     else if (i == 3)
                         loud = true;
-                if (loud) setLoud();
-                if (play) playTone();
+
+                Fault error = null;
+                if (loud)
+                    yield return Arbiter.Choice(setLoud(),
+                        delegate(vector.CallbackResponseType s) { },
+                        delegate(Fault f) { error = f; });
+
+                if (error == null && play)
+                    yield return Arbiter.Choice(playTone(),
+                        delegate(vector.CallbackResponseType s1) { },
+                        delegate(Fault f) { error = f; });
+
+                if (error == null)
+                    responsePort.Post(vector.CallbackResponseType.Instance);
+                else
+                    responsePort.Post(error);
             }
             else
             {
                 // Otherwise it was a SetAllRequestInfo
-                setLoud();
-                playTone();
+                Activate(Arbiter.Choice(setLoud(),
+                    delegate(vector.CallbackResponseType s)
+                    {
+                        Activate(Arbiter.Choice(playTone(),
+                            delegate(vector.CallbackResponseType s1) { responsePort.Post(vector.CallbackResponseType.Instance); },
+                            delegate(Fault f) { responsePort.Post(f); }));
+                    },
+                    delegate(Fault f) { responsePort.Post(f); }));
             }
+            yield break;
         }
 
-        private void playTone()
+        private DsspResponsePort<vector.CallbackResponseType> playTone()
         {
+            var responsePort = new DsspResponsePort<vector.CallbackResponseType>();
             brick.PlayToneBody play = new brick.PlayToneBody()
             {
                 Frequency1 = (int)Math.Round(_state.Values[0]),
@@ -90,18 +112,21 @@ namespace Myro.Services.Scribbler.ToneGenerator
                 Duration = (int)Math.Round(_state.Values[2])
             };
             if (play.Frequency1 < 0 || play.Frequency2 < 0 || play.Duration < 0)
-                throw new ArgumentOutOfRangeException();
+                responsePort.Post(RSUtils.FaultOfException(new ArgumentOutOfRangeException()));
             else
                 Activate(Arbiter.Choice(_scribblerPort.PlayTone(play),
-                    delegate(DefaultUpdateResponseType success) { },
-                    delegate(Fault failure) { LogError("Fault playing tone", failure); }));
+                    delegate(DefaultUpdateResponseType success) { responsePort.Post(vector.CallbackResponseType.Instance); },
+                    delegate(Fault failure) { responsePort.Post(failure); }));
+            return responsePort;
         }
 
-        private void setLoud()
+        private DsspResponsePort<vector.CallbackResponseType> setLoud()
         {
+            var responsePort = new DsspResponsePort<vector.CallbackResponseType>();
             Activate(Arbiter.Choice(_scribblerPort.SetLoud(_state.GetBool(3)),
-                delegate(DefaultUpdateResponseType success) { },
-                delegate(Fault failure) { LogError("Fault setting loud", failure); }));
+                delegate(DefaultUpdateResponseType success) { responsePort.Post(vector.CallbackResponseType.Instance); },
+                delegate(Fault failure) { responsePort.Post(failure); }));
+            return responsePort;
         }
 
     }

@@ -140,8 +140,8 @@ namespace Myro.Services.Generic.Vector
         public IList<bool> GetValuesBool() { return new List<bool>(from v in Values select (v >= 0.5 ? true : false)); }
         public void Set(int index, double value, DateTime timestamp) { Values[index] = value; Timestamp = timestamp; }
         public void Set(string key, double value, DateTime timestamp) { Set(indexCache[key], value, timestamp); }
-        public void SetAll(IEnumerable<bool> values, DateTime timestamp) { SetAll(from v in values select (v ? 1.0 : 0.0), timestamp); }
-        public void SetAll(IEnumerable<double> values, DateTime timestamp)
+        public void SetAll(List<bool> values, DateTime timestamp) { SetAll((from v in values select (v ? 1.0 : 0.0)).ToList(), timestamp); }
+        public void SetAll(List<double> values, DateTime timestamp)
         {
             List<double> newValues = new List<double>(values);
             // If the length of the vector changes, rebuild the index cache
@@ -153,7 +153,7 @@ namespace Myro.Services.Generic.Vector
                 rebuildIndexCache();
             }
             else
-                Values = new List<double>(values);
+                Values = values;
         }
         public void SetKeys(IEnumerable<string> keys)
         {
@@ -459,6 +459,16 @@ namespace Myro.Services.Generic.Vector
         public SetAllElements(SetAllRequestType body, DsspResponsePort<DefaultUpdateResponseType> responsePort) : base(body, responsePort) { }
         public SetAllElements(List<double> values) : base(new SetAllRequestType() { Values = values, Timestamp = DateTime.Now }) { }
     }
+
+    /// <summary>
+    /// This class should be posted by Get and Set callbacks upon success.
+    /// </summary>
+    [DataContract]
+    public class CallbackResponseType
+    {
+        public static readonly CallbackResponseType Instance = new CallbackResponseType();
+    }
+
     #endregion
 
 }

@@ -1,9 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <StartAction>Program</StartAction>
-    <StartProgram>C:\Microsoft Robotics Studio 1.5 (CTP May 2007)\bin\DssHost.exe</StartProgram>
-    <StartWorkingDirectory>C:\Microsoft Robotics Studio 1.5 (CTP May 2007)\</StartWorkingDirectory>
-    <StartArguments>-p:50000 -t:50001 -m:"samples\IPRE\Scribbler\ScribblerBase\Scribbler.manifest.xml"</StartArguments>
-  </PropertyGroup>
-<PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'"><StartWorkingDirectory>C:\Microsoft Robotics Studio 1.5 (CTP May 2007)\</StartWorkingDirectory><StartProgram>C:\Microsoft Robotics Studio 1.5 (CTP May 2007)\bin\DssHost.exe</StartProgram></PropertyGroup></Project>
