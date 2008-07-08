@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<!--This file was created with the Microsoft Visual Programming Language.-->
+<Manifest xmlns:sonarsensor="http://schemas.microsoft.com/robotics/2007/07/lego/nxt/sonarsensor.html" xmlns:vector="http://schemas.tempuri.org/2008/06/vector.html" xmlns:brick="http://schemas.microsoft.com/robotics/2007/07/lego/nxt/brick.html" xmlns:this="urn:uuid:3d9482d4-d72f-4964-9980-d60dd063b3b9" xmlns:dssp="http://schemas.microsoft.com/xw/2004/10/dssp.html" xmlns:drive="http://schemas.microsoft.com/robotics/2007/07/lego/nxt/drive.html" xmlns="http://schemas.microsoft.com/xw/2004/10/manifest.html">
+  <CreateServiceList>
+    <ServiceRecordType>
+      <dssp:Contract>http://schemas.microsoft.com/robotics/2007/07/lego/nxt/brick.html</dssp:Contract>
+      <dssp:PartnerList />
+      <Name>this:LegoNXTBrickv2</Name>
+    </ServiceRecordType>
+    <ServiceRecordType>
+      <dssp:Contract>http://schemas.microsoft.com/robotics/2007/07/lego/nxt/drive.html</dssp:Contract>
+      <dssp:Service>http://localhost:80/drive</dssp:Service>
+      <dssp:PartnerList>
+        <dssp:Partner>
+          <dssp:Contract>http://schemas.microsoft.com/robotics/2007/07/lego/nxt/drive.html</dssp:Contract>
+          <dssp:Service>legonxtdrivev2.config.xml</dssp:Service>
+          <dssp:PartnerList />
+          <dssp:Name>dssp:StateService</dssp:Name>
+        </dssp:Partner>
+      </dssp:PartnerList>
+      <Name>this:LegoNXTDrivev2</Name>
+    </ServiceRecordType>
+    <ServiceRecordType>
+      <dssp:Contract>http://schemas.microsoft.com/robotics/2007/07/lego/nxt/sonarsensor.html</dssp:Contract>
+      <dssp:PartnerList>
+        <dssp:Partner>
+          <dssp:Contract>http://schemas.microsoft.com/robotics/2007/07/lego/nxt/sonarsensor.html</dssp:Contract>
+          <dssp:Service>legonxtultrasonicsensorv2.config.xml</dssp:Service>
+          <dssp:PartnerList />
+          <dssp:Name>dssp:StateService</dssp:Name>
+        </dssp:Partner>
+      </dssp:PartnerList>
+      <Name>this:LegoNXTUltrasonicSensorv2</Name>
+    </ServiceRecordType>
+    <ServiceRecordType>
+      <dssp:Contract>http://schemas.tempuri.org/2008/06/vector.html</dssp:Contract>
+      <dssp:Service>http://localhost:80/sonar</dssp:Service>
+      <dssp:PartnerList>
+        <dssp:Partner>
+          <dssp:PartnerList />
+          <dssp:Name>vector:auto_sonar</dssp:Name>
+          <dssp:ServiceName>this:LegoNXTUltrasonicSensorv2</dssp:ServiceName>
+        </dssp:Partner>
+      </dssp:PartnerList>
+      <Name>this:Vector</Name>
+    </ServiceRecordType>
+  </CreateServiceList>
+</Manifest>

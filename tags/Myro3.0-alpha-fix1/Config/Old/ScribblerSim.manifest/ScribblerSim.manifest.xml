@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<!--This file was created with the Microsoft Visual Programming Language.-->
+<Manifest xmlns:simulatedbumper="http://schemas.microsoft.com/robotics/simulation/services/2006/05/simulatedbumper.html" xmlns:simulation="http://schemas.microsoft.com/robotics/2006/04/simulation.html" xmlns:scribblersim="http://www.roboteducation.org/scribblersim.html" xmlns:this="urn:uuid:05a70548-6d4e-4b4a-b90c-06c50e65490b" xmlns:simulateddifferentialdrive="http://schemas.microsoft.com/robotics/simulation/services/2006/05/simulateddifferentialdrive.html" xmlns:dssp="http://schemas.microsoft.com/xw/2004/10/dssp.html" xmlns:vector="http://schemas.tempuri.org/2008/06/vector.html" xmlns="http://schemas.microsoft.com/xw/2004/10/manifest.html">
+  <CreateServiceList>
+    <ServiceRecordType>
+      <dssp:Contract>http://www.roboteducation.org/scribblersim.html</dssp:Contract>
+      <dssp:PartnerList />
+      <Name>this:ScribblerSim</Name>
+    </ServiceRecordType>
+    <ServiceRecordType>
+      <dssp:Contract>http://schemas.tempuri.org/2008/06/vector.html</dssp:Contract>
+      <dssp:Service>http://localhost:80/ir</dssp:Service>
+      <dssp:PartnerList>
+        <dssp:Partner>
+          <dssp:PartnerList />
+          <dssp:Name>vector:auto_left_right</dssp:Name>
+          <dssp:ServiceName>this:SimulatedGenericContactSensors</dssp:ServiceName>
+        </dssp:Partner>
+      </dssp:PartnerList>
+      <Name>this:IR</Name>
+    </ServiceRecordType>
+    <ServiceRecordType>
+      <dssp:Contract>http://schemas.microsoft.com/robotics/simulation/services/2006/05/simulatedbumper.html</dssp:Contract>
+      <dssp:PartnerList>
+        <dssp:Partner>
+          <dssp:Service>http://localhost/ScribblerBumpers</dssp:Service>
+          <dssp:PartnerList />
+          <dssp:Name>simulation:Entity</dssp:Name>
+        </dssp:Partner>
+      </dssp:PartnerList>
+      <Name>this:SimulatedGenericContactSensors</Name>
+    </ServiceRecordType>
+    <ServiceRecordType>
+      <dssp:Contract>http://schemas.microsoft.com/robotics/simulation/services/2006/05/simulateddifferentialdrive.html</dssp:Contract>
+      <dssp:Service>http://localhost:80/drive</dssp:Service>
+      <dssp:PartnerList>
+        <dssp:Partner>
+          <dssp:Service>http://localhost/ScribblerRobot</dssp:Service>
+          <dssp:PartnerList />
+          <dssp:Name>simulation:Entity</dssp:Name>
+        </dssp:Partner>
+      </dssp:PartnerList>
+      <Name>this:SimulatedGenericDifferentialDrive</Name>
+    </ServiceRecordType>
+  </CreateServiceList>
+</Manifest>

@@ -1,0 +1,77 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RoombaState xmlns:s="http://www.w3.org/2003/05/soap-envelope" xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing" xmlns:d="http://schemas.microsoft.com/xw/2004/10/dssp.html" xmlns="http://schemas.microsoft.com/robotics/2007/01/irobot.html">
+  <Name>Pac Man</Name>
+  <FirmwareDate>0001-01-01T00:00:00</FirmwareDate>
+  <SerialPort>5</SerialPort>
+  <BaudRate>0</BaudRate>
+  <IRobotModel>NotSpecified</IRobotModel>
+  <ConnectionType>NotConfigured</ConnectionType>
+  <StopOnResync>false</StopOnResync>
+  <Mode>Uninitialized</Mode>
+  <MaintainMode>Off</MaintainMode>
+  <Sensors>
+    <RoombaMode>NotSpecified</RoombaMode>
+    <Timestamp>0001-01-01T00:00:00</Timestamp>
+    <BumpsWheeldrops />
+    <Wall>false</Wall>
+    <CliffLeft>false</CliffLeft>
+    <CliffFrontLeft>false</CliffFrontLeft>
+    <CliffFrontRight>false</CliffFrontRight>
+    <CliffRight>false</CliffRight>
+    <VirtualWall>false</VirtualWall>
+    <MotorOvercurrents />
+    <DirtDetectorLeft>0</DirtDetectorLeft>
+    <DirtDetectorRight>0</DirtDetectorRight>
+  </Sensors>
+  <Pose>
+    <RoombaMode>NotSpecified</RoombaMode>
+    <Timestamp>0001-01-01T00:00:00</Timestamp>
+    <RemoteControlCommand />
+    <ButtonsRoomba>Off</ButtonsRoomba>
+    <ButtonsCreate>Off</ButtonsCreate>
+    <Distance>0</Distance>
+    <Angle>0</Angle>
+  </Pose>
+  <Power>
+    <RoombaMode>NotSpecified</RoombaMode>
+    <Timestamp>0001-01-01T00:00:00</Timestamp>
+    <ChargingState>NotCharging</ChargingState>
+    <Voltage>0</Voltage>
+    <Current>0</Current>
+    <Temperature>0</Temperature>
+    <Charge>0</Charge>
+    <Capacity>0</Capacity>
+  </Power>
+  <LastUpdated>0001-01-01T00:00:00</LastUpdated>
+  <PollingInterval>0</PollingInterval>
+  <SongDefinitions>
+    <CmdDefineSong>
+      <SongNumber>1</SongNumber>
+      <Notes>
+        <RoombaNote>
+          <Tone>B_Hz_493p9</Tone>
+          <Duration>20</Duration>
+        </RoombaNote>
+        <RoombaNote>
+          <Tone>B_Hz_987p8</Tone>
+          <Duration>10</Duration>
+        </RoombaNote>
+      </Notes>
+    </CmdDefineSong>
+    <CmdDefineSong>
+      <SongNumber>2</SongNumber>
+      <Notes>
+        <RoombaNote>
+          <Tone>B_Hz_987p8</Tone>
+          <Duration>10</Duration>
+        </RoombaNote>
+        <RoombaNote>
+          <Tone>B_Hz_493p9</Tone>
+          <Duration>20</Duration>
+        </RoombaNote>
+      </Notes>
+    </CmdDefineSong>
+  </SongDefinitions>
+  <WaitForConnect>false</WaitForConnect>
+  <CreateNotifications />
+</RoombaState>

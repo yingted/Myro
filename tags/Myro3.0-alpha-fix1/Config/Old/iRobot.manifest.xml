@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<!--
+//  This file is part of Microsoft Robotics Developer Studio Code Samples.
+//
+//  Copyright (C) Microsoft Corporation.  All rights reserved.
+//
+//  $File: iRobot.Drive.manifest.xml $ $Revision: 2 $
+-->
+<Manifest xmlns:irobot="http://schemas.microsoft.com/robotics/2007/01/irobot.html" xmlns:this="urn:uuid:e25ba7ec-75fc-44ba-8fbf-04c67f4e3ac8" xmlns:stream="http://schemas.microsoft.com/robotics/2006/12/irobot/stream.html" xmlns:dssp="http://schemas.microsoft.com/xw/2004/10/dssp.html" xmlns:drive="http://schemas.microsoft.com/robotics/2006/12/irobot/drive.html" xmlns:bumper="http://schemas.microsoft.com/robotics/2006/12/irobot/roomba/bumper.html" xmlns="http://schemas.microsoft.com/xw/2004/10/manifest.html">
+  <CreateServiceList>
+    <ServiceRecordType>
+      <dssp:Contract>http://schemas.microsoft.com/robotics/2007/01/irobot.html</dssp:Contract>
+      <dssp:PartnerList>
+        <dssp:Partner>
+          <dssp:Contract>http://schemas.microsoft.com/robotics/2007/01/irobot.html</dssp:Contract>
+          <dssp:Service>irobot.config.xml</dssp:Service>
+          <dssp:PartnerList />
+          <dssp:Name>dssp:StateService</dssp:Name>
+        </dssp:Partner>
+        <dssp:Partner>
+          <dssp:Contract>http://schemas.microsoft.com/robotics/generic/2006/12/dssstream.html</dssp:Contract>
+          <dssp:PartnerList />
+          <dssp:Name>irobot:irobotstream</dssp:Name>
+          <dssp:ServiceName>this:iRobotInternalCommunications</dssp:ServiceName>
+        </dssp:Partner>
+      </dssp:PartnerList>
+      <Name>this:irobot</Name>
+    </ServiceRecordType>
+    <ServiceRecordType>
+      <dssp:Contract>http://schemas.microsoft.com/robotics/2006/12/irobot/drive.html</dssp:Contract>
+      <dssp:PartnerList>
+        <dssp:Partner>
+          <dssp:Contract>http://schemas.microsoft.com/robotics/2007/02/irobotlite.html</dssp:Contract>
+          <dssp:PartnerList />
+          <dssp:Name>drive:iRobotUpdates</dssp:Name>
+          <dssp:ServiceName>this:irobot</dssp:ServiceName>
+        </dssp:Partner>
+        <dssp:Partner>
+          <dssp:Contract>http://schemas.microsoft.com/robotics/2007/01/irobot/create.html</dssp:Contract>
+          <dssp:PartnerList />
+          <dssp:Name>drive:Create</dssp:Name>
+          <dssp:ServiceName>this:irobot</dssp:ServiceName>
+        </dssp:Partner>
+      </dssp:PartnerList>
+      <Name>this:drive</Name>
+    </ServiceRecordType>
+    <ServiceRecordType>
+      <dssp:Contract>http://schemas.microsoft.com/robotics/2006/12/irobot/roomba/bumper.html</dssp:Contract>
+      <dssp:PartnerList>
+        <dssp:Partner>
+          <dssp:Contract>http://schemas.microsoft.com/robotics/2007/02/irobotlite.html</dssp:Contract>
+          <dssp:PartnerList />
+          <dssp:Name>bumper:iRobotSensorUpdates</dssp:Name>
+          <dssp:ServiceName>this:irobot</dssp:ServiceName>
+        </dssp:Partner>
+      </dssp:PartnerList>
+      <Name>this:contact</Name>
+    </ServiceRecordType>
+    <ServiceRecordType>
+      <dssp:Contract>http://schemas.microsoft.com/robotics/2006/12/irobot/stream.html</dssp:Contract>
+      <dssp:PartnerList />
+      <Name>this:iRobotInternalCommunications</Name>
+    </ServiceRecordType>
+  </CreateServiceList>
+</Manifest>

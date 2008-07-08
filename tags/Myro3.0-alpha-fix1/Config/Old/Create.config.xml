@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RobotConfig>
+  <DssEnvironment>
+    <HttpPort>50000</HttpPort>
+    <SoapPort>50001</SoapPort>
+  </DssEnvironment>
+
+  <!-- Verbosity Level from 1-5 -->
+  <Verbosity>
+    <Level>2</Level>
+  </Verbosity>
+
+  <Manifest file="file://C:\Users\t-richr\Myro-dev\richard-dev-1\Config\iRobot.manifest.xml" />
+
+  <!--<StartService>
+    <Contract>http://schemas.microsoft.com/robotics/2007/01/irobot.html</Contract>
+    <Service>/irobot</Service>
+  </StartService>
+
+  <StartService>
+    <Contract>http://schemas.microsoft.com/robotics/2006/12/irobot/stream.html</Contract>
+    <Service>/iRobotInternalCommunications</Service>
+  </StartService>-->
+  
+  <!--<Adapter type="Vector" name="ir">
+    <Contract>http://schemas.microsoft.com/robotics/2006/12/irobot/roomba/bumper.html</Contract>
+    <Service>/createbumper</Service>
+  </Adapter>-->
+
+  <Adapter type="Drive" name="drive">
+    <Contract>http://schemas.microsoft.com/robotics/2006/12/irobot/drive.html</Contract>
+    <Service>/createdrive</Service>
+  </Adapter>
+
+</RobotConfig>

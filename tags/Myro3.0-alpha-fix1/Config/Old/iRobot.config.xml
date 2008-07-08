@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RoombaState xmlns:s="http://www.w3.org/2003/05/soap-envelope" xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing" xmlns:d="http://schemas.microsoft.com/xw/2004/10/dssp.html" xmlns="http://schemas.microsoft.com/robotics/2007/01/irobot.html">
+  <Name>Johnny</Name>
+  <FirmwareDate>0001-01-01T00:00:00</FirmwareDate>
+  <SerialPort>5</SerialPort>
+  <BaudRate>57600</BaudRate>
+  <IRobotModel>Create</IRobotModel>
+  <ConnectionType>CreateSerialPort</ConnectionType>
+  <StopOnResync>false</StopOnResync>
+  <Mode>Uninitialized</Mode>
+  <MaintainMode>Full</MaintainMode>
+  
+</RoombaState>

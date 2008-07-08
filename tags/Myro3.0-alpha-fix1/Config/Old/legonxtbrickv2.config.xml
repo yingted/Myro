@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<NxtBrickState xmlns:s="http://www.w3.org/2003/05/soap-envelope" xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing" xmlns:d="http://schemas.microsoft.com/xw/2004/10/dssp.html" xmlns="http://schemas.microsoft.com/robotics/2007/07/lego/nxt/brick.html">
+  <Configuration>
+    <SerialPort>6</SerialPort>
+    <BaudRate>115200</BaudRate>
+    <ConnectionType>Bluetooth</ConnectionType>
+    <ShowInBrowser>true</ShowInBrowser>
+  </Configuration>
+</NxtBrickState>

@@ -1,0 +1,229 @@
+﻿<UserControl x:Class="Myro.GUI.SimpleIDE.TopBar"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:wnd="clr-namespace:Myro.GUI.SimpleIDE"
+             Initialized="OnInitialized">
+    <UserControl.CommandBindings>
+        <CommandBinding Command="{x:Static wnd:TopBar.ShowServices}" CanExecute="IsConfigLoaded" Executed="OnShowServices" />
+    </UserControl.CommandBindings>
+    <Border BorderBrush="DarkGray" BorderThickness="0,0,0,1" Background="#FFE8F7FF" SnapsToDevicePixels="True" >
+        <Grid Height="Auto">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Grid.Resources>
+                <LinearGradientBrush x:Key="PressedBrush" StartPoint="0,0" EndPoint="0,1" SpreadMethod="Pad">
+                    <GradientBrush.GradientStops>
+                        <GradientStopCollection>
+                            <GradientStop Color="#FF91B2E4" Offset="0.15" />
+                            <GradientStop Color="#3091B2E4" Offset="1.15" />
+                        </GradientStopCollection>
+                    </GradientBrush.GradientStops>
+                </LinearGradientBrush>
+                <LinearGradientBrush x:Key="SelectedBackgroundBrush" StartPoint="0,0" EndPoint="0,1">
+                    <GradientBrush.GradientStops>
+                        <GradientStopCollection>
+                            <GradientStop Color="#FF91B2E4" Offset="0" />
+                            <GradientStop Color="#3091B2E4" Offset="1" />
+                        </GradientStopCollection>
+                    </GradientBrush.GradientStops>
+                </LinearGradientBrush>
+                <!-- Border Brushes -->
+                <LinearGradientBrush x:Key="PressedBorderBrush" StartPoint="0,0" EndPoint="0,1">
+                    <GradientBrush.GradientStops>
+                        <GradientStopCollection>
+                            <GradientStop Color="#444" Offset="0.0"/>
+                            <GradientStop Color="#888" Offset="1.0"/>
+                        </GradientStopCollection>
+                    </GradientBrush.GradientStops>
+                </LinearGradientBrush>
+                <SolidColorBrush x:Key="SolidBorderBrush" Color="#2999FF" />
+                <Style x:Key="ButtonStyle" TargetType="Button">
+                    <Setter Property="SnapsToDevicePixels" Value="true"/>
+                    <Setter Property="OverridesDefaultStyle" Value="true"/>
+                    <Setter Property="Focusable" Value="false"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="Border" BorderThickness="1"
+                                      Background="Transparent" BorderBrush="Transparent" Focusable="False">
+                                    <ContentPresenter Margin="2" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                            RecognizesAccessKey="True"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="true">
+                                        <Setter TargetName="Border" Property="Background" Value="{StaticResource SelectedBackgroundBrush}" />
+                                        <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource SolidBorderBrush}" />
+                                    </Trigger>
+                                    <Trigger Property="IsPressed" Value="true">
+                                        <Setter TargetName="Border" Property="Background" Value="{StaticResource PressedBrush}" />
+                                        <!--<Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource PressedBorderBrush}" />-->
+                                    </Trigger>
+                                    <Trigger Property="CheckBox.IsChecked" Value="true">
+                                        <Setter TargetName="Border" Property="Background" Value="{StaticResource PressedBrush}" />
+                                        <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource PressedBorderBrush}" />
+                                    </Trigger>
+                                    <Trigger Property="IsEnabled" Value="false">
+                                        <!--<Setter TargetName="Border" Property="Background" Value="{StaticResource DisabledBackgroundBrush}" />
+                                            <Setter TargetName="Border" Property="BorderBrush" Value="{StaticResource DisabledBorderBrush}" />
+                                            <Setter Property="Foreground" Value="{StaticResource DisabledForegroundBrush}"/>-->
+                                        <Setter TargetName="Border" Property="Opacity" Value="0.25" />
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+                <Style x:Key="JewelStyle" TargetType="Button">
+                    <Setter Property="SnapsToDevicePixels" Value="false"/>
+                    <Setter Property="OverridesDefaultStyle" Value="true"/>
+                    <Setter Property="Focusable" Value="false"/>
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="Button">
+                                <Border x:Name="Border" BorderThickness="1" VerticalAlignment="Center"
+                                      Focusable="False">
+                                    <Border.BitmapEffect>
+                                        <DropShadowBitmapEffect ShadowDepth="2" />
+                                    </Border.BitmapEffect>
+                                    <ContentPresenter Margin="2" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                            RecognizesAccessKey="True"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="true">
+                                        <Setter TargetName="Border" Property="BitmapEffect">
+                                            <Setter.Value>
+                                                <DropShadowBitmapEffect ShadowDepth="3" />
+                                            </Setter.Value>
+                                        </Setter>
+                                        <!--<Setter TargetName="Border" Property="RenderTransform">
+                                            <Setter.Value>
+                                                <TranslateTransform X="-0.5" Y="-0.5" />
+                                            </Setter.Value>
+                                        </Setter>-->
+                                    </Trigger>
+                                    <Trigger Property="CheckBox.IsChecked" Value="true">
+                                        <Setter TargetName="Border" Property="BitmapEffect">
+                                            <Setter.Value>
+                                                <DropShadowBitmapEffect ShadowDepth="2" />
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Setter TargetName="Border" Property="RenderTransform">
+                                            <Setter.Value>
+                                                <TranslateTransform X="0.5" Y="0.5" />
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Trigger>
+                                    <Trigger Property="IsPressed" Value="true">
+                                        <Setter TargetName="Border" Property="BitmapEffect">
+                                            <Setter.Value>
+                                                <DropShadowBitmapEffect ShadowDepth="2" />
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Setter TargetName="Border" Property="RenderTransform">
+                                            <Setter.Value>
+                                                <TranslateTransform X="0.5" Y="0.5" />
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </Grid.Resources>
+            <Button Style="{StaticResource JewelStyle}" Grid.Column="0" Margin="0,0,10,0" Click="OnJewelClick" Name="JewelButton" ClickMode="Press" Focusable="False">
+                <Button.BitmapEffect>
+                    <OuterGlowBitmapEffect x:Name="JewelGlowEffect" GlowColor="OrangeRed" GlowSize="10" Opacity="0" />
+                </Button.BitmapEffect>
+                <Button.Resources>
+                    <Storyboard Name="JewelGlow" x:Key="JewelGlow">
+                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="JewelGlowEffect"
+                                                   Storyboard.TargetProperty="Opacity"
+                                                   Duration="0:0:6"
+                                                   RepeatBehavior="Forever">
+                            <LinearDoubleKeyFrame Value="0.1" KeyTime="0:0:0" />
+                            <LinearDoubleKeyFrame Value="0.8" KeyTime="0:0:3" />
+                            <LinearDoubleKeyFrame Value="1.0" KeyTime="0:0:3.5" />
+                            <LinearDoubleKeyFrame Value="0.8" KeyTime="0:0:5" />
+                            <LinearDoubleKeyFrame Value="0.1" KeyTime="0:0:6" />
+                        </DoubleAnimationUsingKeyFrames>
+                    </Storyboard>
+                </Button.Resources>
+                <Image Width="52" Height="52" Stretch="Uniform" Name="JewelImage" Source="/SimpleIDE;component/jewellogo.png" />
+            </Button>
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,19">
+                    <StackPanel.Resources>
+                        <Style TargetType="Button" BasedOn="{StaticResource ButtonStyle}" >
+                            <Setter Property="Width" Value="32" />
+                            <Setter Property="Height" Value="32" />
+                        </Style>
+                    </StackPanel.Resources>
+                    <StackPanel Orientation="Vertical">
+                        <Label Name="BaseNameLabel" Padding="0,0,4,0" MinWidth="70" />
+                        <Label Name="FriendlyNameLabel" Padding="0,0,4,0" MinWidth="70" />
+                    </StackPanel>
+                    <Button Command="ApplicationCommands.New" ToolTip="Create a new Python file">
+                        <Image Source="/SimpleIDE;component/page_add.png" Stretch="None" SnapsToDevicePixels="True" />
+                    </Button>
+                    <Button Command="ApplicationCommands.Open" ToolTip="Open a Python file">
+                        <Image Source="/SimpleIDE;component/folder_page.png" Stretch="None" SnapsToDevicePixels="True" />
+                    </Button>
+                    <Button Command="ApplicationCommands.Save" ToolTip="Save the current Python file">
+                        <Image Source="/SimpleIDE;component/disk.png" Stretch="None" />
+                    </Button>
+                    <Button Command="{x:Static wnd:Window1.SaveAll}" ToolTip="Save all open Python files">
+                        <Image Source="/SimpleIDE;component/disk_multiple.png" Stretch="None" />
+                    </Button>
+                    <Border Width="40" />
+                    <Button Command="ApplicationCommands.Cut" ToolTip="Cut">
+                        <Image Source="/SimpleIDE;component/cut.png" Stretch="None" />
+                    </Button>
+                    <Button Command="ApplicationCommands.Copy" ToolTip="Copy">
+                        <Image Source="/SimpleIDE;component/page_copy.png" Stretch="None" />
+                    </Button>
+                    <Button Command="ApplicationCommands.Paste" ToolTip="Paste">
+                        <Image Source="/SimpleIDE;component/page_paste.png" Stretch="None" />
+                    </Button>
+                    <Border Width="40" />
+                    <Button Name="runButton" Command="{x:Static wnd:Window1.Run}" ToolTip="Run the current Python file">
+                        <Image Source="/SimpleIDE;component/cog_go.png" Stretch="None" />
+                    </Button>
+                </StackPanel>
+                <Menu VerticalAlignment="Bottom" HorizontalAlignment="Left" Background="Transparent" Height="20.96" Grid.RowSpan="2" Width="183.47" SnapsToDevicePixels="True">
+                    <MenuItem Header="_File">
+                        <MenuItem Header="_New" Command="ApplicationCommands.New" />
+                        <MenuItem Header="_Open..." Command="ApplicationCommands.Open" />
+                        <Separator />
+                        <MenuItem Header="_Save" Command="ApplicationCommands.Save" />
+                        <MenuItem Header="Save A_ll" Command="{x:Static wnd:Window1.SaveAll}" />
+                        <MenuItem Header="Save _As..." Command="ApplicationCommands.SaveAs" />
+                        <Separator />
+                        <MenuItem Header="_Close" Command="{x:Static wnd:Window1.CloseDocument}" />
+                        <MenuItem Header="Close All" Command="{x:Static wnd:Window1.CloseAll}" />
+                        <MenuItem Header="E_xit" Command="{x:Static wnd:Window1.Exit}" />
+                    </MenuItem>
+                    <MenuItem Header="_Edit">
+                        <MenuItem Header="Cut" Command="ApplicationCommands.Cut" />
+                        <MenuItem Header="Copy" Command="ApplicationCommands.Copy" />
+                        <MenuItem Header="Paste" Command="ApplicationCommands.Paste" />
+                    </MenuItem>
+                    <MenuItem Header="_Tools">
+                        <MenuItem Header="Show Running _Services..." Command="{x:Static wnd:TopBar.ShowServices}" />
+                        <MenuItem Header="Robot _Configuration Editor..." Command="{x:Static wnd:Window1.ConfigEditor}" />
+                        <MenuItem Header="IDE _Options..." Command="{x:Static wnd:Window1.IDEOptions}" />
+                    </MenuItem>
+                    <MenuItem Header="_Help">
+                        <MenuItem Header="About" Command="{x:Static wnd:Window1.About}" />
+                    </MenuItem>
+                </Menu>
+            </Grid>
+        </Grid>
+    </Border>
+</UserControl>
