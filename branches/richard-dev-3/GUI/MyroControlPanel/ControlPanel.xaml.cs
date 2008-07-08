@@ -162,7 +162,7 @@ namespace Myro.GUI.ControlPanel
                                 pi.Meters = new CircleMeters()
                                 {
                                     //Width = 200,
-                                    Height = 30,
+                                    //Height = 30,
                                 };
                                 var myPi = pi;
                                 pi.Meters.ValueChange += (CircleMeters.ValueChangeHandler)

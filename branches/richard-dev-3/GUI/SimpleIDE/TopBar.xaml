@@ -207,7 +207,7 @@
                         <Separator />
                         <MenuItem Header="_Close" Command="{x:Static wnd:Window1.CloseDocument}" />
                         <MenuItem Header="Close All" Command="{x:Static wnd:Window1.CloseAll}" />
-                        <MenuItem Header="E_xit" />
+                        <MenuItem Header="E_xit" Command="{x:Static wnd:Window1.Exit}" />
                     </MenuItem>
                     <MenuItem Header="_Edit">
                         <MenuItem Header="Cut" Command="ApplicationCommands.Cut" />

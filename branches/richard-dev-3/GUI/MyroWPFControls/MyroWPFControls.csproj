@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30428</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{957BB0C6-567B-47E3-8754-0FD14B35ACCC}</ProjectGuid>
     <OutputType>library</OutputType>
@@ -39,11 +39,11 @@
     </Reference>
     <Reference Include="DssBase, Version=2.0.730.3, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Microsoft Robotics Dev Studio 2008\bin\DssBase.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\Microsoft Robotics Dev Studio 2008\bin\DssBase.dll</HintPath>
     </Reference>
     <Reference Include="GameController.Y2006.M09.proxy, Version=0.0.0.0, Culture=neutral, PublicKeyToken=8b70575c4d29de37, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Microsoft Robotics Dev Studio 2008\bin\GameController.Y2006.M09.proxy.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\Microsoft Robotics Dev Studio 2008\bin\GameController.Y2006.M09.proxy.dll</HintPath>
     </Reference>
     <Reference Include="IronMath, Version=1.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -102,6 +102,7 @@
     <Compile Include="DriveControl.xaml.cs">
       <DependentUpon>DriveControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="GUIUtilities.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>

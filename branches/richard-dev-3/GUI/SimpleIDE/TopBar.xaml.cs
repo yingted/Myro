@@ -15,6 +15,8 @@ using System.Windows.Shapes;
 using System.Windows.Media.Animation;
 using System.Diagnostics;
 
+using Myro.GUI.WPFControls;
+
 namespace Myro.GUI.SimpleIDE
 {
     /// <summary>
@@ -106,19 +108,33 @@ namespace Myro.GUI.SimpleIDE
 
         private void OnJewelClick(object sender, RoutedEventArgs e)
         {
-            if (jewelAnimation != null)
+            try
             {
-                jewelAnimation.Stop(JewelButton);
-                jewelAnimation = null;
+                if (jewelAnimation != null)
+                {
+                    jewelAnimation.Stop(JewelButton);
+                    jewelAnimation = null;
+                }
+                if (CurrentConfig == null)
+                    displayJewelRobotChooser();
             }
-            if (CurrentConfig == null)
-                displayJewelRobotChooser();
+            catch (Exception err)
+            {
+                GUIUtilities.ReportUnexpectedException(err);
+            }
         }
 
         private void OnInitialized(object sender, EventArgs e)
         {
-            jewelAnimation = (Storyboard)JewelButton.FindResource("JewelGlow");
-            jewelAnimation.Begin(JewelButton, true);
+            try
+            {
+                jewelAnimation = (Storyboard)JewelButton.FindResource("JewelGlow");
+                jewelAnimation.Begin(JewelButton, true);
+            }
+            catch (Exception err)
+            {
+                GUIUtilities.ReportUnexpectedException(err);
+            }
         }
 
         private void IsConfigLoaded(object sender, CanExecuteRoutedEventArgs e)
@@ -128,9 +144,16 @@ namespace Myro.GUI.SimpleIDE
 
         private void OnShowServices(object sender, ExecutedRoutedEventArgs e)
         {
-            if (CurrentConfig != null)
-                Process.Start(new ProcessStartInfo(
-                    "http://localhost:" + CurrentConfig.MyroConfiguration.HttpPort.ToString() + "/directory"));
+            try
+            {
+                if (CurrentConfig != null)
+                    Process.Start(new ProcessStartInfo(
+                        "http://localhost:" + CurrentConfig.MyroConfiguration.HttpPort.ToString() + "/directory"));
+            }
+            catch (Exception err)
+            {
+                GUIUtilities.ReportUnexpectedException(err);
+            }
         }
 
         #endregion

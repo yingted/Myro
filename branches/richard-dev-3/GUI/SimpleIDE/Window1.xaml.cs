@@ -16,6 +16,7 @@ using Microsoft.Win32;
 using System.Threading;
 
 using Myro;
+using Myro.GUI.WPFControls;
 
 namespace Myro.GUI.SimpleIDE
 {
@@ -32,6 +33,7 @@ namespace Myro.GUI.SimpleIDE
         public static RoutedCommand IDEOptions = new RoutedCommand();
         //public static RoutedCommand BrowseManifest = new RoutedCommand();
         public static RoutedCommand About = new RoutedCommand();
+        public static RoutedCommand Exit = new RoutedCommand();
 
         //string curManifest = null;
         MyroConfigFiles currentConfig = null;
@@ -62,17 +64,410 @@ namespace Myro.GUI.SimpleIDE
                 if (editor.RequestCloseAll() == false)
                     e.Cancel = true;
             }
-            catch (Exception)
+            catch (Exception err)
             {
+                GUIUtilities.ReportUnexpectedException(err);
                 e.Cancel = true;
             }
         }
 
         private void OnClosed(object sender, EventArgs e)
         {
-            controlPanel.Dispose();
-            commandWindow.Dispose();
-            Robot.Shutdown();
+            try
+            {
+                controlPanel.Dispose();
+                commandWindow.Dispose();
+                Robot.Shutdown();
+            }
+            catch (Exception err)
+            {
+                GUIUtilities.ReportUnexpectedException(err);
+            }
+        }
+
+        //private void OnBrowseManifest(object sender, ExecutedRoutedEventArgs e)
+        //{
+        //    var dlg = new OpenFileDialog();
+        //    if (curManifest != null && curManifest.Length > 0)
+        //        dlg.FileName = curManifest;
+        //    dlg.DefaultExt = ".manifest.xml";
+        //    dlg.Filter = "DSS Manifest (.manifest.xml)|*.manifest.xml";
+        //    if (dlg.ShowDialog(this) == true)
+        //    {
+        //        lock (connectionThreadLock)
+        //        {
+        //            curManifest = dlg.FileName;
+        //            if (connectionThread == null || connectionThread.IsAlive == false)
+        //            {
+        //                connectionThread = new Thread(new ThreadStart(delegate() { connect(); }));
+        //                connectionThread.Start();
+        //            }
+        //        }
+        //    }
+        //}
+
+        //private void ToggleConnect(object sender, RoutedEventArgs e)
+        //{
+        //    if (curManifest == null || curManifest.Length <= 0)
+        //        BrowseManifest(sender, e);
+
+        //    lock (connectionThreadLock)
+        //    {
+        //        if (connectionThread == null || connectionThread.IsAlive == false)
+        //        {
+        //            connectionThread = new Thread(new ThreadStart(delegate() { connect(); }));
+        //            connectionThread.Start();
+        //        }
+        //    }
+        //}
+
+        private void OnInitialized(object sender, EventArgs e)
+        {
+            try
+            {
+                commandWindow.StartScripting();
+                commandWindow.PythonExecuting +=
+                    delegate(object source, EventArgs e2)
+                    {
+                        //Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal,
+                        //    new ThreadStart(delegate() { runButton.BitmapEffect = new OuterGlowBitmapEffect() { GlowColor = Colors.Orange, GlowSize = 5 }; }));
+                    };
+                commandWindow.PythonFinished +=
+                    delegate(object source, EventArgs e2)
+                    {
+                        //Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal,
+                        //    new ThreadStart(delegate() { runButton.BitmapEffect = null; }));
+                    };
+                editor = new Editor(this);
+                editor.InsertedEditor += OnEditorInserted;
+                editor.RemovedEditor += OnEditorRemoved;
+                editor.ActivatedEditor += OnEditorActivated;
+                editor.ModifiedChanged += OnEditorNameChanged;
+                editor.NameChanged += OnEditorNameChanged;
+                //SetButtonsEnabled();
+            }
+            catch (Exception err)
+            {
+                GUIUtilities.ReportUnexpectedException(err);
+            }
+        }
+
+        private void OnNew(object sender, ExecutedRoutedEventArgs e)
+        {
+            try
+            {
+                editor.RequestNewDocument();
+            }
+            catch (Exception err)
+            {
+                GUIUtilities.ReportUnexpectedException(err);
+            }
+        }
+
+        private void OnSave(object sender, ExecutedRoutedEventArgs e)
+        {
+            try
+            {
+                var doc = getCurrentDocument();
+                if (doc != null)
+                    editor.RequestSaveDocument(doc);
+            }
+            catch (Exception err)
+            {
+                GUIUtilities.ReportUnexpectedException(err);
+            }
+        }
+
+        private void OnSaveAs(object sender, ExecutedRoutedEventArgs e)
+        {
+            try
+            {
+                var doc = getCurrentDocument();
+                if (doc != null)
+                    editor.RequestSaveAs(doc);
+            }
+            catch (Exception err)
+            {
+                GUIUtilities.ReportUnexpectedException(err);
+            }
+        }
+
+        private void OnOpen(object sender, ExecutedRoutedEventArgs e)
+        {
+            try
+            {
+                editor.RequestOpen();
+            }
+            catch (Exception err)
+            {
+                GUIUtilities.ReportUnexpectedException(err);
+            }
+        }
+
+        private void OnSaveAll(object sender, ExecutedRoutedEventArgs e)
+        {
+            try
+            {
+                editor.RequestSaveAll();
+            }
+            catch (Exception err)
+            {
+                GUIUtilities.ReportUnexpectedException(err);
+            }
+        }
+
+        private void OnCloseCurrent(object sender, ExecutedRoutedEventArgs e)
+        {
+            try
+            {
+                var doc = getCurrentDocument();
+                if (doc != null)
+                    editor.RequestClose(doc);
+            }
+            catch (Exception err)
+            {
+                GUIUtilities.ReportUnexpectedException(err);
+            }
+        }
+
+        private void OnCloseAll(object sender, ExecutedRoutedEventArgs e)
+        {
+            try
+            {
+                editor.RequestCloseAll();
+            }
+            catch (Exception err)
+            {
+                GUIUtilities.ReportUnexpectedException(err);
+            }
+        }
+
+        private void OnExit(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+
+        private void OnRun(object sender, ExecutedRoutedEventArgs e)
+        {
+            try
+            {
+                var editor = getCurrentEditor();
+                if (editor != null)
+                    commandWindow.ExecuteCommandSilently(editor.Text);
+            }
+            catch (Exception err)
+            {
+                GUIUtilities.ReportUnexpectedException(err);
+            }
+        }
+
+        private void OnEditorInserted(object sender, Editor.EditorEventArgs e)
+        {
+            try
+            {
+                var header = new Grid();
+                header.Children.Add(new Label() { Content = e.Document.FileName });
+                header.Children.Add(new Button() { Content = new Image() { Source = new BitmapImage(new Uri("cross.png", UriKind.Relative)) } });
+                var item = new CloseableTabItemDemo.CloseableTabItem()
+                {
+                    Header = e.Document.FileName,
+                    Content = e.Document.EditorControl
+                };
+                item.GotFocus +=
+                    delegate(object sender2, RoutedEventArgs e2)
+                    {
+                        e.Document.EditorControl.Focus();
+                    };
+                item.CloseTab +=
+                    delegate(object sender2, RoutedEventArgs e2)
+                    {
+                        editor.RequestClose(e.Document);
+                    };
+                mainTabs.Items.Add(item);
+                mainTabs.SelectedIndex = mainTabs.Items.Count - 1;
+            }
+            catch (Exception err)
+            {
+                GUIUtilities.ReportUnexpectedException(err);
+            }
+        }
+
+        private void OnEditorRemoved(object sender, Editor.EditorEventArgs e)
+        {
+            try
+            {
+                mainTabs.Items.RemoveAt(findEditor(e.Document));
+            }
+            catch (Exception err)
+            {
+                GUIUtilities.ReportUnexpectedException(err);
+            }
+        }
+
+        private void OnEditorActivated(object sender, Editor.EditorEventArgs e)
+        {
+            try
+            {
+                mainTabs.SelectedIndex = findEditor(e.Document);
+                //if (mainTabs.SelectedItem != null && GetCurrentEditor() != null)
+                //    FocusManager.SetFocusedElement((TabItem)mainTabs.SelectedItem, GetCurrentEditor());
+            }
+            catch (Exception err)
+            {
+                GUIUtilities.ReportUnexpectedException(err);
+            }
+        }
+
+        private void OnEditorNameChanged(object sender, Editor.EditorEventArgs e)
+        {
+            try
+            {
+                if (e.Document.IsModified)
+                    ((TabItem)mainTabs.Items[findEditor(e.Document)]).Header = e.Document.FileName + " *";
+                else
+                    ((TabItem)mainTabs.Items[findEditor(e.Document)]).Header = e.Document.FileName;
+            }
+            catch (Exception err)
+            {
+                GUIUtilities.ReportUnexpectedException(err);
+            }
+        }
+
+        private void OnTabChanged(object sender, SelectionChangedEventArgs e)
+        {
+            try
+            {
+                //SetButtonsEnabled();
+                if (mainTabs.SelectedItem != null && getCurrentEditor() != null)
+                    getCurrentEditor().Focus();
+            }
+            catch (Exception err)
+            {
+                GUIUtilities.ReportUnexpectedException(err);
+            }
+        }
+
+        private void HasCurrentDocument(object sender, CanExecuteRoutedEventArgs e)
+        {
+            try
+            {
+                e.CanExecute = (getCurrentEditor() != null);
+            }
+            catch (Exception err)
+            {
+                GUIUtilities.ReportUnexpectedException(err);
+            }
+        }
+
+        private void OnConfigEditor(object sender, ExecutedRoutedEventArgs e)
+        {
+            try
+            {
+                new ConfigEditor().Show();
+            }
+            catch (Exception err)
+            {
+                GUIUtilities.ReportUnexpectedException(err);
+            }
+        }
+
+        private void OnRobotChange(object sender, TopBar.RobotChangeEventArgs e)
+        {
+            try
+            {
+                if (connectionThread == null || connectionThread.IsAlive == false)
+                {
+                    currentConfig = e.ConfigFiles;
+                    connectionThread = new Thread(new ThreadStart(delegate() { connect(); }));
+                    connectionThread.Start();
+                }
+                else
+                    e.Cancel = true;
+            }
+            catch (Exception err)
+            {
+                GUIUtilities.ReportUnexpectedException(err);
+            }
+        }
+
+        private void OnAbout(object sender, ExecutedRoutedEventArgs e)
+        {
+            try
+            {
+                AboutBox about = new AboutBox();
+                about.ShowDialog();
+            }
+            catch (Exception err)
+            {
+                GUIUtilities.ReportUnexpectedException(err);
+            }
+        }
+
+        private void OnIDEOptions(object sender, ExecutedRoutedEventArgs e)
+        {
+
+        }
+
+        private void OnExit(object sender, ExecutedRoutedEventArgs e)
+        {
+            this.Close();
+        }
+
+        //private void OnCut(object sender, RoutedEventArgs e)
+        //{
+        //    var editor = GetCurrentEditor();
+        //    if (editor != null)
+        //        editor.Cut();
+        //}
+
+        //private void OnCopy(object sender, RoutedEventArgs e)
+        //{
+        //    var editor = GetCurrentEditor();
+        //    if (editor != null)
+        //        editor.Copy();
+        //}
+
+        //private void OnPaste(object sender, RoutedEventArgs e)
+        //{
+        //    var editor = GetCurrentEditor();
+        //    if (editor != null)
+        //        editor.Paste();
+        //}
+
+        private int findEditor(Editor.EditorDocument doc)
+        {
+            for (int i = 0; i < mainTabs.Items.Count; i++)
+                if (((TabItem)mainTabs.Items[i]).Content == doc.EditorControl)
+                    return i;
+            throw new ArgumentException("Editor document not found in tabs");
+        }
+
+        private Editor.EditorDocument getCurrentDocument()
+        {
+            if (mainTabs.SelectedIndex >= 0)
+            {
+                var content = getCurrentEditor();
+                if (content != null)
+                    foreach (var doc in editor.Documents)
+                        if (content == doc.EditorControl)
+                            return doc;
+                return null;
+            }
+            else
+                return null;
+        }
+
+        private TextBox getCurrentEditor()
+        {
+            if (mainTabs != null)
+                if (mainTabs.SelectedIndex >= 0)
+                    // This returns the textbox if the currently-selected tab contains
+                    // one, or null if it doesn't.
+                    return ((TabItem)mainTabs.Items[mainTabs.SelectedIndex]).Content as TextBox;
+                else
+                    return null;
+            else
+                return null;
         }
 
         //private void disconnect()
@@ -140,295 +535,6 @@ namespace Myro.GUI.SimpleIDE
         //        connect();
         //    else
         //        disconnect();
-        //}
-
-        //private void OnBrowseManifest(object sender, ExecutedRoutedEventArgs e)
-        //{
-        //    var dlg = new OpenFileDialog();
-        //    if (curManifest != null && curManifest.Length > 0)
-        //        dlg.FileName = curManifest;
-        //    dlg.DefaultExt = ".manifest.xml";
-        //    dlg.Filter = "DSS Manifest (.manifest.xml)|*.manifest.xml";
-        //    if (dlg.ShowDialog(this) == true)
-        //    {
-        //        lock (connectionThreadLock)
-        //        {
-        //            curManifest = dlg.FileName;
-        //            if (connectionThread == null || connectionThread.IsAlive == false)
-        //            {
-        //                connectionThread = new Thread(new ThreadStart(delegate() { connect(); }));
-        //                connectionThread.Start();
-        //            }
-        //        }
-        //    }
-        //}
-
-        //private void ToggleConnect(object sender, RoutedEventArgs e)
-        //{
-        //    if (curManifest == null || curManifest.Length <= 0)
-        //        BrowseManifest(sender, e);
-
-        //    lock (connectionThreadLock)
-        //    {
-        //        if (connectionThread == null || connectionThread.IsAlive == false)
-        //        {
-        //            connectionThread = new Thread(new ThreadStart(delegate() { connect(); }));
-        //            connectionThread.Start();
-        //        }
-        //    }
-        //}
-
-        private void OnInitialized(object sender, EventArgs e)
-        {
-            commandWindow.StartScripting();
-            commandWindow.PythonExecuting +=
-                delegate(object source, EventArgs e2)
-                {
-                    //Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal,
-                    //    new ThreadStart(delegate() { runButton.BitmapEffect = new OuterGlowBitmapEffect() { GlowColor = Colors.Orange, GlowSize = 5 }; }));
-                };
-            commandWindow.PythonFinished +=
-                delegate(object source, EventArgs e2)
-                {
-                    //Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal,
-                    //    new ThreadStart(delegate() { runButton.BitmapEffect = null; }));
-                };
-            editor = new Editor(this);
-            editor.InsertedEditor += OnEditorInserted;
-            editor.RemovedEditor += OnEditorRemoved;
-            editor.ActivatedEditor += OnEditorActivated;
-            editor.ModifiedChanged += OnEditorNameChanged;
-            editor.NameChanged += OnEditorNameChanged;
-            //SetButtonsEnabled();
-        }
-
-        private void OnNew(object sender, ExecutedRoutedEventArgs e)
-        {
-            try { editor.RequestNewDocument(); }
-            catch (Exception) { }
-        }
-
-        private void OnSave(object sender, ExecutedRoutedEventArgs e)
-        {
-            var doc = GetCurrentDocument();
-            if (doc != null)
-                try { editor.RequestSaveDocument(doc); }
-                catch (Exception) { }
-        }
-
-        private void OnSaveAs(object sender, ExecutedRoutedEventArgs e)
-        {
-            var doc = GetCurrentDocument();
-            if (doc != null)
-                try { editor.RequestSaveAs(doc); }
-                catch (Exception) { }
-        }
-
-        private void OnOpen(object sender, ExecutedRoutedEventArgs e)
-        {
-            try { editor.RequestOpen(); }
-            catch (Exception) { }
-        }
-
-        private void OnSaveAll(object sender, ExecutedRoutedEventArgs e)
-        {
-            try { editor.RequestSaveAll(); }
-            catch (Exception) { }
-        }
-
-        private void OnCloseCurrent(object sender, ExecutedRoutedEventArgs e)
-        {
-            var doc = GetCurrentDocument();
-            if (doc != null)
-                editor.RequestClose(doc);
-        }
-
-        private void OnCloseAll(object sender, ExecutedRoutedEventArgs e)
-        {
-            editor.RequestCloseAll();
-        }
-
-        private void OnExit(object sender, RoutedEventArgs e)
-        {
-            this.Close();
-        }
-
-        private void OnRun(object sender, ExecutedRoutedEventArgs e)
-        {
-            var editor = GetCurrentEditor();
-            if (editor != null)
-                commandWindow.ExecuteCommandSilently(editor.Text);
-        }
-
-        private int FindEditor(Editor.EditorDocument doc)
-        {
-            for (int i = 0; i < mainTabs.Items.Count; i++)
-                if (((TabItem)mainTabs.Items[i]).Content == doc.EditorControl)
-                    return i;
-            throw new ArgumentException("Editor document not found in tabs");
-        }
-
-        private Editor.EditorDocument GetCurrentDocument()
-        {
-            if (mainTabs.SelectedIndex >= 0)
-            {
-                var content = GetCurrentEditor();
-                if (content != null)
-                    foreach (var doc in editor.Documents)
-                        if (content == doc.EditorControl)
-                            return doc;
-                return null;
-            }
-            else
-                return null;
-        }
-
-        private TextBox GetCurrentEditor()
-        {
-            if (mainTabs != null)
-                if (mainTabs.SelectedIndex >= 0)
-                    // This returns the textbox if the currently-selected tab contains
-                    // one, or null if it doesn't.
-                    return ((TabItem)mainTabs.Items[mainTabs.SelectedIndex]).Content as TextBox;
-                else
-                    return null;
-            else
-                return null;
-        }
-
-        private void OnEditorInserted(object sender, Editor.EditorEventArgs e)
-        {
-            var header = new Grid();
-            header.Children.Add(new Label() { Content = e.Document.FileName });
-            header.Children.Add(new Button() { Content = new Image() { Source = new BitmapImage(new Uri("cross.png", UriKind.Relative)) } });
-            var item = new CloseableTabItemDemo.CloseableTabItem()
-            {
-                Header = e.Document.FileName,
-                Content = e.Document.EditorControl
-            };
-            item.GotFocus +=
-                delegate(object sender2, RoutedEventArgs e2)
-                {
-                    e.Document.EditorControl.Focus();
-                };
-            item.CloseTab +=
-                delegate(object sender2, RoutedEventArgs e2)
-                {
-                    editor.RequestClose(e.Document);
-                };
-            mainTabs.Items.Add(item);
-            mainTabs.SelectedIndex = mainTabs.Items.Count - 1;
-        }
-
-        private void OnEditorRemoved(object sender, Editor.EditorEventArgs e)
-        {
-            mainTabs.Items.RemoveAt(FindEditor(e.Document));
-        }
-
-        private void OnEditorActivated(object sender, Editor.EditorEventArgs e)
-        {
-            mainTabs.SelectedIndex = FindEditor(e.Document);
-            //if (mainTabs.SelectedItem != null && GetCurrentEditor() != null)
-            //    FocusManager.SetFocusedElement((TabItem)mainTabs.SelectedItem, GetCurrentEditor());
-        }
-
-        private void OnEditorNameChanged(object sender, Editor.EditorEventArgs e)
-        {
-            if (e.Document.IsModified)
-                ((TabItem)mainTabs.Items[FindEditor(e.Document)]).Header = e.Document.FileName + " *";
-            else
-                ((TabItem)mainTabs.Items[FindEditor(e.Document)]).Header = e.Document.FileName;
-        }
-
-        //private void SetButtonsEnabled()
-        //{
-        //    if (GetCurrentEditor() == null)
-        //        saveItem.IsEnabled =
-        //            saveAllItem.IsEnabled =
-        //            saveAsItem.IsEnabled =
-        //            saveButton.IsEnabled =
-        //            saveAllButton.IsEnabled =
-        //            //copyItem.IsEnabled =
-        //            //cutItem.IsEnabled =
-        //            //pasteItem.IsEnabled =
-        //            //copyButton.IsEnabled =
-        //            //cutButton.IsEnabled =
-        //            //pasteButton.IsEnabled =
-        //            false;
-        //    else
-        //        saveItem.IsEnabled =
-        //            saveAllItem.IsEnabled =
-        //            saveAsItem.IsEnabled =
-        //            saveButton.IsEnabled =
-        //            saveAllButton.IsEnabled =
-        //            //copyItem.IsEnabled =
-        //            //cutItem.IsEnabled =
-        //            //pasteItem.IsEnabled =
-        //            //copyButton.IsEnabled =
-        //            //cutButton.IsEnabled =
-        //            //pasteButton.IsEnabled =
-        //            true;
-        //}
-
-        private void OnTabChanged(object sender, SelectionChangedEventArgs e)
-        {
-            //SetButtonsEnabled();
-            if (mainTabs.SelectedItem != null && GetCurrentEditor() != null)
-                GetCurrentEditor().Focus();
-        }
-
-        private void HasCurrentDocument(object sender, CanExecuteRoutedEventArgs e)
-        {
-            e.CanExecute = (GetCurrentEditor() != null);
-        }
-
-        private void OnConfigEditor(object sender, ExecutedRoutedEventArgs e)
-        {
-            new ConfigEditor().Show();
-        }
-
-        private void OnRobotChange(object sender, TopBar.RobotChangeEventArgs e)
-        {
-            if (connectionThread == null || connectionThread.IsAlive == false)
-            {
-                currentConfig = e.ConfigFiles;
-                connectionThread = new Thread(new ThreadStart(delegate() { connect(); }));
-                connectionThread.Start();
-            }
-            else
-                e.Cancel = true;
-        }
-
-        private void OnAbout(object sender, ExecutedRoutedEventArgs e)
-        {
-            AboutBox about = new AboutBox();
-            about.ShowDialog();
-        }
-
-        private void OnIDEOptions(object sender, ExecutedRoutedEventArgs e)
-        {
-
-        }
-
-        //private void OnCut(object sender, RoutedEventArgs e)
-        //{
-        //    var editor = GetCurrentEditor();
-        //    if (editor != null)
-        //        editor.Cut();
-        //}
-
-        //private void OnCopy(object sender, RoutedEventArgs e)
-        //{
-        //    var editor = GetCurrentEditor();
-        //    if (editor != null)
-        //        editor.Copy();
-        //}
-
-        //private void OnPaste(object sender, RoutedEventArgs e)
-        //{
-        //    var editor = GetCurrentEditor();
-        //    if (editor != null)
-        //        editor.Paste();
         //}
     }
 }

@@ -37,6 +37,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Frontend", "Frontend", "{425F3C48-CE4B-4FBB-9A61-0097D76B3CFB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Robot", "Frontend\Front\Robot.csproj", "{4A2F2891-310B-4690-8224-20C58A6676E2}"
+	ProjectSection(ProjectDependencies) = postProject
+		{6BF981B1-88CF-4497-967D-0E4F39F5B440} = {6BF981B1-88CF-4497-967D-0E4F39F5B440}
+	EndProjectSection
 EndProject
 Project("{57B76CF8-F148-40C5-BE9B-5C5EFB1ACA14}") = "Python", "Frontend\Python\Python.pyproj", "{5F60C63E-FDA5-4924-AAD8-57BD896B6D9F}"
 EndProject

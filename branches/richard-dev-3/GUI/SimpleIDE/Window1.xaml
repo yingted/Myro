@@ -24,6 +24,7 @@
         <!--<CommandBinding Command="{x:Static wnd:Window1.IDEOptions}" Executed="OnIDEOptions" />-->
         <!--<CommandBinding Command="{x:Static wnd:Window1.BrowseManifest}" Executed="OnBrowseManifest" />-->
         <CommandBinding Command="{x:Static wnd:Window1.About}" Executed="OnAbout" />
+        <CommandBinding Command="{x:Static wnd:Window1.Exit}" Executed="OnExit" />
     </Window.CommandBindings>
     <Grid>
         <Grid.RowDefinitions>
