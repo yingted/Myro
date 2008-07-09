@@ -54,7 +54,14 @@ namespace Myro.GUI.SimpleIDE
 
         public Window1()
         {
-            InitializeComponent();
+            try
+            {
+                InitializeComponent();
+            }
+            catch (Exception err)
+            {
+                GUIUtilities.ReportUnexpectedException(err);
+            }
         }
 
         private void OnClosing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -77,6 +84,7 @@ namespace Myro.GUI.SimpleIDE
             {
                 controlPanel.Dispose();
                 commandWindow.Dispose();
+                webcamDisplay.Dispose();
                 Robot.Shutdown();
             }
             catch (Exception err)
@@ -145,6 +153,8 @@ namespace Myro.GUI.SimpleIDE
                 editor.ModifiedChanged += OnEditorNameChanged;
                 editor.NameChanged += OnEditorNameChanged;
                 //SetButtonsEnabled();
+
+                webcamDisplay.StartUpdate();
             }
             catch (Exception err)
             {

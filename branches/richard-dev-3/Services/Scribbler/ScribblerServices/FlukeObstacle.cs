@@ -14,7 +14,7 @@ using System.Linq;
 using brick = Myro.Services.Scribbler.ScribblerBase.Proxy;
 using vector = Myro.Services.Generic.Vector;
 
-namespace Myro.Services.Scribbler
+namespace Myro.Services.Scribbler.FlukeObstacle
 {
     public static class Contract
     {

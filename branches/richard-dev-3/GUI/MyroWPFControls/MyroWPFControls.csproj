@@ -41,9 +41,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\..\Microsoft Robotics Dev Studio 2008\bin\DssBase.dll</HintPath>
     </Reference>
-    <Reference Include="GameController.Y2006.M09.proxy, Version=0.0.0.0, Culture=neutral, PublicKeyToken=8b70575c4d29de37, processorArchitecture=MSIL">
+    <Reference Include="GameControllerMyro.Proxy, Version=0.0.0.0, Culture=neutral, PublicKeyToken=8b70575c4d29de37, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\Microsoft Robotics Dev Studio 2008\bin\GameController.Y2006.M09.proxy.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\Microsoft Robotics Dev Studio 2008\bin\GameControllerMyro.Proxy.dll</HintPath>
     </Reference>
     <Reference Include="IronMath, Version=1.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -57,6 +57,7 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -91,6 +92,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="WebcamDisplay.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CircleMeters.xaml.cs">
@@ -116,6 +121,9 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Compile Include="WebcamDisplay.xaml.cs">
+      <DependentUpon>WebcamDisplay.xaml</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -130,6 +138,10 @@
     <ProjectReference Include="..\..\Frontend\Front\Robot.csproj">
       <Project>{4A2F2891-310B-4690-8224-20C58A6676E2}</Project>
       <Name>Robot</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Services\Scribbler\ScribblerBase\ScribblerBase.csproj">
+      <Project>{90C2F23D-A2DD-4EAB-9923-CAAC83BE5416}</Project>
+      <Name>ScribblerBase</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Utilities\Utilities.csproj">
       <Project>{481FEFE3-E033-464C-A1D4-7C95C5AC95C5}</Project>

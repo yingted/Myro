@@ -119,6 +119,7 @@
       <Private>False</Private>
       <HintPath>..\..\..\..\bin\DssBase.dll</HintPath>
     </Reference>
+    <Reference Include="RoboticsCommon, Version=2.0.730.3, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="RoboticsCommon.proxy, Version=1.0.229.2, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <Private>False</Private>
@@ -135,6 +136,7 @@
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Runtime.Serialization">
       <SpecificVersion>False</SpecificVersion>
       <Private>False</Private>
@@ -146,6 +148,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="FlukeCam.cs" />
     <Compile Include="FlukeObstacle.cs" />
     <Compile Include="LightSensor.cs" />
     <Compile Include="LineSensor.cs" />

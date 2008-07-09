@@ -50,6 +50,9 @@
                         <TabItem Header="Simulator" Name="tabItem2">
                             <Grid />
                         </TabItem>-->
+                        <TabItem Header="Camera">
+                            <controls:WebcamDisplay Name="webcamDisplay" />
+                        </TabItem>
                     </TabControl>
                     <controls:CommandWindow Name="commandWindow" Grid.Row="1" />
                     <GridSplitter Grid.Row="0" HorizontalAlignment="Stretch" Name="gridSplitter3" VerticalAlignment="Bottom" Height="5" ShowsPreview="False" ResizeBehavior="CurrentAndNext" Background="Transparent" />

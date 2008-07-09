@@ -3,7 +3,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{01EDA09F-EDD7-488F-B512-48FA7E32AAB2}</ProjectGuid>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30428</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <OutputType>Library</OutputType>
     <NoStandardLibraries>false</NoStandardLibraries>
@@ -82,9 +82,9 @@
     <Compile Include="AdapterSpecN.cs" />
     <Compile Include="DriveAdapter.cs" />
     <Compile Include="IAdapter.cs" />
-    <Compile Include="ImageAdapter.cs" />
     <Compile Include="SpeechAdapter.cs" />
     <Compile Include="VectorAdapter.cs" />
+    <Compile Include="WebcamAdapter.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".svn\entries" />
@@ -99,6 +99,10 @@
     <None Include="myroKey.snk" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Services\Scribbler\ScribblerBase\ScribblerBase.csproj">
+      <Project>{90C2F23D-A2DD-4EAB-9923-CAAC83BE5416}</Project>
+      <Name>ScribblerBase</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Utilities\Utilities.csproj">
       <Project>{481FEFE3-E033-464C-A1D4-7C95C5AC95C5}</Project>
       <Name>Utilities</Name>

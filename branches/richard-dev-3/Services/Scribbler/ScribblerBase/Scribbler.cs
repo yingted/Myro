@@ -73,7 +73,9 @@ namespace Myro.Services.Scribbler.ScribblerBase
         /// <summary>
         /// Main operations port
         /// </summary>
-        [ServicePort("/scribbler", AllowMultipleInstances = false)]
+        [ServicePort("/scribbler", AllowMultipleInstances = false,
+            QueueDepthLimit = 10,
+            QueuingPolicy = DsspOperationQueuingPolicy.DiscardWithFault)]
         private ScribblerOperations _mainPort = new ScribblerOperations();
 
         /// <summary>
@@ -252,13 +254,27 @@ namespace Myro.Services.Scribbler.ScribblerBase
         private IEnumerator<ITask> SendScribblerCommandHandler(SendScribblerCommand command)
         {
             // Send command to robot and wait for echo and response
-            ScribblerResponse validResponse = _scribblerCom.SendCommand(command.Body);
-            if (validResponse == null)
+            ScribblerResponse validResponse;
+            try
             {
-                LogError(LogGroups.Console, "Send Scribbler Command null response");
-                command.ResponsePort.Post(new Fault());
+                validResponse = _scribblerCom.SendCommand(command.Body);
+                if (validResponse == null)
+                    throw new Exception("Send Scribbler Command null response");
             }
-            else
+            catch (TimeoutException e)
+            {
+                Console.WriteLine("Serial port timeout");
+                command.ResponsePort.Post(RSUtils.FaultOfException(e));
+                validResponse = null;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("SendCommand exception: " + e.ToString());
+                command.ResponsePort.Post(RSUtils.FaultOfException(e));
+                validResponse = null;
+            }
+
+            if (validResponse != null)
             {
                 //reset timer
                 PollTimer.Enabled = false;
@@ -634,6 +650,45 @@ namespace Myro.Services.Scribbler.ScribblerBase
                     get.ResponsePort.Post(f);
                 });
             yield break;
+        }
+
+        [ServiceHandler(ServiceHandlerBehavior.Exclusive)]
+        public IEnumerator<ITask> GetImageHandler(GetImage get)
+        {
+            if (!_state.Connected)
+            {
+                get.ResponsePort.Post(new Fault() { Reason = new ReasonText[] { new ReasonText() { Value = "Not connected" } } });
+                yield break;
+            }
+
+            ScribblerCommand cmd;
+            ImageResponse response = new ImageResponse()
+            {
+                Width = ScribblerHelper.ImageWidth,
+                Height = ScribblerHelper.ImageHeight,
+                Timestamp = DateTime.Now,
+            };
+            if (get.Body.ImageType.Equals(Params.Image_Color))
+                cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.GET_IMAGE);
+            else
+            {
+                get.ResponsePort.Post(RSUtils.FaultOfException(
+                        new ArgumentException("Invalid image type: " + get.Body.ImageType, "ImageType")));
+                yield break;
+            }
+
+            SendScribblerCommand sendcmd = new SendScribblerCommand(cmd);
+            _scribblerComPort.Post(sendcmd);
+            yield return Arbiter.Choice(sendcmd.ResponsePort,
+                delegate(ScribblerResponse r)
+                {
+                    response.Data = r.Data;
+                    get.ResponsePort.Post(response);
+                },
+                delegate(Fault f)
+                {
+                    get.ResponsePort.Post(f);
+                });
         }
 
 

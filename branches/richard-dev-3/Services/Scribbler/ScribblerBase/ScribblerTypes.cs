@@ -41,6 +41,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
         SetLoud,
         SetName,
         GetObstacle,
+        GetImage,
         ScribblerResponseMessage,
         SelectiveSubscribe, //IMPORTANT: Because SelectiveSubscribe inherits from Subscribe, it must go on top.
         Subscribe>
@@ -187,6 +188,36 @@ namespace Myro.Services.Scribbler.ScribblerBase
     {
         public GetObstacle() { }
         public GetObstacle(Int32Body b) : base(b) { }
+    }
+
+    [DataContract]
+    [DataMemberConstructor]
+    public class GetImageBody
+    {
+        [DataMember]
+        public Guid ImageType;
+    }
+    [DataContract]
+    [DataMemberConstructor]
+    public class ImageResponse
+    {
+        [DataMember]
+        public int Width;
+        [DataMember]
+        public int Height;
+        [DataMember]
+        public byte[] Data;
+        [DataMember]
+        public DateTime Timestamp;
+    }
+
+    /// <summary>
+    /// Retreieve an image from the Fluke's camera
+    /// </summary>
+    public class GetImage : Get<GetImageBody, PortSet<ImageResponse, Fault>>
+    {
+        public GetImage() { }
+        public GetImage(GetImageBody body) : base(body) { }
     }
 
     /// <summary>

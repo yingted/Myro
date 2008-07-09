@@ -7,6 +7,7 @@ using Myro.API;
 using Microsoft.Dss.Hosting;
 using System.IO;
 using System.Threading;
+using System.Drawing;
 using Myro.Utilities;
 
 namespace Myro
@@ -16,6 +17,7 @@ namespace Myro
         private static AdapterBank bank = null;
         private static AdapterSpec<DriveAdapter> driveAdapter = null;
         private static AdapterSpec<VectorAdapter> soundAdapter = null;
+        private static AdapterSpec<WebcamAdapter> webcamAdapter = null;
         private static int httpPort;
         private static int dsspPort;
 
@@ -32,10 +34,12 @@ namespace Myro
             Console.WriteLine("Done");
             bank = new AdapterBank(new List<IAdapterFactory>() {
                 new Myro.Adapters.DriveAdapterFactory(),
-                new Myro.Adapters.VectorAdapterFactory()
+                new Myro.Adapters.VectorAdapterFactory(),
+                new Myro.Adapters.WebcamAdapterFactory()
             });
             driveAdapter = bank.GetAdapterSpec<DriveAdapter>("drive");
             soundAdapter = bank.GetAdapterSpec<VectorAdapter>("tonegen");
+            webcamAdapter = bank.GetAdapterSpec<WebcamAdapter>("webcam");
         }
 
         public static void Init(string baseName)
@@ -254,6 +258,51 @@ namespace Myro
         }
         #endregion
 
+        #region Camera commands
+
+        public static MyroImage TakePicture(MyroImageType type)
+        {
+            int width, height;
+            byte[] image;
+            webcamAdapter.Adapter.QueryFrame(type, out width, out height, out image);
+            return new MyroImage()
+            {
+                Width = width,
+                Height = height,
+                Image = image
+            };
+        }
+
+        public static Bitmap TakeBitmap(MyroImageType type)
+        {
+            var r = TakePicture(type);
+            
+            Bitmap ret;
+            System.Drawing.Imaging.BitmapData bitmapData;
+                ret = new Bitmap(r.Width, r.Height, type.PixelFormat);
+                // Get bitmap data
+                bitmapData = ret.LockBits(
+                    new Rectangle(0, 0, ret.Width, ret.Height),
+                    System.Drawing.Imaging.ImageLockMode.WriteOnly,
+                    type.PixelFormat);
+
+            // Copy frame
+            IntPtr scanline = bitmapData.Scan0;
+            int frameOffset = 0;
+            for(int i = 0; i<ret.Height; i++)
+            {
+                System.Runtime.InteropServices.Marshal.Copy(
+                    r.Image, frameOffset, scanline, type.BitsPerPixel * ret.Width);
+                scanline = new IntPtr(scanline.ToInt64() + (long)bitmapData.Stride);
+                frameOffset += (type.BitsPerPixel * ret.Width);
+            }
+
+            ret.UnlockBits(bitmapData);
+            return ret;
+        }
+
+        #endregion Camera commands
+
         #region Exception definitions
         public class MyroNotInitializedException : Exception
         {
@@ -291,4 +340,12 @@ namespace Myro
         //    DssEnvironment.WaitForShutdown();
         //}
     }
+
+    public class MyroImage
+    {
+        public int Width;
+        public int Height;
+        public byte[] Image;
+    }
+
 }

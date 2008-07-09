@@ -81,7 +81,8 @@ namespace Myro.Services.Scribbler.ScribblerBase
             _serialPort.Parity = Parity.None;
             _serialPort.DataBits = 8;
             _serialPort.StopBits = StopBits.One;
-            _serialPort.WriteTimeout = 2000;
+            _serialPort.ReadTimeout = 500;
+            _serialPort.WriteTimeout = 500;
 
             try
             {
@@ -90,7 +91,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
                 if (name != null)
                 {
                     System.Threading.Thread.Sleep(500); //give the BT device some time between closing and opening of the port
-                    _serialPort.Open();
+                    _serialPort.Open(); 
                     foundRobotName = name;
                     openedComPort = comPort;
                 }
@@ -367,19 +368,19 @@ namespace Myro.Services.Scribbler.ScribblerBase
 #endif
 
 
-                try
-                {
-                    // When requesting a response, clear the inbound buffer 
-                    if (_serialPort.BytesToRead > 0)
-                        _serialPort.DiscardInBuffer();
+                //try
+                //{
+                // When requesting a response, clear the inbound buffer 
+                if (_serialPort.BytesToRead > 0)
+                    _serialPort.DiscardInBuffer();
 
-                    _serialPort.Write(buffer, 0, ix);
-                }
-                catch
-                {
-                    Console.WriteLine("Serial Port Timeout.  Lost connection with Scribbler.");
-                    //throw new IOException();
-                }
+                _serialPort.Write(buffer, 0, ix);
+                //}
+                //catch
+                //{
+                //Console.WriteLine("Serial Port Timeout.  Lost connection with Scribbler.");
+                //throw new IOException();
+                //}
 
                 if (helper.HasEcho((ScribblerHelper.Commands)cmd.CommandType))
                     echo = GetEcho(buffer, outMessageSize);
@@ -402,27 +403,27 @@ namespace Myro.Services.Scribbler.ScribblerBase
             ScribblerResponse response = null;
             int ixOutBuff = 0;
             DateTime lastbytetime = DateTime.Now;
-            try
+            //try
+            //{
+            while (ixOutBuff < echoSize) // && Compare(DateTime.Now, lastbytetime) < ReadTimeOut)
             {
-                while (ixOutBuff < echoSize) // && Compare(DateTime.Now, lastbytetime) < ReadTimeOut)
+                byte[] temp = new byte[1];
+                _serialPort.Read(temp, 0, 1); //get 1 byte
+                if (temp[0] == outBuff[ixOutBuff])
                 {
-                    byte[] temp = new byte[1];
-                    _serialPort.Read(temp, 0, 1); //get 1 byte
-                    if (temp[0] == outBuff[ixOutBuff])
-                    {
-                        inBuff[ixOutBuff] = temp[0];
-                        ixOutBuff++;
-                        lastbytetime = DateTime.Now;
-                    }
-                    else
-                    {
-                        Console.WriteLine("Echo missmatch");
-                        break;
-                    }
+                    inBuff[ixOutBuff] = temp[0];
+                    ixOutBuff++;
+                    lastbytetime = DateTime.Now;
                 }
+                else
+                {
+                    Console.WriteLine("Echo missmatch");
+                    break;
+                }
+            }
 
-                response = new ScribblerResponse();
-                response.Data = (byte[])inBuff.Clone();
+            response = new ScribblerResponse();
+            response.Data = (byte[])inBuff.Clone();
 
 #if DEBUG
                 Console.Write("Echo: ");
@@ -435,12 +436,12 @@ namespace Myro.Services.Scribbler.ScribblerBase
                 }
                 Console.Write("\n");
 #endif
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("GetCommandResponse Exception: " + ex);
-                //throw;
-            }
+            //}
+            //catch (Exception ex)
+            //{
+            //    Console.WriteLine("GetCommandResponse Exception: " + ex);
+            //    //throw;
+            //}
             return response;
         }
 
@@ -470,51 +471,51 @@ namespace Myro.Services.Scribbler.ScribblerBase
             //Console.WriteLine("Check 2");
             int read = 0;
             bool error = false, done = false;
-            try
+            //try
+            //{
+            while (read < Math.Abs(nBytes) && !done)
             {
-                while (read < Math.Abs(nBytes) && !done)
+                int canread;
+                int count = 0;
+                while (((canread = _serialPort.BytesToRead) == 0) && count++ < 5)
+                    Thread.Sleep(50); //spin 
+
+                if (count > 5)
+                    break;
+
+                if (nBytes < 0)
                 {
-                    int canread;
-                    int count = 0;
-                    while (((canread = _serialPort.BytesToRead) == 0) && count++ < 5)
-                        Thread.Sleep(50); //spin 
-
-                    if (count > 5)
-                        break;
-
-                    if (nBytes < 0)
+                    //Console.WriteLine("Reading variable length (buffer size " + inBuff.Length + ")");
+                    for (int i = 0; i < canread; i++)
                     {
-                        //Console.WriteLine("Reading variable length (buffer size " + inBuff.Length + ")");
-                        for (int i = 0; i < canread; i++)
-                        {
-                            _serialPort.Read(inBuff, read++, 1);
-                            //Console.WriteLine("  Got " + inBuff[read - 1] + " at " + (read - 1));
-                            if (inBuff[read - 1] == 0x0A)
-                                done = true;
-                        }
+                        _serialPort.Read(inBuff, read++, 1);
+                        //Console.WriteLine("  Got " + inBuff[read - 1] + " at " + (read - 1));
+                        if (inBuff[read - 1] == 0x0A)
+                            done = true;
+                    }
+                }
+                else
+                {
+                    int needtoread = nBytes - read;
+                    //Console.WriteLine("Reading fixed length of " + needtoread + ", buffer " + nBytes);
+                    if (canread > needtoread)
+                    {
+                        _serialPort.Read(inBuff, read, needtoread);
+                        read += needtoread;
                     }
                     else
                     {
-                        int needtoread = nBytes - read;
-                        //Console.WriteLine("Reading fixed length of " + needtoread + ", buffer " + nBytes);
-                        if (canread > needtoread)
-                        {
-                            _serialPort.Read(inBuff, read, needtoread);
-                            read += needtoread;
-                        }
-                        else
-                        {
-                            _serialPort.Read(inBuff, read, canread);
-                            read += canread;
-                        }
+                        _serialPort.Read(inBuff, read, canread);
+                        read += canread;
                     }
                 }
+            }
 
 
-                int dataBytes = (cmdEcho ? Math.Abs(nBytes) - 1 : Math.Abs(nBytes));
-                response = new ScribblerResponse(Math.Max(0, dataBytes));
-                response.CommandType = (cmdEcho ? inBuff[inBuff.Length-1] : (byte)0);
-                Array.Copy(inBuff, response.Data, dataBytes);
+            int dataBytes = (cmdEcho ? Math.Abs(nBytes) - 1 : Math.Abs(nBytes));
+            response = new ScribblerResponse(Math.Max(0, dataBytes));
+            response.CommandType = (cmdEcho ? inBuff[inBuff.Length - 1] : (byte)0);
+            Array.Copy(inBuff, response.Data, dataBytes);
 
 #if DEBUG
                     Console.Write("Got: ");
@@ -527,12 +528,12 @@ namespace Myro.Services.Scribbler.ScribblerBase
                     }
                     Console.Write("\n");
 #endif
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("GetCommandResponse Exception: " + ex);
-                //throw;
-            }
+            //}
+            //catch (Exception ex)
+            //{
+            //    Console.WriteLine("GetCommandResponse Exception: " + ex);
+            //    //throw;
+            //}
             return response;
         }
 

@@ -25,8 +25,10 @@ namespace Myro.Services.Scribbler.ScribblerBase
     internal class ScribblerHelper
     {
 
-        private static int SetMessageReturnLength = 12;
+        private const int SetMessageReturnLength = 12;
         private const int ScribblerOutMessageSize = 9;
+        public const int ImageWidth = 256;
+        public const int ImageHeight = 192;
 
         /// <summary>
         /// enumeration of Scribbler API commands
@@ -65,7 +67,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
             GET_DATA = 81,
 
             //GET_RLE             = 82,  // a segmented and run-length encoded image
-            //GET_IMAGE           = 83,  // the entire 256 x 192 image in YUYV format
+            GET_IMAGE           = 83,  // the entire 256 x 192 image in YUYV format
             //GET_WINDOW          = 84,  // the windowed image (followed by which window)
             GET_DONGLE_L_IR = 85,  // number of returned pulses when left emitter is turned on
             GET_DONGLE_C_IR = 86,  // number of returned pulses when center emitter is turned on
@@ -223,6 +225,9 @@ namespace Myro.Services.Scribbler.ScribblerBase
                 case Commands.GET_DONGLE_R_IR:
                     return 2;
                     break;
+                case Commands.GET_IMAGE:
+                    return ImageWidth * ImageHeight * 3;
+                    break;
                 default:
                     Console.WriteLine("Command missmatch - return size");
                     return 1;
@@ -277,6 +282,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
                 case Commands.GET_DONGLE_C_IR:
                 case Commands.GET_DONGLE_L_IR:
                 case Commands.GET_DONGLE_R_IR:
+                case Commands.GET_IMAGE:
                     return 1;
                     break;
                 case Commands.SET_DIMMER_LED:
@@ -340,6 +346,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
                 case Commands.GET_DONGLE_C_IR:
                 case Commands.GET_DONGLE_L_IR:
                 case Commands.GET_DONGLE_R_IR:
+                case Commands.GET_IMAGE:
                 case Commands.SOFT_RESET:
                     return false;
                     break;
