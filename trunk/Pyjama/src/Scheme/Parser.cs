@@ -29,6 +29,19 @@ public class Parser {
 	return run();
     }
 
+    // file loader
+    public static object loadFile(string filename) {
+	tokens_reg = Scanner.scanInput(readContent(filename));
+	k_reg = null; 
+	pc = new Function(processSexps);
+	return run();
+    }
+
+    public static string readContent(string filename) {
+	String content = File.OpenText(filename).ReadToEnd();
+	return content;
+    }
+
     // the trampoline
     public static object run() {
 	while (pc != null) {
@@ -135,14 +148,6 @@ public class Parser {
 	}
     }
 
-    // file loader
-
-    public static object loadFile(string filename) {
-	tokens_reg = Scanner.scanInput(readContent(filename));
-	pc = new Function(processSexps);
-	return run();
-    }
-
     public static void processSexps() {
 	List<object> token = (List<object>) tokens_reg[0];
 	if (isTokenType(token, "end-marker")) {
@@ -154,33 +159,7 @@ public class Parser {
 	}
     }
 
-    public static string readContent(string filename) {
-	String content = File.OpenText(filename).ReadToEnd();
-	return content;
-    }
-
     // continuations
-
-    public static string prettyPrint(object obj) {
-	string retval = "";
-	if (obj is List<object>) {
-	    foreach (object item in (List<object>) obj) {
-		if (retval != "")
-		    retval += " ";
-		if (item is List<object>)
-		    retval += prettyPrint((List<object>) item);
-		else
-		    retval += item.ToString();
-	    }
-	    return "(" + retval + ")";
-	} else {
-	    return obj.ToString();
-	}
-    }
-    
-    public static bool isTokenType(List<object> token, string tokenType) {
-	return (((string) token[0]) == tokenType);
-    }
 
     public static void applyCont() {
 	string tag = (string) k_reg[0];
@@ -351,7 +330,6 @@ public class Parser {
 	}
     }
 
-
     public class SchemeCharacter {
 	char ch;
 	
@@ -410,6 +388,27 @@ public class Parser {
     // >>> parse("(a b c 1 2 -3.14 #f \"hello there\" #\\newline (e [f . x] . 4) ())")
     // >>> loadFile("scanner-parser.ss")
     
+    public static string prettyPrint(object obj) {
+	string retval = "";
+	if (obj is List<object>) {
+	    foreach (object item in (List<object>) obj) {
+		if (retval != "")
+		    retval += " ";
+		if (item is List<object>)
+		    retval += prettyPrint((List<object>) item);
+		else
+		    retval += item.ToString();
+	    }
+	    return "(" + retval + ")";
+	} else {
+	    return obj.ToString();
+	}
+    }
+    
+    public static bool isTokenType(List<object> token, string tokenType) {
+	return (((string) token[0]) == tokenType);
+    }
+
     public static string arrayToString(object[] array) {
 	string retval = "";
 	foreach (object item in array) {
@@ -421,11 +420,14 @@ public class Parser {
     }
     
     public static void Main(string[] args) {
-	// example:
-	// >>> scanFile("scanner.ss")
-	string s = arrayToString(args);
-	System.Console.WriteLine("Parsing: '{0}'...", s);
-	System.Console.WriteLine(prettyPrint(parse(s)));
+	if (args[0] == "exp") {
+	    string s = args[1];
+	    System.Console.WriteLine("Parsing expression: '{0}'...", s);
+	    System.Console.WriteLine(prettyPrint(parse(s)));
+	} else {
+	    System.Console.WriteLine("Parsing file: '{0}'...", args[0]);
+	    System.Console.WriteLine(prettyPrint(loadFile(args[0])));
+	}
     }
 
 }
