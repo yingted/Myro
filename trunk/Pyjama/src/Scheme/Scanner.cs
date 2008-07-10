@@ -91,7 +91,7 @@ public class Scanner {
 	}
 	return retval;
     }
-    
+
     public static string listToString(List<object> list) {
 	string retval = "";
 	foreach (object item in list) {
@@ -126,13 +126,14 @@ public class Scanner {
     }
     
     public static List<object> convertBufferToToken(string tokenType, List<object> buffer) {
+	//Console.WriteLine(String.Format("convertBufferToToken: '{0}'", tokenType));
 	if (tokenType == "number") {
 	    return makeNumber(buffer);
 	} else if (tokenType == "identifier") {
 	    return makeList("identifier", listToString(buffer));
 	} else if (tokenType == "boolean") {
-	    string sbool = (string) buffer[0];
-	    return makeList("boolean", (sbool.IndexOf('t') >= 0 || sbool.IndexOf('T') >= 0));
+	    char cbool = (char) buffer[0];
+	    return makeList("boolean", (cbool == 't' || cbool == 'T'));
 	} else if (tokenType == "character") {
 	    return makeList("character", buffer[0]);
 	} else if (tokenType == "named-character") {
