@@ -86,7 +86,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
 
         //Timer to poll scribbler at minimum frequency
         private System.Timers.Timer PollTimer;
-        private static int TimerDelay = 250;           //4 Hz
+        private static int TimerDelay = 2500;           //4 Hz
 
         /// <summary>
         /// Default Service Constructor
@@ -167,18 +167,39 @@ namespace Myro.Services.Scribbler.ScribblerBase
 
             //add custom handlers to interleave
             mainInterleave.CombineWith(new Interleave(
-                new TeardownReceiverGroup(),
                 new ExclusiveReceiverGroup(
                     Arbiter.ReceiveWithIterator<SetMotors>(true, _mainPort, SetMotorHandler),
                     Arbiter.ReceiveWithIterator<SetLED>(true, _mainPort, SetLEDHandler),
                     Arbiter.ReceiveWithIterator<SetAllLEDs>(true, _mainPort, SetAllLEDsHandler),
                     Arbiter.ReceiveWithIterator<PlayTone>(true, _mainPort, PlayToneHandler),
                     Arbiter.ReceiveWithIterator<SetName>(true, _mainPort, SetNameHandler),
-                    Arbiter.ReceiveWithIterator<ScribblerResponseMessage>(true, _mainPort, ScribblerResponseHandler)
+                    Arbiter.ReceiveWithIterator<ScribblerResponseMessage>(true, _mainPort, ScribblerResponseHandler),
+                    Arbiter.ReceiveWithIterator<SetLoud>(true, _mainPort, SetLoudHandler),
+                    Arbiter.ReceiveWithIterator<SetLEDFront>(true, _mainPort, SetLEDFrontHandler),
+                    Arbiter.ReceiveWithIterator<SetLEDBack>(true, _mainPort, SetLEDBackHandler)
                 ),
+                new ConcurrentReceiverGroup()));
+
+            // These handlers do not use the state, so can run concurrently to those above.
+            Activate(Arbiter.ReceiveWithIterator<GetObstacle>(true, _mainPort, GetObstacleHandler));
+            Activate(Arbiter.ReceiveWithIterator<GetImage>(true, _mainPort, GetImageHandler));
+
+            // These don't use the state either.
+            // GetWindow has to set up the window, then retrieve it, so it must run exclusively.
+            Activate(new Interleave(
+                new ExclusiveReceiverGroup(
+                    Arbiter.ReceiveWithIterator<GetWindow>(true, _mainPort, GetWindowHandler)
+                    ),
                 new ConcurrentReceiverGroup()
             ));
 
+        }
+
+        private PortSet<ScribblerResponse, Fault> _scribblerComPortPost(ScribblerCommand cmd)
+        {
+            SendScribblerCommand sendcmd = new SendScribblerCommand(cmd);
+            _scribblerComPort.Post(sendcmd);
+            return sendcmd.ResponsePort;
         }
 
         /// <summary>
@@ -200,7 +221,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
         /// <param name="e"></param>
         private void PollTimer_Elapsed(object sender, EventArgs e)
         {
-            ScribblerCommand cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.GET_ALL);
+            ScribblerCommand cmd = new ScribblerCommand(ScribblerHelper.Commands.GET_ALL);
             SendScribblerCommand sendcmd = new SendScribblerCommand(cmd);
             _scribblerComPort.Post(sendcmd);
         }
@@ -229,7 +250,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
 
             _state.RobotName = shortenedname;
 
-            ScribblerCommand cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.SET_NAME, shortenedname);
+            ScribblerCommand cmd = new ScribblerCommand(ScribblerHelper.Commands.SET_NAME, shortenedname);
             SendScribblerCommand sendcmd = new SendScribblerCommand(cmd);
             _scribblerComPort.Post(sendcmd);
 
@@ -366,7 +387,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
                 yield break;
             }
 
-            ScribblerCommand cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.SET_SPEAKER_2,
+            ScribblerCommand cmd = new ScribblerCommand(ScribblerHelper.Commands.SET_SPEAKER_2,
                                                         message.Body.Duration,
                                                         message.Body.Frequency1,
                                                         message.Body.Frequency2);
@@ -385,7 +406,6 @@ namespace Myro.Services.Scribbler.ScribblerBase
             yield break;
         }
 
-        [ServiceHandler(ServiceHandlerBehavior.Exclusive)]
         public IEnumerator<ITask> SetLoudHandler(SetLoud message)
         {
             if (!_state.Connected)
@@ -394,7 +414,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
                 message.ResponsePort.Post(new Fault());
                 yield break;
             }
-            ScribblerCommand cmd = new ScribblerCommand((byte)
+            ScribblerCommand cmd = new ScribblerCommand(
                 (message.Body.IsLoud ? ScribblerHelper.Commands.SET_LOUD : ScribblerHelper.Commands.SET_QUIET));
             SendScribblerCommand sendcmd = new SendScribblerCommand(cmd);
             _scribblerComPort.Post(sendcmd);
@@ -424,32 +444,32 @@ namespace Myro.Services.Scribbler.ScribblerBase
                 case 0: //left LED
                     _state.LEDLeft = message.Body.State;
                     if (message.Body.State)
-                        cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.SET_LED_LEFT_ON);
+                        cmd = new ScribblerCommand(ScribblerHelper.Commands.SET_LED_LEFT_ON);
                     else
-                        cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.SET_LED_LEFT_OFF);
+                        cmd = new ScribblerCommand(ScribblerHelper.Commands.SET_LED_LEFT_OFF);
                     break;
                 case 1: //center LED
                     _state.LEDCenter = message.Body.State;
                     if (message.Body.State)
-                        cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.SET_LED_CENTER_ON);
+                        cmd = new ScribblerCommand(ScribblerHelper.Commands.SET_LED_CENTER_ON);
                     else
-                        cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.SET_LED_CENTER_OFF);
+                        cmd = new ScribblerCommand(ScribblerHelper.Commands.SET_LED_CENTER_OFF);
                     break;
                 case 2: //right LED
                     _state.LEDRight = message.Body.State;
                     if (message.Body.State)
-                        cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.SET_LED_RIGHT_ON);
+                        cmd = new ScribblerCommand(ScribblerHelper.Commands.SET_LED_RIGHT_ON);
                     else
-                        cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.SET_LED_RIGHT_OFF);
+                        cmd = new ScribblerCommand(ScribblerHelper.Commands.SET_LED_RIGHT_OFF);
                     break;
                 case 3: //all LEDs
                     _state.LEDLeft = message.Body.State;
                     _state.LEDCenter = message.Body.State;
                     _state.LEDRight = message.Body.State;
                     if (message.Body.State)
-                        cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.SET_LED_ALL_ON);
+                        cmd = new ScribblerCommand(ScribblerHelper.Commands.SET_LED_ALL_ON);
                     else
-                        cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.SET_LED_ALL_OFF);
+                        cmd = new ScribblerCommand(ScribblerHelper.Commands.SET_LED_ALL_OFF);
                     break;
                 default:
                     LogError("LED number set incorrect");
@@ -472,7 +492,6 @@ namespace Myro.Services.Scribbler.ScribblerBase
             yield break;
         }
 
-        [ServiceHandler(ServiceHandlerBehavior.Exclusive)]
         public IEnumerator<ITask> SetLEDFrontHandler(SetLEDFront set)
         {
             if (!_state.Connected)
@@ -484,9 +503,9 @@ namespace Myro.Services.Scribbler.ScribblerBase
 
             ScribblerCommand cmd;
             if (set.Body.FrontLED == true)
-                cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.SET_DONGLE_LED_ON);
+                cmd = new ScribblerCommand(ScribblerHelper.Commands.SET_DONGLE_LED_ON);
             else
-                cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.SET_DONGLE_LED_OFF);
+                cmd = new ScribblerCommand(ScribblerHelper.Commands.SET_DONGLE_LED_OFF);
 
             SendScribblerCommand sendcmd = new SendScribblerCommand(cmd);
             _scribblerComPort.Post(sendcmd);
@@ -500,7 +519,6 @@ namespace Myro.Services.Scribbler.ScribblerBase
         }
 
 
-        [ServiceHandler(ServiceHandlerBehavior.Exclusive)]
         public IEnumerator<ITask> SetLEDBackHandler(SetLEDBack set)
         {
             if (!_state.Connected)
@@ -510,7 +528,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
                 yield break;
             }
 
-            ScribblerCommand cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.SET_DIMMER_LED, set.Body.BackLED);
+            ScribblerCommand cmd = new ScribblerCommand(ScribblerHelper.Commands.SET_DIMMER_LED, set.Body.BackLED);
 
             SendScribblerCommand sendcmd = new SendScribblerCommand(cmd);
             _scribblerComPort.Post(sendcmd);
@@ -541,7 +559,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
             _state.LEDRight = message.Body.RightLED;
 
             //send command
-            ScribblerCommand cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.SET_LED_ALL,
+            ScribblerCommand cmd = new ScribblerCommand(ScribblerHelper.Commands.SET_LED_ALL,
                                                             _state.LEDLeft,
                                                             _state.LEDCenter,
                                                             _state.LEDRight);
@@ -584,7 +602,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
             _state.MotorRight = message.Body.RightSpeed;
 
             //send command
-            ScribblerCommand cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.SET_MOTORS, (byte)_state.MotorRight, (byte)_state.MotorLeft);
+            ScribblerCommand cmd = new ScribblerCommand(ScribblerHelper.Commands.SET_MOTORS, (byte)_state.MotorRight, (byte)_state.MotorLeft);
             SendScribblerCommand sendcmd = new SendScribblerCommand(cmd);
             _scribblerComPort.Post(sendcmd);
 
@@ -610,7 +628,6 @@ namespace Myro.Services.Scribbler.ScribblerBase
             yield break;
         }
 
-        [ServiceHandler(ServiceHandlerBehavior.Exclusive)]
         public IEnumerator<ITask> GetObstacleHandler(GetObstacle get)
         {
             if (!_state.Connected)
@@ -623,13 +640,13 @@ namespace Myro.Services.Scribbler.ScribblerBase
             switch (get.Body.Value)
             {
                 case 0:
-                    cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.GET_DONGLE_L_IR);
+                    cmd = new ScribblerCommand(ScribblerHelper.Commands.GET_DONGLE_L_IR);
                     break;
                 case 1:
-                    cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.GET_DONGLE_C_IR);
+                    cmd = new ScribblerCommand(ScribblerHelper.Commands.GET_DONGLE_C_IR);
                     break;
                 case 2:
-                    cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.GET_DONGLE_R_IR);
+                    cmd = new ScribblerCommand(ScribblerHelper.Commands.GET_DONGLE_R_IR);
                     break;
                 default:
                     get.ResponsePort.Post(RSUtils.FaultOfException(
@@ -652,7 +669,6 @@ namespace Myro.Services.Scribbler.ScribblerBase
             yield break;
         }
 
-        [ServiceHandler(ServiceHandlerBehavior.Exclusive)]
         public IEnumerator<ITask> GetImageHandler(GetImage get)
         {
             if (!_state.Connected)
@@ -661,34 +677,113 @@ namespace Myro.Services.Scribbler.ScribblerBase
                 yield break;
             }
 
-            ScribblerCommand cmd;
-            ImageResponse response = new ImageResponse()
+            MyroImageType imageType = null;
+            byte[] responseData = null;
+            Fault fault = null;
+            // Retrieve image data based on image type
+            if (get.Body.ImageType.Equals(MyroImageType.Color.Guid))
             {
-                Width = ScribblerHelper.ImageWidth,
-                Height = ScribblerHelper.ImageHeight,
-                Timestamp = DateTime.Now,
-            };
-            if (get.Body.ImageType.Equals(Params.Image_Color))
-                cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.GET_IMAGE);
+                imageType = MyroImageType.Color;
+                yield return Arbiter.Choice(_scribblerComPortPost(
+                    new ScribblerCommand(ScribblerHelper.Commands.GET_IMAGE)),
+                    delegate(ScribblerResponse r) { responseData = r.Data; },
+                    delegate(Fault f) { fault = f; });
+            }
+            else if (get.Body.ImageType.Equals(MyroImageType.Gray.Guid))
+            {
+                imageType = MyroImageType.Gray;
+                var gw = new GetWindow(new GetWindowBody()
+                {
+                    Window = 0,
+                    XLow = 1,
+                    YLow = 0,
+                    XHigh = 255,
+                    YHigh = 191,
+                    XStep = 2,
+                    YStep = 2
+                });
+                _mainPort.Post(gw);
+                yield return Arbiter.Choice(gw.ResponsePort,
+                    delegate(ImageResponse r)
+                    {
+                        if (r.Data.Length != imageType.Width * imageType.Height)
+                            fault = RSUtils.FaultOfException(new Exception("Invalid grayscale image from GetWindow"));
+                        else
+                            responseData = r.Data;
+                    },
+                    delegate(Fault f) { fault = f; });
+            }
             else
             {
-                get.ResponsePort.Post(RSUtils.FaultOfException(
-                        new ArgumentException("Invalid image type: " + get.Body.ImageType, "ImageType")));
-                yield break;
+                fault = RSUtils.FaultOfException(
+                        new ArgumentException("Invalid image type: " + get.Body.ImageType, "ImageType"));
             }
 
-            SendScribblerCommand sendcmd = new SendScribblerCommand(cmd);
-            _scribblerComPort.Post(sendcmd);
-            yield return Arbiter.Choice(sendcmd.ResponsePort,
-                delegate(ScribblerResponse r)
-                {
-                    response.Data = r.Data;
-                    get.ResponsePort.Post(response);
-                },
-                delegate(Fault f)
-                {
-                    get.ResponsePort.Post(f);
-                });
+            // Send the image response
+            if (fault == null)
+            {
+                if (responseData != null && imageType != null)
+                    get.ResponsePort.Post(new ImageResponse()
+                        {
+                            Width = imageType.Width,
+                            Height = imageType.Height,
+                            Timestamp = DateTime.Now,
+                            Data = responseData
+                        });
+                else
+                    get.ResponsePort.Post(RSUtils.FaultOfException(new Exception("Internal error: in ScribblerBase.GetImageHandler")));
+            }
+            else
+                get.ResponsePort.Post(fault);
+
+            yield break;
+        }
+
+        public IEnumerator<ITask> GetWindowHandler(GetWindow get)
+        {
+            Fault fault = null;
+            yield return Arbiter.Choice(
+                _scribblerComPortPost(new ScribblerCommand(
+                    ScribblerHelper.Commands.SET_WINDOW,
+                    new byte[] {
+                        get.Body.Window,
+                        get.Body.XLow,
+                        get.Body.YLow,
+                        get.Body.XHigh,
+                        get.Body.YHigh,
+                        get.Body.XStep,
+                        get.Body.YStep },
+                        false, 0)),
+                    delegate(ScribblerResponse r) { },
+                    delegate(Fault f) { fault = f; });
+
+            int width = ((int)get.Body.XHigh - (int)get.Body.XLow) / get.Body.XStep + 1,
+                height = ((int)get.Body.YHigh - (int)get.Body.YLow) / get.Body.YStep + 1,
+                size = width * height;
+            if (fault == null)
+                yield return Arbiter.Choice(
+                    _scribblerComPortPost(new ScribblerCommand(
+                        ScribblerHelper.Commands.GET_WINDOW,
+                        new byte[] { get.Body.Window },
+                        false,
+                        size)),
+                    delegate(ScribblerResponse r)
+                    {
+                        get.ResponsePort.Post(new ImageResponse()
+                        {
+                            Width = width,
+                            Height = height,
+                            Timestamp = DateTime.Now,
+                            Data = r.Data
+                        });
+                    },
+                    delegate(Fault f) { fault = f; });
+
+            if (fault != null)
+                get.ResponsePort.Post(fault);
+
+            yield break;
+
         }
 
 
@@ -1074,7 +1169,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
                     {
                         if (parameters["buttonOk"] == "Poll" && _state.Connected)
                         {
-                            ScribblerCommand cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.GET_ALL);
+                            ScribblerCommand cmd = new ScribblerCommand(ScribblerHelper.Commands.GET_ALL);
                             SendScribblerCommand sendcmd = new SendScribblerCommand(cmd);
                             _scribblerComPort.Post(sendcmd);
                             Activate(

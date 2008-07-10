@@ -63,13 +63,22 @@ namespace Myro.Services.Scribbler.FlukeCam
                 {
                     try
                     {
-                        req.ResponsePort.Post(new webcam.QueryFrameResponse()
-                        {
-                            Format = req.Body.Format,
-                            Size = new System.Drawing.Size(r.Width, r.Height),
-                            TimeStamp = r.Timestamp,
-                            Frame = convertColorToRGB(r.Data, r.Width, r.Height)
-                        });
+                        if (req.Body.Format.Equals(MyroImageType.Color.Guid))
+                            req.ResponsePort.Post(new webcam.QueryFrameResponse()
+                            {
+                                Format = req.Body.Format,
+                                Size = new System.Drawing.Size(r.Width, r.Height),
+                                TimeStamp = r.Timestamp,
+                                Frame = convertColorToRGB(r.Data, r.Width, r.Height)
+                            });
+                        else if(req.Body.Format.Equals(MyroImageType.Gray.Guid))
+                            req.ResponsePort.Post(new webcam.QueryFrameResponse()
+                            {
+                                Format = req.Body.Format,
+                                Size = new System.Drawing.Size(r.Width, r.Height),
+                                TimeStamp = r.Timestamp,
+                                Frame = convertGrayToRGB(r.Data, r.Width, r.Height)
+                            });
                     }
                     catch (Exception e)
                     {
@@ -144,6 +153,21 @@ namespace Myro.Services.Scribbler.FlukeCam
                     ret[destLineOffset++] = (byte)Math.Max(Math.Min(y - 0.39466 * u - 0.58060 * v, 255), 0);
                     ret[destLineOffset++] = (byte)Math.Max(Math.Min(y + 2.03211 * u, 255), 0);
                 }
+            }
+
+            return ret;
+        }
+
+        private byte[] convertGrayToRGB(byte[] color, int width, int height)
+        {
+            byte[] ret = new byte[width * height * 3];
+
+            int destOffset = 0;
+            for (int i = 0; i < color.Length; i++)
+            {
+                ret[destOffset++] = color[i];
+                ret[destOffset++] = color[i];
+                ret[destOffset++] = color[i];
             }
 
             return ret;

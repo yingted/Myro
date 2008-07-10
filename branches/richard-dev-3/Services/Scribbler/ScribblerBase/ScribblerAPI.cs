@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Dss.Core.Attributes;
 using W3C.Soap;
+using Myro.Utilities;
 
 
 // Scribbler API Helper
@@ -22,13 +23,13 @@ using W3C.Soap;
 
 namespace Myro.Services.Scribbler.ScribblerBase
 {
-    internal class ScribblerHelper
+    public static class ScribblerHelper
     {
 
         private const int SetMessageReturnLength = 12;
         private const int ScribblerOutMessageSize = 9;
-        public const int ImageWidth = 256;
-        public const int ImageHeight = 192;
+        //public const int ImageWidth = 256;
+        //public const int ImageHeight = 192;
 
         /// <summary>
         /// enumeration of Scribbler API commands
@@ -68,7 +69,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
 
             //GET_RLE             = 82,  // a segmented and run-length encoded image
             GET_IMAGE           = 83,  // the entire 256 x 192 image in YUYV format
-            //GET_WINDOW          = 84,  // the windowed image (followed by which window)
+            GET_WINDOW          = 84,  // the windowed image (followed by which window)
             GET_DONGLE_L_IR = 85,  // number of returned pulses when left emitter is turned on
             GET_DONGLE_C_IR = 86,  // number of returned pulses when center emitter is turned on
             GET_DONGLE_R_IR = 87,  // number of returned pulses when right emitter is turned on
@@ -113,7 +114,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
             //SET_RESET_SCRIBBLER = 124,
             //SET_SERIAL_ERASE    = 125,
             SET_DIMMER_LED = 126,
-            //SET_WINDOW          = 127,
+            SET_WINDOW          = 127,
             //SET_FORWARDNESS     = 128,
             //SET_WHITE_BALANCE   = 129,
             //SET_NO_WHITE_BALANCE= 130,
@@ -137,7 +138,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
         /// </summary>
         /// <param name="cmd"></param>
         /// <returns></returns>
-        public int ReturnSize(Commands cmd)
+        public static int ReturnSize(Commands cmd)
         {
             // Negative size means variable data, limited by either the absolute value of the negative number or
             // 0x0A, whichever is smaller.
@@ -218,6 +219,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
                 case Commands.SET_DONGLE_LED_ON:
                 case Commands.SET_DIMMER_LED:
                 case Commands.SOFT_RESET:
+                case Commands.SET_WINDOW:
                     return 0;
                     break;
                 case Commands.GET_DONGLE_C_IR:
@@ -226,7 +228,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
                     return 2;
                     break;
                 case Commands.GET_IMAGE:
-                    return ImageWidth * ImageHeight * 3;
+                    return MyroImageType.Color.Width * MyroImageType.Color.Height;
                     break;
                 default:
                     Console.WriteLine("Command missmatch - return size");
@@ -235,7 +237,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
             }
         }
 
-        public int CommandSize(Commands cmd)
+        public static int CommandSize(Commands cmd)
         {
             switch (cmd)
             {
@@ -291,6 +293,9 @@ namespace Myro.Services.Scribbler.ScribblerBase
                 case Commands.SOFT_RESET:
                     return 1;
                     break;
+                case Commands.SET_WINDOW:
+                    return 8;
+                    break;
                 default:
                     Console.WriteLine("Command missmatch - command size");
                     return 0;
@@ -298,7 +303,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
             }
         }
 
-        public bool HasEcho(Commands cmd)
+        public static bool HasEcho(Commands cmd)
         {
             switch (cmd)
             {
@@ -348,6 +353,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
                 case Commands.GET_DONGLE_R_IR:
                 case Commands.GET_IMAGE:
                 case Commands.SOFT_RESET:
+                case Commands.SET_WINDOW:
                     return false;
                     break;
                 default:

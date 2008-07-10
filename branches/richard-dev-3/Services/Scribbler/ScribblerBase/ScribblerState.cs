@@ -97,10 +97,10 @@ namespace Myro.Services.Scribbler.ScribblerBase
 
         [DataMember]
         public bool LEDLeft;
-        
+
         [DataMember]
         public bool LEDRight;
-       
+
         [DataMember]
         public bool LEDCenter;
 
@@ -143,7 +143,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
         public DateTime LightSensorsLastUpdated;
     }
 
-   
+
 
     /// <summary>
     /// Custom subscriptions
@@ -157,7 +157,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
         public List<string> Sensors;
     }
 
-    
+
 
     /// <summary>
     /// An array of bytes to send to Scribbler
@@ -165,22 +165,15 @@ namespace Myro.Services.Scribbler.ScribblerBase
     [DataContract]
     public class ScribblerCommand
     {
-        private byte   _commandType;
-        private byte[] _data;
-
         [DataMember]
-        public byte CommandType
-        {
-            get { return _commandType; }
-            set { _commandType = value; }
-        }
-
+        public byte CommandType;
         [DataMember]
-        public byte[] Data
-        {
-            get { return _data; }
-            set { _data = value; }
-        }
+        public byte[] Data;
+        [DataMember]
+        public bool HasEcho;
+        [DataMember]
+        public int ResponseLength;
+
 
         /// <summary>
         /// Standard constructor
@@ -188,21 +181,33 @@ namespace Myro.Services.Scribbler.ScribblerBase
         public ScribblerCommand()
         { }
 
+        public ScribblerCommand(ScribblerHelper.Commands command, byte[] data, bool hasEcho, int responseLength)
+        {
+            CommandType = (byte)command;
+            Data = data;
+            HasEcho = hasEcho;
+            ResponseLength = responseLength;
+        }
+
         /// <summary>
         /// For "get" commands and simple "set" commands
         /// </summary>
         /// <param name="command"></param>
-        public ScribblerCommand(byte command)
+        public ScribblerCommand(ScribblerHelper.Commands command)
         {
-            _data = new byte[8];
-            _commandType = command;
+            Data = new byte[ScribblerHelper.CommandSize(command) - 1];
+            CommandType = (byte)command;
+            HasEcho = ScribblerHelper.HasEcho(command);
+            ResponseLength = ScribblerHelper.ReturnSize(command);
         }
 
-        public ScribblerCommand(byte command, byte data)
+        public ScribblerCommand(ScribblerHelper.Commands command, byte data)
         {
-            _data = new byte[8];
-            _commandType = command;
-            _data[0] = data;
+            Data = new byte[ScribblerHelper.CommandSize(command) - 1];
+            CommandType = (byte)command;
+            Data[0] = data;
+            HasEcho = ScribblerHelper.HasEcho(command);
+            ResponseLength = ScribblerHelper.ReturnSize(command);
         }
 
         /// <summary>
@@ -211,12 +216,14 @@ namespace Myro.Services.Scribbler.ScribblerBase
         /// <param name="command"></param>
         /// <param name="data1"></param>
         /// <param name="data2"></param>
-        public ScribblerCommand(byte command, byte data1, byte data2)
+        public ScribblerCommand(ScribblerHelper.Commands command, byte data1, byte data2)
         {
-            _data = new byte[8];
-            _commandType = command;
-            _data[0] = data1;
-            _data[1] = data2;
+            Data = new byte[ScribblerHelper.CommandSize(command) - 1];
+            CommandType = (byte)command;
+            Data[0] = data1;
+            Data[1] = data2;
+            HasEcho = ScribblerHelper.HasEcho(command);
+            ResponseLength = ScribblerHelper.ReturnSize(command);
         }
 
         /// <summary>
@@ -224,16 +231,18 @@ namespace Myro.Services.Scribbler.ScribblerBase
         /// </summary>
         /// <param name="command"></param>
         /// <param name="data"></param>
-        public ScribblerCommand(byte command, string data)
+        public ScribblerCommand(ScribblerHelper.Commands command, string data)
         {
-            _data = new byte[8];
-            _commandType = command;
+            Data = new byte[ScribblerHelper.CommandSize(command) - 1];
+            CommandType = (byte)command;
             int length = Math.Min(data.Length, 8);
             char[] tmp = data.ToCharArray(0, length);
             for (int i = 0; i < length; i++)
-                _data[i] = (byte)tmp[i];
+                Data[i] = (byte)tmp[i];
             for (int i = length; i < 8; i++)
-                _data[i] = 0;
+                Data[i] = 0;
+            HasEcho = ScribblerHelper.HasEcho(command);
+            ResponseLength = ScribblerHelper.ReturnSize(command);
         }
 
         /// <summary>
@@ -243,31 +252,35 @@ namespace Myro.Services.Scribbler.ScribblerBase
         /// <param name="duration"></param>
         /// <param name="frequency1"></param>
         /// <param name="frequency2"></param>
-        public ScribblerCommand(byte command, int duration, int frequency1, int frequency2)
+        public ScribblerCommand(ScribblerHelper.Commands command, int duration, int frequency1, int frequency2)
         {
-            _data = new byte[8];
-            _commandType = command;
+            Data = new byte[ScribblerHelper.CommandSize(command) - 1];
+            CommandType = (byte)command;
 
-            _data[0] = (byte)(duration >> 8);
-            _data[1] = (byte)duration;
+            Data[0] = (byte)(duration >> 8);
+            Data[1] = (byte)duration;
 
-            _data[2] = (byte)(frequency1 >> 8);
-            _data[3] = (byte)frequency1;
+            Data[2] = (byte)(frequency1 >> 8);
+            Data[3] = (byte)frequency1;
 
-            _data[4] = (byte)(frequency2 >> 8);
-            _data[5] = (byte)frequency2;
+            Data[4] = (byte)(frequency2 >> 8);
+            Data[5] = (byte)frequency2;
+            HasEcho = ScribblerHelper.HasEcho(command);
+            ResponseLength = ScribblerHelper.ReturnSize(command);
         }
 
         /// <summary>
         /// For setAllLEDs command
         /// </summary>
-        public ScribblerCommand(byte command, bool left, bool center, bool right)
+        public ScribblerCommand(ScribblerHelper.Commands command, bool left, bool center, bool right)
         {
-            _data = new byte[8];
-            _commandType = command;
-            _data[0] = left ? (byte)1 : (byte)0;
-            _data[1] = center ? (byte)1 : (byte)0;
-            _data[2] = right ? (byte)1 : (byte)0;
+            Data = new byte[ScribblerHelper.CommandSize(command) - 1];
+            CommandType = (byte)command;
+            Data[0] = left ? (byte)1 : (byte)0;
+            Data[1] = center ? (byte)1 : (byte)0;
+            Data[2] = right ? (byte)1 : (byte)0;
+            HasEcho = ScribblerHelper.HasEcho(command);
+            ResponseLength = ScribblerHelper.ReturnSize(command);
         }
 
     }

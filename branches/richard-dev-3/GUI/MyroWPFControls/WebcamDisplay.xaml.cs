@@ -97,8 +97,8 @@ namespace Myro.GUI.WPFControls
             {
                 if (isActive && curType != null)
                 {
-                    try
-                    {
+                    //try
+                    //{
                         Bitmap img = Robot.TakeBitmap(curType);
                         Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal,
                             new ThreadStart(delegate()
@@ -109,11 +109,11 @@ namespace Myro.GUI.WPFControls
                                 Int32Rect.Empty,
                                 System.Windows.Media.Imaging.BitmapSizeOptions.FromEmptyOptions());
                         }));
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(e);
-                    }
+                //    }
+                //    catch (Exception e)
+                //    {
+                //        Console.WriteLine(e);
+                //    }
                 }
                 Thread.Sleep(delayMs);
             }

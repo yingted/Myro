@@ -3,6 +3,9 @@
   <RobotName>Scribby </RobotName>
   <IRLeft>false</IRLeft>
   <IRRight>false</IRRight>
+  <ObstacleLeft>0</ObstacleLeft>
+  <ObstacleCenter>0</ObstacleCenter>
+  <ObstacleRight>0</ObstacleRight>
   <LineLeft>false</LineLeft>
   <LineRight>false</LineRight>
   <Stall>false</Stall>
@@ -14,6 +17,8 @@
   <LEDLeft>false</LEDLeft>
   <LEDRight>false</LEDRight>
   <LEDCenter>false</LEDCenter>
+  <LEDFront>false</LEDFront>
+  <LEDBack>0</LEDBack>
   <Connected>true</Connected>
   <ComPort>3</ComPort>
   <BumpersLastUpdated>2008-06-19T14:01:21.284861-07:00</BumpersLastUpdated>

@@ -42,6 +42,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
         SetName,
         GetObstacle,
         GetImage,
+        GetWindow,
         ScribblerResponseMessage,
         SelectiveSubscribe, //IMPORTANT: Because SelectiveSubscribe inherits from Subscribe, it must go on top.
         Subscribe>
@@ -199,6 +200,25 @@ namespace Myro.Services.Scribbler.ScribblerBase
     }
     [DataContract]
     [DataMemberConstructor]
+    public class GetWindowBody
+    {
+        [DataMember]
+        public byte Window;
+        [DataMember]
+        public byte XLow;
+        [DataMember]
+        public byte YLow;
+        [DataMember]
+        public byte XHigh;
+        [DataMember]
+        public byte YHigh;
+        [DataMember]
+        public byte XStep;
+        [DataMember]
+        public byte YStep;
+    }
+    [DataContract]
+    [DataMemberConstructor]
     public class ImageResponse
     {
         [DataMember]
@@ -218,6 +238,12 @@ namespace Myro.Services.Scribbler.ScribblerBase
     {
         public GetImage() { }
         public GetImage(GetImageBody body) : base(body) { }
+    }
+
+    public class GetWindow : Get<GetWindowBody, PortSet<ImageResponse, Fault>>
+    {
+        public GetWindow() { }
+        public GetWindow(GetWindowBody b) : base(b) { }
     }
 
     /// <summary>

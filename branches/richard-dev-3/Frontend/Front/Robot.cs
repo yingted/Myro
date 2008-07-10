@@ -276,26 +276,19 @@ namespace Myro
         public static Bitmap TakeBitmap(MyroImageType type)
         {
             var r = TakePicture(type);
-            
+
             Bitmap ret;
             System.Drawing.Imaging.BitmapData bitmapData;
-                ret = new Bitmap(r.Width, r.Height, type.PixelFormat);
-                // Get bitmap data
-                bitmapData = ret.LockBits(
-                    new Rectangle(0, 0, ret.Width, ret.Height),
-                    System.Drawing.Imaging.ImageLockMode.WriteOnly,
-                    type.PixelFormat);
+            ret = new Bitmap(r.Width, r.Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+            // Get bitmap data
+            bitmapData = ret.LockBits(
+                new Rectangle(0, 0, ret.Width, ret.Height),
+                System.Drawing.Imaging.ImageLockMode.WriteOnly,
+                System.Drawing.Imaging.PixelFormat.Format24bppRgb);
 
             // Copy frame
-            IntPtr scanline = bitmapData.Scan0;
-            int frameOffset = 0;
-            for(int i = 0; i<ret.Height; i++)
-            {
-                System.Runtime.InteropServices.Marshal.Copy(
-                    r.Image, frameOffset, scanline, type.BitsPerPixel * ret.Width);
-                scanline = new IntPtr(scanline.ToInt64() + (long)bitmapData.Stride);
-                frameOffset += (type.BitsPerPixel * ret.Width);
-            }
+            System.Runtime.InteropServices.Marshal.Copy(
+                r.Image, 0, bitmapData.Scan0, 3 * ret.Width * ret.Height);
 
             ret.UnlockBits(bitmapData);
             return ret;

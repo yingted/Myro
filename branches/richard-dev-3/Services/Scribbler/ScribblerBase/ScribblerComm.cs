@@ -31,8 +31,6 @@ namespace Myro.Services.Scribbler.ScribblerBase
 
         private const int _baudRate = 38400;
 
-        private ScribblerHelper helper = new ScribblerHelper();
-
         /// <summary>
         /// after this number of milliseconds without seeing data, the scribbler will send its 'find me' message
         /// </summary>
@@ -140,10 +138,10 @@ namespace Myro.Services.Scribbler.ScribblerBase
 #endif
 
                 // Send the GETINFO string
-                ScribblerResponse srp = SendCommand(new ScribblerCommand((byte)ScribblerHelper.Commands.GET_INFO));
+                ScribblerResponse srp = SendCommand(new ScribblerCommand(ScribblerHelper.Commands.GET_INFO));
 
                 // GTEMP: Send twice - some problem with dongle
-                srp = SendCommand(new ScribblerCommand((byte)ScribblerHelper.Commands.GET_INFO));
+                srp = SendCommand(new ScribblerCommand(ScribblerHelper.Commands.GET_INFO));
 
                 UTF8Encoding enc = new UTF8Encoding();
                 string s = enc.GetString(srp.Data);
@@ -183,7 +181,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
                 }
 
                 // Now get robotname
-                srp = SendCommand(new ScribblerCommand((byte)ScribblerHelper.Commands.GET_NAME));
+                srp = SendCommand(new ScribblerCommand(ScribblerHelper.Commands.GET_NAME));
                 enc = new UTF8Encoding();
                 robotname = enc.GetString(srp.Data);
                 if (robotname.Length == 0)
@@ -195,7 +193,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
                 }
 
                 // Sending Echo off command
-                SendCommand(new ScribblerCommand((byte)ScribblerHelper.Commands.SET_ECHO_MODE, (byte)1, (byte)1));
+                SendCommand(new ScribblerCommand(ScribblerHelper.Commands.SET_ECHO_MODE, (byte)1, (byte)1));
 
 #if DEBUG
                 Console.WriteLine("TrySerialPort found: " + robotname); //DEBUG
@@ -329,7 +327,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
         {
             ScribblerResponse echo = null;
             ScribblerResponse response = null;
-            int outMessageSize = helper.CommandSize((ScribblerHelper.Commands)cmd.CommandType);
+            int outMessageSize = cmd.Data.Length + 1;
             byte[] buffer = new byte[outMessageSize];
 
             if (buffer != null)
@@ -367,6 +365,13 @@ namespace Myro.Services.Scribbler.ScribblerBase
                 Console.Write("\n");
 #endif
 
+                if (cmd.CommandType == (byte)ScribblerHelper.Commands.GET_IMAGE)
+                {
+                    Console.WriteLine("Image");
+                    Console.WriteLine(cmd.Data.Length);
+                    Console.WriteLine(cmd.ResponseLength);
+                    Console.WriteLine(cmd.HasEcho);
+                }
 
                 //try
                 //{
@@ -382,10 +387,11 @@ namespace Myro.Services.Scribbler.ScribblerBase
                 //throw new IOException();
                 //}
 
-                if (helper.HasEcho((ScribblerHelper.Commands)cmd.CommandType))
+
+                if (cmd.HasEcho)
                     echo = GetEcho(buffer, outMessageSize);
 
-                response = GetCommandResponse(helper.ReturnSize((ScribblerHelper.Commands)cmd.CommandType), helper.HasEcho((ScribblerHelper.Commands)cmd.CommandType));
+                response = GetCommandResponse(cmd.ResponseLength, cmd.HasEcho);
             }
             return response;
         }

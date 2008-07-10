@@ -32,7 +32,7 @@ namespace Myro.Utilities
         public static int DefaultDsspPort = 50001;
 
         public static readonly Guid Image_Color = new Guid("8FC7EC69-B0AE-42ab-B3D4-CF167B924D95");
-        //public static readonly Guid = new Guid("DBFCB483-0DF4-4424-AD65-9B87F96A1732");
+        public static readonly Guid Image_Gray = new Guid("DBFCB483-0DF4-4424-AD65-9B87F96A1732");
     }
 
     public class MyroImageType
@@ -41,9 +41,11 @@ namespace Myro.Utilities
         public string FriendlyName;
         public Guid Guid;
         public int BitsPerPixel;
+        public int Width;
+        public int Height;
         public System.Drawing.Imaging.PixelFormat PixelFormat;
 
-        MyroImageType()
+        public MyroImageType()
         {
         }
 
@@ -51,7 +53,7 @@ namespace Myro.Utilities
         {
             var ret = KnownImageTypes.Find(it => it.Guid.Equals(guid));
             if (ret == default(MyroImageType))
-                throw new ArgumentException("Guid does not represent a known Myro image type.  Type the Guids in Myro.Utilities.Params");
+                throw new ArgumentException("Guid does not represent a known Myro image type.  Try the Guids in Myro.Utilities.Params");
             return ret;
         }
 
@@ -59,23 +61,38 @@ namespace Myro.Utilities
         {
             var ret = KnownImageTypes.Find(it => it.ShortName.Equals(shortName, StringComparison.CurrentCultureIgnoreCase));
             if (ret == default(MyroImageType))
-                throw new ArgumentException("Guid does not represent a known Myro image type.  Type the Guids in Myro.Utilities.Params");
+                throw new ArgumentException("Guid does not represent a known Myro image type.  Try the Guids in Myro.Utilities.Params");
             return ret;
         }
+
+        public static MyroImageType Color = new MyroImageType()
+        {
+            ShortName = "color",
+            FriendlyName = "Uncompressed Color",
+            Guid = Params.Image_Color,
+            BitsPerPixel = 3,
+            Width = 256,
+            Height = 192,
+            PixelFormat = System.Drawing.Imaging.PixelFormat.Format24bppRgb
+        };
+        public static MyroImageType Gray = new MyroImageType()
+        {
+            ShortName = "gray",
+            FriendlyName = "Uncompressed Grayscale",
+            Guid = Params.Image_Gray,
+            BitsPerPixel = 1,
+            Width = 128,
+            Height = 96,
+            PixelFormat = System.Drawing.Imaging.PixelFormat.Format16bppGrayScale
+        };
 
         /// <summary>
         /// Known image types
         /// </summary>
         public static List<MyroImageType> KnownImageTypes = new List<MyroImageType>()
         {
-            new MyroImageType()
-            {
-                ShortName = "color", 
-                FriendlyName = "Uncompressed Color", 
-                Guid = Params.Image_Color,
-                BitsPerPixel = 3,
-                PixelFormat = System.Drawing.Imaging.PixelFormat.Format24bppRgb
-            }
+            Color,
+            Gray
         };
     }
 
