@@ -79,6 +79,15 @@ namespace Myro.Services.Scribbler.FlukeCam
                                 TimeStamp = r.Timestamp,
                                 Frame = convertGrayToRGB(r.Data, r.Width, r.Height)
                             });
+                        else if(req.Body.Format.Equals(MyroImageType.JpegColor.Guid))
+                            req.ResponsePort.Post(new webcam.QueryFrameResponse()
+                            {
+                                Format = req.Body.Format,
+                                Size = new System.Drawing.Size(r.Width, r.Height),
+                                TimeStamp = r.Timestamp,
+                                Frame = r.Data
+                            });
+
                     }
                     catch (Exception e)
                     {

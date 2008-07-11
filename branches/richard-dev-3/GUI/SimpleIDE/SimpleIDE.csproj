@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30428</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{81B3CA9F-6F49-408D-84D9-4427B710836E}</ProjectGuid>
     <OutputType>WinExe</OutputType>
@@ -69,6 +69,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="ClosingWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="ConfigEditor.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -101,6 +105,9 @@
   <ItemGroup>
     <Compile Include="AboutBox.xaml.cs">
       <DependentUpon>AboutBox.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ClosingWindow.xaml.cs">
+      <DependentUpon>ClosingWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="ConfigEditor.xaml.cs">
       <DependentUpon>ConfigEditor.xaml</DependentUpon>

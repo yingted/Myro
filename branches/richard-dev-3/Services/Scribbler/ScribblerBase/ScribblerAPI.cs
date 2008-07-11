@@ -77,7 +77,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
             //GET_BATTERY         = 89,  // battery voltage
             //GET_SERIAL_MEM      = 90,  // with the address returns the value in serial memory
             //GET_SCRIB_PROGRAM   = 91,  // with offset, returns the scribbler program buffer
-            //GET_CAM_PARAM       = 92,  // get the camera parameter at specified address
+            GET_CAM_PARAM       = 92,  // get the camera parameter at specified address
             //GET_IMAGE_COMPRESSED= 93,
             //GET_BLOB_WINDOW     = 94,
             //GET_BLOB            = 95,
@@ -118,18 +118,45 @@ namespace Myro.Services.Scribbler.ScribblerBase
             //SET_FORWARDNESS     = 128,
             //SET_WHITE_BALANCE   = 129,
             //SET_NO_WHITE_BALANCE= 130,
-            //SET_CAM_PARAM       = 131  // set the camera parameter at specified address to a value
+            SET_CAM_PARAM       = 131,  // set the camera parameter at specified address to a value
 
             //SET_UART0           = 132,
             //SET_PASS_BYTE       = 133,
             //SET_PASSTHROUGH     = 134,
 
-            //GET_JPEG_GRAY_HEADER= 135,
-            //GET_JPEG_GRAY_SCAN  = 136,
-            //GET_JPEG_COLOR_HEADER=137,
-            //GET_JPEG_COLOR_SCAN = 138
+            GET_JPEG_GRAY_HEADER= 135,
+            GET_JPEG_GRAY_SCAN  = 136,
+            GET_JPEG_COLOR_HEADER=137,
+            GET_JPEG_COLOR_SCAN = 138
             // NOTE: If you add or modify these commands, you will also need to modify the functions below
             // as well as ScribblerResponseHandler in Scribbler.cs
+        }
+
+        public static class CameraParams
+        {
+            public const byte CAM_PID = 0x0A;
+            public const byte CAM_PID_DEFAULT = 0x76;
+    
+            public const byte CAM_VER=0x0B;
+            public const byte CAM_VER_DEFAULT=0x48;
+        
+            public const byte CAM_BRT=0x06;
+            public const byte CAM_BRT_DEFAULT=0x80;
+        
+            public const byte CAM_EXP=0x10;
+            public const byte CAM_EXP_DEFAULT=0x41;
+        
+            public const byte CAM_COMA=0x12;
+            public const byte CAM_COMA_DEFAULT=0x14;
+            public const byte CAM_COMA_WHITE_BALANCE_ON= (CAM_COMA_DEFAULT |  (1 << 2));
+            public const byte CAM_COMA_WHITE_BALANCE_OFF=(CAM_COMA_DEFAULT & ~(1 << 2));
+        
+            public const byte CAM_COMB=0x13;
+            public const byte CAM_COMB_DEFAULT=0xA3;
+            public const byte CAM_COMB_GAIN_CONTROL_ON= (CAM_COMB_DEFAULT |  (1 << 1));
+            public const byte CAM_COMB_GAIN_CONTROL_OFF=(CAM_COMB_DEFAULT & ~(1 << 1));
+            public const byte CAM_COMB_EXPOSURE_CONTROL_ON= (CAM_COMB_DEFAULT |  (1 << 0));
+            public const byte CAM_COMB_EXPOSURE_CONTROL_OFF=(CAM_COMB_DEFAULT & ~(1 << 0));
         }
 
         /// <summary>
@@ -220,6 +247,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
                 case Commands.SET_DIMMER_LED:
                 case Commands.SOFT_RESET:
                 case Commands.SET_WINDOW:
+                case Commands.SET_CAM_PARAM:
                     return 0;
                     break;
                 case Commands.GET_DONGLE_C_IR:
@@ -227,11 +255,19 @@ namespace Myro.Services.Scribbler.ScribblerBase
                 case Commands.GET_DONGLE_R_IR:
                     return 2;
                     break;
+                case Commands.GET_CAM_PARAM:
+                    return 1;
+                    break;
+                case Commands.GET_JPEG_COLOR_HEADER:
+                case Commands.GET_JPEG_COLOR_SCAN:
+                case Commands.GET_JPEG_GRAY_HEADER:
+                case Commands.GET_JPEG_GRAY_SCAN:
+                    return -294912;
                 case Commands.GET_IMAGE:
                     return MyroImageType.Color.Width * MyroImageType.Color.Height;
                     break;
                 default:
-                    Console.WriteLine("Command missmatch - return size");
+                    Console.WriteLine("Unknown command - return size");
                     return 1;
                     break;
             }
@@ -285,9 +321,14 @@ namespace Myro.Services.Scribbler.ScribblerBase
                 case Commands.GET_DONGLE_L_IR:
                 case Commands.GET_DONGLE_R_IR:
                 case Commands.GET_IMAGE:
+                case Commands.GET_JPEG_COLOR_HEADER:
+                case Commands.GET_JPEG_COLOR_SCAN:
+                case Commands.GET_JPEG_GRAY_HEADER:
+                case Commands.GET_JPEG_GRAY_SCAN:
                     return 1;
                     break;
                 case Commands.SET_DIMMER_LED:
+                case Commands.GET_CAM_PARAM:
                     return 2;
                     break;
                 case Commands.SOFT_RESET:
@@ -296,9 +337,12 @@ namespace Myro.Services.Scribbler.ScribblerBase
                 case Commands.SET_WINDOW:
                     return 8;
                     break;
+                case Commands.SET_CAM_PARAM:
+                    return 3;
+                    break;
                 default:
-                    Console.WriteLine("Command missmatch - command size");
-                    return 0;
+                    Console.WriteLine("Unknown command - command size");
+                    return 1;
                     break;
             }
         }
@@ -354,10 +398,16 @@ namespace Myro.Services.Scribbler.ScribblerBase
                 case Commands.GET_IMAGE:
                 case Commands.SOFT_RESET:
                 case Commands.SET_WINDOW:
+                case Commands.SET_CAM_PARAM:
+                case Commands.GET_CAM_PARAM:
+                case Commands.GET_JPEG_COLOR_HEADER:
+                case Commands.GET_JPEG_COLOR_SCAN:
+                case Commands.GET_JPEG_GRAY_HEADER:
+                case Commands.GET_JPEG_GRAY_SCAN:
                     return false;
                     break;
                 default:
-                    Console.WriteLine("Command missmatch - command echo");
+                    Console.WriteLine("Unknown command - command echo");
                     return false;
                     break;
             }

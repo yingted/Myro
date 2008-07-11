@@ -89,7 +89,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
                 if (name != null)
                 {
                     System.Threading.Thread.Sleep(500); //give the BT device some time between closing and opening of the port
-                    _serialPort.Open(); 
+                    _serialPort.Open();
                     foundRobotName = name;
                     openedComPort = comPort;
                 }
@@ -365,19 +365,18 @@ namespace Myro.Services.Scribbler.ScribblerBase
                 Console.Write("\n");
 #endif
 
-                if (cmd.CommandType == (byte)ScribblerHelper.Commands.GET_IMAGE)
-                {
-                    Console.WriteLine("Image");
-                    Console.WriteLine(cmd.Data.Length);
-                    Console.WriteLine(cmd.ResponseLength);
-                    Console.WriteLine(cmd.HasEcho);
-                }
 
                 //try
                 //{
                 // When requesting a response, clear the inbound buffer 
-                if (_serialPort.BytesToRead > 0)
+                //Console.WriteLine(_serialPort.BytesToRead + " bytes left over");
+                while (_serialPort.BytesToRead > 0)
                     _serialPort.DiscardInBuffer();
+
+                //Console.WriteLine(((ScribblerHelper.Commands)cmd.CommandType).ToString());
+                //Console.WriteLine("Command: " + cmd.Data.Length);
+                //Console.WriteLine("Response: " + cmd.ResponseLength);
+                //Console.WriteLine("Echo: " + cmd.HasEcho);
 
                 _serialPort.Write(buffer, 0, ix);
                 //}
@@ -389,9 +388,9 @@ namespace Myro.Services.Scribbler.ScribblerBase
 
 
                 if (cmd.HasEcho)
-                    echo = GetEcho(buffer, outMessageSize);
+                    echo = GetEcho(buffer);
 
-                response = GetCommandResponse(cmd.ResponseLength, cmd.HasEcho);
+                response = GetCommandResponse(cmd);
             }
             return response;
         }
@@ -403,33 +402,48 @@ namespace Myro.Services.Scribbler.ScribblerBase
         /// </summary>
         /// <param name="outBuff">The outbound message to match</param>
         /// <returns>ScribblerResponse</returns>
-        private ScribblerResponse GetEcho(byte[] outBuff, int echoSize)
+        private ScribblerResponse GetEcho(byte[] outBuff)
         {
-            byte[] inBuff = new byte[echoSize];
+            byte[] inBuff = new byte[outBuff.Length];
             ScribblerResponse response = null;
-            int ixOutBuff = 0;
-            DateTime lastbytetime = DateTime.Now;
+            //int ixOutBuff = 0;
+            //DateTime lastbytetime = DateTime.Now;
             //try
             //{
-            while (ixOutBuff < echoSize) // && Compare(DateTime.Now, lastbytetime) < ReadTimeOut)
+
+            // Read the whole echo in one chunk, with 500ms timeout
+            int count = 0;
+            while (_serialPort.BytesToRead < outBuff.Length)
             {
-                byte[] temp = new byte[1];
-                _serialPort.Read(temp, 0, 1); //get 1 byte
-                if (temp[0] == outBuff[ixOutBuff])
-                {
-                    inBuff[ixOutBuff] = temp[0];
-                    ixOutBuff++;
-                    lastbytetime = DateTime.Now;
-                }
-                else
-                {
-                    Console.WriteLine("Echo missmatch");
-                    break;
-                }
+                if(++count > 50)
+                    throw new TimeoutException("Timed out waiting for command echo of " + outBuff.Length + " bytes");
+                Thread.Sleep(10); //spin
             }
 
+            _serialPort.Read(inBuff, 0, outBuff.Length);
+            for(int i=0; i<outBuff.Length; i++)
+                if(inBuff[i] != outBuff[i])
+                    Console.WriteLine("Echo mismatch");
+
+            //while (ixOutBuff < echoSize) // && Compare(DateTime.Now, lastbytetime) < ReadTimeOut)
+            //{
+            //    byte[] temp = new byte[1];
+            //    _serialPort.Read(temp, 0, 1); //get 1 byte
+            //    if (temp[0] == outBuff[ixOutBuff])
+            //    {
+            //        inBuff[ixOutBuff] = temp[0];
+            //        ixOutBuff++;
+            //        lastbytetime = DateTime.Now;
+            //    }
+            //    else
+            //    {
+            //        Console.WriteLine("Echo missmatch");
+            //        break;
+            //    }
+            //}
+
             response = new ScribblerResponse();
-            response.Data = (byte[])inBuff.Clone();
+            response.Data = inBuff;
 
 #if DEBUG
                 Console.Write("Echo: ");
@@ -467,8 +481,11 @@ namespace Myro.Services.Scribbler.ScribblerBase
         /// </summary>
         /// <param name="nBytes">number of bytes to read (includes the command type byte)</param>
         /// <returns>ScribblerResponse</returns>
-        private ScribblerResponse GetCommandResponse(int nBytes, bool cmdEcho)
+        private ScribblerResponse GetCommandResponse(ScribblerCommand cmd)
         {
+            int nBytes = cmd.ResponseLength;
+            bool cmdEcho = cmd.HasEcho;
+
             //Console.WriteLine("GetCommandResponse: creating buffer");
             byte[] inBuff = new Byte[Math.Abs(nBytes)];
 
@@ -477,27 +494,60 @@ namespace Myro.Services.Scribbler.ScribblerBase
             //Console.WriteLine("Check 2");
             int read = 0;
             bool error = false, done = false;
-            //try
-            //{
+
+            // Set the default EOM character to a linefeed
+            if (cmd.EndMarker1 == null)
+            {
+                cmd.EndMarker1 = 0x0A;
+                cmd.EndMarker2 = null;
+            }
+
             while (read < Math.Abs(nBytes) && !done)
             {
                 int canread;
                 int count = 0;
-                while (((canread = _serialPort.BytesToRead) == 0) && count++ < 5)
-                    Thread.Sleep(50); //spin 
+                while (((canread = _serialPort.BytesToRead) == 0) && count++ < 100)
+                    Thread.Sleep(20); //spin 
 
-                if (count > 5)
+                if (canread == 0)
                     break;
+
+                //Console.WriteLine("Spun for " + (count*10) + " ms, got chunk of " + canread);
 
                 if (nBytes < 0)
                 {
+                    if (cmd.CommandType == (byte)ScribblerHelper.Commands.GET_JPEG_COLOR_SCAN)
+                    {
+                        Console.WriteLine("JPEG");
+                    }
                     //Console.WriteLine("Reading variable length (buffer size " + inBuff.Length + ")");
                     for (int i = 0; i < canread; i++)
                     {
                         _serialPort.Read(inBuff, read++, 1);
-                        //Console.WriteLine("  Got " + inBuff[read - 1] + " at " + (read - 1));
-                        if (inBuff[read - 1] == 0x0A)
-                            done = true;
+
+                        // NOTE: This is a hack to get the header length from the first
+                        // two bytes of the return from GET_JPEG_HEADER.
+                        if (read == 2 &&
+                            (cmd.CommandType == (byte)ScribblerHelper.Commands.GET_JPEG_COLOR_HEADER ||
+                            cmd.CommandType == (byte)ScribblerHelper.Commands.GET_JPEG_GRAY_HEADER))
+                        {
+                            nBytes = (int)inBuff[0] + ((int)inBuff[1] << 8) + 2;
+                            Console.WriteLine("Looking for JPEG header of " + nBytes + " bytes");
+                        }
+                        else if(nBytes < 0) // Have to check this again because of the JPEG hack, changed nBytes
+                        {
+                            //Console.WriteLine("  Got " + inBuff[read - 1] + " at " + (read - 1));
+                            if (cmd.EndMarker2 == null)
+                            {
+                                if (inBuff[read - 1] == cmd.EndMarker1)
+                                    done = true;
+                            }
+                            else if (read >= 2)
+                            {
+                                if (inBuff[read - 2] == cmd.EndMarker1 && inBuff[read - 1] == cmd.EndMarker2)
+                                    done = true;
+                            }
+                        }
                     }
                 }
                 else
@@ -517,8 +567,12 @@ namespace Myro.Services.Scribbler.ScribblerBase
                 }
             }
 
+            //Console.WriteLine("GetCommandResponse: " + _serialPort.BytesToRead + " left over");
 
-            int dataBytes = (cmdEcho ? Math.Abs(nBytes) - 1 : Math.Abs(nBytes));
+            if (read < nBytes)
+                throw new Exception("Command response of " + read + " was too short: " + (ScribblerHelper.Commands)cmd.CommandType);
+
+            int dataBytes = (cmdEcho ? read - 1 : read);
             response = new ScribblerResponse(Math.Max(0, dataBytes));
             response.CommandType = (cmdEcho ? inBuff[inBuff.Length - 1] : (byte)0);
             Array.Copy(inBuff, response.Data, dataBytes);
@@ -534,12 +588,6 @@ namespace Myro.Services.Scribbler.ScribblerBase
                     }
                     Console.Write("\n");
 #endif
-            //}
-            //catch (Exception ex)
-            //{
-            //    Console.WriteLine("GetCommandResponse Exception: " + ex);
-            //    //throw;
-            //}
             return response;
         }
 

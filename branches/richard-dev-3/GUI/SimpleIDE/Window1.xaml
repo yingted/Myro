@@ -31,7 +31,7 @@
             <RowDefinition Height="auto"/>
             <RowDefinition />
         </Grid.RowDefinitions>
-        <wnd:TopBar Grid.Row="0" RobotChange="OnRobotChange" Focusable="false" />
+        <wnd:TopBar x:Name="topBar"  Grid.Row="0" RobotChange="OnRobotChange" Focusable="false" />
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="62*" />

@@ -261,14 +261,17 @@ namespace Myro.GUI.ControlPanel
         {
             if (PollSliderGlow != null && pollingSlider != null)
             {
+                delayMs = (int)(reversePollValue(pollingSlider.Value) * 1000.0);
                 //PollSliderGlow.Duration = TimeSpan.FromMilliseconds(pollingSlider.Value);
-                if (reversePollValue(pollingSlider.Value) == pollingSlider.Maximum)
+                if (pollingSlider.Maximum - reversePollValue(pollingSlider.Value) <= .02 )
                 {
+                    shouldUpdate = false;
                     PollSliderGlow.Seek(pollingSlider, TimeSpan.FromMilliseconds(0), System.Windows.Media.Animation.TimeSeekOrigin.BeginTime);
                     PollSliderGlow.Pause(pollingSlider);
                 }
                 else
                 {
+                    shouldUpdate = true;
                     PollSliderGlow.Resume(pollingSlider);
                     PollSliderGlow.SetSpeedRatio(pollingSlider, 1.0 / reversePollValue(pollingSlider.Value));
                 }
@@ -277,14 +280,6 @@ namespace Myro.GUI.ControlPanel
 
         private void OnPollLostMouse(object sender, MouseEventArgs e)
         {
-            if (pollingSlider != null)
-            {
-                delayMs = (int)(reversePollValue(pollingSlider.Value) * 1000.0);
-                if (reversePollValue(pollingSlider.Value) == pollingSlider.Maximum)
-                    shouldUpdate = false;
-                else
-                    shouldUpdate = true;
-            }
         }
 
         private double reversePollValue(double value)

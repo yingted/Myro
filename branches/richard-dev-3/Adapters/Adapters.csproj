@@ -63,6 +63,10 @@
       <HintPath>..\..\..\..\..\Microsoft Robotics Dev Studio 2008\bin\RoboticsCommon.proxy.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="ScribblerServices.Proxy, Version=0.0.0.0, Culture=neutral, PublicKeyToken=8b70575c4d29de37, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\Microsoft Robotics Dev Studio 2008\bin\ScribblerServices.Proxy.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
@@ -80,6 +84,7 @@
     <Compile Include="AdapterBank.cs" />
     <Compile Include="AdapterSpec.cs" />
     <Compile Include="AdapterSpecN.cs" />
+    <Compile Include="CamControlAdapter.cs" />
     <Compile Include="DriveAdapter.cs" />
     <Compile Include="IAdapter.cs" />
     <Compile Include="SpeechAdapter.cs" />
@@ -102,6 +107,10 @@
     <ProjectReference Include="..\Services\Scribbler\ScribblerBase\ScribblerBase.csproj">
       <Project>{90C2F23D-A2DD-4EAB-9923-CAAC83BE5416}</Project>
       <Name>ScribblerBase</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Services\Scribbler\ScribblerServices\ScribblerServices.csproj">
+      <Project>{7642E562-01BF-4385-B821-7B1637BAEDA1}</Project>
+      <Name>ScribblerServices</Name>
     </ProjectReference>
     <ProjectReference Include="..\Utilities\Utilities.csproj">
       <Project>{481FEFE3-E033-464C-A1D4-7C95C5AC95C5}</Project>

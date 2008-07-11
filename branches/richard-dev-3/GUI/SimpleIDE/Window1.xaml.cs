@@ -75,11 +75,12 @@ namespace Myro.GUI.SimpleIDE
             {
                 GUIUtilities.ReportUnexpectedException(err);
                 e.Cancel = true;
+                return;
             }
-        }
 
-        private void OnClosed(object sender, EventArgs e)
-        {
+            this.IsEnabled = false;
+            Window closing = new ClosingWindow();
+            closing.Show();
             try
             {
                 controlPanel.Dispose();
@@ -91,6 +92,14 @@ namespace Myro.GUI.SimpleIDE
             {
                 GUIUtilities.ReportUnexpectedException(err);
             }
+            finally
+            {
+                closing.Close();
+            }
+        }
+
+        private void OnClosed(object sender, EventArgs e)
+        {
         }
 
         //private void OnBrowseManifest(object sender, ExecutedRoutedEventArgs e)
@@ -137,14 +146,14 @@ namespace Myro.GUI.SimpleIDE
                 commandWindow.PythonExecuting +=
                     delegate(object source, EventArgs e2)
                     {
-                        //Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal,
-                        //    new ThreadStart(delegate() { runButton.BitmapEffect = new OuterGlowBitmapEffect() { GlowColor = Colors.Orange, GlowSize = 5 }; }));
+                        Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal,
+                            new ThreadStart(delegate() { topBar.IsRunning = true; }));
                     };
                 commandWindow.PythonFinished +=
                     delegate(object source, EventArgs e2)
                     {
-                        //Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal,
-                        //    new ThreadStart(delegate() { runButton.BitmapEffect = null; }));
+                        Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal,
+                            new ThreadStart(delegate() { topBar.IsRunning = false; }));
                     };
                 editor = new Editor(this);
                 editor.InsertedEditor += OnEditorInserted;

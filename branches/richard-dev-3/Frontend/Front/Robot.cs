@@ -18,6 +18,7 @@ namespace Myro
         private static AdapterSpec<DriveAdapter> driveAdapter = null;
         private static AdapterSpec<VectorAdapter> soundAdapter = null;
         private static AdapterSpec<WebcamAdapter> webcamAdapter = null;
+        private static AdapterSpec<CamControlAdapter> camcontrolAdapter = null;
         private static int httpPort;
         private static int dsspPort;
 
@@ -35,11 +36,13 @@ namespace Myro
             bank = new AdapterBank(new List<IAdapterFactory>() {
                 new Myro.Adapters.DriveAdapterFactory(),
                 new Myro.Adapters.VectorAdapterFactory(),
-                new Myro.Adapters.WebcamAdapterFactory()
+                new Myro.Adapters.WebcamAdapterFactory(),
+                new Myro.Adapters.CamControlAdapterFactory()
             });
             driveAdapter = bank.GetAdapterSpec<DriveAdapter>("drive");
             soundAdapter = bank.GetAdapterSpec<VectorAdapter>("tonegen");
             webcamAdapter = bank.GetAdapterSpec<WebcamAdapter>("webcam");
+            camcontrolAdapter = bank.GetAdapterSpec<CamControlAdapter>("camcontrol");
         }
 
         public static void Init(string baseName)
@@ -73,7 +76,7 @@ namespace Myro
         public static void ForwardFor(double power, double seconds)
         {
             checkPowerRange(power);
-            SetMotorsFor(power, power, seconds);
+            SetMotors(power, power, seconds);
         }
 
         public static void Backward(double power)
@@ -85,7 +88,7 @@ namespace Myro
         public static void BackwardFor(double power, double seconds)
         {
             checkPowerRange(power);
-            SetMotorsFor(-power, -power, seconds);
+            SetMotors(-power, -power, seconds);
         }
 
         public static void Turn(string direction, double power)
@@ -101,9 +104,9 @@ namespace Myro
         {
             int dir = checkDirection(direction);
             if (dir == -1)
-                TurnLeftFor(power, seconds);
+                TurnLeft(power, seconds);
             else if (dir == 1)
-                TurnRightFor(power, seconds);
+                TurnRight(power, seconds);
         }
 
         public static void TurnLeft(double power)
@@ -112,10 +115,10 @@ namespace Myro
             SetMotors(-power, power);
         }
 
-        public static void TurnLeftFor(double power, double seconds)
+        public static void TurnLeft(double power, double seconds)
         {
             checkPowerRange(power);
-            SetMotorsFor(-power, power, seconds);
+            SetMotors(-power, power, seconds);
         }
 
         public static void TurnRight(double power)
@@ -124,10 +127,10 @@ namespace Myro
             SetMotors(power, -power);
         }
 
-        public static void TurnRightFor(double power, double seconds)
+        public static void TurnRight(double power, double seconds)
         {
             checkPowerRange(power);
-            SetMotorsFor(power, -power, seconds);
+            SetMotors(power, -power, seconds);
         }
 
         public static void Stop()
@@ -135,7 +138,7 @@ namespace Myro
             SetMotors(0f, 0f);
         }
 
-        public static void SetMotorsFor(double leftPower, double rightPower, double seconds)
+        public static void SetMotors(double leftPower, double rightPower, double seconds)
         {
             SetMotors(leftPower, rightPower);
             Thread.Sleep((int)(seconds * 1000));
@@ -280,6 +283,10 @@ namespace Myro
             Bitmap ret;
             System.Drawing.Imaging.BitmapData bitmapData;
             ret = new Bitmap(r.Width, r.Height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+
+            if (r.Image.Length != 3 * ret.Width * ret.Height)
+                throw new Exception("Image returned from QueryFrame in TakeBitmap is the wrong size");
+
             // Get bitmap data
             bitmapData = ret.LockBits(
                 new Rectangle(0, 0, ret.Width, ret.Height),
@@ -292,6 +299,16 @@ namespace Myro
 
             ret.UnlockBits(bitmapData);
             return ret;
+        }
+
+        public static void DarkenCamera(byte level)
+        {
+            camcontrolAdapter.Adapter.DarkenCamera(level);
+        }
+
+        public static void AutoCamera()
+        {
+            camcontrolAdapter.Adapter.AutoCamera();
         }
 
         #endregion Camera commands

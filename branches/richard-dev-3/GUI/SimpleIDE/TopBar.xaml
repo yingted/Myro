@@ -138,6 +138,7 @@
                     <OuterGlowBitmapEffect x:Name="JewelGlowEffect" GlowColor="OrangeRed" GlowSize="10" Opacity="0" />
                 </Button.BitmapEffect>
                 <Button.Resources>
+                    <OuterGlowBitmapEffect x:Key="RunGlowEffect" GlowColor="Orange" GlowSize="15" />
                     <Storyboard Name="JewelGlow" x:Key="JewelGlow">
                         <DoubleAnimationUsingKeyFrames Storyboard.TargetName="JewelGlowEffect"
                                                    Storyboard.TargetProperty="Opacity"

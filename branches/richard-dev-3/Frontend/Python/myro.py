@@ -20,28 +20,33 @@ def shutdown():
     Robot.Shutdown() 
 def move(translate, rotate):
     Robot.Move(translate, rotate)
-def forward(power):
-    Robot.Forward(power)
-def forwardFor(power, seconds):
-    Robot.ForwardFor(power, seconds)
-def backward(power):
-    Robot.Backward(power)
-def backwardFor(power, seconds):
-    Robot.BackwardFor(power, seconds)
-def turn(direction, power):
-    Robot.Turn(direction, power)
-def turnFor(direction, power, seconds):
-    Robot.TurnFor(direction, power, seconds)
-def turnLeft(power):
-    Robot.TurnLeft(power)
-def turnLeftFor(power, seconds):
-    Robot.TurnLeftFor(power, seconds)
-def turnRight(power):
-    Robot.TurnRight(power)
-def turnRightFor(power, seconds):
-    Robot.TurnRightFor(power, seconds)
+def forward(power, seconds = 0):
+    if seconds == 0:
+        Robot.Forward(power)
+    else:
+        Robot.ForwardFor(power, seconds)
+def backward(power, seconds = 0):
+    if seconds == 0:
+        Robot.Backward(power)
+    else:
+        Robot.Backward(power, seconds)
+def turn(direction, power, seconds = 0):
+    if seconds == 0:
+        Robot.Turn(direction, power)
+    else:
+        Robot.TurnFor(direction, power, seconds)
+def turnLeft(power, seconds = 0):
+    if seconds == 0:
+        Robot.TurnLeft(power)
+    else:
+        Robot.TurnForLeft(power, seconds)
+def turnRight(power, seconds = 0):
+    if seconds == 0:
+        Robot.TurnRight(power)
+    else:
+        Robot.TurnRightFor(power, seconds)
 def stop():
-    Robot.Stop
+    Robot.Stop()
 def setMotors(leftPower, rightPower):
     Robot.SetMotors(leftPower, rightPower)
 def setMotorsFor(leftPower, rightPower, seconds):

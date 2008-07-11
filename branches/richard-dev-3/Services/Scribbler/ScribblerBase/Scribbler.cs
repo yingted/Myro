@@ -22,6 +22,8 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Security.Permissions;
+using System.Drawing;
+using System.Drawing.Imaging;
 using W3C.Soap;
 using Myro.Utilities;
 
@@ -86,7 +88,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
 
         //Timer to poll scribbler at minimum frequency
         private System.Timers.Timer PollTimer;
-        private static int TimerDelay = 2500;           //4 Hz
+        private static int TimerDelay = 250;           //4 Hz
 
         /// <summary>
         /// Default Service Constructor
@@ -129,12 +131,12 @@ namespace Myro.Services.Scribbler.ScribblerBase
                 PollTimer.Interval = TimerDelay;
                 PollTimer.AutoReset = true;
                 PollTimer.Elapsed += new System.Timers.ElapsedEventHandler(PollTimer_Elapsed);
-                PollTimer.Start();
+                //PollTimer.Start();
 
 
                 //play startup tone
                 PlayToneBody startTone = new PlayToneBody(200, 1000, 2000);
-                _mainPort.Post(new PlayTone(startTone));
+                _mainPort.PostUnknownType(new PlayTone(startTone));
 
                 //debug
                 //ScribblerCommand cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.GET_INFO);
@@ -168,27 +170,29 @@ namespace Myro.Services.Scribbler.ScribblerBase
             //add custom handlers to interleave
             mainInterleave.CombineWith(new Interleave(
                 new ExclusiveReceiverGroup(
-                    Arbiter.ReceiveWithIterator<SetMotors>(true, _mainPort, SetMotorHandler),
-                    Arbiter.ReceiveWithIterator<SetLED>(true, _mainPort, SetLEDHandler),
-                    Arbiter.ReceiveWithIterator<SetAllLEDs>(true, _mainPort, SetAllLEDsHandler),
-                    Arbiter.ReceiveWithIterator<PlayTone>(true, _mainPort, PlayToneHandler),
-                    Arbiter.ReceiveWithIterator<SetName>(true, _mainPort, SetNameHandler),
-                    Arbiter.ReceiveWithIterator<ScribblerResponseMessage>(true, _mainPort, ScribblerResponseHandler),
-                    Arbiter.ReceiveWithIterator<SetLoud>(true, _mainPort, SetLoudHandler),
-                    Arbiter.ReceiveWithIterator<SetLEDFront>(true, _mainPort, SetLEDFrontHandler),
-                    Arbiter.ReceiveWithIterator<SetLEDBack>(true, _mainPort, SetLEDBackHandler)
+                    Arbiter.ReceiveWithIteratorFromPortSet<SetMotors>(true, _mainPort, SetMotorHandler),
+                    Arbiter.ReceiveWithIteratorFromPortSet<SetLED>(true, _mainPort, SetLEDHandler),
+                    Arbiter.ReceiveWithIteratorFromPortSet<SetAllLEDs>(true, _mainPort, SetAllLEDsHandler),
+                    Arbiter.ReceiveWithIteratorFromPortSet<PlayTone>(true, _mainPort, PlayToneHandler),
+                    Arbiter.ReceiveWithIteratorFromPortSet<SetName>(true, _mainPort, SetNameHandler),
+                    Arbiter.ReceiveWithIteratorFromPortSet<ScribblerResponseMessage>(true, _mainPort, ScribblerResponseHandler),
+                    Arbiter.ReceiveWithIteratorFromPortSet<SetLoud>(true, _mainPort, SetLoudHandler),
+                    Arbiter.ReceiveWithIteratorFromPortSet<SetLEDFront>(true, _mainPort, SetLEDFrontHandler),
+                    Arbiter.ReceiveWithIteratorFromPortSet<SetLEDBack>(true, _mainPort, SetLEDBackHandler)
                 ),
                 new ConcurrentReceiverGroup()));
 
             // These handlers do not use the state, so can run concurrently to those above.
-            Activate(Arbiter.ReceiveWithIterator<GetObstacle>(true, _mainPort, GetObstacleHandler));
-            Activate(Arbiter.ReceiveWithIterator<GetImage>(true, _mainPort, GetImageHandler));
+            Activate(Arbiter.ReceiveWithIteratorFromPortSet<GetObstacle>(true, _mainPort, GetObstacleHandler));
+            Activate(Arbiter.ReceiveWithIteratorFromPortSet<GetImage>(true, _mainPort, GetImageHandler));
+            Activate(Arbiter.ReceiveWithIteratorFromPortSet<GetCamParam>(true, _mainPort, GetCamParamHandler));
+            Activate(Arbiter.ReceiveWithIteratorFromPortSet<SetCamParam>(true, _mainPort, SetCamParamHandler));
 
             // These don't use the state either.
-            // GetWindow has to set up the window, then retrieve it, so it must run exclusively.
+            // GetWindow has to set up the window, then retrieve it, so it must run one at a time.
             Activate(new Interleave(
                 new ExclusiveReceiverGroup(
-                    Arbiter.ReceiveWithIterator<GetWindow>(true, _mainPort, GetWindowHandler)
+                    Arbiter.ReceiveWithIteratorFromPortSet<GetWindow>(true, _mainPort, GetWindowHandler)
                     ),
                 new ConcurrentReceiverGroup()
             ));
@@ -303,7 +307,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
 
                 //Update our state with the scribbler's response
                 //UpdateState(validResponse);
-                _mainPort.Post(new ScribblerResponseMessage(validResponse));
+                _mainPort.PostUnknownType(new ScribblerResponseMessage(validResponse));
 
                 command.ResponsePort.Post(validResponse);
             }
@@ -594,7 +598,9 @@ namespace Myro.Services.Scribbler.ScribblerBase
             //debug
             if (message.Body.LeftSpeed < 0 || message.Body.LeftSpeed > 200 || message.Body.RightSpeed < 0 || message.Body.RightSpeed > 200)
             {
-                LogError("Scribbler SetMotorHandler: target power set incorrect");
+                //LogError("Scribbler SetMotorHandler: target power set incorrect");
+                message.ResponsePort.Post(RSUtils.FaultOfException(new ArgumentOutOfRangeException("Motor speed", "Motor speed out of range")));
+                yield break;
             }
 
             //update state
@@ -702,7 +708,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
                     XStep = 2,
                     YStep = 2
                 });
-                _mainPort.Post(gw);
+                _mainPort.PostUnknownType(gw);
                 yield return Arbiter.Choice(gw.ResponsePort,
                     delegate(ImageResponse r)
                     {
@@ -712,6 +718,69 @@ namespace Myro.Services.Scribbler.ScribblerBase
                             responseData = r.Data;
                     },
                     delegate(Fault f) { fault = f; });
+            }
+            else if (get.Body.ImageType.Equals(MyroImageType.JpegColor.Guid))
+            {
+                imageType = MyroImageType.JpegColor;
+
+                // Get Header
+                byte[] header = null;
+                // NOTE: Hack here, in ScribblerComm.SendCommand, if the command is to
+                // get a JPEG header, it will get the header length from the first two
+                // bytes from the serial port.
+                yield return Arbiter.Choice(_scribblerComPortPost(new ScribblerCommand(
+                    ScribblerHelper.Commands.GET_JPEG_COLOR_HEADER)),
+                    delegate(ScribblerResponse r) { header = r.Data; },
+                    delegate(Fault f) { fault = f; });
+                if (fault == null)
+                    Console.WriteLine("JPEG: header is " + header.Length + " bytes");
+
+                // Get scans
+                byte[] scans = null;
+                if (fault == null)
+                    yield return Arbiter.Choice(_scribblerComPortPost(new ScribblerCommand(
+                        ScribblerHelper.Commands.GET_JPEG_COLOR_SCAN) { EndMarker1 = 0xff, EndMarker2 = 0xd9 }),
+                        delegate(ScribblerResponse r) { scans = r.Data; },
+                        delegate(Fault f) { fault = f; });
+                //Console.WriteLine("JPEG: scans is " + scans.Length + " bytes");
+
+                // Decode JPEG
+                if (fault == null)
+                {
+                    if (header == null || scans == null)
+                        fault = RSUtils.FaultOfException(new Exception("Had null header or scans in GetImageHandler for jpeg"));
+                    else
+                    {
+                        try
+                        {
+                            byte[] jpeg = new byte[header.Length - 2 + scans.Length];
+                            Array.Copy(header, 2, jpeg, 0, header.Length - 2);
+                            Array.Copy(scans, 0, jpeg, header.Length - 2, scans.Length);
+                            Bitmap bmp = new Bitmap(new MemoryStream(jpeg));
+
+                            if (bmp.Width != imageType.Width || bmp.Height != imageType.Height ||
+                                    bmp.PixelFormat != PixelFormat.Format24bppRgb)
+                                throw new Exception("Bitmap from JPEG had wrong size or format");
+
+                            BitmapData bitmapData = bmp.LockBits(
+                                new Rectangle(0, 0, bmp.Width, bmp.Height),
+                                System.Drawing.Imaging.ImageLockMode.ReadOnly,
+                                System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+
+                            // Copy frame
+                            byte[] frame = new byte[imageType.Width * imageType.Height * 3];
+                            System.Runtime.InteropServices.Marshal.Copy(
+                                bitmapData.Scan0, frame, 0, imageType.Width * imageType.Height * 3);
+
+                            bmp.UnlockBits(bitmapData);
+                        }
+                        catch (Exception e)
+                        {
+                            fault = RSUtils.FaultOfException(e);
+                        }
+
+                    }
+                }
             }
             else
             {
@@ -741,6 +810,12 @@ namespace Myro.Services.Scribbler.ScribblerBase
 
         public IEnumerator<ITask> GetWindowHandler(GetWindow get)
         {
+            if (!_state.Connected)
+            {
+                get.ResponsePort.Post(new Fault() { Reason = new ReasonText[] { new ReasonText() { Value = "Not connected" } } });
+                yield break;
+            }
+
             Fault fault = null;
             yield return Arbiter.Choice(
                 _scribblerComPortPost(new ScribblerCommand(
@@ -786,6 +861,40 @@ namespace Myro.Services.Scribbler.ScribblerBase
 
         }
 
+        public IEnumerator<ITask> GetCamParamHandler(GetCamParam get)
+        {
+            if (!_state.Connected)
+            {
+                get.ResponsePort.Post(new Fault() { Reason = new ReasonText[] { new ReasonText() { Value = "Not connected" } } });
+                yield break;
+            }
+
+            yield return Arbiter.Choice(
+                _scribblerComPortPost(new ScribblerCommand(
+                    ScribblerHelper.Commands.GET_CAM_PARAM,
+                    get.Body.Value)),
+                delegate(ScribblerResponse r) { get.ResponsePort.Post(new ByteBody(r.Data[0])); },
+                delegate(Fault f) { get.ResponsePort.Post(f); });
+            yield break;
+        }
+
+        public IEnumerator<ITask> SetCamParamHandler(SetCamParam set)
+        {
+            if (!_state.Connected)
+            {
+                set.ResponsePort.Post(new Fault() { Reason = new ReasonText[] { new ReasonText() { Value = "Not connected" } } });
+                yield break;
+            }
+
+            yield return Arbiter.Choice(
+                _scribblerComPortPost(new ScribblerCommand(
+                    ScribblerHelper.Commands.SET_CAM_PARAM,
+                    set.Body.Addr,
+                    set.Body.Value)),
+                delegate(ScribblerResponse r) { set.ResponsePort.Post(DefaultUpdateResponseType.Instance); },
+                delegate(Fault f) { set.ResponsePort.Post(f); });
+            yield break;
+        }
 
         /// <summary>
         /// Update state after recieving return data from robot
@@ -1087,7 +1196,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
                         {
                             SetNameBody newname = new SetNameBody(parameters["Name"]);
                             SetName newnamemessage = new SetName(newname);
-                            _mainPort.Post(newnamemessage);
+                            _mainPort.PostUnknownType(newnamemessage);
                             Activate(
                                 Arbiter.Choice(
                                     Arbiter.Receive<DefaultUpdateResponseType>(false, newnamemessage.ResponsePort,
@@ -1138,12 +1247,12 @@ namespace Myro.Services.Scribbler.ScribblerBase
                                 PollTimer.Interval = TimerDelay;
                                 PollTimer.AutoReset = true;
                                 PollTimer.Elapsed += new System.Timers.ElapsedEventHandler(PollTimer_Elapsed);
-                                PollTimer.Start();
+                                //PollTimer.Start();
 
                                 //play startup tone
                                 PlayToneBody startTone = new PlayToneBody(200, 1000, 2000);
                                 PlayTone playToneMessage = new PlayTone(startTone);
-                                _mainPort.Post(playToneMessage);
+                                _mainPort.PostUnknownType(playToneMessage);
 
                                 Activate(
                                     Arbiter.Choice(
@@ -1201,7 +1310,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
                             SetMotorsBody setMotorsBody = new SetMotorsBody(left, right);
                             SetMotors setMotorsRequest = new SetMotors(setMotorsBody);
 
-                            _mainPort.Post(setMotorsRequest);
+                            _mainPort.PostUnknownType(setMotorsRequest);
 
                             Activate(
                                 Arbiter.Choice(
@@ -1223,7 +1332,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
                             SetMotorsBody setMotorsBody = new SetMotorsBody(100, 100);
                             SetMotors setMotorsRequest = new SetMotors(setMotorsBody);
 
-                            _mainPort.Post(setMotorsRequest);
+                            _mainPort.PostUnknownType(setMotorsRequest);
 
                             Activate(
                                 Arbiter.Choice(
@@ -1252,7 +1361,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
 
                             SetAllLedsBody leds = new SetAllLedsBody(left, center, right);
                             SetAllLEDs setAllLeds = new SetAllLEDs(leds);
-                            _mainPort.Post(setAllLeds);
+                            _mainPort.PostUnknownType(setAllLeds);
 
                             Activate(
                                 Arbiter.Choice(
@@ -1285,7 +1394,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
 
                             PlayToneBody playTone = new PlayToneBody(duration, tone1, tone2);
                             PlayTone playToneMessage = new PlayTone(playTone);
-                            _mainPort.Post(playToneMessage);
+                            _mainPort.PostUnknownType(playToneMessage);
 
                             Activate(
                                 Arbiter.Choice(

@@ -14,6 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Media.Animation;
 using System.Diagnostics;
+using System.Windows.Media.Effects;
 
 using Myro.GUI.WPFControls;
 
@@ -73,6 +74,19 @@ namespace Myro.GUI.SimpleIDE
                     }
                 }
             }
+        }
+        private bool isRunning = false;
+        public bool IsRunning
+        {
+            set
+            {
+                isRunning = value;
+                if (isRunning)
+                    JewelButton.BitmapEffect = (BitmapEffect)JewelButton.Resources["RunGlowEffect"];
+                else
+                    JewelButton.BitmapEffect = null;
+            }
+            get { return isRunning; }
         }
         #endregion
 

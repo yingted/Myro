@@ -149,6 +149,7 @@
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="FlukeCam.cs" />
+    <Compile Include="FlukeCamControl.cs" />
     <Compile Include="FlukeObstacle.cs" />
     <Compile Include="LightSensor.cs" />
     <Compile Include="LineSensor.cs" />

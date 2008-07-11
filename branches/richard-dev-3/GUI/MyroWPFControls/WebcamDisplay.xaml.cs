@@ -45,7 +45,8 @@ namespace Myro.GUI.WPFControls
         MyroImageType curType;
         bool shouldExit = false;
         Thread updateThread = null;
-        int delayMs = 500;
+        int delayMs = 250;
+        int setDarkness = -1;
 
         public WebcamDisplay()
         {
@@ -97,8 +98,16 @@ namespace Myro.GUI.WPFControls
             {
                 if (isActive && curType != null)
                 {
-                    //try
-                    //{
+                    try
+                    {
+                        if (setDarkness >= 0)
+                        {
+                            if (setDarkness == 256)
+                                Robot.AutoCamera();
+                            else
+                                Robot.DarkenCamera((byte)setDarkness);
+                            setDarkness = -1;
+                        }
                         Bitmap img = Robot.TakeBitmap(curType);
                         Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal,
                             new ThreadStart(delegate()
@@ -109,11 +118,11 @@ namespace Myro.GUI.WPFControls
                                 Int32Rect.Empty,
                                 System.Windows.Media.Imaging.BitmapSizeOptions.FromEmptyOptions());
                         }));
-                //    }
-                //    catch (Exception e)
-                //    {
-                //        Console.WriteLine(e);
-                //    }
+                    }
+                    catch (Exception)
+                    {
+                        //Console.WriteLine(e);
+                    }
                 }
                 Thread.Sleep(delayMs);
             }
@@ -125,6 +134,26 @@ namespace Myro.GUI.WPFControls
                 IsActive = false;
             else
                 IsActive = true;
+        }
+
+        private void OnDarkValueChange(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            DarkLabel.Content = ((int)DarkSlider.Value).ToString();
+            setDarkness = (byte)(Math.Max(0, Math.Min(255, DarkSlider.Value)));
+        }
+
+        private void OnDarkMouseLost(object sender, MouseEventArgs e)
+        {
+        }
+
+        private void OnDarkChecked(object sender, RoutedEventArgs e)
+        {
+            setDarkness = (byte)(Math.Max(0, Math.Min(255, DarkSlider.Value)));
+        }
+
+        private void OnDarkUnchecked(object sender, RoutedEventArgs e)
+        {
+            setDarkness = 256;
         }
 
     }

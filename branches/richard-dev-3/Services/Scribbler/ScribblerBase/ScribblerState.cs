@@ -174,6 +174,10 @@ namespace Myro.Services.Scribbler.ScribblerBase
         [DataMember]
         public int ResponseLength;
 
+        [DataMember]
+        public Nullable<byte> EndMarker1;
+        [DataMember]
+        public Nullable<byte> EndMarker2;
 
         /// <summary>
         /// Standard constructor
