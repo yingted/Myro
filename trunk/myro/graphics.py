@@ -129,9 +129,15 @@ import Tkinter
 import globvars
 try: 	 
      import Image as PyImage	     
-     import ImageTk	     
 except: 	 
      print >> sys.stderr, "WARNING: Image not found; do you need Python Imaging Library?" 	 
+
+try:
+     import ImageTK
+except:
+     print >> sys.stderr, "WARNING: ImageTk not found; do you need the TkInter Library?"
+
+
 tk = Tkinter	 
 try: 	 
      from numpy import array	     
