@@ -18,7 +18,7 @@ SRCS=src/Pyjama.cs src/PyjamaInterfaces.cs src/Utils.cs \
 	src/TextDocument.cs src/Print.cs src/Shell.cs \
 	src/PythonShell.cs src/PyjamaGUI.cs src/FindDialog.cs
 # FIXME: can we tell which NEWSOURCE we have?
-DEFINES=-d:NEWSOURCEVIEW
+#DEFINES=-d:NEWSOURCEVIEW
 CSFLAGS=-pkg:gtksourceview-sharp-2.0 -pkg:gtk-sharp-2.0 -pkg:glade-sharp-2.0 
 CS=gmcs
 MONO=mono
