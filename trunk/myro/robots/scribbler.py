@@ -600,6 +600,20 @@ class Scribbler(Robot):
                       v_low=v_low, v_high=v_high,
                       smooth_thresh=smooth_thresh)
 
+# conf_rle   - Sets parameters for the Run Length Encoded blob image
+#		returned by takePicture("blob")
+#
+# Y,U,V high/low parameters configure a bounding box (in YUV color space)
+# of pixels that are "on" or white. All other pixels are off or black.
+#
+# Note - The delay parameter should always be 90. it's an internal tuning 
+# parameter, and Keith says Bad Things(TM) happen if it's not 90.
+#
+# The smooth_thresh parameter tells how many pixels must be black/white
+# before the Run Length Encoding (of blob images) recognizes the change
+# and sends a run of the opposite bit. This makes the blob images look 
+# slightly streaky, but greatly increases the efficiency of the RLE compression
+# by eliminating minor noise.
 
     def conf_rle(self, delay = 90, smooth_thresh = 4,
                  y_low=0, y_high=254,
