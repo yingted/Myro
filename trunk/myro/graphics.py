@@ -133,7 +133,7 @@ except:
      print >> sys.stderr, "WARNING: Image not found; do you need Python Imaging Library?" 	 
 
 try:
-     import ImageTK
+     import ImageTk
 except:
      print >> sys.stderr, "WARNING: ImageTk not found; do you need the TkInter Library?"
 
