@@ -382,9 +382,11 @@ class Scribbler(Robot):
             self._set_speaker(int(frequency), int(duration * 1000))
         else:
             self._set_speaker_2(int(frequency), int(frequency2), int(duration * 1000))
-                        
+
         v = self.ser.read(Scribbler.PACKET_LENGTH + 11)
-        print map(lambda x:"0x%x" % ord(x), v)
+
+        if self.debug:
+            print map(lambda x:"0x%x" % ord(x), v)
 
         self.ser.setTimeout(old)
         self.lock.release()
