@@ -372,11 +372,23 @@ class Scribbler(Robot):
         print "Hello, I'm %s!" % name
 
     def beep(self, duration, frequency, frequency2 = None):
+
+        self.lock.acquire() #print "locked acquired"
+        
+        old = self.ser.timeout
+        self.ser.setTimeout(duration)
+
         if frequency2 == None:
             self._set_speaker(int(frequency), int(duration * 1000))
         else:
             self._set_speaker_2(int(frequency), int(frequency2), int(duration * 1000))
+                        
+        v = self.ser.read(Scribbler.PACKET_LENGTH + 11)
+        print map(lambda x:"0x%x" % ord(x), v)
 
+        self.ser.setTimeout(old)
+        self.lock.release()
+        
     def get(self, sensor = "all", *position):
         sensor = sensor.lower()
         if sensor == "config":
@@ -1395,10 +1407,22 @@ class Scribbler(Robot):
         self._set(Scribbler.SET_MOTORS, rightPower, leftPower)
 
     def _read(self, bytes = 1):
+        
+        if self.debug:
+            print "Trying to read", bytes, "bytes", "timeout =", self.ser.timeout
+
         c = self.ser.read(bytes)
+        
+        if self.debug:
+            print "Initially read", len(c), "bytes:",
+            print map(lambda x:"0x%x" % ord(x), c)
+            
         # .nah. bug fix
         while (bytes > 1 and len(c) < bytes):      
             c = c + self.ser.read(bytes-len(c))
+            if self.debug:
+                print map(lambda x:"0x%x" % ord(x), c)
+
         # .nah. end bug fix
         if self.debug:
             print "_read (%d)" % len(c)
@@ -1431,7 +1455,7 @@ class Scribbler(Robot):
         try:
             self.lock.acquire() #print "locked acquired"
             self._write(values)
-            self._read(Scribbler.PACKET_LENGTH) # read echo
+            test = self._read(Scribbler.PACKET_LENGTH) # read echo
             self._lastSensors = self._read(11) # single bit sensors
             #self.ser.flushInput()
             if self.requestStop:
@@ -1465,22 +1489,22 @@ class Scribbler(Robot):
             
         return retval
 
-    def _set_speaker(self, frequency, duration):
-        return self._set(Scribbler.SET_SPEAKER, 
-             duration >> 8,
-                         duration % 256,
-                         frequency >> 8,
-                         frequency % 256)
-
+    def _set_speaker(self, frequency, duration):            
+        self._write([Scribbler.SET_SPEAKER, 
+                    duration >> 8,
+                    duration % 256,
+                    frequency >> 8,
+                    frequency % 256])
+        
     def _set_speaker_2(self, freq1, freq2, duration):
-        return self._set(Scribbler.SET_SPEAKER_2, 
-                         duration >> 8,
-                         duration % 256,
-                         freq1 >> 8,
-                         freq1 % 256,
-                         freq2 >> 8,
-                         freq2 % 256)
-    
+        self._write([Scribbler.SET_SPEAKER_2, 
+                  duration >> 8,
+                  duration % 256,
+                  freq1 >> 8,
+                  freq1 % 256,
+                  freq2 >> 8,
+                  freq2 % 256])
+        
 def cap(c):
     if (c > 255): 
         return 255
