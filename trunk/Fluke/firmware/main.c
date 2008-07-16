@@ -226,7 +226,7 @@ int main (void)
 		{
 		  get_info = 1;
 		}
-	      // scribbler should know have the whole GET_INFO request
+	      // scribbler should now have the whole GET_INFO request
 	      else if ((rqst_idx == 8) && get_info == 1)
 		{
 		  get_info = 2;
