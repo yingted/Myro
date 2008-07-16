@@ -15,6 +15,7 @@ using System.Windows.Shapes;
 using System.Windows.Media.Animation;
 using System.Diagnostics;
 using System.Windows.Media.Effects;
+using System.Threading;
 
 using Myro.GUI.WPFControls;
 
@@ -73,6 +74,10 @@ namespace Myro.GUI.SimpleIDE
                             new BitmapImage(new Uri("file://" + value.IconFilePath));
                     }
                 }
+                // Call this to update the state of grayed-out controls
+                // that depend on CurrentConfig being set to become ungrayed.
+                Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal, new ThreadStart(
+                    delegate() { CommandManager.InvalidateRequerySuggested(); }));
             }
         }
         private bool isRunning = false;
@@ -177,7 +182,7 @@ namespace Myro.GUI.SimpleIDE
 
         private void displayJewelRobotChooser()
         {
-            if (robotChooserMenu == null)
+            if (robotChooserMenu == null || robotChooserMenu.IsOpen == false)
             {
                 JewelButton.SetValue(CheckBox.IsCheckedProperty, true);
 

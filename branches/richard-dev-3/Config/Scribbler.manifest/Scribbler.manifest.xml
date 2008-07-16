@@ -22,7 +22,7 @@
     </ServiceRecordType>
     <ServiceRecordType>
       <dssp:Contract>http://www.roboteducation.org/schemas/2008/06/scribblerirbumper.html</dssp:Contract>
-      <dssp:Service>http://localhost:80/bumpers</dssp:Service>
+      <dssp:Service>http://localhost:80/ir</dssp:Service>
       <dssp:PartnerList />
       <Name>this:ScribblerBumper</Name>
     </ServiceRecordType>
@@ -58,7 +58,7 @@
     </ServiceRecordType>
     <ServiceRecordType>
       <dssp:Contract>http://www.roboteducation.org/schemas/2008/06/flukeobstacle.html</dssp:Contract>
-      <dssp:Service>http://localhost:80/ir</dssp:Service>
+      <dssp:Service>http://localhost:80/obstacle</dssp:Service>
       <dssp:PartnerList />
       <Name>this:FlukeObstacleDetector</Name>
     </ServiceRecordType>

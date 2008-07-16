@@ -18,7 +18,7 @@ using soap = W3C.Soap;
 
 using submgr = Microsoft.Dss.Services.SubscriptionManager;
 using brick = Myro.Services.Scribbler.ScribblerBase.Proxy;
-using drive = Microsoft.Robotics.Services.Drive.Proxy;
+using drive = Microsoft.Robotics.Services.Drive;
 using W3C.Soap;
 
 namespace Myro.Services.Scribbler.Drive
@@ -69,14 +69,14 @@ namespace Myro.Services.Scribbler.Drive
                 _state = new drive.DriveDifferentialTwoWheelState();
                 _state.IsEnabled = true;
 
-                _state.LeftWheel = new Microsoft.Robotics.Services.Motor.Proxy.WheeledMotorState();
+                _state.LeftWheel = new Microsoft.Robotics.Services.Motor.WheeledMotorState();
                 _state.LeftWheel.Name = "Left Wheel";
-                _state.LeftWheel.MotorState = new Microsoft.Robotics.Services.Motor.Proxy.MotorState();
+                _state.LeftWheel.MotorState = new Microsoft.Robotics.Services.Motor.MotorState();
                 _state.LeftWheel.MotorState.Name = "Left Motor";
 
-                _state.RightWheel = new Microsoft.Robotics.Services.Motor.Proxy.WheeledMotorState();
+                _state.RightWheel = new Microsoft.Robotics.Services.Motor.WheeledMotorState();
                 _state.RightWheel.Name = "Right Wheel";
-                _state.RightWheel.MotorState = new Microsoft.Robotics.Services.Motor.Proxy.MotorState();
+                _state.RightWheel.MotorState = new Microsoft.Robotics.Services.Motor.MotorState();
                 _state.RightWheel.MotorState.Name = "Right Motor";
             }
 

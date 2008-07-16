@@ -37,8 +37,11 @@ namespace Myro.Services.Scribbler.Bumper
     [Description("The Scribbler Bumper Service")]
     [Contract(Contract.Identifier)]
     [AlternateContract(vector.Contract.Identifier)] //implementing the generic contract
-    public class BumperService : vector.VectorService
+    public class BumperService : vector.VectorServiceBase
     {
+        [ServicePort(AllowMultipleInstances = false)]
+        vector.VectorOperations _operationsPort = new vector.VectorOperations();
+        protected override vector.VectorOperations OperationsPort { get { return _operationsPort; } }
 
         [Partner("ScribblerBase",
             Contract = brick.Contract.Identifier,

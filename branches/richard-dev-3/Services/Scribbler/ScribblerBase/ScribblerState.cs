@@ -433,7 +433,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
         /// units: ms
         /// </summary>
         [DataMember]
-        public int Duration;
+        public double Duration;
 
         /// <summary>
         /// units: Hz
@@ -451,7 +451,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
         {
         }
 
-        public PlayToneBody(int duration, int freq1, int freq2)
+        public PlayToneBody(double duration, int freq1, int freq2)
         {
             Duration = duration;
             Frequency1 = freq1;

@@ -516,10 +516,10 @@ namespace Myro.Services.Scribbler.ScribblerBase
 
                 if (nBytes < 0)
                 {
-                    if (cmd.CommandType == (byte)ScribblerHelper.Commands.GET_JPEG_COLOR_SCAN)
-                    {
-                        Console.WriteLine("JPEG");
-                    }
+                    //if (cmd.CommandType == (byte)ScribblerHelper.Commands.GET_JPEG_COLOR_SCAN)
+                    //{
+                    //    Console.WriteLine("JPEG");
+                    //}
                     //Console.WriteLine("Reading variable length (buffer size " + inBuff.Length + ")");
                     for (int i = 0; i < canread; i++)
                     {
@@ -532,7 +532,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
                             cmd.CommandType == (byte)ScribblerHelper.Commands.GET_JPEG_GRAY_HEADER))
                         {
                             nBytes = (int)inBuff[0] + ((int)inBuff[1] << 8) + 2;
-                            Console.WriteLine("Looking for JPEG header of " + nBytes + " bytes");
+                            //Console.WriteLine("Looking for JPEG header of " + nBytes + " bytes");
                         }
                         else if(nBytes < 0) // Have to check this again because of the JPEG hack, changed nBytes
                         {
@@ -570,7 +570,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
             //Console.WriteLine("GetCommandResponse: " + _serialPort.BytesToRead + " left over");
 
             if (read < nBytes)
-                throw new Exception("Command response of " + read + " was too short: " + (ScribblerHelper.Commands)cmd.CommandType);
+                throw new ScribblerProtocolException("Command response of " + read + " was too short: " + (ScribblerHelper.Commands)cmd.CommandType);
 
             int dataBytes = (cmdEcho ? read - 1 : read);
             response = new ScribblerResponse(Math.Max(0, dataBytes));

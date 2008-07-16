@@ -86,7 +86,7 @@ namespace Myro.GUI.SimpleIDE
                 controlPanel.Dispose();
                 commandWindow.Dispose();
                 webcamDisplay.Dispose();
-                Robot.Shutdown();
+                Robot.shutdown();
             }
             catch (Exception err)
             {
@@ -162,6 +162,8 @@ namespace Myro.GUI.SimpleIDE
                 editor.ModifiedChanged += OnEditorNameChanged;
                 editor.NameChanged += OnEditorNameChanged;
                 //SetButtonsEnabled();
+
+                editor.RequestNewDocument();
 
                 webcamDisplay.StartUpdate();
             }
@@ -515,30 +517,38 @@ namespace Myro.GUI.SimpleIDE
 
         private void connect()
         {
-            if (connected == false && currentConfig != null)
+            try
             {
-                Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal,
-                    new ThreadStart(delegate()
-                    {
-                        //manifestBox.Text = "Connecting to robot...";
-                        commandWindow.ExecuteCommand("from myro import *");
-                        commandWindow.LogText("> init('" + currentConfig.BaseName + "')\n", Colors.MediumBlue);
-                    }));
-                Robot.Init(currentConfig.ManifestFilePath,
-                    currentConfig.MyroConfiguration.HttpPort,
-                    currentConfig.MyroConfiguration.DsspPort);
-                controlPanel.SetRobot();
-                Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal,
-                    new ThreadStart(delegate()
-                    {
-                        controlPanel.IsEnabled = true;
-                        try
+                if (connected == false && currentConfig != null)
+                {
+                    Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal,
+                        new ThreadStart(delegate()
                         {
-                            //((Image)connectButton.Content).Source = new BitmapImage(new Uri("connected.png", UriKind.Relative));
-                            //manifestBox.Text = (curManifest == null ? "" : curManifest);
-                        }
-                        catch (Exception e) { Console.WriteLine(e); }
-                    }));
+                            //manifestBox.Text = "Connecting to robot...";
+                            commandWindow.ExecuteCommand("from myro import *");
+                            commandWindow.LogText("> init('" + currentConfig.BaseName + "')\n", Colors.MediumBlue);
+                        }));
+                    Robot.Init(currentConfig.ManifestFilePath,
+                        currentConfig.MyroConfiguration.HttpPort,
+                        currentConfig.MyroConfiguration.DsspPort);
+                    controlPanel.SetRobot();
+                    Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal,
+                        new ThreadStart(delegate()
+                        {
+                            controlPanel.IsEnabled = true;
+                            try
+                            {
+                                //((Image)connectButton.Content).Source = new BitmapImage(new Uri("connected.png", UriKind.Relative));
+                                //manifestBox.Text = (curManifest == null ? "" : curManifest);
+                            }
+                            catch (Exception e) { Console.WriteLine(e); }
+                        }));
+                }
+            }
+            catch (Exception e)
+            {
+                Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal,
+                    new ThreadStart(delegate() { GUIUtilities.ReportUnexpectedException(e); }));
             }
         }
 

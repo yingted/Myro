@@ -17,11 +17,11 @@
             </GroupBox>
             <GroupBox Header="Tone generator" Margin="5" Name="groupBox1" VerticalAlignment="Top">
                 <StackPanel Name="stackPanel1">
-                    <Slider ValueChanged="Frequency1Changed" Name="freq1Slider" Minimum="200" Maximum="800" TickPlacement="BottomRight" TickFrequency="0" LostMouseCapture="PlayTone" />
+                    <Slider ValueChanged="Frequency1Changed" Name="freq1Slider" Minimum="400" Maximum="1200" TickPlacement="BottomRight" TickFrequency="0" LostMouseCapture="PlayTone" />
                     <Label Name="freq1Label" HorizontalAlignment="Right">Frequency 1</Label>
-                    <Slider ValueChanged="Frequency2Changed" Name="freq2Slider" Minimum="200" Maximum="800" TickPlacement="BottomRight" TickFrequency="0" LostMouseCapture="PlayTone" />
+                    <Slider ValueChanged="Frequency2Changed" Name="freq2Slider" Minimum="400" Maximum="1200" TickPlacement="BottomRight" TickFrequency="0" LostMouseCapture="PlayTone" />
                     <Label Name="freq2Label" HorizontalAlignment="Right">Frequency 2</Label>
-                    <Slider ValueChanged="DurationChanged" Name="durSlider" Maximum="1000" TickPlacement="BottomRight" TickFrequency="0" LostMouseCapture="PlayTone" />
+                    <Slider ValueChanged="DurationChanged" Name="durSlider" Maximum="1" TickPlacement="BottomRight" TickFrequency="0" LostMouseCapture="PlayTone" SmallChange="0.05" LargeChange="0.1" />
                     <Grid>
                         <CheckBox Checked="SetLoud" Unchecked="SetLoud" Name="loudCheck" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Left" IsChecked="True" ClickMode="Press">Loud</CheckBox>
                         <Label Name="durLabel" Padding="5" HorizontalAlignment="Right">Tone duration</Label>

@@ -217,7 +217,7 @@
                     </MenuItem>
                     <MenuItem Header="_Tools">
                         <MenuItem Header="Show Running _Services..." Command="{x:Static wnd:TopBar.ShowServices}" />
-                        <MenuItem Header="Robot _Configuration Editor..." Command="{x:Static wnd:Window1.ConfigEditor}" />
+                        <MenuItem Header="Robot _Configuration Editor (Admin only!)" Command="{x:Static wnd:Window1.ConfigEditor}" />
                         <MenuItem Header="IDE _Options..." Command="{x:Static wnd:Window1.IDEOptions}" />
                     </MenuItem>
                     <MenuItem Header="_Help">

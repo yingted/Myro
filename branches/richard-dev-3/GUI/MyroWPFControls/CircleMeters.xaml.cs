@@ -29,6 +29,7 @@ namespace Myro.GUI.WPFControls
 
         List<Canvas> canvases = new List<Canvas>();
         List<TextBlock> labels = new List<TextBlock>();
+        List<Label> valueLabels = new List<Label>();
         Color curColor = Brushes.DarkGray.Color;
         double[] curValues = null;
         public static double widthOne = 30;
@@ -56,6 +57,7 @@ namespace Myro.GUI.WPFControls
                 mainGrid.ColumnDefinitions.Add(new ColumnDefinition());
             canvases.Clear();
             labels.Clear();
+            valueLabels.Clear();
             if (count > 0)
             {
                 double widthEach = this.ActualWidth / (double)count;
@@ -98,7 +100,7 @@ namespace Myro.GUI.WPFControls
                         TextWrapping = TextWrapping.WrapWithOverflow,
                         Margin = new Thickness(0),
                         Padding = new Thickness(0),
-                        Foreground=Brushes.CadetBlue,
+                        Foreground = Brushes.CadetBlue,
                     };
                     //l.SetValue(Canvas.TopProperty, 0.0);
                     //l.SetValue(Canvas.LeftProperty, 0.0);
@@ -106,22 +108,35 @@ namespace Myro.GUI.WPFControls
                     l.MouseLeftButtonDown += delegate(object sender, MouseButtonEventArgs e) { valueChangeHelper(myI, e); };
                     labels.Add(l);
 
+                    Label lv = new Label()
+                    {
+                        VerticalAlignment = VerticalAlignment.Center,
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        Padding = new Thickness(0),
+                        Foreground = Brushes.Black,
+                        FontSize = 9,
+                    };
+                    lv.SetValue(Grid.RowProperty, 0);
+                    lv.MouseLeftButtonDown += delegate(object sender, MouseButtonEventArgs e) { valueChangeHelper(myI, e); };
+                    valueLabels.Add(lv);
+
                     Grid g = new Grid()
                     {
-                        VerticalAlignment=VerticalAlignment.Top,
-                        HorizontalAlignment=HorizontalAlignment.Stretch,
+                        VerticalAlignment = VerticalAlignment.Top,
+                        HorizontalAlignment = HorizontalAlignment.Stretch,
                     };
                     g.SetValue(Grid.ColumnProperty, i);
-                    g.RowDefinitions.Add(new RowDefinition() { Height=GridLength.Auto });
-                    g.RowDefinitions.Add(new RowDefinition() { Height=GridLength.Auto });
+                    g.RowDefinitions.Add(new RowDefinition() { Height = GridLength.Auto });
+                    g.RowDefinitions.Add(new RowDefinition() { Height = GridLength.Auto });
                     g.Children.Add(c);
+                    g.Children.Add(lv);
                     g.Children.Add(l);
                     mainGrid.Children.Add(g);
                 }
             }
         }
 
-        public void setData(double[] values, string[] labels, double min, double max)
+        public void SetData(double[] values, string[] labels, double min, double max)
         {
             this.curValues = values;
             double maxCircleRadius = widthOne / 2;
@@ -147,6 +162,10 @@ namespace Myro.GUI.WPFControls
                     new Point(widthOne / 2.0, widthOne / 2.0), radii[i], radii[i]);
                 if (i < labels.Length)
                     this.labels[i].Text = labels[i];
+                if (values[i] == 0.0 || values[i] == 1.0)
+                    this.valueLabels[i].Content = "";
+                else
+                    this.valueLabels[i].Content = Math.Round(values[i], 2).ToString();
                 //g.FillEllipse(brush, xs[i] + offset, offset, 2 * radii.ElementAt(i), 2 * radii.ElementAt(i));
                 //g.DrawString(vals[i].ToString(), font, black, xs[i] + maxCircleRadius, (float)maxCircleRadius * 1.8f, format);
                 //Console.WriteLine(labels.Length + " labels");

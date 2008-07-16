@@ -11,7 +11,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using game = Microsoft.Robotics.Services.GameController.Proxy;
+using game = Myro.Services.GameController.Proxy;
 using Microsoft.Ccr.Core;
 using Myro;
 
@@ -41,7 +41,7 @@ namespace Myro.GUI.WPFControls
         {
             try
             {
-                Robot.SetMotors(motors.Item0, motors.Item1);
+                Robot.motors(motors.Item0, motors.Item1);
             }
             catch (Exception) { }
         }

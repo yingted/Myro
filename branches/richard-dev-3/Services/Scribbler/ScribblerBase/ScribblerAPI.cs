@@ -68,8 +68,8 @@ namespace Myro.Services.Scribbler.ScribblerBase
             GET_DATA = 81,
 
             //GET_RLE             = 82,  // a segmented and run-length encoded image
-            GET_IMAGE           = 83,  // the entire 256 x 192 image in YUYV format
-            GET_WINDOW          = 84,  // the windowed image (followed by which window)
+            GET_IMAGE = 83,  // the entire 256 x 192 image in YUYV format
+            GET_WINDOW = 84,  // the windowed image (followed by which window)
             GET_DONGLE_L_IR = 85,  // number of returned pulses when left emitter is turned on
             GET_DONGLE_C_IR = 86,  // number of returned pulses when center emitter is turned on
             GET_DONGLE_R_IR = 87,  // number of returned pulses when right emitter is turned on
@@ -77,7 +77,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
             //GET_BATTERY         = 89,  // battery voltage
             //GET_SERIAL_MEM      = 90,  // with the address returns the value in serial memory
             //GET_SCRIB_PROGRAM   = 91,  // with offset, returns the scribbler program buffer
-            GET_CAM_PARAM       = 92,  // get the camera parameter at specified address
+            GET_CAM_PARAM = 92,  // get the camera parameter at specified address
             //GET_IMAGE_COMPRESSED= 93,
             //GET_BLOB_WINDOW     = 94,
             //GET_BLOB            = 95,
@@ -114,19 +114,19 @@ namespace Myro.Services.Scribbler.ScribblerBase
             //SET_RESET_SCRIBBLER = 124,
             //SET_SERIAL_ERASE    = 125,
             SET_DIMMER_LED = 126,
-            SET_WINDOW          = 127,
+            SET_WINDOW = 127,
             //SET_FORWARDNESS     = 128,
             //SET_WHITE_BALANCE   = 129,
             //SET_NO_WHITE_BALANCE= 130,
-            SET_CAM_PARAM       = 131,  // set the camera parameter at specified address to a value
+            SET_CAM_PARAM = 131,  // set the camera parameter at specified address to a value
 
             //SET_UART0           = 132,
             //SET_PASS_BYTE       = 133,
             //SET_PASSTHROUGH     = 134,
 
-            GET_JPEG_GRAY_HEADER= 135,
-            GET_JPEG_GRAY_SCAN  = 136,
-            GET_JPEG_COLOR_HEADER=137,
+            GET_JPEG_GRAY_HEADER = 135,
+            GET_JPEG_GRAY_SCAN = 136,
+            GET_JPEG_COLOR_HEADER = 137,
             GET_JPEG_COLOR_SCAN = 138
             // NOTE: If you add or modify these commands, you will also need to modify the functions below
             // as well as ScribblerResponseHandler in Scribbler.cs
@@ -136,27 +136,27 @@ namespace Myro.Services.Scribbler.ScribblerBase
         {
             public const byte CAM_PID = 0x0A;
             public const byte CAM_PID_DEFAULT = 0x76;
-    
-            public const byte CAM_VER=0x0B;
-            public const byte CAM_VER_DEFAULT=0x48;
-        
-            public const byte CAM_BRT=0x06;
-            public const byte CAM_BRT_DEFAULT=0x80;
-        
-            public const byte CAM_EXP=0x10;
-            public const byte CAM_EXP_DEFAULT=0x41;
-        
-            public const byte CAM_COMA=0x12;
-            public const byte CAM_COMA_DEFAULT=0x14;
-            public const byte CAM_COMA_WHITE_BALANCE_ON= (CAM_COMA_DEFAULT |  (1 << 2));
-            public const byte CAM_COMA_WHITE_BALANCE_OFF=(CAM_COMA_DEFAULT & ~(1 << 2));
-        
-            public const byte CAM_COMB=0x13;
-            public const byte CAM_COMB_DEFAULT=0xA3;
-            public const byte CAM_COMB_GAIN_CONTROL_ON= (CAM_COMB_DEFAULT |  (1 << 1));
-            public const byte CAM_COMB_GAIN_CONTROL_OFF=(CAM_COMB_DEFAULT & ~(1 << 1));
-            public const byte CAM_COMB_EXPOSURE_CONTROL_ON= (CAM_COMB_DEFAULT |  (1 << 0));
-            public const byte CAM_COMB_EXPOSURE_CONTROL_OFF=(CAM_COMB_DEFAULT & ~(1 << 0));
+
+            public const byte CAM_VER = 0x0B;
+            public const byte CAM_VER_DEFAULT = 0x48;
+
+            public const byte CAM_BRT = 0x06;
+            public const byte CAM_BRT_DEFAULT = 0x80;
+
+            public const byte CAM_EXP = 0x10;
+            public const byte CAM_EXP_DEFAULT = 0x41;
+
+            public const byte CAM_COMA = 0x12;
+            public const byte CAM_COMA_DEFAULT = 0x14;
+            public const byte CAM_COMA_WHITE_BALANCE_ON = (CAM_COMA_DEFAULT | (1 << 2));
+            public const byte CAM_COMA_WHITE_BALANCE_OFF = (CAM_COMA_DEFAULT & ~(1 << 2));
+
+            public const byte CAM_COMB = 0x13;
+            public const byte CAM_COMB_DEFAULT = 0xA3;
+            public const byte CAM_COMB_GAIN_CONTROL_ON = (CAM_COMB_DEFAULT | (1 << 1));
+            public const byte CAM_COMB_GAIN_CONTROL_OFF = (CAM_COMB_DEFAULT & ~(1 << 1));
+            public const byte CAM_COMB_EXPOSURE_CONTROL_ON = (CAM_COMB_DEFAULT | (1 << 0));
+            public const byte CAM_COMB_EXPOSURE_CONTROL_OFF = (CAM_COMB_DEFAULT & ~(1 << 0));
         }
 
         /// <summary>
@@ -322,11 +322,11 @@ namespace Myro.Services.Scribbler.ScribblerBase
                 case Commands.GET_DONGLE_R_IR:
                 case Commands.GET_IMAGE:
                 case Commands.GET_JPEG_COLOR_HEADER:
-                case Commands.GET_JPEG_COLOR_SCAN:
                 case Commands.GET_JPEG_GRAY_HEADER:
-                case Commands.GET_JPEG_GRAY_SCAN:
                     return 1;
                     break;
+                case Commands.GET_JPEG_COLOR_SCAN:
+                case Commands.GET_JPEG_GRAY_SCAN:
                 case Commands.SET_DIMMER_LED:
                 case Commands.GET_CAM_PARAM:
                     return 2;
@@ -415,6 +415,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
 
         public static UInt16 GetShort(byte[] data, int offset)
         {
+//            Console.WriteLine("GetShort:  byte1 = " + data[offset] + " byte2 = " + data[offset + 1]);
             return (UInt16)((data[offset] << 8) | data[offset + 1]);
         }
 
@@ -466,5 +467,19 @@ namespace Myro.Services.Scribbler.ScribblerBase
             }
         }
 
+    }
+
+    public class ScribblerProtocolException : Exception
+    {
+        public ScribblerProtocolException() : base() { }
+        public ScribblerProtocolException(string message) : base(message) { }
+        public ScribblerProtocolException(string message, Exception innerException) : base(message, innerException) { }
+    }
+
+    public class ScribblerDataException : Exception
+    {
+        public ScribblerDataException() : base() { }
+        public ScribblerDataException(string message) : base(message) { }
+        public ScribblerDataException(string message, Exception innerException) : base(message, innerException) { }
     }
 }

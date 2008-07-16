@@ -36,17 +36,24 @@ namespace Myro.GUI.WPFControls
             {
                 isActive = value;
                 if (isActive)
+                {
+                    SnapshotButton.IsEnabled = false;
                     PlayButton.Content = PlayButton.Resources["Stop"];
+                }
                 else
+                {
+                    SnapshotButton.IsEnabled = true;
                     PlayButton.Content = PlayButton.Resources["Play"];
+                }
             }
         }
 
         MyroImageType curType;
         bool shouldExit = false;
         Thread updateThread = null;
-        int delayMs = 250;
-        int setDarkness = -1;
+        Thread takePictureThread = null;
+        int delayMs = 30;
+        int setDarknessRequest = -1;
 
         public WebcamDisplay()
         {
@@ -96,36 +103,42 @@ namespace Myro.GUI.WPFControls
         {
             while (!shouldExit)
             {
-                if (isActive && curType != null)
+                if (IsActive && curType != null)
                 {
                     try
                     {
-                        if (setDarkness >= 0)
+                        if (setDarknessRequest >= 0)
                         {
-                            if (setDarkness == 256)
-                                Robot.AutoCamera();
+                            if (setDarknessRequest == 256)
+                                Robot.autoCamera();
                             else
-                                Robot.DarkenCamera((byte)setDarkness);
-                            setDarkness = -1;
+                                Robot.darkenCamera((byte)setDarknessRequest);
+                            setDarknessRequest = -1;
                         }
-                        Bitmap img = Robot.TakeBitmap(curType);
-                        Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal,
-                            new ThreadStart(delegate()
-                        {
-                            CamImage.Source = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
-                                img.GetHbitmap(),
-                                IntPtr.Zero,
-                                Int32Rect.Empty,
-                                System.Windows.Media.Imaging.BitmapSizeOptions.FromEmptyOptions());
-                        }));
+                        takePictureHelper();
                     }
-                    catch (Exception)
+                    catch (Exception e)
                     {
-                        //Console.WriteLine(e);
+                        Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal,
+                            new ThreadStart(delegate() { IsActive = false; GUIUtilities.ReportUnexpectedException(e); }));
                     }
                 }
                 Thread.Sleep(delayMs);
             }
+        }
+
+        private void takePictureHelper()
+        {
+            Bitmap img = Robot.TakeBitmap(curType);
+            Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal,
+                new ThreadStart(delegate()
+            {
+                CamImage.Source = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
+                    img.GetHbitmap(),
+                    IntPtr.Zero,
+                    Int32Rect.Empty,
+                    System.Windows.Media.Imaging.BitmapSizeOptions.FromEmptyOptions());
+            }));
         }
 
         private void OnPlayClick(object sender, RoutedEventArgs e)
@@ -136,10 +149,37 @@ namespace Myro.GUI.WPFControls
                 IsActive = true;
         }
 
+        private void OnSnapClick(object sender, RoutedEventArgs e)
+        {
+            if (takePictureThread == null)
+            {
+                SnapshotButton.IsEnabled = false;
+                takePictureThread = new Thread(new ThreadStart(delegate()
+                    {
+                        try
+                        {
+                            takePictureHelper();
+                        }
+                        catch (Exception err)
+                        {
+                            Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal,
+                                new ThreadStart(delegate() { IsActive = false; GUIUtilities.ReportUnexpectedException(err); }));
+                        }
+                        finally
+                        {
+                            Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal,
+                                new ThreadStart(delegate() { SnapshotButton.IsEnabled = true; }));
+                            takePictureThread = null;
+                        }
+                    }));
+                takePictureThread.Start();
+            }
+        }
+
         private void OnDarkValueChange(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             DarkLabel.Content = ((int)DarkSlider.Value).ToString();
-            setDarkness = (byte)(Math.Max(0, Math.Min(255, DarkSlider.Value)));
+            setDarknessRequest = (byte)(Math.Max(0, Math.Min(255, DarkSlider.Value)));
         }
 
         private void OnDarkMouseLost(object sender, MouseEventArgs e)
@@ -148,12 +188,12 @@ namespace Myro.GUI.WPFControls
 
         private void OnDarkChecked(object sender, RoutedEventArgs e)
         {
-            setDarkness = (byte)(Math.Max(0, Math.Min(255, DarkSlider.Value)));
+            setDarknessRequest = (byte)(Math.Max(0, Math.Min(255, DarkSlider.Value)));
         }
 
         private void OnDarkUnchecked(object sender, RoutedEventArgs e)
         {
-            setDarkness = 256;
+            setDarknessRequest = 256;
         }
 
     }

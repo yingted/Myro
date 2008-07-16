@@ -90,13 +90,18 @@ namespace Myro.Services.Scribbler.ScribblerBase
         private System.Timers.Timer PollTimer;
         private static int TimerDelay = 250;           //4 Hz
 
+        private byte[] cachedJpegHeaderColor = null;
+        private byte[] cachedJpegHeaderGray = null;
+        private ColorPalette grayscalePallette = new Bitmap(128, 192, PixelFormat.Format8bppIndexed).Palette;
+
         /// <summary>
         /// Default Service Constructor
         /// </summary>
         public ScribblerService(DsspServiceCreationPort creationPort)
             : base(creationPort)
         {
-
+            for (int i = 0; i < grayscalePallette.Entries.Length; i++)
+                grayscalePallette.Entries[i] = Color.FromArgb(i, i, i);
         }
 
         /// <summary>
@@ -135,7 +140,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
 
 
                 //play startup tone
-                PlayToneBody startTone = new PlayToneBody(200, 1000, 2000);
+                PlayToneBody startTone = new PlayToneBody(.2, 1000, 2000);
                 _mainPort.PostUnknownType(new PlayTone(startTone));
 
                 //debug
@@ -392,7 +397,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
             }
 
             ScribblerCommand cmd = new ScribblerCommand(ScribblerHelper.Commands.SET_SPEAKER_2,
-                                                        message.Body.Duration,
+                                                        (int)(message.Body.Duration*1000.0),
                                                         message.Body.Frequency1,
                                                         message.Body.Frequency2);
 
@@ -666,7 +671,14 @@ namespace Myro.Services.Scribbler.ScribblerBase
             yield return Arbiter.Choice(sendcmd.ResponsePort,
                 delegate(ScribblerResponse r)
                 {
-                    get.ResponsePort.Post(new UInt16Body(ScribblerHelper.GetShort(r.Data, 0)));
+                    try
+                    {
+                        get.ResponsePort.Post(new UInt16Body(ScribblerHelper.GetShort(r.Data, 0)));
+                    }
+                    catch (Exception e)
+                    {
+                        get.ResponsePort.Post(RSUtils.FaultOfException(e));
+                    }
                 },
                 delegate(Fault f)
                 {
@@ -706,72 +718,177 @@ namespace Myro.Services.Scribbler.ScribblerBase
                     XHigh = 255,
                     YHigh = 191,
                     XStep = 2,
-                    YStep = 2
+                    YStep = 1
                 });
                 _mainPort.PostUnknownType(gw);
                 yield return Arbiter.Choice(gw.ResponsePort,
                     delegate(ImageResponse r)
                     {
-                        if (r.Data.Length != imageType.Width * imageType.Height)
+                        if (r.Data.Length != 128 * 192)
                             fault = RSUtils.FaultOfException(new Exception("Invalid grayscale image from GetWindow"));
                         else
-                            responseData = r.Data;
+                        {
+                            // Scale image up and copy bits
+                            Bitmap bmp = new Bitmap(128, 192, PixelFormat.Format8bppIndexed);
+                            bmp.Palette = grayscalePallette;
+                            BitmapData bmpData = bmp.LockBits(new Rectangle(0, 0, 128, 192), ImageLockMode.WriteOnly, PixelFormat.Format8bppIndexed);
+                            System.Runtime.InteropServices.Marshal.Copy(r.Data, 0, bmpData.Scan0, 128 * 192);
+                            bmp.UnlockBits(bmpData);
+                            Bitmap bmp2 = new Bitmap(256, 192, PixelFormat.Format24bppRgb);
+                            Graphics g = Graphics.FromImage(bmp2);
+                            g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.Bilinear;
+                            g.DrawImage(bmp, 0, 0, 256, 192);
+                            BitmapData bmpData2 = bmp2.LockBits(new Rectangle(0, 0, 256, 192), ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+                            responseData = new byte[256 * 192 * 3];
+                            System.Runtime.InteropServices.Marshal.Copy(bmpData2.Scan0, responseData, 0, 256 * 192 * 3);
+                            bmp2.UnlockBits(bmpData2);
+                            bmp.Dispose();
+                            bmp2.Dispose();
+                            g.Dispose();
+                        }
                     },
                     delegate(Fault f) { fault = f; });
             }
-            else if (get.Body.ImageType.Equals(MyroImageType.JpegColor.Guid))
+            else if (get.Body.ImageType.Equals(MyroImageType.JpegColor.Guid) ||
+                get.Body.ImageType.Equals(MyroImageType.JpegColorFast.Guid))
             {
                 imageType = MyroImageType.JpegColor;
 
                 // Get Header
-                byte[] header = null;
-                // NOTE: Hack here, in ScribblerComm.SendCommand, if the command is to
-                // get a JPEG header, it will get the header length from the first two
-                // bytes from the serial port.
-                yield return Arbiter.Choice(_scribblerComPortPost(new ScribblerCommand(
-                    ScribblerHelper.Commands.GET_JPEG_COLOR_HEADER)),
-                    delegate(ScribblerResponse r) { header = r.Data; },
-                    delegate(Fault f) { fault = f; });
-                if (fault == null)
-                    Console.WriteLine("JPEG: header is " + header.Length + " bytes");
+                if (cachedJpegHeaderColor == null)
+                {
+                    // NOTE: Hack here, in ScribblerComm.SendCommand, if the command is to
+                    // get a JPEG header, it will get the header length from the first two
+                    // bytes from the serial port.
+                    yield return Arbiter.Choice(_scribblerComPortPost(new ScribblerCommand(
+                        ScribblerHelper.Commands.GET_JPEG_COLOR_HEADER)),
+                        delegate(ScribblerResponse r) { cachedJpegHeaderColor = r.Data; },
+                        delegate(Fault f) { fault = f; });
+                    //if (fault == null)
+                    //    Console.WriteLine("JPEG: header is " + cachedJpegHeaderColor.Length + " bytes");
+                }
 
                 // Get scans
                 byte[] scans = null;
                 if (fault == null)
+                {
+                    byte reliable = get.Body.ImageType.Equals(MyroImageType.JpegColor.Guid) ? (byte)1 : (byte)0;
                     yield return Arbiter.Choice(_scribblerComPortPost(new ScribblerCommand(
-                        ScribblerHelper.Commands.GET_JPEG_COLOR_SCAN) { EndMarker1 = 0xff, EndMarker2 = 0xd9 }),
+                        ScribblerHelper.Commands.GET_JPEG_COLOR_SCAN, reliable) { EndMarker1 = 0xff, EndMarker2 = 0xd9 }),
                         delegate(ScribblerResponse r) { scans = r.Data; },
                         delegate(Fault f) { fault = f; });
-                //Console.WriteLine("JPEG: scans is " + scans.Length + " bytes");
+                }
+                //if (fault == null)
+                //    Console.WriteLine("JPEG: scans is " + scans.Length + " bytes");
 
                 // Decode JPEG
                 if (fault == null)
                 {
-                    if (header == null || scans == null)
-                        fault = RSUtils.FaultOfException(new Exception("Had null header or scans in GetImageHandler for jpeg"));
+                    if (cachedJpegHeaderColor == null || scans == null)
+                        fault = RSUtils.FaultOfException(new ScribblerDataException("Had null header or scans in GetImageHandler for jpeg"));
                     else
                     {
                         try
                         {
-                            byte[] jpeg = new byte[header.Length - 2 + scans.Length];
-                            Array.Copy(header, 2, jpeg, 0, header.Length - 2);
-                            Array.Copy(scans, 0, jpeg, header.Length - 2, scans.Length);
-                            Bitmap bmp = new Bitmap(new MemoryStream(jpeg));
+                            byte[] jpeg = new byte[cachedJpegHeaderColor.Length - 2 + scans.Length];
+                            Array.Copy(cachedJpegHeaderColor, 2, jpeg, 0, cachedJpegHeaderColor.Length - 2);
+                            Array.Copy(scans, 0, jpeg, cachedJpegHeaderColor.Length - 2, scans.Length);
+
+                            // Create Bitmap from jpeg and scale (jpegs from Fluke are half-width)
+                            Bitmap obmp = new Bitmap(new MemoryStream(jpeg));
+                            Bitmap bmp = new Bitmap(imageType.Width, imageType.Height, PixelFormat.Format24bppRgb);
+                            Graphics g = Graphics.FromImage(bmp);
+                            g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.Bilinear;
+                            g.DrawImage(obmp, 0, 0, imageType.Width, imageType.Height);
+                            obmp.Dispose();
+                            g.Dispose();
 
                             if (bmp.Width != imageType.Width || bmp.Height != imageType.Height ||
                                     bmp.PixelFormat != PixelFormat.Format24bppRgb)
-                                throw new Exception("Bitmap from JPEG had wrong size or format");
-
-                            BitmapData bitmapData = bmp.LockBits(
-                                new Rectangle(0, 0, bmp.Width, bmp.Height),
-                                System.Drawing.Imaging.ImageLockMode.ReadOnly,
-                                System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+                                throw new ScribblerDataException("Bitmap from JPEG had wrong size or format");
 
                             // Copy frame
-                            byte[] frame = new byte[imageType.Width * imageType.Height * 3];
+                            //Console.WriteLine("Copying frame...");
+                            BitmapData bitmapData = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height),
+                                System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+                            responseData = new byte[imageType.Width * imageType.Height * 3];
                             System.Runtime.InteropServices.Marshal.Copy(
-                                bitmapData.Scan0, frame, 0, imageType.Width * imageType.Height * 3);
+                                bitmapData.Scan0, responseData, 0, imageType.Width * imageType.Height * 3);
+                            bmp.UnlockBits(bitmapData);
+                            //Console.WriteLine("JPEG done");
+                        }
+                        catch (Exception e)
+                        {
+                            fault = RSUtils.FaultOfException(e);
+                        }
 
+                    }
+                }
+            }
+            else if (get.Body.ImageType.Equals(MyroImageType.JpegGray.Guid) ||
+                get.Body.ImageType.Equals(MyroImageType.JpegGrayFast.Guid))
+            {
+                imageType = MyroImageType.JpegGray;
+
+                // Get Header
+                if (cachedJpegHeaderGray == null)
+                {
+                    // NOTE: Hack here, in ScribblerComm.SendCommand, if the command is to
+                    // get a JPEG header, it will get the header length from the first two
+                    // bytes from the serial port.
+                    yield return Arbiter.Choice(_scribblerComPortPost(new ScribblerCommand(
+                        ScribblerHelper.Commands.GET_JPEG_GRAY_HEADER)),
+                        delegate(ScribblerResponse r) { cachedJpegHeaderGray = r.Data; },
+                        delegate(Fault f) { fault = f; });
+                    //if (fault == null)
+                    //    Console.WriteLine("JPEG: header is " + cachedJpegHeaderGray.Length + " bytes");
+                }
+
+                // Get scans
+                byte[] scans = null;
+                if (fault == null)
+                {
+                    byte reliable = get.Body.ImageType.Equals(MyroImageType.JpegGray.Guid) ? (byte)1 : (byte)0;
+                    yield return Arbiter.Choice(_scribblerComPortPost(new ScribblerCommand(
+                        ScribblerHelper.Commands.GET_JPEG_GRAY_SCAN, reliable) { EndMarker1 = 0xff, EndMarker2 = 0xd9 }),
+                        delegate(ScribblerResponse r) { scans = r.Data; },
+                        delegate(Fault f) { fault = f; });
+                }
+                //if (fault == null)
+                //    Console.WriteLine("JPEG: scans is " + scans.Length + " bytes");
+
+                // Decode JPEG
+                if (fault == null)
+                {
+                    if (cachedJpegHeaderGray == null || scans == null)
+                        fault = RSUtils.FaultOfException(new ScribblerDataException("Had null header or scans in GetImageHandler for jpeg"));
+                    else
+                    {
+                        try
+                        {
+                            byte[] jpeg = new byte[cachedJpegHeaderGray.Length - 2 + scans.Length];
+                            Array.Copy(cachedJpegHeaderGray, 2, jpeg, 0, cachedJpegHeaderGray.Length - 2);
+                            Array.Copy(scans, 0, jpeg, cachedJpegHeaderGray.Length - 2, scans.Length);
+
+                            // Create Bitmap from jpeg and scale (jpegs from Fluke are half-width)
+                            Bitmap obmp = new Bitmap(new MemoryStream(jpeg));
+                            Bitmap bmp = new Bitmap(imageType.Width, imageType.Height, PixelFormat.Format24bppRgb);
+                            Graphics g = Graphics.FromImage(bmp);
+                            g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.Bilinear;
+                            g.DrawImage(obmp, 0, 0, imageType.Width, imageType.Height);
+                            obmp.Dispose();
+                            g.Dispose();
+
+                            if (bmp.Width != imageType.Width || bmp.Height != imageType.Height ||
+                                    bmp.PixelFormat != PixelFormat.Format24bppRgb)
+                                throw new ScribblerDataException("Bitmap from JPEG had wrong size or format");
+
+                            // Copy frame
+                            BitmapData bitmapData = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height),
+                                System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+                            responseData = new byte[imageType.Width * imageType.Height * 3];
+                            System.Runtime.InteropServices.Marshal.Copy(
+                                bitmapData.Scan0, responseData, 0, imageType.Width * imageType.Height * 3);
                             bmp.UnlockBits(bitmapData);
                         }
                         catch (Exception e)
@@ -1182,7 +1299,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
         public IEnumerator<ITask> HttpPostHandler(HttpPost httpPost)
         {
             // Use helper to read form data
-            ReadFormData readForm = new ReadFormData(httpPost.Body.Context);
+            ReadFormData readForm = new ReadFormData(httpPost);
             _httpUtilities.Post(readForm);
 
             // Wait for result

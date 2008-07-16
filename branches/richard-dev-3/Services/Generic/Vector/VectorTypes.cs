@@ -28,7 +28,6 @@ namespace Myro.Services.Generic.Vector
         /// <summary>
         /// The Dss Service contract
         /// </summary>
-        [DataMember()]
         public const String Identifier = "http://www.roboteducation.org/schemas/2008/06/vector.html";
     }
 
@@ -220,7 +219,7 @@ namespace Myro.Services.Generic.Vector
     /// <summary>
     /// Vector Main Operations Port
     /// </summary>
-    [ServicePort()]
+    [ServicePort]
     public class VectorOperations : PortSet<DsspDefaultLookup, DsspDefaultDrop,
         HttpGet, Get, Replace, GetByIndex, GetByKey, GetAllElements, SetByIndex, SetByKey, SetAllElements, Subscribe>
     {
@@ -332,6 +331,7 @@ namespace Myro.Services.Generic.Vector
     /// The values and the last modification timestamp will be returned in a
     /// GetAllResponseType.
     /// </summary>
+    [DataContract]
     public class GetAllElementsRequestType
     {
         public GetAllElementsRequestType() { }

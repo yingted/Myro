@@ -15,6 +15,7 @@ using System.IO;
 using System.IO.Pipes;
 using System.Threading;
 using Microsoft.Ccr.Core;
+using System.Reflection;
 
 using IronPython.Hosting;
 using IronPython.Compiler;
@@ -78,6 +79,7 @@ namespace Myro.GUI.WPFControls
             //pe.Sys.path.Add(Myro.Utilities.Params.PythonPath);
             //pe.Sys.path.Add("C:\\Users\\t-richr\\Myro-dev\\richard-dev-2\\Frontend\\Python");
             //pe.Import("site");
+            pe.Sys.path.Add(System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location));
 
             var s = new AnonymousPipeServerStream(PipeDirection.In);
             stdout = s;
@@ -97,6 +99,11 @@ namespace Myro.GUI.WPFControls
 
             pe.SetStandardOutput(stdoutpipe);
             pe.SetStandardError(stderrpipe);
+            //Console.SetOut(new StreamWriter(stdoutpipe));
+            //Console.SetError(new StreamWriter(stderrpipe));
+
+            //Console.OpenStandardOutput();
+            //Console.OpenStandardError();
 
             historyBlock.Document.PageWidth = historyBlock.ViewportWidth;
             historyBlock.Document.Blocks.Clear();
@@ -205,7 +212,8 @@ namespace Myro.GUI.WPFControls
             PythonExecuting.Invoke(this, new EventArgs());
             try
             {
-                pe.Execute(command);
+                pe.ExecuteToConsole(command);
+                //pe.Execute(command);
             }
             catch (Exception err)
             {

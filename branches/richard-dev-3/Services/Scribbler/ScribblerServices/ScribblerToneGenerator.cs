@@ -34,8 +34,12 @@ namespace Myro.Services.Scribbler.ToneGenerator
     [Description("The Scribbler ToneGenerator Service")]
     [Contract(Contract.Identifier)]
     [AlternateContract(vector.Contract.Identifier)] //implementing the generic contract
-    public class ScribblerToneGenerator : vector.VectorService
+    public class ScribblerToneGenerator : vector.VectorServiceBase
     {
+        [ServicePort(AllowMultipleInstances = false)]
+        vector.VectorOperations _operationsPort = new vector.VectorOperations();
+        protected override vector.VectorOperations OperationsPort { get { return _operationsPort; } }
+
         /// <summary>
         /// Robot base partner
         /// </summary>
@@ -109,7 +113,7 @@ namespace Myro.Services.Scribbler.ToneGenerator
             {
                 Frequency1 = (int)Math.Round(_state.Values[0]),
                 Frequency2 = (int)Math.Round(_state.Values[1]),
-                Duration = (int)Math.Round(_state.Values[2])
+                Duration = _state.Values[2]
             };
             if (play.Frequency1 < 0 || play.Frequency2 < 0 || play.Duration < 0)
                 responsePort.Post(RSUtils.FaultOfException(new ArgumentOutOfRangeException()));

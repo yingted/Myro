@@ -26,8 +26,8 @@ namespace Myro.GUI.ControlPanel
 
         List<ServicePanelInfo> origPanelList = new List<ServicePanelInfo>()
         {
-            new ServicePanelInfo() { Description="Bumpers / IR", Name="bumpers", Min=0.0, Max=1.0, Color=Colors.Blue },
-            new ServicePanelInfo() { Description="IR Sensors", Name="ir", Min=0.0, Max=0.2, Color=Colors.DarkRed },
+            new ServicePanelInfo() { Description="IR", Name="ir", Min=0.0, Max=1.0, Color=Colors.Blue },
+            new ServicePanelInfo() { Description="Obsacle Sensors", Name="obstacle", Min=0.0, Max=2000.0, Color=Colors.IndianRed },
             new ServicePanelInfo() { Description="Sonar", Name="sonar", Min=20.0, Max=0.0, Color=Colors.Tan },
             new ServicePanelInfo() { Description="Stall", Name="stall", Min=0.0, Max=1.0, Color=Colors.Red },
             new ServicePanelInfo() { Description="Light sensors", Name="light", Min=2000.0, Max=0.0, Color=Colors.DeepSkyBlue },
@@ -59,7 +59,8 @@ namespace Myro.GUI.ControlPanel
                             }
                             catch (Exception e)
                             {
-                                Console.WriteLine(e.ToString());
+                                GUIUtilities.ReportUnexpectedException(e);
+                                //Console.WriteLine(e.ToString());
                             }
                         }));
             panelList = origPanelList;
@@ -118,7 +119,7 @@ namespace Myro.GUI.ControlPanel
                         {
                             Robot.GetPairs(pi.Name, out names, out values);
                             Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal,
-                                new ThreadStart(delegate() { myPi.Meters.setData(values, names, myPi.Min, myPi.Max); }));
+                                new ThreadStart(delegate() { myPi.Meters.SetData(values, names, myPi.Min, myPi.Max); }));
                         }
                         catch (Exception) { }
                     }
@@ -190,8 +191,9 @@ namespace Myro.GUI.ControlPanel
                         }
                         catch (Exception e)
                         {
-                            Console.WriteLine(e.ToString());
-                            throw;
+                            GUIUtilities.ReportUnexpectedException(e);
+                            //Console.WriteLine(e.ToString());
+                            //throw;
                         }
                         finally { signal.Set(); }
                     }));
@@ -233,18 +235,26 @@ namespace Myro.GUI.ControlPanel
         private void DurationChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (freq2Label != null)
-                durLabel.Content = Math.Round(durSlider.Value).ToString() + " ms";
+                durLabel.Content = Math.Round(durSlider.Value, 2).ToString() + " sec";
         }
 
         private void PlayTone(object sender, MouseEventArgs e)
         {
-            try
+            double duration = durSlider.Value;
+            double freq1 = (freq1Slider.Value == freq1Slider.Minimum ? 0.0 : freq1Slider.Value);
+            double freq2 = (freq2Slider.Value == freq2Slider.Minimum ? 0.0 : freq2Slider.Value);
+            new Thread(new ThreadStart(delegate()
             {
-                Robot.Beep(durSlider.Value,
-                    (freq1Slider.Value == freq1Slider.Minimum ? 0.0 : freq1Slider.Value),
-                    (freq2Slider.Value == freq2Slider.Minimum ? 0.0 : freq2Slider.Value));
-            }
-            catch (Exception) { }
+                try
+                {
+                    Robot.beep(duration, freq1, freq2);
+                }
+                catch (Exception err)
+                {
+                    Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal,
+                        new ThreadStart(delegate() { GUIUtilities.ReportUnexpectedException(err); }));
+                }
+            })).Start();
         }
 
         private void SetLoud(object sender, RoutedEventArgs e)
@@ -252,7 +262,7 @@ namespace Myro.GUI.ControlPanel
             try
             {
                 if (loudCheck != null)
-                    Robot.SetLoud(loudCheck.IsChecked.HasValue ? loudCheck.IsChecked.Value : true);
+                    Robot.setLoud(loudCheck.IsChecked.HasValue ? loudCheck.IsChecked.Value : true);
             }
             catch (Exception) { }
         }
@@ -263,7 +273,7 @@ namespace Myro.GUI.ControlPanel
             {
                 delayMs = (int)(reversePollValue(pollingSlider.Value) * 1000.0);
                 //PollSliderGlow.Duration = TimeSpan.FromMilliseconds(pollingSlider.Value);
-                if (pollingSlider.Maximum - reversePollValue(pollingSlider.Value) <= .02 )
+                if (pollingSlider.Maximum - reversePollValue(pollingSlider.Value) <= .02)
                 {
                     shouldUpdate = false;
                     PollSliderGlow.Seek(pollingSlider, TimeSpan.FromMilliseconds(0), System.Windows.Media.Animation.TimeSeekOrigin.BeginTime);

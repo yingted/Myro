@@ -33,8 +33,12 @@ namespace Myro.Services.Scribbler.LightSensor
     [Description("The Scribbler Light Sensor Service")]
     [Contract(Contract.Identifier)]
     [AlternateContract(vector.Contract.Identifier)]
-    public class ScribblerLightSensor : vector.VectorService
+    public class ScribblerLightSensor : vector.VectorServiceBase
     {
+        [ServicePort(AllowMultipleInstances=false)]
+        vector.VectorOperations _operationsPort = new vector.VectorOperations();
+        protected override vector.VectorOperations OperationsPort { get { return _operationsPort; } }
+
         [Partner("ScribblerBase", Contract = brick.Contract.Identifier, CreationPolicy = PartnerCreationPolicy.UseExistingOrCreate, Optional = false)]
         private brick.ScribblerOperations _scribblerPort = new brick.ScribblerOperations();
 

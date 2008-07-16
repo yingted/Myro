@@ -5,7 +5,8 @@ using System.Text;
 using Microsoft.Dss.ServiceModel.Dssp;
 using Microsoft.Ccr.Core;
 using Microsoft.Dss.Hosting;
-using webcam = Microsoft.Robotics.Services.WebCam.Proxy;
+//using webcam = Microsoft.Robotics.Services.WebCam.Proxy;
+using webcam = Myro.Services.Scribbler.FlukeCam.Proxy;
 using Myro.Utilities;
 
 namespace Myro.Adapters
@@ -14,7 +15,8 @@ namespace Myro.Adapters
     {
         public List<string> supportedContracts = new List<string>()
         {
-            webcam.Contract.Identifier,
+            "http://www.roboteducation.org/schemas/2008/06/flukecam.html"
+            //webcam.Contract.Identifier,
         };
 
         public List<string> SupportedContracts { get { return supportedContracts; } }

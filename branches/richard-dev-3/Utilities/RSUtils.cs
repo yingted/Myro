@@ -298,14 +298,10 @@ namespace Myro.Utilities
     public class FaultReceivedException : Exception
     {
         public Fault Fault { get; private set; }
-        public FaultReceivedException(Fault fault)
+        public FaultReceivedException(Fault fault) : base(Strings.FromFault(fault))
         {
             Fault = fault;
             //Console.WriteLine("***" + this.ToString());
-        }
-        public override string ToString()
-        {
-            return Strings.FromFault(Fault);
         }
     }
 
