@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ScribblerState xmlns:s="http://www.w3.org/2003/05/soap-envelope" xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing" xmlns:d="http://schemas.microsoft.com/xw/2004/10/dssp.html" xmlns="http://www.roboteducation.org/schemas/2008/06/scribblerbase.html">
+  <RobotName>Scribby </RobotName>
+  <IRLeft>false</IRLeft>
+  <IRRight>false</IRRight>
+  <ObstacleLeft>0</ObstacleLeft>
+  <ObstacleCenter>0</ObstacleCenter>
+  <ObstacleRight>0</ObstacleRight>
+  <LineLeft>false</LineLeft>
+  <LineRight>false</LineRight>
+  <Stall>false</Stall>
+  <LightLeft>0</LightLeft>
+  <LightRight>0</LightRight>
+  <LightCenter>0</LightCenter>
+  <MotorLeft>0</MotorLeft>
+  <MotorRight>0</MotorRight>
+  <LEDLeft>false</LEDLeft>
+  <LEDRight>false</LEDRight>
+  <LEDCenter>false</LEDCenter>
+  <LEDFront>false</LEDFront>
+  <LEDBack>0</LEDBack>
+  <Connected>true</Connected>
+  <ComPort>3</ComPort>
+  <BumpersLastUpdated>2008-06-19T14:01:21.284861-07:00</BumpersLastUpdated>
+  <LineSensorsLastUpdated>2008-06-19T14:01:21.284861-07:00</LineSensorsLastUpdated>
+  <LightSensorsLastUpdated>2008-06-19T14:01:21.284861-07:00</LightSensorsLastUpdated>
+</ScribblerState>

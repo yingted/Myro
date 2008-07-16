@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RobotConfig
+xmlns:dssp="http://schemas.microsoft.com/xw/2004/10/dssp.html"
+xmlns:mani="http://schemas.microsoft.com/xw/2004/10/manifest.html">
+
+  <DssEnvironment>
+    <HttpPort>50000</HttpPort>
+    <SoapPort>50001</SoapPort>
+  </DssEnvironment>
+
+  <!-- Verbosity Level from 1-5 -->
+  <Verbosity>
+    <Level>2</Level>
+  </Verbosity>
+
+  <Manifest file=".\Config\Scribbler.manifest\Scribbler.manifest.xml" />
+
+  <!--<StartService>
+    <Contract>http://www.roboteducation.org/scribblerbase.html</Contract>
+    <Service>/scribbler</Service>
+  </StartService>
+  
+  <Adapter type="Vector" name="ir">
+    <Contract>http://www.roboteducation.org/scribblerirbumper.html</Contract>
+    <Service>/scribblerirbumper</Service>
+  </Adapter>
+
+  <Adapter type="Vector" name="stall">
+    <Contract>http://www.roboteducation.org/scribblerstall.html</Contract>
+    <Service>/scribblerstall</Service>
+  </Adapter>
+
+  <Adapter type="Vector" name="light">
+    <Contract>http://www.roboteducation.org/scribblerlightsensor.html</Contract>
+    <Service>/scribblerlight</Service>
+  </Adapter>
+
+  <Adapter type="Vector" name="line">
+    <Contract>http://www.roboteducation.org/scribblerlinesensor.html</Contract>
+    <Service>/scribblerline</Service>
+  </Adapter>
+
+  <Adapter type="Drive" name="drive">
+    <Contract>http://www.roboteducation.org/scribblerdrive.html</Contract>
+    <Service>/scribblerdrive</Service>
+  </Adapter>
+
+  <Adapter type="Vector" name="tonegen">
+    <Contract>http://www.roboteducation.org/scribblertonegenerator.html</Contract>
+    <Service>/scribblertonegen</Service>
+  </Adapter>-->
+  
+</RobotConfig>

@@ -1,0 +1,78 @@
+<?xml version="1.0"?>
+<!--This file was created with the Microsoft Visual Programming Language.-->
+<Manifest xmlns:flukecamcontrol="http://www.roboteducation.org/schemas/2008/06/flukecamcontrol.html" xmlns:scribblerirbumper="http://www.roboteducation.org/schemas/2008/06/scribblerirbumper.html" xmlns:dssp="http://schemas.microsoft.com/xw/2004/10/dssp.html" xmlns:this="urn:uuid:f2d9b8e8-8c80-4f83-b832-29c4a66251d2" xmlns:flukecam="http://www.roboteducation.org/schemas/2008/06/flukecam.html" xmlns:scribblertonegenerator="http://www.roboteducation.org/schemas/2008/06/scribblertonegenerator.html" xmlns:scribblerlightsensor="http://www.roboteducation.org/schemas/2008/06/scribblerlightsensor.html" xmlns:scribblerbase="http://www.roboteducation.org/schemas/2008/06/scribblerbase.html" xmlns:scribblerstall="http://www.roboteducation.org/schemas/2008/06/scribblerstall.html" xmlns:scribblerled="http://www.roboteducation.org/schemas/2008/06/scribblerled.html" xmlns:scribblerdrive="http://www.roboteducation.org/schemas/2008/06/scribblerdrive.html" xmlns:flukeobstacle="http://www.roboteducation.org/schemas/2008/06/flukeobstacle.html" xmlns:scribblerlinesensor="http://www.roboteducation.org/schemas/2008/06/scribblerlinesensor.html" xmlns="http://schemas.microsoft.com/xw/2004/10/manifest.html">
+  <CreateServiceList>
+    <ServiceRecordType>
+      <dssp:Contract>http://www.roboteducation.org/schemas/2008/06/scribblerbase.html</dssp:Contract>
+      <dssp:PartnerList>
+        <dssp:Partner>
+          <dssp:Contract>http://www.roboteducation.org/schemas/2008/06/scribblerbase.html</dssp:Contract>
+          <dssp:Service>scribblerbase.config.xml</dssp:Service>
+          <dssp:PartnerList />
+          <dssp:Name>dssp:StateService</dssp:Name>
+        </dssp:Partner>
+      </dssp:PartnerList>
+      <Name>this:ScribblerBase</Name>
+    </ServiceRecordType>
+    <ServiceRecordType>
+      <dssp:Contract>http://www.roboteducation.org/schemas/2008/06/scribblerdrive.html</dssp:Contract>
+      <dssp:Service>http://localhost:80/drive</dssp:Service>
+      <dssp:PartnerList />
+      <Name>this:ScribblerDrive</Name>
+    </ServiceRecordType>
+    <ServiceRecordType>
+      <dssp:Contract>http://www.roboteducation.org/schemas/2008/06/scribblerirbumper.html</dssp:Contract>
+      <dssp:Service>http://localhost:80/ir</dssp:Service>
+      <dssp:PartnerList />
+      <Name>this:ScribblerBumper</Name>
+    </ServiceRecordType>
+    <ServiceRecordType>
+      <dssp:Contract>http://www.roboteducation.org/schemas/2008/06/scribblerlightsensor.html</dssp:Contract>
+      <dssp:Service>http://localhost:80/light</dssp:Service>
+      <dssp:PartnerList />
+      <Name>this:ScribblerLightSensors</Name>
+    </ServiceRecordType>
+    <ServiceRecordType>
+      <dssp:Contract>http://www.roboteducation.org/schemas/2008/06/scribblerlinesensor.html</dssp:Contract>
+      <dssp:Service>http://localhost:80/line</dssp:Service>
+      <dssp:PartnerList />
+      <Name>this:ScribblerLineSensor</Name>
+    </ServiceRecordType>
+    <ServiceRecordType>
+      <dssp:Contract>http://www.roboteducation.org/schemas/2008/06/scribblerstall.html</dssp:Contract>
+      <dssp:Service>http://localhost:80/stall</dssp:Service>
+      <dssp:PartnerList />
+      <Name>this:ScribblerStall</Name>
+    </ServiceRecordType>
+    <ServiceRecordType>
+      <dssp:Contract>http://www.roboteducation.org/schemas/2008/06/scribblertonegenerator.html</dssp:Contract>
+      <dssp:Service>http://localhost:80/tonegen</dssp:Service>
+      <dssp:PartnerList />
+      <Name>this:ScribblerToneGenerator</Name>
+    </ServiceRecordType>
+    <ServiceRecordType>
+      <dssp:Contract>http://www.roboteducation.org/schemas/2008/06/scribblerled.html</dssp:Contract>
+      <dssp:Service>http://localhost:80/led</dssp:Service>
+      <dssp:PartnerList />
+      <Name>this:ScribblerLEDservice</Name>
+    </ServiceRecordType>
+    <ServiceRecordType>
+      <dssp:Contract>http://www.roboteducation.org/schemas/2008/06/flukeobstacle.html</dssp:Contract>
+      <dssp:Service>http://localhost:80/obstacle</dssp:Service>
+      <dssp:PartnerList />
+      <Name>this:FlukeObstacleDetector</Name>
+    </ServiceRecordType>
+    <ServiceRecordType>
+      <dssp:Contract>http://www.roboteducation.org/schemas/2008/06/flukecam.html</dssp:Contract>
+      <dssp:Service>http://localhost:80/webcam</dssp:Service>
+      <dssp:PartnerList />
+      <Name>this:FlukeCamera</Name>
+    </ServiceRecordType>
+    <ServiceRecordType>
+      <dssp:Contract>http://www.roboteducation.org/schemas/2008/06/flukecamcontrol.html</dssp:Contract>
+      <dssp:Service>http://localhost:80/camcontrol</dssp:Service>
+      <dssp:PartnerList />
+      <Name>this:FlukeCameraControl</Name>
+    </ServiceRecordType>
+  </CreateServiceList>
+</Manifest>

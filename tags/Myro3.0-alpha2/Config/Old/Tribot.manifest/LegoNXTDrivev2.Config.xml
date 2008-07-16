@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<DriveState xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.microsoft.com/robotics/2007/07/lego/nxt/drive.html">
+	<DistanceBetweenWheels>.115</DistanceBetweenWheels>
+	<LeftWheel>
+		<MotorPort>MotorC</MotorPort>
+		<ReversePolarity>false</ReversePolarity>
+		<WheelDiameter>.056</WheelDiameter>
+	</LeftWheel>
+	<RightWheel>
+		<MotorPort>MotorB</MotorPort>
+		<ReversePolarity>false</ReversePolarity>
+		<WheelDiameter>.056</WheelDiameter>
+	</RightWheel>
+	<PollingFrequencyMs>0</PollingFrequencyMs>
+</DriveState>

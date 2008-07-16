@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<SonarSensorState xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://schemas.microsoft.com/robotics/2007/07/lego/nxt/sonarsensor.html">
+	<Name>sonar</Name>
+	<SensorPort>Sensor4</SensorPort>
+	<PollingFrequencyMs>0</PollingFrequencyMs>
+</SonarSensorState>

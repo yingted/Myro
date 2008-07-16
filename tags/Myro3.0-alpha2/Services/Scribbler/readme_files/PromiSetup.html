@@ -1,0 +1,62 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<title>Promi SD202 Serial to Bluetooth Adapter Setup</title>
+<style type="text/css">
+        Body
+        {
+	       font-family: Verdana;
+	        font-size: smaller;
+	        background-image: url('ipre.png'); 
+	        background-repeat: no-repeat;
+	        background-position: 90% 90%; 
+	        background-attachment: fixed;
+        }
+		ul 
+		{
+			list-style-image: url('bullet.png')
+		}
+		ul ul
+		{
+			list-style-image: url('bullet2.png')
+		}
+     .style1 {font-family: Verdana, Arial, Helvetica, sans-serif}
+</style>
+</head>
+<body>
+<h1>Promi SD202 Serial to Bluetooth Adapter Setup</h1>
+<h3>One time setup / TA Instructions </h3>
+<ol>
+  <li>Power the device and connect it to the PC's serial port. </li>
+  <li>Install and run the PromiWin software that ships with the device. </li>
+  <li>To connect to the device, the default baud rate will be 9600. </li>
+  <li>Set the baud rate to 38400</li>
+  <li>Turn off hardware flow control</li>
+  <li>Disable AT commands</li>
+  <li>Turn on Authentication and give it a passkey. &quot;1234&quot; is a standard Bluetooth device default password. (There is a bug when there is no passkey).</li>
+  <li>Optionally change the name of the device to something friendlier / unique </li>
+</ol>
+<h3>Re-pairing / Student Instructions  </h3>
+<ol>
+  <li>Turn on scribbler with adapter plugged in.
+    <ol>
+      <li>If scribbler LED flashes really fast, repeat TA instructions above. </li>
+      <li>The Status LED should be flashing periodically. </li>
+    </ol>
+  </li>
+  <li>Do the standard windows pairing.  
+    <ol>
+      <li>Make sure a com port number is assigned. Go to the &quot;Properties&quot; window for that device, then under the services tab, make sure the &quot;generic serial&quot; profile is checked. </li>
+    </ol>
+  </li>
+  <li>Now connect to robot with  MSRS, Myro, or HyperTerminal.
+    <ol>
+      <li>IMPORTANT: Before connecting to the robot with MSRS, always make sure that the robot is freshly restarted. This can be accomplished by either pressing the red reset button on the robot, or turning it off then on again. </li>
+      <li>When connected, the Status LED will be constant green. </li>
+    </ol>
+  </li>
+</ol>
+<p>&nbsp;</p>
+</body>
+</html>
