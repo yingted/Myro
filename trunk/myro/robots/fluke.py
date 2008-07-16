@@ -13,10 +13,11 @@ try:
     import serial
 except:
     print "WARNING: pyserial not loaded: fluke won't work!"
-from myro import Robot, ask
+from myro import ask
 from myro.graphics import _askQuestion, Picture
 import myro.globvars
 import cStringIO
+import threading
 # needed for new camera dongle
 try:
     from numpy import array
@@ -52,7 +53,7 @@ def isTrue(value):
     elif value: return True
     return False
 
-class Fluke(Robot):
+class Fluke:
     SOFT_RESET=33
     GET_ALL=65 
     GET_ALL_BINARY=66  
@@ -144,7 +145,7 @@ class Fluke(Robot):
     PACKET_LENGTH     =  9
     
     def __init__(self, serialport = None, baudrate = 38400):
-        Robot.__init__(self)
+        self.lock = threading.Lock()
 
         #### Camera Addresses ####
         self.CAM_PID=0x0A
@@ -196,6 +197,7 @@ class Fluke(Robot):
         
         myro.globvars.robot = self
         self.dongle = None
+        self.robotinfo = {}
         info = self.getVersion()
         if "fluke" in info.keys():
             self.dongle = info["fluke"]
@@ -290,110 +292,36 @@ class Fluke(Robot):
             time.sleep(1.2)       # give it time to see if another IPRE show up
             if self.ser.inWaiting() == 0: # if none, then we are out of here!
                 break
-            print "Waking robot from sleep..."
+            print "Waking fluke from sleep..."
             time.sleep(.25)               # give it some time
         self.ser.flushInput()
         self.ser.flushOutput()
 
     def get(self, sensor = "all", *position):
         sensor = sensor.lower()
-        if sensor == "config":
-            if self.dongle == None:
-                return {"ir": 2, "line": 2, "stall": 1, "light": 3}
-            else:
-                return {"ir": 2, "line": 2, "stall": 1, "light": 3,
-                        "battery": 1, "obstacle": 3, "bright": 3}
-        elif sensor == "stall":
-            retval = self._get(Fluke.GET_ALL, 11) # returned as bytes
-            self._lastSensors = retval # single bit sensors
-            return retval[10]
-        elif sensor == "forwardness":
-            if read_mem(self.ser, 0, 0) != 0xDF:
-                retval = "fluke-forward"
-            else:
-                retval = "fluke-forward"
-            return retval
-        elif sensor == "startsong":
-            #TODO: need to get this from flash memory
-            return "tada"
-        elif sensor == "version":
-            #TODO: just return this version for now; get from flash
-            return __REVISION__.split()[1]
-        elif sensor == "data":
-            return self.getData(*position)
-        elif sensor == "info":
-            return self.getInfo(*position)
-        elif sensor == "name":
-            c = self._get(Fluke.GET_NAME1, 8)
-            c += self._get(Fluke.GET_NAME2, 8)
-            c = string.join([chr(x) for x in c if "0" <= chr(x) <= "z"], '').strip()
-            return c
-        elif sensor == "password":
-            c = self._get(Fluke.GET_PASS1, 8)
-            c += self._get(Fluke.GET_PASS2, 8)
-            c = string.join([chr(x) for x in c if "0" <= chr(x) <= "z"], '').strip()
-            return c
-        elif sensor == "volume":
-            return self._volume
-        elif sensor == "battery":
+        if sensor == "battery":
             return self.getBattery()
         elif sensor == "blob":
             return self.getBlob()
         else:
             if len(position) == 0:
-                if sensor == "light":
-                    return self._get(Fluke.GET_LIGHT_ALL, 6, "word")
-                elif sensor == "line":
-                    return self._get(Fluke.GET_LINE_ALL, 2)
-                elif sensor == "ir":
-                    return self._get(Fluke.GET_IR_ALL, 2)
-                elif sensor == "obstacle":
+                if sensor == "obstacle":
                     return [self.getObstacle("left"), self.getObstacle("center"), self.getObstacle("right")]
                 elif sensor == "bright":
                     return [self.getBright("left"), self.getBright("middle"), self.getBright("right") ]
                 elif sensor == "all":
                     retval = self._get(Fluke.GET_ALL, 11) # returned as bytes
                     self._lastSensors = retval # single bit sensors
-                    if self.dongle == None:
-                        return {"light": [retval[2] << 8 | retval[3], retval[4] << 8 | retval[5], retval[6] << 8 | retval[7]],
-                                "ir": [retval[0], retval[1]], "line": [retval[8], retval[9]], "stall": retval[10]}
-                    else:
-                        return {"light": [retval[2] << 8 | retval[3], retval[4] << 8 | retval[5], retval[6] << 8 | retval[7]],
-                                "ir": [retval[0], retval[1]], "line": [retval[8], retval[9]], "stall": retval[10],
-                                "obstacle": [self.getObstacle("left"), self.getObstacle("center"), self.getObstacle("right")],
-                                "bright": [self.getBright("left"), self.getBright("middle"), self.getBright("right")],
-                                "blob": self.getBlob(),
-                                "battery": self.getBattery(),
-                                }
+                    return {"obstacle": [self.getObstacle("left"), self.getObstacle("center"), self.getObstacle("right")],
+                            "bright": [self.getBright("left"), self.getBright("middle"), self.getBright("right")],
+                            "blob": self.getBlob(),
+                            "battery": self.getBattery(),
+                            }
                 else:                
                     raise ("invalid sensor name: '%s'" % sensor)
             retvals = []
             for pos in position:
-                if sensor == "light":
-                    values = self._get(Fluke.GET_LIGHT_ALL, 6, "word")
-                    if pos in [0, "left"]:
-                        retvals.append(values[0])
-                    elif pos in [1, "middle", "center"]:
-                        retvals.append(values[1])
-                    elif pos in [2, "right"]:
-                        retvals.append(values[2])
-                    elif pos == None or pos == "all":
-                        retvals.append(values)
-                elif sensor == "ir":
-                    values = self._get(Fluke.GET_IR_ALL, 2)                    
-                    if pos in [0, "left"]:
-                        retvals.append(values[0])
-                    elif pos in [1, "right"]:
-                        retvals.append(values[1])
-                    elif pos == None or pos == "all":
-                        retvals.append(values)
-                elif sensor == "line":
-                    values = self._get(Fluke.GET_LINE_ALL, 2)
-                    if pos in [0, "left"]:
-                        retvals.append(values[0])
-                    elif pos in [1, "right"]:
-                        retvals.append(values[1])
-                elif sensor == "obstacle":
+                if sensor == "obstacle":
                     return self.getObstacle(pos)
                 elif sensor == "bright":
                     return self.getBright(pos)
@@ -409,9 +337,9 @@ class Fluke(Robot):
                 return retvals
 
     def getVersion(self):
-        retDict = {}
-        self.ser.write(chr(Fluke.GET_INFO) + (' ' * 8))
+        self.ser.write(chr(Fluke.GET_VERSION))
         retval = self.ser.readline()
+        retDict = {}
         for pair in retval.split(","):
             if ":" in pair:            
                 it, value = pair.split(":")
@@ -1116,55 +1044,6 @@ class Fluke(Robot):
                 return x
         else:
             return map(ord, c)
-
-    def _write(self, rawdata):
-        t = map(lambda x: chr(int(x)), rawdata)
-        data = string.join(t, '') + (chr(0) * (Fluke.PACKET_LENGTH - len(t)))[:9]
-        if self.debug:
-            print "_write:", data, len(data),
-            print "data:",
-            print map(lambda x:"0x%x" % ord(x), data)
-        if self.dongle == None:
-            time.sleep(0.01) # HACK! THIS SEEMS TO NEED TO BE HERE!
-        self.ser.write(data)      # write packets
-
-    def _set(self, *values):
-        try:
-            self.lock.acquire() #print "locked acquired"
-            self._write(values)
-            test = self._read(Fluke.PACKET_LENGTH) # read echo
-            self._lastSensors = self._read(11) # single bit sensors
-            #self.ser.flushInput()
-            if self.requestStop:
-                self.requestStop = 0
-                self.stop()
-                self.lock.release()
-                raise KeyboardInterrupt
-        finally:
-            self.lock.release()
-    
-
-    def _get(self, value, bytes = 1, mode = "byte"):
-        try:
-            self.lock.acquire()
-            self._write([value])
-            self._read(Fluke.PACKET_LENGTH) # read the echo
-            if mode == "byte":
-                retval = self._read(bytes)
-            elif mode == "word":
-                retvalBytes = self._read(bytes)
-                retval = []
-                for p in range(0,len(retvalBytes),2):
-                    retval.append(retvalBytes[p] << 8 | retvalBytes[p + 1])
-            elif mode == "line": # until hit \n newline
-                retval = self.ser.readline()
-                if self.debug:
-                    print "_get(line)", retval
-            #self.ser.flushInput()            
-        finally:
-            self.lock.release()
-            
-        return retval
 
 def cap(c):
     if (c > 255): 
