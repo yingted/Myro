@@ -147,6 +147,13 @@ class Roomba(Robot): # myro robot
         else:
             raise ("invalid set item name: '%s'" % item)
 
+class RoombaFluke(Roomba, Fluke):
+    def __init__(self):
+        pass
+    # call one with port, copy the other
+    #Roomba.__init__(self)
+    #Fluke.__init__(self)
+
 def freq2num(f):
     # 32.70 is arbitrarily zero octave
     # 32.70 = exp(VAL / 1.442695)
@@ -291,7 +298,7 @@ class RoombaBumperDevice(Device):
 class RoombaBatteryDevice(Device):
     def __init__(self, robot):
         self._dev = robot
-        Device.__init__(self, "ir")
+        Device.__init__(self, "battery")
     def getTemperature(self):    
     	return self._dev.sensorData['temperature']
     def getCharge(self):
@@ -372,6 +379,10 @@ class RoombaRobot(PyroRobot):
 
     def sendMsg(self, msg):
 	self.lock.acquire()
+        # if fluke, prepend 
+        #SET_PASS_N_BYTES=139
+        #GET_PASS_N_BYTES=140
+        #GET_PASS_BYTES_UNTIL=141
 	self.sc.write(msg + self._newline)
 	#time.sleep(0.05)
 	self.lock.release()
@@ -381,6 +392,7 @@ class RoombaRobot(PyroRobot):
 		self.sc.read(size=1)
 	while 1:	
 	    	self.sendMsg('\x8E\x00') # 
+                # if fluke, prepend
 		retval = self.sc.read(size=26) # Read 26 bytes
 		if (retval != '') and (len(retval) == 26): # Fixes a possible crash
 			break
