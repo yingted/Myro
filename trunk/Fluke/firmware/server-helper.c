@@ -701,3 +701,12 @@ void serve_fluke_reset()
   WDFEED= 0xAA;
   WDFEED= 0x55;
 }
+
+/*
+ * Send the Version string
+ */
+
+void serve_version()
+{
+  putstr(VERSION);
+}

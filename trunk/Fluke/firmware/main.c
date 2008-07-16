@@ -204,6 +204,7 @@ int main (void)
 	      else if (ch == GET_JPEG_COLOR_HEADER)serve_jpeg_color_header();
 	      else if (ch == GET_JPEG_GRAY_SCAN)   serve_jpeg_gray_scan();
 	      else if (ch == GET_JPEG_COLOR_SCAN)  serve_jpeg_color_scan();
+	      else if (ch == GET_VERSION)          serve_version();
 	      else scribbler_cmd = 1;
 	    }
 	  
@@ -259,7 +260,7 @@ int main (void)
 		  rqst_idx = 0;
 		}
 	    }
-	}
+	} /* end if it received a request */
       
       /*
        * if we are talking to the scribbler see if it has anything

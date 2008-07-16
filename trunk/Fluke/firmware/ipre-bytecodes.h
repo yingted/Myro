@@ -110,3 +110,5 @@
 #define SET_PASS_N_BYTES      139
 #define GET_PASS_N_BYTES      140
 #define GET_PASS_BYTES_UNTIL  141
+
+#define GET_VERSION           142
