@@ -709,4 +709,5 @@ void serve_fluke_reset()
 void serve_version()
 {
   putstr(VERSION);
+  putch(0x0A);
 }

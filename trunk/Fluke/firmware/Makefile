@@ -31,7 +31,7 @@ dl2: download
 dl3:
 	python update-firmware.py main.hex /dev/tty.scribbler5844 fast
 
-main.hex: main.out
+main.hex: main.out 
 	$(CP) $(CPFLAGS) main.out main.hex
 #$(OD) $(ODFLAGS) main.out > main.dmp
 
