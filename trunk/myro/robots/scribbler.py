@@ -376,7 +376,7 @@ class Scribbler(Robot):
         self.lock.acquire() #print "locked acquired"
         
         old = self.ser.timeout
-        self.ser.setTimeout(duration)
+        self.ser.setTimeout(duration+2)
 
         if frequency2 == None:
             self._set_speaker(int(frequency), int(duration * 1000))
@@ -1493,10 +1493,10 @@ class Scribbler(Robot):
 
     def _set_speaker(self, frequency, duration):            
         self._write([Scribbler.SET_SPEAKER, 
-                    duration >> 8,
-                    duration % 256,
-                    frequency >> 8,
-                    frequency % 256])
+                   duration >> 8,
+                   duration % 256,
+                   frequency >> 8,
+                   frequency % 256])
         
     def _set_speaker_2(self, freq1, freq2, duration):
         self._write([Scribbler.SET_SPEAKER_2, 
