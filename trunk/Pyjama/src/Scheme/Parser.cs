@@ -7,104 +7,112 @@ using System.Collections.Generic; // List
 
 public class Parser {
 
-    delegate void Function();
-
-    // global registers
-    static List<object> tokens_reg = null;
-    static List<object> k_reg = null;
-    static string terminator_reg = null;
-    static object sexp_reg = null;
-    static Function pc = null;
-
-    static SchemeSymbol EmptyList = new SchemeSymbol("()");
-
-    public static List<object> makeList(params object[] args) {
+  delegate void Function();
+  
+  // global registers
+  static List<object> tokens_reg = null;
+  static List<object> k_reg = null;
+  static string terminator_reg = null;
+  static object sexp_reg = null;
+  static Function pc = null;
+  
+  static SchemeSymbol EmptyList = new SchemeSymbol("()");
+  
+  public static List<object> makeList(params object[] args) {
 	return new List<object>(args);
-    }
-    
-    public static object parse(string input) {
+  }
+  
+  public static object parse(string input) {
 	tokens_reg = Scanner.scanInput(input);
 	k_reg = makeList("init-cont");
 	pc =  new Function(parseSexp);
 	return run();
-    }
-
-    // file loader
-    public static object loadFile(string filename) {
+  }
+  
+  // file loader
+  public static object loadFile(string filename) {
 	tokens_reg = Scanner.scanInput(readContent(filename));
 	k_reg = null; 
 	pc = new Function(processSexps);
 	return run();
-    }
-
-    public static string readContent(string filename) {
+  }
+  
+  public static string readContent(string filename) {
 	String content = File.OpenText(filename).ReadToEnd();
 	return content;
-    }
-
-    // the trampoline
-    public static object run() {
+  }
+  
+  // the trampoline
+  public static object run() {
 	while (pc != null) {
-	    pc();
+	  pc();
 	}
 	return sexp_reg;
-    }
-
-    public static void parseSexp() {
+  }
+  
+  public static void parseSexp() {
 	List<object> token = (List<object>) tokens_reg[0];
 	string tag = (string) token[0];
 	if (tag == "integer") {
-	    sexp_reg = new SchemeInteger((int) token[1]);
-	    tokens_reg.RemoveAt(0);
-	    pc = new Function(applyCont);
-	} else if (tag == "double") {
-	    sexp_reg = new SchemeDouble((double) token[1]);
-	    tokens_reg.RemoveAt(0);
-	    pc = new Function(applyCont);
+	  sexp_reg = new ExtactNumber(int.Parse(token[1]));
+	  tokens_reg.RemoveAt(0);
+	  pc = new Function(applyCont);
+	} else if (tag == "decimal") {
+	  sexp_reg = new InexactNumber(double.Parse(token[1]));
+	  tokens_reg.RemoveAt(0);
+	  pc = new Function(applyCont);
+	} else if (tag == "rational") {
+	  sexp_reg = new ExactNumber(int.Parse(token[1]), int.Parse(token[2]));
+	  tokens_reg.RemoveAt(0);
+	  pc = new Function(applyCont);
 	} else if (tag == "boolean") {
-	    sexp_reg = new SchemeBoolean((bool) token[1]);
-	    tokens_reg.RemoveAt(0);
-	    pc = new Function(applyCont);
+	  sexp_reg = new SchemeBoolean((bool) token[1]);
+	  tokens_reg.RemoveAt(0);
+	  pc = new Function(applyCont);
 	} else if (tag == "character") {
-	    char ch = (char) token[1];
-	    sexp_reg = new SchemeCharacter(ch);
-	    tokens_reg.RemoveAt(0);
-	    pc = new Function(applyCont);
+	  char ch = (char) token[1];
+	  sexp_reg = new SchemeCharacter(ch);
+	  tokens_reg.RemoveAt(0);
+	  pc = new Function(applyCont);
 	} else if (tag == "string") {
-	    string str = (string) token[1];
-	    sexp_reg = new SchemeString(str);
-	    tokens_reg.RemoveAt(0);
-	    pc = new Function(applyCont);
+	  string str = (string) token[1];
+	  sexp_reg = new SchemeString(str);
+	  tokens_reg.RemoveAt(0);
+	  pc = new Function(applyCont);
 	} else if (tag == "identifier") {
-	    string id = (string) token[1];
-	    sexp_reg = (object) new SchemeSymbol(id);
-	    tokens_reg.RemoveAt(0);
-	    pc = new Function(applyCont);
+	  string id = (string) token[1];
+	  sexp_reg = (object) new SchemeSymbol(id);
+	  tokens_reg.RemoveAt(0);
+	  pc = new Function(applyCont);
 	} else if (tag == "apostrophe") {
-	    tokens_reg.RemoveAt(0);
-	    k_reg = makeList("quote-cont", k_reg);
-	    pc = new Function(parseSexp);
+	  tokens_reg.RemoveAt(0);
+	  k_reg = makeList("quote-cont", k_reg);
+	  pc = new Function(parseSexp);
 	} else if (tag == "lparen") {
-	    tokens_reg.RemoveAt(0);
-	    if (isTokenType(((List<object>) tokens_reg[0]), "dot")) 
+	  tokens_reg.RemoveAt(0);
+	  if (isTokenType(((List<object>) tokens_reg[0]), "dot")) 
 		pc = new Function(parseError);
-	    else
+	  else
 		terminator_reg = "rparen";
-	    pc = new Function(parseSexpSequence);
+	  pc = new Function(parseSexpSequence);
 	} else if (tag == "lbracket") {
-	    tokens_reg.RemoveAt(0);
-	    if (isTokenType(((List<object>) tokens_reg[0]), "dot")) {
+	  tokens_reg.RemoveAt(0);
+	  if (isTokenType(((List<object>) tokens_reg[0]), "dot")) {
 		pc = new Function(parseError);
-	    } else {
+	  } else {
 		terminator_reg = "rbracket";
 		pc = new Function(parseSexpSequence);
-	    }
+	  }
+	} else if (tag == "lvector") {
+	  tokens_reg.RemoveAt(0);
+	  k_reg = makeList("vector-cont", k_reg);
+	  pc = new Function(parseVector);
 	} else {
-	    pc = new Function(parseError);
+	  pc = new Function(parseError);
 	}
-    }
-
-    public static void parseSexpSequence() {
+  }
+  
+  public static void parseSexpSequence() {
 	List<object> token = (List<object>) tokens_reg[0];
 	string tag = (string) token[0];
 	if (tag == "rparen" || tag == "rbracket") {
@@ -139,295 +147,324 @@ public class Parser {
 	}
     }
 
-    public static void parseError() {
+  public static void parseVector() {
+	List<object> token = (List<object>) tokens_reg[0];
+	string tag = (string) token[0];
+	if (tag == "rparen") {
+	  sexp_reg = Emptylist;
+	  pc = new Function(applyCont);
+	} else {
+	  k_reg = makeList("vector-sexp1-cont", k_reg);
+	  pc = new Function(parseSexp);
+	}
+  }
+  
+  public static void parseError() {
 	List<object> token = (List<object>) tokens_reg[0];
 	if (isTokenType(token, "end-marker")) {
-	    throw new Exception("unexpected end of input");
+	  throw new Exception("unexpected end of input");
 	} else {
-	    throw new Exception(String.Format("unexpected token {0} encountered", token));
+	  throw new Exception(String.Format("unexpected token {0} encountered", token));
 	}
-    }
-
-    public static void processSexps() {
+  }
+  
+  public static void processSexps() {
 	List<object> token = (List<object>) tokens_reg[0];
 	if (isTokenType(token, "end-marker")) {
-	    sexp_reg = new SchemeSymbol("done");
-	    pc = null;
+	  sexp_reg = new SchemeSymbol("done");
+	  pc = null;
 	} else {
-	    k_reg = makeList("process-cont");
-	    pc = new Function(parseSexp);
+	  k_reg = makeList("process-cont");
+	  pc = new Function(parseSexp);
 	}
-    }
-
-    // continuations
-
-    public static void applyCont() {
+  }
+  
+  // continuations
+  
+  public static void applyCont() {
 	string tag = (string) k_reg[0];
 	//Console.WriteLine("   applyCont with {0}", tag);
 	if (tag == "init-cont") {
-	    if (isTokenType((List<object>) tokens_reg[0], "end-marker")) {
+	  if (isTokenType((List<object>) tokens_reg[0], "end-marker")) {
 		pc = null;
-	    } else {
+	  } else {
 		throw new Exception(String.Format("tokens left over: {0}", tokens_reg));
-	    }
+	  }
 	} else if (tag == "quote-cont") {
-	    List<object> k = (List<object>) k_reg[1];
-	    k_reg = k;
-	    sexp_reg = new Cons(new SchemeSymbol("quote"), new Cons(sexp_reg, EmptyList));
-	    pc = new Function(applyCont);
+	  List<object> k = (List<object>) k_reg[1];
+	  k_reg = k;
+	  sexp_reg = new Cons(new SchemeSymbol("quote"), new Cons(sexp_reg, EmptyList));
+	  pc = new Function(applyCont);
 	} else if (tag == "dot-cont") {
-	    string expectedTerminator = (string) k_reg[1];
-	    List<object> k = (List<object>) k_reg[2];
-	    terminator_reg = expectedTerminator;
-	    k_reg = k;
-	    pc = new Function(closeSexpSequence);
+	  string expectedTerminator = (string) k_reg[1];
+	  List<object> k = (List<object>) k_reg[2];
+	  terminator_reg = expectedTerminator;
+	  k_reg = k;
+	  pc = new Function(closeSexpSequence);
 	} else if (tag == "seq1-cont") {
-	    string expectedTerminator = (string) k_reg[1];
-	    List<object> k = (List<object>) k_reg[2];
-	    terminator_reg = expectedTerminator;
-	    k_reg = makeList("seq2-cont", sexp_reg, k);
-	    pc = new Function(parseSexpSequence);
+	  string expectedTerminator = (string) k_reg[1];
+	  List<object> k = (List<object>) k_reg[2];
+	  terminator_reg = expectedTerminator;
+	  k_reg = makeList("seq2-cont", sexp_reg, k);
+	  pc = new Function(parseSexpSequence);
 	} else if (tag == "seq2-cont") {
-	    List<object> k = null;
-	    object sexp1 = null;
-	    if (k_reg[1] is List<object>) {
+	  List<object> k = null;
+	  object sexp1 = null;
+	  if (k_reg[1] is List<object>) {
 		sexp1 = (List<object>) k_reg[1];
-	    } else {
+	  } else {
 		sexp1 = k_reg[1];
-	    }
-	    if (k_reg[2] is List<object>) {
+	  }
+	  if (k_reg[2] is List<object>) {
 		k = (List<object>) k_reg[2];
-	    } else {
+	  } else {
 		throw new Exception("invalid k_reg list2");
-	    }
-	    k_reg = k;
-	    sexp_reg = new Cons(sexp1, sexp_reg);
-	    pc = new Function(applyCont);
+	  }
+	  k_reg = k;
+	  sexp_reg = new Cons(sexp1, sexp_reg);
+	  pc = new Function(applyCont);
 	} else if (tag == "process-cont") {
-	    prettyPrint(sexp_reg);
-	    pc = new Function(processSexps);
+	  prettyPrint(sexp_reg);
+	  pc = new Function(processSexps);
+	} else if (tag == "vector-cont") {
+	  List<object> k = (List<object>) k_reg[1];
+	  k_reg = k;
+	  sexp_reg = new Vector(sexp_reg);
+	  pc = new Function(applyCont);
+	} else if (tag == "vector-sexp1-cont") {
+	  List<object> k = (List<object>) k_reg[1];
+	  k_reg = makeList("vector-rest-cont", sexp_reg, k);
+	  pc = new Function(parseVector);
+	} else if (tag == "vector-rest-cont") {
+	  object sexp1 = k_reg[1];
+	  List<object> k = (List<object>) k_reg[2];
+	  k_reg = k;
+	  sexp_reg = new Cons(sexp1, sexp_reg);
+	  pc = new Function(applyCont);
 	} else {
-	    throw new Exception(String.Format("invalid continuation {0} in applyCont", k_reg));
+	  throw new Exception(String.Format("invalid continuation {0} in applyCont", k_reg));
 	}
-    }
-
-    //-----------------------------------------------------------------------
-    // S-expression representations
-
-    public class Cons {
+  }
+  
+  //-----------------------------------------------------------------------
+  // S-expression representations
+  
+  public class Cons {
 	public object car;
 	public object cdr;
-
+	
 	public Cons(object a, object b) {
-	    this.car = a;
-	    this.cdr = b;
+	  this.car = a;
+	  this.cdr = b;
 	}
-
+	
 	public override string ToString() {
-	    if (this.car == new SchemeSymbol("quote") &&
-		(this.cdr is Cons) &&
-                ((Cons)this.cdr).cdr == EmptyList) {
+	  if (this.car == new SchemeSymbol("quote") &&
+		  (this.cdr is Cons) &&
+		  ((Cons)this.cdr).cdr == EmptyList) {
 		return String.Format("'{0}", ((Cons)this.cdr).car);
-	    } else {
+	  } else {
 		string s = String.Format("({0}", this.car);
 		object sexp = this.cdr;
 		while (sexp is Cons) {
-		    s += String.Format(" {0}", ((Cons)sexp).car);
-		    sexp = ((Cons)sexp).cdr;
+		  s += String.Format(" {0}", ((Cons)sexp).car);
+		  sexp = ((Cons)sexp).cdr;
 		}
 		if (sexp == EmptyList) {
-		    s += ")";
+		  s += ")";
 		} else {
-		    s += String.Format(" . {0})", sexp);
+		  s += String.Format(" . {0})", sexp);
 		}
 		return s;
-	    }
+	  }
 	}
-    }
-
-    public class SchemeSymbol {
+  }
+  
+  public class SchemeSymbol {
 	string id;
 	
 	public SchemeSymbol(string id) {
-	    this.id = id;
+	  this.id = id;
 	}
 	
-        public override bool Equals(object other) {
-	    return (other is SchemeSymbol && this.id == ((SchemeSymbol)other).id);
+	public override bool Equals(object other) {
+	  return (other is SchemeSymbol && this.id == ((SchemeSymbol)other).id);
 	}
 	
-        public override int GetHashCode() {
-	    return id.GetHashCode();
+	public override int GetHashCode() {
+	  return id.GetHashCode();
 	}
 	
 	public override string ToString() {
-	    return this.id;
+	  return this.id;
 	}
-    }
-    
-    public class SchemeInteger {
+  }
+  
+  public class ExactNumber {
 	int num;
 	
-	public SchemeInteger(int num) {
-	    this.num = num;
+	public ExactNumber(int num) {
+	  this.num = num;
 	}
-
-        public override bool Equals(object other) {
-	    return (other is SchemeInteger && this.num == ((SchemeInteger)other).num);
+	
+	public override bool Equals(object other) {
+	  return (other is SchemeInteger && this.num == ((SchemeInteger)other).num);
 	}
-
-        public override int GetHashCode() {
-	    return num.GetHashCode();
+	
+	public override int GetHashCode() {
+	  return num.GetHashCode();
 	}
-
+	
 	public override string ToString() {
-	    return this.num.ToString();
+	  return this.num.ToString();
 	}
-    }
-
-    public class SchemeDouble {
+  }
+  
+  public class InexactNumber {
 	double num;
 	
-	public SchemeDouble(double num) {
-	    this.num = num;
+	public InexactNumber(double num) {
+	  this.num = num;
 	}
-
-        public override bool Equals(object other) {
-	    return (other is SchemeDouble && this.num == ((SchemeDouble)other).num);
+	
+	public override bool Equals(object other) {
+	  return (other is SchemeDouble && this.num == ((SchemeDouble)other).num);
 	}
-
-        public override int GetHashCode() {
-	    return num.GetHashCode();
+	
+	public override int GetHashCode() {
+	  return num.GetHashCode();
 	}
-
+	
 	public override string ToString() {
-	    return this.num.ToString();
+	  return this.num.ToString();
 	}
-    }
+  }
+  
+  public class Vector {
+  }
 
-
-    public class SchemeBoolean {
+  public class SchemeBoolean {
 	bool val;
 	
 	public SchemeBoolean(bool val) {
-	    this.val = val;
+	  this.val = val;
 	}
-
-        public override bool Equals(object other) {
-	    return (other is SchemeBoolean && this.val == ((SchemeBoolean)other).val);
+	
+	public override bool Equals(object other) {
+	  return (other is SchemeBoolean && this.val == ((SchemeBoolean)other).val);
 	}
-
-        public override int GetHashCode() {
-	    return val.GetHashCode();
+	
+	public override int GetHashCode() {
+	  return val.GetHashCode();
 	}
-
+	
 	public override string ToString() {
-	    if (this.val) {
+	  if (this.val) {
 		return "#t";
-	    } else {
+	  } else {
 		return "#f";
-	    }
+	  }
 	}
-    }
-
-    public class SchemeCharacter {
+  }
+  
+  public class SchemeCharacter {
 	char ch;
 	
 	public SchemeCharacter(char ch) {
-	    this.ch = ch;
+	  this.ch = ch;
 	}
 	
-        public override bool Equals(object other) {
-	    return (other is SchemeCharacter && this.ch == ((SchemeCharacter)other).ch);
+	public override bool Equals(object other) {
+	  return (other is SchemeCharacter && this.ch == ((SchemeCharacter)other).ch);
 	}
 	
-        public override int GetHashCode() {
-	    return ch.GetHashCode();
+	public override int GetHashCode() {
+	  return ch.GetHashCode();
 	}
 	
 	public override string ToString() {
-	    if (this.ch == '\0') return "#\\nul";
-	    else if (this.ch == ' ') return "#\\space";
-	    else if (this.ch == '\t') return "#\\tab";
-	    else if (this.ch == '\n') return "#\\newline";
-	    else if (this.ch == '\b') return "#\\backspace";
-	    else if (this.ch == '\r') return "#\\return";
-	    else if (this.ch == '\f') return "#\\page";
-	    else return String.Format("#\\{0}", this.ch);    // not quite right
+	  if (this.ch == '\0') return "#\\nul";
+	  else if (this.ch == ' ') return "#\\space";
+	  else if (this.ch == '\t') return "#\\tab";
+	  else if (this.ch == '\n') return "#\\newline";
+	  else if (this.ch == '\b') return "#\\backspace";
+	  else if (this.ch == '\r') return "#\\return";
+	  else if (this.ch == '\f') return "#\\page";
+	  else return String.Format("#\\{0}", this.ch);    // not quite right
 	}
-    }
-
-    public class SchemeString {
+  }
+  
+  public class SchemeString {
 	string val;
 	
 	public SchemeString(string val) {
-	    this.val = val;
+	  this.val = val;
 	}
-
-        public override bool Equals(object other) {
-	    return (other is SchemeString && this.val == ((SchemeString)other).val);
+	
+	public override bool Equals(object other) {
+	  return (other is SchemeString && this.val == ((SchemeString)other).val);
 	}
-
-        public override int GetHashCode() {
-	    return val.GetHashCode();
+	
+	public override int GetHashCode() {
+	  return val.GetHashCode();
 	}
-
+	
 	public override string ToString() {
-	    return '"' + this.val + '"';
+	  return '"' + this.val + '"';
 	}
-    }
-
-
-    // () is represented as EmptyList
-    
-    //-----------------------------------------------------------------------
-    // examples:
-    // >>> parse("apple")
-    // >>> parse("#T")
-    // >>> parse("(a (b c (d)))")
-    // >>> parse("(a b c 1 2 -3.14 #f \"hello there\" #\\newline (e [f . x] . 4) ())")
-    // >>> loadFile("scanner-parser.ss")
-    
-    public static string prettyPrint(object obj) {
+  }
+  
+  
+  // () is represented as EmptyList
+  
+  //-----------------------------------------------------------------------
+  // examples:
+  // >>> parse("apple")
+  // >>> parse("#T")
+  // >>> parse("(a (b c (d)))")
+  // >>> parse("(a b c 1 2 -3.14 #f \"hello there\" #\\newline (e [f . x] . 4) ())")
+  // >>> loadFile("scanner-parser.ss")
+  
+  public static string prettyPrint(object obj) {
 	string retval = "";
 	if (obj is List<object>) {
-	    foreach (object item in (List<object>) obj) {
+	  foreach (object item in (List<object>) obj) {
 		if (retval != "")
-		    retval += " ";
+		  retval += " ";
 		if (item is List<object>)
-		    retval += prettyPrint((List<object>) item);
+		  retval += prettyPrint((List<object>) item);
 		else
-		    retval += item.ToString();
-	    }
-	    return "(" + retval + ")";
+		  retval += item.ToString();
+	  }
+	  return "(" + retval + ")";
 	} else {
-	    return obj.ToString();
+	  return obj.ToString();
 	}
-    }
-    
-    public static bool isTokenType(List<object> token, string tokenType) {
+  }
+  
+  public static bool isTokenType(List<object> token, string tokenType) {
 	return (((string) token[0]) == tokenType);
-    }
-
-    public static string arrayToString(object[] array) {
+  }
+  
+  public static string arrayToString(object[] array) {
 	string retval = "";
 	foreach (object item in array) {
-	    if (retval != "")
+	  if (retval != "")
 		retval += " ";
-	    retval += item.ToString();
+	  retval += item.ToString();
 	}
 	return retval;
-    }
-    
-    public static void Main(string[] args) {
+  }
+  
+  public static void Main(string[] args) {
 	if (args[0] == "exp") {
-	    string s = args[1];
-	    System.Console.WriteLine("Parsing expression: '{0}'...", s);
-	    System.Console.WriteLine(prettyPrint(parse(s)));
+	  string s = args[1];
+	  System.Console.WriteLine("Parsing expression: '{0}'...", s);
+	  System.Console.WriteLine(prettyPrint(parse(s)));
 	} else {
-	    System.Console.WriteLine("Parsing file: '{0}'...", args[0]);
-	    System.Console.WriteLine(prettyPrint(loadFile(args[0])));
+	  System.Console.WriteLine("Parsing file: '{0}'...", args[0]);
+	  System.Console.WriteLine(prettyPrint(loadFile(args[0])));
 	}
-    }
-
+  }
+  
 }
