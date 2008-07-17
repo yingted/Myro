@@ -150,6 +150,7 @@ def upgrade_myro(url=None, version=None):
 class SerialRobot:
     def __init__(self, serialport=None, baudrate=38400):
         from myro import ask
+        self.robotinfo = {}
         if serialport == None:
             serialport = ask("Port", useCache=0)
         # Deal with requirement that Windows "COM#" names where # >= 9 needs to

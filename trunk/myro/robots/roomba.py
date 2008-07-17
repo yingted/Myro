@@ -147,13 +147,6 @@ class Roomba(Robot): # myro robot
         else:
             raise ("invalid set item name: '%s'" % item)
 
-class RoombaFluke(Roomba, Fluke):
-    def __init__(self):
-        pass
-    # call one with port, copy the other
-    #Roomba.__init__(self)
-    #Fluke.__init__(self)
-
 def freq2num(f):
     # 32.70 is arbitrarily zero octave
     # 32.70 = exp(VAL / 1.442695)

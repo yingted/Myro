@@ -1198,3 +1198,11 @@ def rgb2yuv(R, G, B):
     V = int( 0.615 * R - 0.51499* G - 0.10001 * B + 128)
     return [max(min(v,255),0) for v in (Y, U, V)]
 
+
+#class RoombaFluke(Roomba, Fluke):
+#    def __init__(self):
+#        pass
+#    # call one with port, copy the other
+#    #Roomba.__init__(self)
+#    #Fluke.__init__(self)
+
