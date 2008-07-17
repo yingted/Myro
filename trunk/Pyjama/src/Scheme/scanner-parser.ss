@@ -1,4 +1,4 @@
-;; includes support for vectors and rationals
+;; includes support for vectors, rationals, exponents, and backquote
 
 ;; data structure representations of actions and states
 
@@ -77,13 +77,10 @@
   (lambda (token-type buffer)
     (let ((buffer (reverse buffer)))
       (case token-type
-	;; new
 	(integer
 	  (list 'integer (list->string buffer)))
-	;; new
 	(decimal
 	  (list 'decimal (list->string buffer)))
-	;; new
 	(rational
 	  (list 'rational (list->string buffer)))
 	(identifier
@@ -186,6 +183,8 @@
 	  ((char=? c #\)) '(drop (emit rparen)))
 	  ((char=? c #\]) '(drop (emit rbracket)))
 	  ((char=? c #\') '(drop (emit apostrophe)))
+	  ((char=? c #\`) '(drop (emit backquote)))
+	  ((char=? c #\,) '(drop (goto comma-state)))
 	  ((char=? c #\#) '(drop (goto hash-prefix-state)))
 	  ((char=? c #\") '(drop (goto string-state)))
 	  ((char-initial? c) '(shift (goto identifier-state)))
@@ -199,11 +198,15 @@
 	  ((char=? c #\newline) '(drop (goto start-state)))
 	  ((char=? c #\nul) '(goto start-state))
 	  (else '(drop (goto comment-state)))))
+      ;; new
+      (comma-state
+	(cond
+	  ((char=? c #\@) '(drop (emit comma-at)))
+	  (else '(emit comma))))
       (hash-prefix-state
 	(cond
 	  ((char-boolean? c) '(shift (emit boolean)))
 	  ((char=? c #\\) '(drop (goto character-state)))
-	  ;; new
 	  ((char=? c #\() '(drop (emit lvector)))
 	  (else (scan-error c))))
       (character-state
@@ -263,38 +266,30 @@
 	(cond
 	  ((char-numeric? c) '(shift (goto whole-number-state)))
 	  ((char=? c #\.) '(shift (goto fractional-number-state)))
-	  ;; new
 	  ((char=? c #\/) '(shift (goto rational-number-state)))
-	  ;; new
 	  ((or (char=? c #\e) (char=? c #\E)) '(shift (goto suffix-state)))
-	  ;; changed
 	  ((char-delimiter? c) '(emit integer))
 	  ((char-subsequent? c) '(shift (goto identifier-state)))
 	  (else (scan-error c))))
       (fractional-number-state
 	(cond
 	  ((char-numeric? c) '(shift (goto fractional-number-state)))
-	  ;; new
 	  ((or (char=? c #\e) (char=? c #\E)) '(shift (goto suffix-state)))
-	  ;; changed
 	  ((char-delimiter? c) '(emit decimal))
 	  ((char-subsequent? c) '(shift (goto identifier-state)))
 	  (else (scan-error c))))
-      ;; new
       (rational-number-state
 	(cond
 	  ((char-numeric? c) '(shift (goto rational-number-state*)))
 	  ((char-delimiter? c) '(emit identifier))
 	  ((char-subsequent? c) '(shift (goto identifier-state)))
 	  (else (scan-error c))))
-      ;; new
       (rational-number-state*
 	(cond
 	  ((char-numeric? c) '(shift (goto rational-number-state*)))
 	  ((char-delimiter? c) '(emit rational))
 	  ((char-subsequent? c) '(shift (goto identifier-state)))
 	  (else (scan-error c))))
-      ;; new
       (suffix-state
 	(cond
 	  ((char-sign? c) '(shift (goto signed-exponent-state)))
@@ -302,14 +297,12 @@
 	  ((char-delimiter? c) '(emit identifier))
 	  ((char-subsequent? c) '(shift (goto identifier-state)))
 	  (else (scan-error c))))
-      ;; new
       (signed-exponent-state
 	(cond
 	  ((char-numeric? c) '(shift (goto exponent-state)))
 	  ((char-delimiter? c) '(emit identifier))
 	  ((char-subsequent? c) '(shift (goto identifier-state)))
 	  (else (scan-error c))))
-      ;; new
       (exponent-state
 	(cond
 	  ((char-numeric? c) '(shift (goto exponent-state)))
@@ -332,6 +325,8 @@
 (define terminator_reg 'undefined)
 (define sexp_reg 'undefined)
 (define pc 'undefined)
+;; new
+(define keyword_reg 'undefined)
 
 (define parse
   (lambda (input)
@@ -351,17 +346,14 @@
 (define parse-sexp
   (lambda ()
     (record-case (first tokens_reg)
-      ;; new
       (integer (str)
 	(set! sexp_reg (string->number str))
 	(set! tokens_reg (rest-of tokens_reg))
 	(set! pc apply-cont))
-      ;; new
       (decimal (str)
 	(set! sexp_reg (string->number str))
 	(set! tokens_reg (rest-of tokens_reg))
 	(set! pc apply-cont))
-      ;; new
       (rational (str)
 	(let ((num (string->number str)))
 	  (if num
@@ -386,10 +378,22 @@
 	(set! sexp_reg id)
 	(set! tokens_reg (rest-of tokens_reg))
 	(set! pc apply-cont))
+      ;; new
       (apostrophe ()
-	(set! tokens_reg (rest-of tokens_reg))
-	(set! k_reg (make-quote-cont k_reg))
-	(set! pc parse-sexp))
+	(set! keyword_reg 'quote)
+	(set! pc parse-abbreviation))
+      ;; new
+      (backquote ()
+	(set! keyword_reg 'quasiquote)
+	(set! pc parse-abbreviation))
+      ;; new
+      (comma ()
+	(set! keyword_reg 'unquote)
+	(set! pc parse-abbreviation))
+      ;; new
+      (comma-at ()
+	(set! keyword_reg 'unquote-splicing)
+	(set! pc parse-abbreviation))
       (lparen ()
 	(set! tokens_reg (rest-of tokens_reg))
 	(if (token-type? (first tokens_reg) 'dot)
@@ -406,13 +410,20 @@
 	  (begin
 	    (set! terminator_reg 'rbracket)
 	    (set! pc parse-sexp-sequence))))
-      ;; new
       (lvector ()
 	(set! tokens_reg (rest-of tokens_reg))
 	(set! k_reg (make-vector-cont k_reg))
 	(set! pc parse-vector))
       (else
 	(set! pc parse-error)))))
+
+;; new
+;; tokens_reg keyword_reg k_reg
+(define parse-abbreviation
+  (lambda ()
+    (set! tokens_reg (rest-of tokens_reg))
+    (set! k_reg (make-abbreviation-cont keyword_reg k_reg))
+    (set! pc parse-sexp)))
 
 ;; tokens_reg terminator_reg k_reg
 (define parse-sexp-sequence
@@ -445,7 +456,6 @@
       (else
 	(set! pc parse-error)))))
 
-;; new
 ;; tokens_reg k_reg
 (define parse-vector
   (lambda ()
@@ -504,9 +514,10 @@
   (lambda ()
     (list 'init-cont)))
 
-(define make-quote-cont
-  (lambda (k)
-    (list 'quote-cont k)))
+;; new
+(define make-abbreviation-cont
+  (lambda (keyword k)
+    (list 'abbreviation-cont keyword k)))
 
 (define make-dot-cont
   (lambda (expected-terminator k)
@@ -524,17 +535,14 @@
   (lambda ()
     (list 'process-cont)))
 
-;; new
 (define make-vector-cont
   (lambda (k)
     (list 'vector-cont k)))
 
-;; new
 (define make-vector-sexp1-cont
   (lambda (k)
     (list 'vector-sexp1-cont k)))
 
-;; new
 (define make-vector-rest-cont
   (lambda (sexp1 k)
     (list 'vector-rest-cont sexp1 k)))
@@ -547,9 +555,10 @@
 	(if (token-type? (first tokens_reg) 'end-marker)
 	  (set! pc #f)
 	  (error 'read "tokens left over: ~a" tokens_reg)))
-      (quote-cont (k)
+      ;; new
+      (abbreviation-cont (keyword k)
 	(set! k_reg k)
-	(set! sexp_reg (list 'quote sexp_reg))
+	(set! sexp_reg (list keyword sexp_reg))
 	(set! pc apply-cont))
       (dot-cont (expected-terminator k)
 	(set! terminator_reg expected-terminator)
@@ -566,16 +575,13 @@
       (process-cont ()
 	(pretty-print sexp_reg)
 	(set! pc process-sexps))
-      ;; new
       (vector-cont (k)
 	(set! k_reg k)
 	(set! sexp_reg (list->vector sexp_reg))
 	(set! pc apply-cont))
-      ;; new
       (vector-sexp1-cont (k)
 	(set! k_reg (make-vector-rest-cont sexp_reg k))
 	(set! pc parse-vector))
-      ;; new
       (vector-rest-cont (sexp1 k)
 	(set! k_reg k)
 	(set! sexp_reg (cons sexp1 sexp_reg))

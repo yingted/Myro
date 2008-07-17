@@ -1,4 +1,4 @@
-# includes support for vectors and rationals
+# includes support for vectors, rationals, exponents, and backquote
 
 import string
 
@@ -68,7 +68,6 @@ def scanError(c):
     else:
         raise Exception("unexpected character %s encountered" % c)
 
-# changed
 def convertBufferToToken(tokenType, buffer):
     datum = string.join(buffer, '')
     if tokenType == "integer":
@@ -136,6 +135,10 @@ def applyState(state, c):
         if c == ')': return ("drop", ("emit", "rparen"))
         if c == ']': return ("drop", ("emit", "rbracket"))
         if c == "'": return ("drop", ("emit", "apostrophe"))
+        # new
+        if c == '`': return ("drop", ("emit", "backquote"))
+        # new
+        if c == ',': return ("drop", ("goto", "comma-state"))
         if c == '#': return ("drop", ("goto", "hash-prefix-state"))
         if c == '"': return ("drop", ("goto", "string-state"))
         if c in initialChars: return ("shift", ("goto", "identifier-state"))
@@ -148,10 +151,13 @@ def applyState(state, c):
         if c == '\n': return ("drop", ("goto", "start-state"))
         if c == '\0': return ("goto", "start-state")
         else: return ("drop", ("goto", "comment-state"))
+    # new
+    elif state == "comma-state":
+        if c == '@': return ("drop", ("emit", "comma-at"))
+        else: return ("emit", "comma")
     elif state == "hash-prefix-state":
         if c in booleanChars: return ("shift", ("emit", "boolean"))
         if c == '\\': return ("drop", ("goto", "character-state"))
-        # new
         if c == '(': return ("drop", ("emit", "lvector"))
         else: scanError(c)
     elif state == "character-state":
@@ -186,76 +192,56 @@ def applyState(state, c):
         if c in numericChars: return ("shift", ("goto", "whole-number-state"))
         if c == '.': return ("shift", ("goto", "signed-decimal-point-state"))
         if c in delimiterChars: return ("emit", "identifier")
-        # changed
         if c in subsequentChars: return ("shift", ("goto", "identifier-state"))
         else: scanError(c)
     elif state == "decimal-point-state":
         if c in numericChars: return ("shift", ("goto", "fractional-number-state"))
         if c in delimiterChars: return ("emit", "dot")
-        # changed
         if c in subsequentChars: return ("shift", ("goto", "identifier-state"))
         else: scanError(c)
     elif state == "signed-decimal-point-state":
         if c in numericChars: return ("shift", ("goto", "fractional-number-state"))
         if c in delimiterChars: return ("emit", "identifier")
-        # changed
         if c in subsequentChars: return ("shift", ("goto", "identifier-state"))
         else: scanError(c)
     elif state == "whole-number-state":
         if c in numericChars: return ("shift", ("goto", "whole-number-state"))
         if c == '.': return ("shift", ("goto", "fractional-number-state"))
-        # new
         if c == '/': return ("shift", ("goto", "rational-number-state"))
-        # new
         if c == 'e' or c == 'E': return ("shift", ("goto", "suffix-state"))
-        # changed
         if c in delimiterChars: return ("emit", "integer")
-        # changed
         if c in subsequentChars: return ("shift", ("goto", "identifier-state"))
         else: scanError(c)
     elif state == "fractional-number-state":
         if c in numericChars: return ("shift", ("goto", "fractional-number-state"))
-        # new
         if c == 'e' or c == 'E': return ("shift", ("goto", "suffix-state"))
-        # changed
         if c in delimiterChars: return ("emit", "decimal")
-        # changed
         if c in subsequentChars: return ("shift", ("goto", "identifier-state"))
         else: scanError(c)
-    # new
     elif state == "rational-number-state":
         if c in numericChars: return ("shift", ("goto", "rational-number-state*"))
         if c in delimiterChars: return ("emit", "identifier")
-        # changed
         if c in subsequentChars: return ("shift", ("goto", "identifier-state"))
         else: scanError(c)
-    # new
     elif state == "rational-number-state*":
         if c in numericChars: return ("shift", ("goto", "rational-number-state*"))
         if c in delimiterChars: return ("emit", "rational")
-        # changed
         if c in subsequentChars: return ("shift", ("goto", "identifier-state"))
         else: scanError(c)
-    # new
     elif state == "suffix-state":
         if c in signChars: return ("shift", ("goto", "signed-exponent-state"))
         if c in numericChars: return ("shift", ("goto", "exponent-state"))
         if c in delimiterChars: return ("emit", "identifier")
-        # changed
         if c in subsequentChars: return ("shift", ("goto", "identifier-state"))
         else: scanError(c)
-    # new
     elif state == "signed-exponent-state":
         if c in numericChars: return ("shift", ("goto", "exponent-state"))
         if c in delimiterChars: return ("emit", "identifier")
-        # changed
         if c in subsequentChars: return ("shift", ("goto", "identifier-state"))
         else: scanError(c)
-    # new
     elif state == "exponent-state":
         if c in numericChars: return ("shift", ("goto", "exponent-state"))
         if c in delimiterChars: return ("emit", "decimal")
-        # changed
         if c in subsequentChars: return ("shift", ("goto", "identifier-state"))
         else: scanError(c)
     else:
@@ -280,6 +266,8 @@ k_reg = None
 terminator_reg = None
 sexp_reg = None
 pc = None
+# new
+keyword_reg = None
 
 def parse(input):
     global tokens_reg, k_reg, pc
@@ -296,25 +284,20 @@ def run():
     return sexp_reg
 
 def parseSexp():
-    global tokens_reg, k_reg, terminator_reg, sexp_reg, pc
+    # new/changed
+    global tokens_reg, k_reg, terminator_reg, keyword_reg, sexp_reg, pc
     token = tokens_reg[0]
     tag = token[0]
-# deleted
-#    if tag == "number":
-#       ...
-    # new
     if tag == "integer":
         value = int(token[1])
         sexp_reg = ExactNumber(value)
         tokens_reg.pop(0)
         pc = applyCont
-    # new
     elif tag == "decimal":
         value = float(token[1])
         sexp_reg = InexactNumber(value)
         tokens_reg.pop(0)
         pc = applyCont
-    # new
     elif tag == "rational":
         num, den = int(token[1]), int(token[2])
         sexp_reg = ExactNumber(num, den)
@@ -340,10 +323,22 @@ def parseSexp():
 	sexp_reg = Symbol(id)
 	tokens_reg.pop(0)
 	pc = applyCont
+    # new/changed
     elif tag == "apostrophe":
-	tokens_reg.pop(0)
-	k_reg = ("quote-cont", k_reg)
-	pc = parseSexp
+        keyword_reg = "quote"
+        pc = parseAbbreviation
+    # new
+    elif tag == "backquote":
+        keyword_reg = "quasiquote"
+        pc = parseAbbreviation
+    # new
+    elif tag == "comma":
+        keyword_reg = "unquote"
+        pc = parseAbbreviation
+    # new
+    elif tag == "comma-at":
+        keyword_reg = "unquote-splicing"
+        pc = parseAbbreviation
     elif tag == "lparen":
 	tokens_reg.pop(0)
 	if isTokenType(tokens_reg[0], "dot"):
@@ -358,13 +353,19 @@ def parseSexp():
         else:
 	    terminator_reg = "rbracket"
 	    pc = parseSexpSequence
-    # new
     elif tag == "lvector":
         tokens_reg.pop(0)
         k_reg = ("vector-cont", k_reg)
         pc = parseVector
     else:
         pc = parseError
+
+# new
+def parseAbbreviation():
+    global tokens_reg, keyword_reg, k_reg, pc
+    tokens_reg.pop(0)
+    k_reg = ("abbreviation-cont", keyword_reg, k_reg)
+    pc = parseSexp
 
 def parseSexpSequence():
     global tokens_reg, k_reg, terminator_reg, sexp_reg, pc
@@ -398,7 +399,6 @@ def closeSexpSequence():
     else:
         pc = parseError
 
-# new
 def parseVector():
     global tokens_reg, k_reg, sexp_reg, pc
     token = tokens_reg[0]
@@ -453,10 +453,13 @@ def applyCont():
             pc = None
         else:
             raise Exception("tokens left over: %s" % tokens_reg)
-    elif tag == "quote-cont":
-        k = k_reg[1]
+    # new/changed - deleted "quote-cont" case
+    elif tag == "abbreviation-cont":
+        keyword = k_reg[1]
+        k = k_reg[2]
         k_reg = k
-        sexp_reg = Cons(Symbol("quote"), Cons(sexp_reg, ()))
+        quoteSym = Symbol(keyword)
+        sexp_reg = Cons(quoteSym, Cons(sexp_reg, ()))
         pc = applyCont
     elif tag == "dot-cont":
         expectedTerminator, k = k_reg[1], k_reg[2]
@@ -476,18 +479,15 @@ def applyCont():
     elif tag == "process-cont":
         prettyPrint(sexp_reg)
         pc = processSexps
-    # new
     elif tag == "vector-cont":
         k = k_reg[1]
         k_reg = k
         sexp_reg = Vector(sexp_reg)
         pc = applyCont
-    # new
     elif tag == "vector-sexp1-cont":
         k = k_reg[1]
         k_reg = ("vector-rest-cont", sexp_reg, k)
         pc = parseVector
-    # new
     elif tag == "vector-rest-cont":
         sexp1, k = k_reg[1], k_reg[2]
         k_reg = k
@@ -498,8 +498,6 @@ def applyCont():
 
 #-----------------------------------------------------------------------
 # S-expression representations
-
-# changed
 
 class Boolean:
     def __init__(self, bool):
@@ -577,6 +575,21 @@ class Cons:
                 isinstance(self.cdr, Cons) and \
                 self.cdr.cdr == ():
             return "'%s" % (self.cdr.car,)
+        # new - these cases can probably be consolidated
+        elif self.car == Symbol("quasiquote") and \
+                isinstance(self.cdr, Cons) and \
+                self.cdr.cdr == ():
+            return "`%s" % (self.cdr.car,)
+        # new
+        elif self.car == Symbol("unquote") and \
+                isinstance(self.cdr, Cons) and \
+                self.cdr.cdr == ():
+            return ",%s" % (self.cdr.car,)
+        # new
+        elif self.car == Symbol("unquote-splicing") and \
+                isinstance(self.cdr, Cons) and \
+                self.cdr.cdr == ():
+            return ",@%s" % (self.cdr.car,)
         else:
             s = "(%s" % (self.car,)
             sexp = self.cdr

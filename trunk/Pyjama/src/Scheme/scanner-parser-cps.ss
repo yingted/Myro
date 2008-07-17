@@ -1,4 +1,4 @@
-;; includes support for vectors and rationals
+;; includes support for vectors, rationals, exponents, and backquote
 
 ;; data structure representations of actions and states
 
@@ -77,13 +77,10 @@
   (lambda (token-type buffer)
     (let ((buffer (reverse buffer)))
       (case token-type
-	;; new
 	(integer
 	  (list 'integer (list->string buffer)))
-	;; new
 	(decimal
 	  (list 'decimal (list->string buffer)))
-	;; new
 	(rational
 	  (list 'rational (list->string buffer)))
 	(identifier
@@ -186,6 +183,10 @@
 	  ((char=? c #\)) '(drop (emit rparen)))
 	  ((char=? c #\]) '(drop (emit rbracket)))
 	  ((char=? c #\') '(drop (emit apostrophe)))
+	  ;; new
+	  ((char=? c #\`) '(drop (emit backquote)))
+	  ;; new
+	  ((char=? c #\,) '(drop (goto comma-state)))
 	  ((char=? c #\#) '(drop (goto hash-prefix-state)))
 	  ((char=? c #\") '(drop (goto string-state)))
 	  ((char-initial? c) '(shift (goto identifier-state)))
@@ -199,11 +200,15 @@
 	  ((char=? c #\newline) '(drop (goto start-state)))
 	  ((char=? c #\nul) '(goto start-state))
 	  (else '(drop (goto comment-state)))))
+      ;; new
+      (comma-state
+	(cond
+	  ((char=? c #\@) '(drop (emit comma-at)))
+	  (else '(emit comma))))
       (hash-prefix-state
 	(cond
 	  ((char-boolean? c) '(shift (emit boolean)))
 	  ((char=? c #\\) '(drop (goto character-state)))
-	  ;; new
 	  ((char=? c #\() '(drop (emit lvector)))
 	  (else (scan-error c))))
       (character-state
@@ -263,38 +268,30 @@
 	(cond
 	  ((char-numeric? c) '(shift (goto whole-number-state)))
 	  ((char=? c #\.) '(shift (goto fractional-number-state)))
-	  ;; new
 	  ((char=? c #\/) '(shift (goto rational-number-state)))
-	  ;; new
 	  ((or (char=? c #\e) (char=? c #\E)) '(shift (goto suffix-state)))
-	  ;; changed
 	  ((char-delimiter? c) '(emit integer))
 	  ((char-subsequent? c) '(shift (goto identifier-state)))
 	  (else (scan-error c))))
       (fractional-number-state
 	(cond
 	  ((char-numeric? c) '(shift (goto fractional-number-state)))
-	  ;; new
 	  ((or (char=? c #\e) (char=? c #\E)) '(shift (goto suffix-state)))
-	  ;; changed
 	  ((char-delimiter? c) '(emit decimal))
 	  ((char-subsequent? c) '(shift (goto identifier-state)))
 	  (else (scan-error c))))
-      ;; new
       (rational-number-state
 	(cond
 	  ((char-numeric? c) '(shift (goto rational-number-state*)))
 	  ((char-delimiter? c) '(emit identifier))
 	  ((char-subsequent? c) '(shift (goto identifier-state)))
 	  (else (scan-error c))))
-      ;; new
       (rational-number-state*
 	(cond
 	  ((char-numeric? c) '(shift (goto rational-number-state*)))
 	  ((char-delimiter? c) '(emit rational))
 	  ((char-subsequent? c) '(shift (goto identifier-state)))
 	  (else (scan-error c))))
-      ;; new
       (suffix-state
 	(cond
 	  ((char-sign? c) '(shift (goto signed-exponent-state)))
@@ -302,14 +299,12 @@
 	  ((char-delimiter? c) '(emit identifier))
 	  ((char-subsequent? c) '(shift (goto identifier-state)))
 	  (else (scan-error c))))
-      ;; new
       (signed-exponent-state
 	(cond
 	  ((char-numeric? c) '(shift (goto exponent-state)))
 	  ((char-delimiter? c) '(emit identifier))
 	  ((char-subsequent? c) '(shift (goto identifier-state)))
 	  (else (scan-error c))))
-      ;; new
       (exponent-state
 	(cond
 	  ((char-numeric? c) '(shift (goto exponent-state)))
@@ -328,6 +323,9 @@
 ;;          | ( <sexp>+ . <sexp> )
 ;;          | [ <sexp>* ]
 ;;          | [ <sexp>+ . <sexp> ]
+;;          | ` <sexp>
+;;          | , <sexp>
+;;          | ,@ <sexp>
 
 ;; token stream represented as a list
 (define first car)
@@ -344,13 +342,10 @@
 (define parse-sexp
   (lambda (tokens k)
     (record-case (first tokens)
-      ;; new
       (integer (str)
 	(k (string->number str) (rest-of tokens)))
-      ;; new
       (decimal (str)
 	(k (string->number str) (rest-of tokens)))
-      ;; new
       (rational (str)
 	(let ((num (string->number str)))
 	  (if num
@@ -360,10 +355,11 @@
       (character (char) (k char (rest-of tokens)))
       (string (str) (k str (rest-of tokens)))
       (identifier (id) (k id (rest-of tokens)))
-      (apostrophe ()
-	(parse-sexp (rest-of tokens)
-	  (lambda (sexp tokens-left)
-	    (k (list 'quote sexp) tokens-left))))
+      ;; new
+      (apostrophe () (parse-abbreviation tokens 'quote k))
+      (backquote () (parse-abbreviation tokens 'quasiquote k))
+      (comma () (parse-abbreviation tokens 'unquote k))
+      (comma-at () (parse-abbreviation tokens 'unquote-splicing k))
       (lparen ()
 	(let ((tokens (rest-of tokens)))
 	  (if (token-type? (first tokens) 'dot)
@@ -374,12 +370,18 @@
 	  (if (token-type? (first tokens) 'dot)
 	    (parse-error (first tokens))
 	    (parse-sexp-sequence tokens 'rbracket k))))
-      ;; new
       (lvector ()
 	(parse-vector (rest-of tokens)
 	  (lambda (sexps tokens-left)
 	    (k (list->vector sexps) tokens-left))))
       (else (parse-error (first tokens))))))
+
+;; new
+(define parse-abbreviation
+  (lambda (tokens keyword k)
+    (parse-sexp (rest-of tokens)
+      (lambda (sexp tokens-left)
+	(k (list keyword sexp) tokens-left)))))
 
 (define parse-sexp-sequence
   (lambda (tokens expected-terminator k)
@@ -410,7 +412,6 @@
 	  (error 'read "bracketed list terminated by parenthesis"))))
       (else (parse-error (first tokens))))))
 
-;; new
 (define parse-vector
   (lambda (tokens k)
     (record-case (first tokens)
