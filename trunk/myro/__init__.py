@@ -1187,7 +1187,7 @@ def _mouseCallback(point, name="default"):
     window.lastX, window.lastY = point.x, point.y
     rgba = pixel.getRGBA()
     window.setStatusDirect("(%d, %d): (%d,%d,%d,a=%d)" %
-                           (point.x, point.y, rgb[0], rgb[1], rgb[2], rgb[3]))
+                           (point.x, point.y, rgba[0], rgba[1], rgba[2], rgba[3]))
 
 def _mouseCallbackRelease(point, name="default"):
     window = myro.globvars.windows[name]
@@ -1416,7 +1416,7 @@ sys.excepthook = _myroExceptionHandler
 
 from myro.robots.scribbler import Scribbler
 from myro.robots.surveyor import Surveyor, watch
-from myro.robots.roomba import Roomba, Create
+#from myro.robots.roomba import Roomba, Create
 from myro.robots.simulator import SimScribbler
 from myro.graphics import *
 
