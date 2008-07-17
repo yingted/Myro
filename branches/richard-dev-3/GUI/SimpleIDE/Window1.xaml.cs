@@ -43,6 +43,9 @@ namespace Myro.GUI.SimpleIDE
         Thread connectionThread = null;
         Object connectionThreadLock = new Object();
         Editor editor = null;
+        SimulatorDisplay simDisplay = null;
+        TabItem simulatorTab = null;
+        TabItem lastEditorTab = null;
 
         static Window1()
         {
@@ -86,6 +89,7 @@ namespace Myro.GUI.SimpleIDE
                 controlPanel.Dispose();
                 commandWindow.Dispose();
                 webcamDisplay.Dispose();
+                simDisplay.Dispose();
                 Robot.shutdown();
             }
             catch (Exception err)
@@ -166,11 +170,26 @@ namespace Myro.GUI.SimpleIDE
                 editor.RequestNewDocument();
 
                 webcamDisplay.StartUpdate();
+
+                simDisplay = new SimulatorDisplay();
+                simDisplay.SimulatorFound += OnFoundSimulator;
+                simDisplay.Start();
             }
             catch (Exception err)
             {
                 GUIUtilities.ReportUnexpectedException(err);
             }
+        }
+
+        private void OnFoundSimulator(object sender, EventArgs e)
+        {
+            simulatorTab = new TabItem()
+            {
+                Header = "Simulation",
+                Content = simDisplay
+            };
+            mainTabs.Items.Add(simulatorTab);
+            mainTabs.SelectedItem = simulatorTab;
         }
 
         private void OnNew(object sender, ExecutedRoutedEventArgs e)
@@ -272,9 +291,13 @@ namespace Myro.GUI.SimpleIDE
         {
             try
             {
-                var editor = getCurrentEditor();
+                var editor = getEditor(lastEditorTab);
                 if (editor != null)
+                {
+                    if (simulatorTab != null)
+                        mainTabs.SelectedItem = simulatorTab;
                     commandWindow.ExecuteCommandSilently(editor.Text);
+                }
             }
             catch (Exception err)
             {
@@ -360,7 +383,10 @@ namespace Myro.GUI.SimpleIDE
             {
                 //SetButtonsEnabled();
                 if (mainTabs.SelectedItem != null && getCurrentEditor() != null)
+                {
                     getCurrentEditor().Focus();
+                    lastEditorTab = mainTabs.SelectedItem as TabItem;
+                }
             }
             catch (Exception err)
             {
@@ -378,6 +404,11 @@ namespace Myro.GUI.SimpleIDE
             {
                 GUIUtilities.ReportUnexpectedException(err);
             }
+        }
+
+        private void HasLastDocument(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = (lastEditorTab != null);
         }
 
         private void OnConfigEditor(object sender, ExecutedRoutedEventArgs e)
@@ -478,6 +509,14 @@ namespace Myro.GUI.SimpleIDE
                 return null;
         }
 
+        private TextBox getEditor(TabItem tabItem)
+        {
+            if (tabItem != null && tabItem.Content != null)
+                return tabItem.Content as TextBox;
+            else
+                return null;
+        }
+
         private TextBox getCurrentEditor()
         {
             if (mainTabs != null)
@@ -525,7 +564,7 @@ namespace Myro.GUI.SimpleIDE
                         new ThreadStart(delegate()
                         {
                             //manifestBox.Text = "Connecting to robot...";
-                            commandWindow.ExecuteCommand("from myro import *");
+                            commandWindow.ExecuteCommandInteractive("from myro import *");
                             commandWindow.LogText("> init('" + currentConfig.BaseName + "')\n", Colors.MediumBlue);
                         }));
                     Robot.Init(currentConfig.ManifestFilePath,

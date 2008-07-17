@@ -38,7 +38,12 @@ namespace Myro.GUI.WPFControls
         Thread readThreadOut;
         Thread readThreadErr;
 
-        Port<string> commandQueue;
+        struct Command
+        {
+            public bool IsInteractive;
+            public string CommandString;
+        }
+        Port<Command> commandQueue;
         DispatcherQueue commandDispatcherQueue;
 
         Paragraph paragraph;
@@ -93,7 +98,7 @@ namespace Myro.GUI.WPFControls
             readThreadErr = new Thread(new ThreadStart(delegate() { readLoop(stderr, Colors.Crimson); }));
             readThreadErr.Start();
 
-            commandQueue = new Port<string>();
+            commandQueue = new Port<Command>();
             commandDispatcherQueue = new DispatcherQueue("Python command queue", new Dispatcher(1, "Python command queue"));
             Arbiter.Activate(commandDispatcherQueue, Arbiter.Receive(true, commandQueue, commandHandler));
 
@@ -157,15 +162,15 @@ namespace Myro.GUI.WPFControls
             LogText(text, ErrColor);
         }
 
-        public void ExecuteCommand(string command)
+        public void ExecuteCommandInteractive(string command)
         {
             LogText("> " + command + "\n");
-            ExecuteCommandSilently(command);
+            commandQueue.Post(new Command() { IsInteractive = true, CommandString = command });
         }
 
         public void ExecuteCommandSilently(string command)
         {
-            commandQueue.Post(command);
+            commandQueue.Post(new Command() { IsInteractive = false, CommandString = command });
         }
 
         private void OnTextInput(object sender, TextCompositionEventArgs e)
@@ -174,7 +179,7 @@ namespace Myro.GUI.WPFControls
             //    Console.WriteLine((byte)c);
             if (e.Text.EndsWith("\n") || e.Text.EndsWith("\r"))
             {
-                ExecuteCommand(commandLineBox.Text);
+                ExecuteCommandInteractive(commandLineBox.Text);
 
                 // If the user went up in the history and came back down to the in-progress command,
                 // update the in-progress command in the history, otherwise, add a new history item.
@@ -207,13 +212,15 @@ namespace Myro.GUI.WPFControls
             }
         }
 
-        private void commandHandler(string command)
+        private void commandHandler(Command cmd)
         {
             PythonExecuting.Invoke(this, new EventArgs());
             try
             {
-                pe.ExecuteToConsole(command);
-                //pe.Execute(command);
+                if (cmd.IsInteractive)
+                    pe.ExecuteToConsole(cmd.CommandString);
+                else
+                    pe.Execute(cmd.CommandString);
             }
             catch (Exception err)
             {

@@ -14,9 +14,8 @@ using System.Windows.Shapes;
 using System.Threading;
 
 using Myro;
-using Myro.GUI.WPFControls;
 
-namespace Myro.GUI.ControlPanel
+namespace Myro.GUI.WPFControls
 {
     public partial class ControlPanel : UserControl
     {
