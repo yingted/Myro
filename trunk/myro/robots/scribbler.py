@@ -575,6 +575,104 @@ class Scribbler(Robot):
     ########################################################## Dongle Commands
 
 
+# the set_blob_yuv function will set the YUV colorspace for the blob
+# detection on the fluke based upon the average hue of a rectangle of
+# pixels in an image.
+# The GUI allows users to drag to select a rectangle in an image, and 
+# the average HUE of the pixels in that rectangle are used to set the
+# U and V parameters (hue/color parameters) of the blob detecting code
+# on the Lance Fluke (dongle).
+#
+# We set the Y value (Luminance) to 0-254 because we will accept pixels
+# of all intensities.
+#
+# The averaging code (used to find AVG/StdDev and calculate the average
+# range of hue values was based upon a donation from the C++ version of
+# the MYRO API, donated by redwar15@cs.utk.edu
+
+    def set_blob_yuv(self, picture, x1, y1, x2, y2):
+        from math import sqrt
+        #Find min/max of rectangle.
+        xs = [x1,x2]
+        ys = [y1,y2]
+        xs.sort()
+        ys.sort()
+	
+	#set up variables to hold counts and accumulations:
+        totalY = 0.0
+        totalU = 0.0
+        totalV = 0.0
+       
+        ySamples = []
+        uSamples = []
+        vSamples = [] 
+        
+        for i in range(xs[0], xs[1], 1):
+           for j in range(ys[0], ys[1], 1):
+              r,g,b = picture.getPixel(i,j).getRGB()
+              y,u,v = rgb2yuv(r,g,b)
+              totalY = totalY + y
+              totalU = totalU + u
+              totalV = totalV + v
+              ySamples.append(y)
+              uSamples.append(u)
+              vSamples.append(v)
+
+        count = len(ySamples)
+        yMean = totalY / count
+        uMean = totalU / count
+        vMean = totalV / count
+
+
+	# The standard deviation of a random variable with a normal 
+        # distribution is the root-mean-square (RMS) deviation of its 
+        # values from their mean.
+	sY = 0.0
+        sU = 0.0
+        sV = 0.0
+
+        for i in range(0,len(ySamples)):
+           sY = sY + (ySamples[i] - yMean)**2
+           sU = sU + (uSamples[i] - uMean)**2
+           sV = sV + (vSamples[i] - vMean)**2
+
+        sY = sqrt( sY / count)
+        sU = sqrt( sU / count)
+        sV = sqrt( sV / count)
+
+        # Select the U/V bounding box based upon stdMod stdDev
+        # from the mean, with approripate
+        # min/max values to fit in an 8 bit register.
+	#
+	stdMod = 1.5
+
+        minU = max(0, (uMean - sU*stdMod)    )
+        maxU = min(255, (uMean + sU*stdMod)  )
+        minV = max(0, (vMean - sV*stdMod) )
+        maxV = min(255, (vMean + sV*stdMod) )
+        minU = int(minU)
+        maxU = int(maxU)
+        minV = int(minV)
+        maxV = int(maxV)
+
+
+	#Note that we use the default values for
+        #several parameters, most importantly the Y value
+        # defaults to a range of 0-254
+        self.conf_rle( u_low=minU, u_high=maxU,
+                      v_low=minV, v_high=maxV)
+
+        # Return a tupal of parameters suitable for the configureBlob
+        # function, to be shown to the user.
+
+        return ( 0, 254, minU, maxU, minV, maxV) 
+
+
+
+
+# this function is in the process of being replaced by
+# set_blob_yuv() (above)
+
     def conf_rle_range(self, picture, x1, y1, x2, y2):
         xs = [x1, x2]
         ys = [y1, y2]
@@ -639,6 +737,17 @@ class Scribbler(Robot):
                  y_low=0, y_high=254,
                  u_low=51, u_high=136,
                  v_low=190, v_high=254):
+
+        # Force all parameters to be INT's
+        y_low = int(y_low)
+        y_high = int(y_high)
+        u_low  = int(u_low)
+        u_high = int(u_high)
+        v_low  = int(v_low)
+        v_high = int(v_high)
+        delay = int(delay)
+        smooth_thresh = int(smooth_thresh)
+
         if self.debug:
             print "configuring RLE", delay, smooth_thresh, y_low, y_high, u_low, u_high, v_low, v_high
         try:

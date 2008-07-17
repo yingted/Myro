@@ -1195,10 +1195,10 @@ def _mouseCallbackRelease(point, name="default"):
     if abs(window.lastX - point.x) < 3 or abs(window.lastY - point.y) < 3:
         return
     if myro.globvars.robot != None:
-        myro.globvars.robot.conf_rle_range(picture,
-                                           window.lastX, window.lastY,
-                                           point.x, point.y)
-        window.setStatusDirect("Blob colors set!")
+        yMin,yMax,uMin,uMax,vMin,vMax = myro.globvars.robot.set_blob_yuv(
+                                         picture, window.lastX, window.lastY,
+                                         point.x, point.y)
+        window.setStatusDirect("Set configureBlob(%d,%d,%d,%d,%d,%d)" % (yMin, yMax, uMin, uMax, vMin,vMax) )
 
 def writePictureTo(picture, filename):
     return picture.image.save(filename)
