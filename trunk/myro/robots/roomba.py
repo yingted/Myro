@@ -16,6 +16,7 @@ __version__ = "$Revision$"
 from myro import ask
 from myro import Robot
 from myro.robots import Robot as PyroRobot
+from myro.robots.fluke import Fluke
 from myro.robots.device import *
 import myro.globvars
 import string, array, math , struct
@@ -617,5 +618,12 @@ class RoombaRobot(PyroRobot):
 	
     def off(dev):
     	dev.sendMsg('\x85')
+
+class RoombaFluke(Fluke, Roomba):
+    def __init__(self, *args, **kwargs):
+        # call one with port, copy the other
+        Fluke.__init__(self, *args, **kwargs)
+        self.fluke = True
+        self.sc = self.ser
 	
 Create = Roomba
