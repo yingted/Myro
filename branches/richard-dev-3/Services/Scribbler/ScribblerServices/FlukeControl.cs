@@ -1,4 +1,6 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,12 +16,12 @@ using W3C.Soap;
 using b = Myro.Services.Scribbler.ScribblerBase;
 using brick = Myro.Services.Scribbler.ScribblerBase.Proxy;
 
-namespace Myro.Services.Scribbler.FlukeCamControl
+namespace Myro.Services.Scribbler.FlukeControl
 {
     public static class Contract
     {
         [DataMember]
-        public const string Identifier = "http://www.roboteducation.org/schemas/2008/06/flukecamcontrol.html";
+        public const string Identifier = "http://www.roboteducation.org/schemas/2008/06/flukecontrol.html";
     }
 
     [DataContract()]
@@ -43,21 +45,37 @@ namespace Myro.Services.Scribbler.FlukeCamControl
         public bool AutoExposure;
     }
 
-    public class Get : Get<GetRequestType, PortSet<CamControlState, Fault>> { }
-    public class Replace : Replace<CamControlState, PortSet<DefaultReplaceResponseType, Fault>>
+    [DataContract()]
+    [DataMemberConstructor()]
+    public class StringBody
     {
-        public Replace() { }
-        public Replace(CamControlState b) : base(b) { }
+        [DataMember()]
+        public string Value;
     }
+
+    [DataContract]
+    [DataMemberConstructor]
+    public class ByteBody
+    {
+        [DataMember]
+        public byte Value;
+    }
+
+    public class GetName : Get<GetRequestType, PortSet<StringBody, Fault>> { }
+    public class SetName : Update<StringBody, PortSet<DefaultUpdateResponseType, Fault>> { }
+    //public class GetCamera : Get<GetRequestType, PortSet<CamControlState, Fault>> { }
+    public class SetCamera : Update<CamControlState, PortSet<DefaultUpdateResponseType, Fault>> {}
+    public class SetIRPower : Update<ByteBody, PortSet<DefaultUpdateResponseType, Fault>> { }
 
     [ServicePort()]
     public class CamControlOperations : PortSet<
-        DsspDefaultLookup, DsspDefaultDrop, HttpGet, Get, Replace> { }
+        DsspDefaultLookup, DsspDefaultDrop,
+        SetCamera, SetName, GetName, SetIRPower> { }
 
     [DisplayName("Fluke Camera Control")]
     [Description("The Fluke Camera Control Service")]
     [Contract(Contract.Identifier)]
-    class FlukeCamControl : DsspServiceBase
+    class FlukeControl : DsspServiceBase
     {
         /// <summary>
         /// Robot base partner
@@ -76,7 +94,7 @@ namespace Myro.Services.Scribbler.FlukeCamControl
         /// Constructor
         /// </summary>
         /// <param name="port"></param>
-        public FlukeCamControl(DsspServiceCreationPort port) : base(port) { }
+        public FlukeControl(DsspServiceCreationPort port) : base(port) { }
 
         protected override void Start()
         {
@@ -84,7 +102,7 @@ namespace Myro.Services.Scribbler.FlukeCamControl
         }
 
         [ServiceHandler(ServiceHandlerBehavior.Exclusive)]
-        public IEnumerator<ITask> ReplaceHandler(Replace req)
+        public IEnumerator<ITask> SetCameraHandler(SetCamera req)
         {
             Fault fault = null;
 
@@ -138,12 +156,49 @@ namespace Myro.Services.Scribbler.FlukeCamControl
 
             if (fault == null)
             {
-                req.ResponsePort.Post(DefaultReplaceResponseType.Instance);
+                req.ResponsePort.Post(DefaultUpdateResponseType.Instance);
                 _state = req.Body;
             }
             else
                 req.ResponsePort.Post(fault);
+        }
 
+        [ServiceHandler(ServiceHandlerBehavior.Concurrent)]
+        public IEnumerator<ITask> SetNameHandler(SetName req)
+        {
+            yield return Arbiter.Choice(_scribblerPort.SetName(new brick.SetNameBody()
+                {
+                    NewName = req.Body.Value
+                }),
+                delegate(DefaultUpdateResponseType r) { req.ResponsePort.Post(r); },
+                delegate(Fault f) { req.ResponsePort.Post(f); });
+            yield break;
+        }
+
+        [ServiceHandler(ServiceHandlerBehavior.Concurrent)]
+        public IEnumerator<ITask> GetNameHandler(GetName req)
+        {
+            yield return Arbiter.Choice(_scribblerPort.Get(),
+                delegate(brick.ScribblerState r) { req.ResponsePort.Post(new StringBody() { Value = r.RobotName }); },
+                delegate(Fault f) { req.ResponsePort.Post(f); });
+            yield break;
+        }
+
+        [ServiceHandler(ServiceHandlerBehavior.Concurrent)]
+        public IEnumerator<ITask> SetIRPowerHandler(SetIRPower req)
+        {
+            var cmd = b.ScribblerHelper.Commands.SET_DONGLE_IR;
+            yield return Arbiter.Choice(_scribblerPort.SendScribblerCommand(
+                new brick.ScribblerCommand()
+                {
+                    CommandType = (byte)cmd,
+                    Data = new byte[] { req.Body.Value },
+                    ResponseLength = b.ScribblerHelper.ReturnSize(cmd),
+                    HasEcho = b.ScribblerHelper.HasEcho(cmd)
+                }),
+                delegate(brick.ScribblerResponse r) { req.ResponsePort.Post(DefaultUpdateResponseType.Instance); },
+                delegate(Fault f) { req.ResponsePort.Post(f); });
+            yield break;
         }
     }
 }

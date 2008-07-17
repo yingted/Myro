@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation.  All rights reserved.
+
 //------------------------------------------------------------------------------
 // Scribbler.cs
 //
@@ -192,6 +194,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
             Activate(Arbiter.ReceiveWithIteratorFromPortSet<GetImage>(true, _mainPort, GetImageHandler));
             Activate(Arbiter.ReceiveWithIteratorFromPortSet<GetCamParam>(true, _mainPort, GetCamParamHandler));
             Activate(Arbiter.ReceiveWithIteratorFromPortSet<SetCamParam>(true, _mainPort, SetCamParamHandler));
+            Activate(Arbiter.ReceiveWithIteratorFromPortSet<SendScribblerCommand>(true, _mainPort, SendScribblerCommandHandlerExternal));
 
             // These don't use the state either.
             // GetWindow has to set up the window, then retrieve it, so it must run one at a time.
@@ -323,7 +326,11 @@ namespace Myro.Services.Scribbler.ScribblerBase
             yield break;
         }
 
-
+        private IEnumerator<ITask> SendScribblerCommandHandlerExternal(SendScribblerCommand command)
+        {
+            _scribblerComPort.Post(command);
+            yield break;
+        }
 
         private bool ConnectToScribbler()
         {

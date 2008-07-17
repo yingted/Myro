@@ -1,4 +1,6 @@
-﻿using Microsoft.Ccr.Core;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+
+using Microsoft.Ccr.Core;
 using Microsoft.Dss.Core;
 using Microsoft.Dss.Core.Attributes;
 using Microsoft.Dss.ServiceModel.Dssp;

@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation.  All rights reserved.
+
 //------------------------------------------------------------------------------
 // Scribbler API Helper
 //
@@ -107,7 +109,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
             SET_DONGLE_LED_OFF = 117,
             //SET_RLE             = 118,
             //SET_NAME2           = 119,  // Format: 110 char1 char2 char3 char4 char5 char6 char7 char8
-            //SET_DONGLE_IR       = 120,
+            SET_DONGLE_IR       = 120,
             //SET_SERIAL_MEM      = 121,
             //SET_SCRIB_PROGRAM   = 122,
             //SET_START_PROGRAM   = 123,
@@ -248,6 +250,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
                 case Commands.SOFT_RESET:
                 case Commands.SET_WINDOW:
                 case Commands.SET_CAM_PARAM:
+                case Commands.SET_DONGLE_IR:
                     return 0;
                     break;
                 case Commands.GET_DONGLE_C_IR:
@@ -329,6 +332,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
                 case Commands.GET_JPEG_GRAY_SCAN:
                 case Commands.SET_DIMMER_LED:
                 case Commands.GET_CAM_PARAM:
+                case Commands.SET_DONGLE_IR:
                     return 2;
                     break;
                 case Commands.SOFT_RESET:
@@ -404,6 +408,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
                 case Commands.GET_JPEG_COLOR_SCAN:
                 case Commands.GET_JPEG_GRAY_HEADER:
                 case Commands.GET_JPEG_GRAY_SCAN:
+                case Commands.SET_DONGLE_IR:
                     return false;
                     break;
                 default:

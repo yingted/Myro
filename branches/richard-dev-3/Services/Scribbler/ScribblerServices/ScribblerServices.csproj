@@ -135,9 +135,7 @@
     <Compile Include="FlukeCam.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="FlukeCamControl.cs">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="FlukeControl.cs" />
     <Compile Include="FlukeObstacle.cs">
       <SubType>Code</SubType>
     </Compile>

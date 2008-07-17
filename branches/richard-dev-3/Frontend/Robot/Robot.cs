@@ -1,9 +1,10 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Myro.Adapters;
-using Myro.API;
 using Microsoft.Dss.Hosting;
 using System.IO;
 using System.Threading;
@@ -18,7 +19,7 @@ namespace Myro
         private static AdapterSpec<DriveAdapter> driveAdapter = null;
         private static AdapterSpec<VectorAdapter> soundAdapter = null;
         private static AdapterSpec<WebcamAdapter> webcamAdapter = null;
-        private static AdapterSpec<CamControlAdapter> camcontrolAdapter = null;
+        private static AdapterSpec<FlukeControlAdapter> controlAdapter = null;
         private static int httpPort;
         private static int dsspPort;
 
@@ -39,12 +40,12 @@ namespace Myro
                     new Myro.Adapters.DriveAdapterFactory(),
                     new Myro.Adapters.VectorAdapterFactory(),
                     new Myro.Adapters.WebcamAdapterFactory(),
-                    new Myro.Adapters.CamControlAdapterFactory()
+                    new Myro.Adapters.FlukeControlAdapterFactory()
                 });
                 driveAdapter = bank.GetAdapterSpec<DriveAdapter>("drive");
                 soundAdapter = bank.GetAdapterSpec<VectorAdapter>("tonegen");
                 webcamAdapter = bank.GetAdapterSpec<WebcamAdapter>("webcam");
-                camcontrolAdapter = bank.GetAdapterSpec<CamControlAdapter>("camcontrol");
+                controlAdapter = bank.GetAdapterSpec<FlukeControlAdapter>("flukecontrol");
             }
             else
                 throw new Exception("Myro is already initialized");
@@ -62,6 +63,19 @@ namespace Myro
                 DssEnvironment.WaitForShutdown();
             }
         }
+        #endregion
+
+        #region Fluke commands
+
+        public static string getName()
+        { checkNull(controlAdapter); return controlAdapter.Adapter.GetName(); }
+
+        public static void setName(string name)
+        { checkNull(controlAdapter); controlAdapter.Adapter.SetName(name); }
+
+        public static void setIRPower(byte power)
+        { checkNull(controlAdapter); controlAdapter.Adapter.SetIRPower(power); }
+
         #endregion
 
         #region Drive commands
@@ -116,12 +130,10 @@ namespace Myro
 
         public static void motors(double leftPower, double rightPower)
         {
-            if (driveAdapter != null)
-                driveAdapter.Adapter.SetMotors(
-                    Math.Max(-1.0, Math.Min(1.0, leftPower)),
-                    Math.Max(-1.0, Math.Min(1.0, rightPower)));
-            else
-                throw new MyroNotInitializedException();
+            checkNull(driveAdapter);
+            driveAdapter.Adapter.SetMotors(
+                Math.Max(-1.0, Math.Min(1.0, leftPower)),
+                Math.Max(-1.0, Math.Min(1.0, rightPower)));
         }
 
         //public static void turn(string direction, double power)
@@ -156,12 +168,12 @@ namespace Myro
         #endregion
 
         #region Sound commands
-        public static IMyroSong ReadSong(string fileName)
+        public static object ReadSong(string fileName)
         {
             throw new NotImplementedException();
         }
 
-        public static IMyroSong MakeSong(string text)
+        public static object MakeSong(string text)
         {
             throw new NotImplementedException();
         }
@@ -171,7 +183,7 @@ namespace Myro
             throw new NotImplementedException();
         }
 
-        public static void PlaySong(IMyroSong song)
+        public static void PlaySong(object song)
         {
             throw new NotImplementedException();
         }
@@ -192,70 +204,47 @@ namespace Myro
 
         public static void beep(double duration, double frequency1, double frequency2)
         {
-            if (soundAdapter != null)
-                soundAdapter.Adapter.Set(
-                    new List<int>() { 0, 1, 2 },
-                    new List<double>() { frequency1, frequency2, duration });
-            else
-                throw new MyroNotInitializedException();
+            checkNull(soundAdapter);
+            soundAdapter.Adapter.Set(
+                new List<int>() { 0, 1, 2 },
+                new List<double>() { frequency1, frequency2, duration });
         }
 
         public static void setLoud(bool loud)
         {
-            if (soundAdapter != null)
-                soundAdapter.Adapter.Set(3, loud ? 1.0 : 0.0);
-            else
-                throw new MyroNotInitializedException();
+            checkNull(soundAdapter);
+            soundAdapter.Adapter.Set(3, loud ? 1.0 : 0.0);
         }
         #endregion
 
         #region Sensor commands
+
         public static double[] Get(string name)
-        {
-            if (bank != null) return bank.GetAdapterSpec<VectorAdapter>(name.ToLower()).Adapter.GetAllElements().ToArray();
-            else throw new MyroNotInitializedException();
-        }
+        { checkNull(bank); return bank.GetAdapterSpec<VectorAdapter>(name.ToLower()).Adapter.GetAllElements().ToArray(); }
 
         public static double Get(string name, int index)
-        {
-            if (bank != null) return bank.GetAdapterSpec<VectorAdapter>(name.ToLower()).Adapter.Get(index);
-            else throw new MyroNotInitializedException();
-        }
+        { checkNull(bank); return bank.GetAdapterSpec<VectorAdapter>(name.ToLower()).Adapter.Get(index); }
 
         public static double Get(string name, string tag)
-        {
-            if (bank != null) return bank.GetAdapterSpec<VectorAdapter>(name.ToLower()).Adapter.Get(tag.ToLower());
-            else throw new MyroNotInitializedException();
-        }
+        { checkNull(bank); return bank.GetAdapterSpec<VectorAdapter>(name.ToLower()).Adapter.Get(tag.ToLower()); }
 
         public static string[] GetNames(string name)
-        {
-            if (bank != null) return bank.GetAdapterSpec<VectorAdapter>(name.ToLower()).Adapter.GetState().Keys.ToArray();
-            else throw new MyroNotInitializedException();
-        }
+        { checkNull(bank); return bank.GetAdapterSpec<VectorAdapter>(name.ToLower()).Adapter.GetState().Keys.ToArray(); }
 
         public static void GetPairs(string name, out string[] names, out double[] values)
         {
-            if (bank != null)
-            {
-                var state = bank.GetAdapterSpec<VectorAdapter>(name).Adapter.GetState();
-                values = state.Values.ToArray();
-                names = state.Keys.ToArray();
-            }
-            else throw new MyroNotInitializedException();
+            checkNull(bank);
+            var state = bank.GetAdapterSpec<VectorAdapter>(name).Adapter.GetState();
+            values = state.Values.ToArray();
+            names = state.Keys.ToArray();
         }
 
         public static void Set(string name, int index, double value)
-        {
-            if (bank != null) bank.GetAdapterSpec<VectorAdapter>(name.ToLower()).Adapter.Set(index, value);
-            else throw new MyroNotInitializedException();
-        }
+        { checkNull(bank); bank.GetAdapterSpec<VectorAdapter>(name.ToLower()).Adapter.Set(index, value); }
 
         public static void Set(string name, string tag, double value)
-        {
-            if (bank != null) bank.GetAdapterSpec<VectorAdapter>(name.ToLower()).Adapter.Set(tag.ToLower(), value);
-            else throw new MyroNotInitializedException();
-        }
+        { checkNull(bank); bank.GetAdapterSpec<VectorAdapter>(name.ToLower()).Adapter.Set(tag.ToLower(), value); }
+
         #endregion
 
         #region Camera commands
@@ -313,23 +302,31 @@ namespace Myro
 
         public static void darkenCamera(byte level)
         {
-            if (camcontrolAdapter != null) camcontrolAdapter.Adapter.DarkenCamera(level);
+            if (controlAdapter != null) controlAdapter.Adapter.DarkenCamera(level);
             else throw new MyroNotInitializedException();
         }
 
         public static void autoCamera()
         {
-            if (camcontrolAdapter != null) camcontrolAdapter.Adapter.AutoCamera();
+            if (controlAdapter != null) controlAdapter.Adapter.AutoCamera();
             else throw new MyroNotInitializedException();
         }
 
         #endregion Camera commands
 
         #region Exception definitions
+
+        private static void checkNull(object adapter)
+        {
+            if (adapter == null)
+                throw new MyroNotInitializedException();
+        }
+
         public class MyroNotInitializedException : Exception
         {
             public MyroNotInitializedException() : base(Strings.NotInitialized) { }
         }
+
         #endregion
 
         //AdapterBank bank;

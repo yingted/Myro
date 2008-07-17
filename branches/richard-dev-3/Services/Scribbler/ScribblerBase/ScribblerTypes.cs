@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation.  All rights reserved.
+
 //------------------------------------------------------------------------------
 // ScribblerTypes.cs
 //
@@ -70,6 +72,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
                 typeof(GetWindow),
                 typeof(GetCamParam),
                 typeof(SetCamParam),
+                typeof(SendScribblerCommand),
                 typeof(ScribblerResponseMessage),
                 typeof(SelectiveSubscribe), //IMPORTANT: Because SelectiveSubscribe inherits from Subscribe, it must go on top.
                 typeof(Subscribe))

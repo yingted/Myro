@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
+// Copyright (c) Microsoft Corporation.  All rights reserved.
+
 //  This file is part of the IPRE Scribbler package
 //  (http://www.roboteducation.org/)
 // 

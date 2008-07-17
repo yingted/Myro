@@ -1,4 +1,6 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,16 +8,16 @@ using Microsoft.Dss.ServiceModel.Dssp;
 using Microsoft.Ccr.Core;
 using Microsoft.Dss.Hosting;
 using Myro.Utilities;
-using camcontrol = Myro.Services.Scribbler.FlukeCamControl.Proxy;
+using fluke = Myro.Services.Scribbler.FlukeControl.Proxy;
 using b = Myro.Services.Scribbler.ScribblerBase;
 
 namespace Myro.Adapters
 {
-    public class CamControlAdapterFactory : IAdapterFactory
+    public class FlukeControlAdapterFactory : IAdapterFactory
     {
         private List<string> supportedContracts = new List<string>()
         {
-            camcontrol.Contract.Identifier
+            fluke.Contract.Identifier
         };
         public List<string> SupportedContracts
         {
@@ -24,21 +26,21 @@ namespace Myro.Adapters
 
         public IAdapter Create(ServiceInfoType service)
         {
-            return new CamControlAdapter(service);
+            return new FlukeControlAdapter(service);
         }
     }
 
-    public class CamControlAdapter : IAdapter
+    public class FlukeControlAdapter : IAdapter
     {
-        DispatcherQueue queue = new DispatcherQueue("CamControlAdapter queue", new Dispatcher(1, "CamControlAdapter queue"));
-        camcontrol.CamControlOperations opPort;
+        DispatcherQueue queue = new DispatcherQueue("FlukeControlAdapter queue", new Dispatcher(1, "FlukeControlAdapter queue"));
+        fluke.CamControlOperations opPort;
 
         public Microsoft.Dss.ServiceModel.Dssp.ServiceInfoType ServiceInfo { get; internal set; }
 
-        public CamControlAdapter(ServiceInfoType service)
+        public FlukeControlAdapter(ServiceInfoType service)
         {
             this.ServiceInfo = service;
-            opPort = DssEnvironment.ServiceForwarder<camcontrol.CamControlOperations>(new Uri(service.Service));
+            opPort = DssEnvironment.ServiceForwarder<fluke.CamControlOperations>(new Uri(service.Service));
         }
 
         public void Dispose()
@@ -48,7 +50,7 @@ namespace Myro.Adapters
 
         public void DarkenCamera(byte level)
         {
-            RSUtils.ReceiveSync(queue, opPort.Replace(new camcontrol.CamControlState()
+            RSUtils.ReceiveSync(queue, opPort.SetCamera(new fluke.CamControlState()
             {
                 Darkness = level,
                 Val1 = 0,
@@ -63,7 +65,7 @@ namespace Myro.Adapters
 
         public void AutoCamera()
         {
-            RSUtils.ReceiveSync(queue, opPort.Replace(new camcontrol.CamControlState()
+            RSUtils.ReceiveSync(queue, opPort.SetCamera(new fluke.CamControlState()
             {
                 Darkness = 0,
                 Val1 = 0x80,
@@ -74,6 +76,21 @@ namespace Myro.Adapters
                 AutoGain = true,
                 AutoWhiteBalance = true
             }), Params.DefaultRecieveTimeout);
+        }
+
+        public string GetName()
+        {
+            return RSUtils.ReceiveSync(queue, opPort.GetName(), Params.DefaultRecieveTimeout).Value;
+        }
+
+        public void SetName(string name)
+        {
+            RSUtils.ReceiveSync(queue, opPort.SetName(name), Params.DefaultRecieveTimeout);
+        }
+
+        public void SetIRPower(byte power)
+        {
+            RSUtils.ReceiveSync(queue, opPort.SetIRPower(power), Params.DefaultRecieveTimeout);
         }
     }
 }

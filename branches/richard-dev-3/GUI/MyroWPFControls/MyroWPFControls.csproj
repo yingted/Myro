@@ -150,7 +150,7 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Frontend\Front\Robot.csproj">
+    <ProjectReference Include="..\..\Frontend\Robot\Robot.csproj">
       <Project>{4A2F2891-310B-4690-8224-20C58A6676E2}</Project>
       <Name>Robot</Name>
     </ProjectReference>
