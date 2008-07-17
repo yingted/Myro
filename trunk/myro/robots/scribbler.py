@@ -670,42 +670,12 @@ class Scribbler(Robot):
 
 
 
-# this function is in the process of being replaced by
-# set_blob_yuv() (above)
 
-    def conf_rle_range(self, picture, x1, y1, x2, y2):
-        xs = [x1, x2]
-        ys = [y1, y2]
-        xs.sort()
-        ys.sort()
-        # min, max
-        us = [255, 0]
-        vs = [255, 0]
-        #yps = [255, 0]
-        for i in range(xs[0], xs[1] + 1, 1):
-            for j in range(ys[0], ys[1] + 1, 1):
-                r,g,b = picture.getPixel(i, j).getRGB()
-                y,u,v = rgb2yuv(r, g, b)
 
-                #if y < yps[0]:
-                #    yps[0] = y
-                #elif v > yps[1]:
-                #    yps[1] = y
 
-                if v < vs[0]:
-                    vs[0] = v
-                elif v > vs[1]:
-                    vs[1] = v
-                    
-                if u < us[0]:
-                    us[0] = u
-                elif u > us[1]:                    
-                    us[1] = u
-                    
-        self.conf_rle(delay = 90, smooth_thresh = 4,
-                      #y_low=yps[0], y_high=yps[1],
-                      u_low=us[0], u_high=us[1],
-                      v_low=vs[0], v_high=vs[1])
+
+
+
 
 
     def configureBlob(self,
