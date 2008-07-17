@@ -532,6 +532,13 @@ void serve_set_passthrough()
     }  
 }
 
+// Clear DB9
+void serve_clear_uart() {
+  int i;
+  for (i = 0; i < 100; i++) {
+    uart0Getch();
+  }
+}
 
 // Send N Bytes from Bluetooth to DB9
 void serve_set_pass_n_bytes()
