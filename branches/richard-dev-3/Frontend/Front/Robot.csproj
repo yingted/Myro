@@ -51,19 +51,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MyroAPI\IMyroLED.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="MyroAPI\IMyroMovement.cs" />
-    <Compile Include="MyroAPI\IMyroRobotData.cs" />
-    <Compile Include="MyroAPI\IMyroSensor.cs" />
-    <Compile Include="MyroAPI\IMyroSound.cs" />
-    <Compile Include="MyroAPI\IMyroSpeech.cs" />
-    <Compile Include="MyroAPI\IMyroUtility.cs" />
-    <Compile Include="MyroAPI\MyroMovement.cs" />
-    <Compile Include="MyroAPI\MyroSensors.cs" />
-    <Compile Include="MyroAPI\MyroSound.cs" />
-    <Compile Include="MyroAPI\MyroUtilities.cs" />
     <Compile Include="Robot.cs" />
   </ItemGroup>
   <ItemGroup>
