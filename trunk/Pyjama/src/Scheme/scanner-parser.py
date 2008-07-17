@@ -1,3 +1,5 @@
+# includes support for vectors and rationals
+
 import string
 
 #-----------------------------------------------------------------------
@@ -66,28 +68,34 @@ def scanError(c):
     else:
         raise Exception("unexpected character %s encountered" % c)
 
+# changed
 def convertBufferToToken(tokenType, buffer):
-    if tokenType == "number":
-        return ("number", eval(string.join(buffer, '')))
+    datum = string.join(buffer, '')
+    if tokenType == "integer":
+        return ("integer", datum)
+    elif tokenType == "decimal":
+        return ("decimal", datum)
+    elif tokenType == "rational":
+        numerator, denominator = string.split(datum, '/')
+        return ("rational", numerator, denominator)
     elif tokenType == "identifier":
-        return ("identifier", string.join(buffer, ''))
+        return ("identifier", datum)
     elif tokenType == "boolean":
-        return ("boolean", buffer[0] in ('t', 'T'))
+        return ("boolean", datum == "t" or datum == "T")
     elif tokenType == "character":
-        return ("character", buffer[0])
+        return ("character", datum[0])
     elif tokenType == "named-character":
-        name = string.join(buffer, '')
-        if name == "nul": return ("character", '\0')
-        if name == "space": return ("character", ' ')
-        if name == "tab": return ("character", '\t')
-        if name == "newline": return ("character", '\n')
-        if name == "linefeed": return ("character", '\n')
-        if name == "backspace": return ("character", '\b')
-        if name == "return": return ("character", '\r')
-        if name == "page": return ("character", '\f')
-        raise Exception("invalid character name #\\%s" % name)
+        if datum == "nul": return ("character", '\0')
+        if datum == "space": return ("character", ' ')
+        if datum == "tab": return ("character", '\t')
+        if datum == "newline": return ("character", '\n')
+        if datum == "linefeed": return ("character", '\n')
+        if datum == "backspace": return ("character", '\b')
+        if datum == "return": return ("character", '\r')
+        if datum == "page": return ("character", '\f')
+        raise Exception("invalid character name #\\%s" % datum)
     elif tokenType == "string":
-        return ("string", string.join(buffer, ''))
+        return ("string", datum)
     else:
         return (tokenType,)
 
@@ -143,6 +151,8 @@ def applyState(state, c):
     elif state == "hash-prefix-state":
         if c in booleanChars: return ("shift", ("emit", "boolean"))
         if c == '\\': return ("drop", ("goto", "character-state"))
+        # new
+        if c == '(': return ("drop", ("emit", "lvector"))
         else: scanError(c)
     elif state == "character-state":
         if c in alphabeticChars: return ("shift", ("goto", "alphabetic-character-state"))
@@ -176,33 +186,77 @@ def applyState(state, c):
         if c in numericChars: return ("shift", ("goto", "whole-number-state"))
         if c == '.': return ("shift", ("goto", "signed-decimal-point-state"))
         if c in delimiterChars: return ("emit", "identifier")
-        if c in initialChars: return ("shift", ("goto", "identifier-state"))
-        if c in specialSubsequentChars: return ("shift", ("goto", "identifier-state"))
+        # changed
+        if c in subsequentChars: return ("shift", ("goto", "identifier-state"))
         else: scanError(c)
     elif state == "decimal-point-state":
         if c in numericChars: return ("shift", ("goto", "fractional-number-state"))
         if c in delimiterChars: return ("emit", "dot")
-        if c in initialChars: return ("shift", ("goto", "identifier-state"))
-        if c in specialSubsequentChars: return ("shift", ("goto", "identifier-state"))
+        # changed
+        if c in subsequentChars: return ("shift", ("goto", "identifier-state"))
         else: scanError(c)
     elif state == "signed-decimal-point-state":
         if c in numericChars: return ("shift", ("goto", "fractional-number-state"))
         if c in delimiterChars: return ("emit", "identifier")
-        if c in initialChars: return ("shift", ("goto", "identifier-state"))
-        if c in specialSubsequentChars: return ("shift", ("goto", "identifier-state"))
+        # changed
+        if c in subsequentChars: return ("shift", ("goto", "identifier-state"))
         else: scanError(c)
     elif state == "whole-number-state":
         if c in numericChars: return ("shift", ("goto", "whole-number-state"))
         if c == '.': return ("shift", ("goto", "fractional-number-state"))
-        if c in delimiterChars: return ("emit", "number")
-        if c in initialChars: return ("shift", ("goto", "identifier-state"))
-        if c in specialSubsequentChars: return ("shift", ("goto", "identifier-state"))
+        # new
+        if c == '/': return ("shift", ("goto", "rational-number-state"))
+        # new
+        if c == 'e' or c == 'E': return ("shift", ("goto", "suffix-state"))
+        # changed
+        if c in delimiterChars: return ("emit", "integer")
+        # changed
+        if c in subsequentChars: return ("shift", ("goto", "identifier-state"))
         else: scanError(c)
     elif state == "fractional-number-state":
         if c in numericChars: return ("shift", ("goto", "fractional-number-state"))
-        if c in delimiterChars: return ("emit", "number")
-        if c in initialChars: return ("shift", ("goto", "identifier-state"))
-        if c in specialSubsequentChars: return ("shift", ("goto", "identifier-state"))
+        # new
+        if c == 'e' or c == 'E': return ("shift", ("goto", "suffix-state"))
+        # changed
+        if c in delimiterChars: return ("emit", "decimal")
+        # changed
+        if c in subsequentChars: return ("shift", ("goto", "identifier-state"))
+        else: scanError(c)
+    # new
+    elif state == "rational-number-state":
+        if c in numericChars: return ("shift", ("goto", "rational-number-state*"))
+        if c in delimiterChars: return ("emit", "identifier")
+        # changed
+        if c in subsequentChars: return ("shift", ("goto", "identifier-state"))
+        else: scanError(c)
+    # new
+    elif state == "rational-number-state*":
+        if c in numericChars: return ("shift", ("goto", "rational-number-state*"))
+        if c in delimiterChars: return ("emit", "rational")
+        # changed
+        if c in subsequentChars: return ("shift", ("goto", "identifier-state"))
+        else: scanError(c)
+    # new
+    elif state == "suffix-state":
+        if c in signChars: return ("shift", ("goto", "signed-exponent-state"))
+        if c in numericChars: return ("shift", ("goto", "exponent-state"))
+        if c in delimiterChars: return ("emit", "identifier")
+        # changed
+        if c in subsequentChars: return ("shift", ("goto", "identifier-state"))
+        else: scanError(c)
+    # new
+    elif state == "signed-exponent-state":
+        if c in numericChars: return ("shift", ("goto", "exponent-state"))
+        if c in delimiterChars: return ("emit", "identifier")
+        # changed
+        if c in subsequentChars: return ("shift", ("goto", "identifier-state"))
+        else: scanError(c)
+    # new
+    elif state == "exponent-state":
+        if c in numericChars: return ("shift", ("goto", "exponent-state"))
+        if c in delimiterChars: return ("emit", "decimal")
+        # changed
+        if c in subsequentChars: return ("shift", ("goto", "identifier-state"))
         else: scanError(c)
     else:
         raise Exception("invalid state %s in applyState" % state)
@@ -245,11 +299,27 @@ def parseSexp():
     global tokens_reg, k_reg, terminator_reg, sexp_reg, pc
     token = tokens_reg[0]
     tag = token[0]
-    if tag == "number":
-        num = token[1]
-	sexp_reg = Number(num)
+# deleted
+#    if tag == "number":
+#       ...
+    # new
+    if tag == "integer":
+        value = int(token[1])
+        sexp_reg = ExactNumber(value)
         tokens_reg.pop(0)
-	pc = applyCont
+        pc = applyCont
+    # new
+    elif tag == "decimal":
+        value = float(token[1])
+        sexp_reg = InexactNumber(value)
+        tokens_reg.pop(0)
+        pc = applyCont
+    # new
+    elif tag == "rational":
+        num, den = int(token[1]), int(token[2])
+        sexp_reg = ExactNumber(num, den)
+        tokens_reg.pop(0)
+        pc = applyCont
     elif tag == "boolean":
         bool = token[1]
 	sexp_reg = Boolean(bool)
@@ -288,6 +358,11 @@ def parseSexp():
         else:
 	    terminator_reg = "rbracket"
 	    pc = parseSexpSequence
+    # new
+    elif tag == "lvector":
+        tokens_reg.pop(0)
+        k_reg = ("vector-cont", k_reg)
+        pc = parseVector
     else:
         pc = parseError
 
@@ -322,6 +397,19 @@ def closeSexpSequence():
             raise Exception("should never reach here")
     else:
         pc = parseError
+
+# new
+def parseVector():
+    global tokens_reg, k_reg, sexp_reg, pc
+    token = tokens_reg[0]
+    tag = token[0]
+    if tag == "rparen":
+        sexp_reg = ()
+        tokens_reg.pop(0)
+        pc = applyCont
+    else:
+        k_reg = ("vector-sexp1-cont", k_reg)
+        pc = parseSexp
 
 def parseError():
     global tokens_reg
@@ -388,29 +476,34 @@ def applyCont():
     elif tag == "process-cont":
         prettyPrint(sexp_reg)
         pc = processSexps
+    # new
+    elif tag == "vector-cont":
+        k = k_reg[1]
+        k_reg = k
+        sexp_reg = Vector(sexp_reg)
+        pc = applyCont
+    # new
+    elif tag == "vector-sexp1-cont":
+        k = k_reg[1]
+        k_reg = ("vector-rest-cont", sexp_reg, k)
+        pc = parseVector
+    # new
+    elif tag == "vector-rest-cont":
+        sexp1, k = k_reg[1], k_reg[2]
+        k_reg = k
+        sexp_reg = Cons(sexp1, sexp_reg)
+        pc = applyCont
     else:
         raise Exception("invalid continuation %s in applyCont" % k_reg)
 
 #-----------------------------------------------------------------------
 # S-expression representations
 
-class Number:
-    def __init__(self, num):
-        self.num = num
-
-    def __eq__(self, other):
-        return isinstance(other, Number) and self.num == other.num
-
-    def __repr__(self):
-        return str(self.num)
-
+# changed
 
 class Boolean:
     def __init__(self, bool):
         self.bool = bool
-
-    def __eq__(self, other):
-        return isinstance(other, Boolean) and self.bool == other.bool
 
     def __repr__(self):
         if self.bool:
@@ -418,13 +511,16 @@ class Boolean:
         else:
             return "#f"
 
+    def __eq__(self, other):
+        return isinstance(other, Boolean) and self.bool == other.bool
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
 
 class Character:
     def __init__(self, char):
         self.char = char
-
-    def __eq__(self, other):
-        return isinstance(other, Character) and self.char == other.char
 
     def __repr__(self):
         if self.char == '\0': return "#\\nul"
@@ -436,27 +532,39 @@ class Character:
         if self.char == '\f': return "#\\page"
         else: return "#\\%c" % self.char    # not quite right
 
+    def __eq__(self, other):
+        return isinstance(other, Character) and self.char == other.char
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
 
 class String:
     def __init__(self, s):
         self.s = s
 
+    def __repr__(self):
+        return '"' + self.s + '"'
+
     def __eq__(self, other):
         return isinstance(other, String) and self.s == other.s
 
-    def __repr__(self):
-        return '"' + self.s + '"'
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
 
 class Symbol:
     def __init__(self, id):
         self.id = id
 
+    def __repr__(self):
+        return self.id
+
     def __eq__(self, other):
         return isinstance(other, Symbol) and self.id == other.id
 
-    def __repr__(self):
-        return self.id
+    def __ne__(self, other):
+        return not self.__eq__(other)
 
 
 class Cons:
@@ -485,6 +593,162 @@ class Cons:
 # () is represented as ()
 
 
+class Vector:
+    def __init__(self, consCell):
+        self.elements = []
+        while consCell != ():
+            self.elements.append(consCell.car)
+            consCell = consCell.cdr
+
+    def __repr__(self):
+        s = ""
+        for element in self.elements:
+            s += str(element) + " "
+        return "#(" + s[:-1] + ")"
+
+    def __eq__(self, other):
+        return isinstance(other, Vector) and \
+            self.elements == [] and other.elements == []
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+
+# InexactNumber and ExactNumber should probably be subclasses of
+# Number (which should be an abstract class?)
+
+class InexactNumber:
+    def __init__(self, value):
+        self.value = float(value)
+
+    def __repr__(self):
+        return str(self.value)
+
+    def __eq__(self, other):
+        if isinstance(other, InexactNumber):
+            return self.value == other.value
+        elif isinstance(other, ExactNumber):
+            return self.value == other.inexactValue()
+        else:
+            return False
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __add__(self, other):
+        if isinstance(other, InexactNumber):
+            return InexactNumber(self.value + other.value)
+        elif isinstance(other, ExactNumber):
+            return InexactNumber(self.value + other.inexactValue())
+        else:
+            raise Exception("+: %s is not a number" % other)
+
+    def __sub__(self, other):
+        if isinstance(other, InexactNumber):
+            return InexactNumber(self.value - other.value)
+        elif isinstance(other, ExactNumber):
+            return InexactNumber(self.value - other.inexactValue())
+        else:
+            raise Exception("-: %s is not a number" % other)
+
+    def __mul__(self, other):
+        if isinstance(other, InexactNumber):
+            return InexactNumber(self.value * other.value)
+        elif isinstance(other, ExactNumber):
+            return InexactNumber(self.value * other.inexactValue())
+        else:
+            raise Exception("*: %s is not a number" % other)
+
+    def __div__(self, other):
+        if isinstance(other, InexactNumber):
+            return InexactNumber(self.value / other.value)
+        elif isinstance(other, ExactNumber):
+            return InexactNumber(self.value / other.inexactValue())
+        else:
+            raise Exception("/: %s is not a number" % other)
+
+
+class ExactNumber:
+    def __init__(self, num, den=1):
+        if den == 0:
+            raise Exception("cannot represent %d/%d" % (num, den))
+        elif num * den < 0:
+            sign = -1
+        else:
+            sign = +1
+        num, den = abs(num), abs(den)
+        # reduce to lowest terms
+        a, b = num, den
+        while b > 0:
+            remainder = a % b
+            a = b
+            b = remainder
+        gcd = a
+        self.numerator = sign * num / gcd
+        self.denominator = den / gcd
+        
+    def __repr__(self):
+        if self.denominator == 1:
+            return "%d" % self.numerator
+        else:
+            return "%d/%d" % (self.numerator, self.denominator)
+
+    def inexactValue(self):
+        return float(self.numerator) / float(self.denominator)
+
+    def __eq__(self, other):
+        if isinstance(other, ExactNumber):
+            return self.numerator == other.numerator \
+                and self.denominator == other.denominator
+        elif isinstance(other, InexactNumber):
+            return self.inexactValue() == other.value
+        else:
+            return False
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+    def __add__(self, other):
+        if isinstance(other, ExactNumber):
+            n = self.numerator * other.denominator + other.numerator * self.denominator
+            d = self.denominator * other.denominator
+            return ExactNumber(n, d)
+        elif isinstance(other, InexactNumber):
+            return InexactNumber(self.inexactValue() + other.value)
+        else:
+            raise Exception("+: %s is not a number" % other)
+
+    def __sub__(self, other):
+        if isinstance(other, ExactNumber):
+            n = self.numerator * other.denominator - other.numerator * self.denominator
+            d = self.denominator * other.denominator
+            return ExactNumber(n, d)
+        elif isinstance(other, InexactNumber):
+            return InexactNumber(self.inexactValue() - other.value)
+        else:
+            raise Exception("-: %s is not a number" % other)
+   
+    def __mul__(self, other):
+        if isinstance(other, ExactNumber):
+            n = self.numerator * other.numerator
+            d = self.denominator * other.denominator
+            return ExactNumber(n, d)
+        elif isinstance(other, InexactNumber):
+            return InexactNumber(self.inexactValue() * other.value)
+        else:
+            raise Exception("*: %s is not a number" % other)
+
+    def __div__(self, other):
+        if isinstance(other, ExactNumber):
+            n = self.numerator * other.denominator
+            d = self.denominator * other.numerator
+            return ExactNumber(n, d)
+        elif isinstance(other, InexactNumber):
+            return InexactNumber(self.inexactValue() / other.value)
+        else:
+            raise Exception("/: %s is not a number" % other)
+
+
 def prettyPrint(sexp):
     # not so pretty yet
     print sexp
@@ -498,3 +762,5 @@ def prettyPrint(sexp):
 # >>> parse("(a (b c (d)))")
 # >>> parse("(a b c 1 2 -3.14 #f \"hello there\" #\\newline (e [f . x] . 4) ())")
 # >>> loadFile("scanner-parser.ss")
+# >>> parse("(a 'b (quote c) #(1 2 d))")
+# >>> parse("2/3") + parse("3/4")
