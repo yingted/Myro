@@ -7,7 +7,7 @@ using System.Collections.Generic; // List
 public class Scanner {
 
   static string charsToScan = "";
-  static chr[] SLASH = {'/'};
+  static char[] SLASH = {'/'};
 
   public static char first(int n) {
 	return charsToScan[n];

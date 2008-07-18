@@ -54,15 +54,16 @@ public class Parser {
 	List<object> token = (List<object>) tokens_reg[0];
 	string tag = (string) token[0];
 	if (tag == "integer") {
-	  sexp_reg = new ExtactNumber(int.Parse(token[1]));
+	  sexp_reg = new ExactNumber(int.Parse((string)token[1]));
 	  tokens_reg.RemoveAt(0);
 	  pc = new Function(applyCont);
 	} else if (tag == "decimal") {
-	  sexp_reg = new InexactNumber(double.Parse(token[1]));
+	  sexp_reg = new InexactNumber(double.Parse((string)token[1]));
 	  tokens_reg.RemoveAt(0);
 	  pc = new Function(applyCont);
 	} else if (tag == "rational") {
-	  sexp_reg = new ExactNumber(int.Parse(token[1]), int.Parse(token[2]));
+	  sexp_reg = new ExactNumber(
+		  int.Parse((string)token[1]), int.Parse((string)token[2]));
 	  tokens_reg.RemoveAt(0);
 	  pc = new Function(applyCont);
 	} else if (tag == "boolean") {
@@ -98,10 +99,10 @@ public class Parser {
 	} else if (tag == "lbracket") {
 	  tokens_reg.RemoveAt(0);
 	  if (isTokenType(((List<object>) tokens_reg[0]), "dot")) {
-		pc = new Function(parseError);
+	    pc = new Function(parseError);
 	  } else {
-		terminator_reg = "rbracket";
-		pc = new Function(parseSexpSequence);
+	    terminator_reg = "rbracket";
+	    pc = new Function(parseSexpSequence);
 	  }
 	} else if (tag == "lvector") {
 	  tokens_reg.RemoveAt(0);
@@ -151,7 +152,8 @@ public class Parser {
 	List<object> token = (List<object>) tokens_reg[0];
 	string tag = (string) token[0];
 	if (tag == "rparen") {
-	  sexp_reg = Emptylist;
+	  sexp_reg = EmptyList;
+	  tokens_reg.RemoveAt(0);
 	  pc = new Function(applyCont);
 	} else {
 	  k_reg = makeList("vector-sexp1-cont", k_reg);
@@ -301,22 +303,61 @@ public class Parser {
   }
   
   public class ExactNumber {
-	int num;
+	int numerator;
+	int denominator;
 	
 	public ExactNumber(int num) {
-	  this.num = num;
+	  this.numerator = num;
+	  this.denominator = 1;
 	}
 	
+	public ExactNumber(int numerator, int denominator) {
+	  int gcd = GCD(numerator, denominator);
+	  this.numerator = numerator/gcd;
+	  this.denominator = denominator/gcd;
+	}
+	
+	public static int GCD(int n1, int n2) {
+	  // Greatest Common Denominator
+	  n1 = Math.Abs(n1);
+	  n2 = Math.Abs(n2);
+	  if (n1 == 0) return n2;
+	  if (n2 == 0) return n1;
+	  if (n1 > n2) return GCD(n2, n1 % n2);
+	  else         return GCD(n1, n2 % n1);
+	}
+	
+	public static int LCM(int n1, int n2) {
+	  // Least Common Multiple
+	  n1 = Math.Abs(n1);
+	  n2 = Math.Abs(n2);
+	  if (n1 > n2) return ((n2 / GCD(n1, n2)) * n1);
+	  else         return ((n1 / GCD(n1, n2)) * n2);
+	}
+
 	public override bool Equals(object other) {
-	  return (other is SchemeInteger && this.num == ((SchemeInteger)other).num);
+	  return (other is ExactNumber &&
+		  (this.numerator == ((ExactNumber)other).numerator &&
+			  this.denominator == ((ExactNumber)other).denominator));
 	}
 	
 	public override int GetHashCode() {
-	  return num.GetHashCode();
+	  double d = ((double) numerator) / denominator;
+	  return d.GetHashCode();
 	}
 	
 	public override string ToString() {
-	  return this.num.ToString();
+	  if (denominator != 1)
+		return string.Format("{0}/{1}", numerator, denominator);
+	  else
+		return numerator.ToString();
+	}
+
+	public static ExactNumber operator +(ExactNumber f1, ExactNumber f2) {
+	  int lcm = LCM(f1.denominator, f2.denominator);
+	  return new ExactNumber((f1.numerator * lcm/f1.denominator +
+			                  f2.numerator * lcm/f2.denominator),
+		                     lcm);
 	}
   }
   
@@ -328,7 +369,7 @@ public class Parser {
 	}
 	
 	public override bool Equals(object other) {
-	  return (other is SchemeDouble && this.num == ((SchemeDouble)other).num);
+	  return (other is InexactNumber && this.num == ((InexactNumber)other).num);
 	}
 	
 	public override int GetHashCode() {
@@ -341,6 +382,27 @@ public class Parser {
   }
   
   public class Vector {
+
+	List<object> elements;
+
+	public Vector(object cell) {
+	  elements = new List<object>();
+	  while (cell is Cons) {
+		elements.Add(((Cons)cell).car);
+		cell = ((Cons)cell).cdr;
+	  }
+	}
+
+	public override string ToString() {
+	  string retval = "";
+	  foreach (object s in elements) {
+		if (retval != "") 
+		  retval += " ";
+		retval += s.ToString();
+	  }
+	  return String.Format("#({0})", retval);
+	}
+	
   }
 
   public class SchemeBoolean {
