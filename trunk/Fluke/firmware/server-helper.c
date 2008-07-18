@@ -692,8 +692,8 @@ void serve_update_firmware()
     {		  		  
       set_led(0);
       led_on();
-		      uf_storeinEEPROM();
-		      ram_uf_loadFlash();
+      uf_storeinEEPROM();
+      ram_uf_loadFlash();
     }
 }
 

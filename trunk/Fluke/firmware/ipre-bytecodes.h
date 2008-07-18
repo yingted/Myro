@@ -112,3 +112,5 @@
 #define GET_PASS_BYTES_UNTIL  141
 
 #define GET_VERSION           142
+#define SET_PASSTHROUGH_ON    143
+#define SET_PASSTHROUGH_OFF   144

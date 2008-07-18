@@ -188,11 +188,9 @@ int main (void)
 	      else if (ch == SET_UART0)		   serve_set_uart0();
 	      else if (ch == SET_PASS_BYTE)	   serve_send_byte();
 	      else if (ch == SET_PASSTHROUGH)	   serve_set_passthrough();
-	      else if (ch == SET_PASS_N_BYTES)	   {
-		if (scrib == 0) serve_clear_uart();
-		serve_set_pass_n_bytes();
-		scrib = 1;
-	      }
+	      else if (ch == SET_PASS_N_BYTES)	   serve_set_pass_n_bytes();
+	      else if (ch == SET_PASSTHROUGH_ON)   scrib = 1;
+	      else if (ch == SET_PASSTHROUGH_OFF)  scrib = 0;
 	      else if (ch == GET_PASS_N_BYTES)	   serve_get_pass_n_bytes();
 	      else if (ch == GET_PASS_BYTES_UNTIL) serve_get_pass_bytes_until();
 	      else if (ch == SET_FORWARDNESS)	   serve_set_forwardness();
