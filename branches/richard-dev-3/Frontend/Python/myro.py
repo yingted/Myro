@@ -4,8 +4,8 @@ import clr
 import System
 import System.IO
 import sys
-clr.AddReferenceToFileAndPath("C:\\Microsoft Robotics Dev Studio 2008\\bin\\MyroRobot.dll")
-clr.AddReferenceToFileAndPath("C:\\Microsoft Robotics Dev Studio 2008\\bin\\MyroUtilities.dll")
+
+clr.AddReference("MyroRobot")
 
 # This import line will bring in most of the API that is implemented in C#
 from Myro.Robot import *
@@ -13,7 +13,7 @@ from Myro.Robot import *
 #from Myro.Utilities import Params
 
 
-# Importing * from Robot gets us most of the movement and sound functions.
+# Importing from Myro.Robot gets us most of the movement and sound functions.
 # We still need to define the "magic" get/set methods in Python.  These can return either
 # single values or arrays, and "all" is a special keyword.
 

@@ -79,7 +79,7 @@ namespace Myro.GUI.WPFControls
             ParameterizedThreadStart checker = new ParameterizedThreadStart(
                 delegate(object next)
                 {
-                    Console.WriteLine("Checking for simulator...");
+                    //Console.WriteLine("Checking for simulator...");
                     if (checkSimulator() == false)
                     {
                         Thread.Sleep(TimeSpan.FromSeconds(1));
@@ -97,7 +97,7 @@ namespace Myro.GUI.WPFControls
             {
                 _notifyTarget = new SimulationEnginePort();
                 addCameraWatch("MainCamera", true);
-                //addCameraWatch("ScribblerCamera");
+                addCameraWatch("ScribblerCamera", false);
                 return true;
             }
             else

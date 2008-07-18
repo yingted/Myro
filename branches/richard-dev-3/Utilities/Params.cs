@@ -17,16 +17,18 @@ namespace Myro.Utilities
             string bindir = Path.GetDirectoryName(Assembly.GetAssembly(typeof(Params)).Location);
             if (Path.GetFileName(bindir).Equals("bin"))
             {
+                RootPath = Path.GetDirectoryName(bindir);
                 BinPath = bindir;
-                ConfigPath = Path.Combine(Path.GetDirectoryName(bindir), "config");
+                ConfigPath = Path.Combine(RootPath, "config");
             }
             else
             {
-                throw new Exception("Myro does not seen to have been installed in the MSRDS bin directory");
+                throw new Exception("Myro does not seem to be located correctly");
             }
         }
 
         public static int DefaultRecieveTimeout = 30000;
+        public static string RootPath = null;
         public static string ConfigPath = null; // "C:\\Microsoft Robotics Dev Studio 2008\\config";
         public static string BinPath = null; //"C:\\Microsoft Robotics Dev Studio 2008\\bin";
         //public static string PythonPath = "C:\\IronPython-1.1.1\\Lib";
