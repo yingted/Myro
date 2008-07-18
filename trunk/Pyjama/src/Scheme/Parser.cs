@@ -15,6 +15,7 @@ public class Parser {
   static string terminator_reg = null;
   static object sexp_reg = null;
   static Function pc = null;
+  static string keyword_reg = null;
   
   static SchemeSymbol EmptyList = new SchemeSymbol("()");
   
@@ -86,9 +87,17 @@ public class Parser {
 	  tokens_reg.RemoveAt(0);
 	  pc = new Function(applyCont);
 	} else if (tag == "apostrophe") {
-	  tokens_reg.RemoveAt(0);
-	  k_reg = makeList("quote-cont", k_reg);
-	  pc = new Function(parseSexp);
+	  keyword_reg = "quote";
+	  pc = new Function(parseAbbreviation);
+	} else if (tag == "backquote") {
+	  keyword_reg = "quasiquote";
+	  pc = new Function(parseAbbreviation);
+	} else if (tag == "comma") {
+	  keyword_reg = "unquote";
+	  pc = new Function(parseAbbreviation);
+	} else if (tag == "comma-at") {
+	  keyword_reg = "unquote-splicing";
+	  pc = new Function(parseAbbreviation);
 	} else if (tag == "lparen") {
 	  tokens_reg.RemoveAt(0);
 	  if (isTokenType(((List<object>) tokens_reg[0]), "dot")) 
@@ -113,6 +122,12 @@ public class Parser {
 	}
   }
   
+  public static void parseAbbreviation() {
+    tokens_reg.RemoveAt(0);
+    k_reg = makeList("abbreviation-cont", keyword_reg, k_reg);
+    pc = new Function(parseSexp);
+  }
+
   public static void parseSexpSequence() {
 	List<object> token = (List<object>) tokens_reg[0];
 	string tag = (string) token[0];
@@ -192,10 +207,11 @@ public class Parser {
 	  } else {
 		throw new Exception(String.Format("tokens left over: {0}", tokens_reg));
 	  }
-	} else if (tag == "quote-cont") {
-	  List<object> k = (List<object>) k_reg[1];
+	} else if (tag == "abbreviation-cont") {
+	  string keyword = (string) k_reg[1];
+	  List<object> k = (List<object>) k_reg[2];
 	  k_reg = k;
-	  sexp_reg = new Cons(new SchemeSymbol("quote"), new Cons(sexp_reg, EmptyList));
+	  sexp_reg = new Cons(new SchemeSymbol(keyword), new Cons(sexp_reg, EmptyList));
 	  pc = new Function(applyCont);
 	} else if (tag == "dot-cont") {
 	  string expectedTerminator = (string) k_reg[1];
@@ -265,6 +281,18 @@ public class Parser {
 		  (this.cdr is Cons) &&
 		  ((Cons)this.cdr).cdr == EmptyList) {
 		return String.Format("'{0}", ((Cons)this.cdr).car);
+	  } else if (this.car == new SchemeSymbol("quasiquote") &&
+		  (this.cdr is Cons) &&
+		  ((Cons)this.cdr).cdr == EmptyList) {
+		return String.Format("`{0}", ((Cons)this.cdr).car);
+	  } else if (this.car == new SchemeSymbol("unquote") &&
+		  (this.cdr is Cons) &&
+		  ((Cons)this.cdr).cdr == EmptyList) {
+		return String.Format(",{0}", ((Cons)this.cdr).car);
+	  } else if (this.car == new SchemeSymbol("unquote-splicing") &&
+		  (this.cdr is Cons) &&
+		  ((Cons)this.cdr).cdr == EmptyList) {
+		return String.Format(",@{0}", ((Cons)this.cdr).car);
 	  } else {
 		string s = String.Format("({0}", this.car);
 		object sexp = this.cdr;

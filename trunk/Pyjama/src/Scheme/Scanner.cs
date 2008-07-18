@@ -199,6 +199,10 @@ public class Scanner {
 		return makeList("drop", makeList("emit", "rbracket"));
 	  } else if (c == '\'') { 
 		return makeList("drop", makeList("emit", "apostrophe"));
+	  } else if (c == '`') { 
+		return makeList("drop", makeList("emit", "backquote"));
+	  } else if (c == ',') { 
+		return makeList("drop", makeList("goto", "comma-state"));
 	  } else if (c == '#') { 
 		return makeList("drop", makeList("goto", "hash-prefix-state"));
 	  } else if (c == '"') { 
@@ -223,6 +227,12 @@ public class Scanner {
 		return makeList("goto", "start-state");
 	  } else {
 		return makeList("drop", makeList("goto", "comment-state"));
+	  }
+	} else if (state == "comma-state") {
+	  if (c == '@') {
+		return makeList("drop", makeList("emit", "comma-at"));
+	  } else {
+		return makeList("emit", "comma");
 	  }
 	} else if (state == "hash-prefix-state") {
 	  if (booleanChars.IndexOf(c) >= 0) {
