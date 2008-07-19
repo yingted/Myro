@@ -267,7 +267,7 @@ terminator_reg = None
 keyword_reg = None
 pc = None
 
-def read(input):
+def readDatum(input):
     global tokens_reg, k_reg, pc
     tokens_reg = scanInput(input)
     k_reg = ("init-cont",)
@@ -758,10 +758,10 @@ def prettyPrint(sexp):
 #-----------------------------------------------------------------------
 # examples:
 
-# >>> read("apple")
-# >>> read("#T")
-# >>> read("(a (b c (d)))")
-# >>> read("(a b c 1 2 -3.14 #f \"hello there\" #\\newline (e [f . x] . 4) ())")
+# >>> readDatum("apple")
+# >>> readDatum("#T")
+# >>> readDatum("(a (b c (d)))")
+# >>> readDatum("(a b c 1 2 -3.14 #f \"hello there\" #\\newline (e [f . x] . 4) ())")
 # >>> readFile("reader.ss")
-# >>> read("(a 'b (quote c) #(1 2 d))")
-# >>> read("2/3") + read("3/4")
+# >>> readDatum("(a 'b (quote c) #(1 2 d))")
+# >>> readDatum("2/3") + readDatum("3/4")

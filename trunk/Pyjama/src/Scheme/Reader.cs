@@ -23,7 +23,7 @@ public class Reader {
 	return new List<object>(args);
   }
   
-  public static object read(string input) {
+  public static object readDatum(string input) {
 	tokens_reg = Scanner.scanInput(input);
 	k_reg = makeList("init-cont");
 	pc =  new Function(readSexp);
@@ -509,13 +509,13 @@ public class Reader {
   
   //-----------------------------------------------------------------------
   // examples:
-  // >>> read("apple")
-  // >>> read("#T")
-  // >>> read("(a (b c (d)))")
-  // >>> read("(a b c 1 2 -3.14 #f \"hello there\" #\\newline (e [f . x] . 4) ())")
+  // >>> readDatum("apple")
+  // >>> readDatum("#T")
+  // >>> readDatum("(a (b c (d)))")
+  // >>> readDatum("(a b c 1 2 -3.14 #f \"hello there\" #\\newline (e [f . x] . 4) ())")
   // >>> readFile("reader.ss")
-  // >>> read("(a 'b (quote c) #(1 2 d))")
-  // >>> read("2/3") + read("3/4")
+  // >>> readDatum("(a 'b (quote c) #(1 2 d))")
+  // >>> readDatum("2/3") + readDatum("3/4")
   
   public static string prettyPrint(object obj) {
 	string retval = "";
@@ -552,7 +552,7 @@ public class Reader {
 	if (args[0] == "exp") {
 	  string s = args[1];
 	  System.Console.WriteLine("Parsing expression: '{0}'...", s);
-	  System.Console.WriteLine(prettyPrint(read(s)));
+	  System.Console.WriteLine(prettyPrint(readDatum(s)));
 	} else {
 	  System.Console.WriteLine("Parsing file: '{0}'...", args[0]);
 	  System.Console.WriteLine(prettyPrint(readFile(args[0])));
