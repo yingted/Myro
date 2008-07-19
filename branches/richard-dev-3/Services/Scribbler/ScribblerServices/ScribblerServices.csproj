@@ -96,15 +96,25 @@
     <WarningLevel>1</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.Ccr.Core, Version=2.0.826.3, Culture=neutral, PublicKeyToken=d12f30389d94881d, processorArchitecture=MSIL" />
-    <Reference Include="Microsoft.Dss.Base, Version=2.0.826.3, Culture=neutral, PublicKeyToken=d12f30389d94881d, processorArchitecture=MSIL" />
-    <Reference Include="Microsoft.Dss.Runtime, Version=2.0.826.3, Culture=neutral, PublicKeyToken=d12f30389d94881d, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.Ccr.Core, Version=2.0.826.3, Culture=neutral, PublicKeyToken=d12f30389d94881d, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="Microsoft.Dss.Base, Version=2.0.826.3, Culture=neutral, PublicKeyToken=d12f30389d94881d, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="Microsoft.Dss.Runtime, Version=2.0.826.3, Culture=neutral, PublicKeyToken=d12f30389d94881d, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
     <Reference Include="mscorlib">
       <SpecificVersion>False</SpecificVersion>
       <Private>False</Private>
     </Reference>
-    <Reference Include="RoboticsCommon, Version=2.0.826.3, Culture=neutral, PublicKeyToken=6f5a65c6ba7cb1d3, processorArchitecture=MSIL" />
-    <Reference Include="RoboticsCommon.transform, Version=2.0.826.3, Culture=neutral, PublicKeyToken=6f5a65c6ba7cb1d3, processorArchitecture=MSIL" />
+    <Reference Include="RoboticsCommon, Version=2.0.826.3, Culture=neutral, PublicKeyToken=6f5a65c6ba7cb1d3, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="RoboticsCommon.transform, Version=2.0.826.3, Culture=neutral, PublicKeyToken=6f5a65c6ba7cb1d3, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
     <Reference Include="ScribblerBase.Proxy, Version=0.0.0.0, Culture=neutral, PublicKeyToken=b55f232c1146389e, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\bin\ScribblerBase.Proxy.dll</HintPath>

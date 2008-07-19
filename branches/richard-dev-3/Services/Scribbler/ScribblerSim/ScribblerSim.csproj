@@ -97,21 +97,43 @@
     <WarningLevel>1</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.Ccr.Core, Version=2.0.826.3, Culture=neutral, PublicKeyToken=d12f30389d94881d, processorArchitecture=MSIL" />
-    <Reference Include="Microsoft.Dss.Base, Version=2.0.826.3, Culture=neutral, PublicKeyToken=d12f30389d94881d, processorArchitecture=MSIL" />
-    <Reference Include="Microsoft.Dss.Runtime, Version=2.0.826.3, Culture=neutral, PublicKeyToken=d12f30389d94881d, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.Ccr.Core, Version=2.0.826.3, Culture=neutral, PublicKeyToken=d12f30389d94881d, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="Microsoft.Dss.Base, Version=2.0.826.3, Culture=neutral, PublicKeyToken=d12f30389d94881d, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="Microsoft.Dss.Runtime, Version=2.0.826.3, Culture=neutral, PublicKeyToken=d12f30389d94881d, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
     <Reference Include="mscorlib">
       <SpecificVersion>False</SpecificVersion>
       <Private>False</Private>
     </Reference>
-    <Reference Include="PhysicsEngine, Version=2.0.826.3, Culture=neutral, PublicKeyToken=d12f30389d94881d, processorArchitecture=x86" />
-    <Reference Include="RoboticsCommon, Version=2.0.826.3, Culture=neutral, PublicKeyToken=6f5a65c6ba7cb1d3, processorArchitecture=MSIL" />
-    <Reference Include="SimulatedBumper.Y2006.M05.proxy, Version=2.0.826.3, Culture=neutral, PublicKeyToken=6f5a65c6ba7cb1d3, processorArchitecture=MSIL" />
-    <Reference Include="SimulatedDifferentialDrive.2006.M06.proxy, Version=2.0.826.3, Culture=neutral, PublicKeyToken=6f5a65c6ba7cb1d3, processorArchitecture=MSIL" />
-    <Reference Include="SimulatedWebcam.Y2006.M09.proxy, Version=2.0.826.3, Culture=neutral, PublicKeyToken=6f5a65c6ba7cb1d3, processorArchitecture=MSIL" />
-    <Reference Include="SimulationCommon, Version=2.0.826.3, Culture=neutral, PublicKeyToken=d12f30389d94881d, processorArchitecture=MSIL" />
-    <Reference Include="SimulationEngine, Version=2.0.826.3, Culture=neutral, PublicKeyToken=d12f30389d94881d, processorArchitecture=MSIL" />
-    <Reference Include="SimulationEngine.proxy, Version=2.0.826.3, Culture=neutral, PublicKeyToken=d12f30389d94881d, processorArchitecture=MSIL" />
+    <Reference Include="PhysicsEngine, Version=2.0.826.3, Culture=neutral, PublicKeyToken=d12f30389d94881d, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="RoboticsCommon, Version=2.0.826.3, Culture=neutral, PublicKeyToken=6f5a65c6ba7cb1d3, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="SimulatedBumper.Y2006.M05.proxy, Version=2.0.826.3, Culture=neutral, PublicKeyToken=6f5a65c6ba7cb1d3, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="SimulatedDifferentialDrive.2006.M06.proxy, Version=2.0.826.3, Culture=neutral, PublicKeyToken=6f5a65c6ba7cb1d3, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="SimulatedWebcam.Y2006.M09.proxy, Version=2.0.826.3, Culture=neutral, PublicKeyToken=6f5a65c6ba7cb1d3, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="SimulationCommon, Version=2.0.826.3, Culture=neutral, PublicKeyToken=d12f30389d94881d, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="SimulationEngine, Version=2.0.826.3, Culture=neutral, PublicKeyToken=d12f30389d94881d, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="SimulationEngine.proxy, Version=2.0.826.3, Culture=neutral, PublicKeyToken=d12f30389d94881d, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
     <Reference Include="System">
       <SpecificVersion>False</SpecificVersion>
       <Private>False</Private>

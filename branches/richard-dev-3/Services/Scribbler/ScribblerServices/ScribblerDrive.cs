@@ -34,7 +34,6 @@ namespace Myro.Services.Scribbler.Drive
     [Description("The Scribbler Drive Service")]
     [Contract(Contract.Identifier)]
     [AlternateContract(drive.Contract.Identifier)] //implementing the generic motor contract
-
     public class ScribblerDrive : DsspServiceBase
     {
         private drive.DriveDifferentialTwoWheelState _state = null;

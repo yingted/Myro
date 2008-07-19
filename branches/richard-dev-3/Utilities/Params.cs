@@ -21,10 +21,10 @@ namespace Myro.Utilities
                 BinPath = bindir;
                 ConfigPath = Path.Combine(RootPath, "config");
             }
-            else
-            {
-                throw new Exception("Myro does not seem to be located correctly");
-            }
+            //else
+            //{
+            //    throw new Exception("Myro does not seem to be located correctly");
+            //}
         }
 
         public static int DefaultRecieveTimeout = 30000;

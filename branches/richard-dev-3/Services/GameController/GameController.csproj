@@ -78,20 +78,20 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\Microsoft Robotics Dev Studio 2008\bin\InputInterop.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.Ccr.Core, Version=2.0.826.3">
+      <SpecificVersion>False</SpecificVersion>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Microsoft.Dss.Base, Version=2.0.826.3">
+      <SpecificVersion>False</SpecificVersion>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="Microsoft.Dss.Runtime, Version=2.0.826.3">
-      <SpecificVersion>True</SpecificVersion>
+      <SpecificVersion>False</SpecificVersion>
       <Private>False</Private>
     </Reference>
     <Reference Include="mscorlib">
       <SpecificVersion>False</SpecificVersion>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Microsoft.Ccr.Core, Version=2.0.826.3">
-      <SpecificVersion>True</SpecificVersion>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Microsoft.Dss.Base, Version=2.0.826.3">
-      <SpecificVersion>True</SpecificVersion>
       <Private>False</Private>
     </Reference>
     <Reference Include="System">

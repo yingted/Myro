@@ -34,10 +34,18 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.Ccr.Core, Version=2.0.826.3, Culture=neutral, PublicKeyToken=d12f30389d94881d, processorArchitecture=MSIL" />
-    <Reference Include="Microsoft.Dss.Base, Version=2.0.826.3, Culture=neutral, PublicKeyToken=d12f30389d94881d, processorArchitecture=MSIL" />
-    <Reference Include="Microsoft.Dss.Environment, Version=2.0.826.3, Culture=neutral, PublicKeyToken=d12f30389d94881d, processorArchitecture=MSIL" />
-    <Reference Include="Microsoft.Dss.Runtime, Version=2.0.826.3, Culture=neutral, PublicKeyToken=d12f30389d94881d, processorArchitecture=MSIL" />
+    <Reference Include="Microsoft.Ccr.Core, Version=2.0.826.3, Culture=neutral, PublicKeyToken=d12f30389d94881d, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="Microsoft.Dss.Base, Version=2.0.826.3, Culture=neutral, PublicKeyToken=d12f30389d94881d, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="Microsoft.Dss.Environment, Version=2.0.826.3, Culture=neutral, PublicKeyToken=d12f30389d94881d, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="Microsoft.Dss.Runtime, Version=2.0.826.3, Culture=neutral, PublicKeyToken=d12f30389d94881d, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />

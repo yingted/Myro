@@ -334,51 +334,50 @@ namespace Myro.Services.Scribbler.ScribblerBase
 
         private bool ConnectToScribbler()
         {
-            try
-            {
-                _state.Connected = false;
+            //try
+            //{
+            _state.Connected = false;
 
-                //look for scribbler on last known Com port
-                if (_state.ComPort > 0)
-                {
-                    _state.Connected = _scribblerCom.Open(_state.ComPort);
-                }
+            //look for scribbler on last known Com port
+            if (_state.ComPort > 0)
+            {
+                _state.Connected = _scribblerCom.Open(_state.ComPort);
+            }
 
-                //scan all ports for the name of our Robot
-                /*
-                if (_state.Connected == false)
-                {
-                    _state.Connected = _scribblerCom.FindRobot(_state.RobotName);
-                }
-                */
-            }
-            catch (UnauthorizedAccessException ex)
+            //scan all ports for the name of our Robot
+            /*
+            if (_state.Connected == false)
             {
-                LogError(ex);
+                _state.Connected = _scribblerCom.FindRobot(_state.RobotName);
             }
-            catch (IOException ex)
-            {
-                LogError(ex);
-            }
-            catch (ArgumentOutOfRangeException ex)
-            {
-                LogError(ex);
-            }
-            catch (ArgumentException ex)
-            {
-                LogError(ex);
-            }
-            catch (InvalidOperationException ex)
-            {
-                LogError(ex);
-            }
+            */
+            //}
+            //catch (UnauthorizedAccessException ex)
+            //{
+            //    LogError(ex);
+            //}
+            //catch (IOException ex)
+            //{
+            //    LogError(ex);
+            //}
+            //catch (ArgumentOutOfRangeException ex)
+            //{
+            //    LogError(ex);
+            //}
+            //catch (ArgumentException ex)
+            //{
+            //    LogError(ex);
+            //}
+            //catch (InvalidOperationException ex)
+            //{
+            //    LogError(ex);
+            //}
 
             if (!_state.Connected)
             {
                 LogError(LogGroups.Console, "No Scribbler robot found.");
             }
-
-            if (_state.Connected)
+            else
             {
                 _state.RobotName = _scribblerCom.foundRobotName;
                 _state.ComPort = _scribblerCom.openedComPort;
@@ -404,7 +403,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
             }
 
             ScribblerCommand cmd = new ScribblerCommand(ScribblerHelper.Commands.SET_SPEAKER_2,
-                                                        (int)(message.Body.Duration*1000.0),
+                                                        (int)(message.Body.Duration * 1000.0),
                                                         message.Body.Frequency1,
                                                         message.Body.Frequency2);
 

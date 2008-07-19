@@ -37,12 +37,12 @@
                     </Grid.RowDefinitions>
                     <CheckBox Grid.Row="0" Name="DarkCheck" Content="Darken camera" VerticalAlignment="Center" Checked="OnDarkChecked" Unchecked="OnDarkUnchecked" />
                     <StackPanel Grid.Row="1" VerticalAlignment="Center">
-                        <Slider Name="DarkSlider" Maximum="255" TickFrequency="0" TickPlacement="BottomRight" AutoToolTipPlacement="None" ValueChanged="OnDarkValueChange" LostMouseCapture="OnDarkMouseLost">
+                        <Slider Name="DarkSlider" Maximum="255" TickFrequency="0" TickPlacement="BottomRight" AutoToolTipPlacement="None" ValueChanged="OnDarkValueChange" LostMouseCapture="OnDarkMouseLost" IsEnabled="False">
                             <Slider.LayoutTransform>
                                 <ScaleTransform ScaleY="0.8" ScaleX="0.8" />
                             </Slider.LayoutTransform>
                         </Slider>
-                        <Label Name="DarkLabel" Margin="0,-10,3,0" HorizontalContentAlignment="Right" Padding="0" Content="Level" />
+                        <Label Name="DarkLabel" Margin="0,-10,3,0" HorizontalContentAlignment="Right" Padding="0" Content="Level" IsEnabled="False" />
                     </StackPanel>
                 </Grid>
             </StackPanel>

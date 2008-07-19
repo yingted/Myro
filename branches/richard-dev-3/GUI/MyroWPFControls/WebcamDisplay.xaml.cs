@@ -40,11 +40,15 @@ namespace Myro.GUI.WPFControls
                 if (isActive)
                 {
                     SnapshotButton.IsEnabled = false;
+                    var img = SnapshotButton.Content as UIElement;
+                    if(img != null) img.Opacity = 0.25;
                     PlayButton.Content = PlayButton.Resources["Stop"];
                 }
                 else
                 {
                     SnapshotButton.IsEnabled = true;
+                    var img = SnapshotButton.Content as UIElement;
+                    if(img != null) img.Opacity = 1.0;
                     PlayButton.Content = PlayButton.Resources["Play"];
                 }
             }
@@ -190,11 +194,15 @@ namespace Myro.GUI.WPFControls
 
         private void OnDarkChecked(object sender, RoutedEventArgs e)
         {
+            DarkSlider.IsEnabled = true;
+            DarkLabel.IsEnabled = true;
             setDarknessRequest = (byte)(Math.Max(0, Math.Min(255, DarkSlider.Value)));
         }
 
         private void OnDarkUnchecked(object sender, RoutedEventArgs e)
         {
+            DarkSlider.IsEnabled = false;
+            DarkLabel.IsEnabled = false;
             setDarknessRequest = 256;
         }
 

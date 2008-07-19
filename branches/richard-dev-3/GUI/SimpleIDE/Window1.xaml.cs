@@ -16,6 +16,7 @@ using System.Windows.Shapes;
 using System.Windows.Media.Effects;
 using Microsoft.Win32;
 using System.Threading;
+using System.Diagnostics;
 
 using Myro;
 using Myro.GUI.WPFControls;
@@ -36,6 +37,7 @@ namespace Myro.GUI.SimpleIDE
         //public static RoutedCommand BrowseManifest = new RoutedCommand();
         public static RoutedCommand About = new RoutedCommand();
         public static RoutedCommand Exit = new RoutedCommand();
+        public static RoutedCommand ShowServices = new RoutedCommand();
 
         //string curManifest = null;
         MyroConfigFiles currentConfig = null;
@@ -432,8 +434,12 @@ namespace Myro.GUI.SimpleIDE
                 if (connectionThread == null || connectionThread.IsAlive == false)
                 {
                     currentConfig = e.ConfigFiles;
+
+                    // Initialize Myro
                     connectionThread = new Thread(new ThreadStart(delegate() { connect(); }));
                     connectionThread.Start();
+
+                    e.Cancel = false;
                 }
                 else
                     e.Cancel = true;
@@ -441,6 +447,7 @@ namespace Myro.GUI.SimpleIDE
             catch (Exception err)
             {
                 GUIUtilities.ReportUnexpectedException(err);
+                e.Cancel = true;
             }
         }
 
@@ -465,6 +472,25 @@ namespace Myro.GUI.SimpleIDE
         private void OnExit(object sender, ExecutedRoutedEventArgs e)
         {
             this.Close();
+        }
+
+        private void OnShowServices(object sender, ExecutedRoutedEventArgs e)
+        {
+            try
+            {
+                if (currentConfig != null)
+                    Process.Start(new ProcessStartInfo(
+                        "http://localhost:" + currentConfig.MyroConfiguration.HttpPort.ToString() + "/directory"));
+            }
+            catch (Exception err)
+            {
+                GUIUtilities.ReportUnexpectedException(err);
+            }
+        }
+
+        private void IsConfigLoaded(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = (currentConfig != null);
         }
 
         //private void OnCut(object sender, RoutedEventArgs e)

@@ -57,70 +57,42 @@ namespace Myro.Adapters
 
         protected virtual void Initialize()
         {
-            // Initialize the port and subscribe to the service
+            // Initialize the port and subscribe to the service to know when the motors are enabled
             motorsOn = false;
             drivePort = DssEnvironment.ServiceForwarder<drive.DriveOperations>(new Uri(ServiceInfo.Service));
             drive.DriveOperations driveNotificationPort = new drive.DriveOperations();
-            drivePort.Subscribe(driveNotificationPort);
+            RSUtils.ReceiveSync(taskQueue, drivePort.Subscribe(driveNotificationPort), Params.DefaultRecieveTimeout);
 
             // Set up notifications
             Arbiter.Activate(DssEnvironment.TaskQueue,
                 Arbiter.Receive<drive.Update>(true, driveNotificationPort, NotifyDriveUpdate));
+
+            // For some reason the first requests to the service are giving Faults, so get
+            // it out of the way first
+            try
+            {
+                SetMotors(0.0, 0.0);
+            }
+            catch (Exception)
+            { }
         }
 
         public void SetMotors(double leftPower, double rightPower)
         {
             if (!motorsOn)
                 EnableMotors();
-
-            //drive.SetDrivePowerRequest drivePowerReq = new drive.SetDrivePowerRequest();
-            //drivePowerReq.LeftWheelPower = leftPower;
-            //drivePowerReq.RightWheelPower = rightPower;
-            //drive.SetDrivePower setDrivePower = new drive.SetDrivePower(drivePowerReq);
-            //drivePort.Post(setDrivePower);
-
-            //ManualResetEvent signal = new ManualResetEvent(false);
-            //Arbiter.Activate(DssEnvironment.TaskQueue,
-            //    Arbiter.Choice<DefaultUpdateResponseType, Fault>(
-            //        drivePort.SetDrivePower((double)leftPower, (double)rightPower),
-            //        delegate(DefaultUpdateResponseType state)
-            //        {
-            //            signal.Set();
-            //        },
-            //        delegate(Fault failure)
-            //        {
-            //            Console.WriteLine("*** Fault in SetMotors: ");
-            //            foreach (var r in failure.Reason)
-            //                Console.WriteLine("***    " + r.Value);
-            //            signal.Set();
-            //        }));
-            //signal.WaitOne();
             RSUtils.ReceiveSync(taskQueue, drivePort.SetDrivePower(leftPower, rightPower), Myro.Utilities.Params.DefaultRecieveTimeout);
         }
 
         protected void EnableMotors()
         {
-            drive.EnableDriveRequest enableDriveMessage = new drive.EnableDriveRequest();
-            enableDriveMessage.Enable = true;
-            drivePort.EnableDrive(enableDriveMessage);
-            Console.WriteLine("Enabling motors");
+            RSUtils.ReceiveSync(taskQueue, drivePort.EnableDrive(true), Params.DefaultRecieveTimeout);
         }
 
         protected void NotifyDriveUpdate(drive.Update notification)
         {
             motorsOn = notification.Body.IsEnabled;
         }
-
-        //public override bool Equals(Object obj)
-        //{
-        //    if (obj is String)
-        //    {
-        //        string truncUri = ServiceInfo.Service.Substring(ServiceInfo.Service.IndexOf('/', ServiceInfo.Service.IndexOf("//") + 2));
-        //        return String.Equals(truncUri, obj);
-        //    }
-        //    else
-        //        return String.Equals(this.ServiceInfo.Service, ((DriveAdapter)obj).ServiceInfo.Service);
-        //}
 
         public void Stop()
         {
@@ -130,11 +102,6 @@ namespace Myro.Adapters
         public drive.DriveDifferentialTwoWheelState Get()
         {
             return RSUtils.ReceiveSync<drive.DriveDifferentialTwoWheelState>(taskQueue, drivePort.Get(), Myro.Utilities.Params.DefaultRecieveTimeout);
-        }
-
-        public void Set(drive.DriveDifferentialTwoWheelState state)
-        {
-            throw new NotSupportedException("Setting the entire state is not supported on a drive.  Try the other forms of \"set\".");
         }
     }
 

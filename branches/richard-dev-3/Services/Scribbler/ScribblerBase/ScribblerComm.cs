@@ -84,8 +84,8 @@ namespace Myro.Services.Scribbler.ScribblerBase
             _serialPort.ReadTimeout = 500;
             _serialPort.WriteTimeout = 500;
 
-            try
-            {
+            //try
+            //{
                 string name = TrySerialPort(_serialPort.PortName);
 
                 if (name != null)
@@ -97,18 +97,18 @@ namespace Myro.Services.Scribbler.ScribblerBase
                 }
                 else
                     return false;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Invalid Serial Port.");
+            //}
+//            catch (Exception ex)
+//            {
+//                Console.WriteLine("Invalid Serial Port.");
 
-#if DEBUG
-                Console.WriteLine("Open caught exception: " + ex);
-                throw new Exception("TrySerialPort caught exception", ex);
-#endif
+//#if DEBUG
+//                Console.WriteLine("Open caught exception: " + ex);
+//                throw new Exception("TrySerialPort caught exception", ex);
+//#endif
 
-                return false;
-            }
+//                return false;
+//            }
             return true;
         }
 
@@ -201,13 +201,14 @@ namespace Myro.Services.Scribbler.ScribblerBase
                 Console.WriteLine("TrySerialPort found: " + robotname); //DEBUG
 #endif
             }
-            catch (Exception ex)
-            {
-#if DEBUG
-                Console.WriteLine("TrySerialPort caught exception: " + ex);
-                //throw new Exception("TrySerialPort caught exception", ex);
-#endif
-            }
+//            catch (Exception ex)
+//            {
+//                throw;
+//#if DEBUG
+//                Console.WriteLine("TrySerialPort caught exception: " + ex);
+//                //throw new Exception("TrySerialPort caught exception", ex);
+//#endif
+//            }
             finally
             {
                 if (p != null && p.IsOpen)

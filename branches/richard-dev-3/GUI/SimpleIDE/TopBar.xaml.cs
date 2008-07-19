@@ -15,7 +15,6 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Media.Animation;
-using System.Diagnostics;
 using System.Windows.Media.Effects;
 using System.Threading;
 
@@ -67,7 +66,7 @@ namespace Myro.GUI.SimpleIDE
                 {
                     var evt = new RobotChangeEventArgs() { ConfigFiles = value };
                     RobotChange.Invoke(this, new RobotChangeEventArgs() { ConfigFiles = value });
-                    if (evt.Cancel != true)
+                    if (evt.Cancel == false)
                     {
                         currentConfig = value;
                         DisplayedBaseName = value.BaseName;
@@ -76,10 +75,6 @@ namespace Myro.GUI.SimpleIDE
                             new BitmapImage(new Uri("file://" + value.IconFilePath));
                     }
                 }
-                // Call this to update the state of grayed-out controls
-                // that depend on CurrentConfig being set to become ungrayed.
-                Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal, new ThreadStart(
-                    delegate() { CommandManager.InvalidateRequerySuggested(); }));
             }
         }
         private bool isRunning = false;
@@ -110,13 +105,14 @@ namespace Myro.GUI.SimpleIDE
         #endregion
 
         #region Commands
-        public static RoutedCommand ShowServices = new RoutedCommand();
         #endregion
 
         #region Private variables
 
         ContextMenu robotChooserMenu;
         Storyboard jewelAnimation;
+
+        List<MenuItem> cachedConfigMenu;
 
         #endregion
 
@@ -156,25 +152,11 @@ namespace Myro.GUI.SimpleIDE
             {
                 GUIUtilities.ReportUnexpectedException(err);
             }
-        }
-
-        private void IsConfigLoaded(object sender, CanExecuteRoutedEventArgs e)
-        {
-            e.CanExecute = (CurrentConfig != null);
-        }
-
-        private void OnShowServices(object sender, ExecutedRoutedEventArgs e)
-        {
             try
             {
-                if (CurrentConfig != null)
-                    Process.Start(new ProcessStartInfo(
-                        "http://localhost:" + CurrentConfig.MyroConfiguration.HttpPort.ToString() + "/directory"));
+                cachedConfigMenu = makeConfigMenuItems();
             }
-            catch (Exception err)
-            {
-                GUIUtilities.ReportUnexpectedException(err);
-            }
+            catch (Exception) { }
         }
 
         #endregion
@@ -182,9 +164,34 @@ namespace Myro.GUI.SimpleIDE
 
         #region Helper methods
 
+        private List<MenuItem> makeConfigMenuItems()
+        {
+            var ret = new List<MenuItem>();
+            var finder = new MyroConfigFinder(Myro.Utilities.Params.ConfigPath);
+            foreach (var config in finder.FindConfigFiles())
+            {
+                MenuItem menuitem = new MenuItem()
+                {
+                    Header = finder.MakeListItem(config),
+                };
+                var myConfig = config;
+                menuitem.Click += delegate
+                {
+                    CurrentConfig = myConfig;
+
+                    // Call this to update the state of grayed-out controls
+                    // that depend on CurrentConfig being set to become ungrayed.
+                    CommandManager.InvalidateRequerySuggested();
+                };
+                ret.Add(menuitem);
+            }
+            return ret;
+        }
+
         private void displayJewelRobotChooser()
         {
-            if (robotChooserMenu == null || robotChooserMenu.IsOpen == false)
+            //Console.WriteLine(robotChooserMenu);
+            if (robotChooserMenu == null)
             {
                 JewelButton.SetValue(CheckBox.IsCheckedProperty, true);
 
@@ -199,22 +206,30 @@ namespace Myro.GUI.SimpleIDE
                     robotChooserMenu = null;
                     JewelButton.SetValue(CheckBox.IsCheckedProperty, false);
                 };
-                var finder = new MyroConfigFinder(Myro.Utilities.Params.ConfigPath);
-                foreach (var config in finder.FindConfigFiles())
+
+                // Use the cached menu the first time - speeds up the first
+                // time the user clicks the menu because files are read from
+                // disk.  Rebuild it from scratch after the first time though,
+                // so that new configs are read.
+                List<MenuItem> menuitems;
+                if (cachedConfigMenu != null)
                 {
-                    MenuItem menuitem = new MenuItem()
-                    {
-                        Header = finder.MakeListItem(config),
-                    };
-                    var myConfig = config;
-                    menuitem.Click += delegate { CurrentConfig = myConfig; };
-                    robotChooserMenu.Items.Add(menuitem);
+                    Console.WriteLine("Using cached menu items");
+                    menuitems = cachedConfigMenu;
+                    cachedConfigMenu = null;
                 }
+                else
+                {
+                    menuitems = makeConfigMenuItems();
+                }
+
+                foreach (var menuitem in menuitems)
+                    robotChooserMenu.Items.Add(menuitem);
 
                 robotChooserMenu.IsOpen = true;
             }
-            else
-                robotChooserMenu.IsOpen = false;
+            //else
+            //    robotChooserMenu.IsOpen = false;
         }
 
         #endregion
