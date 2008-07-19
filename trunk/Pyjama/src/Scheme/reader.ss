@@ -1,6 +1,6 @@
-;; includes support for vectors, rationals, exponents, and backquote
+;; Scanner and s-expression reader (registerized)
 
-;; data structure representations of actions and states
+;; includes support for vectors, rationals, exponents, and backquote
 
 ;;------------------------------------------------------------------------
 ;; scanner - character stream represented as a list
@@ -198,7 +198,6 @@
 	  ((char=? c #\newline) '(drop (goto start-state)))
 	  ((char=? c #\nul) '(goto start-state))
 	  (else '(drop (goto comment-state)))))
-      ;; new
       (comma-state
 	(cond
 	  ((char=? c #\@) '(drop (emit comma-at)))
@@ -313,26 +312,25 @@
 	(error 'apply-state "invalid state: ~a" state)))))
 
 ;;------------------------------------------------------------------------
-;; parser (registerized)
+;; reader (registerized)
 
 ;; token stream represented as a list
 (define first car)
 (define rest-of cdr)
 
 ;; global registers
-(define tokens_reg 'undefined)
 (define k_reg 'undefined)
-(define terminator_reg 'undefined)
+(define tokens_reg 'undefined)
 (define sexp_reg 'undefined)
-(define pc 'undefined)
-;; new
+(define terminator_reg 'undefined)
 (define keyword_reg 'undefined)
+(define pc 'undefined)
 
-(define parse
+(define read-datum
   (lambda (input)
     (set! tokens_reg (scan-input input))
     (set! k_reg (make-init-cont))
-    (set! pc parse-sexp)
+    (set! pc read-sexp)
     (run)))
 
 ;; the trampoline
@@ -343,7 +341,7 @@
       sexp_reg)))
 
 ;; tokens_reg k_reg
-(define parse-sexp
+(define read-sexp
   (lambda ()
     (record-case (first tokens_reg)
       (integer (str)
@@ -378,55 +376,50 @@
 	(set! sexp_reg id)
 	(set! tokens_reg (rest-of tokens_reg))
 	(set! pc apply-cont))
-      ;; new
       (apostrophe ()
 	(set! keyword_reg 'quote)
-	(set! pc parse-abbreviation))
-      ;; new
+	(set! pc read-abbreviation))
       (backquote ()
 	(set! keyword_reg 'quasiquote)
-	(set! pc parse-abbreviation))
-      ;; new
+	(set! pc read-abbreviation))
       (comma ()
 	(set! keyword_reg 'unquote)
-	(set! pc parse-abbreviation))
-      ;; new
+	(set! pc read-abbreviation))
       (comma-at ()
 	(set! keyword_reg 'unquote-splicing)
-	(set! pc parse-abbreviation))
+	(set! pc read-abbreviation))
       (lparen ()
 	(set! tokens_reg (rest-of tokens_reg))
 	(if (token-type? (first tokens_reg) 'dot)
 	  (begin
-	    (set! pc parse-error))
+	    (set! pc read-error))
 	  (begin
 	    (set! terminator_reg 'rparen)
-	    (set! pc parse-sexp-sequence))))
+	    (set! pc read-sexp-sequence))))
       (lbracket ()
 	(set! tokens_reg (rest-of tokens_reg))
 	(if (token-type? (first tokens_reg) 'dot)
 	  (begin
-	    (set! pc parse-error))
+	    (set! pc read-error))
 	  (begin
 	    (set! terminator_reg 'rbracket)
-	    (set! pc parse-sexp-sequence))))
+	    (set! pc read-sexp-sequence))))
       (lvector ()
 	(set! tokens_reg (rest-of tokens_reg))
 	(set! k_reg (make-vector-cont k_reg))
-	(set! pc parse-vector))
+	(set! pc read-vector))
       (else
-	(set! pc parse-error)))))
+	(set! pc read-error)))))
 
-;; new
 ;; tokens_reg keyword_reg k_reg
-(define parse-abbreviation
+(define read-abbreviation
   (lambda ()
     (set! tokens_reg (rest-of tokens_reg))
     (set! k_reg (make-abbreviation-cont keyword_reg k_reg))
-    (set! pc parse-sexp)))
+    (set! pc read-sexp)))
 
 ;; tokens_reg terminator_reg k_reg
-(define parse-sexp-sequence
+(define read-sexp-sequence
   (lambda ()
     (record-case (first tokens_reg)
       ((rparen rbracket) ()
@@ -435,10 +428,10 @@
       (dot ()
 	(set! tokens_reg (rest-of tokens_reg))
 	(set! k_reg (make-dot-cont terminator_reg k_reg))
-	(set! pc parse-sexp))
+	(set! pc read-sexp))
       (else
 	(set! k_reg (make-seq1-cont terminator_reg k_reg))
-	(set! pc parse-sexp)))))
+	(set! pc read-sexp)))))
 
 ;; sexp_reg tokens_reg terminator_reg k_reg
 (define close-sexp-sequence
@@ -454,10 +447,10 @@
 	 ((eq? terminator_reg 'rbracket)
 	  (error 'read "bracketed list terminated by parenthesis"))))
       (else
-	(set! pc parse-error)))))
+	(set! pc read-error)))))
 
 ;; tokens_reg k_reg
-(define parse-vector
+(define read-vector
   (lambda ()
     (record-case (first tokens_reg)
       (rparen ()
@@ -466,10 +459,10 @@
 	(set! pc apply-cont))
       (else
 	(set! k_reg (make-vector-sexp1-cont k_reg))
-	(set! pc parse-sexp)))))
+	(set! pc read-sexp)))))
 
 ;; tokens_reg
-(define parse-error
+(define read-error
   (lambda ()
     (let ((token (first tokens_reg)))
       (if (token-type? token 'end-marker)
@@ -477,24 +470,24 @@
 	(error 'read "unexpected token ~a encountered" token)))))
 
 ;;------------------------------------------------------------------------
-;; file loader
+;; file reader
 
-(define load-file
+(define read-file
   (lambda (filename)
     (set! tokens_reg (scan-input (read-content filename)))
-    (set! pc process-sexps)
+    (set! pc print-sexps)
     (run)))
 
 ;; tokens_reg
-(define process-sexps
+(define print-sexps
   (lambda ()
     (if (token-type? (first tokens_reg) 'end-marker)
       (begin
 	(set! sexp_reg 'done)
 	(set! pc #f))      
       (begin
-	(set! k_reg (make-process-cont))
-	(set! pc parse-sexp)))))
+	(set! k_reg (make-print-sexps-cont))
+	(set! pc read-sexp)))))
 
 ;; returns the entire file contents as a single string
 (define read-content
@@ -514,7 +507,6 @@
   (lambda ()
     (list 'init-cont)))
 
-;; new
 (define make-abbreviation-cont
   (lambda (keyword k)
     (list 'abbreviation-cont keyword k)))
@@ -531,9 +523,9 @@
   (lambda (sexp1 k)
     (list 'seq2-cont sexp1 k)))
 
-(define make-process-cont
+(define make-print-sexps-cont
   (lambda ()
-    (list 'process-cont)))
+    (list 'print-sexps-cont)))
 
 (define make-vector-cont
   (lambda (k)
@@ -555,7 +547,6 @@
 	(if (token-type? (first tokens_reg) 'end-marker)
 	  (set! pc #f)
 	  (error 'read "tokens left over: ~a" tokens_reg)))
-      ;; new
       (abbreviation-cont (keyword k)
 	(set! k_reg k)
 	(set! sexp_reg (list keyword sexp_reg))
@@ -567,21 +558,24 @@
       (seq1-cont (expected-terminator k)
 	(set! terminator_reg expected-terminator)
 	(set! k_reg (make-seq2-cont sexp_reg k))
-	(set! pc parse-sexp-sequence))
+	(set! pc read-sexp-sequence))
       (seq2-cont (sexp1 k)
 	(set! k_reg k)
 	(set! sexp_reg (cons sexp1 sexp_reg))
 	(set! pc apply-cont))
-      (process-cont ()
+      (print-sexps-cont ()
 	(pretty-print sexp_reg)
-	(set! pc process-sexps))
+	(set! pc print-sexps))
+      ;; temporary
+      (load-cont ()
+	(set! pc #f))
       (vector-cont (k)
 	(set! k_reg k)
 	(set! sexp_reg (list->vector sexp_reg))
 	(set! pc apply-cont))
       (vector-sexp1-cont (k)
 	(set! k_reg (make-vector-rest-cont sexp_reg k))
-	(set! pc parse-vector))
+	(set! pc read-vector))
       (vector-rest-cont (sexp1 k)
 	(set! k_reg k)
 	(set! sexp_reg (cons sexp1 sexp_reg))

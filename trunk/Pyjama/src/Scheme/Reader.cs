@@ -3,9 +3,9 @@ using System.IO; // File
 using System.Collections.Generic; // List
 
 //-----------------------------------------------------------------------
-// parser (registerized)
+// reader (registerized)
 
-public class Parser {
+public class Reader {
 
   delegate void Function();
   
@@ -23,18 +23,18 @@ public class Parser {
 	return new List<object>(args);
   }
   
-  public static object parse(string input) {
+  public static object read(string input) {
 	tokens_reg = Scanner.scanInput(input);
 	k_reg = makeList("init-cont");
-	pc =  new Function(parseSexp);
+	pc =  new Function(readSexp);
 	return run();
   }
   
-  // file loader
-  public static object loadFile(string filename) {
+  // file reader
+  public static object readFile(string filename) {
 	tokens_reg = Scanner.scanInput(readContent(filename));
 	k_reg = null; 
-	pc = new Function(processSexps);
+	pc = new Function(printSexps);
 	return run();
   }
   
@@ -51,7 +51,7 @@ public class Parser {
 	return sexp_reg;
   }
   
-  public static void parseSexp() {
+  public static void readSexp() {
 	List<object> token = (List<object>) tokens_reg[0];
 	string tag = (string) token[0];
 	if (tag == "integer") {
@@ -88,47 +88,47 @@ public class Parser {
 	  pc = new Function(applyCont);
 	} else if (tag == "apostrophe") {
 	  keyword_reg = "quote";
-	  pc = new Function(parseAbbreviation);
+	  pc = new Function(readAbbreviation);
 	} else if (tag == "backquote") {
 	  keyword_reg = "quasiquote";
-	  pc = new Function(parseAbbreviation);
+	  pc = new Function(readAbbreviation);
 	} else if (tag == "comma") {
 	  keyword_reg = "unquote";
-	  pc = new Function(parseAbbreviation);
+	  pc = new Function(readAbbreviation);
 	} else if (tag == "comma-at") {
 	  keyword_reg = "unquote-splicing";
-	  pc = new Function(parseAbbreviation);
+	  pc = new Function(readAbbreviation);
 	} else if (tag == "lparen") {
 	  tokens_reg.RemoveAt(0);
 	  if (isTokenType(((List<object>) tokens_reg[0]), "dot")) 
-		pc = new Function(parseError);
+		pc = new Function(readError);
 	  else
 		terminator_reg = "rparen";
-	  pc = new Function(parseSexpSequence);
+	  pc = new Function(readSexpSequence);
 	} else if (tag == "lbracket") {
 	  tokens_reg.RemoveAt(0);
 	  if (isTokenType(((List<object>) tokens_reg[0]), "dot")) {
-	    pc = new Function(parseError);
+	    pc = new Function(readError);
 	  } else {
 	    terminator_reg = "rbracket";
-	    pc = new Function(parseSexpSequence);
+	    pc = new Function(readSexpSequence);
 	  }
 	} else if (tag == "lvector") {
 	  tokens_reg.RemoveAt(0);
 	  k_reg = makeList("vector-cont", k_reg);
-	  pc = new Function(parseVector);
+	  pc = new Function(readVector);
 	} else {
-	  pc = new Function(parseError);
+	  pc = new Function(readError);
 	}
   }
   
-  public static void parseAbbreviation() {
+  public static void readAbbreviation() {
     tokens_reg.RemoveAt(0);
     k_reg = makeList("abbreviation-cont", keyword_reg, k_reg);
-    pc = new Function(parseSexp);
+    pc = new Function(readSexp);
   }
 
-  public static void parseSexpSequence() {
+  public static void readSexpSequence() {
 	List<object> token = (List<object>) tokens_reg[0];
 	string tag = (string) token[0];
 	if (tag == "rparen" || tag == "rbracket") {
@@ -137,10 +137,10 @@ public class Parser {
 	} else if (tag == "dot") {
 	    tokens_reg.RemoveAt(0);
 	    k_reg = makeList("dot-cont", terminator_reg, k_reg);
-	    pc = new Function(parseSexp);
+	    pc = new Function(readSexp);
 	} else {
 	    k_reg = makeList("seq1-cont", terminator_reg, k_reg);
-	    pc = new Function(parseSexp);
+	    pc = new Function(readSexp);
 	}
     }
 
@@ -159,11 +159,11 @@ public class Parser {
 		throw new Exception("should never reach here");
 	    }
 	} else {
-	    pc = new Function(parseError);
+	    pc = new Function(readError);
 	}
     }
 
-  public static void parseVector() {
+  public static void readVector() {
 	List<object> token = (List<object>) tokens_reg[0];
 	string tag = (string) token[0];
 	if (tag == "rparen") {
@@ -172,11 +172,11 @@ public class Parser {
 	  pc = new Function(applyCont);
 	} else {
 	  k_reg = makeList("vector-sexp1-cont", k_reg);
-	  pc = new Function(parseSexp);
+	  pc = new Function(readSexp);
 	}
   }
   
-  public static void parseError() {
+  public static void readError() {
 	List<object> token = (List<object>) tokens_reg[0];
 	if (isTokenType(token, "end-marker")) {
 	  throw new Exception("unexpected end of input");
@@ -185,14 +185,14 @@ public class Parser {
 	}
   }
   
-  public static void processSexps() {
+  public static void printSexps() {
 	List<object> token = (List<object>) tokens_reg[0];
 	if (isTokenType(token, "end-marker")) {
 	  sexp_reg = new SchemeSymbol("done");
 	  pc = null;
 	} else {
-	  k_reg = makeList("process-cont");
-	  pc = new Function(parseSexp);
+	  k_reg = makeList("print-sexps-cont");
+	  pc = new Function(readSexp);
 	}
   }
   
@@ -224,7 +224,7 @@ public class Parser {
 	  List<object> k = (List<object>) k_reg[2];
 	  terminator_reg = expectedTerminator;
 	  k_reg = makeList("seq2-cont", sexp_reg, k);
-	  pc = new Function(parseSexpSequence);
+	  pc = new Function(readSexpSequence);
 	} else if (tag == "seq2-cont") {
 	  List<object> k = null;
 	  object sexp1 = null;
@@ -241,9 +241,9 @@ public class Parser {
 	  k_reg = k;
 	  sexp_reg = new Cons(sexp1, sexp_reg);
 	  pc = new Function(applyCont);
-	} else if (tag == "process-cont") {
+	} else if (tag == "print-sexps-cont") {
 	  prettyPrint(sexp_reg);
-	  pc = new Function(processSexps);
+	  pc = new Function(printSexps);
 	} else if (tag == "vector-cont") {
 	  List<object> k = (List<object>) k_reg[1];
 	  k_reg = k;
@@ -252,7 +252,7 @@ public class Parser {
 	} else if (tag == "vector-sexp1-cont") {
 	  List<object> k = (List<object>) k_reg[1];
 	  k_reg = makeList("vector-rest-cont", sexp_reg, k);
-	  pc = new Function(parseVector);
+	  pc = new Function(readVector);
 	} else if (tag == "vector-rest-cont") {
 	  object sexp1 = k_reg[1];
 	  List<object> k = (List<object>) k_reg[2];
@@ -509,11 +509,13 @@ public class Parser {
   
   //-----------------------------------------------------------------------
   // examples:
-  // >>> parse("apple")
-  // >>> parse("#T")
-  // >>> parse("(a (b c (d)))")
-  // >>> parse("(a b c 1 2 -3.14 #f \"hello there\" #\\newline (e [f . x] . 4) ())")
-  // >>> loadFile("scanner-parser.ss")
+  // >>> read("apple")
+  // >>> read("#T")
+  // >>> read("(a (b c (d)))")
+  // >>> read("(a b c 1 2 -3.14 #f \"hello there\" #\\newline (e [f . x] . 4) ())")
+  // >>> readFile("reader.ss")
+  // >>> read("(a 'b (quote c) #(1 2 d))")
+  // >>> read("2/3") + read("3/4")
   
   public static string prettyPrint(object obj) {
 	string retval = "";
@@ -550,10 +552,10 @@ public class Parser {
 	if (args[0] == "exp") {
 	  string s = args[1];
 	  System.Console.WriteLine("Parsing expression: '{0}'...", s);
-	  System.Console.WriteLine(prettyPrint(parse(s)));
+	  System.Console.WriteLine(prettyPrint(read(s)));
 	} else {
 	  System.Console.WriteLine("Parsing file: '{0}'...", args[0]);
-	  System.Console.WriteLine(prettyPrint(loadFile(args[0])));
+	  System.Console.WriteLine(prettyPrint(readFile(args[0])));
 	}
   }
   

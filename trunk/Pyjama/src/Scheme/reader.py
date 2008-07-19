@@ -1,3 +1,5 @@
+# Scanner and s-expression reader (registerized)
+
 # includes support for vectors, rationals, exponents, and backquote
 
 import string
@@ -135,9 +137,7 @@ def applyState(state, c):
         if c == ')': return ("drop", ("emit", "rparen"))
         if c == ']': return ("drop", ("emit", "rbracket"))
         if c == "'": return ("drop", ("emit", "apostrophe"))
-        # new
         if c == '`': return ("drop", ("emit", "backquote"))
-        # new
         if c == ',': return ("drop", ("goto", "comma-state"))
         if c == '#': return ("drop", ("goto", "hash-prefix-state"))
         if c == '"': return ("drop", ("goto", "string-state"))
@@ -151,7 +151,6 @@ def applyState(state, c):
         if c == '\n': return ("drop", ("goto", "start-state"))
         if c == '\0': return ("goto", "start-state")
         else: return ("drop", ("goto", "comment-state"))
-    # new
     elif state == "comma-state":
         if c == '@': return ("drop", ("emit", "comma-at"))
         else: return ("emit", "comma")
@@ -255,25 +254,24 @@ def scanFile(filename):
     return scanInput(content)
 
 # example:
-# >>> scanFile("scanner-parser.ss")
+# >>> scanFile("reader.ss")
 
 #-----------------------------------------------------------------------
-# parser (registerized)
+# reader (registerized)
 
 # global registers
-tokens_reg = None
 k_reg = None
-terminator_reg = None
+tokens_reg = None
 sexp_reg = None
-pc = None
-# new
+terminator_reg = None
 keyword_reg = None
+pc = None
 
-def parse(input):
+def read(input):
     global tokens_reg, k_reg, pc
     tokens_reg = scanInput(input)
     k_reg = ("init-cont",)
-    pc = parseSexp
+    pc = readSexp
     return run()
 
 # the trampoline
@@ -283,8 +281,7 @@ def run():
         pc()
     return sexp_reg
 
-def parseSexp():
-    # new/changed
+def readSexp():
     global tokens_reg, k_reg, terminator_reg, keyword_reg, sexp_reg, pc
     token = tokens_reg[0]
     tag = token[0]
@@ -323,51 +320,46 @@ def parseSexp():
 	sexp_reg = Symbol(id)
 	tokens_reg.pop(0)
 	pc = applyCont
-    # new/changed
     elif tag == "apostrophe":
         keyword_reg = "quote"
-        pc = parseAbbreviation
-    # new
+        pc = readAbbreviation
     elif tag == "backquote":
         keyword_reg = "quasiquote"
-        pc = parseAbbreviation
-    # new
+        pc = readAbbreviation
     elif tag == "comma":
         keyword_reg = "unquote"
-        pc = parseAbbreviation
-    # new
+        pc = readAbbreviation
     elif tag == "comma-at":
         keyword_reg = "unquote-splicing"
-        pc = parseAbbreviation
+        pc = readAbbreviation
     elif tag == "lparen":
 	tokens_reg.pop(0)
 	if isTokenType(tokens_reg[0], "dot"):
-	    pc = parseError
+	    pc = readError
         else:
 	    terminator_reg = "rparen"
-	    pc = parseSexpSequence
+	    pc = readSexpSequence
     elif tag == "lbracket":
 	tokens_reg.pop(0)
 	if isTokenType(tokens_reg[0], "dot"):
-	    pc = parseError
+	    pc = readError
         else:
 	    terminator_reg = "rbracket"
-	    pc = parseSexpSequence
+	    pc = readSexpSequence
     elif tag == "lvector":
         tokens_reg.pop(0)
         k_reg = ("vector-cont", k_reg)
-        pc = parseVector
+        pc = readVector
     else:
-        pc = parseError
+        pc = readError
 
-# new
-def parseAbbreviation():
+def readAbbreviation():
     global tokens_reg, keyword_reg, k_reg, pc
     tokens_reg.pop(0)
     k_reg = ("abbreviation-cont", keyword_reg, k_reg)
-    pc = parseSexp
+    pc = readSexp
 
-def parseSexpSequence():
+def readSexpSequence():
     global tokens_reg, k_reg, terminator_reg, sexp_reg, pc
     token = tokens_reg[0]
     tag = token[0]
@@ -377,10 +369,10 @@ def parseSexpSequence():
     elif tag == "dot":
 	tokens_reg.pop(0)
 	k_reg = ("dot-cont", terminator_reg, k_reg)
-	pc = parseSexp
+	pc = readSexp
     else:
 	k_reg = ("seq1-cont", terminator_reg, k_reg)
-	pc = parseSexp
+	pc = readSexp
 
 def closeSexpSequence():
     global tokens_reg, k_reg, terminator_reg, sexp_reg, pc
@@ -397,9 +389,9 @@ def closeSexpSequence():
         else:
             raise Exception("should never reach here")
     else:
-        pc = parseError
+        pc = readError
 
-def parseVector():
+def readVector():
     global tokens_reg, k_reg, sexp_reg, pc
     token = tokens_reg[0]
     tag = token[0]
@@ -409,9 +401,9 @@ def parseVector():
         pc = applyCont
     else:
         k_reg = ("vector-sexp1-cont", k_reg)
-        pc = parseSexp
+        pc = readSexp
 
-def parseError():
+def readError():
     global tokens_reg
     token = tokens_reg[0]
     if isTokenType(token, "end-marker"):
@@ -419,23 +411,23 @@ def parseError():
     else:
         raise Exception("unexpected token %s encountered" % token)
 
-# file loader
+# file reader
 
-def loadFile(filename):
+def readFile(filename):
     global tokens_reg, pc
     tokens_reg = scanInput(readContent(filename))
-    pc = processSexps
+    pc = printSexps
     return run()
 
-def processSexps():
+def printSexps():
     global tokens_reg, sexp_reg, k_reg, pc
     token = tokens_reg[0]
     if isTokenType(token, "end-marker"):
 	sexp_reg = Symbol("done")
 	pc = None
     else:
-	k_reg = ("process-cont",)
-	pc = parseSexp
+	k_reg = ("print-sexps-cont",)
+	pc = readSexp
 
 def readContent(filename):
     f = open(filename)
@@ -453,7 +445,6 @@ def applyCont():
             pc = None
         else:
             raise Exception("tokens left over: %s" % tokens_reg)
-    # new/changed - deleted "quote-cont" case
     elif tag == "abbreviation-cont":
         keyword = k_reg[1]
         k = k_reg[2]
@@ -470,15 +461,15 @@ def applyCont():
         expectedTerminator, k = k_reg[1], k_reg[2]
 	terminator_reg = expectedTerminator
 	k_reg = ("seq2-cont", sexp_reg, k)
-	pc = parseSexpSequence
+	pc = readSexpSequence
     elif tag == "seq2-cont":
         sexp1, k = k_reg[1], k_reg[2]
 	k_reg = k
 	sexp_reg = Cons(sexp1, sexp_reg)
 	pc = applyCont
-    elif tag == "process-cont":
+    elif tag == "print-sexps-cont":
         prettyPrint(sexp_reg)
-        pc = processSexps
+        pc = printSexps
     elif tag == "vector-cont":
         k = k_reg[1]
         k_reg = k
@@ -487,7 +478,7 @@ def applyCont():
     elif tag == "vector-sexp1-cont":
         k = k_reg[1]
         k_reg = ("vector-rest-cont", sexp_reg, k)
-        pc = parseVector
+        pc = readVector
     elif tag == "vector-rest-cont":
         sexp1, k = k_reg[1], k_reg[2]
         k_reg = k
@@ -575,17 +566,14 @@ class Cons:
                 isinstance(self.cdr, Cons) and \
                 self.cdr.cdr == ():
             return "'%s" % (self.cdr.car,)
-        # new - these cases can probably be consolidated
         elif self.car == Symbol("quasiquote") and \
                 isinstance(self.cdr, Cons) and \
                 self.cdr.cdr == ():
             return "`%s" % (self.cdr.car,)
-        # new
         elif self.car == Symbol("unquote") and \
                 isinstance(self.cdr, Cons) and \
                 self.cdr.cdr == ():
             return ",%s" % (self.cdr.car,)
-        # new
         elif self.car == Symbol("unquote-splicing") and \
                 isinstance(self.cdr, Cons) and \
                 self.cdr.cdr == ():
@@ -770,10 +758,10 @@ def prettyPrint(sexp):
 #-----------------------------------------------------------------------
 # examples:
 
-# >>> parse("apple")
-# >>> parse("#T")
-# >>> parse("(a (b c (d)))")
-# >>> parse("(a b c 1 2 -3.14 #f \"hello there\" #\\newline (e [f . x] . 4) ())")
-# >>> loadFile("scanner-parser.ss")
-# >>> parse("(a 'b (quote c) #(1 2 d))")
-# >>> parse("2/3") + parse("3/4")
+# >>> read("apple")
+# >>> read("#T")
+# >>> read("(a (b c (d)))")
+# >>> read("(a b c 1 2 -3.14 #f \"hello there\" #\\newline (e [f . x] . 4) ())")
+# >>> readFile("reader.ss")
+# >>> read("(a 'b (quote c) #(1 2 d))")
+# >>> read("2/3") + read("3/4")

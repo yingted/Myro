@@ -1,6 +1,6 @@
-;; includes support for vectors, rationals, exponents, and backquote
+;; Scanner and s-expression reader
 
-;; data structure representations of actions and states
+;; includes support for vectors, rationals, exponents, and backquote
 
 ;;------------------------------------------------------------------------
 ;; scanner - character stream represented as a list
@@ -183,9 +183,7 @@
 	  ((char=? c #\)) '(drop (emit rparen)))
 	  ((char=? c #\]) '(drop (emit rbracket)))
 	  ((char=? c #\') '(drop (emit apostrophe)))
-	  ;; new
 	  ((char=? c #\`) '(drop (emit backquote)))
-	  ;; new
 	  ((char=? c #\,) '(drop (goto comma-state)))
 	  ((char=? c #\#) '(drop (goto hash-prefix-state)))
 	  ((char=? c #\") '(drop (goto string-state)))
@@ -200,7 +198,6 @@
 	  ((char=? c #\newline) '(drop (goto start-state)))
 	  ((char=? c #\nul) '(goto start-state))
 	  (else '(drop (goto comment-state)))))
-      ;; new
       (comma-state
 	(cond
 	  ((char=? c #\@) '(drop (emit comma-at)))
@@ -331,15 +328,15 @@
 (define first car)
 (define rest-of cdr)
 
-(define parse
+(define read-datum
   (lambda (input)
-    (parse-sexp (scan-input input)
+    (read-sexp (scan-input input)
       (lambda (sexp tokens-left)
 	(if (token-type? (first tokens-left) 'end-marker)
 	  sexp
 	  (error 'read "tokens left over: ~a" tokens-left))))))
 
-(define parse-sexp
+(define read-sexp
   (lambda (tokens k)
     (record-case (first tokens)
       (integer (str)
@@ -355,47 +352,45 @@
       (character (char) (k char (rest-of tokens)))
       (string (str) (k str (rest-of tokens)))
       (identifier (id) (k id (rest-of tokens)))
-      ;; new
-      (apostrophe () (parse-abbreviation tokens 'quote k))
-      (backquote () (parse-abbreviation tokens 'quasiquote k))
-      (comma () (parse-abbreviation tokens 'unquote k))
-      (comma-at () (parse-abbreviation tokens 'unquote-splicing k))
+      (apostrophe () (read-abbreviation tokens 'quote k))
+      (backquote () (read-abbreviation tokens 'quasiquote k))
+      (comma () (read-abbreviation tokens 'unquote k))
+      (comma-at () (read-abbreviation tokens 'unquote-splicing k))
       (lparen ()
 	(let ((tokens (rest-of tokens)))
 	  (if (token-type? (first tokens) 'dot)
-	    (parse-error (first tokens))
-	    (parse-sexp-sequence tokens 'rparen k))))
+	    (read-error (first tokens))
+	    (read-sexp-sequence tokens 'rparen k))))
       (lbracket ()
 	(let ((tokens (rest-of tokens)))
 	  (if (token-type? (first tokens) 'dot)
-	    (parse-error (first tokens))
-	    (parse-sexp-sequence tokens 'rbracket k))))
+	    (read-error (first tokens))
+	    (read-sexp-sequence tokens 'rbracket k))))
       (lvector ()
-	(parse-vector (rest-of tokens)
+	(read-vector (rest-of tokens)
 	  (lambda (sexps tokens-left)
 	    (k (list->vector sexps) tokens-left))))
-      (else (parse-error (first tokens))))))
+      (else (read-error (first tokens))))))
 
-;; new
-(define parse-abbreviation
+(define read-abbreviation
   (lambda (tokens keyword k)
-    (parse-sexp (rest-of tokens)
+    (read-sexp (rest-of tokens)
       (lambda (sexp tokens-left)
 	(k (list keyword sexp) tokens-left)))))
 
-(define parse-sexp-sequence
+(define read-sexp-sequence
   (lambda (tokens expected-terminator k)
     (record-case (first tokens)
       ((rparen rbracket) ()
        (close-sexp-sequence '() tokens expected-terminator k))
       (dot ()
-	(parse-sexp (rest-of tokens)
+	(read-sexp (rest-of tokens)
 	  (lambda (sexp tokens-left)
 	    (close-sexp-sequence sexp tokens-left expected-terminator k))))
       (else
-	(parse-sexp tokens
+	(read-sexp tokens
 	  (lambda (sexp1 tokens-left)
-	    (parse-sexp-sequence tokens-left expected-terminator
+	    (read-sexp-sequence tokens-left expected-terminator
 	      (lambda (sexp2 tokens-left)
 		(k (cons sexp1 sexp2) tokens-left)))))))))
 
@@ -410,41 +405,41 @@
 	  (error 'read "parenthesized list terminated by bracket"))
 	 ((eq? expected-terminator 'rbracket)
 	  (error 'read "bracketed list terminated by parenthesis"))))
-      (else (parse-error (first tokens))))))
+      (else (read-error (first tokens))))))
 
-(define parse-vector
+(define read-vector
   (lambda (tokens k)
     (record-case (first tokens)
       (rparen ()
 	(k '() (rest-of tokens)))
       (else
-	(parse-sexp tokens
+	(read-sexp tokens
 	  (lambda (sexp1 tokens-left)
-	    (parse-vector tokens-left
+	    (read-vector tokens-left
 	      (lambda (sexps tokens-left)
 		(k (cons sexp1 sexps) tokens-left)))))))))
 
-(define parse-error
+(define read-error
   (lambda (token)
     (if (token-type? token 'end-marker)
       (error 'read "unexpected end of input")
       (error 'read "unexpected token ~a encountered" token))))
 
 ;;------------------------------------------------------------------------
-;; file loader
+;; file reader
 
-(define load-file
+(define read-file
   (lambda (filename)
-    (process-sexps (scan-input (read-content filename)))))
+    (print-sexps (scan-input (read-content filename)))))
 
-(define process-sexps
+(define print-sexps
   (lambda (tokens)
     (if (token-type? (first tokens) 'end-marker)
       'done
-      (parse-sexp tokens
+      (read-sexp tokens
 	(lambda (sexp tokens-left)
 	  (pretty-print sexp)
-	  (process-sexps tokens-left))))))
+	  (print-sexps tokens-left))))))
 
 ;; returns the entire file contents as a single string
 (define read-content
@@ -456,4 +451,5 @@
 	    (if (eof-object? char)
 	      '()
 	      (cons char (loop (read-char port))))))))))
+
 

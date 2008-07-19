@@ -1,7 +1,7 @@
 MCS=gmcs
 
-Parser.exe: Parser.cs Scanner.cs
-	$(MCS) Parser.cs Scanner.cs -main:Parser
+Reader.exe: Reader.cs Scanner.cs
+	$(MCS) Reader.cs Scanner.cs -main:Reader
 
 clean:
 	$(RM) *.exe *~
