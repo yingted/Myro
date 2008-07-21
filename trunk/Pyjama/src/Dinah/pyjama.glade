@@ -4051,7 +4051,7 @@
 						  <property name="spacing">0</property>
 
 						  <child>
-						    <widget class="GtkButton" id="button17">
+						    <widget class="GtkButton" id="rightdragbutton">
 						      <property name="visible">True</property>
 						      <property name="can_focus">True</property>
 						      <property name="relief">GTK_RELIEF_NORMAL</property>
