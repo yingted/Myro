@@ -9,9 +9,6 @@ class Pyjama:
 
     '''This is the the class for the main window for Pyjama.'''
 
-    def hideItem(self,widget,data=None):
-        self.wTree.get_widget(widget).hide()
-
     def __init__(self):
         '''Find the file and uses it.'''
         self.gladefile="pyjama.glade"
@@ -64,6 +61,39 @@ class Pyjama:
 
         #makes motors a source for dnd
         self.wTree.get_widget("motorsdragbutton").drag_source_set(gtk.gdk.BUTTON1_MASK,[("motors",0,10)],gtk.gdk.ACTION_COPY)
+
+        #makes wait a source for dnd
+        self.wTree.get_widget("waitdragbutton").drag_source_set(gtk.gdk.BUTTON1_MASK,[("wait",0,11)],gtk.gdk.ACTION_COPY)
+
+        #makes current time a source for dnd
+        self.wTree.get_widget("currenttimedragbutton").drag_source_set(gtk.gdk.BUTTON1_MASK,[("currenttime",0,12)],gtk.gdk.ACTION_COPY)
+
+        #makes set timer a source for dnd
+        self.wTree.get_widget("timerdragbutton").drag_source_set(gtk.gdk.BUTTON1_MASK,[("settimer",0,13)],gtk.gdk.ACTION_COPY)
+
+        #makes time elapsed a source for dnd
+        self.wTree.get_widget("timeelapseddragbutton").drag_source_set(gtk.gdk.BUTTON1_MASK,[("elapsed",0,14)],gtk.gdk.ACTION_COPY)
+
+        #makes ask user a source for dnd
+        self.wTree.get_widget("askuserdragbutton").drag_source_set(gtk.gdk.BUTTON1_MASK,[("askuser",0,15)],gtk.gdk.ACTION_COPY)
+
+        #makes gamepad a source for dnd
+        self.wTree.get_widget("gamepaddragbutton").drag_source_set(gtk.gdk.BUTTON1_MASK,[("gamepad",0,16)],gtk.gdk.ACTION_COPY)
+
+        #makes joystick a source for dnd
+        self.wTree.get_widget("joystickdragbutton").drag_source_set(gtk.gdk.BUTTON1_MASK,[("joystick",0,17)],gtk.gdk.ACTION_COPY)
+
+        #makes take picture a source for dnd
+        self.wTree.get_widget("takepicdragbutton").drag_source_set(gtk.gdk.BUTTON1_MASK,[("takepic",0,18)],gtk.gdk.ACTION_COPY)
+
+        #makes show picture a source for dnd
+        self.wTree.get_widget("showpicdragbutton").drag_source_set(gtk.gdk.BUTTON1_MASK,[("showpic",0,19)],gtk.gdk.ACTION_COPY)
+
+        #makes load picture a source for dnd
+        self.wTree.get_widget("loadpicdragbutton").drag_source_set(gtk.gdk.BUTTON1_MASK,[("loadpic",0,20)],gtk.gdk.ACTION_COPY)
+
+        #makes save picture a source for dnd
+        self.wTree.get_widget("savepicdragbutton").drag_source_set(gtk.gdk.BUTTON1_MASK,[("savepic",0,21)],gtk.gdk.ACTION_COPY)
 
     def on_mainvbox_drag_drop(self,source,context,x,y,time):
         outerBox=self.wTree.get_widget("mainvbox")
@@ -167,7 +197,7 @@ class Pyjama:
         self.window.show_all()
 
         #makes innerVBox a drag destination
-        innerVBox.drag_dest_set(gtk.DEST_DEFAULT_MOTION|gtk.DEST_DEFAULT_HIGHLIGHT|gtk.DEST_DEFAULT_DROP, [("print",0,4),("forward",0,5),("backward",0,6),("left",0,7),("right",0,8),("stop",0,9),("motors",0,10)], gtk.gdk.ACTION_COPY)
+        innerVBox.drag_dest_set(gtk.DEST_DEFAULT_MOTION|gtk.DEST_DEFAULT_HIGHLIGHT|gtk.DEST_DEFAULT_DROP, [("print",0,4),("forward",0,5),("backward",0,6),("left",0,7),("right",0,8),("stop",0,9),("motors",0,10),("wait",0,11),("currenttime",0,12),("settimer",0,13),("elapsed",0,14),("askuser",0,15),("gamepad",0,16),("joystick",0,17),("takepic",0,18),("showpic",0,19),("loadpic",0,20),("savepic",0,21)], gtk.gdk.ACTION_COPY)
         innerVBox.connect("drag_drop",self.on_innerVBox_drag_drop)
 
     def on_innerVBox_drag_drop(self,source,context,x,y,time):
@@ -262,13 +292,122 @@ class Pyjama:
             motorsSpin2=gtk.SpinButton(gtk.Adjustment(1,-1,1,.1,.5,0),0.0,1)
             motorsHBox.pack_start(motorsSpin2)
             innerVBox2.add(motorsHBox)
+        elif context.targets==["wait"]:
+            innerVBox2=gtk.VBox(True,1)
+            outerVBox2.add(innerVBox2)
+            waitHBox=gtk.HBox(True,3)
+            waitLabel1=gtk.Label(" wait ")
+            waitHBox.pack_start(waitLabel1)
+            waitSpin=gtk.SpinButton(gtk.Adjustment(1,0,10,.1,.5,0),0.0,1)
+            waitHBox.pack_start(waitSpin)
+            waitLabel2=gtk.Label(" seconds ")
+            waitHBox.pack_start(waitLabel2)
+            innerVBox.add(waitHBox)
+        elif context.targets==["currenttime"]:
+            innerVBox2=gtk.VBox(True,1)
+            outerVBox2.add(innerVBox2)
+            currenttimeHBox=gtk.HBox(True,1)
+            currenttimeLabel=gtk.Label(" current time ")
+            currenttimeHBox.add(currenttimeLabel)
+            innerVBox2.add(currenttimeHBox)
+        elif context.targets==["settimer"]:
+            innerVBox2=gtk.VBox(True,1)
+            outerVBox2.add(innerVBox2)
+            settimerHBox=gtk.HBox(True,2)
+            settimerComboBox=gtk.combo_box_new_text()
+            settimerComboBox.append_text("start")
+            settimerComboBox.append_text("pause")
+            settimerComboBox.append_text("stop")
+            settimerComboBox.append_text("reset")
+            settimerHBox.pack_start(settimerComboBox,False,False,0)
+            settimerLabel=gtk.Label(" timer ")
+            settimerHBox.pack_start(settimerLabel,False,False,0)
+            innerVBox2.add(settimerHBox)
+        elif context.targets==["elapsed"]:
+            innerVBox2=gtk.VBox(True,1)
+            outerVBox2.add(innerVBox2)
+            elapsedHBox=gtk.HBox(True,1)
+            elapsedLabel=gtk.Label(" time elapsed ")
+            elapsedHBox.add(elapsedLabel)
+            innerVBox.add(elapsedHBox)
+        elif context.targets==["askuser"]:
+            innerVBox2=gtk.VBox(True,1)
+            outerVBox2.add(innerVBox2)
+            askuserHBox=gtk.HBox(True,2)
+            askuserLabel=gtk.Label(" ask user for a ")
+            askuserHBox.pack_start(askuserLabel,False,False,0)
+            askuserComboBox=gtk.combo_box_entry_new_text()
+            askuserComboBox.append_text("number")
+            askuserComboBox.append_text("string")
+            askuserComboBox.append_text("yes/no")
+            askuserHBox.pack_start(askuserComboBox,False,False,0)
+            innerVBox.add(askuserHBox)
+        elif context.targets==["gamepad"]:
+            innerVBox2=gtk.VBox(True,1)
+            outerVBox2.add(innerVBox2)
+            gamepadHBox=gtk.HBox(True,1)
+            gamepadLabel=gtk.Label(" use gamepad ")
+            gamepadHBox.pack_start(gamepadLabel,False,False,0)
+            innerVBox2.add(gamepadHBox)
+        elif context.targets==["joystick"]:
+            innerVBox2=gtk.VBox(True,1)
+            outerVBox2.add(innerVBox2)
+            joystickHBox=gtk.HBox(True,1)
+            joystickLabel=gtk.Label(" use joystick ")
+            joystickHBox.pack_start(joystickLabel,False,False,0)
+            innerVBox2.add(joystickHBox)
+        elif context.targets==["takepic"]:
+            innerVBox2=gtk.VBox(True,1)
+            outerVBox2.add(innerVBox2)
+            takepicHBox=gtk.HBox(True,3)
+            takepicLabel1=gtk.Label(" take ")
+            takepicHBox.pack_start(takepicLabel1,False,False,0)
+            takepicComboBox=gtk.combo_box_new_text()
+            takepicComboBox.append_text("color")
+            takepicComboBox.append_text("grayscale")
+            takepicComboBox.append_text("blob")
+            takepicHBox.pack_start(takepicComboBox,False,False,0)
+            takepicLabel2=gtk.Label(" picture ")
+            takepicHBox.pack_start(takepicLabel2,False,False,0)
+            innerVBox2.add(takepicHBox)
+        elif context.targets==["showpic"]:
+            innerVBox2=gtk.VBox(True,1)
+            outerVBox2.add(innerVBox2)
+            showpicHBox=gtk.HBox(True,2)
+            showpicLabel=gtk.Label(" show ")
+            showpicHBox.pack_start(showpicLabel,False,False,0)
+            showpicComboBox=gtk.combo_box_new_text()
+            showpicComboBox.append_text("<picture>")
+            showpicHBox.pack_start(showpicComboBox,False,False,0)
+            innerVBox2.add(showpicHBox)
+        elif context.targets==["loadpic"]:
+            innerVBox2=gtk.VBox(True,1)
+            outerVBox2.add(innerVBox2)
+            loadpicHBox=gtk.HBox(True,2)
+            loadpicLabel=gtk.Label(" load ")
+            loadpicHBox.pack_start(loadpicLabel,False,False,0)
+            loadpicFileChooser=gtk.FileChooserButton("Choose a Picture File")
+            loadpicHBox.pack_start(loadpicFileChooser,False,False,0)
+            innerVBox2.add(loadpicHBox)
+        elif context.targets==["savepic"]:
+            innerVBox2=gtk.VBox(True,1)
+            outerVBox2.add(innerVBox2)
+            savepicHBox=gtk.HBox(True,4)
+            savepicLabel1=gtk.Label(" save ")
+            savepicHBox.pack_start(savepicLabel1,False,False,0)
+            savepicComboBox=gtk.combo_box_new_text()
+            savepicComboBox.append_text("<picture>")
+            savepicHBox.pack_start(savepicComboBox,False,False,0)
+            savepicLabel2=gtk.Label(" to ")
+            savepicFileChooser=gtk.FileChooserButton("Choose a File")
+            savepicHBox.pack_start(savepicFileChooser,False,False,0)
+            innerVBox2.add(savepicHBox)
         else:
             pass
         self.window.show_all()
 
     def runProgram(self,widget,data=None):
         try:
-            #if printString:
             print printString.get_text()
         except NameError:
             pass
