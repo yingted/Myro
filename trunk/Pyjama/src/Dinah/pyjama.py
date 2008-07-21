@@ -47,6 +47,24 @@ class Pyjama:
         #makes print a source for dnd
         self.wTree.get_widget("printdragbutton").drag_source_set(gtk.gdk.BUTTON1_MASK,[("print",0,4)],gtk.gdk.ACTION_COPY)
 
+        #makes forward a source for dnd
+        self.wTree.get_widget("forwarddragbutton").drag_source_set(gtk.gdk.BUTTON1_MASK,[("forward",0,5)],gtk.gdk.ACTION_COPY)
+
+        #makes backward a source for dnd
+        self.wTree.get_widget("backwarddragbutton").drag_source_set(gtk.gdk.BUTTON1_MASK,[("backward",0,6)],gtk.gdk.ACTION_COPY)
+
+        #makes turn left a source for dnd
+        self.wTree.get_widget("leftdragbutton").drag_source_set(gtk.gdk.BUTTON1_MASK,[("left",0,7)],gtk.gdk.ACTION_COPY)
+
+        #makes turn right a source for dnd
+        self.wTree.get_widget("rightdragbutton").drag_source_set(gtk.gdk.BUTTON1_MASK,[("right",0,8)],gtk.gdk.ACTION_COPY)
+
+        #makes stop a source for dnd
+        self.wTree.get_widget("stopdragbutton").drag_source_set(gtk.gdk.BUTTON1_MASK,[("stop",0,9)],gtk.gdk.ACTION_COPY)
+
+        #makes motors a source for dnd
+        self.wTree.get_widget("motorsdragbutton").drag_source_set(gtk.gdk.BUTTON1_MASK,[("motors",0,10)],gtk.gdk.ACTION_COPY)
+
     def on_mainvbox_drag_drop(self,source,context,x,y,time):
         outerBox=self.wTree.get_widget("mainvbox")
         global innerVBox
@@ -67,7 +85,6 @@ class Pyjama:
             endDoReturn.set_active(0)
             endDo.pack_start(endDoReturn,False,False,0)
             innerBox.pack_start(endDo,False,False,0)
-            self.window.show_all()
         elif context.targets==["whenscript"]:
             innerBox=gtk.VBox(True,3)
             outerBox.add(innerBox)
@@ -91,7 +108,6 @@ class Pyjama:
             endWhenReturn.set_active(0)
             endWhen.pack_start(endWhenReturn,False,False,0)
             innerBox.pack_start(endWhen,False,False,0)
-            self.window.show_all()
         elif context.targets==["givenscript"]:
             innerBox=gtk.VBox(True,3)
             outerBox.add(innerBox)
@@ -115,7 +131,6 @@ class Pyjama:
             endGivenReturn.set_active(0)
             endGiven.pack_start(endGivenReturn,False,False,0)
             innerBox.pack_start(endGiven,False,False,0)
-            self.window.show_all()
         elif context.targets==["whengivenscript"]:
             innerBox=gtk.VBox(True,4)
             outerBox.add(innerBox)
@@ -147,31 +162,114 @@ class Pyjama:
             endWhengivenReturn.set_active(0)
             endWhengiven.pack_start(endWhengivenReturn,False,False,0)
             innerBox.pack_start(endWhengiven,False,False,0)
-            self.window.show_all()
         else:
             pass
-        innerVBox.drag_dest_set(gtk.DEST_DEFAULT_MOTION|gtk.DEST_DEFAULT_HIGHLIGHT|gtk.DEST_DEFAULT_DROP, [("print",0,4)], gtk.gdk.ACTION_COPY)
+        self.window.show_all()
+
+        #makes innerVBox a drag destination
+        innerVBox.drag_dest_set(gtk.DEST_DEFAULT_MOTION|gtk.DEST_DEFAULT_HIGHLIGHT|gtk.DEST_DEFAULT_DROP, [("print",0,4),("forward",0,5),("backward",0,6),("left",0,7),("right",0,8),("stop",0,9),("motors",0,10)], gtk.gdk.ACTION_COPY)
         innerVBox.connect("drag_drop",self.on_innerVBox_drag_drop)
 
     def on_innerVBox_drag_drop(self,source,context,x,y,time):
-        global printString
         outerVBox2=innerVBox
-        innerVBox2=gtk.VBox(True,1)
-        outerVBox2.add(innerVBox2)
-        printHBox=gtk.HBox(True,2)
-        printLabel=gtk.Label(" print ")
-        printHBox.pack_start(printLabel,False,False,0)
-        printString=gtk.Entry()
-        printHBox.pack_start(printString,False,False,0)
-        innerVBox2.add(printHBox)
+        if context.targets==["print"]:
+            global printString
+            innerVBox2=gtk.VBox(True,1)
+            outerVBox2.add(innerVBox2)
+            printHBox=gtk.HBox(True,2)
+            printLabel=gtk.Label(" print ")
+            printHBox.pack_start(printLabel,False,False,0)
+            printString=gtk.Entry()
+            printHBox.pack_start(printString,False,False,0)
+            innerVBox2.add(printHBox)
+        elif context.targets==["forward"]:
+            innerVBox2=gtk.VBox(True,1)
+            outerVBox2.add(innerVBox2)
+            forwardHBox=gtk.HBox(True,5)
+            forwardLabel1=gtk.Label(" forward at speed ")
+            forwardHBox.pack_start(forwardLabel1,False,False,0)
+            forwardSpin1=gtk.SpinButton(gtk.Adjustment(1,-1,1,.1,.5,0),0.0,1)
+            forwardHBox.pack_start(forwardSpin1,False,False,0)
+            forwardLabel2=gtk.Label(" for ")
+            forwardHBox.pack_start(forwardLabel2,False,False,0)
+            forwardSpin2=gtk.SpinButton(gtk.Adjustment(1,0,10,.1,.5,0),0.0,1)
+            forwardHBox.pack_start(forwardSpin2,False,False,0)
+            forwardLabel3=gtk.Label(" seconds ")
+            forwardHBox.pack_start(forwardLabel3,False,False,0)
+            innerVBox2.add(forwardHBox)
+        elif context.targets==["backward"]:
+            innerVBox2=gtk.VBox(True,1)
+            outerVBox2.add(innerVBox2)
+            backwardHBox=gtk.HBox(True,5)
+            backwardLabel1=gtk.Label(" backward at speed ")
+            backwardHBox.pack_start(backwardLabel1,False,False,0)
+            backwardSpin1=gtk.SpinButton(gtk.Adjustment(1,-1,1,.1,.5,0),0.0,1)
+            backwardHBox.pack_start(backwardSpin1,False,False,0)
+            backwardLabel2=gtk.Label(" for ")
+            backwardHBox.pack_start(backwardLabel2,False,False,0)
+            backwardSpin2=gtk.SpinButton(gtk.Adjustment(1,0,10,.1,.5,0),0.0,1)
+            backwardHBox.pack_start(backwardSpin2,False,False,0)
+            backwardLabel3=gtk.Label(" seconds ")
+            backwardHBox.pack_start(backwardLabel3,False,False,0)
+            innerVBox2.add(backwardHBox)
+        elif context.targets==["left"]:
+            innerVBox2=gtk.VBox(True,1)
+            outerVBox2.add(innerVBox2)
+            leftHBox=gtk.HBox(True,5)
+            leftLabel1=gtk.Label(" turn left at speed ")
+            leftHBox.pack_start(leftLabel1,False,False,0)
+            leftSpin1=gtk.SpinButton(gtk.Adjustment(1,-1,1,.1,.5,0),0.0,1)
+            leftHBox.pack_start(leftSpin1,False,False,0)
+            leftLabel2=gtk.Label(" for ")
+            leftHBox.pack_start(leftLabel2,False,False,0)
+            leftSpin2=gtk.SpinButton(gtk.Adjustment(1,0,10,.1,.5,0),0.0,1)
+            leftHBox.pack_start(leftSpin2,False,False,0)
+            leftLabel3=gtk.Label(" seconds ")
+            leftHBox.pack_start(leftLabel3,False,False,0)
+            innerVBox2.add(leftHBox)
+        elif context.targets==["right"]:
+            innerVBox2=gtk.VBox(True,1)
+            outerVBox2.add(innerVBox2)
+            rightHBox=gtk.HBox(True,5)
+            rightLabel1=gtk.Label(" turn right at speed ")
+            rightHBox.pack_start(rightLabel1,False,False,0)
+            rightSpin1=gtk.SpinButton(gtk.Adjustment(1,-1,1,.1,.5,0),0.0,1)
+            rightHBox.pack_start(rightSpin1,False,False,0)
+            rightLabel2=gtk.Label(" for ")
+            rightHBox.pack_start(rightLabel2,False,False,0)
+            rightSpin2=gtk.SpinButton(gtk.Adjustment(1,0,10,.1,.5,0),0.0,1)
+            rightHBox.pack_start(rightSpin2,False,False,0)
+            rightLabel3=gtk.Label(" seconds ")
+            rightHBox.pack_start(rightLabel3,False,False,0)
+            innerVBox2.add(rightHBox)
+        elif context.targets==["stop"]:
+            innerVBox2=gtk.VBox(True,1)
+            outerVBox2.add(innerVBox2)
+            stopHBox=gtk.HBox(True,1)
+            stopLabel=gtk.Label(" stop ")
+            stopHBox.pack_start(stopLabel)
+            innerVBox2.add(stopHBox)
+        elif context.targets==["motors"]:
+            innerVBox2=gtk.VBox(True,1)
+            outerVBox2.add(innerVBox2)
+            motorsHBox=gtk.HBox(True,4)
+            motorsLabel1=gtk.Label(" left motor at speed ")
+            motorsHBox.pack_start(motorsLabel1)
+            motorsSpin1=gtk.SpinButton(gtk.Adjustment(1,-1,1,.1,.5,0),0.0,1)
+            motorsHBox.pack_start(motorsSpin1)
+            motorsLabel2=gtk.Label(" and right motor at speed ")
+            motorsHBox.pack_start(motorsLabel2)
+            motorsSpin2=gtk.SpinButton(gtk.Adjustment(1,-1,1,.1,.5,0),0.0,1)
+            motorsHBox.pack_start(motorsSpin2)
+            innerVBox2.add(motorsHBox)
+        else:
+            pass
         self.window.show_all()
 
     def runProgram(self,widget,data=None):
         try:
-            if printString:
-                print printString.get_text()
-            else:
-                pass
+            #if printString:
+            print printString.get_text()
         except NameError:
             pass
         
