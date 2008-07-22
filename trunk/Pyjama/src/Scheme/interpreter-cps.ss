@@ -104,7 +104,7 @@
     (extend (make-empty-environment)
       (list 'nil 'sqrt 'print 'newline 'load 'null? 'cons 'car 'cdr
 	    'list '+ '- '* '/ '< '> '= 'range 'set-car! 'set-cdr!
-	    'reverse 'append 'list->vector 'dir)
+	    'reverse 'append 'list->vector 'dir 'time 'write)
       (list '()
 	    (lambda (args k2 env2) (k2 (apply sqrt args)))
 	    (lambda (args k2 env2) (for-each pretty-print args) (k2 'ok))
@@ -129,6 +129,11 @@
 	    (lambda (args k2 env2) (k2 (apply append args)))
 	    (lambda (args k2 env2) (k2 (apply list->vector args)))
 	    (lambda (args k2 env2) (k2 (get-variables env2)))
+	    (lambda (args k2 env2) (k2 (let ((now (current-time)))
+					 (+ (time-second now)
+					    (inexact (/ (time-nanosecond now)
+							1000000000))))))
+	    (lambda (args k2 env2) (k2 (write args)))
 	    ))))
 
 (define get-variables
