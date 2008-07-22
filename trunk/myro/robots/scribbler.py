@@ -809,10 +809,14 @@ class Scribbler(Robot):
         height = 192
         p = Picture()
 
-        version = map(int, self.dongle.split("."))
-    
+        if self.dongle:
+            version = map(int, self.dongle.split("."))
+        else:
+            version = [1, 0, 0]
+                
         if version < [2, 7, 8]:
-            mode = image_codes[mode]
+            if mode in self.image_codes:
+                mode = self.image_codes[mode]
             
         if mode == "color":
             a = self._grab_array()
