@@ -23,6 +23,10 @@
     (printf "==> ")
     (let ((input (read)))
       (cond
+        ((eq? input 'quit)
+	 (set! macro-env (make-macro-env))
+	 (set! toplevel-env (make-toplevel-env))
+	 '(exiting the interpreter))
 	((not (string? input))
 	 (printf "give me a string~%")
 	 (read-eval-print))
@@ -62,8 +66,12 @@
 	    (set-binding-value! binding clauses)
 	    (k 'ok))))
       (begin-exp (exps) (eval-sequence exps env handler k))
-      (lambda-exp (formals body) (k (closure formals body env)))
-      (mu-lambda-exp (formal body) (k (mu-closure formal body env)))
+      (lambda-exp (formals body)
+	(k (closure formals body env)))
+      (vararg-lambda-exp (formals runt body)
+	(k (vararg-closure formals runt body env)))
+      (mu-lambda-exp (formal body)
+	(k (mu-closure formal body env)))
       (try-exp (body catch-var catch-exps finally-exps)
 	(let ((new-handler
 		(lambda (e)
@@ -126,7 +134,21 @@
 (define closure
   (lambda (formals body env)
     (lambda (args env2 handler k2)
-      (m body (extend env formals args) handler k2))))
+      (if (= (length args) (length formals))
+	(m body (extend env formals args) handler k2)
+	(handler "incorrect number of arguments")))))
+
+(define vararg-closure
+  (lambda (formals runt body env)
+    (lambda (args env2 handler k2)
+      (if (>= (length args) (length formals))
+	(let ((new-env
+		(extend env
+		  (cons runt formals)
+		  (cons (list-tail args (length formals))
+			(list-head args (length formals))))))
+	  (m body new-env handler k2))
+	(handler "not enough arguments given")))))
 
 (define mu-closure
   (lambda (formal body env)
@@ -153,10 +175,11 @@
 
 (define make-toplevel-env
   (lambda ()
-    (extend (make-empty-environment)
+    (make-initial-environment
       (list 'nil 'exit 'sqrt 'print 'display 'newline 'load 'null? 'cons 'car 'cdr
 	    'list '+ '- '* '/ '< '> '= 'equal? 'range 'set-car! 'set-cdr!
-	    'reverse 'append 'list->vector 'dir 'current-time)
+	    'import 'get 'call-with-current-continuation 'call/cc
+	    'reverse 'append 'list->vector 'dir 'env 'current-time)
       (list '()
 	    (lambda (args env2 handler k2)
 	      (set! macro-env (make-macro-env))
@@ -166,7 +189,7 @@
 	    (lambda (args env2 handler k2) (for-each pretty-print args) (k2 'ok))
 	    (lambda (args env2 handler k2) (k2 (display args)))
 	    (lambda (args env2 handler k2) (newline) (k2 'ok))
-	    (lambda (args env2 handler k2) (load-file (car args) handler k2))
+	    (lambda (args env2 handler k2) (load-file (car args) toplevel-env handler k2))
 	    (lambda (args env2 handler k2) (k2 (apply null? args)))
 	    (lambda (args env2 handler k2) (k2 (apply cons args)))
 	    (lambda (args env2 handler k2) (k2 (apply car args)))
@@ -183,44 +206,95 @@
 	    (lambda (args env2 handler k2) (k2 (apply range args)))
 	    (lambda (args env2 handler k2) (k2 (apply set-car! args)))
 	    (lambda (args env2 handler k2) (k2 (apply set-cdr! args)))
+	    (lambda (args env2 handler k2) (import-primitive args env2 handler k2))
+	    (lambda (args env2 handler k2) (get-primitive args env2 handler k2))
+	    (lambda (args env2 handler k2) (call/cc-primitive (car args) env2 handler k2))
+	    (lambda (args env2 handler k2) (call/cc-primitive (car args) env2 handler k2))
 	    (lambda (args env2 handler k2) (k2 (apply reverse args)))
 	    (lambda (args env2 handler k2) (k2 (apply append args)))
 	    (lambda (args env2 handler k2) (k2 (apply list->vector args)))
 	    (lambda (args env2 handler k2) (k2 (get-variables env2)))
+	    (lambda (args env2 handler k2) (k2 env2))
 	    (lambda (args env2 handler k2) (k2 (let ((now (current-time)))
 						 (+ (time-second now)
 						    (inexact (/ (time-nanosecond now)
-							       1000000000))))))
+								1000000000))))))
 	    ))))
+
+(define get-primitive
+  (lambda (args env handler k)
+    (let ((sym (car args)))
+      (lookup-value sym env
+	(lambda (v)
+	  (if (null? (cdr args))
+	    (k v)
+	    (get-primitive (cdr args) v handler k)))))))
+
+(define import-primitive
+  (lambda (args env handler k)
+    (let ((filename (car args)))
+	(if (null? (cdr args))
+	  (load-file filename env handler k)
+	  (let ((module-name (cadr args)))
+	    (lookup-binding-in-first-frame module-name env
+	      (lambda (binding)
+		(let ((module (extend env '() '())))
+		  (set-binding-value! binding module)
+		  (load-file filename module handler k)))))))))
+
+(define call/cc-primitive
+  (lambda (proc env handler k)
+    (let ((fake-k (lambda (args env2 handler k2) (k (car args)))))
+      (proc (list fake-k) env handler k))))
 
 (define get-variables
   (lambda (env)
-    (letrec
-      ((get-variables-from-frame
-	 (lambda (frame)
-	   (if (empty-frame? frame)
-	     '()
-	     (cons (binding-variable (first-binding frame))
-		   (get-variables-from-frame (rest-of-bindings frame)))))))
-      (if (empty-environment? env)
-	'()
-	(cons (get-variables-from-frame (first-frame env))
-	      (get-variables (rest-of-frames env)))))))
+    (map (lambda (frame) (map binding-variable frame)) env)))
+
+(define load-stack '())
 
 (define load-file
-  (lambda (filename handler k)
-    (set! tokens_reg (scan-input (read-content filename)))
-    (let loop ()
-      (if (token-type? (first tokens_reg) 'end-marker)
-	(k 'ok)
+  (lambda (filename env handler k)
+    ;;(printf "calling load-file~%")
+    (if (member filename load-stack)
 	(begin
-	  (set! k_reg (list 'load-cont))
-	  (set! pc read-sexp)
-	  (let ((datum (run)))
-	    (parse datum
-	      (lambda (exp)
-		(m exp toplevel-env handler
-		  (lambda (v) (loop)))))))))))
+	  (printf "skipping recursive load of ~s~%" filename)
+	  (k 'ok))
+	(begin
+	  (set! load-stack (cons filename load-stack))
+	  (let ((tokens (scan-input (read-content filename))))
+	    (load-loop tokens env handler
+	      (lambda (v)
+		(set! load-stack (cdr load-stack))
+		(k v))))))))
+		
+(define load-loop
+  (lambda (tokens env handler k)
+    (if (token-type? (first tokens) 'end-marker)
+      (k 'ok)
+      (read-sexp tokens
+	(lambda (datum tokens-left)
+	  ;;(printf "read ~s~%" datum)
+	  (parse datum
+	    (lambda (exp)
+	      (m exp env handler
+		(lambda (v)
+		  (load-loop tokens-left env handler k))))))))))
+
+;;(define load-file
+;;  (lambda (filename env handler k)
+;;    (set! tokens_reg (scan-input (read-content filename)))
+;;    (let loop ()
+;;      (if (token-type? (first tokens_reg) 'end-marker)
+;;	(k 'ok)
+;;	(begin
+;;	  (set! k_reg (list 'load-cont))
+;;	  (set! pc read-sexp)
+;;	  (let ((datum (run)))
+;;	    (parse datum
+;;	      (lambda (exp)
+;;		(m exp env handler
+;;		  (lambda (v) (loop)))))))))))
 
 (define range
   (lambda args

@@ -47,11 +47,12 @@
 ;; environments
 
 (define make-empty-environment
-  (lambda () '()))
+  (lambda ()
+    '(())))
 
-(define empty-environment?
-  (lambda (env)
-    (null? env)))
+(define make-initial-environment
+  (lambda (vars vals)
+    (list (make-frame vars vals))))
 
 (define first-frame
   (lambda (env)
@@ -73,7 +74,7 @@
 
 (define search-env
   (lambda (env variable)
-    (if (empty-environment? env)
+    (if (null? env)
       #f
       (let ((binding (search-frame (first-frame env) variable)))
         (if binding
@@ -85,8 +86,8 @@
     (let ((binding (search-env env variable)))
       (if binding
 	(k binding)
-;;	(REP-k `(error: variable ,variable is unbound))))))
-        (error 'lookup-binding "unbound variable ~s" variable)))))
+	(REP-k `(error: variable ,variable is unbound))))))
+;;        (error 'lookup-binding "unbound variable ~s" variable)))))
 
 (define lookup-value
   (lambda (variable env k)

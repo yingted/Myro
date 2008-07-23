@@ -3,7 +3,7 @@
 (load "petite-init.ss")
 (load "define-datatype.ss")
 
-(load "reader.ss")
+(load "reader-cps.ss")
 (load "unifier-cps.ss")
 
 ;;--------------------------------------------------------------------------
@@ -57,6 +57,10 @@
     (exps (list-of expression?)))
   (lambda-exp
     (formals (list-of symbol?))
+    (body expression?))
+  (vararg-lambda-exp
+    (formals (list-of symbol?))
+    (runt-formal symbol?)
     (body expression?))
   (mu-lambda-exp
     (formal symbol?)
@@ -146,7 +150,7 @@
 
 (define make-macro-env
   (lambda ()
-    (extend (make-empty-environment)
+    (make-initial-environment
       (list 'and 'or 'cond 'let* 'let 'letrec)
       (list '([(and) #t]
 	      [(and ?exp) ?exp]
@@ -228,9 +232,13 @@
       ((lambda? datum)
        (parse (cons 'begin (cddr datum))
 	 (lambda (v)
-	   (if (symbol? (cadr datum))
-	     (k (mu-lambda-exp (cadr datum) v))
-	     (k (lambda-exp (cadr datum) v))))))
+	   (cond
+	     ((symbol? (cadr datum))
+	      (k (mu-lambda-exp (cadr datum) v)))
+	     ((improper-list? (cadr datum))
+	      (k (vararg-lambda-exp (all-but-last (cadr datum)) (last (cadr datum)) v)))
+	     (else
+	      (k (lambda-exp (cadr datum) v)))))))
       ((try? datum)
        (cond
 	 ((= (length datum) 2)
@@ -319,6 +327,25 @@
 	    (expand-quasiquote (cdr datum)
 	      (lambda (v2)
 		(k `(cons ,v1 ,v2))))))))))
+
+(define improper-list?
+  (lambda (x)
+    (and (pair? x)
+	 (not (null? (cdr x)))
+	 (or (not (pair? (cdr x)))
+	     (improper-list? (cdr x))))))
+
+(define all-but-last
+  (lambda (formals)
+    (if (not (pair? (cdr formals)))
+      (list (car formals))
+      (cons (car formals) (all-but-last (cdr formals))))))
+
+(define last
+  (lambda (formals)
+    (if (not (pair? (cdr formals)))
+      (cdr formals)
+      (last (cdr formals)))))
 
 (define literal?
   (lambda (datum)
