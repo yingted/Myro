@@ -3,23 +3,6 @@
 ;; includes support for vectors, rationals, exponents, and backquote
 
 ;;------------------------------------------------------------------------
-;; scanner - character stream represented as a list
-
-;;(define 1st car)
-;;(define remaining cdr)
-
-;;(define scan-input
-;;  (lambda (input)
-;;    (let scan ((chars (append (string->list input) (list #\nul)))
-;;	       (tokens '()))
-;;      (let ((answer (apply-action '(goto start-state) '() chars)))
-;;	(let ((token (car answer))
-;;	      (chars-left (cdr answer)))
-;;	  (if (token-type? token 'end-marker)
-;;	    (reverse (cons token tokens))
-;;	    (scan chars-left (cons token tokens))))))))
-
-;;------------------------------------------------------------------------
 ;; scanner - character stream represented as a position number
 
 (define chars-to-scan 'undefined)
@@ -30,16 +13,37 @@
 (define remaining
   (lambda (n) (+ 1 n)))
 
+;; scan-input takes a string and returns a list of tokens created
+;; from all of the characters in the string
+
 (define scan-input
-  (lambda (input)
+  (lambda (input handler k)   ;; k receives a list of tokens
     (set! chars-to-scan (string-append input (string #\nul)))
-    (let scan ((chars 0) (tokens '()))
-      (let ((answer (apply-action '(goto start-state) '() chars)))
-	(let ((token (car answer))
-	      (chars-left (cdr answer)))
-	  (if (token-type? token 'end-marker)
-	    (reverse (cons token tokens))
-	    (scan chars-left (cons token tokens))))))))
+    (scan-input-loop 0 handler k)))
+
+(define scan-input-loop
+  (lambda (chars handler k)
+    (apply-action '(goto start-state) '() chars handler
+      (lambda (token chars-left)
+	(if (token-type? token 'end-marker)
+	  (k (list token))
+	  (scan-input-loop chars-left handler
+	    (lambda (tokens)
+	      (k (cons token tokens)))))))))
+
+;; for testing purposes
+(define test-handler
+  (lambda (e) (list 'exception e)))
+
+;; for testing purposes
+(define scan-string
+  (lambda (input)
+    (scan-input input test-handler (lambda (v) v))))
+
+;; for testing purposes
+(define scan-file
+  (lambda (filename)
+    (scan-input (read-content filename) test-handler (lambda (v) v))))
 
 ;;------------------------------------------------------------------------
 ;; scanner actions
@@ -51,60 +55,59 @@
 ;;            | (emit <token-type>)
 
 (define apply-action
-  (lambda (action buffer chars)
+  (lambda (action buffer chars handler k)  ;; k receives 2 args: token, chars-left
     (record-case action
       (shift (next)
-	(apply-action next (cons (1st chars) buffer) (remaining chars)))
+	(apply-action next (cons (1st chars) buffer) (remaining chars) handler k))
       (replace (new-char next)
-	(apply-action next (cons new-char buffer) (remaining chars)))
+	(apply-action next (cons new-char buffer) (remaining chars) handler k))
       (drop (next)
-	(apply-action next buffer (remaining chars)))
+	(apply-action next buffer (remaining chars) handler k))
       (goto (state)
-	(apply-action (apply-state state (1st chars)) buffer chars))
+	(apply-action (apply-state state (1st chars) handler) buffer chars handler k))
       (emit (token-type)
-	(make-answer (convert-buffer-to-token token-type buffer) chars))
+	(convert-buffer-to-token token-type buffer handler
+	  (lambda (v) (k v chars))))
       (else (error 'apply-action "invalid action: ~a" action)))))
       
 (define scan-error
-  (lambda (c)
+  (lambda (c handler)
     (if (char=? c #\nul)
-      (error 'scan "unexpected end of input")
-      (error 'scan "unexpected character ~a encountered" c))))
-
-(define make-answer cons)
+      (handler "unexpected end of input")
+      (handler (format "unexpected character ~a encountered" c)))))
 
 (define convert-buffer-to-token
-  (lambda (token-type buffer)
+  (lambda (token-type buffer handler k)
     (let ((buffer (reverse buffer)))
       (case token-type
 	(integer
-	  (list 'integer (list->string buffer)))
+	  (k (list 'integer (list->string buffer))))
 	(decimal
-	  (list 'decimal (list->string buffer)))
+	  (k (list 'decimal (list->string buffer))))
 	(rational
-	  (list 'rational (list->string buffer)))
+	  (k (list 'rational (list->string buffer))))
 	(identifier
-	  (list 'identifier (string->symbol (list->string buffer))))
+	  (k (list 'identifier (string->symbol (list->string buffer)))))
 	(boolean
-	  (list 'boolean (or (char=? (car buffer) #\t) (char=? (car buffer) #\T))))
+	  (k (list 'boolean (or (char=? (car buffer) #\t) (char=? (car buffer) #\T)))))
 	(character
-	  (list 'character (car buffer)))
+	  (k (list 'character (car buffer))))
 	(named-character
 	  (let ((name (list->string buffer)))
 	    (cond
-	      ((string=? name "nul") (list 'character #\nul))
-	      ((string=? name "space") (list 'character #\space))
-	      ((string=? name "tab") (list 'character #\tab))
-	      ((string=? name "newline") (list 'character #\newline))
-	      ((string=? name "linefeed") (list 'character #\newline))
-	      ((string=? name "backspace") (list 'character #\backspace))
-	      ((string=? name "return") (list 'character #\return))
-	      ((string=? name "page") (list 'character #\page))
-	      (else (error 'scan "invalid character name #\\~a" name)))))
+	      ((string=? name "nul") (k (list 'character #\nul)))
+	      ((string=? name "space") (k (list 'character #\space)))
+	      ((string=? name "tab") (k (list 'character #\tab)))
+	      ((string=? name "newline") (k (list 'character #\newline)))
+	      ((string=? name "linefeed") (k (list 'character #\newline)))
+	      ((string=? name "backspace") (k (list 'character #\backspace)))
+	      ((string=? name "return") (k (list 'character #\return)))
+	      ((string=? name "page") (k (list 'character #\page)))
+	      (else (handler (format "invalid character name #\\~a" name))))))
 	(string
-	  (list 'string (list->string buffer)))
+	  (k (list 'string (list->string buffer))))
 	(else
-	  (list token-type))))))
+	  (k (list token-type)))))))
 
 (define token-type?
   (lambda (token class)
@@ -172,7 +175,7 @@
 ;; finite-state automaton
 
 (define apply-state
-  (lambda (state c)
+  (lambda (state c handler)
     (case state
       (start-state
 	(cond
@@ -192,7 +195,7 @@
 	  ((char=? c #\.) '(shift (goto decimal-point-state)))
 	  ((char-numeric? c) '(shift (goto whole-number-state)))
 	  ((char=? c #\nul) '(emit end-marker))
-	  (else (scan-error c))))
+	  (else (scan-error c handler))))
       (comment-state
 	(cond
 	  ((char=? c #\newline) '(drop (goto start-state)))
@@ -207,12 +210,12 @@
 	  ((char-boolean? c) '(shift (emit boolean)))
 	  ((char=? c #\\) '(drop (goto character-state)))
 	  ((char=? c #\() '(drop (emit lvector)))
-	  (else (scan-error c))))
+	  (else (scan-error c handler))))
       (character-state
 	(cond
 	  ((char-alphabetic? c) '(shift (goto alphabetic-character-state)))
 	  ((not (char=? c #\nul)) '(shift (emit character)))
-	  (else (scan-error c))))
+	  (else (scan-error c handler))))
       (alphabetic-character-state
 	(cond
 	  ((char-alphabetic? c) '(shift (goto named-character-state)))
@@ -225,7 +228,7 @@
 	(cond
 	  ((char=? c #\") '(drop (emit string)))
 	  ((char=? c #\\) '(drop (goto string-escape-state)))
-	  ((char=? c #\nul) (scan-error c))
+	  ((char=? c #\nul) (scan-error c handler))
 	  (else '(shift (goto string-state)))))
       (string-escape-state
 	(cond
@@ -236,31 +239,31 @@
 	  ((char=? c #\n) '(replace #\newline (goto string-state)))
 	  ((char=? c #\t) '(replace #\tab (goto string-state)))
 	  ((char=? c #\r) '(replace #\return (goto string-state)))
-	  (else (scan-error c))))
+	  (else (scan-error c handler))))
       (identifier-state
 	(cond
 	  ((char-subsequent? c) '(shift (goto identifier-state)))
 	  ((char-delimiter? c) '(emit identifier))
-	  (else (scan-error c))))
+	  (else (scan-error c handler))))
       (signed-state
 	(cond
 	  ((char-numeric? c) '(shift (goto whole-number-state)))
 	  ((char=? c #\.) '(shift (goto signed-decimal-point-state)))
 	  ((char-delimiter? c) '(emit identifier))
 	  ((char-subsequent? c) '(shift (goto identifier-state)))
-	  (else (scan-error c))))
+	  (else (scan-error c handler))))
       (decimal-point-state
 	(cond
 	  ((char-numeric? c) '(shift (goto fractional-number-state)))
 	  ((char-delimiter? c) '(emit dot))
 	  ((char-subsequent? c) '(shift (goto identifier-state)))
-	  (else (scan-error c))))
+	  (else (scan-error c handler))))
       (signed-decimal-point-state
 	(cond
 	  ((char-numeric? c) '(shift (goto fractional-number-state)))
 	  ((char-delimiter? c) '(emit identifier))
 	  ((char-subsequent? c) '(shift (goto identifier-state)))
-	  (else (scan-error c))))
+	  (else (scan-error c handler))))
       (whole-number-state
 	(cond
 	  ((char-numeric? c) '(shift (goto whole-number-state)))
@@ -269,45 +272,45 @@
 	  ((or (char=? c #\e) (char=? c #\E)) '(shift (goto suffix-state)))
 	  ((char-delimiter? c) '(emit integer))
 	  ((char-subsequent? c) '(shift (goto identifier-state)))
-	  (else (scan-error c))))
+	  (else (scan-error c handler))))
       (fractional-number-state
 	(cond
 	  ((char-numeric? c) '(shift (goto fractional-number-state)))
 	  ((or (char=? c #\e) (char=? c #\E)) '(shift (goto suffix-state)))
 	  ((char-delimiter? c) '(emit decimal))
 	  ((char-subsequent? c) '(shift (goto identifier-state)))
-	  (else (scan-error c))))
+	  (else (scan-error c handler))))
       (rational-number-state
 	(cond
 	  ((char-numeric? c) '(shift (goto rational-number-state*)))
 	  ((char-delimiter? c) '(emit identifier))
 	  ((char-subsequent? c) '(shift (goto identifier-state)))
-	  (else (scan-error c))))
+	  (else (scan-error c handler))))
       (rational-number-state*
 	(cond
 	  ((char-numeric? c) '(shift (goto rational-number-state*)))
 	  ((char-delimiter? c) '(emit rational))
 	  ((char-subsequent? c) '(shift (goto identifier-state)))
-	  (else (scan-error c))))
+	  (else (scan-error c handler))))
       (suffix-state
 	(cond
 	  ((char-sign? c) '(shift (goto signed-exponent-state)))
 	  ((char-numeric? c) '(shift (goto exponent-state)))
 	  ((char-delimiter? c) '(emit identifier))
 	  ((char-subsequent? c) '(shift (goto identifier-state)))
-	  (else (scan-error c))))
+	  (else (scan-error c handler))))
       (signed-exponent-state
 	(cond
 	  ((char-numeric? c) '(shift (goto exponent-state)))
 	  ((char-delimiter? c) '(emit identifier))
 	  ((char-subsequent? c) '(shift (goto identifier-state)))
-	  (else (scan-error c))))
+	  (else (scan-error c handler))))
       (exponent-state
 	(cond
 	  ((char-numeric? c) '(shift (goto exponent-state)))
 	  ((char-delimiter? c) '(emit decimal))
 	  ((char-subsequent? c) '(shift (goto identifier-state)))
-	  (else (scan-error c))))
+	  (else (scan-error c handler))))
       (else
 	(error 'apply-state "invalid state: ~a" state)))))
 
@@ -328,16 +331,23 @@
 (define first car)
 (define rest-of cdr)
 
-(define read-datum
+;; for testing purposes
+(define read-string
   (lambda (input)
-    (read-sexp (scan-input input)
-      (lambda (sexp tokens-left)
-	(if (token-type? (first tokens-left) 'end-marker)
-	  sexp
-	  (error 'read "tokens left over: ~a" tokens-left))))))
+    (read-datum input test-handler (lambda (sexp tokens-left) sexp))))
+
+(define read-datum
+  (lambda (input handler k)  ;; k receives 2 args:  sexp, tokens-left
+    (scan-input input handler
+      (lambda (tokens)
+	(read-sexp tokens handler
+	  (lambda (sexp tokens-left)
+	    (if (token-type? (first tokens-left) 'end-marker)
+	      (k sexp tokens-left)
+	      (handler (format "tokens left over: ~a" tokens-left)))))))))
 
 (define read-sexp
-  (lambda (tokens k)
+  (lambda (tokens handler k)   ;; k receives 2 args:  sexp, tokens-left
     (record-case (first tokens)
       (integer (str)
 	(k (string->number str) (rest-of tokens)))
@@ -347,99 +357,103 @@
 	(let ((num (string->number str)))
 	  (if num
 	    (k num (rest-of tokens))
-	    (error 'scan "cannot represent ~a" str))))
+	    (handler (format "cannot represent ~a" str)))))
       (boolean (bool) (k bool (rest-of tokens)))
       (character (char) (k char (rest-of tokens)))
       (string (str) (k str (rest-of tokens)))
       (identifier (id) (k id (rest-of tokens)))
-      (apostrophe () (read-abbreviation tokens 'quote k))
-      (backquote () (read-abbreviation tokens 'quasiquote k))
-      (comma () (read-abbreviation tokens 'unquote k))
-      (comma-at () (read-abbreviation tokens 'unquote-splicing k))
+      (apostrophe () (read-abbreviation tokens 'quote handler k))
+      (backquote () (read-abbreviation tokens 'quasiquote handler k))
+      (comma () (read-abbreviation tokens 'unquote handler k))
+      (comma-at () (read-abbreviation tokens 'unquote-splicing handler k))
       (lparen ()
 	(let ((tokens (rest-of tokens)))
 	  (if (token-type? (first tokens) 'dot)
-	    (read-error (first tokens))
-	    (read-sexp-sequence tokens 'rparen k))))
+	    (read-error (first tokens) handler)
+	    (read-sexp-sequence tokens 'rparen handler k))))
       (lbracket ()
 	(let ((tokens (rest-of tokens)))
 	  (if (token-type? (first tokens) 'dot)
-	    (read-error (first tokens))
-	    (read-sexp-sequence tokens 'rbracket k))))
+	    (read-error (first tokens) handler)
+	    (read-sexp-sequence tokens 'rbracket handler k))))
       (lvector ()
-	(read-vector (rest-of tokens)
+	(read-vector (rest-of tokens) handler
 	  (lambda (sexps tokens-left)
 	    (k (list->vector sexps) tokens-left))))
-      (else (read-error (first tokens))))))
+      (else (read-error (first tokens) handler)))))
 
 (define read-abbreviation
-  (lambda (tokens keyword k)
-    (read-sexp (rest-of tokens)
+  (lambda (tokens keyword handler k)  ;; k receives 2 args: sexp, tokens-left
+    (read-sexp (rest-of tokens) handler
       (lambda (sexp tokens-left)
 	(k (list keyword sexp) tokens-left)))))
 
 (define read-sexp-sequence
-  (lambda (tokens expected-terminator k)
+  (lambda (tokens expected-terminator handler k)
     (record-case (first tokens)
       ((rparen rbracket) ()
-       (close-sexp-sequence '() tokens expected-terminator k))
+       (close-sexp-sequence '() tokens expected-terminator handler k))
       (dot ()
-	(read-sexp (rest-of tokens)
+	(read-sexp (rest-of tokens) handler
 	  (lambda (sexp tokens-left)
-	    (close-sexp-sequence sexp tokens-left expected-terminator k))))
+	    (close-sexp-sequence sexp tokens-left expected-terminator handler k))))
       (else
-	(read-sexp tokens
+	(read-sexp tokens handler
 	  (lambda (sexp1 tokens-left)
-	    (read-sexp-sequence tokens-left expected-terminator
+	    (read-sexp-sequence tokens-left expected-terminator handler
 	      (lambda (sexp2 tokens-left)
 		(k (cons sexp1 sexp2) tokens-left)))))))))
 
 (define close-sexp-sequence
-  (lambda (sexp tokens expected-terminator k)
+  (lambda (sexp tokens expected-terminator handler k)
     (record-case (first tokens)
       ((rparen rbracket) ()
        (cond
 	 ((token-type? (first tokens) expected-terminator)
 	  (k sexp (rest-of tokens)))
 	 ((eq? expected-terminator 'rparen)
-	  (error 'read "parenthesized list terminated by bracket"))
+	  (handler "parenthesized list terminated by bracket"))
 	 ((eq? expected-terminator 'rbracket)
-	  (error 'read "bracketed list terminated by parenthesis"))))
-      (else (read-error (first tokens))))))
+	  (handler "bracketed list terminated by parenthesis"))))
+      (else (read-error (first tokens) handler)))))
 
 (define read-vector
-  (lambda (tokens k)
+  (lambda (tokens handler k)
     (record-case (first tokens)
       (rparen ()
 	(k '() (rest-of tokens)))
       (else
-	(read-sexp tokens
+	(read-sexp tokens handler
 	  (lambda (sexp1 tokens-left)
-	    (read-vector tokens-left
+	    (read-vector tokens-left handler
 	      (lambda (sexps tokens-left)
 		(k (cons sexp1 sexps) tokens-left)))))))))
 
 (define read-error
-  (lambda (token)
+  (lambda (token handler)
     (if (token-type? token 'end-marker)
-      (error 'read "unexpected end of input")
-      (error 'read "unexpected token ~a encountered" token))))
+      (handler "unexpected end of input")
+      (handler (format "unexpected token ~a encountered" token)))))
 
 ;;------------------------------------------------------------------------
 ;; file reader
 
+;; for testing purposes
 (define read-file
   (lambda (filename)
-    (print-sexps (scan-input (read-content filename)))))
+    (scan-input (read-content filename) test-handler
+      (lambda (tokens)
+	(print-sexps tokens test-handler)))))
 
+;; for testing purposes
 (define print-sexps
-  (lambda (tokens)
+  (lambda (tokens handler)
     (if (token-type? (first tokens) 'end-marker)
       'done
-      (read-sexp tokens
+      (read-sexp tokens handler
 	(lambda (sexp tokens-left)
 	  (pretty-print sexp)
-	  (print-sexps tokens-left))))))
+	  (print-sexps tokens-left handler))))))
 
 ;; returns the entire file contents as a single string
 (define read-content
@@ -451,5 +465,3 @@
 	    (if (eof-object? char)
 	      '()
 	      (cons char (loop (read-char port))))))))))
-
-

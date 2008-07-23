@@ -89,24 +89,24 @@
 	 (search-env macro-env (car datum)))))
 
 (define expand-once
-  (lambda (datum k)
-    (lookup-value (car datum) macro-env 'ignore
+  (lambda (datum handler k)
+    (lookup-value (car datum) macro-env handler
       (lambda (result)
 	(if (list? result)
-	  (process-macro-clauses result datum k)
+	  (process-macro-clauses result datum handler k)
 	  (k (result datum)))))))
 
 (define process-macro-clauses
-  (lambda (clauses datum k)
+  (lambda (clauses datum handler k)
     (if (null? clauses)
-      (error 'process-macro-clauses "no matching clause found for ~s" datum)
+      (handler (format "no matching clause found for ~s" datum))
       (let ((left-pattern (caar clauses))
 	    (right-pattern (cadar clauses)))
 	(unify-patterns left-pattern datum
 	  (lambda (subst)
 	    (if subst
 	      (instantiate right-pattern subst k)
-	      (process-macro-clauses (cdr clauses) datum k))))))))
+	      (process-macro-clauses (cdr clauses) datum handler k))))))))
 
 (define mit-define-transformer
   (lambda (datum)
@@ -172,61 +172,65 @@
 
 ;;--------------------------------------------------------------------------
 
-;; temporary
+;; for testing purposes
+(define test-handler
+  (lambda (e) (list 'exception e)))
+
+;; for testing purposes
 (define parse-string
   (lambda (string)
-    (parse (read-datum string) (lambda (exp) exp))))
+    (read-datum string test-handler
+      (lambda (datum tokens-left)
+	(parse datum test-handler (lambda (exp) exp))))))
 
 (define parse
-  (lambda (datum k)
+  (lambda (datum handler k)
     (cond
       ((literal? datum) (k (lit-exp datum)))
       ((quote? datum) (k (lit-exp (cadr datum))))
       ((quasiquote? datum)
-       (expand-quasiquote (cadr datum)
+       (expand-quasiquote (cadr datum) handler
 	 (lambda (v)
-	   (parse v k))))
-      ((unquote? datum) (error 'parse "misplaced ~s" datum))
-      ((unquote-splicing? datum) (error 'parse "misplaced ~s" datum))
+	   (parse v handler k))))
+      ((unquote? datum) (handler (format "misplaced ~s" datum)))
+      ((unquote-splicing? datum) (handler (format "misplaced ~s" datum)))
       ((symbol? datum) (k (var-exp datum)))
       ((syntactic-sugar? datum)
-       (expand-once datum
+       (expand-once datum handler
 	 (lambda (v)
-	   (parse v k))))
+	   (parse v handler k))))
       ((if-then? datum)
-       (parse (cadr datum)
+       (parse (cadr datum) handler
 	 (lambda (v1)
-	   (parse (caddr datum)
+	   (parse (caddr datum) handler
 	     (lambda (v2)
 	       (k (if-exp v1 v2 (lit-exp #f))))))))
       ((if-else? datum)
-       (parse (cadr datum)
+       (parse (cadr datum) handler
 	 (lambda (v1)
-	   (parse (caddr datum)
+	   (parse (caddr datum) handler
 	     (lambda (v2)
-	       (parse (cadddr datum)
+	       (parse (cadddr datum) handler
 		 (lambda (v3)
 		   (k (if-exp v1 v2 v3)))))))))
       ((assignment? datum)
-       (parse (caddr datum)
+       (parse (caddr datum) handler
 	 (lambda (v)
 	   (k (assign-exp (cadr datum) v)))))
       ((define? datum)
        (if (mit-define? datum)
-	 (parse (mit-define-transformer datum) k)
-	 (parse (caddr datum)
+	 (parse (mit-define-transformer datum) handler k)
+	 (parse (caddr datum) handler
 	   (lambda (body)
 	     (k (define-exp (cadr datum) body))))))
       ((define-syntax? datum)
        (k (define-syntax-exp (cadr datum) (cddr datum))))
       ((begin? datum)
-       (if (null? (cdr datum))
-	 (error 'parse "bad begin syntax: ~a" datum)
-	 (parse-all (cdr datum)
-	   (lambda (v)
-	     (k (begin-exp v))))))
+       (parse-all (cdr datum) handler
+	 (lambda (v)
+	   (k (begin-exp v)))))
       ((lambda? datum)
-       (parse (cons 'begin (cddr datum))
+       (parse (cons 'begin (cddr datum)) handler
 	 (lambda (body)
 	   (if (proper-list? (cadr datum))
 	     (k (lambda-exp (cadr datum) body))
@@ -235,60 +239,60 @@
        (cond
 	 ((= (length datum) 2)
 	  ;; (try <body>)
-	  (parse (try-body datum) k))
+	  (parse (try-body datum) handler k))
 	 ((and (= (length datum) 3) (catch? (caddr datum)))
 	  ;; (try <body> (catch <var> <exp> ...))
-	  (parse (try-body datum)
+	  (parse (try-body datum) handler
 	    (lambda (body)
-	      (parse-all (catch-exps (caddr datum))
+	      (parse-all (catch-exps (caddr datum)) handler
 		(lambda (cexps)
 		  (let ((cvar (catch-var (caddr datum))))
 		    (k (try-catch-exp body cvar cexps))))))))
 	 ((and (= (length datum) 3) (finally? (caddr datum)))
 	  ;; (try <body> (finally <exp> ...))
-	  (parse (try-body datum)
+	  (parse (try-body datum) handler
 	    (lambda (body)
-	      (parse-all (finally-exps (caddr datum))
+	      (parse-all (finally-exps (caddr datum)) handler
 		(lambda (fexps)
 		  (k (try-finally-exp body fexps)))))))
 	 ((and (= (length datum) 4) (catch? (caddr datum)) (finally? (cadddr datum)))
 	  ;; (try <body> (catch <var> <exp> ...) (finally <exp> ...))
-	  (parse (try-body datum)
+	  (parse (try-body datum) handler
 	    (lambda (body)
-	      (parse-all (catch-exps (caddr datum))
+	      (parse-all (catch-exps (caddr datum)) handler
 		(lambda (cexps)
-		  (parse-all (finally-exps (cadddr datum))
+		  (parse-all (finally-exps (cadddr datum)) handler
 		    (lambda (fexps)
 		      (let ((cvar (catch-var (caddr datum))))
 			(k (try-catch-finally-exp body cvar cexps fexps))))))))))
-	 (else (error 'parse "bad try syntax: ~s" datum))))
+	 (else (handler (format "bad try syntax: ~s" datum)))))
       ((raise? datum)
-       (parse (cadr datum)
+       (parse (cadr datum) handler
 	 (lambda (v)
 	   (k (raise-exp v)))))
       ((application? datum)
-       (parse (car datum)
+       (parse (car datum) handler
 	 (lambda (v1)
-	   (parse-all (cdr datum)
+	   (parse-all (cdr datum) handler
 	     (lambda (v2)
 	       (k (app-exp v1 v2)))))))
-      (else (error 'parse "bad concrete syntax: ~s" datum)))))
+      (else (handler (format "bad concrete syntax: ~s" datum))))))
 
 (define parse-all
-  (lambda (datum-list k)
+  (lambda (datum-list handler k)
     (if (null? datum-list)
       (k '())
-      (parse (car datum-list)
+      (parse (car datum-list) handler
 	(lambda (a)
-	  (parse-all (cdr datum-list)
+	  (parse-all (cdr datum-list) handler
 	    (lambda (b)
 	      (k (cons a b)))))))))
 
 (define expand-quasiquote
-  (lambda (datum k)
+  (lambda (datum handler k)
     (cond
       ((vector? datum)
-       (expand-quasiquote (vector->list datum)
+       (expand-quasiquote (vector->list datum) handler
 	 (lambda (ls) (k `(list->vector ,ls)))))
       ((not (pair? datum)) (k `(quote ,datum)))
       ;; doesn't handle nested quasiquotes yet
@@ -297,12 +301,12 @@
       ((unquote-splicing? (car datum))
        (if (null? (cdr datum))
 	 (k (cadr (car datum)))
-	 (expand-quasiquote (cdr datum)
+	 (expand-quasiquote (cdr datum) handler
 	   (lambda (v) (k `(append ,(cadr (car datum)) ,v))))))
       (else
-	(expand-quasiquote (car datum)
+	(expand-quasiquote (car datum) handler
 	  (lambda (v1)
-	    (expand-quasiquote (cdr datum)
+	    (expand-quasiquote (cdr datum) handler
 	      (lambda (v2)
 		(k `(cons ,v1 ,v2))))))))))
 
@@ -386,18 +390,21 @@
 ;;------------------------------------------------------------------------
 ;; file parser
 
+;; for testing purposes
 (define parse-file
   (lambda (filename)
-    (parse-loop (scan-input (read-content filename)))))
+    (scan-input (read-content filename) test-handler
+      (lambda (tokens)
+	(print-parsed-sexps tokens handler)))))
 
-(define parse-loop
-  (lambda (tokens)
+;; for testing purposes
+(define print-parsed-sexps
+  (lambda (tokens handler)
     (if (token-type? (first tokens) 'end-marker)
       'done
-      (read-sexp tokens
+      (read-sexp tokens handler
 	(lambda (datum tokens-left)
-	  (parse datum
+	  (parse datum handler
 	    (lambda (exp)
 	      (pretty-print exp)
-	      (parse-loop tokens-left))))))))
-
+	      (print-parsed-sexps tokens-left handler))))))))

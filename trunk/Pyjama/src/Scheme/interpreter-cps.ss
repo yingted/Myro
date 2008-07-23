@@ -33,9 +33,11 @@
 	 (printf "give me a string~%")
 	 (read-eval-print))
 	(else
-	 (parse (read-datum input)
-	   (lambda (exp)
-	     (m exp toplevel-env REP-handler REP-k))))))))
+	 (read-datum input REP-handler
+	   (lambda (datum tokens-left)
+	     (parse datum REP-handler
+	       (lambda (exp)
+		 (m exp toplevel-env REP-handler REP-k))))))))))
 
 (define m
   (lambda (exp env handler k)
@@ -256,20 +258,21 @@
 	  (k 'ok))
 	(begin
 	  (set! load-stack (cons filename load-stack))
-	  (let ((tokens (scan-input (read-content filename))))
-	    (load-loop tokens env handler
-	      (lambda (v)
-		(set! load-stack (cdr load-stack))
-		(k v))))))))
+	  (scan-input (read-content filename) handler
+	    (lambda (tokens)
+	      (load-loop tokens env handler
+		(lambda (v)
+		  (set! load-stack (cdr load-stack))
+		  (k v)))))))))
 		
 (define load-loop
   (lambda (tokens env handler k)
     (if (token-type? (first tokens) 'end-marker)
       (k 'ok)
-      (read-sexp tokens
+      (read-sexp tokens handler
 	(lambda (datum tokens-left)
 	  ;;(printf "read ~s~%" datum)
-	  (parse datum
+	  (parse datum handler
 	    (lambda (exp)
 	      (m exp env handler
 		(lambda (v)
