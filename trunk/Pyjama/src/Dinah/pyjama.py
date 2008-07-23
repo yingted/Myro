@@ -100,7 +100,37 @@ class Pyjama:
         dialog.destroy()
         #if a name is provided for the script, this creates the notebook page
         if response_id==gtk.RESPONSE_ACCEPT:
-            newScript=gtk.Label("Success!")
+            newScript=gtk.ScrolledWindow()
+            newHBox=gtk.HBox(True,2)
+            newScript.add_with_viewport(newHBox)
+            #toolbar.append_element is deprecated as of pygtk2.4--use toolbar.insert(item,pos) instead, using gtk.radiotoolbutton, gtk.toolitem, gtk.button. since i'm in an old version the new way doesn't work.
+            newToolbar=gtk.Toolbar()
+            newHBox.pack_start(newToolbar,False,False,0)
+            newToolbar.set_orientation(gtk.ORIENTATION_VERTICAL)
+            newToolbar.set_style(gtk.TOOLBAR_TEXT)
+            dobutton=newToolbar.append_element(gtk.TOOLBAR_CHILD_RADIOBUTTON,None,"Do",None,None,None,self.scriptChanger,newToolbar)
+            whenbutton=newToolbar.append_element(gtk.TOOLBAR_CHILD_RADIOBUTTON,dobutton,"When",None,None,None,self.scriptChanger,newToolbar)
+            givenbutton=newToolbar.append_element(gtk.TOOLBAR_CHILD_RADIOBUTTON,dobutton,"Given",None,None,None,self.scriptChanger,newToolbar)
+            whengivenbutton=newToolbar.append_element(gtk.TOOLBAR_CHILD_RADIOBUTTON,dobutton,"When\nGiven",None,None,None,self.scriptChanger,newToolbar)
+            dobutton.set_active(True)
+            newVBox=gtk.VBox(True,3)
+            newHBox.pack_start(newVBox,False,False,0)
+            newScriptHBox=gtk.HBox(True,1)
+            newVBox.pack_start(newScriptHBox,False,False,0)
+            newDoLabel=gtk.Label(" do: ")
+            newScriptHBox.pack_start(newDoLabel,False,False,0)
+            newCodeVBox=gtk.VBox(True,1)
+            newVBox.pack_start(newCodeVBox,False,False,0)
+            newReturn=gtk.HBox(True,2)
+            newVBox.pack_start(newReturn,False,False,0)
+            newReturnLabel=gtk.Label(" end script, return: ")
+            newReturn.pack_start(newReturnLabel,False,False,0)
+            newReturnComboBox=gtk.combo_box_entry_new_text()
+            newReturnComboBox.append_text("None")
+            newReturnComboBox.append_text("<parameters>")
+            newReturnComboBox.append_text("<variables>")
+            newReturnComboBox.set_active(0)
+            newReturn.pack_start(newReturnComboBox,False,False,0)
             self.wTree.get_widget("dinahscriptsnotebook").append_page(newScript,newScriptLabel)
             self.window.show_all()
             pass
@@ -108,6 +138,7 @@ class Pyjama:
             pass
             
     def scriptChanger(self,widget,data=None):
+        #will have to edit to fit in with multiple tabs
         scripthbox=self.wTree.get_widget("scripthbox")
         if self.wTree.get_widget("dobutton").get_active():
             for child in scripthbox.get_children():
