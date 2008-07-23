@@ -1149,12 +1149,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_3339B279E1B842648EDA4DD96EC0C02E"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_33F8CF6CD21AE2115DBD53FD6A5DDA04"
         "OwnerKey" = "8:_8233E36543F8C6B7125A5E5EFCF32A30"
         "MsmSig" = "8:_UNDEFINED"
@@ -1570,12 +1564,6 @@
         "Entry"
         {
         "MsmKey" = "8:_71F80F8AB3D44ECDB10204C5018691CF"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_79E36314F7934860811B6B39B5FE99CF"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -2319,6 +2307,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_CE8FF6AC80F34E9C8E89B3DBA4EE37DE"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_D01F7170D11940A9BE8FB85AD35F7C34"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -2602,6 +2596,12 @@
         "Entry"
         {
         "MsmKey" = "8:_FD78791C2739429DAF4472825226E8CB"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_FE0572D368FD4C01A021AF209A52A0BE"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -3926,26 +3926,6 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_3339B279E1B842648EDA4DD96EC0C02E"
-            {
-            "SourcePath" = "8:..\\..\\PythonDemos\\square-nxt.py"
-            "TargetName" = "8:square-nxt.py"
-            "Tag" = "8:"
-            "Folder" = "8:_739ED69F26534568BBAE3EA56CDA2C43"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_33F8CF6CD21AE2115DBD53FD6A5DDA04"
             {
             "AssemblyRegister" = "3:1"
@@ -5050,26 +5030,6 @@
             "TargetName" = "8:line.Config.xml"
             "Tag" = "8:"
             "Folder" = "8:_D6F7A193B97A4CBBA004307B69A8A928"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_79E36314F7934860811B6B39B5FE99CF"
-            {
-            "SourcePath" = "8:..\\..\\PythonDemos\\square-create.py"
-            "TargetName" = "8:square-create.py"
-            "Tag" = "8:"
-            "Folder" = "8:_739ED69F26534568BBAE3EA56CDA2C43"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -6774,6 +6734,26 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_CE8FF6AC80F34E9C8E89B3DBA4EE37DE"
+            {
+            "SourcePath" = "8:..\\..\\PythonDemos\\obstacle-avoid.py"
+            "TargetName" = "8:obstacle-avoid.py"
+            "Tag" = "8:"
+            "Folder" = "8:_739ED69F26534568BBAE3EA56CDA2C43"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_D01F7170D11940A9BE8FB85AD35F7C34"
             {
             "SourcePath" = "8:..\\..\\store\\media\\lbr3_j7.obj"
@@ -7699,6 +7679,26 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_FE0572D368FD4C01A021AF209A52A0BE"
+            {
+            "SourcePath" = "8:..\\..\\PythonDemos\\pulse.py"
+            "TargetName" = "8:pulse.py"
+            "Tag" = "8:"
+            "Folder" = "8:_739ED69F26534568BBAE3EA56CDA2C43"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_FF3675ABEFC644A190BCAC856CEAB832"
             {
             "SourcePath" = "8:..\\..\\store\\media\\Wood_cherry.jpg"
@@ -7886,7 +7886,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Myro 3.0"
         "ProductCode" = "8:{918C0A3A-AD05-42C2-8A88-11E8CC417FBC}"
-        "PackageCode" = "8:{3D412E3C-A98A-4943-9136-02D5090235AA}"
+        "PackageCode" = "8:{BA2E1C46-C3D7-472C-9695-CBF6ECEF7402}"
         "UpgradeCode" = "8:{DF5CEF93-C200-4AF1-AE7E-F69658924D04}"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"

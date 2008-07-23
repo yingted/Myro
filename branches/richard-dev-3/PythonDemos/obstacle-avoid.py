@@ -6,7 +6,7 @@ print "Welcome, this program avoids obstacles (usually)..."
 # In this loop, we will read some sensor values, decide what to do, then do it!
 # The loop means we'll keep repeating this cycle over and over again, quickly.
 # Known as "sense, think, act"
-while(True):
+while(get("led", "left") == 0.0):
     
     # Sense: Read the obstacle sensors (IR sensors)
     obstacle = getObstacle()
@@ -35,3 +35,4 @@ while(True):
     # Act: Set the motor speeds
     motors(leftMotorSpeed, rightMotorSpeed)
 
+stop()

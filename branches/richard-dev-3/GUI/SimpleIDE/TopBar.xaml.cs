@@ -19,6 +19,7 @@ using System.Windows.Media.Effects;
 using System.Threading;
 
 using Myro.GUI.WPFControls;
+using Myro.Utilities;
 
 namespace Myro.GUI.SimpleIDE
 {
@@ -172,7 +173,7 @@ namespace Myro.GUI.SimpleIDE
             {
                 MenuItem menuitem = new MenuItem()
                 {
-                    Header = finder.MakeListItem(config),
+                    Header = MyroConfigGUI.MakeListItem(config),
                 };
                 var myConfig = config;
                 menuitem.Click += delegate

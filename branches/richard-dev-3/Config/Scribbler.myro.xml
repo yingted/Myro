@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<MyroConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<MyroRobotConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <FriendlyName>Scribbler with Fluke</FriendlyName>
   <HttpPort>50000</HttpPort>
   <DsspPort>50001</DsspPort>
-</MyroConfiguration>
+</MyroRobotConfiguration>

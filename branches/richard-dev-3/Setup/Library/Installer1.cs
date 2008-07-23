@@ -30,7 +30,7 @@ namespace Library
             msg += "VALUES:\n";
             foreach (var v in Context.Parameters.Values)
                 msg += (v + "\n");
-            MessageBox.Show(msg);
+            //MessageBox.Show(msg);
 
             List<string> writeableDirs = new List<string>();
 
@@ -50,7 +50,7 @@ namespace Library
                     throw new Exception("Couldn't make " + d + " writeable");
             }
 
-            MessageBox.Show("Made writeable:\n" + dirs);
+            //MessageBox.Show("Made writeable:\n" + dirs);
 
         }
 

@@ -52,7 +52,9 @@ namespace Myro
         }
 
         public static void init(string baseName)
-        { Init(Path.Combine(Path.Combine(Params.ConfigPath, baseName + ".manifest"), baseName + ".manifest.xml"), Params.DefaultHttpPort, Params.DefaultDsspPort); }
+        {
+            Init(Path.Combine(Path.Combine(Params.ConfigPath, baseName + ".manifest"), baseName + ".manifest.xml"), Params.DefaultHttpPort, Params.DefaultDsspPort);
+        }
 
         public static void shutdown()
         {

@@ -18,7 +18,8 @@ from Myro.Robot import *
 # single values or arrays, and "all" is a special keyword.
 
 def get(sensor = "all", position = "all"):
-    position = position.lower()
+    if type(position) == str:
+        position = position.lower()
     
     # Fix "aliases"
     if position == "center":
@@ -55,12 +56,19 @@ def setLEDBack(value):
         
 
 def set(sensor, positionorvalue, value = None):
-    sensor = sensor.lower()
+    if type(sensor) == str:
+        sensor = sensor.lower()
+    if type(positionorvalue) == str:
+        positionorvalue = positionorvalue.lower()
     
     # Fix "aliases"
     if(value != None):
         if positionorvalue == "center":
             positionorvalue = "middle"
+        if value == "on":
+            value = 1.0
+        elif value == "off":
+            value = 0.0
     
     if sensor == "volume":
         setLoud(positionorvalue)

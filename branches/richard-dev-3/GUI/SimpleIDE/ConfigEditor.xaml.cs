@@ -192,7 +192,7 @@ namespace Myro.GUI.SimpleIDE
             ConfigList.Items.Clear();
             configFiles = configFinder.FindConfigFiles();
             foreach (var c in configFiles)
-                ConfigList.Items.Add(configFinder.MakeListItem(c));
+                ConfigList.Items.Add(MyroConfigGUI.MakeListItem(c));
             if (oldIndex < ConfigList.Items.Count)
                 ConfigList.SelectedIndex = oldIndex;
         }
@@ -282,7 +282,7 @@ namespace Myro.GUI.SimpleIDE
             if (currentConfigFiles != null)
             {
                 // Create new config based on controls' text
-                currentConfigFiles.MyroConfiguration = new MyroConfiguration()
+                currentConfigFiles.MyroConfiguration = new MyroRobotConfiguration()
                 {
                     FriendlyName = FriendlyNameBox.Text,
                     HttpPort = int.Parse(HttpPortBox.Text),

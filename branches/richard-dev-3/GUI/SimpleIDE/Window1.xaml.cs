@@ -20,6 +20,7 @@ using System.Diagnostics;
 
 using Myro;
 using Myro.GUI.WPFControls;
+using Myro.Utilities;
 
 namespace Myro.GUI.SimpleIDE
 {

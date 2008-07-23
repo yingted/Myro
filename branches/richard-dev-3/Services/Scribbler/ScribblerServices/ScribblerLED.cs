@@ -77,7 +77,12 @@ namespace Myro.Services.Scribbler.LED
                         else if (i == 4)
                         {
                             nResponses++;
-                            Activate(Arbiter.Choice(_scribblerPort.SetLEDBack(RSUtils.UnnormalizeDouble(_state.Get(4))),
+                            byte val =
+                                (_state.Get(4) <= 0.0) ?
+                                (byte)0 :
+                                (byte)(_state.Get(4) * (255.0 - 170.0) + 170.0);
+                            Activate(Arbiter.Choice(
+                                _scribblerPort.SetLEDBack(val),
                                 delegate(DefaultUpdateResponseType s) { responses.Post(DefaultUpdateResponseType.Instance); },
                                 delegate(Fault f) { responses.Post(f); }));
                         }
