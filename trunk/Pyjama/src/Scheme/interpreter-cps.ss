@@ -222,9 +222,14 @@
     (let ((sym (car args)))
       (lookup-value sym env handler
 	(lambda (v)
-	  (if (null? (cdr args))
-	    (k v)
-	    (get-primitive (cdr args) v handler k)))))))
+	  (cond
+	    ((null? (cdr args)) (k v))
+	    ((not (module? v)) (handler (format "~s is not a module" sym)))
+	    (else (get-primitive (cdr args) v handler k))))))))
+
+(define module?
+  (lambda (x)
+    (list? x)))
 
 (define import-primitive
   (lambda (args env handler k)
