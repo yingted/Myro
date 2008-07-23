@@ -24,7 +24,7 @@ class Pyjama:
 
 
         #sets up drop signal over codevbox, running program, adding new script tab
-        scriptDic={"on_codevbox_drag_drop": self.on_codevbox_drag_drop,"on_playbutton_clicked": self.runProgram,"on_dobutton_toggled":self.scriptChanger,"on_whenbutton_toggled":self.scriptChanger,"on_givenbutton_toggled":self.scriptChanger,"on_whengivenbutton_toggled":self.scriptChanger,"on_addother_clicked":self.addOther}
+        scriptDic={"on_codevbox_drag_drop": self.codeDragDrop,"on_playbutton_clicked": self.runProgram,"on_dobutton_toggled":self.scriptChanger,"on_whenbutton_toggled":self.scriptChanger,"on_givenbutton_toggled":self.scriptChanger,"on_whengivenbutton_toggled":self.scriptChanger,"on_addother_clicked":self.addOther}
         self.wTree.signal_autoconnect(scriptDic)
 
         #makes print a source for dnd
@@ -83,7 +83,7 @@ class Pyjama:
 
         #makes codevbox a drag destination
         self.wTree.get_widget("codevbox").drag_dest_set(gtk.DEST_DEFAULT_MOTION|gtk.DEST_DEFAULT_HIGHLIGHT|gtk.DEST_DEFAULT_DROP, [("print",0,4),("forward",0,5),("backward",0,6),("left",0,7),("right",0,8),("stop",0,9),("motors",0,10),("wait",0,11),("currenttime",0,12),("settimer",0,13),("elapsed",0,14),("askuser",0,15),("gamepad",0,16),("joystick",0,17),("takepic",0,18),("showpic",0,19),("loadpic",0,20),("savepic",0,21)], gtk.gdk.ACTION_COPY)
-        self.wTree.get_widget("codevbox").connect("drag_drop",self.on_codevbox_drag_drop)
+        self.wTree.get_widget("codevbox").connect("drag_drop",self.codeDragDrop)
 
     def addOther(self,widget,data=None):
         #pops up a dialog which asks for a name for the script
@@ -108,17 +108,24 @@ class Pyjama:
             newHBox.pack_start(newToolbar,False,False,0)
             newToolbar.set_orientation(gtk.ORIENTATION_VERTICAL)
             newToolbar.set_style(gtk.TOOLBAR_TEXT)
+            global dobutton
             dobutton=newToolbar.append_element(gtk.TOOLBAR_CHILD_RADIOBUTTON,None,"Do",None,None,None,self.scriptChanger,newToolbar)
+            global whenbutton
             whenbutton=newToolbar.append_element(gtk.TOOLBAR_CHILD_RADIOBUTTON,dobutton,"When",None,None,None,self.scriptChanger,newToolbar)
+            global givenbutton
             givenbutton=newToolbar.append_element(gtk.TOOLBAR_CHILD_RADIOBUTTON,dobutton,"Given",None,None,None,self.scriptChanger,newToolbar)
             whengivenbutton=newToolbar.append_element(gtk.TOOLBAR_CHILD_RADIOBUTTON,dobutton,"When\nGiven",None,None,None,self.scriptChanger,newToolbar)
             dobutton.set_active(True)
             newVBox=gtk.VBox(True,3)
             newHBox.pack_start(newVBox,False,False,0)
+            #makes newScriptHBox global so it can be used to change scripts
+            global newScriptHBox
             newScriptHBox=gtk.HBox(True,1)
             newVBox.pack_start(newScriptHBox,False,False,0)
             newDoLabel=gtk.Label(" do: ")
             newScriptHBox.pack_start(newDoLabel,False,False,0)
+            #make newCodeVBox global so it can be used in drag and drop
+            global newCodeVBox
             newCodeVBox=gtk.VBox(True,1)
             newVBox.pack_start(newCodeVBox,False,False,0)
             newReturn=gtk.HBox(True,2)
@@ -133,19 +140,33 @@ class Pyjama:
             newReturn.pack_start(newReturnComboBox,False,False,0)
             self.wTree.get_widget("dinahscriptsnotebook").append_page(newScript,newScriptLabel)
             self.window.show_all()
-            pass
+            newCodeVBox.drag_dest_set(gtk.DEST_DEFAULT_MOTION|gtk.DEST_DEFAULT_HIGHLIGHT|gtk.DEST_DEFAULT_DROP, [("print",0,4),("forward",0,5),("backward",0,6),("left",0,7),("right",0,8),("stop",0,9),("motors",0,10),("wait",0,11),("currenttime",0,12),("settimer",0,13),("elapsed",0,14),("askuser",0,15),("gamepad",0,16),("joystick",0,17),("takepic",0,18),("showpic",0,19),("loadpic",0,20),("savepic",0,21)], gtk.gdk.ACTION_COPY)
+            newCodeVBox.connect("drag_drop",self.codeDragDrop)
         else:
             pass
             
     def scriptChanger(self,widget,data=None):
-        #will have to edit to fit in with multiple tabs
-        scripthbox=self.wTree.get_widget("scripthbox")
-        if self.wTree.get_widget("dobutton").get_active():
+        if self.wTree.get_widget("dinahscriptsnotebook").get_current_page()==0:
+            scripthbox=self.wTree.get_widget("scripthbox")
+            do=self.wTree.get_widget("dobutton")
+            when=self.wTree.get_widget("whenbutton")
+            given=self.wTree.get_widget("givenbutton")
+        else:
+            pagenum=self.wTree.get_widget("dinahscriptsnotebook").get_current_page()
+            page=self.wTree.get_widget("dinahscriptsnotebook").get_nth_page(pagenum)
+            for child in page.get_children():
+                #want to find right child widget, use it in scriptChanger (will need to do same thing in dnd to have more than 1 extra script)
+                pass
+            scripthbox=newScriptHBox
+            do=dobutton
+            when=whenbutton
+            given=givenbutton
+        if do.get_active():
             for child in scripthbox.get_children():
                 scripthbox.remove(child)
             dolabel=gtk.Label(" do: ")
             scripthbox.add(dolabel)
-        elif self.wTree.get_widget("whenbutton").get_active():
+        elif when.get_active():
             for child in scripthbox.get_children():
                 scripthbox.remove(child)
             whenhbox=gtk.HBox(True,3)
@@ -159,7 +180,7 @@ class Pyjama:
             whenhbox.pack_start(whencombobox,False,False,0)
             whenlabel2=gtk.Label(" is clicked/pressed, do: ")
             whenhbox.pack_start(whenlabel2,False,False,0)
-        elif self.wTree.get_widget("givenbutton").get_active():
+        elif given.get_active():
             for child in scripthbox.get_children():
                 scripthbox.remove(child)
             givenhbox=gtk.HBox(True,3)
@@ -192,8 +213,11 @@ class Pyjama:
             whengivenhbox.pack_start(whengivenlabel3,False,False,0)
         self.window.show_all()
 
-    def on_codevbox_drag_drop(self,source,context,x,y,time):
-        codevbox=self.wTree.get_widget("codevbox")
+    def codeDragDrop(self,source,context,x,y,time):
+        if self.wTree.get_widget("dinahscriptsnotebook").get_current_page()==0:
+            codevbox=self.wTree.get_widget("codevbox")
+        else:
+            codevbox=newCodeVBox
         if context.targets==["print"]:
             global printString
             innerVBox=gtk.VBox(True,1)
@@ -265,7 +289,7 @@ class Pyjama:
             rightHBox.pack_start(rightLabel3,False,False,0)
             innerVBox.add(rightHBox)
         elif context.targets==["stop"]:
-            innerVBox=gtk.VBox(True,1)
+            innerVBox2=gtk.VBox(True,1)
             codevbox.add(innerVBox)
             stopHBox=gtk.HBox(True,1)
             stopLabel=gtk.Label(" stop ")
