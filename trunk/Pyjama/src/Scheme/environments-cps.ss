@@ -85,6 +85,7 @@
     (let ((binding (search-env env variable)))
       (if binding
 	(k binding)
+;;	(REP-k `(error: variable ,variable is unbound))))))
         (error 'lookup-binding "unbound variable ~s" variable)))))
 
 (define lookup-value

@@ -151,3 +151,21 @@
 ;; ==> "(nth 20 fibs)"
 ;; ==> "(first 30 fibs)"
 
+(define test-all
+  (lambda ()
+    (print (list (odd? 42) (even? 42) (odd? 43) (even? 43)))
+    (print (collect (* n n) for n in (range 10)))
+    (print (collect (* n n) for n in (range 5 20 3)))
+    (print (collect (* n n) for n in (range 10) if (> n 5)))
+    (print (for 5 times do (print 'hello)))
+    (print (for sym in '(a b c d) do (print sym) (newline)))
+    (print (for n in (range 10 20 2) do (print n)))
+    (print (for n at (i j) in matrix2D do (print (list n 'coords: i j))))
+    (print (for n at (i j k) in matrix3D do (print (list n 'coords: i j k))))
+    (print (! 5))
+    (print (nth 10 facts))
+    (print (nth 20 fibs))
+    (print (first 30 fibs))))
+
+;; try/catch
+

@@ -1,11 +1,15 @@
-;; (define time 
-;;   (lambda ()
-;;     (let ((now (current-time)))
-;;       (+ (time-second now)
-;; 	 (inexact (/ (time-nanosecond now)
-;; 		     1000000000))))))
+;; chez scheme
+(define get-time
+   (lambda ()
+     (let ((now (current-time)))
+       (+ (time-second now)
+ 	 (inexact (/ (time-nanosecond now)
+ 		     1000000000))))))
 
-(define start (time))
+;;;; pyjama scheme
+;;(define get-time
+;;  (lambda ()
+;;    (current-time)))
 
 (define fact 
   (lambda (n)
@@ -13,13 +17,9 @@
 	n 
 	(* n (fact (- n 1))))))
 
-(write (fact 12000))
+(define start (get-time))
+(define answer (fact 12000))
+(define stop (get-time))
+
+(display (- stop start))
 (newline)
-(write (- (time) start))
-(newline)
-
-
-(try (fact n)
-     (except (e) (fact (- n 1)))
-     (except (e) (error "error")))
-
