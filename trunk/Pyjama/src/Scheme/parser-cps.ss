@@ -28,11 +28,6 @@
 
 ;;         | (raise <exp>)
 
-;;         | (spawn <name> <exp>)
-;;         | (lock <exp>)
-;;         | (acquire <exp>)
-;;         | (release <exp>)
-;;
 ;;--------------------------------------------------------------------------
 
 (define-datatype expression expression?
@@ -58,34 +53,26 @@
   (lambda-exp
     (formals (list-of symbol?))
     (body expression?))
-  (vararg-lambda-exp
-    (formals (list-of symbol?))
-    (runt-formal symbol?)
-    (body expression?))
   (mu-lambda-exp
-    (formal symbol?)
+    (formals (list-of symbol?))
+    (runt symbol?)
     (body expression?))
   (app-exp
     (operator expression?)
     (operands (list-of expression?)))
-  (try-exp
+  (try-catch-exp
+    (body expression?)
+    (catch-var symbol?)
+    (catch-exps (list-of expression?)))
+  (try-finally-exp
+    (body expression?)
+    (finally-exps (list-of expression?)))
+  (try-catch-finally-exp
     (body expression?)
     (catch-var symbol?)
     (catch-exps (list-of expression?))
     (finally-exps (list-of expression?)))
-  (try-finally-exp
-    (body expression?)
-    (finally-exps (list-of expression?)))
   (raise-exp
-    (exp expression?))
-  (spawn-exp
-    (name string?)
-    (exp expression?))
-  (lock-exp
-    (exp expression?))
-  (acquire-exp
-    (exp expression?))
-  (release-exp
     (exp expression?))
   )
 
@@ -103,7 +90,7 @@
 
 (define expand-once
   (lambda (datum k)
-    (lookup-value (car datum) macro-env
+    (lookup-value (car datum) macro-env 'ignore
       (lambda (result)
 	(if (list? result)
 	  (process-macro-clauses result datum k)
@@ -120,6 +107,13 @@
 	    (if subst
 	      (instantiate right-pattern subst k)
 	      (process-macro-clauses (cdr clauses) datum k))))))))
+
+(define mit-define-transformer
+  (lambda (datum)
+    (let ((name (caadr datum))
+	  (formals (cdadr datum))
+	  (bodies (cddr datum)))
+      `(define ,name (lambda ,formals ,@bodies)))))
 
 (define let-transformer
   (lambda (datum)
@@ -218,9 +212,11 @@
 	 (lambda (v)
 	   (k (assign-exp (cadr datum) v)))))
       ((define? datum)
-       (parse (caddr datum)
-	 (lambda (v)
-	   (k (define-exp (cadr datum) v)))))
+       (if (mit-define? datum)
+	 (parse (mit-define-transformer datum) k)
+	 (parse (caddr datum)
+	   (lambda (body)
+	     (k (define-exp (cadr datum) body))))))
       ((define-syntax? datum)
        (k (define-syntax-exp (cadr datum) (cddr datum))))
       ((begin? datum)
@@ -231,14 +227,10 @@
 	     (k (begin-exp v))))))
       ((lambda? datum)
        (parse (cons 'begin (cddr datum))
-	 (lambda (v)
-	   (cond
-	     ((symbol? (cadr datum))
-	      (k (mu-lambda-exp (cadr datum) v)))
-	     ((improper-list? (cadr datum))
-	      (k (vararg-lambda-exp (all-but-last (cadr datum)) (last (cadr datum)) v)))
-	     (else
-	      (k (lambda-exp (cadr datum) v)))))))
+	 (lambda (body)
+	   (if (proper-list? (cadr datum))
+	     (k (lambda-exp (cadr datum) body))
+	     (k (mu-lambda-exp (head (cadr datum)) (last (cadr datum)) body))))))
       ((try? datum)
        (cond
 	 ((= (length datum) 2)
@@ -250,7 +242,8 @@
 	    (lambda (body)
 	      (parse-all (catch-exps (caddr datum))
 		(lambda (cexps)
-		  (k (try-exp body (catch-var (caddr datum)) cexps '())))))))
+		  (let ((cvar (catch-var (caddr datum))))
+		    (k (try-catch-exp body cvar cexps))))))))
 	 ((and (= (length datum) 3) (finally? (caddr datum)))
 	  ;; (try <body> (finally <exp> ...))
 	  (parse (try-body datum)
@@ -266,28 +259,13 @@
 		(lambda (cexps)
 		  (parse-all (finally-exps (cadddr datum))
 		    (lambda (fexps)
-		      (k (try-exp body (catch-var (caddr datum)) cexps fexps)))))))))
+		      (let ((cvar (catch-var (caddr datum))))
+			(k (try-catch-finally-exp body cvar cexps fexps))))))))))
 	 (else (error 'parse "bad try syntax: ~s" datum))))
       ((raise? datum)
        (parse (cadr datum)
 	 (lambda (v)
 	   (k (raise-exp v)))))
-      ((spawn? datum)
-       (parse (caddr datum)
-	 (lambda (v)
-	   (k (spawn-exp (cadr datum) v)))))
-      ((lock? datum)
-       (parse (cadr datum)
-	 (lambda (v)
-	   (k (lock-exp v)))))
-      ((acquire? datum)
-       (parse (cadr datum)
-	 (lambda (v)
-	   (k (acquire-exp v)))))
-      ((release? datum)
-       (parse (cadr datum)
-	 (lambda (v)
-	   (k (release-exp v)))))
       ((application? datum)
        (parse (car datum)
 	 (lambda (v1)
@@ -328,24 +306,29 @@
 	      (lambda (v2)
 		(k `(cons ,v1 ,v2))))))))))
 
-(define improper-list?
+(define proper-list?
   (lambda (x)
-    (and (pair? x)
-	 (not (null? (cdr x)))
-	 (or (not (pair? (cdr x)))
-	     (improper-list? (cdr x))))))
+    (or (null? x)
+	(and (pair? x)
+	     (proper-list? (cdr x))))))
 
-(define all-but-last
+(define head
   (lambda (formals)
-    (if (not (pair? (cdr formals)))
-      (list (car formals))
-      (cons (car formals) (all-but-last (cdr formals))))))
+    (cond
+      ((symbol? formals) '())
+      ((pair? (cdr formals)) (cons (car formals) (head (cdr formals))))
+      (else (list (car formals))))))
 
 (define last
   (lambda (formals)
-    (if (not (pair? (cdr formals)))
-      (cdr formals)
-      (last (cdr formals)))))
+    (cond
+      ((symbol? formals) formals)
+      ((pair? (cdr formals)) (last (cdr formals)))
+      (else (cdr formals)))))
+
+(define mit-define?
+  (lambda (datum)
+    (not (symbol? (cadr datum)))))
 
 (define literal?
   (lambda (datum)
@@ -377,10 +360,6 @@
 (define begin? (tagged-list 'begin >= 2))
 (define lambda? (tagged-list 'lambda >= 3))
 (define raise? (tagged-list 'raise = 2))
-(define spawn? (tagged-list 'spawn = 3))
-(define lock? (tagged-list 'lock = 2))
-(define acquire? (tagged-list 'acquire = 2))
-(define release? (tagged-list 'release = 2))
 
 (define application?
   (lambda (datum)
@@ -393,7 +372,8 @@
     (and (symbol? x)
 	 (memq x '(quote quasiquote lambda if set! define begin
 		    cond and or let let* letrec ;; do delay case
-		    try catch finally raise spawn lock acquire release)))))
+		    try catch finally raise
+		    )))))
 
 (define try? (tagged-list 'try >= 2))
 (define try-body cadr)
@@ -408,16 +388,16 @@
 
 (define parse-file
   (lambda (filename)
-    (set! tokens_reg (scan-input (read-content filename)))
-    (let loop ()
-      (if (token-type? (first tokens_reg) 'end-marker)
-	'done
-	(begin
-	  (set! k_reg (list 'load-cont))
-	  (set! pc read-sexp)
-	  (let ((datum (run)))
-	    (parse datum
-	      (lambda (exp)
-		(pretty-print exp)
-		(loop)))))))))
+    (parse-loop (scan-input (read-content filename)))))
+
+(define parse-loop
+  (lambda (tokens)
+    (if (token-type? (first tokens) 'end-marker)
+      'done
+      (read-sexp tokens
+	(lambda (datum tokens-left)
+	  (parse datum
+	    (lambda (exp)
+	      (pretty-print exp)
+	      (parse-loop tokens-left))))))))
 

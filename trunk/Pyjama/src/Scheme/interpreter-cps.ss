@@ -24,8 +24,10 @@
     (let ((input (read)))
       (cond
         ((eq? input 'quit)
+	 ;; temporary
 	 (set! macro-env (make-macro-env))
 	 (set! toplevel-env (make-toplevel-env))
+	 (set! load-stack '())
 	 '(exiting the interpreter))
 	((not (string? input))
 	 (printf "give me a string~%")
@@ -39,7 +41,7 @@
   (lambda (exp env handler k)
     (cases expression exp
       (lit-exp (datum) (k datum))
-      (var-exp (id) (lookup-value id env k))
+      (var-exp (id) (lookup-value id env handler k))
       (if-exp (test-exp then-exp else-exp)
 	(m test-exp env handler
 	  (lambda (bool)
@@ -49,76 +51,54 @@
       (assign-exp (var rhs-exp)
 	(m rhs-exp env handler
 	  (lambda (rhs-value)
-	    (lookup-binding var env
+	    (lookup-binding var env handler
 	      (lambda (binding)
 		(set-binding-value! binding rhs-value)
 		(k 'ok))))))
       (define-exp (var rhs-exp)
 	(m rhs-exp env handler
 	  (lambda (rhs-value)
-	    (lookup-binding-in-first-frame var env
+	    (lookup-binding-in-first-frame var env handler
 	      (lambda (binding)
 		(set-binding-value! binding rhs-value)
 		(k 'ok))))))
       (define-syntax-exp (keyword clauses)
-	(lookup-binding-in-first-frame keyword macro-env
+	(lookup-binding-in-first-frame keyword macro-env handler
 	  (lambda (binding)
 	    (set-binding-value! binding clauses)
 	    (k 'ok))))
       (begin-exp (exps) (eval-sequence exps env handler k))
       (lambda-exp (formals body)
 	(k (closure formals body env)))
-      (vararg-lambda-exp (formals runt body)
-	(k (vararg-closure formals runt body env)))
-      (mu-lambda-exp (formal body)
-	(k (mu-closure formal body env)))
-      (try-exp (body catch-var catch-exps finally-exps)
-	(let ((new-handler
-		(lambda (e)
-		  ;;(printf "try-handler: handling ~a exception~%" e)
-		  (let ((new-env (extend env (list catch-var) (list e))))
-		    (let ((catch-handler
-			   (lambda (e)
-			     ;;(printf "catch-handler: handling ~a exception~%" e)
-			     (if (null? finally-exps)
-			       (begin
-				 ;;(printf "propagating ~a exception~%" e)
-				 (handler e))
-			       (begin
-				 ;;(printf "executing finally block~%")
-				 (eval-sequence finally-exps env handler
-				   (lambda (v)
-				     ;;(printf "propagating ~a exception~%" e)
-				     (handler e))))))))
-		      ;;(printf "executing catch block~%")
-		      (eval-sequence catch-exps new-env catch-handler
-			(lambda (v)
-			  (if (null? finally-exps)
-			    (k v)
-			    (begin
-			      ;;(printf "executing finally block~%")
-			      (eval-sequence finally-exps env handler
-				(lambda (v2) (k v))))))))))))
-	  (if (null? finally-exps)
-	    (m body env new-handler k)
-	    (m body env new-handler
-	      (lambda (v)
-		;;(printf "executing finally block~%")
-		(eval-sequence finally-exps env handler
-		  (lambda (v2) (k v))))))))
+      (mu-lambda-exp (formals runt body)
+	(k (mu-closure formals runt body env)))
+      (try-catch-exp (body catch-var catch-exps)
+	(let ((new-handler (try-catch-handler catch-var catch-exps env handler k)))
+	  (m body env new-handler k)))
       (try-finally-exp (body finally-exps)
-	(let ((new-handler
-		(lambda (e)
-		  ;;(printf "executing finally block~%")
-		  (eval-sequence finally-exps env handler
-		    (lambda (v)
-		      ;;(printf "propagating ~a exception~%" e)
-		      (handler e))))))
+	(let ((new-handler (try-finally-handler finally-exps env handler)))
 	  (m body env new-handler
 	    (lambda (v)
 	      ;;(printf "executing finally block~%")
 	      (eval-sequence finally-exps env handler
 		(lambda (v2) (k v)))))))
+      (try-catch-finally-exp (body catch-var catch-exps finally-exps)
+	(let ((new-handler
+		(lambda (e)
+		  ;;(printf "try-handler: handling ~a exception~%" e)
+		  (let ((new-env (extend env (list catch-var) (list e))))
+		    (let ((catch-handler (try-finally-handler finally-exps env handler)))
+		      ;;(printf "executing catch block~%")
+		      (eval-sequence catch-exps new-env catch-handler
+			(lambda (v)
+			  ;;(printf "executing finally block~%")
+			  (eval-sequence finally-exps env handler
+			    (lambda (v2) (k v))))))))))
+	  (m body env new-handler
+	     (lambda (v)
+	       ;;(printf "executing finally block~%")
+	       (eval-sequence finally-exps env handler
+		 (lambda (v2) (k v)))))))
       (raise-exp (exp)
 	(m exp env handler
 	  ;; todo: pass in more info to handler (k, env)
@@ -131,6 +111,23 @@
 		(func vals env handler k))))))
       (else (error 'm "bad abstract syntax: ~s" exp)))))
 
+(define try-catch-handler
+  (lambda (catch-var catch-exps env handler k)
+    (lambda (e)
+      ;;(printf "try-handler: handling ~a exception~%" e)
+      (let ((new-env (extend env (list catch-var) (list e))))
+	;;(printf "executing catch block~%")
+	(eval-sequence catch-exps new-env handler k)))))
+
+(define try-finally-handler
+  (lambda (finally-exps env handler)
+    (lambda (e)
+      ;;(printf "executing finally block~%")
+      (eval-sequence finally-exps env handler
+	(lambda (v)
+	  ;;(printf "propagating ~a exception~%" e)
+	  (handler e))))))
+
 (define closure
   (lambda (formals body env)
     (lambda (args env2 handler k2)
@@ -138,7 +135,7 @@
 	(m body (extend env formals args) handler k2)
 	(handler "incorrect number of arguments")))))
 
-(define vararg-closure
+(define mu-closure
   (lambda (formals runt body env)
     (lambda (args env2 handler k2)
       (if (>= (length args) (length formals))
@@ -149,11 +146,6 @@
 			(list-head args (length formals))))))
 	  (m body new-env handler k2))
 	(handler "not enough arguments given")))))
-
-(define mu-closure
-  (lambda (formal body env)
-    (lambda (args env2 handler k2)
-      (m body (extend env (list formal) (list args)) handler k2))))
 
 (define m*
   (lambda (exps env handler k)
@@ -184,10 +176,12 @@
 	    (lambda (args env2 handler k2)
 	      (set! macro-env (make-macro-env))
 	      (set! toplevel-env (make-toplevel-env))
+	      ;; temporary
+	      (set! load-stack '())
 	      '(exiting the interpreter))
 	    (lambda (args env2 handler k2) (k2 (apply sqrt args)))
 	    (lambda (args env2 handler k2) (for-each pretty-print args) (k2 'ok))
-	    (lambda (args env2 handler k2) (k2 (display args)))
+	    (lambda (args env2 handler k2) (apply display args) (k2 'ok))
 	    (lambda (args env2 handler k2) (newline) (k2 'ok))
 	    (lambda (args env2 handler k2) (load-file (car args) toplevel-env handler k2))
 	    (lambda (args env2 handler k2) (k2 (apply null? args)))
@@ -224,7 +218,7 @@
 (define get-primitive
   (lambda (args env handler k)
     (let ((sym (car args)))
-      (lookup-value sym env
+      (lookup-value sym env handler
 	(lambda (v)
 	  (if (null? (cdr args))
 	    (k v)
@@ -236,7 +230,7 @@
 	(if (null? (cdr args))
 	  (load-file filename env handler k)
 	  (let ((module-name (cadr args)))
-	    (lookup-binding-in-first-frame module-name env
+	    (lookup-binding-in-first-frame module-name env handler
 	      (lambda (binding)
 		(let ((module (extend env '() '())))
 		  (set-binding-value! binding module)
@@ -280,21 +274,6 @@
 	      (m exp env handler
 		(lambda (v)
 		  (load-loop tokens-left env handler k))))))))))
-
-;;(define load-file
-;;  (lambda (filename env handler k)
-;;    (set! tokens_reg (scan-input (read-content filename)))
-;;    (let loop ()
-;;      (if (token-type? (first tokens_reg) 'end-marker)
-;;	(k 'ok)
-;;	(begin
-;;	  (set! k_reg (list 'load-cont))
-;;	  (set! pc read-sexp)
-;;	  (let ((datum (run)))
-;;	    (parse datum
-;;	      (lambda (exp)
-;;		(m exp env handler
-;;		  (lambda (v) (loop)))))))))))
 
 (define range
   (lambda args

@@ -82,22 +82,21 @@
           (search-env (rest-of-frames env) variable))))))
 
 (define lookup-binding
-  (lambda (variable env k)
+  (lambda (variable env handler k)
     (let ((binding (search-env env variable)))
       (if binding
 	(k binding)
-	(REP-k `(error: variable ,variable is unbound))))))
-;;        (error 'lookup-binding "unbound variable ~s" variable)))))
+	(handler (format "unbound variable ~s" variable))))))
 
 (define lookup-value
-  (lambda (variable env k)
-    (lookup-binding variable env
+  (lambda (variable env handler k)
+    (lookup-binding variable env handler
       (lambda (binding)
 	(k (binding-value binding))))))
 
 ;; adds a new binding for var to the first frame if one doesn't exist
 (define lookup-binding-in-first-frame
-  (lambda (var env k)
+  (lambda (var env handler k)
     (let ((frame (first-frame env)))
       (let ((binding (search-frame frame var)))
         (if binding
