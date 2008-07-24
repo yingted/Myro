@@ -705,4 +705,28 @@
       (test-handler ()
 	(set! sexp_reg (list 'exception exception_reg))
 	(set! pc #f))
+      (REP-handler ()
+	(apply-cont REP-k `(uncaught exception: ,exception_reg)))
+      (try-catch-handler (catch-var catch-exps env handler k)
+	;;(printf "try-handler: handling ~a exception~%" exception_reg)
+	(let ((new-env (extend env (list catch-var) (list exception_reg))))
+	  ;;(printf "executing catch block~%")
+	  ;; fix me: when we registerize the interpreter, we'll need to
+	  ;; convert this function call to register form
+	  (eval-sequence catch-exps new-env handler k)))
+       (try-finally-handler (finally-exps env handler)
+	  ;;(printf "executing finally block~%")
+	  ;; fix me: when we registerize the interpreter, we'll need to
+	  ;; convert this function call to register form
+	  (eval-sequence finally-exps env handler
+	    (make-cont 'interpreter 'try-finally-handler-cont handler exception_reg)))
+       (try-catch-handler (env catch-var finally-exps handler catch-exps k)
+	  ;;(printf "try-handler: handling ~a exception~%" exception_reg)
+	  (let ((new-env (extend env (list catch-var) (list exception_reg))))
+	    (let ((catch-handler (try-finally-handler finally-exps env handler)))
+	      ;;(printf "executing catch block~%")
+	      ;; fix me: when we registerize the interpreter, we'll need to
+	      ;; convert this function call to register form
+	      (eval-sequence catch-exps new-env catch-handler
+		(make-cont 'interpreter 'm-7 finally-exps env handler k)))))
       (else (error 'apply-handler "invalid exception handler: ~s" handler_reg)))))

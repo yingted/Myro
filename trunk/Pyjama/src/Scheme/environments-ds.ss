@@ -88,7 +88,8 @@
     (let ((binding (search-env env variable)))
       (if binding
 	(apply-cont k binding)
-	(apply-handler handler (format "unbound variable ~s" variable))))))
+	;; temporary
+	(interp-apply-handler handler (format "unbound variable ~s" variable))))))
 
 (define lookup-value
   (lambda (variable env handler k)

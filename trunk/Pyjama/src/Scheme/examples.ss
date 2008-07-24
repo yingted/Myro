@@ -168,7 +168,8 @@
     (print (first 30 fibs))
     (test-mu-lambda)
     (test-define)
-    (test-call/cc)))
+    (test-call/cc)
+    ))
 
 (define verify
   (lambda (answer exp)
@@ -193,7 +194,8 @@
       ((lambda (a b . z) (list a b z)) 1 2))
     (verify "not enough arguments given"
       (try ((lambda (a b . z) (list a b z)) 1)
-	   (catch e e)))))
+	   (catch e e)))
+    ))
 
 (define test-define
   (lambda ()
@@ -290,3 +292,4 @@
        (catch e (if (equal? e 'foo) 99 (raise 'doug)))
        (finally (print 'closing-outer-files))) (catch e e)))
     ))
+

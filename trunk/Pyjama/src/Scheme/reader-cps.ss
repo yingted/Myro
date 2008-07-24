@@ -455,8 +455,9 @@
 ;; for testing purposes
 
 ;; read-next-sexp takes a list of tokens and reads the next full sexp
-;; from the tokens.  It returns the sexp and the remaining tokens as a
-;; pair.
+;; from the tokens.  It returns the result and the remaining tokens as
+;; a pair, or an exception object of the form (exception "description")
+
 (define read-next-sexp
   (lambda (tokens)
     (read-sexp tokens test-handler

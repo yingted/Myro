@@ -395,7 +395,7 @@
   (lambda (filename)
     (scan-input (read-content filename) test-handler
       (lambda (tokens)
-	(print-parsed-sexps tokens handler)))))
+	(print-parsed-sexps tokens test-handler)))))
 
 ;; for testing purposes
 (define print-parsed-sexps

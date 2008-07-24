@@ -91,9 +91,9 @@
 	     (apply-cont k (value datum))))
        (lookup-cont (k)
 	 (apply-cont k (binding-value value)))
-       (print-parsed-sexps-cont (tokens-left)
+       (print-parsed-sexps-cont (tokens-left handler)
 	 (pretty-print value)
-	 (print-parsed-sexps tokens-left))
+	 (print-parsed-sexps tokens-left handler))
        (else (error 'apply-parser-cont "invalid continuation: '~s'" k)))))
 
 ;;--------------------------------------------------------------------------
@@ -423,20 +423,20 @@
 ;; for testing purposes
 (define parse-file
   (lambda (filename)
-    (print-parsed-sexps (scan-file filename))))
+    (print-parsed-sexps (scan-file filename) test-handler)))
 
 ;; for testing purposes
 (define print-parsed-sexps
-  (lambda (tokens)
+  (lambda (tokens handler)
     (if (token-type? (first tokens) 'end-marker)
       'done
       (let ((result (read-next-sexp tokens)))
 	(if (exception? result)
-	  result
+	  (parser-apply-handler handler (cadr result))
 	  (let ((sexp (car result))
 		(tokens-left (cdr result)))
-	    (parse sexp test-handler
-	      (make-cont 'parser 'print-parsed-sexps-cont tokens-left))))))))
+	    (parse sexp handler
+	      (make-cont 'parser 'print-parsed-sexps-cont tokens-left handler))))))))
 
 ;; temporary
 (define parser-apply-handler
