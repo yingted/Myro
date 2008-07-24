@@ -1,11 +1,10 @@
 ;; fixme:
 ;; - call/cc
 
-
 ;; Interpreter
 
-(load "environments-cps.ss")
-(load "parser-cps.ss")
+(load "environments-ds.ss")
+(load "parser-ds.ss")
 
 ;;----------------------------------------------------------------------------
 
@@ -177,9 +176,13 @@
 	(m operator env handler (make-cont 'm-2 operands env handler k)))
       (else (error 'm "bad abstract syntax: ~s" exp)))))
 
-(define try-catch-handler (make-cont 'try-catch-handler catch-var catch-exps env handler k))
+(define try-catch-handler 
+  (lambda (catch-var catch-exps env handler k)
+    (make-cont 'try-catch-handler catch-var catch-exps env handler k)))
 
-(define try-finally-handler (make-cont 'try-finally-handler finally-exps env handler))
+(define try-finally-handler 
+  (lambda (finally-exps env handler)
+    (make-cont 'try-finally-handler finally-exps env handler)))
 
 (define closure
   (lambda (formals body env)
@@ -285,7 +288,7 @@
 (define call/cc-primitive
   (lambda (proc env handler k)
     (let ((fake-k (make-cont 'call/cc-cont args env handler k))) 
-      (my-apply proc args (make-cont 'call/cc-cont-2 env handler k))))
+      (my-apply proc args (make-cont 'call/cc-cont-2 env handler k)))))
 
 (define get-variables
   (lambda (env)
@@ -325,4 +328,3 @@
 	
 (define toplevel-env (make-toplevel-env))
 (define macro-env (make-macro-env))
-
