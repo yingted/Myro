@@ -1,12 +1,35 @@
-(define make-cont cons)
+(define make-cont list)
 
 (define apply-uni-cont
   (lambda (k value)
     (record-case k
+      (init () value)
       (occurs-cont (var pattern k)
 	(if value
 	  (apply-uni-cont k #t)
 	  (occurs? var (cdr pattern) k)))
+      (unify-patterns-cont (p1 p2 k)
+	(if value
+	    (apply-uni-cont k #f)
+	    (apply-uni-cont k (unit-sub p1 p2))))
+      (apply-sub-cont (s2 k)
+	(instantiate value s2 k))
+      (instantiate-cont (a k)
+	(apply-uni-cont k (cons a value)))
+      (instantiate-cont-2 (pattern s k)
+	(instantiate (cdr pattern) s (make-cont 'instantiate-cont value k)))
+      (unify-pairs-1 (s-car k)
+	(if (not value)
+	    (apply-uni-cont k #f)
+	    (apply-uni-cont k (compose-subs s-car value))))
+      (unify-pairs-2 (new-cdr1 s-car k)
+	(unify-patterns new-cdr1 value (make-cont 'unify-pairs-1 s-car k)))
+      (unify-pairs-3 (pair2 s-car k)
+	(instantiate (cdr pair2) s-car (make-cont 'unify-pairs-2 value s-car k)))
+      (unify-pairs-4 (pair1 pair2 k)
+	(if (not value)
+	    (apply-uni-cont k #f)
+	    (instantiate (cdr pair1) value (make-cont 'unify-pairs-3 pair2 value k))))
       (else (error 'apply-uni-cont "invalid continuation: ~s" k)))))
 
 ;; Unification pattern-matcher
@@ -46,11 +69,7 @@
       ((pattern-variable? p1)
        (if (pattern-variable? p2)
 	 (apply-uni-cont k (unit-sub p1 p2))
-	 (occurs? p1 p2
-	   (lambda (bool)
-	     (if bool
-	       (apply-uni-cont k #f)
-	       (apply-uni-cont k (unit-sub p1 p2)))))))
+	 (occurs? p1 p2 (make-cont 'unify-patterns-cont p1 p2 k))))
       ((pattern-variable? p2) (unify-patterns p2 p1 k))
       ((and (constant? p1) (constant? p2) (equal? p1 p2)) (apply-uni-cont k (empty-sub)))
       ((and (pair? p1) (pair? p2)) (unify-pairs p1 p2 k))
@@ -58,19 +77,7 @@
 
 (define unify-pairs
   (lambda (pair1 pair2 k)
-    (unify-patterns (car pair1) (car pair2)
-      (lambda (s-car)
-	(if (not s-car)
-	  (apply-uni-cont k #f)
-	  (instantiate (cdr pair1) s-car
-	    (lambda (new-cdr1)
-	      (instantiate (cdr pair2) s-car
-		(lambda (new-cdr2)
-		  (unify-patterns new-cdr1 new-cdr2
-		    (lambda (s-cdr)
-		      (if (not s-cdr)
-			(apply-uni-cont k #f)
-			(apply-uni-cont k (compose-subs s-car s-cdr))))))))))))))
+    (unify-patterns (car pair1) (car pair2) (make-cont 'unify-pairs-4 pair1 pair2 k))))
 
 (define instantiate
   (lambda (pattern s k)
@@ -78,11 +85,7 @@
       ((constant? pattern) (apply-uni-cont k pattern))
       ((pattern-variable? pattern) (apply-sub s pattern k))
       ((pair? pattern)
-       (instantiate (car pattern) s
-	 (lambda (a)
-	   (instantiate (cdr pattern) s
-	     (lambda (b)
-	       (apply-uni-cont k (cons a b)))))))
+       (instantiate (car pattern) s (make-cont 'instantiate-cont-2 pattern s k)))
       (else (error 'instantiate "bad pattern: ~a" pattern)))))
 
 ;;------------------------------------------------------------------
@@ -117,7 +120,5 @@
 	  (apply-uni-cont k new-pattern)
 	  (apply-uni-cont k var)))
       (composite (s1 s2)
-	(apply-sub s1 var
-	  (lambda (pattern)
-	    (instantiate pattern s2 k))))
+	(apply-sub s1 var (make-cont 'apply-sub-cont s2 k)))
       (else (error 'apply-sub "bad substitution: ~a" s)))))
