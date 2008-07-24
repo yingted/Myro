@@ -21,6 +21,8 @@
 
 (define apply-parser-cont
   (lambda (k value)
+    ;;(if (not (eq? (car k) 'parser))
+    ;;(apply-cont k value)
     (record-case (cdr k)
        (init () value)
        (print-parsed-sexps (tokens-left handler)

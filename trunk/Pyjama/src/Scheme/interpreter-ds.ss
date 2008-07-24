@@ -1,6 +1,3 @@
-;; fixme:
-;; - call/cc
-
 ;; Interpreter
 
 (load "environments-ds.ss")
@@ -21,10 +18,6 @@
 	   (apply-cont 'interpreter k value))
        (load-file-2 (env handler k)
 	   (load-loop value env handler (make-cont 'load-file k)))
-       (call/cc-cont (args env handler k)
-           (apply-cont 'interpreter k (car args)))
-       (call/cc-cont-2 () 
-	   (apply-cont 'interpreter k 'huh?))
        (import-prim (env filename handler k)
 	   (let ((module (extend env '() '())))
 	     (set-binding-value! value module)
@@ -141,7 +134,8 @@
 	 (printf "give me a string~%")
 	 (read-eval-print))
 	(else
-	 (read-datum input REP-handler (make-cont 'rep-2)))))))
+	 ;;(read-datum input REP-handler (make-cont 'interpreter 'rep-2)))))))
+	 (parse (read-string input) test-handler (make-cont 'interpreter 'rep-2)))))))
 
 (define m
   (lambda (exp env handler k)
@@ -287,8 +281,9 @@
 
 (define call/cc-primitive
   (lambda (proc env handler k)
-    (let ((fake-k (make-cont 'call/cc-cont args env handler k))) 
-      (my-apply proc args (make-cont 'call/cc-cont-2 env handler k)))))
+    (let ((fake-k (lambda (args env2 handler k2) 
+		    (apply-cont k (car args)))))
+      (proc (list fake-k) env handler k))))
 
 (define get-variables
   (lambda (env)
