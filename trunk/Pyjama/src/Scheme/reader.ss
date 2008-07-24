@@ -2,24 +2,6 @@
 
 ;; includes support for vectors, rationals, exponents, and backquote
 
-;;------------------------------------------------------------------------
-;; scanner - character stream represented as a list
-
-;;(define 1st car)
-;;(define remaining cdr)
-
-;;(define scan-input
-;;  (lambda (input)
-;;    (let scan ((chars (append (string->list input) (list #\nul)))
-;;	       (tokens '()))
-;;      (let ((answer (apply-action '(goto start-state) '() chars)))
-;;	(let ((token (car answer))
-;;	      (chars-left (cdr answer)))
-;;	  (if (token-type? token 'end-marker)
-;;	    (reverse (cons token tokens))
-;;	    (scan chars-left (cons token tokens))))))))
-
-;;------------------------------------------------------------------------
 ;; scanner - character stream represented as a position number
 
 (define chars-to-scan 'undefined)
@@ -30,16 +12,47 @@
 (define remaining
   (lambda (n) (+ 1 n)))
 
+;; scan-input takes a string and returns a list of tokens created
+;; from all of the characters in the string
+
+;; input_reg handler_reg k_reg
 (define scan-input
+  (lambda ()
+    (set! chars-to-scan (string-append input_reg (string #\nul)))
+    (set! chars_reg 0)
+    (set! pc scan-input-loop)))
+
+;; chars_reg handler_reg k_reg
+(define scan-input-loop
+  (lambda ()
+    (set! action_reg '(goto start-state))
+    (set! buffer_reg '())
+    (set! k_reg (make-start-action-cont handler_reg k_reg))
+    (set! pc apply-action)))
+
+;; for testing purposes
+(define test-handler (lambda (e) (list 'exception e)))
+
+;; for testing purposes
+(define test-cont '(test-cont))
+
+;; for testing purposes
+(define scan-string
   (lambda (input)
-    (set! chars-to-scan (string-append input (string #\nul)))
-    (let scan ((chars 0) (tokens '()))
-      (let ((answer (apply-action '(goto start-state) '() chars)))
-	(let ((token (car answer))
-	      (chars-left (cdr answer)))
-	  (if (token-type? token 'end-marker)
-	    (reverse (cons token tokens))
-	    (scan chars-left (cons token tokens))))))))
+    (set! input_reg input)
+    (set! handler_reg test-handler)
+    (set! k_reg test-cont)
+    (set! pc scan-input)
+    (run)))
+
+;; for testing purposes
+(define scan-file
+  (lambda (filename)
+    (set! input_reg (read-content filename))
+    (set! handler_reg test-handler)
+    (set! k_reg test-cont)
+    (set! pc scan-input)
+    (run)))
 
 ;;------------------------------------------------------------------------
 ;; scanner actions
@@ -50,61 +63,63 @@
 ;;            | (goto <state>)
 ;;            | (emit <token-type>)
 
+;; action_reg buffer_reg chars_reg handler_reg k_reg
 (define apply-action
-  (lambda (action buffer chars)
+  (lambda (action buffer chars handler k)  ;; k receives 2 args: token, chars-left
     (record-case action
       (shift (next)
-	(apply-action next (cons (1st chars) buffer) (remaining chars)))
+	(apply-action next (cons (1st chars) buffer) (remaining chars) handler k))
       (replace (new-char next)
-	(apply-action next (cons new-char buffer) (remaining chars)))
+	(apply-action next (cons new-char buffer) (remaining chars) handler k))
       (drop (next)
-	(apply-action next buffer (remaining chars)))
+	(apply-action next buffer (remaining chars) handler k))
       (goto (state)
-	(apply-action (apply-state state (1st chars)) buffer chars))
+	(apply-action (apply-state state (1st chars) handler) buffer chars handler k))
       (emit (token-type)
-	(make-answer (convert-buffer-to-token token-type buffer) chars))
+	(convert-buffer-to-token token-type buffer handler
+	  (lambda (v) (k v chars))))
       (else (error 'apply-action "invalid action: ~a" action)))))
       
+;; c_reg handler_reg
 (define scan-error
-  (lambda (c)
+  (lambda (c handler)
     (if (char=? c #\nul)
-      (error 'scan "unexpected end of input")
-      (error 'scan "unexpected character ~a encountered" c))))
+      (handler "unexpected end of input")
+      (handler (format "unexpected character ~a encountered" c)))))
 
-(define make-answer cons)
-
+;; token_reg buffer_reg handler_reg k_reg
 (define convert-buffer-to-token
-  (lambda (token-type buffer)
+  (lambda (token-type buffer handler k)  ;; k receives 1 token
     (let ((buffer (reverse buffer)))
       (case token-type
 	(integer
-	  (list 'integer (list->string buffer)))
+	  (k (list 'integer (list->string buffer))))
 	(decimal
-	  (list 'decimal (list->string buffer)))
+	  (k (list 'decimal (list->string buffer))))
 	(rational
-	  (list 'rational (list->string buffer)))
+	  (k (list 'rational (list->string buffer))))
 	(identifier
-	  (list 'identifier (string->symbol (list->string buffer))))
+	  (k (list 'identifier (string->symbol (list->string buffer)))))
 	(boolean
-	  (list 'boolean (or (char=? (car buffer) #\t) (char=? (car buffer) #\T))))
+	  (k (list 'boolean (or (char=? (car buffer) #\t) (char=? (car buffer) #\T)))))
 	(character
-	  (list 'character (car buffer)))
+	  (k (list 'character (car buffer))))
 	(named-character
 	  (let ((name (list->string buffer)))
 	    (cond
-	      ((string=? name "nul") (list 'character #\nul))
-	      ((string=? name "space") (list 'character #\space))
-	      ((string=? name "tab") (list 'character #\tab))
-	      ((string=? name "newline") (list 'character #\newline))
-	      ((string=? name "linefeed") (list 'character #\newline))
-	      ((string=? name "backspace") (list 'character #\backspace))
-	      ((string=? name "return") (list 'character #\return))
-	      ((string=? name "page") (list 'character #\page))
-	      (else (error 'scan "invalid character name #\\~a" name)))))
+	      ((string=? name "nul") (k (list 'character #\nul)))
+	      ((string=? name "space") (k (list 'character #\space)))
+	      ((string=? name "tab") (k (list 'character #\tab)))
+	      ((string=? name "newline") (k (list 'character #\newline)))
+	      ((string=? name "linefeed") (k (list 'character #\newline)))
+	      ((string=? name "backspace") (k (list 'character #\backspace)))
+	      ((string=? name "return") (k (list 'character #\return)))
+	      ((string=? name "page") (k (list 'character #\page)))
+	      (else (handler (format "invalid character name #\\~a" name))))))
 	(string
-	  (list 'string (list->string buffer)))
+	  (k (list 'string (list->string buffer))))
 	(else
-	  (list token-type))))))
+	  (k (list token-type)))))))
 
 (define token-type?
   (lambda (token class)
@@ -171,8 +186,9 @@
 ;;------------------------------------------------------------------------
 ;; finite-state automaton
 
+;; state_reg c_reg handler_reg
 (define apply-state
-  (lambda (state c)
+  (lambda (state c handler)
     (case state
       (start-state
 	(cond
@@ -192,7 +208,7 @@
 	  ((char=? c #\.) '(shift (goto decimal-point-state)))
 	  ((char-numeric? c) '(shift (goto whole-number-state)))
 	  ((char=? c #\nul) '(emit end-marker))
-	  (else (scan-error c))))
+	  (else (scan-error c handler))))
       (comment-state
 	(cond
 	  ((char=? c #\newline) '(drop (goto start-state)))
@@ -207,12 +223,12 @@
 	  ((char-boolean? c) '(shift (emit boolean)))
 	  ((char=? c #\\) '(drop (goto character-state)))
 	  ((char=? c #\() '(drop (emit lvector)))
-	  (else (scan-error c))))
+	  (else (scan-error c handler))))
       (character-state
 	(cond
 	  ((char-alphabetic? c) '(shift (goto alphabetic-character-state)))
 	  ((not (char=? c #\nul)) '(shift (emit character)))
-	  (else (scan-error c))))
+	  (else (scan-error c handler))))
       (alphabetic-character-state
 	(cond
 	  ((char-alphabetic? c) '(shift (goto named-character-state)))
@@ -225,7 +241,7 @@
 	(cond
 	  ((char=? c #\") '(drop (emit string)))
 	  ((char=? c #\\) '(drop (goto string-escape-state)))
-	  ((char=? c #\nul) (scan-error c))
+	  ((char=? c #\nul) (scan-error c handler))
 	  (else '(shift (goto string-state)))))
       (string-escape-state
 	(cond
@@ -236,31 +252,31 @@
 	  ((char=? c #\n) '(replace #\newline (goto string-state)))
 	  ((char=? c #\t) '(replace #\tab (goto string-state)))
 	  ((char=? c #\r) '(replace #\return (goto string-state)))
-	  (else (scan-error c))))
+	  (else (scan-error c handler))))
       (identifier-state
 	(cond
 	  ((char-subsequent? c) '(shift (goto identifier-state)))
 	  ((char-delimiter? c) '(emit identifier))
-	  (else (scan-error c))))
+	  (else (scan-error c handler))))
       (signed-state
 	(cond
 	  ((char-numeric? c) '(shift (goto whole-number-state)))
 	  ((char=? c #\.) '(shift (goto signed-decimal-point-state)))
 	  ((char-delimiter? c) '(emit identifier))
 	  ((char-subsequent? c) '(shift (goto identifier-state)))
-	  (else (scan-error c))))
+	  (else (scan-error c handler))))
       (decimal-point-state
 	(cond
 	  ((char-numeric? c) '(shift (goto fractional-number-state)))
 	  ((char-delimiter? c) '(emit dot))
 	  ((char-subsequent? c) '(shift (goto identifier-state)))
-	  (else (scan-error c))))
+	  (else (scan-error c handler))))
       (signed-decimal-point-state
 	(cond
 	  ((char-numeric? c) '(shift (goto fractional-number-state)))
 	  ((char-delimiter? c) '(emit identifier))
 	  ((char-subsequent? c) '(shift (goto identifier-state)))
-	  (else (scan-error c))))
+	  (else (scan-error c handler))))
       (whole-number-state
 	(cond
 	  ((char-numeric? c) '(shift (goto whole-number-state)))
@@ -269,50 +285,60 @@
 	  ((or (char=? c #\e) (char=? c #\E)) '(shift (goto suffix-state)))
 	  ((char-delimiter? c) '(emit integer))
 	  ((char-subsequent? c) '(shift (goto identifier-state)))
-	  (else (scan-error c))))
+	  (else (scan-error c handler))))
       (fractional-number-state
 	(cond
 	  ((char-numeric? c) '(shift (goto fractional-number-state)))
 	  ((or (char=? c #\e) (char=? c #\E)) '(shift (goto suffix-state)))
 	  ((char-delimiter? c) '(emit decimal))
 	  ((char-subsequent? c) '(shift (goto identifier-state)))
-	  (else (scan-error c))))
+	  (else (scan-error c handler))))
       (rational-number-state
 	(cond
 	  ((char-numeric? c) '(shift (goto rational-number-state*)))
 	  ((char-delimiter? c) '(emit identifier))
 	  ((char-subsequent? c) '(shift (goto identifier-state)))
-	  (else (scan-error c))))
+	  (else (scan-error c handler))))
       (rational-number-state*
 	(cond
 	  ((char-numeric? c) '(shift (goto rational-number-state*)))
 	  ((char-delimiter? c) '(emit rational))
 	  ((char-subsequent? c) '(shift (goto identifier-state)))
-	  (else (scan-error c))))
+	  (else (scan-error c handler))))
       (suffix-state
 	(cond
 	  ((char-sign? c) '(shift (goto signed-exponent-state)))
 	  ((char-numeric? c) '(shift (goto exponent-state)))
 	  ((char-delimiter? c) '(emit identifier))
 	  ((char-subsequent? c) '(shift (goto identifier-state)))
-	  (else (scan-error c))))
+	  (else (scan-error c handler))))
       (signed-exponent-state
 	(cond
 	  ((char-numeric? c) '(shift (goto exponent-state)))
 	  ((char-delimiter? c) '(emit identifier))
 	  ((char-subsequent? c) '(shift (goto identifier-state)))
-	  (else (scan-error c))))
+	  (else (scan-error c handler))))
       (exponent-state
 	(cond
 	  ((char-numeric? c) '(shift (goto exponent-state)))
 	  ((char-delimiter? c) '(emit decimal))
 	  ((char-subsequent? c) '(shift (goto identifier-state)))
-	  (else (scan-error c))))
+	  (else (scan-error c handler))))
       (else
 	(error 'apply-state "invalid state: ~a" state)))))
 
 ;;------------------------------------------------------------------------
-;; reader (registerized)
+;; recursive descent parser
+;;
+;; <sexp> ::= <number> | <boolean> | <character> | <string> | <identifier>
+;;          | ' <sexp>
+;;          | ( <sexp>* )
+;;          | ( <sexp>+ . <sexp> )
+;;          | [ <sexp>* ]
+;;          | [ <sexp>+ . <sexp> ]
+;;          | ` <sexp>
+;;          | , <sexp>
+;;          | ,@ <sexp>
 
 ;; token stream represented as a list
 (define first car)
@@ -326,12 +352,23 @@
 (define keyword_reg 'undefined)
 (define pc 'undefined)
 
+;; input_reg handler_reg k_reg
 (define read-datum
-  (lambda (input)
-    (set! tokens_reg (scan-input input))
-    (set! k_reg (make-init-cont))
-    (set! pc read-sexp)
-    (run)))
+  (lambda (input handler k)  ;; k receives 2 args:  sexp, tokens-left
+    (scan-input input handler
+      (lambda (tokens)
+	(read-sexp tokens handler
+	  (lambda (sexp tokens-left)
+	    (if (token-type? (first tokens-left) 'end-marker)
+	      (k sexp tokens-left)
+	      (handler (format "tokens left over: ~a" tokens-left)))))))))
+
+;;(define read-datum
+;;  (lambda (input)
+;;    (set! tokens_reg (scan-input input))
+;;    (set! k_reg (make-init-cont))
+;;    (set! pc read-sexp)
+;;    (run)))
 
 ;; the trampoline
 (define run
@@ -539,10 +576,13 @@
   (lambda (sexp1 k)
     (list 'vector-rest-cont sexp1 k)))
 
-;; k_reg sexp_reg tokens_reg
+;; k_reg sexp_reg tokens_reg    ???? why is tokens_reg here???
 (define apply-cont
   (lambda ()
     (record-case k_reg
+      ;; for testing purposes
+      (test-cont ()
+	(set! pc #f))
       (init-cont ()
 	(if (token-type? (first tokens_reg) 'end-marker)
 	  (set! pc #f)
@@ -566,9 +606,6 @@
       (print-sexps-cont ()
 	(pretty-print sexp_reg)
 	(set! pc print-sexps))
-      ;; temporary
-      (load-cont ()
-	(set! pc #f))
       (vector-cont (k)
 	(set! k_reg k)
 	(set! sexp_reg (list->vector sexp_reg))
@@ -580,5 +617,34 @@
 	(set! k_reg k)
 	(set! sexp_reg (cons sexp1 sexp_reg))
 	(set! pc apply-cont))
+      (scan-input-loop-cont (token k)
+	(set! k_reg k)
+	(set! sexp_reg (cons token sexp_reg))
+	(set! pc apply-cont))
       (else (error 'apply-cont "invalid continuation: ~a" k_reg)))))
 
+;; k_reg token_reg chars_reg
+(define apply-cont2
+  (lambda ()
+    (record-case k_reg
+      (start-action-cont (handler k)
+	(if (token-type? token_reg 'end-marker)
+	  (begin
+	    (set! k_reg k)
+	    (set! sexp_reg (list token_reg))
+	    (set! pc apply-cont))
+	  (begin
+	    (set! handler_reg handler)
+	    (set! k_reg (make-scan-input-loop-cont token_reg k))
+	    (set! pc scan-input-loop))))
+      (else (error 'apply-cont2 "invalid continuation: ~a" k_reg)))))
+
+;; handler_reg exn_reg
+(define apply-handler
+  (lambda ()
+    (record-case handler_reg
+      ...)))
+
+(define make-scan-input-loop-cont
+  (lambda (token k)
+    (list 'scan-input-loop-cont token k)))

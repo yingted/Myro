@@ -22,7 +22,7 @@
     (scan-input-loop 0 handler k)))
 
 (define scan-input-loop
-  (lambda (chars handler k)
+  (lambda (chars handler k)   ;; k receives a list of tokens
     (apply-action '(goto start-state) '() chars handler
       (lambda (token chars-left)
 	(if (token-type? token 'end-marker)
@@ -32,18 +32,20 @@
 	      (k (cons token tokens)))))))))
 
 ;; for testing purposes
-(define test-handler
-  (lambda (e) (list 'exception e)))
+(define test-handler (lambda (e) (list 'exception e)))
+
+;; for testing purposes
+(define test-cont (lambda (v) v))
 
 ;; for testing purposes
 (define scan-string
   (lambda (input)
-    (scan-input input test-handler (lambda (v) v))))
+    (scan-input input test-handler test-cont)))
 
 ;; for testing purposes
 (define scan-file
   (lambda (filename)
-    (scan-input (read-content filename) test-handler (lambda (v) v))))
+    (scan-input (read-content filename) test-handler test-cont)))
 
 ;;------------------------------------------------------------------------
 ;; scanner actions
