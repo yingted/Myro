@@ -9,6 +9,7 @@
 (define apply-cont
   (lambda (k value)
     (case (car k)
+       (interpreter (apply-interpreter-cont k value))
        (parser (apply-parser-cont k value))
        (unifier (apply-unifier-cont k value))
        (reader
@@ -95,7 +96,7 @@
 	 (apply-cont k (binding-value binding)))
        (else (error 'apply-parser-cont "invalid continuation: '~s'" k)))))
 
-(define apply-cont2
+(define apply-parser-cont2
   (lambda (k datum tokens-left)
     (record-case k
        (print-parsed-sexps-2 (handler)
