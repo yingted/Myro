@@ -395,6 +395,12 @@
 (define rest-of cdr)
 
 ;; for testing purposes
+
+;; read-string takes a string and parses it into the next
+;; s-expression, returning the s-expression.  If there are characters
+;; left over, an exception object is returned, represented as the list
+;; (exception "description").
+
 (define read-string
   (lambda (input)
     (set! input_reg input)

@@ -2,7 +2,7 @@
 
 (define apply-unifier-cont
   (lambda (k value)
-    (record-case k
+    (record-case (cdr k)
       (init () value)
       (occurs-cont (var pattern k)
 	(if value
@@ -30,7 +30,7 @@
 	(if (not value)
 	    (apply-cont k #f)
 	    (instantiate (cdr pair1) value (make-cont 'unifier 'unify-pairs-3 pair2 value k))))
-      (else (error 'apply-cont "invalid continuation: ~s" k)))))
+      (else (error 'apply-unifier-cont "invalid continuation: ~s" k)))))
 
 ;; Unification pattern-matcher
 

@@ -28,10 +28,10 @@
        (print-parsed-sexps (tokens-left handler)
 	   (pretty-print value)
 	   (print-parsed-sexps tokens-left handler))
-       (expand-quasi-1 (v1 v2 k)
+       (expand-quasi-1 (v1 k)
 	   (apply-cont k `(cons ,v1 ,value)))
-       (expand-quasi-2 (datum handler v2 k)
-	   (expand-quasiquote (cdr datum) handler (make-cont 'parser 'expand-quasi-1 value v2 k)))
+       (expand-quasi-2 (datum handler k)
+	   (expand-quasiquote (cdr datum) handler (make-cont 'parser 'expand-quasi-1 value k)))
        (expand-quasi-3 (datum k)
 	   (apply-cont k `(append ,(cadr (car datum)) ,value)))
        (expand-quasi-4 (k)
@@ -46,23 +46,23 @@
 	   (parse-all (cdr datum) handler (make-cont 'parser 'parse-1 value k)))
        (parse-3 (k)
 	   (apply-cont k (raise-exp value)))
-       (parse-4 (datum k body cvar cexps)
+       (parse-4 (datum k body cexps)
            (let ((cvar (catch-var (caddr datum))))
 	     (apply-cont k (try-catch-finally-exp body cvar cexps value))))
-       (parse-5 (datum handler k body cvar)
-           (parse-all (finally-exps (cadddr datum)) handler (make-cont 'parser 'parse-4 datum k body cvar value)))
-       (parse-6 (datum handler k cvar)
-           (parse-all (catch-exps (caddr datum)) handler (make-cont 'parser 'parse-5 datum handler k value cvar)))
+       (parse-5 (datum handler k body)
+           (parse-all (finally-exps (cadddr datum)) handler (make-cont 'parser 'parse-4 datum k body value)))
+       (parse-6 (datum handler k)
+           (parse-all (catch-exps (caddr datum)) handler (make-cont 'parser 'parse-5 datum handler k value)))
        (parse-7 (k body)
 	   (apply-cont k (try-finally-exp body value)))
        (parse-8 (datum handler k)
 	   (parse-all (finally-exps (caddr datum)) handler (make-cont 'parser 'parse-7 k value)))
-       (parse-9 (datum k body cvar)
+       (parse-9 (datum k body)
 	   (let ((cvar (catch-var (caddr datum))))
 	     (apply-cont k (try-catch-exp body cvar value))))
-       (parse-10 (datum handler datum k cvar)
-	   (parse-all (catch-exps (caddr datum)) handler (make-cont 'parser 'parse-9 datum k value cvar)))
-       (parse-11 (datum)
+       (parse-10 (datum handler k)
+	   (parse-all (catch-exps (caddr datum)) handler (make-cont 'parser 'parse-9 datum k value)))
+       (parse-11 (datum k)
 	   (if (proper-list? (cadr datum))
 	     (apply-cont k (lambda-exp (cadr datum) value))
 	     (apply-cont k (mu-lambda-exp (head (cadr datum)) (last (cadr datum)) value))))
@@ -95,17 +95,17 @@
 	     (process-macro-clauses value datum handler k)
 	     (apply-cont k (value datum))))
        (lookup-cont (k)
-	 (apply-cont k (binding-value binding)))
+	 (apply-cont k (binding-value value)))
        (else (error 'apply-parser-cont "invalid continuation: '~s'" k)))))
 
-(define apply-parser-cont2
-  (lambda (k datum tokens-left)
-    (record-case k
-       (print-parsed-sexps-2 (handler)
-	   (parse datum handler (make-cont 'parser 'print-parsed-sexps tokens-left handler)))
-       (parse-string (handler)
-	   (parse datum handler (make-cont 'parser 'init)))
-       (else (error 'apply-cont2 "invalid continuation: '~s'" k)))))
+;;(define apply-parser-cont2
+;;  (lambda (k datum tokens-left)
+;;    (record-case k
+;;       (print-parsed-sexps-2 (handler)
+;;	   (parse datum handler (make-cont 'parser 'print-parsed-sexps tokens-left handler)))
+;;       (parse-string (handler)
+;;	   (parse datum handler (make-cont 'parser 'init)))
+;;       (else (error 'apply-cont2 "invalid continuation: '~s'" k)))))
 
 ;;--------------------------------------------------------------------------
 ;; The core grammar
@@ -266,10 +266,19 @@
 ;;--------------------------------------------------------------------------
 
 ;; for testing purposes
+(define exception?
+  (lambda (x)
+    (and (list? x)
+	 (not (null? x))
+	 (eq? (car x) 'exception))))
+
+;; for testing purposes
 (define parse-string
   (lambda (string)
-    (parse (read-string string) test-handler (make-cont 'parser 'init))))
-;;    (read-datum string test-handler (make-cont 'parser 'parse-string test-handler))))
+    (let ((sexp (read-string string)))
+      (if (exception? sexp)
+	sexp
+	(parse sexp test-handler (make-cont 'parser 'init))))))
 
 (define parse
   (lambda (datum handler k)
@@ -284,7 +293,7 @@
       ((syntactic-sugar? datum)
        (expand-once datum handler (make-cont 'parser 'parse-20 handler k)))
       ((if-then? datum)
-       (parse (cadr datum) handler (amke-cont 'parse-19 datum handler k))) 
+       (parse (cadr datum) handler (make-cont 'parser 'parse-19 datum handler k))) 
       ((if-else? datum)
        (parse (cadr datum) handler (make-cont 'parser 'parse-17 datum handler k)))
       ((assignment? datum)
@@ -298,7 +307,7 @@
       ((begin? datum)
        (parse-all (cdr datum) handler (make-cont 'parser 'parse-12 k)))
       ((lambda? datum)
-       (parse (cons 'begin (cddr datum)) handler (make-cont 'parser 'parse-11 datum)))
+       (parse (cons 'begin (cddr datum)) handler (make-cont 'parser 'parse-11 datum k)))
       ((try? datum)
        (cond
 	 ((= (length datum) 2)
@@ -306,13 +315,13 @@
 	  (parse (try-body datum) handler k))
 	 ((and (= (length datum) 3) (catch? (caddr datum)))
 	  ;; (try <body> (catch <var> <exp> ...))
-	  (parse (try-body datum) handler (make-cont 'parser 'parse-10 datum handler datum k cvar)))
+	  (parse (try-body datum) handler (make-cont 'parser 'parse-10 datum handler k)))
 	 ((and (= (length datum) 3) (finally? (caddr datum)))
 	  ;; (try <body> (finally <exp> ...))
 	  (parse (try-body datum) handler (make-cont 'parser 'parse-8 datum handler k)))
 	 ((and (= (length datum) 4) (catch? (caddr datum)) (finally? (cadddr datum)))
 	  ;; (try <body> (catch <var> <exp> ...) (finally <exp> ...))
-	  (parse (try-body datum) handler (make-cont 'parser 'parse-6 datum handler k cvar)))
+	  (parse (try-body datum) handler (make-cont 'parser 'parse-6 datum handler k)))
 	 (else (parser-apply-handler handler (format "bad try syntax: ~s" datum)))))
       ((raise? datum)
        (parse (cadr datum) handler (make-cont 'parser 'parse-3 k)))
@@ -340,7 +349,7 @@
 	 (apply-cont k (cadr (car datum)))
 	 (expand-quasiquote (cdr datum) handler (make-cont 'parser 'expand-quasi-3 datum k))))
       (else
-       (expand-quasiquote (car datum) handler (make-cont 'parser 'expand-quasi-2 datum handler v2 k))))))
+       (expand-quasiquote (car datum) handler (make-cont 'parser 'expand-quasi-2 datum handler k))))))
 
 (define proper-list?
   (lambda (x)
@@ -391,7 +400,7 @@
 (define if-then? (tagged-list 'if = 3))
 (define if-else? (tagged-list 'if = 4))
 (define assignment? (tagged-list 'set! = 3))
-(define define? (tagged-list 'define = 3))
+(define define? (tagged-list 'define >= 3))
 (define define-syntax? (tagged-list 'define-syntax >= 3))
 (define begin? (tagged-list 'begin >= 2))
 (define lambda? (tagged-list 'lambda >= 3))

@@ -359,7 +359,7 @@
 (define if-then? (tagged-list 'if = 3))
 (define if-else? (tagged-list 'if = 4))
 (define assignment? (tagged-list 'set! = 3))
-(define define? (tagged-list 'define = 3))
+(define define? (tagged-list 'define >= 3))
 (define define-syntax? (tagged-list 'define-syntax >= 3))
 (define begin? (tagged-list 'begin >= 2))
 (define lambda? (tagged-list 'lambda >= 3))
