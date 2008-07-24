@@ -11,6 +11,73 @@
     (apply-handler)))
 
 ;;----------------------------------------------------------------------------
+;; procedures represented as data structures
+
+(define make-procedure list)
+
+(define apply-proc
+  (lambda (proc args env handler k)
+    (record-case proc
+      (closure (formals body env)
+	(if (= (length args) (length formals))
+	  (m body (extend env formals args) handler k)
+	  ;; temporary
+	  (interp-apply-handler handler "incorrect number of arguments")))
+      (mu-closure (formals runt body env)
+	(if (>= (length args) (length formals))
+	    (let ((new-env
+		   (extend env
+		     (cons runt formals)
+		     (cons (list-tail args (length formals))
+			   (list-head args (length formals))))))
+	      (m body new-env handler k))
+	    ;; temporary
+	    (interp-apply-handler handler "not enough arguments given")))
+      (fake-k (k) (apply-cont k (car args)))
+      (exit-prim ()
+	(set! macro-env (make-macro-env))
+	(set! toplevel-env (make-toplevel-env))
+	;; temporary
+	(set! load-stack '())
+	'(exiting the interpreter))
+      (sqrt-prim () (apply-cont k (apply sqrt args)))
+      (print-prim () (begin (for-each pretty-print args) (apply-cont k 'ok)))
+      (display-prim () (apply display args))
+      (newline-prim () (begin (newline) (apply-cont k 'ok)))
+      (load-prim () (load-file-temp (car args) toplevel-env handler k))
+      (null?-prim () (apply-cont k (apply null? args)))
+      (cons-prim () (apply-cont k (apply cons args)))
+      (car-prim () (apply-cont k (apply car args)))
+      (cdr-prim () (apply-cont k (apply cdr args)))
+      (list-prim () (apply-cont k args))
+      (+-prim () (apply-cont k (apply + args)))
+      (--prim () (apply-cont k (apply - args)))
+      (*-prim () (apply-cont k (apply * args)))
+      (/-prim () (apply-cont k (apply / args)))
+      (<-prim () (apply-cont k (apply < args)))
+      (>-prim () (apply-cont k (apply > args)))
+      (=-prim () (apply-cont k (apply = args)))
+      (equal?-prim () (apply-cont k (apply equal? args)))
+      (range-prim () (apply-cont k (apply range args)))
+      (set-car!-prim () (apply-cont k (apply set-car! args)))
+      (set-cdr!-prim () (apply-cont k (apply set-cdr! args)))
+      (import-prim () (import-primitive args env handler k))
+      (get-prim () (get-primitive args env handler k))
+      (call-with-current-continuation-prim () (call/cc-primitive (car args) env handler k))
+      (call/cc-prim () (call/cc-primitive (car args) env handler k))
+      (reverse-prim () (apply-cont k (apply reverse args)))
+      (append-prim () (apply-cont k (apply append args)))
+      (list->vector-prim () (apply-cont k (apply list->vector args)))
+      (dir-prim () (apply-cont k (get-variables env)))
+      (env-prim () (apply-cont k env))
+      (current-time-prim ()
+	(apply-cont k (let ((now (current-time)))
+			(+ (time-second now)
+			   (inexact (/ (time-nanosecond now)
+				       1000000000))))))
+      (else (error 'apply-proc "invalid procedure: ~a" proc)))))
+
+;;----------------------------------------------------------------------------
 
 (define apply-interpreter-cont
   (lambda (k value)
@@ -46,7 +113,7 @@
 	    ;; temporary
 	    (interp-apply-handler handler exception))
        (m-1 (func env handler k)
-	    (func value env handler k))
+	    (apply-proc func value env handler k))
        (m-2 (operands env handler k)
 	    (m* operands env handler (make-cont 'interpreter 'm-1 value env handler k)))
        (m-3 (handler)
@@ -164,24 +231,11 @@
 
 (define closure
   (lambda (formals body env)
-    (lambda (args env2 handler k2)
-      (if (= (length args) (length formals))
-	(m body (extend env formals args) handler k2)
-	;; temporary
-	(interp-apply-handler handler "incorrect number of arguments")))))
+    (make-procedure 'closure formals body env)))
 
 (define mu-closure
   (lambda (formals runt body env)
-    (lambda (args env2 handler k2)
-      (if (>= (length args) (length formals))
-	(let ((new-env
-		(extend env
-		  (cons runt formals)
-		  (cons (list-tail args (length formals))
-			(list-head args (length formals))))))
-	  (m body new-env handler k2))
-	;; temporary
-	(interp-apply-handler handler "not enough arguments given")))))
+    (make-procedure 'mu-closure formals runt body env)))
 
 (define m*
   (lambda (exps env handler k)
@@ -201,47 +255,38 @@
 	    'import 'get 'call-with-current-continuation 'call/cc
 	    'reverse 'append 'list->vector 'dir 'env 'current-time)
       (list '()
-	    (lambda (args env2 handler k2)
-	      (set! macro-env (make-macro-env))
-	      (set! toplevel-env (make-toplevel-env))
-	      ;; temporary
-	      (set! load-stack '())
-	      '(exiting the interpreter))
-	    (lambda (args env2 handler k2) (apply-cont k2 (apply sqrt args)))
-	    (lambda (args env2 handler k2) (for-each pretty-print args) (apply-cont k2 'ok))
-	    (lambda (args env2 handler k2) (apply display args) (apply-cont k2 'ok))
-	    (lambda (args env2 handler k2) (newline) (apply-cont k2 'ok))
-	    (lambda (args env2 handler k2) (load-file-temp (car args) toplevel-env handler k2))
-	    (lambda (args env2 handler k2) (apply-cont k2 (apply null? args)))
-	    (lambda (args env2 handler k2) (apply-cont k2 (apply cons args)))
-	    (lambda (args env2 handler k2) (apply-cont k2 (apply car args)))
-	    (lambda (args env2 handler k2) (apply-cont k2 (apply cdr args)))
-	    (lambda (args env2 handler k2) (apply-cont k2 args))
-	    (lambda (args env2 handler k2) (apply-cont k2 (apply + args)))
-	    (lambda (args env2 handler k2) (apply-cont k2 (apply - args)))
-	    (lambda (args env2 handler k2) (apply-cont k2 (apply * args)))
-	    (lambda (args env2 handler k2) (apply-cont k2 (apply / args)))
-	    (lambda (args env2 handler k2) (apply-cont k2 (apply < args)))
-	    (lambda (args env2 handler k2) (apply-cont k2 (apply > args)))
-	    (lambda (args env2 handler k2) (apply-cont k2 (apply = args)))
-	    (lambda (args env2 handler k2) (apply-cont k2 (apply equal? args)))
-	    (lambda (args env2 handler k2) (apply-cont k2 (apply range args)))
-	    (lambda (args env2 handler k2) (apply-cont k2 (apply set-car! args)))
-	    (lambda (args env2 handler k2) (apply-cont k2 (apply set-cdr! args)))
-	    (lambda (args env2 handler k2) (import-primitive args env2 handler k2))
-	    (lambda (args env2 handler k2) (get-primitive args env2 handler k2))
-	    (lambda (args env2 handler k2) (call/cc-primitive (car args) env2 handler k2))
-	    (lambda (args env2 handler k2) (call/cc-primitive (car args) env2 handler k2))
-	    (lambda (args env2 handler k2) (apply-cont k2 (apply reverse args)))
-	    (lambda (args env2 handler k2) (apply-cont k2 (apply append args)))
-	    (lambda (args env2 handler k2) (apply-cont k2 (apply list->vector args)))
-	    (lambda (args env2 handler k2) (apply-cont k2 (get-variables env2)))
-	    (lambda (args env2 handler k2) (apply-cont k2 env2))
-	    (lambda (args env2 handler k2) (apply-cont k2 (let ((now (current-time)))
-						 (+ (time-second now)
-						    (inexact (/ (time-nanosecond now)
-								1000000000))))))
-	    ))))
+	    (make-procedure 'exit-prim)
+	    (make-procedure 'sqrt-prim)
+	    (make-procedure 'print-prim)
+	    (make-procedure 'display-prim)
+	    (make-procedure 'newline-prim)
+	    (make-procedure 'load-prim)
+	    (make-procedure 'null?-prim)
+	    (make-procedure 'cons-prim)
+	    (make-procedure 'car-prim)
+	    (make-procedure 'cdr-prim)
+	    (make-procedure 'list-prim)
+	    (make-procedure '+-prim)
+	    (make-procedure '--prim)
+	    (make-procedure '*-prim)
+	    (make-procedure '/-prim)
+	    (make-procedure '<-prim)
+	    (make-procedure '>-prim)
+	    (make-procedure '=-prim)
+	    (make-procedure 'equal?-prim)
+	    (make-procedure 'range-prim)
+	    (make-procedure 'set-car!-prim)
+	    (make-procedure 'set-cdr!-prim)
+	    (make-procedure 'import-prim)
+	    (make-procedure 'get-prim)
+	    (make-procedure 'call-with-current-continuation-prim)
+	    (make-procedure 'call/cc-prim)
+	    (make-procedure 'reverse-prim)
+	    (make-procedure 'append-prim)
+	    (make-procedure 'list->vector-prim)
+	    (make-procedure 'dir-prim)
+	    (make-procedure 'env-prim)
+	    (make-procedure 'current-time-prim)))))	    
 
 (define get-primitive
   (lambda (args env handler k)
@@ -260,16 +305,10 @@
 	  (let ((module-name (cadr args)))
 	    (lookup-binding-in-first-frame module-name env handler (make-cont 'interpreter 'import-prim env filename handler k)))))))
 
-(define my-apply ;; for invoking function in call/cc
-  (lambda (proc args k)
-    (proc args)
-    (apply-cont k)))
-
 (define call/cc-primitive
   (lambda (proc env handler k)
-    (let ((fake-k (lambda (args env2 handler k2) 
-		    (apply-cont k (car args)))))
-      (proc (list fake-k) env handler k))))
+    (let ((fake-k (make-procedure 'fake-k k)))
+      (apply-proc proc (list fake-k) env handler k))))
 
 (define get-variables
   (lambda (env)
