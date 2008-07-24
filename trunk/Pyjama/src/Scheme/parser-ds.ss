@@ -7,22 +7,24 @@
 (load "unifier-ds.ss")
 
 (define apply-cont
-  (lambda (type k value)
-    (case type
+  (lambda (k value)
+    (case (car k)
        (parser (apply-parser-cont k value))
-       (unifier (apply-uni-cont k value))
-       (reader (apply-reader-cont k value))
-       (else (error 'apply-cont "invalid continuation type: '~s'" type)))))
+       (unifier (apply-unifier-cont k value))
+       (reader
+	 (set! k_reg k)
+	 (set! sexp_reg value)
+	 (set! pc apply-reader-cont)
+	 (run))
+       (else (error 'apply-cont "invalid continuation type: '~s'" (car k))))))
 
 (define apply-parser-cont
   (lambda (k value)
-    (record-case k
+    (record-case (cdr k)
        (init () value)
-       (print-parsed-sexps (tokens-left)
+       (print-parsed-sexps (tokens-left handler)
 	   (pretty-print value)
 	   (print-parsed-sexps tokens-left handler))
-       (parse-file (handler)
-	   (print-parsed-sexps value handler))
        (expand-quasi-1 (v1 v2 k)
 	   (apply-cont k `(cons ,v1 ,value)))
        (expand-quasi-2 (datum handler v2 k)
@@ -95,9 +97,9 @@
   (lambda (k datum tokens-left)
     (record-case k
        (print-parsed-sexps-2 (handler)
-	   (parse datum handler (make-cont 'parser 'print-parsed-sexps tokens-left)))
-       (parse-string (test-handler)
-	   (parse datum test-handler (make-cont 'parser 'init)))
+	   (parse datum handler (make-cont 'parser 'print-parsed-sexps tokens-left handler)))
+       (parse-string (handler)
+	   (parse datum handler (make-cont 'parser 'init)))
        (else (error 'apply-read-sexp-cont "invalid continuation: '~s'" k)))))
 
 ;;--------------------------------------------------------------------------
@@ -259,13 +261,14 @@
 ;;--------------------------------------------------------------------------
 
 ;; for testing purposes
-(define test-handler
+(define parser-test-handler
   (lambda (e) (list 'exception e)))
 
 ;; for testing purposes
 (define parse-string
   (lambda (string)
-    (read-datum string test-handler (make-cont 'parser 'parse-string test-handler))))
+    (parse (read-string string) parser-test-handler (make-cont 'parser 'init))))
+;;    (read-datum string test-handler (make-cont 'parser 'parse-string test-handler))))
 
 (define parse
   (lambda (datum handler k)
@@ -421,11 +424,20 @@
 ;; for testing purposes
 (define parse-file
   (lambda (filename)
-    (scan-input (read-content filename) test-handler (make-cont 'parser 'parse-file handler))))
+    (print-parsed-sexps (scan-file filename) parser-test-handler)))
+
+;; may need fixing
 
 ;; for testing purposes
 (define print-parsed-sexps
   (lambda (tokens handler)
     (if (token-type? (first tokens) 'end-marker)
       'done
-      (read-sexp tokens handler (make-cont 'parser 'print-parsed-sexps-2 handler)))))
+      (begin
+	(set! tokens_reg tokens)
+	(set! handler_reg test-handler)
+	(set! k_reg (make-cont 'parser 'print-parsed-sexps-2 handler))
+	(set! pc read-sexp)
+	(run)))))
+
+;;      (read-sexp tokens handler (make-cont 'parser 'print-parsed-sexps-2 handler)))))

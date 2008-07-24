@@ -1,6 +1,6 @@
 (define make-cont list)
 
-(define apply-uni-cont
+(define apply-unifier-cont
   (lambda (k value)
     (record-case k
       (init () value)

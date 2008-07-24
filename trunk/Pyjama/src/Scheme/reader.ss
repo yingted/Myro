@@ -45,14 +45,14 @@
   (lambda ()
     (set! action_reg '(goto start-state))
     (set! buffer_reg '())
-    (set! k_reg (make-cont 'start-action-cont handler_reg k_reg))
+    (set! k_reg (make-cont 'reader 'start-action-cont handler_reg k_reg))
     (set! pc apply-action)))
 
 ;; for testing purposes
 (define test-handler (make-handler 'test-handler))
 
 ;; for testing purposes
-(define test-cont (make-cont 'stop-cont))
+(define test-cont (make-cont 'reader 'stop-cont))
 
 ;; for testing purposes
 (define scan-string
@@ -109,7 +109,7 @@
 	      (set! pc apply-action)))))
       (emit (token-type)
 	(set! token_reg token-type)
-	(set! k_reg (make-cont 'convert-buffer-cont chars_reg k_reg))
+	(set! k_reg (make-cont 'reader 'convert-buffer-cont chars_reg k_reg))
 	(set! pc convert-buffer-to-token))
       (else (error 'apply-action "invalid action: ~a" action_reg)))))
       
@@ -129,23 +129,23 @@
       (case token_reg
 	(integer
 	  (set! sexp_reg (list 'integer (list->string buffer)))
-	  (set! pc apply-cont))
+	  (set! pc apply-reader-cont))
 	(decimal
 	  (set! sexp_reg (list 'decimal (list->string buffer)))
-	  (set! pc apply-cont))
+	  (set! pc apply-reader-cont))
 	(rational
 	  (set! sexp_reg (list 'rational (list->string buffer)))
-	  (set! pc apply-cont))
+	  (set! pc apply-reader-cont))
 	(identifier
 	  (set! sexp_reg (list 'identifier (string->symbol (list->string buffer))))
-	  (set! pc apply-cont))
+	  (set! pc apply-reader-cont))
 	(boolean
 	  (let ((bool (or (char=? (car buffer) #\t) (char=? (car buffer) #\T))))
 	    (set! sexp_reg (list 'boolean bool))
-	    (set! pc apply-cont)))
+	    (set! pc apply-reader-cont)))
 	(character
 	  (set! sexp_reg (list 'character (car buffer)))
-	  (set! pc apply-cont))
+	  (set! pc apply-reader-cont))
 	(named-character
 	  (let ((name (list->string buffer)))
 	    (let ((char (cond
@@ -161,16 +161,16 @@
 	      (if char
 		(begin
 		  (set! sexp_reg (list 'character char))
-		  (set! pc apply-cont))
+		  (set! pc apply-reader-cont))
 		(begin
 		  (set! exception_reg (format "invalid character name #\\~a" name))
 		  (set! pc apply-handler))))))
 	(string
 	  (set! sexp_reg (list 'string (list->string buffer)))
-	  (set! pc apply-cont))
+	  (set! pc apply-reader-cont))
 	(else
 	  (set! sexp_reg (list token_reg))
-	  (set! pc apply-cont))))))
+	  (set! pc apply-reader-cont))))))
 
 (define token-type?
   (lambda (token class)
@@ -406,7 +406,7 @@
 ;; input_reg handler_reg k_reg
 (define read-datum
   (lambda ()
-    (set! k_reg (make-cont 'read-datum-cont handler_reg k_reg))
+    (set! k_reg (make-cont 'reader 'read-datum-cont handler_reg k_reg))
     (set! pc scan-input)))
 
 ;; the trampoline
@@ -423,37 +423,37 @@
       (integer (str)
 	(set! sexp_reg (string->number str))
 	(set! tokens_reg (rest-of tokens_reg))
-	(set! pc apply-cont))
+	(set! pc apply-reader-cont))
       (decimal (str)
 	(set! sexp_reg (string->number str))
 	(set! tokens_reg (rest-of tokens_reg))
-	(set! pc apply-cont))
+	(set! pc apply-reader-cont))
       (rational (str)
 	(let ((num (string->number str)))
 	  (if num
 	    (begin
 	      (set! sexp_reg num)
 	      (set! tokens_reg (rest-of tokens_reg))
-	      (set! pc apply-cont))
+	      (set! pc apply-reader-cont))
 	    (begin
 	      (set! exception_reg (format "cannot represent ~a" str))
 	      (set! pc apply-handler)))))
       (boolean (bool)
 	(set! sexp_reg bool)
 	(set! tokens_reg (rest-of tokens_reg))
-	(set! pc apply-cont))
+	(set! pc apply-reader-cont))
       (character (char)
 	(set! sexp_reg char)
 	(set! tokens_reg (rest-of tokens_reg))
-	(set! pc apply-cont))
+	(set! pc apply-reader-cont))
       (string (str)
 	(set! sexp_reg str)
 	(set! tokens_reg (rest-of tokens_reg))
-	(set! pc apply-cont))
+	(set! pc apply-reader-cont))
       (identifier (id)
 	(set! sexp_reg id)
 	(set! tokens_reg (rest-of tokens_reg))
-	(set! pc apply-cont))
+	(set! pc apply-reader-cont))
       (apostrophe ()
 	(set! keyword_reg 'quote)
 	(set! pc read-abbreviation))
@@ -484,7 +484,7 @@
 	    (set! pc read-sexp-sequence))))
       (lvector ()
 	(set! tokens_reg (rest-of tokens_reg))
-	(set! k_reg (make-cont 'vector-cont k_reg))
+	(set! k_reg (make-cont 'reader 'vector-cont k_reg))
 	(set! pc read-vector))
       (else
 	(set! pc read-error)))))
@@ -493,7 +493,7 @@
 (define read-abbreviation
   (lambda ()
     (set! tokens_reg (rest-of tokens_reg))
-    (set! k_reg (make-cont 'abbreviation-cont keyword_reg k_reg))
+    (set! k_reg (make-cont 'reader 'abbreviation-cont keyword_reg k_reg))
     (set! pc read-sexp)))
 
 ;; tokens_reg terminator_reg handler_reg k_reg
@@ -505,10 +505,10 @@
 	(set! pc close-sexp-sequence))
       (dot ()
 	(set! tokens_reg (rest-of tokens_reg))
-	(set! k_reg (make-cont 'dot-cont terminator_reg handler_reg k_reg))
+	(set! k_reg (make-cont 'reader 'dot-cont terminator_reg handler_reg k_reg))
 	(set! pc read-sexp))
       (else
-	(set! k_reg (make-cont 'seq1-cont terminator_reg handler_reg k_reg))
+	(set! k_reg (make-cont 'reader 'seq1-cont terminator_reg handler_reg k_reg))
 	(set! pc read-sexp)))))
 
 ;; sexp_reg tokens_reg terminator_reg handler_reg k_reg
@@ -519,7 +519,7 @@
        (cond
 	 ((token-type? (first tokens_reg) terminator_reg)
 	  (set! tokens_reg (rest-of tokens_reg))
-	  (set! pc apply-cont))
+	  (set! pc apply-reader-cont))
 	 ((eq? terminator_reg 'rparen)
 	  (set! exception_reg "parenthesized list terminated by bracket")
 	  (set! pc apply-handler))
@@ -536,9 +536,9 @@
       (rparen ()
 	(set! sexp_reg '())
 	(set! tokens_reg (rest-of tokens_reg))
-	(set! pc apply-cont))
+	(set! pc apply-reader-cont))
       (else
-	(set! k_reg (make-cont 'vector-sexp1-cont handler_reg k_reg))
+	(set! k_reg (make-cont 'reader 'vector-sexp1-cont handler_reg k_reg))
 	(set! pc read-sexp)))))
 
 ;; tokens_reg handler_reg
@@ -558,7 +558,7 @@
   (lambda (filename)
     (set! input_reg (read-content filename))
     (set! handler_reg test-handler)
-    (set! k_reg (make-cont 'read-file-cont test-handler))
+    (set! k_reg (make-cont 'reader 'read-file-cont test-handler))
     (set! pc scan-input)
     (run)))
 
@@ -571,7 +571,7 @@
 	(set! sexp_reg 'done)
 	(set! pc #f))      
       (begin
-	(set! k_reg (make-cont 'print-sexps-cont handler_reg))
+	(set! k_reg (make-cont 'reader 'print-sexps-cont handler_reg))
 	(set! pc read-sexp)))))
 
 ;; returns the entire file contents as a single string
@@ -588,19 +588,21 @@
 ;;------------------------------------------------------------------------
 ;; continuations
 
-;; apply-cont handles both 1-arg and 2-arg continuations, using sexp_reg
-;; or sexp_reg and tokens_reg
+;; apply-reader-cont handles both 1-arg and 2-arg continuations, using
+;; sexp_reg or sexp_reg and tokens_reg
 
 ;; k_reg sexp_reg tokens_reg
-(define apply-cont
+(define apply-reader-cont
   (lambda ()
-    (record-case k_reg
+    (if (not (eq? (car k_reg) 'reader))
+      (apply-cont k_reg sexp_reg)
+    (record-case (cdr k_reg)
       (stop-cont ()
 	(set! pc #f))
       (abbreviation-cont (keyword k)
 	(set! k_reg k)
 	(set! sexp_reg (list keyword sexp_reg))
-	(set! pc apply-cont))
+	(set! pc apply-reader-cont))
       (dot-cont (expected-terminator handler k)
 	(set! terminator_reg expected-terminator)
 	(set! handler_reg handler)
@@ -609,12 +611,12 @@
       (seq1-cont (expected-terminator handler k)
 	(set! terminator_reg expected-terminator)
 	(set! handler_reg handler)
-	(set! k_reg (make-cont 'seq2-cont sexp_reg k))
+	(set! k_reg (make-cont 'reader 'seq2-cont sexp_reg k))
 	(set! pc read-sexp-sequence))
       (seq2-cont (sexp1 k)
 	(set! k_reg k)
 	(set! sexp_reg (cons sexp1 sexp_reg))
-	(set! pc apply-cont))
+	(set! pc apply-reader-cont))
       (print-sexps-cont (handler)
 	(pretty-print sexp_reg)
 	(set! handler_reg handler)
@@ -622,27 +624,27 @@
       (vector-cont (k)
 	(set! k_reg k)
 	(set! sexp_reg (list->vector sexp_reg))
-	(set! pc apply-cont))
+	(set! pc apply-reader-cont))
       (vector-sexp1-cont (handler k)
-	(set! k_reg (make-cont 'vector-rest-cont sexp_reg k))
+	(set! k_reg (make-cont 'reader 'vector-rest-cont sexp_reg k))
 	(set! handler_reg handler)
 	(set! pc read-vector))
       (vector-rest-cont (sexp1 k)
 	(set! k_reg k)
 	(set! sexp_reg (cons sexp1 sexp_reg))
-	(set! pc apply-cont))
+	(set! pc apply-reader-cont))
       (scan-input-loop-cont (token k)
 	(set! k_reg k)
 	(set! sexp_reg (cons token sexp_reg))
-	(set! pc apply-cont))
+	(set! pc apply-reader-cont))
       (convert-buffer-cont (chars k)
 	(set! k_reg k)
 	(set! tokens_reg chars)
-	(set! pc apply-cont))
+	(set! pc apply-reader-cont))
       (read-datum-cont (handler k)
 	(set! tokens_reg sexp_reg)
 	(set! handler_reg handler)
-	(set! k_reg (make-cont 'read-sexp-cont handler k))
+	(set! k_reg (make-cont 'reader 'read-sexp-cont handler k))
 	(set! pc read-sexp))
       (read-file-cont (handler)
 	(set! tokens_reg sexp_reg)
@@ -652,7 +654,7 @@
 	(if (token-type? (first tokens_reg) 'end-marker)
 	  (begin
 	    (set! k_reg k)
-	    (set! pc apply-cont))
+	    (set! pc apply-reader-cont))
 	  (begin
 	    (set! handler_reg handler)
 	    (set! exception_reg (format "tokens left over: ~a" tokens_reg))
@@ -662,13 +664,13 @@
 	  (begin
 	    (set! k_reg k)
 	    (set! sexp_reg (list sexp_reg))
-	    (set! pc apply-cont))
+	    (set! pc apply-reader-cont))
 	  (begin
 	    (set! chars_reg tokens_reg)
 	    (set! handler_reg handler)
-	    (set! k_reg (make-cont 'scan-input-loop-cont sexp_reg k))
+	    (set! k_reg (make-cont 'reader 'scan-input-loop-cont sexp_reg k))
 	    (set! pc scan-input-loop))))
-      (else (error 'apply-cont "invalid continuation: ~a" k_reg)))))
+      (else (error 'apply-reader-cont "invalid continuation: ~a" k_reg))))))
 
 ;; handler_reg exception_reg
 (define apply-handler
