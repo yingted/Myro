@@ -61,8 +61,8 @@
 	   (parse-all (catch-exps (caddr datum)) handler (make-cont 'parser 'parse-9 datum k value cvar)))
        (parse-11 (datum)
 	   (if (proper-list? (cadr datum))
-	       (apply-cont k (lambda-exp (cadr datum) value))
-	       (apply-cont k (mu-lambda-exp (head (cadr datum)) (last (cadr datum)) value))))
+	     (apply-cont k (lambda-exp (cadr datum) value))
+	     (apply-cont k (mu-lambda-exp (head (cadr datum)) (last (cadr datum)) value))))
        (parse-12 (k)
 	   (apply-cont k (begin-exp value)))
        (parse-13 (k datum)
@@ -85,13 +85,15 @@
 	   (parse value handler k))
        (process-macro-clauses (right-pattern k clauses datum handler)
            (if value
-	       (instantiate right-pattern value k)
-	       (process-macro-clauses (cdr clauses) datum handler k)))
+	     (instantiate right-pattern value k)
+	     (process-macro-clauses (cdr clauses) datum handler k)))
        (expand-once (datum handler k datum)
 	   (if (list? value)
-	       (process-macro-clauses value datum handler k)
-	       (apply-cont k (value datum))))
-       (else (error 'apply-cont "invalid continuation: '~s'" k)))))
+	     (process-macro-clauses value datum handler k)
+	     (apply-cont k (value datum))))
+       (lookup-cont (k)
+	 (apply-cont k (binding-value binding)))
+       (else (error 'apply-parser-cont "invalid continuation: '~s'" k)))))
 
 (define apply-cont2
   (lambda (k datum tokens-left)
@@ -100,7 +102,7 @@
 	   (parse datum handler (make-cont 'parser 'print-parsed-sexps tokens-left handler)))
        (parse-string (handler)
 	   (parse datum handler (make-cont 'parser 'init)))
-       (else (error 'apply-read-sexp-cont "invalid continuation: '~s'" k)))))
+       (else (error 'apply-cont2 "invalid continuation: '~s'" k)))))
 
 ;;--------------------------------------------------------------------------
 ;; The core grammar
@@ -175,7 +177,7 @@
 ;;--------------------------------------------------------------------------
 ;; Macro support
 
-(load "environments-cps.ss")
+(load "environments-ds.ss")
 
 (define syntactic-sugar?
   (lambda (datum)
@@ -191,7 +193,7 @@
 (define process-macro-clauses
   (lambda (clauses datum handler k)
     (if (null? clauses)
-      (handler (format "no matching clause found for ~s" datum))
+      (parser-apply-handler handler (format "no matching clause found for ~s" datum))
       (let ((left-pattern (caar clauses))
 	    (right-pattern (cadar clauses)))
 	(unify-patterns left-pattern datum (make-cont 'parser 'process-macro-clauses right-pattern k clauses datum handler))))))
@@ -261,13 +263,9 @@
 ;;--------------------------------------------------------------------------
 
 ;; for testing purposes
-(define parser-test-handler
-  (lambda (e) (list 'exception e)))
-
-;; for testing purposes
 (define parse-string
   (lambda (string)
-    (parse (read-string string) parser-test-handler (make-cont 'parser 'init))))
+    (parse (read-string string) test-handler (make-cont 'parser 'init))))
 ;;    (read-datum string test-handler (make-cont 'parser 'parse-string test-handler))))
 
 (define parse
@@ -277,8 +275,8 @@
       ((quote? datum) (apply-cont k (lit-exp (cadr datum))))
       ((quasiquote? datum)
        (expand-quasiquote (cadr datum) handler (make-cont 'parser 'parse-21 handler k)))
-      ((unquote? datum) (handler (format "misplaced ~s" datum)))
-      ((unquote-splicing? datum) (handler (format "misplaced ~s" datum)))
+      ((unquote? datum) (parser-apply-handler handler (format "misplaced ~s" datum)))
+      ((unquote-splicing? datum) (parser-apply-handler handler (format "misplaced ~s" datum)))
       ((symbol? datum) (apply-cont k (var-exp datum)))
       ((syntactic-sugar? datum)
        (expand-once datum handler (make-cont 'parser 'parse-20 handler k)))
@@ -312,12 +310,12 @@
 	 ((and (= (length datum) 4) (catch? (caddr datum)) (finally? (cadddr datum)))
 	  ;; (try <body> (catch <var> <exp> ...) (finally <exp> ...))
 	  (parse (try-body datum) handler (make-cont 'parser 'parse-6 datum handler k cvar)))
-	 (else (handler (format "bad try syntax: ~s" datum)))))
+	 (else (parser-apply-handler handler (format "bad try syntax: ~s" datum)))))
       ((raise? datum)
        (parse (cadr datum) handler (make-cont 'parser 'parse-3 k)))
       ((application? datum)
        (parse (car datum) handler (make-cont 'parser 'parse-2 datum handler k)))
-      (else (handler (format "bad concrete syntax: ~s" datum))))))
+      (else (parser-apply-handler handler (format "bad concrete syntax: ~s" datum))))))
 
 (define parse-all
   (lambda (datum-list handler k)
@@ -424,7 +422,7 @@
 ;; for testing purposes
 (define parse-file
   (lambda (filename)
-    (print-parsed-sexps (scan-file filename) parser-test-handler)))
+    (print-parsed-sexps (scan-file filename) test-handler)))
 
 ;; may need fixing
 
@@ -441,3 +439,11 @@
 	(run)))))
 
 ;;      (read-sexp tokens handler (make-cont 'parser 'print-parsed-sexps-2 handler)))))
+
+;; temporary
+(define parser-apply-handler
+  (lambda (handler exception)
+    (set! handler_reg handler)
+    (set! exception_reg exception)
+    (set! pc apply-handler)
+    (run)))
