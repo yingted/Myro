@@ -415,7 +415,7 @@
     (set! k_reg (make-cont 'reader 'read-datum-cont handler_reg k_reg))
     (set! pc scan-input)))
 
-;; the trampoline
+;; the trampoline - returns the final result in sexp_reg
 (define run
   (lambda ()
     (if pc
@@ -560,12 +560,29 @@
 ;; file reader
 
 ;; for testing purposes
+
+;; read-file takes a filename and returns the file contents as a list
+;; of tokens
+
 (define read-file
   (lambda (filename)
     (set! input_reg (read-content filename))
     (set! handler_reg test-handler)
     (set! k_reg (make-cont 'reader 'read-file-cont test-handler))
     (set! pc scan-input)
+    (run)))
+
+;; for testing purposes
+
+;; read-next-sexp takes a list of tokens and reads the next full sexp
+;; from the tokens.  It returns the sexp and the remaining tokens as a
+;; pair.
+(define read-next-sexp
+  (lambda (tokens)
+    (set! tokens_reg tokens)
+    (set! handler_reg test-handler)
+    (set! k_reg (make-cont 'reader 'read-next-sexp-cont))
+    (set! pc read-sexp)
     (run)))
 
 ;; for testing purposes
@@ -676,6 +693,9 @@
 	    (set! handler_reg handler)
 	    (set! k_reg (make-cont 'reader 'scan-input-loop-cont sexp_reg k))
 	    (set! pc scan-input-loop))))
+      (read-next-sexp-cont ()
+	(set! sexp_reg (cons sexp_reg tokens_reg))
+	(set! pc #f))
       (else (error 'apply-reader-cont "invalid continuation: ~a" k_reg))))))
 
 ;; handler_reg exception_reg

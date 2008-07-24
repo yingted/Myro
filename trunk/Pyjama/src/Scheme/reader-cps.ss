@@ -453,6 +453,17 @@
 	(print-sexps tokens test-handler)))))
 
 ;; for testing purposes
+
+;; read-next-sexp takes a list of tokens and reads the next full sexp
+;; from the tokens.  It returns the sexp and the remaining tokens as a
+;; pair.
+(define read-next-sexp
+  (lambda (tokens)
+    (read-sexp tokens test-handler
+      (lambda (sexp tokens-left)
+	(cons sexp tokens-left)))))
+
+;; for testing purposes
 (define print-sexps
   (lambda (tokens handler)
     (if (token-type? (first tokens) 'end-marker)

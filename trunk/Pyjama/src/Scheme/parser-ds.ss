@@ -21,13 +21,8 @@
 
 (define apply-parser-cont
   (lambda (k value)
-    ;;(if (not (eq? (car k) 'parser))
-    ;;(apply-cont k value)
     (record-case (cdr k)
        (init () value)
-       (print-parsed-sexps (tokens-left handler)
-	   (pretty-print value)
-	   (print-parsed-sexps tokens-left handler))
        (expand-quasi-1 (v1 k)
 	   (apply-cont k `(cons ,v1 ,value)))
        (expand-quasi-2 (datum handler k)
@@ -96,16 +91,10 @@
 	     (apply-cont k (value datum))))
        (lookup-cont (k)
 	 (apply-cont k (binding-value value)))
+       (print-parsed-sexps-cont (tokens-left)
+	 (pretty-print value)
+	 (print-parsed-sexps tokens-left))
        (else (error 'apply-parser-cont "invalid continuation: '~s'" k)))))
-
-;;(define apply-parser-cont2
-;;  (lambda (k datum tokens-left)
-;;    (record-case k
-;;       (print-parsed-sexps-2 (handler)
-;;	   (parse datum handler (make-cont 'parser 'print-parsed-sexps tokens-left handler)))
-;;       (parse-string (handler)
-;;	   (parse datum handler (make-cont 'parser 'init)))
-;;       (else (error 'apply-cont2 "invalid continuation: '~s'" k)))))
 
 ;;--------------------------------------------------------------------------
 ;; The core grammar
@@ -265,21 +254,6 @@
 
 ;;--------------------------------------------------------------------------
 
-;; for testing purposes
-(define exception?
-  (lambda (x)
-    (and (list? x)
-	 (not (null? x))
-	 (eq? (car x) 'exception))))
-
-;; for testing purposes
-(define parse-string
-  (lambda (string)
-    (let ((sexp (read-string string)))
-      (if (exception? sexp)
-	sexp
-	(parse sexp test-handler (make-cont 'parser 'init))))))
-
 (define parse
   (lambda (datum handler k)
     (cond
@@ -429,28 +403,40 @@
 (define finally-exps cdr)
 
 ;;------------------------------------------------------------------------
-;; file parser
+;; for testing purposes
+
+;; for testing purposes
+(define exception?
+  (lambda (x)
+    (and (list? x)
+	 (not (null? x))
+	 (eq? (car x) 'exception))))
+
+;; for testing purposes
+(define parse-string
+  (lambda (string)
+    (let ((sexp (read-string string)))
+      (if (exception? sexp)
+	sexp
+	(parse sexp test-handler (make-cont 'parser 'init))))))
 
 ;; for testing purposes
 (define parse-file
   (lambda (filename)
-    (print-parsed-sexps (scan-file filename) test-handler)))
-
-;; may need fixing
+    (print-parsed-sexps (scan-file filename))))
 
 ;; for testing purposes
 (define print-parsed-sexps
-  (lambda (tokens handler)
+  (lambda (tokens)
     (if (token-type? (first tokens) 'end-marker)
       'done
-      (begin
-	(set! tokens_reg tokens)
-	(set! handler_reg test-handler)
-	(set! k_reg (make-cont 'parser 'print-parsed-sexps-2 handler))
-	(set! pc read-sexp)
-	(run)))))
-
-;;      (read-sexp tokens handler (make-cont 'parser 'print-parsed-sexps-2 handler)))))
+      (let ((result (read-next-sexp tokens)))
+	(if (exception? result)
+	  result
+	  (let ((sexp (car result))
+		(tokens-left (cdr result)))
+	    (parse sexp test-handler
+	      (make-cont 'parser 'print-parsed-sexps-cont tokens-left))))))))
 
 ;; temporary
 (define parser-apply-handler
