@@ -57,39 +57,29 @@ namespace Myro.GUI.SimpleIDE
                         JewelImage.Source = value;
             }
         }
-        private MyroConfigFiles currentConfig;
-        public MyroConfigFiles CurrentConfig
-        {
-            get { return currentConfig; }
-            set
-            {
-                if (currentConfig != value)
-                {
-                    var evt = new RobotChangeEventArgs() { ConfigFiles = value };
-                    RobotChange.Invoke(this, new RobotChangeEventArgs() { ConfigFiles = value });
-                    if (evt.Cancel == false)
-                    {
-                        currentConfig = value;
-                        DisplayedBaseName = value.BaseName;
-                        DisplayedFriendlyName = value.MyroConfiguration.FriendlyName;
-                        DisplayedIcon = value.IconFilePath == null ? null :
-                            new BitmapImage(new Uri("file://" + value.IconFilePath));
-                    }
-                }
-            }
-        }
-        private bool isRunning = false;
+        private int runningCount = 0;
         public bool IsRunning
         {
             set
             {
-                isRunning = value;
-                if (isRunning)
-                    JewelButton.BitmapEffect = (BitmapEffect)JewelButton.Resources["RunGlowEffect"];
+                if (value == true)
+                    runningCount++;
                 else
-                    JewelButton.BitmapEffect = null;
+                    runningCount--;
+                if (runningCount > 0)
+                    Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal,
+                        new ThreadStart(delegate()
+                        {
+                            JewelButton.BitmapEffect = (BitmapEffect)JewelButton.Resources["RunGlowEffect"];
+                        }));
+                else
+                    Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal,
+                        new ThreadStart(delegate()
+                        {
+                            JewelButton.BitmapEffect = null;
+                        }));
             }
-            get { return isRunning; }
+            get { return runningCount > 0; }
         }
         #endregion
 
@@ -98,7 +88,6 @@ namespace Myro.GUI.SimpleIDE
         public class RobotChangeEventArgs : EventArgs
         {
             public MyroConfigFiles ConfigFiles;
-            public bool Cancel = false;
         }
         public delegate void RobotChangeEventHandler(object sender, RobotChangeEventArgs e);
         public event RobotChangeEventHandler RobotChange;
@@ -133,7 +122,7 @@ namespace Myro.GUI.SimpleIDE
                     jewelAnimation.Stop(JewelButton);
                     jewelAnimation = null;
                 }
-                if (CurrentConfig == null)
+                if (Robot.CurrentConfig == null)
                     displayJewelRobotChooser();
             }
             catch (Exception err)
@@ -146,6 +135,8 @@ namespace Myro.GUI.SimpleIDE
         {
             try
             {
+                Robot.StateChangeEvent += OnRobotStateChange;
+
                 jewelAnimation = (Storyboard)JewelButton.FindResource("JewelGlow");
                 jewelAnimation.Begin(JewelButton, true);
             }
@@ -158,6 +149,39 @@ namespace Myro.GUI.SimpleIDE
                 cachedConfigMenu = makeConfigMenuItems();
             }
             catch (Exception) { }
+        }
+
+        #endregion
+
+
+        #region External event handlers
+
+        private void OnRobotStateChange(Robot.StateChangeEventArgs e)
+        {
+            switch (e.StateChange)
+            {
+                case Robot.RobotStateChange.CONNECTING:
+                    IsRunning = true;
+                    break;
+                case Robot.RobotStateChange.CONNECTING_SUCCEEDED:
+                    Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal, new ThreadStart(delegate()
+                    {
+                        DisplayedBaseName = Robot.CurrentConfig.BaseName;
+                        DisplayedFriendlyName = Robot.CurrentConfig.MyroConfiguration.FriendlyName;
+                        DisplayedIcon = Robot.CurrentConfig.IconFilePath == null ? null :
+                            new BitmapImage(new Uri("file://" + Robot.CurrentConfig.IconFilePath));
+                    }));
+
+                    IsRunning = false;
+
+                    // Call this to update the state of grayed-out controls
+                    // that depend on CurrentConfig being set to become ungrayed.
+                    CommandManager.InvalidateRequerySuggested();
+                    break;
+                case Robot.RobotStateChange.CONNECTING_FAILED:
+                    IsRunning = false;
+                    break;
+            }
         }
 
         #endregion
@@ -178,11 +202,7 @@ namespace Myro.GUI.SimpleIDE
                 var myConfig = config;
                 menuitem.Click += delegate
                 {
-                    CurrentConfig = myConfig;
-
-                    // Call this to update the state of grayed-out controls
-                    // that depend on CurrentConfig being set to become ungrayed.
-                    CommandManager.InvalidateRequerySuggested();
+                    RobotChange.Invoke(this, new RobotChangeEventArgs() { ConfigFiles = myConfig });
                 };
                 ret.Add(menuitem);
             }

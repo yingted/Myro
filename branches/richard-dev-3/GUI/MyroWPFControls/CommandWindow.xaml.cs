@@ -19,6 +19,8 @@ using System.Threading;
 using Microsoft.Ccr.Core;
 using System.Reflection;
 
+using Myro.Utilities;
+
 using IronPython.Hosting;
 using IronPython.Compiler;
 
@@ -150,7 +152,7 @@ namespace Myro.GUI.WPFControls
                     toAdd = text;
                 lastNewlineTrimmed = false;
             }
-            Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal, new ThreadStart(
+            Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new ThreadStart(
                 delegate() { paragraph.Inlines.Add(new Run() { Foreground = new SolidColorBrush(color), Text = toAdd }); }));
         }
 
@@ -217,6 +219,8 @@ namespace Myro.GUI.WPFControls
         private void commandHandler(Command cmd)
         {
             PythonExecuting.Invoke(this, new EventArgs());
+            Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal, new ThreadStart(
+                delegate() { commandLineBox.IsEnabled = false; }));
             try
             {
                 if (cmd.IsInteractive)
@@ -226,11 +230,10 @@ namespace Myro.GUI.WPFControls
             }
             catch (Exception err)
             {
-                if (err.Message != null && err.Message.Length > 0)
-                    LogText(err.Message + "\n", ErrColor);
-                else
-                    LogText(err.ToString() + "\n", ErrColor);
+                LogText(Strings.FromException(err) + "\n", ErrColor);
             }
+            Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal, new ThreadStart(
+                delegate() { commandLineBox.IsEnabled = true; commandLineBox.Focus(); }));
             PythonFinished.Invoke(this, new EventArgs());
         }
 

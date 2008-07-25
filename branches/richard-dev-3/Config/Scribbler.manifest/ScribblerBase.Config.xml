@@ -19,9 +19,9 @@
   <LEDCenter>false</LEDCenter>
   <LEDFront>false</LEDFront>
   <LEDBack>0</LEDBack>
-  <Connected>true</Connected>
+  <Connected>false</Connected>
   <ComPort>3</ComPort>
-  <BumpersLastUpdated>2008-06-19T14:01:21.284861-07:00</BumpersLastUpdated>
-  <LineSensorsLastUpdated>2008-06-19T14:01:21.284861-07:00</LineSensorsLastUpdated>
-  <LightSensorsLastUpdated>2008-06-19T14:01:21.284861-07:00</LightSensorsLastUpdated>
+  <BumpersLastUpdated>0001-01-01T00:00:00</BumpersLastUpdated>
+  <LineSensorsLastUpdated>0001-01-01T00:00:00</LineSensorsLastUpdated>
+  <LightSensorsLastUpdated>0001-01-01T00:00:00</LightSensorsLastUpdated>
 </ScribblerState>

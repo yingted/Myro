@@ -209,14 +209,14 @@ namespace Myro.Adapters
                     // an adapter that works.
                     throw new NoAdapterFoundException(responseRecord);
                 }
-                catch (NoAdapterFoundException e)
+                catch (NoAdapterFoundException)
                 {
-                    throw e;
+                    throw;
                 }
                 catch (Exception e)
                 {
                     DssEnvironment.LogError("Error querying or attaching to " + "dssp.tcp://localhost/" + Name + ": " + e.ToString());
-                    throw e;
+                    throw;
                 }
             }
         }

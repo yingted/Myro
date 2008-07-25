@@ -66,7 +66,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
         /// <param name="comPort"></param>
         /// <param name="baudRate"></param>
         /// <returns>A Ccr Port for receiving serial port data</returns>
-        internal bool Open(int comPort)
+        internal void Open(int comPort)
         {
             if (_serialPort != null)
                 Close();
@@ -86,30 +86,25 @@ namespace Myro.Services.Scribbler.ScribblerBase
 
             //try
             //{
-                string name = TrySerialPort(_serialPort.PortName);
+            string name = TrySerialPort(_serialPort.PortName);
 
-                if (name != null)
-                {
-                    System.Threading.Thread.Sleep(500); //give the BT device some time between closing and opening of the port
-                    _serialPort.Open();
-                    foundRobotName = name;
-                    openedComPort = comPort;
-                }
-                else
-                    return false;
+            System.Threading.Thread.Sleep(500); //give the BT device some time between closing and opening of the port
+            _serialPort.Open();
+            foundRobotName = name;
+            openedComPort = comPort;
+
             //}
-//            catch (Exception ex)
-//            {
-//                Console.WriteLine("Invalid Serial Port.");
+            //            catch (Exception ex)
+            //            {
+            //                Console.WriteLine("Invalid Serial Port.");
 
-//#if DEBUG
-//                Console.WriteLine("Open caught exception: " + ex);
-//                throw new Exception("TrySerialPort caught exception", ex);
-//#endif
+            //#if DEBUG
+            //                Console.WriteLine("Open caught exception: " + ex);
+            //                throw new Exception("TrySerialPort caught exception", ex);
+            //#endif
 
-//                return false;
-//            }
-            return true;
+            //                return false;
+            //            }
         }
 
 
@@ -162,7 +157,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
 #if DEBUG
                     Console.WriteLine("length == 0"); //DEBUG
 #endif
-                    return null;
+                    throw new ScribblerProtocolException("Could not interpret Scribbler info, probably not a Scribbler robot.");
                 }
 
                 // we are receiving data.
@@ -179,7 +174,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
                     Console.WriteLine("not a Scribbler robot."); //DEBUG
 #endif
                     _serialPort = null;
-                    return null;
+                    throw new ScribblerProtocolException("Could not find magic string, not a Scribbler robot.");
                 }
 
                 // Now get robotname
@@ -201,14 +196,18 @@ namespace Myro.Services.Scribbler.ScribblerBase
                 Console.WriteLine("TrySerialPort found: " + robotname); //DEBUG
 #endif
             }
-//            catch (Exception ex)
-//            {
-//                throw;
-//#if DEBUG
-//                Console.WriteLine("TrySerialPort caught exception: " + ex);
-//                //throw new Exception("TrySerialPort caught exception", ex);
-//#endif
-//            }
+            catch (Exception)
+            {
+                throw;
+            }
+            //            catch (Exception ex)
+            //            {
+            //                throw;
+            //#if DEBUG
+            //                Console.WriteLine("TrySerialPort caught exception: " + ex);
+            //                //throw new Exception("TrySerialPort caught exception", ex);
+            //#endif
+            //            }
             finally
             {
                 if (p != null && p.IsOpen)
@@ -220,97 +219,97 @@ namespace Myro.Services.Scribbler.ScribblerBase
         }
 
 
-        /// <summary>
-        /// Attempt to find and open a Scribbler on any serial port.
-        /// <returns>True if a robot unit was found</returns>
-        /// </summary>
-        public bool FindRobot(string robotname)
-        {
-            //debug
-            //Console.WriteLine("FindRobot: " + robotname);
+        ///// <summary>
+        ///// Attempt to find and open a Scribbler on any serial port.
+        ///// <returns>True if a robot unit was found</returns>
+        ///// </summary>
+        //public bool FindRobot(string robotname)
+        //{
+        //    //debug
+        //    //Console.WriteLine("FindRobot: " + robotname);
 
-            //if there are multiple robots connected, add to list and prompt user
-            //item0 = COM port name
-            //item1 = robot name
-            List<Tuple<String, String>> foundRobots = new List<Tuple<string, string>>();
+        //    //if there are multiple robots connected, add to list and prompt user
+        //    //item0 = COM port name
+        //    //item1 = robot name
+        //    List<Tuple<String, String>> foundRobots = new List<Tuple<string, string>>();
 
-            foreach (string spName in SerialPort.GetPortNames())
-            {
-                Console.WriteLine("Checking " + spName);
-                string spName2 = FixComPortName(spName);
+        //    foreach (string spName in SerialPort.GetPortNames())
+        //    {
+        //        Console.WriteLine("Checking " + spName);
+        //        string spName2 = FixComPortName(spName);
 
-                Console.Write("Checking for robot on " + spName2 + ".  ");
+        //        Console.Write("Checking for robot on " + spName2 + ".  ");
 
-                string tempName = TrySerialPort(spName2);
+        //        string tempName = TrySerialPort(spName2);
 
-                if (tempName != null)
-                {
-                    Console.Write("Found robot \"" + tempName + "\"\n");
+        //        if (tempName != null)
+        //        {
+        //            Console.Write("Found robot \"" + tempName + "\"\n");
 
-                    if (tempName == robotname)
-                    {
-                        return Open(int.Parse(spName2.Substring(3, spName2.Length - 3)));
-                    }
-                    else
-                    {
-                        Tuple<String, String> pair = new Tuple<string, string>(spName2, tempName);
-                        foundRobots.Add(pair);
-                    }
-                }
-                else
-                    Console.Write("\n");
-            }
+        //            if (tempName == robotname)
+        //            {
+        //                return Open(int.Parse(spName2.Substring(3, spName2.Length - 3)));
+        //            }
+        //            else
+        //            {
+        //                Tuple<String, String> pair = new Tuple<string, string>(spName2, tempName);
+        //                foundRobots.Add(pair);
+        //            }
+        //        }
+        //        else
+        //            Console.Write("\n");
+        //    }
 
-            //only one robot found. so connect
-            if (foundRobots.Count == 1)
-            {
-                return Open(int.Parse(foundRobots[0].Item0.Substring(3, foundRobots[0].Item0.Length - 3)));
-            }
-            //many robots found. prompt user to connect
-            else if (foundRobots.Count > 0)
-            {
-                Console.WriteLine("*** Found multiple robots: ***");
-                foreach (Tuple<string, string> tup in foundRobots)
-                {
-                    Console.WriteLine("   Robot \"" + tup.Item1 + "\" on " + tup.Item0);
-                }
+        //    //only one robot found. so connect
+        //    if (foundRobots.Count == 1)
+        //    {
+        //        return Open(int.Parse(foundRobots[0].Item0.Substring(3, foundRobots[0].Item0.Length - 3)));
+        //    }
+        //    //many robots found. prompt user to connect
+        //    else if (foundRobots.Count > 0)
+        //    {
+        //        Console.WriteLine("*** Found multiple robots: ***");
+        //        foreach (Tuple<string, string> tup in foundRobots)
+        //        {
+        //            Console.WriteLine("   Robot \"" + tup.Item1 + "\" on " + tup.Item0);
+        //        }
 
 
-                bool selected = false;
-                while (!selected)
-                {
-                    Console.WriteLine("Which robot would you like to connect to?");
-                    Console.Write("Enter the robot's name or COM port:");
+        //        bool selected = false;
+        //        while (!selected)
+        //        {
+        //            Console.WriteLine("Which robot would you like to connect to?");
+        //            Console.Write("Enter the robot's name or COM port:");
 
-                    string connect = Console.ReadLine();
-                    connect = connect.ToUpper();          //read robot name and standardize
+        //            string connect = Console.ReadLine();
+        //            connect = connect.ToUpper();          //read robot name and standardize
 
-                    int connectPort = -1;
-                    int.TryParse(connect, out connectPort); //convert to int if possible
+        //            int connectPort = -1;
+        //            int.TryParse(connect, out connectPort); //convert to int if possible
 
-                    //if user entered number
-                    if (connectPort > 0)
-                        return Open(connectPort);
+        //            //if user entered number
+        //            if (connectPort > 0)
+        //                return Open(connectPort);
 
-                    //NOTE: Item0 = COMport, Item1 = RobotName
-                    foreach (Tuple<string, string> tup in foundRobots)
-                    {
-                        int foundPort = -1;
-                        int.TryParse(tup.Item0.Substring(3, tup.Item0.Length - 3), out foundPort); //convert to int if possible
+        //            //NOTE: Item0 = COMport, Item1 = RobotName
+        //            foreach (Tuple<string, string> tup in foundRobots)
+        //            {
+        //                int foundPort = -1;
+        //                int.TryParse(tup.Item0.Substring(3, tup.Item0.Length - 3), out foundPort); //convert to int if possible
 
-                        //if user entered name
-                        if (connect == tup.Item1.ToUpper())
-                            return Open(foundPort);
-                        else if (connect == tup.Item0.ToUpper()) //if user entered COMport
-                            return Open(foundPort);
-                    }
+        //                //if user entered name
+        //                if (connect == tup.Item1.ToUpper())
+        //                    return Open(foundPort);
+        //                else if (connect == tup.Item0.ToUpper()) //if user entered COMport
+        //                    return Open(foundPort);
+        //            }
 
-                }
-            }
+        //        }
+        //    }
 
-            //no robots found
-            return false;
-        }
+        //    //no robots found
+        //    return false;
+        //}
 
 
         void serialPort_ErrorReceived(object sender, SerialErrorReceivedEventArgs e)
@@ -418,14 +417,14 @@ namespace Myro.Services.Scribbler.ScribblerBase
             int count = 0;
             while (_serialPort.BytesToRead < outBuff.Length)
             {
-                if(++count > 50)
+                if (++count > 50)
                     throw new TimeoutException("Timed out waiting for command echo of " + outBuff.Length + " bytes");
                 Thread.Sleep(10); //spin
             }
 
             _serialPort.Read(inBuff, 0, outBuff.Length);
-            for(int i=0; i<outBuff.Length; i++)
-                if(inBuff[i] != outBuff[i])
+            for (int i = 0; i < outBuff.Length; i++)
+                if (inBuff[i] != outBuff[i])
                     Console.WriteLine("Echo mismatch");
 
             //while (ixOutBuff < echoSize) // && Compare(DateTime.Now, lastbytetime) < ReadTimeOut)
@@ -537,7 +536,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
                             nBytes = (int)inBuff[0] + ((int)inBuff[1] << 8) + 2;
                             //Console.WriteLine("Looking for JPEG header of " + nBytes + " bytes");
                         }
-                        else if(nBytes < 0) // Have to check this again because of the JPEG hack, changed nBytes
+                        else if (nBytes < 0) // Have to check this again because of the JPEG hack, changed nBytes
                         {
                             //Console.WriteLine("  Got " + inBuff[read - 1] + " at " + (read - 1));
                             if (cmd.EndMarker2 == null)

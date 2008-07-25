@@ -26,6 +26,7 @@ using System.ComponentModel;
 using System.Security.Permissions;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Threading;
 using W3C.Soap;
 using Myro.Utilities;
 
@@ -128,42 +129,26 @@ namespace Myro.Services.Scribbler.ScribblerBase
             // display HTTP service Uri
             LogInfo(LogGroups.Console, "Service uri: ");
 
+            //_mainPort.PostUnknownType(new Reconnect());
+
             //open Scribbler Communications port
-            if (ConnectToScribbler())
-            {
-                // Listen for a single Serial port request with an acknowledgement
-                Activate(Arbiter.ReceiveWithIterator<SendScribblerCommand>(false, _scribblerComPort, SendScribblerCommandHandler));
+            //if (ConnectToScribbler())
+            //{
+            // Listen for a single Serial port request with an acknowledgement
 
-                PollTimer = new System.Timers.Timer();
-                PollTimer.Interval = TimerDelay;
-                PollTimer.AutoReset = true;
-                PollTimer.Elapsed += new System.Timers.ElapsedEventHandler(PollTimer_Elapsed);
-                //PollTimer.Start();
+            //debug
+            //ScribblerCommand cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.GET_INFO);
+            //SendScribblerCommand sendcmd = new SendScribblerCommand(cmd);
+            //_scribblerComPort.Post(sendcmd);
 
+            //}
+            //else
+            //{
+            //no scribbler found. Open state page for manual settings.
+            //OpenServiceInBrowser();
+            //}
 
-                //play startup tone
-                PlayToneBody startTone = new PlayToneBody(.2, 1000, 2000);
-                _mainPort.PostUnknownType(new PlayTone(startTone));
-
-                //debug
-                //ScribblerCommand cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.GET_INFO);
-                //SendScribblerCommand sendcmd = new SendScribblerCommand(cmd);
-                //_scribblerComPort.Post(sendcmd);
-
-
-                //fix state
-                _state.MotorLeft = 100;
-                _state.MotorRight = 100;
-                _state.LEDLeft = false;
-                _state.LEDRight = false;
-                _state.LEDCenter = false;
-            }
-            else
-            {
-                //no scribbler found. Open state page for manual settings.
-                //OpenServiceInBrowser();
-            }
-
+            Activate(Arbiter.ReceiveWithIterator<SendScribblerCommand>(false, _scribblerComPort, SendScribblerCommandHandler));
 
             // Listen on the main port for requests and call the appropriate handler.
             Interleave mainInterleave = ActivateDsspOperationHandlers();
@@ -185,7 +170,8 @@ namespace Myro.Services.Scribbler.ScribblerBase
                     Arbiter.ReceiveWithIteratorFromPortSet<ScribblerResponseMessage>(true, _mainPort, ScribblerResponseHandler),
                     Arbiter.ReceiveWithIteratorFromPortSet<SetLoud>(true, _mainPort, SetLoudHandler),
                     Arbiter.ReceiveWithIteratorFromPortSet<SetLEDFront>(true, _mainPort, SetLEDFrontHandler),
-                    Arbiter.ReceiveWithIteratorFromPortSet<SetLEDBack>(true, _mainPort, SetLEDBackHandler)
+                    Arbiter.ReceiveWithIteratorFromPortSet<SetLEDBack>(true, _mainPort, SetLEDBackHandler),
+                    Arbiter.ReceiveWithIteratorFromPortSet<Reconnect>(true, _mainPort, ReconnectHandler)
                 ),
                 new ConcurrentReceiverGroup()));
 
@@ -195,6 +181,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
             Activate(Arbiter.ReceiveWithIteratorFromPortSet<GetCamParam>(true, _mainPort, GetCamParamHandler));
             Activate(Arbiter.ReceiveWithIteratorFromPortSet<SetCamParam>(true, _mainPort, SetCamParamHandler));
             Activate(Arbiter.ReceiveWithIteratorFromPortSet<SendScribblerCommand>(true, _mainPort, SendScribblerCommandHandlerExternal));
+            Activate(Arbiter.ReceiveWithIteratorFromPortSet<HttpPost>(true, _mainPort, HttpPostHandler));
 
             // These don't use the state either.
             // GetWindow has to set up the window, then retrieve it, so it must run one at a time.
@@ -332,7 +319,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
             yield break;
         }
 
-        private bool ConnectToScribbler()
+        private IEnumerator<ITask> ReconnectHandler(Reconnect req)
         {
             //try
             //{
@@ -341,51 +328,67 @@ namespace Myro.Services.Scribbler.ScribblerBase
             //look for scribbler on last known Com port
             if (_state.ComPort > 0)
             {
-                _state.Connected = _scribblerCom.Open(_state.ComPort);
-            }
+                var rPort = new Port<EmptyValue>();
+                Exception ex = null;
+                new Thread(new ThreadStart(delegate()
+                {
+                    try
+                    {
+                        _scribblerCom.Open(_state.ComPort);
+                    }
+                    catch (Exception e)
+                    {
+                        ex = e;
+                    }
+                    rPort.Post(new EmptyValue());
+                })).Start();
+                yield return Arbiter.Receive(false, rPort, delegate(EmptyValue v) { });
+                if (ex != null)
+                {
+                    req.ResponsePort.Post(RSUtils.FaultOfException(ex));
+                    yield break;
+                }
 
-            //scan all ports for the name of our Robot
-            /*
-            if (_state.Connected == false)
-            {
-                _state.Connected = _scribblerCom.FindRobot(_state.RobotName);
-            }
-            */
-            //}
-            //catch (UnauthorizedAccessException ex)
-            //{
-            //    LogError(ex);
-            //}
-            //catch (IOException ex)
-            //{
-            //    LogError(ex);
-            //}
-            //catch (ArgumentOutOfRangeException ex)
-            //{
-            //    LogError(ex);
-            //}
-            //catch (ArgumentException ex)
-            //{
-            //    LogError(ex);
-            //}
-            //catch (InvalidOperationException ex)
-            //{
-            //    LogError(ex);
-            //}
-
-            if (!_state.Connected)
-            {
-                LogError(LogGroups.Console, "No Scribbler robot found.");
-            }
-            else
-            {
                 _state.RobotName = _scribblerCom.foundRobotName;
                 _state.ComPort = _scribblerCom.openedComPort;
                 LogInfo(LogGroups.Console, "Now connected to robot \"" + _state.RobotName + "\" on COM" + _state.ComPort);
                 SaveState(_state);
+
+                PollTimer = new System.Timers.Timer();
+                PollTimer.Interval = TimerDelay;
+                PollTimer.AutoReset = true;
+                PollTimer.Elapsed += new System.Timers.ElapsedEventHandler(PollTimer_Elapsed);
+                //PollTimer.Start();
+
+                //fix state
+                _state.MotorLeft = 100;
+                _state.MotorRight = 100;
+                _state.LEDLeft = false;
+                _state.LEDRight = false;
+                _state.LEDCenter = false;
+
+                _state.Connected = true;
+
+                //play startup tone
+                LogInfo("playing startup tone...");
+                PlayTone startTone = new PlayTone(new PlayToneBody(.2, 1000, 2000));
+                _mainPort.PostUnknownType(startTone);
+                //yield return Arbiter.Choice(startTone.ResponsePort,
+                //    delegate(DefaultUpdateResponseType r) { },
+                //    delegate(Fault f) { throw new Exception("Could not play startup tone"); });
+                LogInfo("done playing");
+
+                req.ResponsePort.Post(DefaultUpdateResponseType.Instance);
+
+                LogInfo("reconnect sent success");
+            }
+            else
+            {
+                req.ResponsePort.Post(RSUtils.FaultOfException(new ScribblerBadCOMPortException()));
+                LogInfo("reconnect sent failure");
             }
 
-            return _state.Connected;
+            yield break;
         }
 
 
@@ -410,11 +413,15 @@ namespace Myro.Services.Scribbler.ScribblerBase
             SendScribblerCommand sendcmd = new SendScribblerCommand(cmd);
             _scribblerComPort.Post(sendcmd);
 
-            yield return Arbiter.Receive<ScribblerResponse>(false, sendcmd.ResponsePort,
+            yield return Arbiter.Choice(sendcmd.ResponsePort,
                 delegate(ScribblerResponse response)
                 {
                     //reply to sender
                     message.ResponsePort.Post(DefaultUpdateResponseType.Instance);
+                },
+                delegate(Fault f)
+                {
+                    message.ResponsePort.Post(f);
                 }
             );
 
@@ -1301,250 +1308,230 @@ namespace Myro.Services.Scribbler.ScribblerBase
         /// <summary>
         /// Http Post Handler.  Handles http form inputs
         /// </summary>
-        [ServiceHandler(ServiceHandlerBehavior.Concurrent)]
+        //[ServiceHandler(ServiceHandlerBehavior.Concurrent)]
         public IEnumerator<ITask> HttpPostHandler(HttpPost httpPost)
         {
             // Use helper to read form data
             ReadFormData readForm = new ReadFormData(httpPost);
             _httpUtilities.Post(readForm);
 
-            // Wait for result
-            Activate(Arbiter.Choice(readForm.ResultPort,
-                delegate(NameValueCollection parameters)
+            // Read form data
+            NameValueCollection parameters = null;
+            yield return Arbiter.Choice(readForm.ResultPort,
+                delegate(NameValueCollection p) { parameters = p; },
+                delegate(Exception e) { throw new Exception("Error reading form data", e); });
+
+            // Act on form data
+            if (!string.IsNullOrEmpty(parameters["Action"])
+                  && parameters["Action"] == "ScribblerConfig")
+            {
+                if (parameters["buttonOk"] == "Change" && _state.Connected)
                 {
-                    if (!string.IsNullOrEmpty(parameters["Action"])
-                          && parameters["Action"] == "ScribblerConfig")
-                    {
-                        if (parameters["buttonOk"] == "Change" && _state.Connected)
-                        {
-                            SetNameBody newname = new SetNameBody(parameters["Name"]);
-                            SetName newnamemessage = new SetName(newname);
-                            _mainPort.PostUnknownType(newnamemessage);
-                            Activate(
-                                Arbiter.Choice(
-                                    Arbiter.Receive<DefaultUpdateResponseType>(false, newnamemessage.ResponsePort,
-                                        delegate(DefaultUpdateResponseType response)
-                                        {
-                                            HttpPostSuccess(httpPost);
-                                        }),
-                                    Arbiter.Receive<Fault>(false, newnamemessage.ResponsePort,
-                                        delegate(Fault f)
-                                        {
-                                            HttpPostFailure(httpPost, f.Reason[0].Value);
-                                        })
-                                )
-                            );
+                    SetNameBody newname = new SetNameBody(parameters["Name"]);
+                    SetName newnamemessage = new SetName(newname);
+                    _mainPort.PostUnknownType(newnamemessage);
+                    Activate(
+                        Arbiter.Choice(
+                            Arbiter.Receive<DefaultUpdateResponseType>(false, newnamemessage.ResponsePort,
+                                delegate(DefaultUpdateResponseType response)
+                                {
+                                    HttpPostSuccess(httpPost);
+                                }),
+                            Arbiter.Receive<Fault>(false, newnamemessage.ResponsePort,
+                                delegate(Fault f)
+                                {
+                                    HttpPostFailure(httpPost, f.Reason[0].Value);
+                                })
+                        )
+                    );
 
-                        }
-                        else if (parameters["buttonOk"] == "Connect" && _state.Connected)
-                        {
-                            //close down this connection to make a new connection below
-
-                            PollTimer.Close();
-
-                            System.Threading.Thread.Sleep(100);
-
-                            _scribblerCom.Close();
-
-                            _state.Connected = false;
-                        }
-
-                        if (parameters["buttonOk"] == "Connect" && !_state.Connected)
-                        {
-                            int port = 0;
-                            int.TryParse(parameters["ComPort"], out port);
-                            string name = parameters["Name"];
-                            if (!string.IsNullOrEmpty(name) && name.Length > 8)
-                                name = name.Substring(0, 8);
-
-                            _state.ComPort = port;
-                            _state.RobotName = name;
-
-                            //open Scribbler Communications port
-                            if (ConnectToScribbler())
-                            {
-                                // Listen for a single Serial port request with an acknowledgement
-                                Activate(Arbiter.ReceiveWithIterator<SendScribblerCommand>(false, _scribblerComPort, SendScribblerCommandHandler));
-
-                                PollTimer = new System.Timers.Timer();
-                                PollTimer.Interval = TimerDelay;
-                                PollTimer.AutoReset = true;
-                                PollTimer.Elapsed += new System.Timers.ElapsedEventHandler(PollTimer_Elapsed);
-                                //PollTimer.Start();
-
-                                //play startup tone
-                                PlayToneBody startTone = new PlayToneBody(200, 1000, 2000);
-                                PlayTone playToneMessage = new PlayTone(startTone);
-                                _mainPort.PostUnknownType(playToneMessage);
-
-                                Activate(
-                                    Arbiter.Choice(
-                                        Arbiter.Receive<DefaultUpdateResponseType>(false, playToneMessage.ResponsePort,
-                                            delegate(DefaultUpdateResponseType response)
-                                            {
-                                                HttpPostSuccess(httpPost);
-                                            }),
-                                        Arbiter.Receive<Fault>(false, playToneMessage.ResponsePort,
-                                            delegate(Fault f)
-                                            {
-                                                HttpPostFailure(httpPost, f.Reason[0].Value);
-                                            })
-                                    )
-                                );
-                            }
-                            else
-                                HttpPostFailure(httpPost, "Connection to Scribbler failed");
-                        }
-                    }
-                    else if (!string.IsNullOrEmpty(parameters["Action"])
-                          && parameters["Action"] == "ScribblerSensors")
-                    {
-                        if (parameters["buttonOk"] == "Poll" && _state.Connected)
-                        {
-                            ScribblerCommand cmd = new ScribblerCommand(ScribblerHelper.Commands.GET_ALL);
-                            SendScribblerCommand sendcmd = new SendScribblerCommand(cmd);
-                            _scribblerComPort.Post(sendcmd);
-                            Activate(
-                                Arbiter.Choice(
-                                    Arbiter.Receive<ScribblerResponse>(false, sendcmd.ResponsePort,
-                                        delegate(ScribblerResponse response)
-                                        {
-                                            HttpPostSuccess(httpPost);
-                                        }),
-                                    Arbiter.Receive<Fault>(false, sendcmd.ResponsePort,
-                                        delegate(Fault f)
-                                        {
-                                            HttpPostFailure(httpPost, f.Reason[0].Value);
-                                        })
-                                )
-                            );
-                        }
-                    }
-                    else if (!string.IsNullOrEmpty(parameters["Action"])
-                        && parameters["Action"] == "ScribblerMotors")
-                    {
-                        if (parameters["buttonOk"] == "Set" && _state.Connected)
-                        {
-                            int left = _state.MotorLeft;
-                            int right = _state.MotorRight;
-                            int.TryParse(parameters["LeftMotor"], out left);
-                            int.TryParse(parameters["RightMotor"], out right);
-
-                            SetMotorsBody setMotorsBody = new SetMotorsBody(left, right);
-                            SetMotors setMotorsRequest = new SetMotors(setMotorsBody);
-
-                            _mainPort.PostUnknownType(setMotorsRequest);
-
-                            Activate(
-                                Arbiter.Choice(
-                                    Arbiter.Receive<DefaultUpdateResponseType>(false, setMotorsRequest.ResponsePort,
-                                        delegate(DefaultUpdateResponseType response)
-                                        {
-                                            HttpPostSuccess(httpPost);
-                                        }),
-                                    Arbiter.Receive<Fault>(false, setMotorsRequest.ResponsePort,
-                                        delegate(Fault f)
-                                        {
-                                            HttpPostFailure(httpPost, f.Reason[0].Value);
-                                        })
-                                )
-                            );
-                        }
-                        else if (parameters["buttonOk"] == "All Stop" && _state.Connected)
-                        {
-                            SetMotorsBody setMotorsBody = new SetMotorsBody(100, 100);
-                            SetMotors setMotorsRequest = new SetMotors(setMotorsBody);
-
-                            _mainPort.PostUnknownType(setMotorsRequest);
-
-                            Activate(
-                                Arbiter.Choice(
-                                    Arbiter.Receive<DefaultUpdateResponseType>(false, setMotorsRequest.ResponsePort,
-                                        delegate(DefaultUpdateResponseType response)
-                                        {
-                                            HttpPostSuccess(httpPost);
-                                        }),
-                                    Arbiter.Receive<Fault>(false, setMotorsRequest.ResponsePort,
-                                        delegate(Fault f)
-                                        {
-                                            HttpPostFailure(httpPost, f.Reason[0].Value);
-                                        })
-                                )
-                            );
-                        }
-                    }
-                    else if (!string.IsNullOrEmpty(parameters["Action"])
-                        && parameters["Action"] == "ScribblerLEDs")
-                    {
-                        if (parameters["buttonOk"] == "Set" && _state.Connected)
-                        {
-                            bool left = ((parameters["LeftLED"] ?? "off") == "on");
-                            bool center = ((parameters["CenterLED"] ?? "off") == "on");
-                            bool right = ((parameters["RightLED"] ?? "off") == "on");
-
-                            SetAllLedsBody leds = new SetAllLedsBody(left, center, right);
-                            SetAllLEDs setAllLeds = new SetAllLEDs(leds);
-                            _mainPort.PostUnknownType(setAllLeds);
-
-                            Activate(
-                                Arbiter.Choice(
-                                    Arbiter.Receive<DefaultUpdateResponseType>(false, setAllLeds.ResponsePort,
-                                        delegate(DefaultUpdateResponseType response)
-                                        {
-                                            HttpPostSuccess(httpPost);
-                                        }),
-                                    Arbiter.Receive<Fault>(false, setAllLeds.ResponsePort,
-                                        delegate(Fault f)
-                                        {
-                                            HttpPostFailure(httpPost, f.Reason[0].Value);
-                                        })
-                                )
-                            );
-
-                        }
-                    }
-                    else if (!string.IsNullOrEmpty(parameters["Action"])
-                   && parameters["Action"] == "ScribblerSpeaker")
-                    {
-                        if (parameters["buttonOk"] == "Play" && _state.Connected)
-                        {
-                            int tone1 = 0;
-                            int tone2 = 0;
-                            int duration = 0;
-                            int.TryParse(parameters["Tone1"], out tone1);
-                            int.TryParse(parameters["Tone2"], out tone2);
-                            int.TryParse(parameters["Duration"], out duration);
-
-                            PlayToneBody playTone = new PlayToneBody(duration, tone1, tone2);
-                            PlayTone playToneMessage = new PlayTone(playTone);
-                            _mainPort.PostUnknownType(playToneMessage);
-
-                            Activate(
-                                Arbiter.Choice(
-                                    Arbiter.Receive<DefaultUpdateResponseType>(false, playToneMessage.ResponsePort,
-                                        delegate(DefaultUpdateResponseType response)
-                                        {
-                                            HttpPostSuccess(httpPost);
-                                        }),
-                                    Arbiter.Receive<Fault>(false, playToneMessage.ResponsePort,
-                                        delegate(Fault f)
-                                        {
-                                            HttpPostFailure(httpPost, f.Reason[0].Value);
-                                        })
-                                )
-                            );
-                        }
-                    }
-                    else
-                    {
-                        HttpPostFailure(httpPost, "Unknown Http Post");
-                    }
-                },
-                delegate(Exception Failure)
+                }
+                else if (parameters["buttonOk"] == "Connect" && _state.Connected)
                 {
-                    LogError(Failure.Message);
-                })
-            );
+                    //close down this connection to make a new connection below
+
+                    PollTimer.Close();
+
+                    System.Threading.Thread.Sleep(100);
+
+                    _scribblerCom.Close();
+
+                    _state.Connected = false;
+
+                    //HttpPostSuccess(httpPost);
+                }
+
+                if (parameters["buttonOk"] == "Connect" && !_state.Connected)
+                {
+                    int port = 0;
+                    int.TryParse(parameters["ComPort"], out port);
+                    string name = parameters["Name"];
+                    if (!string.IsNullOrEmpty(name) && name.Length > 8)
+                        name = name.Substring(0, 8);
+
+                    _state.ComPort = port;
+                    _state.RobotName = name;
+
+                    //open Scribbler Communications port
+                    LogInfo("connecting to scribbler...");
+                    Reconnect rec = new Reconnect();
+                    _mainPort.PostUnknownType(rec);
+                    yield return Arbiter.Choice(rec.ResponsePort,
+                        delegate(DefaultUpdateResponseType r)
+                        {
+                            LogInfo("connected, sending http reply");
+                            HttpPostSuccess(httpPost);
+                            LogInfo("http reply sent");
+                        },
+                        delegate(Fault f)
+                        {
+                            httpPost.ResponsePort.Post(f);
+                        });
+                }
+            }
+            else if (!string.IsNullOrEmpty(parameters["Action"])
+                  && parameters["Action"] == "ScribblerSensors")
+            {
+                if (parameters["buttonOk"] == "Poll" && _state.Connected)
+                {
+                    ScribblerCommand cmd = new ScribblerCommand(ScribblerHelper.Commands.GET_ALL);
+                    SendScribblerCommand sendcmd = new SendScribblerCommand(cmd);
+                    _scribblerComPort.Post(sendcmd);
+                    Activate(
+                        Arbiter.Choice(
+                            Arbiter.Receive<ScribblerResponse>(false, sendcmd.ResponsePort,
+                                delegate(ScribblerResponse response)
+                                {
+                                    HttpPostSuccess(httpPost);
+                                }),
+                            Arbiter.Receive<Fault>(false, sendcmd.ResponsePort,
+                                delegate(Fault f)
+                                {
+                                    HttpPostFailure(httpPost, f.Reason[0].Value);
+                                })
+                        )
+                    );
+                }
+            }
+            else if (!string.IsNullOrEmpty(parameters["Action"])
+                && parameters["Action"] == "ScribblerMotors")
+            {
+                if (parameters["buttonOk"] == "Set" && _state.Connected)
+                {
+                    int left = _state.MotorLeft;
+                    int right = _state.MotorRight;
+                    int.TryParse(parameters["LeftMotor"], out left);
+                    int.TryParse(parameters["RightMotor"], out right);
+
+                    SetMotorsBody setMotorsBody = new SetMotorsBody(left, right);
+                    SetMotors setMotorsRequest = new SetMotors(setMotorsBody);
+
+                    _mainPort.PostUnknownType(setMotorsRequest);
+
+                    Activate(
+                        Arbiter.Choice(
+                            Arbiter.Receive<DefaultUpdateResponseType>(false, setMotorsRequest.ResponsePort,
+                                delegate(DefaultUpdateResponseType response)
+                                {
+                                    HttpPostSuccess(httpPost);
+                                }),
+                            Arbiter.Receive<Fault>(false, setMotorsRequest.ResponsePort,
+                                delegate(Fault f)
+                                {
+                                    HttpPostFailure(httpPost, f.Reason[0].Value);
+                                })
+                        )
+                    );
+                }
+                else if (parameters["buttonOk"] == "All Stop" && _state.Connected)
+                {
+                    SetMotorsBody setMotorsBody = new SetMotorsBody(100, 100);
+                    SetMotors setMotorsRequest = new SetMotors(setMotorsBody);
+
+                    _mainPort.PostUnknownType(setMotorsRequest);
+
+                    Activate(
+                        Arbiter.Choice(
+                            Arbiter.Receive<DefaultUpdateResponseType>(false, setMotorsRequest.ResponsePort,
+                                delegate(DefaultUpdateResponseType response)
+                                {
+                                    HttpPostSuccess(httpPost);
+                                }),
+                            Arbiter.Receive<Fault>(false, setMotorsRequest.ResponsePort,
+                                delegate(Fault f)
+                                {
+                                    HttpPostFailure(httpPost, f.Reason[0].Value);
+                                })
+                        )
+                    );
+                }
+            }
+            else if (!string.IsNullOrEmpty(parameters["Action"])
+                && parameters["Action"] == "ScribblerLEDs")
+            {
+                if (parameters["buttonOk"] == "Set" && _state.Connected)
+                {
+                    bool left = ((parameters["LeftLED"] ?? "off") == "on");
+                    bool center = ((parameters["CenterLED"] ?? "off") == "on");
+                    bool right = ((parameters["RightLED"] ?? "off") == "on");
+
+                    SetAllLedsBody leds = new SetAllLedsBody(left, center, right);
+                    SetAllLEDs setAllLeds = new SetAllLEDs(leds);
+                    _mainPort.PostUnknownType(setAllLeds);
+
+                    Activate(
+                        Arbiter.Choice(
+                            Arbiter.Receive<DefaultUpdateResponseType>(false, setAllLeds.ResponsePort,
+                                delegate(DefaultUpdateResponseType response)
+                                {
+                                    HttpPostSuccess(httpPost);
+                                }),
+                            Arbiter.Receive<Fault>(false, setAllLeds.ResponsePort,
+                                delegate(Fault f)
+                                {
+                                    HttpPostFailure(httpPost, f.Reason[0].Value);
+                                })
+                        )
+                    );
+
+                }
+            }
+            else if (!string.IsNullOrEmpty(parameters["Action"])
+                && parameters["Action"] == "ScribblerSpeaker")
+            {
+                if (parameters["buttonOk"] == "Play" && _state.Connected)
+                {
+                    int tone1 = 0;
+                    int tone2 = 0;
+                    int duration = 0;
+                    int.TryParse(parameters["Tone1"], out tone1);
+                    int.TryParse(parameters["Tone2"], out tone2);
+                    int.TryParse(parameters["Duration"], out duration);
+
+                    PlayToneBody playTone = new PlayToneBody(duration, tone1, tone2);
+                    PlayTone playToneMessage = new PlayTone(playTone);
+                    _mainPort.PostUnknownType(playToneMessage);
+
+                    Activate(
+                        Arbiter.Choice(
+                            Arbiter.Receive<DefaultUpdateResponseType>(false, playToneMessage.ResponsePort,
+                                delegate(DefaultUpdateResponseType response)
+                                {
+                                    HttpPostSuccess(httpPost);
+                                }),
+                            Arbiter.Receive<Fault>(false, playToneMessage.ResponsePort,
+                                delegate(Fault f)
+                                {
+                                    HttpPostFailure(httpPost, f.Reason[0].Value);
+                                })
+                        )
+                    );
+                }
+            }
+            else
+            {
+                HttpPostFailure(httpPost, "Unknown Http Post");
+            }
             yield break;
         }
 
@@ -1564,9 +1551,9 @@ namespace Myro.Services.Scribbler.ScribblerBase
         /// </summary>
         private void HttpPostFailure(HttpPost httpPost, string faultMessage)
         {
-            HttpResponseType rsp =
-                new HttpResponseType(HttpStatusCode.ExpectationFailed, faultMessage);
-            httpPost.ResponsePort.Post(rsp);
+            //HttpResponseType rsp =
+            //    new HttpResponseType(HttpStatusCode.OK, RSUtils.FaultOfException(new Exception(faultMessage)));
+            httpPost.ResponsePort.Post(new Fault() { Reason = new ReasonText[] { new ReasonText() { Value = faultMessage } } });
         }
 
 
@@ -1576,8 +1563,20 @@ namespace Myro.Services.Scribbler.ScribblerBase
         [ServiceHandler(ServiceHandlerBehavior.Exclusive)]
         public virtual IEnumerator<ITask> ReplaceHandler(Replace replace)
         {
+            //if (_state.ComPort != replace.Body.ComPort)
+            //{
+            //    _state = replace.Body;
+            //    var ePort = new Port<Exception>();
+            //    Dispatcher.AddCausality(new Causality("connect to scribbler", ePort));
+            //    Activate(ePort.Receive(delegate(Exception e) { replace.ResponsePort.Post(RSUtils.FaultOfException(e)); }));
+            //    yield return new IterativeTask(ConnectToScribbler);
+            //    replace.ResponsePort.Post(DefaultReplaceResponseType.Instance);
+            //}
+            //else
+            //{
             _state = replace.Body;
             replace.ResponsePort.Post(DefaultReplaceResponseType.Instance);
+            //}
             yield break;
         }
 

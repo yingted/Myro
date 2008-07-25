@@ -79,6 +79,16 @@ namespace Myro.Utilities
                 select readConfig(baseName));
         }
 
+        public MyroConfigFiles FindFromBaseName(string baseName)
+        {
+            MyroConfigFiles config = FindConfigFiles().Find(
+                c => c.BaseName.Equals(baseName, StringComparison.InvariantCultureIgnoreCase));
+            if (config == null)
+                throw new BaseNameNotFoundException();
+            else
+                return config;
+        }
+
         public void WriteConfig(MyroConfigFiles config)
         {
             using (var writer = new StreamWriter(config.ConfigFilePath))
@@ -96,8 +106,10 @@ namespace Myro.Utilities
             File.Copy(imagePath, iconPath);
             config.IconFilePath = iconPath;
         }
+    }
 
-
-
+    public class BaseNameNotFoundException : Exception
+    {
+        public BaseNameNotFoundException() : base(Strings.BaseNameNotFound) { }
     }
 }

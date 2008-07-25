@@ -29,7 +29,7 @@ namespace Myro.GUI.WPFControls
         {
             new ServicePanelInfo() { Description="IR", Name="ir", Min=0.0, Max=1.0, Color=Colors.Blue },
             new ServicePanelInfo() { Description="Obsacle Sensors", Name="obstacle", Min=0.0, Max=2000.0, Color=Colors.IndianRed },
-            new ServicePanelInfo() { Description="Sonar", Name="sonar", Min=20.0, Max=0.0, Color=Colors.Tan },
+            //new ServicePanelInfo() { Description="Sonar", Name="sonar", Min=20.0, Max=0.0, Color=Colors.Tan },
             new ServicePanelInfo() { Description="Stall", Name="stall", Min=0.0, Max=1.0, Color=Colors.Red },
             new ServicePanelInfo() { Description="Light sensors", Name="light", Min=2000.0, Max=0.0, Color=Colors.DeepSkyBlue },
             new ServicePanelInfo() { Description="Line sensors", Name="line", Min=0.0, Max=1.0, Color=Colors.DarkGray },

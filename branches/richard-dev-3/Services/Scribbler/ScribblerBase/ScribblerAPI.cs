@@ -487,4 +487,8 @@ namespace Myro.Services.Scribbler.ScribblerBase
         public ScribblerDataException(string message) : base(message) { }
         public ScribblerDataException(string message, Exception innerException) : base(message, innerException) { }
     }
+
+    public class ScribblerBadCOMPortException : Exception
+    {
+    }
 }

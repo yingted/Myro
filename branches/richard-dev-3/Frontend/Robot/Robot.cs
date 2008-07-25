@@ -10,9 +10,23 @@ using System.IO;
 using System.Threading;
 using System.Drawing;
 using Myro.Utilities;
+using Microsoft.Dss.ServiceModel.Dssp;
+using Microsoft.Ccr.Core;
+using W3C.Soap;
+
+using directory = Microsoft.Dss.Services.Directory.Proxy;
+using scribbler = Myro.Services.Scribbler.ScribblerBase.Proxy;
 
 namespace Myro
 {
+    /// <summary>
+    /// The static Robot class provides the highest-level implementation of the
+    /// Myro API.  This class is responsible for loading a robot configuration
+    /// when init() is called, and starting the DSS environment, which in turn
+    /// starts the robot services.  This class also is the high-level point of
+    /// access for the Myro adapters, and stores a static instance of
+    /// AdapterBank, which actually manages the adapters.
+    /// </summary>
     public static class Robot
     {
         private static AdapterBank bank = null;
@@ -22,48 +36,347 @@ namespace Myro
         private static AdapterSpec<FlukeControlAdapter> controlAdapter = null;
         private static int httpPort;
         private static int dsspPort;
+        private static ServiceInfoType brickService = null;
+
+        public enum RobotStateChange
+        {
+            NONE, CONNECTING, CONNECTING_FAILED, CONNECTING_SUCCEEDED, SHUTDOWN, SHUTDOWN_COMPLETE
+        }
+        public class StateChangeEventArgs : EventArgs
+        {
+            public RobotStateChange StateChange;
+        }
+        public delegate void StateChangeEventHandler(StateChangeEventArgs e);
+        public static event StateChangeEventHandler StateChangeEvent;
+        public static RobotStateChange _lastStateChange = RobotStateChange.NONE;
+        public static RobotStateChange LastStateChange
+        {
+            get
+            {
+                return _lastStateChange;
+            }
+            set
+            {
+                _lastStateChange = value;
+                StateChangeEvent.Invoke(new StateChangeEventArgs() { StateChange = value });
+            }
+        }
+
+        public static MyroConfigFiles CurrentConfig { get; private set; }
 
         #region Startup and shutdown
-        public static void Init(string manifestFile, int httpPort, int dsspPort)
+
+        public static void Init(MyroConfigFiles config)
         {
-            if (bank == null)
-            {
-                Robot.httpPort = httpPort;
-                Robot.dsspPort = dsspPort;
-                FileAttributes att = File.GetAttributes(manifestFile);
-                if ((att & (FileAttributes.Device | FileAttributes.Directory | FileAttributes.Offline)) != 0)
-                    throw new IOException("Manifest file is not a normal file");
-                Console.Write("Starting DSS environment...");
-                DssEnvironment.Initialize(httpPort, dsspPort, "file://" + manifestFile);
-                Console.WriteLine("Done");
-                bank = new AdapterBank(new List<IAdapterFactory>() {
-                    new Myro.Adapters.DriveAdapterFactory(),
-                    new Myro.Adapters.VectorAdapterFactory(),
-                    new Myro.Adapters.WebcamAdapterFactory(),
-                    new Myro.Adapters.FlukeControlAdapterFactory()
-                });
-                driveAdapter = bank.GetAdapterSpec<DriveAdapter>("drive");
-                soundAdapter = bank.GetAdapterSpec<VectorAdapter>("tonegen");
-                webcamAdapter = bank.GetAdapterSpec<WebcamAdapter>("webcam");
-                controlAdapter = bank.GetAdapterSpec<FlukeControlAdapter>("flukecontrol");
-            }
-            else
-                throw new Exception("Myro is already initialized");
+            Init(config, null);
+            //string manifestFile = Path.Combine(Path.Combine(Params.ConfigPath, config.BaseName + ".manifest"), config.BaseName + ".manifest.xml");
+
+            //if (bank == null)
+            //{
+            //    Robot.httpPort = Params.DefaultHttpPort;
+            //    Robot.dsspPort = Params.DefaultDsspPort;
+            //    FileAttributes att = File.GetAttributes(manifestFile);
+            //    if ((att & (FileAttributes.Device | FileAttributes.Directory | FileAttributes.Offline)) != 0)
+            //        throw new IOException("Manifest file is not a normal file");
+            //    Console.Write("Starting DSS environment...");
+            //    DssEnvironment.Initialize(httpPort, dsspPort, "file://" + manifestFile);
+            //    Console.WriteLine("Done");
+
+            //    // If this is a Scribbler, wait for it to start
+            //    if (config.BaseName.ToLower().Equals("scribbler"))
+            //    {
+            //        ManualResetEvent evt = new ManualResetEvent(false);
+            //        waitForService(new ServiceInfoType(scribbler.Contract.Identifier),
+            //            delegate(ServiceInfoType info) { brickService = info; evt.Set(); });
+            //        evt.WaitOne(Params.DefaultRecieveTimeout);
+            //        if (brickService == null)
+            //            throw new MyroInitException("Could not find Scribbler service");
+            //        var scribPort = DssEnvironment.ServiceForwarder<scribbler.ScribblerOperations>(new Uri(brickService.Service));
+            //        DispatcherQueue queue = new DispatcherQueue("init", new Dispatcher());
+            //        try
+            //        {
+            //            RSUtils.ReceiveSync(queue, scribPort.Reconnect(), Params.DefaultRecieveTimeout);
+            //        }
+            //        catch (Exception)
+            //        {
+            //            throw;
+            //        }
+            //        finally
+            //        {
+            //            queue.Dispose();
+            //        }
+            //    }
+
+            //    bank = new AdapterBank(new List<IAdapterFactory>() {
+            //        new Myro.Adapters.DriveAdapterFactory(),
+            //        new Myro.Adapters.VectorAdapterFactory(),
+            //        new Myro.Adapters.WebcamAdapterFactory(),
+            //        new Myro.Adapters.FlukeControlAdapterFactory()
+            //    });
+            //    driveAdapter = bank.GetAdapterSpec<DriveAdapter>("drive");
+            //    soundAdapter = bank.GetAdapterSpec<VectorAdapter>("tonegen");
+            //    webcamAdapter = bank.GetAdapterSpec<WebcamAdapter>("webcam");
+            //    controlAdapter = bank.GetAdapterSpec<FlukeControlAdapter>("flukecontrol");
+            //}
+            //else
+            //    throw new Exception("Myro is already initialized");
         }
 
+        /// <summary>
+        /// This is one of the init methods that is available in Python.  It 
+        /// automatically does the right thing when given a base name such as
+        /// "Scribbler", or "Create".
+        /// </summary>
+        /// <param name="baseName">The base name of the manifest and config file group.</param>
         public static void init(string baseName)
         {
-            Init(Path.Combine(Path.Combine(Params.ConfigPath, baseName + ".manifest"), baseName + ".manifest.xml"), Params.DefaultHttpPort, Params.DefaultDsspPort);
+            init(baseName, null);
         }
 
-        public static void shutdown()
+        /// <summary>
+        /// This is one of the init methods that is available in Python.  It 
+        /// automatically does the right thing when given a base name such as
+        /// "Scribbler", or "Create".  It also allows you to specify a COM port,
+        /// which currently only works with the Scribbler.
+        /// </summary>
+        /// <param name="baseName"></param>
+        /// <param name="comPort"></param>
+        public static void init(string baseName, string comPort)
         {
-            if (bank != null)
+            Init(new MyroConfigFinder(Params.ConfigPath).FindFromBaseName(baseName), comPort);
+        }
+
+        public static void Init(MyroConfigFiles config, string comPort)
+        {
+            bool isScribbler = config.BaseName.ToLower().Equals("scribbler");
+
+            // If this is a Scribbler, wait for it to start
+            if (isScribbler)
             {
-                bank.Dispose();
+                CurrentConfig = config;
+                LastStateChange = RobotStateChange.CONNECTING;
+
+                try
+                {
+                    // Start DSS if not started
+                    if (bank == null)
+                    {
+                        startDSS(config);
+                        createAdapters();
+                    }
+                    connectWaitForScribbler(comPort);
+                }
+                catch (Exception)
+                {
+                    LastStateChange = RobotStateChange.CONNECTING_FAILED;
+                    CurrentConfig = null;
+                    throw;
+                }
+
+                LastStateChange = RobotStateChange.CONNECTING_SUCCEEDED;
+            }
+            else
+            {
+                if (bank == null)
+                {
+                    CurrentConfig = config;
+                    LastStateChange = RobotStateChange.CONNECTING;
+
+                    try
+                    {
+                        startDSS(config);
+                        createAdapters();
+                    }
+                    catch (Exception)
+                    {
+                        LastStateChange = RobotStateChange.CONNECTING_FAILED;
+                        CurrentConfig = null;
+                        throw;
+                    }
+
+                    LastStateChange = RobotStateChange.CONNECTING_SUCCEEDED;
+                }
+                else
+                {
+                    throw new MyroInitException("Myro is already initialized");
+                }
+            }
+        }
+
+        private static void startDSS(MyroConfigFiles config)
+        {
+            string manifestFile = Path.Combine(Path.Combine(Params.ConfigPath, config.BaseName + ".manifest"), config.BaseName + ".manifest.xml");
+            Robot.httpPort = config.MyroConfiguration.HttpPort;
+            Robot.dsspPort = config.MyroConfiguration.DsspPort;
+            FileAttributes att = File.GetAttributes(manifestFile);
+            if ((att & (FileAttributes.Device | FileAttributes.Directory | FileAttributes.Offline)) != 0)
+                throw new IOException("Manifest file is not a normal file");
+            Console.Write("Starting DSS environment...");
+            DssEnvironment.Initialize(httpPort, dsspPort, "file://" + manifestFile);
+            Console.WriteLine("Done");
+        }
+
+        private static void createAdapters()
+        {
+            bank = new AdapterBank(new List<IAdapterFactory>() {
+                new Myro.Adapters.DriveAdapterFactory(),
+                new Myro.Adapters.VectorAdapterFactory(),
+                new Myro.Adapters.WebcamAdapterFactory(),
+                new Myro.Adapters.FlukeControlAdapterFactory()
+            });
+            driveAdapter = bank.GetAdapterSpec<DriveAdapter>("drive");
+            soundAdapter = bank.GetAdapterSpec<VectorAdapter>("tonegen");
+            webcamAdapter = bank.GetAdapterSpec<WebcamAdapter>("webcam");
+            controlAdapter = bank.GetAdapterSpec<FlukeControlAdapter>("flukecontrol");
+        }
+
+        private static void connectWaitForScribbler(string comPort)
+        {
+            ManualResetEvent evt = new ManualResetEvent(false);
+            waitForService(new ServiceInfoType(scribbler.Contract.Identifier),
+                delegate(ServiceInfoType info) { brickService = info; evt.Set(); });
+            evt.WaitOne(Params.DefaultRecieveTimeout);
+            if (brickService == null)
+                throw new MyroInitException("Could not find Scribbler service");
+            var scribPort = DssEnvironment.ServiceForwarder<scribbler.ScribblerOperations>(new Uri(brickService.Service));
+            DispatcherQueue queue = new DispatcherQueue("init", new Dispatcher());
+            try
+            {
+                if (comPort != null)
+                {
+                    int comNumber;
+                    if (comPort.ToLower().StartsWith("com"))
+                        comNumber = Int32.Parse(comPort.Substring(3));
+                    else
+                        throw new MyroInitException("COM port string must be of the format com2, com5, etc.");
+                    RSUtils.ReceiveSync(queue, scribPort.Replace(new scribbler.ScribblerState()
+                    {
+                        ComPort = comNumber
+                    }), Params.DefaultRecieveTimeout);
+                }
+                DssEnvironment.LogInfo("calling reconnect...");
+                RSUtils.ReceiveSync(queue, scribPort.Reconnect(), Params.DefaultRecieveTimeout);
+                DssEnvironment.LogInfo("reconnect returned");
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                queue.Dispose();
+            }
+        }
+
+        /// <summary>
+        /// Shut down the DSS node and MSRDS services.  This method waits
+        /// for everything to shut down before returning
+        /// </summary>
+        public static void Shutdown()
+        {
+            LastStateChange = RobotStateChange.SHUTDOWN;
+
+            try
+            {
+                if (bank != null)
+                {
+                    bank.Dispose();
+                }
+            }
+            catch (Exception) { }
+
+            try
+            {
                 DssEnvironment.Shutdown();
                 DssEnvironment.WaitForShutdown();
             }
+            catch (Exception) { }
+
+            LastStateChange = RobotStateChange.SHUTDOWN_COMPLETE;
+        }
+
+        private static void waitForService(ServiceInfoType serviceInfo, Handler<ServiceInfoType> handler)
+        {
+            var dirPort = DssEnvironment.ServiceForwarder<directory.DirectoryPort>(new Uri("dssp.tcp://localhost/directory"));
+            var notPort = new directory.DirectoryPort();
+
+            // Keep this flag to only run the handler once
+            bool ranHandler = false;
+            Object lockObj = new Object();
+
+            // Subscribe first, then query, to make sure we don't miss the service registering itself
+            DssEnvironment.LogInfo("Subscribing to directory");
+            Arbiter.Activate(DssEnvironment.TaskQueue, Arbiter.Choice(
+                dirPort.Subscribe(
+                    new directory.SubscribeRequest()
+                    {
+                        QueryRecordList = new List<ServiceInfoType>() { serviceInfo },
+                        NotificationCount = 1
+                    },
+                    notPort,
+                    typeof(directory.Insert)),
+                delegate(SubscribeResponseType r)
+                {
+                    DssEnvironment.LogInfo("Subscribed to directory!");
+
+                    // Run handler if the service starts and we get the subscription notification
+                    DssEnvironment.LogInfo("Activating subscription receive");
+                    Arbiter.Activate(DssEnvironment.TaskQueue, Arbiter.Receive<directory.Insert>(false, notPort,
+                        delegate(directory.Insert ins)
+                        {
+                            DssEnvironment.LogInfo("Got subscription notification!");
+                            lock (lockObj)
+                            {
+                                if (ranHandler == false)
+                                {
+                                    new Thread(new ThreadStart(delegate() { handler.Invoke(ins.Body.Record); })).Start();
+                                    ranHandler = true;
+                                }
+                            }
+                        }));
+                },
+                delegate(Fault f)
+                {
+                    lock (lockObj)
+                    {
+                        if (ranHandler == false)
+                        {
+                            new Thread(new ThreadStart(delegate() { handler.Invoke(null); })).Start();
+                            ranHandler = true;
+                        }
+                    }
+                    DssEnvironment.LogError("Fault received while subscribing to directory: " + Strings.FromFault(f));
+                }));
+
+            // Query directory, run handler if the service is already started
+            DssEnvironment.LogInfo("Querying directory");
+            Arbiter.Activate(DssEnvironment.TaskQueue, Arbiter.Choice(
+                dirPort.Query(new directory.QueryRequest() { QueryRecord = serviceInfo }),
+                delegate(directory.QueryResponse r)
+                {
+                    DssEnvironment.LogInfo("Queried directory!");
+                    lock (lockObj)
+                    {
+                        if (ranHandler == false && r.RecordList.Length > 0)
+                        {
+                            new Thread(new ThreadStart(delegate() { handler.Invoke(r.RecordList[0]); })).Start();
+                            ranHandler = true;
+                        }
+                    }
+                },
+                delegate(Fault f)
+                {
+                    //lock (lockObj)
+                    //{
+                    //    if (ranHandler == false)
+                    //    {
+                    //        new Thread(new ThreadStart(delegate() { handler.Invoke(null); })).Start();
+                    //        ranHandler = true;
+                    //    }
+                    //}
+                    DssEnvironment.LogError("Fault received while querying directory: " + Strings.FromFault(f));
+                }));
+
         }
         #endregion
 
@@ -324,9 +637,21 @@ namespace Myro
                 throw new MyroNotInitializedException();
         }
 
+        /// <summary>
+        /// This exception indicates that one of the methods in this class was
+        /// called before init(...) was called.
+        /// </summary>
         public class MyroNotInitializedException : Exception
         {
             public MyroNotInitializedException() : base(Strings.NotInitialized) { }
+        }
+
+        /// <summary>
+        /// This exception indicates that initialization failed.
+        /// </summary>
+        public class MyroInitException : Exception
+        {
+            public MyroInitException(string message) : base(message) { }
         }
 
         #endregion
@@ -362,6 +687,11 @@ namespace Myro
         //}
     }
 
+    /// <summary>
+    /// This class (temporarily) represents an image as returned by takePicture().
+    /// In the future, this will be removed as takePicture() will return an image
+    /// compatible with the existing Myro image processing library.
+    /// </summary>
     public class MyroImage
     {
         public int Width;

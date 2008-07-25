@@ -166,8 +166,8 @@
                         </Style>
                     </StackPanel.Resources>
                     <StackPanel Orientation="Vertical">
-                        <Label Name="BaseNameLabel" Padding="0,0,4,0" MinWidth="70" />
-                        <Label Name="FriendlyNameLabel" Padding="0,0,4,0" MinWidth="70" />
+                        <Label Name="BaseNameLabel" Padding="0,0,4,0" />
+                        <Label Name="FriendlyNameLabel" Padding="0,0,4,0" />
                     </StackPanel>
                     <Button Command="ApplicationCommands.New" ToolTip="Create a new Python file">
                         <Image Source="/SimpleIDE;component/page_add.png" Stretch="None" SnapsToDevicePixels="True" />

@@ -74,6 +74,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
                 typeof(SetCamParam),
                 typeof(SendScribblerCommand),
                 typeof(ScribblerResponseMessage),
+                typeof(Reconnect),
                 typeof(SelectiveSubscribe), //IMPORTANT: Because SelectiveSubscribe inherits from Subscribe, it must go on top.
                 typeof(Subscribe))
         { }
@@ -111,6 +112,12 @@ namespace Myro.Services.Scribbler.ScribblerBase
             base.Body = b;
         }
     }
+
+    [DataContract]
+    public class ReconnectBody
+    {
+    }
+    public class Reconnect : Update<ReconnectBody, PortSet<DefaultUpdateResponseType, Fault>> { }
 
 
     /// <summary>

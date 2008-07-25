@@ -3307,7 +3307,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:CloseableTabItemDemo, Version=1.0.3121.24746, Culture=neutral, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:CloseableTabItemDemo, Version=1.0.3125.30640, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
                     "_06FF8C7106E74EF38EED2326630C2280"
@@ -5649,7 +5649,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:CloseableTabItemDemo, Version=1.0.3121.24746, Culture=neutral, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:CloseableTabItemDemo, Version=1.0.3125.30640, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
                     "_91AEFED37FEE24C6B35958DFBEAFAC9A"

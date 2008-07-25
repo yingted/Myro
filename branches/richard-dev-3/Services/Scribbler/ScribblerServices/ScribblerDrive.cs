@@ -50,11 +50,8 @@ namespace Myro.Services.Scribbler.Drive
         /// <summary>
         /// Default Service Constructor
         /// </summary>
-        public ScribblerDrive(DsspServiceCreationPort creationPort) : 
-                base(creationPort)
-        {
-
-        }
+        public ScribblerDrive(DsspServiceCreationPort creationPort) :
+            base(creationPort) { }
 
         /// <summary>
         /// Service Start
@@ -87,8 +84,8 @@ namespace Myro.Services.Scribbler.Drive
             // Publish the service to the local Node Directory
             DirectoryInsert();
 
-			// display HTTP service Uri
-			LogInfo(LogGroups.Console, "Service uri: ");
+            // display HTTP service Uri
+            LogInfo(LogGroups.Console, "Service uri: ");
         }
 
         #region Standard Port Operations

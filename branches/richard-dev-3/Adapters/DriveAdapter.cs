@@ -69,12 +69,12 @@ namespace Myro.Adapters
 
             // For some reason the first requests to the service are giving Faults, so get
             // it out of the way first
-            try
-            {
-                SetMotors(0.0, 0.0);
-            }
-            catch (Exception)
-            { }
+            //try
+            //{
+            //    SetMotors(0.0, 0.0);
+            //}
+            //catch (Exception)
+            //{ }
         }
 
         public void SetMotors(double leftPower, double rightPower)
