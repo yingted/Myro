@@ -95,7 +95,7 @@
 	(split-variable variable
 	  (lambda (components)
 	    (if components
-	      (lookup-member-variable components "" env handler k)
+	      (lookup-variable-components components "" env handler k)
 	      (handler (format "unbound variable ~a" variable)))))))))
 
 ;; adds a new binding for var to the first frame if one doesn't exist
@@ -110,15 +110,7 @@
               (set-first-frame! env new-frame)
 	      (k new-binding))))))))
 
-(define lookup-module-binding
-  (lambda (component env path handler k)
-    (let ((binding (search-env env component)))
-      (cond
-	(binding (k binding))
-	((string=? path "") (handler (format "unbound variable ~a" component)))
-	(else (handler (format "unbound variable ~a in module ~a" component path)))))))
-
-(define lookup-member-variable
+(define lookup-variable-components
   (lambda (components path env handler k)
     (let ((var (car components)))
       (lookup-module-binding var env path handler
@@ -131,8 +123,16 @@
 		  (result (binding-value binding)))
 	      (if (not (module? result))
 		  (handler (format "~a is not a module" new-path))
-		  (lookup-member-variable
+		  (lookup-variable-components
 		    (cdr components) new-path result handler k)))))))))
+
+(define lookup-module-binding
+  (lambda (component env path handler k)
+    (let ((binding (search-env env component)))
+      (cond
+	(binding (k binding))
+	((string=? path "") (handler (format "unbound variable ~a" component)))
+	(else (handler (format "unbound variable ~a in module ~a" component path)))))))
 
 (define split-variable
   (lambda (variable k)

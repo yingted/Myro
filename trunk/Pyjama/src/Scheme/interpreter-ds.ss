@@ -33,7 +33,7 @@
 	(closure (printf "[procedure]~%"))
 	(mu-closure (printf "[procedure]~%"))
 	(fake-k (printf "[continuation]~%"))
-	(else (printf "[primitive ~s]~%" (caddr x))))
+	(else (printf "[primitive ~a]~%" (caddr x))))
       (pretty-print x))))
 
 (define apply-proc
@@ -110,7 +110,8 @@
        (load-cont-2 (tokens-left env handler k)
 	 (load-loop-temp tokens-left env handler k))
        (load-cont-3 (tokens-left env handler k)
-	 (m value env handler (make-cont 'interpreter 'load-cont-2 tokens-left env handler k)))
+	 (m value env handler
+	   (make-cont 'interpreter 'load-cont-2 tokens-left env handler k)))
        (import-prim (env filename handler k)
 	   (let ((module (extend env '() '())))
 	     (set-binding-value! value module)
@@ -118,8 +119,8 @@
        (get-prim (args k handler sym k)
 	   (cond
 	    ((null? (cdr args)) (apply-cont k value))
-	    ;; temporary
-	    ((not (module? value)) (interp-apply-handler handler (format "~s is not a module" sym)))
+	    ((not (module? value))
+	     (interp-apply-handler handler (format "~a is not a module" sym)))
 	    (else (get-primitive (cdr args) value handler k))))
        (eval-sequence (exps k env handler k)
 	    (if (null? (cdr exps))
@@ -163,7 +164,8 @@
 	  (set-binding-value! value rhs-value)
 	  (apply-cont k 'ok))
        (m-13 (var env handler k)
-	  (lookup-binding-in-first-frame var env handler (make-cont 'interpreter 'm-12 value k)))
+	  (lookup-binding-in-first-frame var env handler
+	    (make-cont 'interpreter 'm-12 value k)))
        (m-14 (rhs-value k)
 	  (set-binding-value! value rhs-value)
 	  (apply-cont k 'ok))
@@ -178,7 +180,22 @@
        (REP-k ()
 	      (safe-print value)
 	      (read-eval-print-temp))
-       (else (error 'apply-parser-cont "invalid continuation: '~s'" k)))))
+       (split-var-cont (variable env handler k)
+	 (if value
+	   (lookup-variable-components value "" env handler k)
+	   (interp-apply-handler handler (format "unbound variable ~a" variable))))
+       (lookup-module-binding-cont (components var path handler k)
+	 (if (null? (cdr components))
+	    (apply-cont k value)
+	    (let ((new-path (if (string=? path "")
+				(format "~a" var)
+				(format "~a.~a" path var)))
+		  (result (binding-value value)))
+	      (if (not (module? result))
+		(interp-apply-handler handler (format "~a is not a module" new-path))
+		(lookup-variable-components
+		  (cdr components) new-path result handler k)))))
+       (else (error 'apply-interpreter-cont "invalid continuation: '~a'" k)))))
 
 (define start
   (lambda ()
@@ -216,13 +233,15 @@
       (lit-exp (datum) (apply-cont k datum))
       (var-exp (id) (lookup-value id env handler k))
       (if-exp (test-exp then-exp else-exp)
-	(m test-exp env handler (make-cont 'interpreter 'm-16 then-exp else-exp env handler k)))
+	(m test-exp env handler
+	  (make-cont 'interpreter 'm-16 then-exp else-exp env handler k)))
       (assign-exp (var rhs-exp)
 	(m rhs-exp env handler (make-cont 'interpreter 'm-15 var env handler k))) 
       (define-exp (var rhs-exp)
 	(m rhs-exp env handler (make-cont 'interpreter 'm-13 var env handler k)))
       (define-syntax-exp (keyword clauses)
-	(lookup-binding-in-first-frame keyword macro-env handler (make-cont 'interpreter 'm-11 clauses k)))
+	(lookup-binding-in-first-frame keyword macro-env handler
+	  (make-cont 'interpreter 'm-11 clauses k)))
       (begin-exp (exps) (eval-sequence exps env handler k))
       (lambda-exp (formals body)
 	(apply-cont k (closure formals body env)))
@@ -233,15 +252,18 @@
 	  (m body env new-handler k)))
       (try-finally-exp (body finally-exps)
 	(let ((new-handler (try-finally-handler finally-exps env handler)))
-	  (m body env new-handler (make-cont 'interpreter 'm-10 finally-exps env handler k)))) 
+	  (m body env new-handler
+	    (make-cont 'interpreter 'm-10 finally-exps env handler k)))) 
       (try-catch-finally-exp (body catch-var catch-exps finally-exps)
-	(let ((new-handler (make-handler 'try-catch-handler env catch-var finally-exps handler catch-exps k)))
-	  (m body env new-handler (make-cont 'interpreter 'm-5 finally-exps env handler k))))
+	(let ((new-handler (make-handler 'try-catch-handler
+			     env catch-var finally-exps handler catch-exps k)))
+	  (m body env new-handler
+	    (make-cont 'interpreter 'm-5 finally-exps env handler k))))
       (raise-exp (exp)
 	(m exp env handler (make-cont 'interpreter 'm-3 handler)))
       (app-exp (operator operands)
 	(m operator env handler (make-cont 'interpreter 'm-2 operands env handler k)))
-      (else (error 'm "bad abstract syntax: ~s" exp)))))
+      (else (error 'm "bad abstract syntax: ~a" exp)))))
 
 (define try-catch-handler 
   (lambda (catch-var catch-exps env handler k)
@@ -267,7 +289,8 @@
 
 (define eval-sequence
   (lambda (exps env handler k)
-    (m (car exps) env handler (make-cont 'interpreter 'eval-sequence exps k env handler k))))
+    (m (car exps) env handler
+      (make-cont 'interpreter 'eval-sequence exps k env handler k))))
 
 (define make-toplevel-env
   (lambda ()
@@ -313,11 +336,13 @@
 (define get-primitive
   (lambda (args env handler k)
     (let ((sym (car args)))
-      (lookup-value sym env handler (make-cont 'interpreter 'get-prim args k handler sym k)))))
+      (lookup-value sym env handler
+	(make-cont 'interpreter 'get-prim args k handler sym k)))))
 
+;; need a more reliable test for a module/environment
 (define module?
   (lambda (x)
-    (list? x)))
+    (and (list? x) (not (null? x)) (list? (car x)))))
 
 (define import-primitive
   (lambda (args env handler k)
@@ -325,7 +350,8 @@
 	(if (null? (cdr args))
 	  (load-file-temp filename env handler k)
 	  (let ((module-name (cadr args)))
-	    (lookup-binding-in-first-frame module-name env handler (make-cont 'interpreter 'import-prim env filename handler k)))))))
+	    (lookup-binding-in-first-frame module-name env handler
+	      (make-cont 'interpreter 'import-prim env filename handler k)))))))
 
 (define call/cc-primitive
   (lambda (proc env handler k)
@@ -349,26 +375,23 @@
 (define load-file-temp
   (lambda (filename env handler k)
     ;;(printf "calling load-file-temp~%")
-    (if (member filename load-stack)
-	(begin
-	  (printf "skipping recursive load of ~s~%" filename)
-	  (apply-cont k 'ok))
-	(if (not (string? filename))
-	    (interp-apply-handler handler 
-    	       (format "filename is not a string: ~s" filename))
-	    (if (not (file-exists? filename))
-		(interp-apply-handler handler 
-		   (format "file does not exist: ~s" filename))
-		(begin
-		  (set! load-stack (cons filename load-stack))
-		  (let ((result (scan-string (read-content filename))))
-		    (if (exception?-temp result)
-			;; temporary
-			(interp-apply-handler handler (cadr result))
-			(let ((tokens result))
-			  (load-loop-temp tokens env handler
-			     (make-cont 'interpreter 'load-cont-1 k)))))))))))
-		
+    (cond
+      ((member filename load-stack)
+       (printf "skipping recursive load of ~a~%" filename)
+       (apply-cont k 'ok))
+      ((not (string? filename))
+       (interp-apply-handler handler (format "filename is not a string: ~a" filename)))
+      ((not (file-exists? filename))
+       (interp-apply-handler handler (format "file does not exist: ~a" filename)))
+      (else
+	(set! load-stack (cons filename load-stack))
+	(let ((result (scan-string (read-content filename))))
+	  (if (exception?-temp result)
+	    (interp-apply-handler handler (cadr result))
+	    (let ((tokens result))
+	      (load-loop-temp tokens env handler
+		(make-cont 'interpreter 'load-cont-1 k)))))))))
+
 ;; temporary
 (define load-loop-temp
   (lambda (tokens env handler k)
@@ -376,12 +399,12 @@
       (apply-cont k 'ok)
       (let ((result (read-next-sexp tokens)))
 	(if (exception?-temp result)
-	    ;; temporary
 	  (interp-apply-handler handler (cadr result))
 	  (let ((datum (car result))
 		(tokens-left (cdr result)))
-	    ;;(printf "read ~s~%" datum)
-	    (parse datum handler (make-cont 'interpreter 'load-cont-3 tokens-left env handler k))))))))
+	    ;;(printf "read ~a~%" datum)
+	    (parse datum handler
+	      (make-cont 'interpreter 'load-cont-3 tokens-left env handler k))))))))
 
 (define range
   (lambda args

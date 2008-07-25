@@ -1,5 +1,4 @@
 ;; to do:
-;; - transform load-file-temp to ds representation in interpreter-ds.ss
 ;; - transform environment-cps.ss functions for dotted identifiers to
 ;;   ds representation in environments-ds.ss
 
@@ -141,7 +140,7 @@
 	    (m* operands env handler
 	      (lambda (vals)
 		(func vals env handler k))))))
-      (else (error 'm "bad abstract syntax: ~s" exp)))))
+      (else (error 'm "bad abstract syntax: ~a" exp)))))
 
 (define try-catch-handler
   (lambda (catch-var catch-exps env handler k)
@@ -255,12 +254,13 @@
 	(lambda (v)
 	  (cond
 	    ((null? (cdr args)) (k v))
-	    ((not (module? v)) (handler (format "~s is not a module" sym)))
+	    ((not (module? v)) (handler (format "~a is not a module" sym)))
 	    (else (get-primitive (cdr args) v handler k))))))))
 
+;; need a more reliable test for a module/environment
 (define module?
   (lambda (x)
-    (list? x)))
+    (and (list? x) (not (null? x)) (list? (car x)))))
 
 (define import-primitive
   (lambda (args env handler k)
@@ -292,12 +292,12 @@
     ;;(printf "calling load-file~%")
     (cond
       ((member filename load-stack)
-       (printf "skipping recursive load of ~s~%" filename)
+       (printf "skipping recursive load of ~a~%" filename)
        (k 'ok))
       ((not (string? filename))
-       (interp-apply-handler handler (format "filename is not a string: ~s" filename)))
+       (handler (format "filename is not a string: ~a" filename)))
       ((not (file-exists? filename))
-       (interp-apply-handler handler (format "file does not exist: ~s" filename)))
+       (handler (format "file does not exist: ~a" filename)))
       (else
        (set! load-stack (cons filename load-stack))
        (scan-input (read-content filename) handler
@@ -313,7 +313,7 @@
       (k 'ok)
       (read-sexp tokens handler
 	(lambda (datum tokens-left)
-	  ;;(printf "read ~s~%" datum)
+	  ;;(printf "read ~a~%" datum)
 	  (parse datum handler
 	    (lambda (exp)
 	      (m exp env handler
@@ -335,12 +335,12 @@
     ;;(printf "calling load-file-temp~%")
     (cond
       ((member filename load-stack)
-       (printf "skipping recursive load of ~s~%" filename)
+       (printf "skipping recursive load of ~a~%" filename)
        (k 'ok))
       ((not (string? filename))
-       (handler (format "filename is not a string: ~s" filename)))
+       (handler (format "filename is not a string: ~a" filename)))
       ((not (file-exists? filename))
-       (handler (format "file does not exist: ~s" filename)))
+       (handler (format "file does not exist: ~a" filename)))
       (else
        (set! load-stack (cons filename load-stack))
        (let ((result (scan-string (read-content filename))))
@@ -364,7 +364,7 @@
 	  (handler (cadr result))
 	  (let ((datum (car result))
 		(tokens-left (cdr result)))
-	    ;;(printf "read ~s~%" datum)
+	    ;;(printf "read ~a~%" datum)
 	    (parse datum handler
 	      (lambda (exp)
 		(m exp env handler

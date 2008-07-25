@@ -83,18 +83,18 @@
           binding
           (search-env (rest-of-frames env) variable))))))
 
+(define lookup-value
+  (lambda (variable env handler k)
+    (lookup-binding variable env handler
+      (make-cont 'parser 'lookup-cont k))))
+
 (define lookup-binding
   (lambda (variable env handler k)
     (let ((binding (search-env env variable)))
       (if binding
 	(apply-cont k binding)
-	;; temporary
-	(interp-apply-handler handler (format "unbound variable ~s" variable))))))
-
-(define lookup-value
-  (lambda (variable env handler k)
-    (lookup-binding variable env handler
-      (make-cont 'parser 'lookup-cont k))))
+	(split-variable variable
+	  (make-cont 'interpreter 'split-var-cont variable env handler k))))))
 
 ;; adds a new binding for var to the first frame if one doesn't exist
 (define lookup-binding-in-first-frame
@@ -107,3 +107,44 @@
             (let ((new-frame (cons new-binding frame)))
               (set-first-frame! env new-frame)
 	      (apply-cont k new-binding))))))))
+
+(define lookup-variable-components
+  (lambda (components path env handler k)
+    (let ((var (car components)))
+      (lookup-module-binding var env path handler
+	(make-cont 'interpreter 'lookup-module-binding-cont components var path handler k)))))
+
+(define lookup-module-binding
+  (lambda (component env path handler k)
+    (let ((binding (search-env env component)))
+      (cond
+	(binding (apply-cont k binding))
+	((string=? path "")
+	 (interp-apply-handler handler (format "unbound variable ~a" component)))
+	(else (interp-apply-handler handler
+		(format "unbound variable ~a in module ~a" component path)))))))
+
+(define split-variable
+  (lambda (variable k)
+    (let ((strings (group (string->list (symbol->string variable)) #\.)))
+      (if (or (member "" strings) (= (length strings) 1))
+	(apply-cont k #f)
+	(apply-cont k (map string->symbol strings))))))
+
+(define group
+  (lambda (chars delimiter)
+    (letrec
+      ((position
+	(lambda (chars)
+	  (if (char=? (car chars) delimiter)
+	    0
+	    (+ 1 (position (cdr chars))))))
+       (group
+	 (lambda (chars)
+	   (cond
+	     ((null? chars) '())
+	     ((not (member delimiter chars)) (list (apply string chars)))
+	     (else (let ((n (position chars)))
+		     (cons (apply string (list-head chars n))
+			   (group (cdr (list-tail chars n))))))))))
+      (group chars))))
