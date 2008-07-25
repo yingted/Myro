@@ -182,6 +182,7 @@
 
 (define start
   (lambda ()
+    (set! load-stack '())
     (read-eval-print-temp)))
 
 (define REP-k (make-cont 'interpreter 'REP-k))
@@ -352,15 +353,21 @@
 	(begin
 	  (printf "skipping recursive load of ~s~%" filename)
 	  (apply-cont k 'ok))
-	(begin
-	  (set! load-stack (cons filename load-stack))
-	  (let ((result (scan-string (read-content filename))))
-	    (if (exception?-temp result)
-		;; temporary
-		(interp-apply-handler handler (cadr result))
-		(let ((tokens result))
-		  (load-loop-temp tokens env handler
-		    (make-cont 'interpreter 'load-cont-1 k)))))))))
+	(if (not (string? filename))
+	    (interp-apply-handler handler 
+    	       (format "filename is not a string: ~s" filename))
+	    (if (not (file-exists? filename))
+		(interp-apply-handler handler 
+		   (format "file does not exist: ~s" filename))
+		(begin
+		  (set! load-stack (cons filename load-stack))
+		  (let ((result (scan-string (read-content filename))))
+		    (if (exception?-temp result)
+			;; temporary
+			(interp-apply-handler handler (cadr result))
+			(let ((tokens result))
+			  (load-loop-temp tokens env handler
+			     (make-cont 'interpreter 'load-cont-1 k)))))))))))
 		
 ;; temporary
 (define load-loop-temp
