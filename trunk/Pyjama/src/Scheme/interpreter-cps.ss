@@ -1,3 +1,8 @@
+;; to do:
+;; - transform load-file-temp to ds representation in interpreter-ds.ss
+;; - transform environment-cps.ss functions for dotted identifiers to
+;;   ds representation in environments-ds.ss
+
 ;; Interpreter
 
 (load "environments-cps.ss")
@@ -285,18 +290,22 @@
 (define load-file
   (lambda (filename env handler k)
     ;;(printf "calling load-file~%")
-    (if (member filename load-stack)
-	(begin
-	  (printf "skipping recursive load of ~s~%" filename)
-	  (k 'ok))
-	(begin
-	  (set! load-stack (cons filename load-stack))
-	  (scan-input (read-content filename) handler
-	    (lambda (tokens)
-	      (load-loop tokens env handler
-		(lambda (v)
-		  (set! load-stack (cdr load-stack))
-		  (k v)))))))))
+    (cond
+      ((member filename load-stack)
+       (printf "skipping recursive load of ~s~%" filename)
+       (k 'ok))
+      ((not (string? filename))
+       (interp-apply-handler handler (format "filename is not a string: ~s" filename)))
+      ((not (file-exists? filename))
+       (interp-apply-handler handler (format "file does not exist: ~s" filename)))
+      (else
+       (set! load-stack (cons filename load-stack))
+       (scan-input (read-content filename) handler
+	 (lambda (tokens)
+	   (load-loop tokens env handler
+	     (lambda (v)
+	       (set! load-stack (cdr load-stack))
+	       (k v)))))))))
 		
 (define load-loop
   (lambda (tokens env handler k)
@@ -324,20 +333,24 @@
 (define load-file-temp
   (lambda (filename env handler k)
     ;;(printf "calling load-file-temp~%")
-    (if (member filename load-stack)
-	(begin
-	  (printf "skipping recursive load of ~s~%" filename)
-	  (k 'ok))
-	(begin
-	  (set! load-stack (cons filename load-stack))
-	  (let ((result (scan-string (read-content filename))))
-	    (if (exception?-temp result)
-	      (handler (cadr result))
-	      (let ((tokens result))
-		(load-loop-temp tokens env handler
-		  (lambda (v)
-		    (set! load-stack (cdr load-stack))
-		    (k v))))))))))
+    (cond
+      ((member filename load-stack)
+       (printf "skipping recursive load of ~s~%" filename)
+       (k 'ok))
+      ((not (string? filename))
+       (handler (format "filename is not a string: ~s" filename)))
+      ((not (file-exists? filename))
+       (handler (format "file does not exist: ~s" filename)))
+      (else
+       (set! load-stack (cons filename load-stack))
+       (let ((result (scan-string (read-content filename))))
+	 (if (exception?-temp result)
+	     (handler (cadr result))
+	     (let ((tokens result))
+	       (load-loop-temp tokens env handler
+		 (lambda (v)
+		   (set! load-stack (cdr load-stack))
+		   (k v))))))))))
 
 ;; temporary version for use with non-registerized interpreter.  this
 ;; will be replaced by a fully registerized version of load-loop when
