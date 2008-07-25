@@ -104,9 +104,12 @@ class Pyjama:
         
         #makes set voice a source for dnd
         self.wTree.get_widget("setvoicedragbutton").drag_source_set(gtk.gdk.BUTTON1_MASK,[("setvoice",0,29)],gtk.gdk.ACTION_COPY)
+        
+        #makes beep2 a source for dnd
+        self.wTree.get_widget("beep2dragbutton").drag_source_set(gtk.gdk.BUTTON1_MASK,[("beep2",0,30)],gtk.gdk.ACTION_COPY)
 
         #makes codevbox a drag destination
-        self.wTree.get_widget("codevbox").drag_dest_set(gtk.DEST_DEFAULT_MOTION|gtk.DEST_DEFAULT_HIGHLIGHT|gtk.DEST_DEFAULT_DROP, [("print",0,4),("forward",0,5),("backward",0,6),("left",0,7),("right",0,8),("stop",0,9),("motors",0,10),("wait",0,11),("currenttime",0,12),("settimer",0,13),("elapsed",0,14),("askuser",0,15),("gamepad",0,16),("joystick",0,17),("takepic",0,18),("showpic",0,19),("loadpic",0,20),("savepic",0,21),("copypic",0,22),("pixels",0,23),("pixel",0,24),("playsound",0,25),("loadsound",0,26),("beep",0,27),("speak",0,28),("setvoice",0,29)],gtk.gdk.ACTION_COPY)
+        self.wTree.get_widget("codevbox").drag_dest_set(gtk.DEST_DEFAULT_MOTION|gtk.DEST_DEFAULT_HIGHLIGHT|gtk.DEST_DEFAULT_DROP, [("print",0,4),("forward",0,5),("backward",0,6),("left",0,7),("right",0,8),("stop",0,9),("motors",0,10),("wait",0,11),("currenttime",0,12),("settimer",0,13),("elapsed",0,14),("askuser",0,15),("gamepad",0,16),("joystick",0,17),("takepic",0,18),("showpic",0,19),("loadpic",0,20),("savepic",0,21),("copypic",0,22),("pixels",0,23),("pixel",0,24),("playsound",0,25),("loadsound",0,26),("beep",0,27),("speak",0,28),("setvoice",0,29),("beep2",0,30)],gtk.gdk.ACTION_COPY)
         #the next line is phrased wrong; fix it later
         self.wTree.get_widget("codevbox").connect("drag_drop",self.codeDragDrop)
 
@@ -163,7 +166,7 @@ class Pyjama:
             newReturn.pack_start(newReturnComboBox,False,False,0)
             self.wTree.get_widget("dinahscriptsnotebook").append_page(newScript,newScriptLabel)
             self.window.show_all()
-            newCodeVBox.drag_dest_set(gtk.DEST_DEFAULT_MOTION|gtk.DEST_DEFAULT_HIGHLIGHT|gtk.DEST_DEFAULT_DROP, [("print",0,4),("forward",0,5),("backward",0,6),("left",0,7),("right",0,8),("stop",0,9),("motors",0,10),("wait",0,11),("currenttime",0,12),("settimer",0,13),("elapsed",0,14),("askuser",0,15),("gamepad",0,16),("joystick",0,17),("takepic",0,18),("showpic",0,19),("loadpic",0,20),("savepic",0,21),("copypic",0,22),("pixels",0,23),("pixel",0,24),("playsound",0,25),("loadsound",0,26),("beep",0,27),("speak",0,28),("setvoice",0,29)],gtk.gdk.ACTION_COPY)
+            newCodeVBox.drag_dest_set(gtk.DEST_DEFAULT_MOTION|gtk.DEST_DEFAULT_HIGHLIGHT|gtk.DEST_DEFAULT_DROP, [("print",0,4),("forward",0,5),("backward",0,6),("left",0,7),("right",0,8),("stop",0,9),("motors",0,10),("wait",0,11),("currenttime",0,12),("settimer",0,13),("elapsed",0,14),("askuser",0,15),("gamepad",0,16),("joystick",0,17),("takepic",0,18),("showpic",0,19),("loadpic",0,20),("savepic",0,21),("copypic",0,22),("pixels",0,23),("pixel",0,24),("playsound",0,25),("loadsound",0,26),("beep",0,27),("speak",0,28),("setvoice",0,29),("beep2",0,30)],gtk.gdk.ACTION_COPY)
             newCodeVBox.connect("drag_drop",self.codeDragDrop)
         else:
             pass
@@ -435,7 +438,7 @@ class Pyjama:
             pixelLabel3=gtk.Label(" , ")
             pixelHBox.pack_start(pixelLabel3,False,False,0)
             pixelSpin2=gtk.SpinButton(gtk.Adjustment(100,0,192,1,5,0),0.0,0)
-            pixelHBox.pack_start(pixelSpin2)
+            pixelHBox.pack_start(pixelSpin2,False,False,0)
             innerVBox.add(pixelHBox)
         elif context.targets==["playsound"]:
             playsoundHBox=gtk.HBox()
@@ -443,7 +446,7 @@ class Pyjama:
             playsoundHBox.pack_start(playsoundLabel,False,False,0)
             playsoundComboBox=gtk.combo_box_new_text()
             playsoundComboBox.append_text("<sound>")
-            playsoundHBox.pack_start(playsoundComboBox)
+            playsoundHBox.pack_start(playsoundComboBox,False,False,0)
             innerVBox.add(playsoundHBox)
         elif context.targets==["loadsound"]:
             loadsoundHBox=gtk.HBox()
@@ -457,30 +460,47 @@ class Pyjama:
             beepLabel1=gtk.Label(" beep at frequency ")
             beepHBox.pack_start(beepLabel1,False,False,0)
             beepSpin1=gtk.SpinButton(gtk.Adjustment(440,25,4200,10,50,0),0.0,2)
-            beepHBox.pack_start(beepSpin1)
+            beepHBox.pack_start(beepSpin1,False,False,0)
             beepLabel2=gtk.Label(" for ")
-            beepHBox.pack_start(beepLabel2)
+            beepHBox.pack_start(beepLabel2,False,False,0)
             beepSpin2=gtk.SpinButton(gtk.Adjustment(1,0,10,1,2,0),0.0,1)
-            beepHBox.pack_start(beepSpin2)
+            beepHBox.pack_start(beepSpin2,False,False,0)
             beepLabel3=gtk.Label(" seconds ")
-            beepHBox.pack_start(beepLabel3)
+            beepHBox.pack_start(beepLabel3,False,False,0)
             innerVBox.add(beepHBox)
         elif context.targets==["speak"]:
             speakHBox=gtk.HBox()
             speakLabel1=gtk.Label(" say ")
-            speakHBox.pack_start(speakLabel1)
+            speakHBox.pack_start(speakLabel1,False,False,0)
             speakTextEntry=gtk.Entry()
             speakTextEntry.set_text("Hello World")
-            speakHBox.pack_start(speakTextEntry)
+            speakHBox.pack_start(speakTextEntry,False,False,0)
             innerVBox.add(speakHBox)
         elif context.targets==["setvoice"]:
             setvoiceHBox=gtk.HBox()
             setvoiceLabel=gtk.Label(" set voice to ")
-            setvoiceHBox.pack_start(setvoiceLabel)
+            setvoiceHBox.pack_start(setvoiceLabel,False,False,0)
             setvoiceComboBox=gtk.combo_box_new_text()
             setvoiceComboBox.append_text("<voice>")
-            setvoiceHBox.pack_start(setvoiceComboBox)
+            setvoiceHBox.pack_start(setvoiceComboBox,False,False,0)
             innerVBox.add(setvoiceHBox)
+        elif context.targets==["beep2"]:
+            beep2HBox=gtk.HBox()
+            beep2Label1=gtk.Label(" beep at frequency ")
+            beep2HBox.pack_start(beep2Label1,False,False,0)
+            beep2Spin1=gtk.SpinButton(gtk.Adjustment(440,25,4200,10,50,0),0.0,2)
+            beep2HBox.pack_start(beep2Spin1,False,False,0)
+            beep2Label2=gtk.Label(" and frequency ")
+            beep2HBox.pack_start(beep2Label2,False,False,0)
+            beep2Spin2=gtk.SpinButton(gtk.Adjustment(440,25,4200,10,50,0),0.0,2)
+            beep2HBox.pack_start(beep2Spin2,False,False,0)
+            beep2Label3=gtk.Label(" for ")
+            beep2HBox.pack_start(beep2Label3,False,False,0)
+            beep2Spin3=gtk.SpinButton(gtk.Adjustment(1,0,10,.1,.5,0),0.0,1)
+            beep2HBox.pack_start(beep2Spin3,False,False,0)
+            beep2Label4=gtk.Label(" seconds ")
+            beep2HBox.pack_start(beep2Label4,False,False,0)
+            innerVBox.add(beep2HBox)
         else:
             pass
         self.window.show_all()
