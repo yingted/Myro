@@ -9,6 +9,7 @@ __REVISION__ = "$Revision$"
 __AUTHOR__   = "Keith O'Hara and Doug Blank"
 
 import time, string
+import os
 try:
     import serial
 except:
@@ -189,7 +190,11 @@ class Scribbler(Robot):
         self._lastRotate    = 0
         self._volume = 0
         if serialport == None:
-            serialport = ask("Port", useCache = 1)
+            if 'MYROROBOT'in os.environ:
+                serialport = os.environ['MYROROBOT']
+                print "Connecting to", serialport
+            else:
+                serialport = ask("Port", useCache = 1)
         # Deal with requirement that Windows "COM#" names where # >= 9 needs to
         # be in the format "\\.\COM#"
         hasPort = True
@@ -1237,6 +1242,16 @@ class Scribbler(Robot):
         self.set_cam_param(2, 0)
         self.set_cam_param(6, 0)    
         self.set_cam_param(0x10, 0)
+
+    def manualCamera(self, gain=0x00, brightness=0x80, exposure=0x41):
+        if self.debug:
+            print "Turning off White Balance, Gain Control, and Exposure Control", level            
+        self.set_cam_param(self.CAM_COMA, self.CAM_COMA_WHITE_BALANCE_OFF)
+        self.set_cam_param(self.CAM_COMB,
+                           (self.CAM_COMB_GAIN_CONTROL_OFF & self.CAM_COMB_EXPOSURE_CONTROL_OFF))
+        self.set_cam_param(0x00, gain)
+        self.set_cam_param(0x06, brightness)
+        self.set_cam_param(0x10, exposure)
 
     def autoCamera(self):
 

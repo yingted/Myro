@@ -1053,6 +1053,12 @@ def darkenCamera(value=0):
     else:
         raise AttributeError, "need to initialize robot"
 
+def manualCamera(gain=0x00, brightness=0x80, exposure=0x41):
+    if myro.globvars.robot:
+        return myro.globvars.robot.manualCamera(gain, brightness, exposure)
+    else:
+        raise AttributeError, "need to initialize robot"
+
 def autoCamera(value=0):
     if myro.globvars.robot:
         return myro.globvars.robot.autoCamera()
