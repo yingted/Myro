@@ -62,7 +62,7 @@
   (lambda ()
     (set! n 20)
     (set! k (make-cont 'identity))
-    (set! pc odd-reg?)
+    (set! pc fib-reg)
     (run)))
 
 (define run
@@ -92,6 +92,14 @@
 	  (set! k k_)
 	  (set! n value)
 	  (set! pc apply-cont-reg))
+       (fib-1 (v_ k_)
+	  (set! k k_)
+	  (set! value (+ v_ value))
+	  (set! pc apply-cont-reg))
+       (fib-2 (n_ k_)
+	  (set! k (make-cont 'fib-1 value k_))
+	  (set! n (- n_ 2))
+	  (set! pc fib-reg))
        )))
   
 ;; ---
@@ -126,6 +134,8 @@
 	     (lambda (v)
 	       (k v))))))
 
+;; ---
+
 ;; n k
 (define odd-reg?
   (lambda ()
@@ -139,6 +149,7 @@
 	  (set! k (make-cont 'odd-reg? k))
 	  (set! pc even-reg?)))))
 
+;; n k
 (define even-reg?
   (lambda ()
     (if (= n 1)
@@ -167,11 +178,13 @@
 	(odd-ds? (- n 1)
 	    (make-cont 'even-ds? k)))))
 
+;; ---
+
 (define fib
   (lambda (n)
     (cond
      ((= n 1) 1)
-     ((= n 1) 1)
+     ((= n 2) 1)
      (else (+ (fib (- n 1))
 	      (fib (- n 2)))))))
 
@@ -192,3 +205,22 @@
      ((= n 1) (apply-cont k 1))     
      ((= n 2) (apply-cont k 1))
      (else (fib-ds (- n 1) (make-cont 'fib-2 n k))))))
+
+(define fib-reg
+  (lambda ()
+    (cond
+     ((= n 1) 
+      (begin
+	(set! pc apply-cont-reg)
+	(set! k k)
+	(set! value 1)))
+     ((= n 2) 
+      (begin
+	(set! pc apply-cont-reg)
+	(set! k k)
+	(set! value 1)))
+     (else 
+      (begin
+	(set! k (make-cont 'fib-2 n k))
+	(set! pc fib-reg)
+	(set! n (- n 1)))))))
