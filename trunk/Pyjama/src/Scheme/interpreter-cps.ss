@@ -103,32 +103,22 @@
 	(k (closure formals body env)))
       (mu-lambda-exp (formals runt body)
 	(k (mu-closure formals runt body env)))
-      (try-catch-exp (body catch-var catch-exps)
-	(let ((new-handler (try-catch-handler catch-var catch-exps env handler k)))
+      (try-catch-exp (body cvar cexps)
+	(let ((new-handler (try-catch-handler cvar cexps env handler k)))
 	  (m body env new-handler k)))
-      (try-finally-exp (body finally-exps)
-	(let ((new-handler (try-finally-handler finally-exps env handler)))
+      (try-finally-exp (body fexps)
+	(let ((new-handler (try-finally-handler fexps env handler)))
 	  (m body env new-handler
 	    (lambda (v)
 	      ;;(printf "executing finally block~%")
-	      (eval-sequence finally-exps env handler
+	      (eval-sequence fexps env handler
 		(lambda (v2) (k v)))))))
-      (try-catch-finally-exp (body catch-var catch-exps finally-exps)
-	(let ((new-handler
-		(lambda (e)
-		  ;;(printf "try-handler: handling ~a exception~%" e)
-		  (let ((new-env (extend env (list catch-var) (list e))))
-		    (let ((catch-handler (try-finally-handler finally-exps env handler)))
-		      ;;(printf "executing catch block~%")
-		      (eval-sequence catch-exps new-env catch-handler
-			(lambda (v)
-			  ;;(printf "executing finally block~%")
-			  (eval-sequence finally-exps env handler
-			    (lambda (v2) (k v))))))))))
+      (try-catch-finally-exp (body cvar cexps fexps)
+	(let ((new-handler (try-catch-finally-handler cvar cexps fexps env handler k)))
 	  (m body env new-handler
 	     (lambda (v)
 	       ;;(printf "executing finally block~%")
-	       (eval-sequence finally-exps env handler
+	       (eval-sequence fexps env handler
 		 (lambda (v2) (k v)))))))
       (raise-exp (exp)
 	(m exp env handler
@@ -136,28 +126,41 @@
 	  (lambda (e) (handler e))))
       (app-exp (operator operands)
 	(m operator env handler
-	  (lambda (func)
+	  (lambda (proc)
 	    (m* operands env handler
 	      (lambda (vals)
-		(func vals env handler k))))))
+		(proc vals env handler k))))))
       (else (error 'm "bad abstract syntax: ~a" exp)))))
 
 (define try-catch-handler
-  (lambda (catch-var catch-exps env handler k)
+  (lambda (cvar cexps env handler k)
     (lambda (e)
       ;;(printf "try-handler: handling ~a exception~%" e)
-      (let ((new-env (extend env (list catch-var) (list e))))
+      (let ((new-env (extend env (list cvar) (list e))))
 	;;(printf "executing catch block~%")
-	(eval-sequence catch-exps new-env handler k)))))
+	(eval-sequence cexps new-env handler k)))))
 
 (define try-finally-handler
-  (lambda (finally-exps env handler)
+  (lambda (fexps env handler)
     (lambda (e)
       ;;(printf "executing finally block~%")
-      (eval-sequence finally-exps env handler
+      (eval-sequence fexps env handler
 	(lambda (v)
 	  ;;(printf "propagating ~a exception~%" e)
 	  (handler e))))))
+
+(define try-catch-finally-handler
+  (lambda (cvar cexps fexps env handler k)
+    (lambda (e)
+      ;;(printf "try-handler: handling ~a exception~%" e)
+      (let ((new-env (extend env (list cvar) (list e))))
+	(let ((catch-handler (try-finally-handler fexps env handler)))
+	  ;;(printf "executing catch block~%")
+	  (eval-sequence cexps new-env catch-handler
+	    (lambda (v)
+	      ;;(printf "executing finally block~%")
+	      (eval-sequence fexps env handler
+		(lambda (v2) (k v))))))))))
 
 (define closure
   (lambda (formals body env)

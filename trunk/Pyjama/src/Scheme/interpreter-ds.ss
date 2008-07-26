@@ -30,10 +30,11 @@
   (lambda (x)
     (if (procedure-rep? x)
       (case (cadr x)
-	(closure (printf "[procedure]~%"))
-	(mu-closure (printf "[procedure]~%"))
-	(fake-k (printf "[continuation]~%"))
-	(else (printf "[primitive ~a]~%" (caddr x))))
+	(closure (printf "#[procedure]~%"))
+	(mu-closure (printf "#[procedure]~%"))
+	(fake-k (printf "#[continuation]~%"))
+	(else (printf "#[primitive ~a]~%" (caddr x))))
+      ;; temporary: we'll need to fully implement safe-print
       (pretty-print x))))
 
 (define apply-proc
@@ -42,7 +43,6 @@
       (closure (formals body env)
 	(if (= (length args) (length formals))
 	  (m body (extend env formals args) handler k)
-	  ;; temporary
 	  (interp-apply-handler handler "incorrect number of arguments")))
       (mu-closure (formals runt body env)
 	(if (>= (length args) (length formals))
@@ -52,7 +52,6 @@
 		     (cons (list-tail args (length formals))
 			   (list-head args (length formals))))))
 	      (m body new-env handler k))
-	    ;; temporary
 	    (interp-apply-handler handler "not enough arguments given")))
       (fake-k (k) (apply-cont k (car args)))
       (exit-prim ()
@@ -62,7 +61,7 @@
 	(set! load-stack '())
 	'(exiting the interpreter))
       (sqrt-prim (name) (apply-cont k (apply sqrt args)))
-      (print-prim (name) (begin (for-each pretty-print args) (apply-cont k 'ok)))
+      (print-prim (name) (begin (for-each safe-print args) (apply-cont k 'ok)))
       (display-prim (name) (apply display args))
       (newline-prim (name) (begin (newline) (apply-cont k 'ok)))
       (load-prim (name) (load-file-temp (car args) toplevel-env handler k))
@@ -84,7 +83,8 @@
       (set-cdr!-prim (name) (apply-cont k (apply set-cdr! args)))
       (import-prim (name) (import-primitive args env handler k))
       (get-prim (name) (get-primitive args env handler k))
-      (call-with-current-continuation-prim (name) (call/cc-primitive (car args) env handler k))
+      (call-with-current-continuation-prim (name)
+	(call/cc-primitive (car args) env handler k))
       (call/cc-prim (name) (call/cc-primitive (car args) env handler k))
       (reverse-prim (name) (apply-cont k (apply reverse args)))
       (append-prim (name) (apply-cont k (apply append args)))
@@ -94,16 +94,21 @@
       (current-time-prim (name)
 	(apply-cont k (let ((now (current-time)))
 			(+ (time-second now)
-			   (inexact (/ (time-nanosecond now)
-				       1000000000))))))
-      (else (error 'apply-proc "invalid procedure: ~a" proc)))))
+			   (inexact (/ (time-nanosecond now) 1000000000))))))
+      (else (error 'apply-proc "bad procedure: ~a" proc)))))
 
 ;;----------------------------------------------------------------------------
+;; continuations represented as data structures
 
 (define apply-interpreter-cont
   (lambda (k value)
     (record-case (cdr k)
        (init () value)
+       (rep-1 ()
+	 (m value toplevel-env REP-handler REP-k))
+       (REP-k ()
+	 (safe-print value)
+	 (read-eval-print-temp))
        (load-cont-1 (k)
 	 (set! load-stack (cdr load-stack))
 	 (apply-cont k value))
@@ -112,90 +117,70 @@
        (load-cont-3 (tokens-left env handler k)
 	 (m value env handler
 	   (make-cont 'interpreter 'load-cont-2 tokens-left env handler k)))
-       (import-prim (env filename handler k)
-	   (let ((module (extend env '() '())))
-	     (set-binding-value! value module)
-	     (load-file-temp filename module handler k)))
-       (get-prim (args k handler sym k)
-	   (cond
-	    ((null? (cdr args)) (apply-cont k value))
-	    ((not (module? value))
-	     (interp-apply-handler handler (format "~a is not a module" sym)))
-	    (else (get-primitive (cdr args) value handler k))))
-       (eval-sequence (exps k env handler k)
-	    (if (null? (cdr exps))
-		(apply-cont k value)
-		(eval-sequence (cdr exps) env handler k)))
-       (m*-1 (k v1)
-            (apply-cont k (cons v1 value)))
+       (import-prim-cont (filename env handler k)
+	 (let ((module (extend env '() '())))
+	   (set-binding-value! value module)
+	   (load-file-temp filename module handler k)))
+       (get-prim-cont (args sym handler k)
+	 (cond
+	   ((null? (cdr args)) (apply-cont k value))
+	   ((not (module? value))
+	    (interp-apply-handler handler (format "~a is not a module" sym)))
+	   (else (get-primitive (cdr args) value handler k))))
+       (eval-sequence-cont (exps env handler k)
+	 (if (null? (cdr exps))
+	   (apply-cont k value)
+	   (eval-sequence (cdr exps) env handler k)))
+       (m*-1 (v1 k)
+	 (apply-cont k (cons v1 value)))
        (m*-2 (exps env handler k)
-   	    (m* (cdr exps) env handler (make-cont 'interpreter 'm*-1 k value)))
+	 (m* (cdr exps) env handler (make-cont 'interpreter 'm*-1 value k)))
        (try-finally-handler-cont (handler exception)
- 	    ;;(printf "propagating ~a exception~%" exception)
-	    ;; temporary
-	    (interp-apply-handler handler exception))
-       (m-1 (func env handler k)
-	    (apply-proc func value env handler k))
+	 ;;(printf "propagating ~a exception~%" exception)
+	 (interp-apply-handler handler exception))
+       (m-1 (proc env handler k)
+	 (apply-proc proc value env handler k))
        (m-2 (operands env handler k)
-	    (m* operands env handler (make-cont 'interpreter 'm-1 value env handler k)))
+	 (m* operands env handler (make-cont 'interpreter 'm-1 value env handler k)))
        (m-3 (handler)
-	  ;; todo: pass in more info to handler (k, env)
-	    ;; temporary
-	  (interp-apply-handler handler value))
-       (m-4 (k v)
-	  (apply-cont k v))
-       (m-5 (finally-exps env handler k)
-          ;;(printf "executing finally block~%")
-	  (eval-sequence finally-exps env handler (make-cont 'interpreter 'm-4 k value)))
-       (m-6 (k v)
-	  (apply-cont k v))
-       (m-7 (finally-exps env handler k)
-	  ;;(printf "executing finally block~%")
-	  (eval-sequence finally-exps env handler (make-cont 'interpreter 'm-6 k value)))
-       (m-9 (k)
-	  (apply-cont k value))
-       (m-10 (finally-exps env handler k)
-	  ;;(printf "executing finally block~%")
-	  (eval-sequence finally-exps env handler (make-cont 'interpreter 'm-9 k)))
+	 ;; todo: pass in more info to handler (k, env)
+	 (interp-apply-handler handler value))
+       (m-4 (v k)
+	 (apply-cont k v))
+       (m-5 (fexps env handler k)
+	 ;;(printf "executing finally block~%")
+	 (eval-sequence fexps env handler (make-cont 'interpreter 'm-4 value k)))
        (m-11 (clauses k)
-	  (set-binding-value! value clauses)
-	  (apply-cont k 'ok))
+	 (set-binding-value! value clauses)
+	 (apply-cont k 'ok))
        (m-12 (rhs-value k)
-	  (set-binding-value! value rhs-value)
-	  (apply-cont k 'ok))
+	 (set-binding-value! value rhs-value)
+	 (apply-cont k 'ok))
        (m-13 (var env handler k)
-	  (lookup-binding-in-first-frame var env handler
-	    (make-cont 'interpreter 'm-12 value k)))
-       (m-14 (rhs-value k)
-	  (set-binding-value! value rhs-value)
-	  (apply-cont k 'ok))
+	 (lookup-binding-in-first-frame var env handler
+	   (make-cont 'interpreter 'm-12 value k)))
        (m-15 (var env handler k)
-	  (lookup-binding var env handler (make-cont 'interpreter 'm-14 value k)))
+	 (lookup-binding var env handler (make-cont 'interpreter 'm-12 value k)))
        (m-16 (then-exp else-exp env handler k)
-	  (if value
-	      (m then-exp env handler k)
-	      (m else-exp env handler k)))
-       (rep-1 ()
-	  (m value toplevel-env REP-handler REP-k))
-       (REP-k ()
-	      (safe-print value)
-	      (read-eval-print-temp))
+	 (if value
+	   (m then-exp env handler k)
+	   (m else-exp env handler k)))
        (split-var-cont (variable env handler k)
 	 (if value
 	   (lookup-variable-components value "" env handler k)
 	   (interp-apply-handler handler (format "unbound variable ~a" variable))))
-       (lookup-module-binding-cont (components var path handler k)
+       (lookup-module-var-cont (components var path handler k)
 	 (if (null? (cdr components))
-	    (apply-cont k value)
-	    (let ((new-path (if (string=? path "")
-				(format "~a" var)
-				(format "~a.~a" path var)))
-		  (result (binding-value value)))
-	      (if (not (module? result))
-		(interp-apply-handler handler (format "~a is not a module" new-path))
-		(lookup-variable-components
-		  (cdr components) new-path result handler k)))))
-       (else (error 'apply-interpreter-cont "invalid continuation: '~a'" k)))))
+	   (apply-cont k value)
+	   (let ((result (binding-value value))
+		 (new-path (if (string=? path "")
+			     (format "~a" var)
+			     (format "~a.~a" path var))))
+	     (if (not (module? result))
+	       (interp-apply-handler handler (format "~a is not a module" new-path))
+	       (lookup-variable-components
+		 (cdr components) new-path result handler k)))))
+       (else (error 'apply-interpreter-cont "bad continuation: ~a" k)))))
 
 (define start
   (lambda ()
@@ -223,9 +208,8 @@
 	(else
 	  (let ((datum (read-string input)))
 	    (if (exception?-temp datum)
-		;; temporary
-		(interp-apply-handler REP-handler (cadr datum))
-		(parse datum REP-handler (make-cont 'interpreter 'rep-1)))))))))
+	      (interp-apply-handler REP-handler (cadr datum))
+	      (parse datum REP-handler (make-cont 'interpreter 'rep-1)))))))))
 
 (define m
   (lambda (exp env handler k)
@@ -247,31 +231,21 @@
 	(apply-cont k (closure formals body env)))
       (mu-lambda-exp (formals runt body)
 	(apply-cont k (mu-closure formals runt body env)))
-      (try-catch-exp (body catch-var catch-exps)
-	(let ((new-handler (try-catch-handler catch-var catch-exps env handler k)))
+      (try-catch-exp (body cvar cexps)
+	(let ((new-handler (make-handler 'try-catch-handler cvar cexps env handler k)))
 	  (m body env new-handler k)))
-      (try-finally-exp (body finally-exps)
-	(let ((new-handler (try-finally-handler finally-exps env handler)))
-	  (m body env new-handler
-	    (make-cont 'interpreter 'm-10 finally-exps env handler k)))) 
-      (try-catch-finally-exp (body catch-var catch-exps finally-exps)
-	(let ((new-handler (make-handler 'try-catch-handler
-			     env catch-var finally-exps handler catch-exps k)))
-	  (m body env new-handler
-	    (make-cont 'interpreter 'm-5 finally-exps env handler k))))
+      (try-finally-exp (body fexps)
+	(let ((new-handler (make-handler 'try-finally-handler fexps env handler)))
+	  (m body env new-handler (make-cont 'interpreter 'm-5 fexps env handler k)))) 
+      (try-catch-finally-exp (body cvar cexps fexps)
+	(let ((new-handler
+		(make-handler 'try-catch-finally-handler cvar cexps fexps env handler k)))
+	  (m body env new-handler (make-cont 'interpreter 'm-5 fexps env handler k))))
       (raise-exp (exp)
 	(m exp env handler (make-cont 'interpreter 'm-3 handler)))
       (app-exp (operator operands)
 	(m operator env handler (make-cont 'interpreter 'm-2 operands env handler k)))
       (else (error 'm "bad abstract syntax: ~a" exp)))))
-
-(define try-catch-handler 
-  (lambda (catch-var catch-exps env handler k)
-    (make-handler 'try-catch-handler catch-var catch-exps env handler k)))
-
-(define try-finally-handler 
-  (lambda (finally-exps env handler)
-    (make-handler 'try-finally-handler finally-exps env handler)))
 
 (define closure
   (lambda (formals body env)
@@ -290,7 +264,7 @@
 (define eval-sequence
   (lambda (exps env handler k)
     (m (car exps) env handler
-      (make-cont 'interpreter 'eval-sequence exps k env handler k))))
+      (make-cont 'interpreter 'eval-sequence-cont exps env handler k))))
 
 (define make-toplevel-env
   (lambda ()
@@ -337,7 +311,7 @@
   (lambda (args env handler k)
     (let ((sym (car args)))
       (lookup-value sym env handler
-	(make-cont 'interpreter 'get-prim args k handler sym k)))))
+	(make-cont 'interpreter 'get-prim-cont args sym handler k)))))
 
 ;; need a more reliable test for a module/environment
 (define module?
@@ -351,7 +325,7 @@
 	  (load-file-temp filename env handler k)
 	  (let ((module-name (cadr args)))
 	    (lookup-binding-in-first-frame module-name env handler
-	      (make-cont 'interpreter 'import-prim env filename handler k)))))))
+	      (make-cont 'interpreter 'import-prim-cont filename env handler k)))))))
 
 (define call/cc-primitive
   (lambda (proc env handler k)

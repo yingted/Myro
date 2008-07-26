@@ -696,7 +696,7 @@
       (read-next-sexp-cont ()
 	(set! sexp_reg (cons sexp_reg tokens_reg))
 	(set! pc #f))
-      (else (error 'apply-reader-cont "invalid continuation: ~a" k_reg))))))
+      (else (error 'apply-reader-cont "bad continuation: ~a" k_reg))))))
 
 ;; handler_reg exception_reg
 (define apply-handler
@@ -707,26 +707,26 @@
 	(set! pc #f))
       (REP-handler ()
 	(apply-cont REP-k `(uncaught exception: ,exception_reg)))
-      (try-catch-handler (catch-var catch-exps env handler k)
+      (try-catch-handler (cvar cexps env handler k)
 	;;(printf "try-handler: handling ~a exception~%" exception_reg)
-	(let ((new-env (extend env (list catch-var) (list exception_reg))))
+	(let ((new-env (extend env (list cvar) (list exception_reg))))
 	  ;;(printf "executing catch block~%")
-	  ;; fix me: when we registerize the interpreter, we'll need to
+	  ;; temporary: when we registerize the interpreter, we'll need to
 	  ;; convert this function call to register form
-	  (eval-sequence catch-exps new-env handler k)))
-       (try-finally-handler (finally-exps env handler)
+	  (eval-sequence cexps new-env handler k)))
+       (try-finally-handler (fexps env handler)
 	  ;;(printf "executing finally block~%")
-	  ;; fix me: when we registerize the interpreter, we'll need to
+	  ;; temporary: when we registerize the interpreter, we'll need to
 	  ;; convert this function call to register form
-	  (eval-sequence finally-exps env handler
+	  (eval-sequence fexps env handler
 	    (make-cont 'interpreter 'try-finally-handler-cont handler exception_reg)))
-       (try-catch-handler (env catch-var finally-exps handler catch-exps k)
+       (try-catch-finally-handler (cvar cexps fexps env handler k)
 	  ;;(printf "try-handler: handling ~a exception~%" exception_reg)
-	  (let ((new-env (extend env (list catch-var) (list exception_reg))))
-	    (let ((catch-handler (try-finally-handler finally-exps env handler)))
+	  (let ((new-env (extend env (list cvar) (list exception_reg))))
+	    (let ((catch-handler (make-handler 'try-finally-handler fexps env handler)))
 	      ;;(printf "executing catch block~%")
-	      ;; fix me: when we registerize the interpreter, we'll need to
+	      ;; temporary: when we registerize the interpreter, we'll need to
 	      ;; convert this function call to register form
-	      (eval-sequence catch-exps new-env catch-handler
-		(make-cont 'interpreter 'm-7 finally-exps env handler k)))))
-      (else (error 'apply-handler "invalid exception handler: ~s" handler_reg)))))
+	      (eval-sequence cexps new-env catch-handler
+		(make-cont 'interpreter 'm-5 fexps env handler k)))))
+      (else (error 'apply-handler "bad exception handler: ~a" handler_reg)))))

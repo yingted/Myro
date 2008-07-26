@@ -169,6 +169,7 @@
     (test-mu-lambda)
     (test-define)
     (test-call/cc)
+    (test-loop)
     ))
 
 (define verify
@@ -293,3 +294,11 @@
        (finally (print 'closing-outer-files))) (catch e e)))
     ))
 
+(define test-loop
+  (lambda ()
+    (try (let loop ((n 5))
+            (print n)
+            (if (= n 0)
+                (raise 'blastoff!))
+            (loop (- n 1)))
+       (catch e e))))

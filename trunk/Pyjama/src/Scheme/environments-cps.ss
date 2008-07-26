@@ -117,22 +117,22 @@
 	(lambda (binding)
 	  (if (null? (cdr components))
 	    (k binding)
-	    (let ((new-path (if (string=? path "")
-				(format "~a" var)
-				(format "~a.~a" path var)))
-		  (result (binding-value binding)))
+	    (let ((result (binding-value binding))
+		  (new-path (if (string=? path "")
+			      (format "~a" var)
+			      (format "~a.~a" path var))))
 	      (if (not (module? result))
 		  (handler (format "~a is not a module" new-path))
 		  (lookup-variable-components
 		    (cdr components) new-path result handler k)))))))))
 
 (define lookup-module-binding
-  (lambda (component env path handler k)
-    (let ((binding (search-env env component)))
+  (lambda (var env path handler k)
+    (let ((binding (search-env env var)))
       (cond
 	(binding (k binding))
-	((string=? path "") (handler (format "unbound variable ~a" component)))
-	(else (handler (format "unbound variable ~a in module ~a" component path)))))))
+	((string=? path "") (handler (format "unbound variable ~a" var)))
+	(else (handler (format "unbound variable ~a in module ~a" var path)))))))
 
 (define split-variable
   (lambda (variable k)

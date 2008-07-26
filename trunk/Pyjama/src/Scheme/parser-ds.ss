@@ -17,7 +17,7 @@
 	 (set! sexp_reg value)
 	 (set! pc apply-reader-cont)
 	 (run))
-       (else (error 'apply-cont "invalid continuation type: '~s'" (car k))))))
+       (else (error 'apply-cont "bad continuation type: ~a" (car k))))))
 
 (define apply-parser-cont
   (lambda (k value)
@@ -26,7 +26,8 @@
        (expand-quasi-1 (v1 k)
 	   (apply-cont k `(cons ,v1 ,value)))
        (expand-quasi-2 (datum handler k)
-	   (expand-quasiquote (cdr datum) handler (make-cont 'parser 'expand-quasi-1 value k)))
+	   (expand-quasiquote (cdr datum) handler
+	     (make-cont 'parser 'expand-quasi-1 value k)))
        (expand-quasi-3 (datum k)
 	   (apply-cont k `(append ,(cadr (car datum)) ,value)))
        (expand-quasi-4 (k)
@@ -45,18 +46,22 @@
            (let ((cvar (catch-var (caddr datum))))
 	     (apply-cont k (try-catch-finally-exp body cvar cexps value))))
        (parse-5 (datum handler k body)
-           (parse-all (finally-exps (cadddr datum)) handler (make-cont 'parser 'parse-4 datum k body value)))
+           (parse-all (finally-exps (cadddr datum)) handler
+	     (make-cont 'parser 'parse-4 datum k body value)))
        (parse-6 (datum handler k)
-           (parse-all (catch-exps (caddr datum)) handler (make-cont 'parser 'parse-5 datum handler k value)))
+           (parse-all (catch-exps (caddr datum)) handler
+	     (make-cont 'parser 'parse-5 datum handler k value)))
        (parse-7 (k body)
 	   (apply-cont k (try-finally-exp body value)))
        (parse-8 (datum handler k)
-	   (parse-all (finally-exps (caddr datum)) handler (make-cont 'parser 'parse-7 k value)))
+	   (parse-all (finally-exps (caddr datum)) handler
+	     (make-cont 'parser 'parse-7 k value)))
        (parse-9 (datum k body)
 	   (let ((cvar (catch-var (caddr datum))))
 	     (apply-cont k (try-catch-exp body cvar value))))
        (parse-10 (datum handler k)
-	   (parse-all (catch-exps (caddr datum)) handler (make-cont 'parser 'parse-9 datum k value)))
+	   (parse-all (catch-exps (caddr datum)) handler
+	     (make-cont 'parser 'parse-9 datum k value)))
        (parse-11 (datum k)
 	   (if (proper-list? (cadr datum))
 	     (apply-cont k (lambda-exp (cadr datum) value))
@@ -72,7 +77,8 @@
        (parse-16 (datum handler k v1)
 	   (parse (cadddr datum) handler (make-cont 'parser 'parse-15 k v1 value)))
        (parse-17 (datum handler k)
-	   (parse (caddr datum) handler (make-cont 'parser 'parse-16 datum handler k value)))
+	   (parse (caddr datum) handler
+	     (make-cont 'parser 'parse-16 datum handler k value)))
        (parse-18 (k v1)
 	   (apply-cont k (if-exp v1 value (lit-exp #f))))
        (parse-19 (datum handler k)
@@ -81,11 +87,11 @@
 	   (parse value handler k))
        (parse-21 (handler k)
 	   (parse value handler k))
-       (process-macro-clauses (right-pattern k clauses datum handler)
+       (process-macro-cont (right-pattern k clauses datum handler)
            (if value
 	     (instantiate right-pattern value k)
 	     (process-macro-clauses (cdr clauses) datum handler k)))
-       (expand-once (datum handler k datum)
+       (expand-once-cont (datum handler k)
 	   (if (list? value)
 	     (process-macro-clauses value datum handler k)
 	     (apply-cont k (value datum))))
@@ -94,7 +100,7 @@
        (print-parsed-sexps-cont (tokens-left handler)
 	 (pretty-print value)
 	 (print-parsed-sexps tokens-left handler))
-       (else (error 'apply-parser-cont "invalid continuation: '~s'" k)))))
+       (else (error 'apply-parser-cont "bad continuation: ~a" k)))))
 
 ;;--------------------------------------------------------------------------
 ;; The core grammar
@@ -180,15 +186,17 @@
 
 (define expand-once
   (lambda (datum handler k)
-    (lookup-value (car datum) macro-env handler (make-cont 'parser 'expand-once datum handler k datum))))
+    (lookup-value (car datum) macro-env handler
+      (make-cont 'parser 'expand-once-cont datum handler k))))
 
 (define process-macro-clauses
   (lambda (clauses datum handler k)
     (if (null? clauses)
-      (parser-apply-handler handler (format "no matching clause found for ~s" datum))
+      (parser-apply-handler handler (format "no matching clause found for ~a" datum))
       (let ((left-pattern (caar clauses))
 	    (right-pattern (cadar clauses)))
-	(unify-patterns left-pattern datum (make-cont 'parser 'process-macro-clauses right-pattern k clauses datum handler))))))
+	(unify-patterns left-pattern datum
+	  (make-cont 'parser 'process-macro-cont right-pattern k clauses datum handler))))))
 
 (define mit-define-transformer
   (lambda (datum)
@@ -257,13 +265,18 @@
 (define parse
   (lambda (datum handler k)
     (cond
-      ((literal? datum) (apply-cont k (lit-exp datum)))
-      ((quote? datum) (apply-cont k (lit-exp (cadr datum))))
+      ((literal? datum)
+       (apply-cont k (lit-exp datum)))
+      ((quote? datum)
+       (apply-cont k (lit-exp (cadr datum))))
       ((quasiquote? datum)
        (expand-quasiquote (cadr datum) handler (make-cont 'parser 'parse-21 handler k)))
-      ((unquote? datum) (parser-apply-handler handler (format "misplaced ~s" datum)))
-      ((unquote-splicing? datum) (parser-apply-handler handler (format "misplaced ~s" datum)))
-      ((symbol? datum) (apply-cont k (var-exp datum)))
+      ((unquote? datum)
+       (parser-apply-handler handler (format "misplaced ~a" datum)))
+      ((unquote-splicing? datum)
+       (parser-apply-handler handler (format "misplaced ~a" datum)))
+      ((symbol? datum)
+       (apply-cont k (var-exp datum)))
       ((syntactic-sugar? datum)
        (expand-once datum handler (make-cont 'parser 'parse-20 handler k)))
       ((if-then? datum)
@@ -296,24 +309,26 @@
 	 ((and (= (length datum) 4) (catch? (caddr datum)) (finally? (cadddr datum)))
 	  ;; (try <body> (catch <var> <exp> ...) (finally <exp> ...))
 	  (parse (try-body datum) handler (make-cont 'parser 'parse-6 datum handler k)))
-	 (else (parser-apply-handler handler (format "bad try syntax: ~s" datum)))))
+	 (else (parser-apply-handler handler (format "bad try syntax: ~a" datum)))))
       ((raise? datum)
        (parse (cadr datum) handler (make-cont 'parser 'parse-3 k)))
       ((application? datum)
        (parse (car datum) handler (make-cont 'parser 'parse-2 datum handler k)))
-      (else (parser-apply-handler handler (format "bad concrete syntax: ~s" datum))))))
+      (else (parser-apply-handler handler (format "bad concrete syntax: ~a" datum))))))
 
 (define parse-all
   (lambda (datum-list handler k)
     (if (null? datum-list)
 	(apply-cont k '())
-	(parse (car datum-list) handler (make-cont 'parser 'parse-all-2 datum-list handler k)))))
+	(parse (car datum-list) handler
+	  (make-cont 'parser 'parse-all-2 datum-list handler k)))))
 
 (define expand-quasiquote
   (lambda (datum handler k)
     (cond
       ((vector? datum)
-       (expand-quasiquote (vector->list datum) handler (make-cont 'parser 'expand-quasi-4 k)))
+       (expand-quasiquote (vector->list datum) handler
+	 (make-cont 'parser 'expand-quasi-4 k)))
       ((not (pair? datum)) (apply-cont k `(quote ,datum)))
       ;; doesn't handle nested quasiquotes yet
       ((quasiquote? datum) (apply-cont k `(quote ,datum)))
@@ -321,9 +336,11 @@
       ((unquote-splicing? (car datum))
        (if (null? (cdr datum))
 	 (apply-cont k (cadr (car datum)))
-	 (expand-quasiquote (cdr datum) handler (make-cont 'parser 'expand-quasi-3 datum k))))
+	 (expand-quasiquote (cdr datum) handler
+	   (make-cont 'parser 'expand-quasi-3 datum k))))
       (else
-       (expand-quasiquote (car datum) handler (make-cont 'parser 'expand-quasi-2 datum handler k))))))
+       (expand-quasiquote (car datum) handler
+	 (make-cont 'parser 'expand-quasi-2 datum handler k))))))
 
 (define proper-list?
   (lambda (x)

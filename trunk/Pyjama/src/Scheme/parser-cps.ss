@@ -99,7 +99,7 @@
 (define process-macro-clauses
   (lambda (clauses datum handler k)
     (if (null? clauses)
-      (handler (format "no matching clause found for ~s" datum))
+      (handler (format "no matching clause found for ~a" datum))
       (let ((left-pattern (caar clauses))
 	    (right-pattern (cadar clauses)))
 	(unify-patterns left-pattern datum
@@ -192,8 +192,8 @@
        (expand-quasiquote (cadr datum) handler
 	 (lambda (v)
 	   (parse v handler k))))
-      ((unquote? datum) (handler (format "misplaced ~s" datum)))
-      ((unquote-splicing? datum) (handler (format "misplaced ~s" datum)))
+      ((unquote? datum) (handler (format "misplaced ~a" datum)))
+      ((unquote-splicing? datum) (handler (format "misplaced ~a" datum)))
       ((symbol? datum) (k (var-exp datum)))
       ((syntactic-sugar? datum)
        (expand-once datum handler
@@ -265,7 +265,7 @@
 		    (lambda (fexps)
 		      (let ((cvar (catch-var (caddr datum))))
 			(k (try-catch-finally-exp body cvar cexps fexps))))))))))
-	 (else (handler (format "bad try syntax: ~s" datum)))))
+	 (else (handler (format "bad try syntax: ~a" datum)))))
       ((raise? datum)
        (parse (cadr datum) handler
 	 (lambda (v)
@@ -276,7 +276,7 @@
 	   (parse-all (cdr datum) handler
 	     (lambda (v2)
 	       (k (app-exp v1 v2)))))))
-      (else (handler (format "bad concrete syntax: ~s" datum))))))
+      (else (handler (format "bad concrete syntax: ~a" datum))))))
 
 (define parse-all
   (lambda (datum-list handler k)

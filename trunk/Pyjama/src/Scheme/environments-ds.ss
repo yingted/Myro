@@ -85,8 +85,7 @@
 
 (define lookup-value
   (lambda (variable env handler k)
-    (lookup-binding variable env handler
-      (make-cont 'parser 'lookup-cont k))))
+    (lookup-binding variable env handler (make-cont 'parser 'lookup-cont k))))
 
 (define lookup-binding
   (lambda (variable env handler k)
@@ -112,17 +111,18 @@
   (lambda (components path env handler k)
     (let ((var (car components)))
       (lookup-module-binding var env path handler
-	(make-cont 'interpreter 'lookup-module-binding-cont components var path handler k)))))
+	(make-cont 'interpreter 'lookup-module-var-cont
+	  components var path handler k)))))
 
 (define lookup-module-binding
-  (lambda (component env path handler k)
-    (let ((binding (search-env env component)))
+  (lambda (var env path handler k)
+    (let ((binding (search-env env var)))
       (cond
 	(binding (apply-cont k binding))
 	((string=? path "")
-	 (interp-apply-handler handler (format "unbound variable ~a" component)))
+	 (interp-apply-handler handler (format "unbound variable ~a" var)))
 	(else (interp-apply-handler handler
-		(format "unbound variable ~a in module ~a" component path)))))))
+		(format "unbound variable ~a in module ~a" var path)))))))
 
 (define split-variable
   (lambda (variable k)
