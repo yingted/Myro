@@ -4,6 +4,8 @@ using System.Reflection;
 using System.Collections;
 using System.Collections.Generic;
 
+[assembly: AssemblyVersion ("1.0.*")]
+[assembly: AssemblyKeyFile ("pyjama.key")]
 public class LoadDLL {
 
 
@@ -85,7 +87,7 @@ public class LoadDLL {
   {
 
 #pragma warning disable 612
-	Assembly assembly = Assembly.LoadWithPartialName("System");
+	//Assembly assembly = Assembly.LoadWithPartialName("System");
 #pragma warning restore 612
  	
 	
@@ -93,9 +95,9 @@ public class LoadDLL {
 
 	//DumpFile("/home/dblank/fepy/IPCE/IronPython-1.1.1/IronMath.dll");
 
-	Dump(assembly);
+	//Dump(assembly);
 
-	//DumpThis();
+	DumpThis();
 
 	/*
 	Type theMathType = assembly.GetType("Cos");
