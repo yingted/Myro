@@ -6,11 +6,129 @@ using System.Collections.Generic;
 
 public class LoadDLL {
 
-  public static void Main(string [] args) {
-	// Filename
-	//PrintParts(args[0]);
+
+  public static void DumpThis() {
+	int indent = 0;
+	// Display information about each assembly loading into this AppDomain.
+	foreach (Assembly b in AppDomain.CurrentDomain.GetAssemblies())
+	{
+	  Display(indent, "Assembly: {0}", b);
+	  
+	  // Display information about each module of this assembly.
+	  foreach ( Module m in b.GetModules(true) )
+	  {
+		Display(indent+1, "Module: {0}", m.Name);
+	  }
+	  
+	  // Display information about each type exported from this assembly.
+	  
+	  indent += 1;
+	  foreach ( Type t in b.GetExportedTypes() )
+	  {
+		Display(0, "");
+		Display(indent, "Type: {0}", t);
+		
+		// For each type, show its members & their custom attributes.
+		
+		indent += 1;
+		foreach (MemberInfo mi in t.GetMembers() )
+		{
+		  Display(indent, "Member: {0}", mi.Name);
+		  DisplayAttributes(indent, mi);
+		  
+		  // If the member is a method, display information about its parameters.
+		  
+		  if (mi.MemberType==MemberTypes.Method)
+		  {
+			foreach ( ParameterInfo pi in ((MethodInfo) mi).GetParameters() )
+			{
+			  Display(indent+1, "Parameter: Type={0}, Name={1}", pi.ParameterType, pi.Name);
+			}
+		  }
+		  
+		  // If the member is a property, display information about the property's accessor methods.
+		  if (mi.MemberType==MemberTypes.Property)
+		  {
+			foreach ( MethodInfo am in ((PropertyInfo) mi).GetAccessors() )
+			{
+			  Display(indent+1, "Accessor method: {0}", am);
+			}
+		  }
+		}
+		indent -= 1;
+	  }
+	  indent -= 1;
+	}
+  }
+
+  public static void DisplayAttributes(Int32 indent, MemberInfo mi)
+  {
+	// Get the set of custom attributes; if none exist, just return.
+	object[] attrs = mi.GetCustomAttributes(false);
+	if (attrs.Length==0) {return;}
 	
-	Assembly assembly = Assembly.LoadFrom(args[0]);
+	// Display the custom attributes applied to this member.
+	Display(indent+1, "Attributes:");
+	foreach ( object o in attrs )
+	{
+	  Display(indent+2, "{0}", o.ToString());
+	}
+  }
+
+  public static void Display(Int32 indent, string format, params object[] param) 
+  {
+	Console.Write(new string(' ', indent*2));
+	Console.WriteLine(format, param);
+  }
+  
+  public static void Main( )
+  {
+
+	Assembly assembly = Assembly.LoadWithPartialName("System");
+	
+	//Assembly assembly = Assembly.Load("System, Version=2.1.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089") ; //.BigInteger
+
+	//DumpFile("/home/dblank/fepy/IPCE/IronPython-1.1.1/IronMath.dll");
+
+	Dump(assembly);
+
+	//DumpThis();
+
+	/*
+	Type theMathType = assembly.GetType("Cos");
+	Object theObj =
+		Activator.CreateInstance(theMathType);
+	
+	// array with one member
+	Type[] paramTypes = new Type[1];
+	paramTypes[0]= Type.GetType("System.Double");
+	
+	// Get method info for Cos( )
+	MethodInfo CosineInfo =
+		theMathType.GetMethod("Cos",paramTypes);
+	
+	// fill an array with the actual parameters
+	Object[] parameters = new Object[1];
+	parameters[0] = 45;
+	Object returnVal =
+		CosineInfo.Invoke(theObj,parameters);
+	Console.WriteLine(
+		"The cosine of a 45 degree angle {0}",
+		returnVal);
+	*/
+  }
+
+  public static void DumpFile(string filename) {
+	Assembly assembly = Assembly.LoadFrom(filename);
+	Dump(assembly);
+  }	
+
+  public static void DumpFrom(string assembly_name) {
+	Assembly assembly = Assembly.Load(assembly_name);
+	Dump(assembly);
+  }	
+
+  public static void Dump(Assembly assembly) {
 	foreach (Type type in assembly.GetTypes()) {
 	  Console.WriteLine("Type: '{0}'", type);
 	  string className = type.FullName;
@@ -64,156 +182,88 @@ public class LoadDLL {
 		Console.WriteLine("      ReflectedType   : '{0}'", fi.ReflectedType);
 	  }
 	}
-	
+
+
+// 	Type theType = Type.GetType(
+// 		"System.Reflection.Assembly");
+ 
+// 	MemberInfo[] mbrInfoArray =
+// 		theType.FindMembers(MemberTypes.Method,
+// 			BindingFlags.Default,
+// 			Type.FilterName, "*");
+// 	foreach (MemberInfo mbrInfo in mbrInfoArray )
+// 	{
+//       Console.WriteLine("{0} is a {1}",
+// 		  mbrInfo, mbrInfo.MemberType);
+// 	}
+// 	//object[] objs = {"Graphics.makeGraphWin"};
+// 	//Call_Method(objs, true);
+
   }
 
-  public static Object[] Using(String filename) {
-	// from Tacky/Util.cs
-	// FIXME: filenames only here
-	Assembly assembly = Assembly.LoadFrom(filename);
-	Type[] typeArray = assembly.GetTypes();
-	Object [] names = new Object[typeArray.Length];
-	int i = 0;
-	if (typeArray != null) {
-	  foreach (Type type in typeArray) {
-		Console.WriteLine("... FullName: '{0}'", type.FullName);
-		int pos = type.FullName.IndexOf("+");
-		if (pos != -1) {
-		  string name = type.FullName.Substring(pos + 1, 
-			  type.FullName.Length - pos - 1);
-		  if (name != "")
-			names[i++] = name;
-// 		  Symbol def = Symbol.Create(name);
-// 		  Pair body = new Pair(Pair.Cons(Symbol.Create("new-prim"),
-// 				  Pair.Cons(type.FullName,
-// 					  Pair.Cons(Symbol.Create("_using"),
-// 						  new Pair(Symbol.Create("args"))))));
-// 		  Expression expr = Expression.Parse(Pair.Cons(Symbol.Create("lambda"), 
-// 				  Pair.Cons(Symbol.Create("args"), body)));
-// 		  globalEnv.Bind(def, (object) expr.Eval(globalEnv, localEnv));                    
-		}
-	  }
+  public static Type MyGetType(String tname) {
+	Assembly[] assemblies = System.AppDomain.CurrentDomain.GetAssemblies();
+	foreach (Assembly assembly in assemblies) {
+	  Type type = assembly.GetType(tname);
+	  // type = System.Reflection.Assembly.Load(aname).GetType(tname);
+	  if (type != null)
+		return type;
 	}
-	return names;
+	return null;
   }
-}
 
-  /*
-  static public Type[] GetTypes(object[] objs)
-      {
-		int i = 0;
-		Type[] retval = new Type[objs.Length];
-		foreach (Object obj in objs)
-		{
-		  if (obj == null)
-			retval[i] =Type.GetType("System.Object");
-		  else
-			retval[i] = obj.GetType();
-		  //Console.WriteLine("gtypes [" + retval[i] + "]");
-		  i++;
-		}
-		return retval;
-	  }
-	  
-	  // could move to scheme, but likely just take out of 
-	  // prims & make part of Expressions.App
-	  public static bool Defined(Object[] args)
-	  {
-	    // 'Class.Method (args)
-	    String [] parts = args[0].ToString().Split('.');
-	    String className = "";
-	    String methodName = "";
-		//Console.WriteLine(parts);	    
-	    if (parts.Length > 1) {
-		  for (int i = 0; i < (parts.Length - 1); i++) {
-		    if (className != "") 
-			  className += ".";
-		    className += parts[i];
-		  }
-		  methodName = parts[parts.Length - 1];
-		  
-		  Type[] types = new Type[0];
-		  if (args[1] != null) 
-		  {
-			types = GetTypes((args[1] as Pair).ToArray());
-		  }
-		  Type type = Util.GetType(className);
-		  MethodInfo method = null;
-		  try {
-		    method = type.GetMethod(methodName, types);
-		  } catch {
-		    // not defined
-		  }
-		  return (method != null);
-	    } else {
-		  return false;
-	    }
-	  }
-	  
-	  // could move to scheme, but likely just take out of 
-	  // prims & make part of Expressions.App
-	  public static object Call_Method(Object[] args, bool static_call)
-	  {
-		// Console.WriteLine("call: " + Util.arrayToString(args));
-		// Assembly a = System.Reflection.Assembly.Load("System");
-		Object[] objs = null;
-		Type[] types = new Type[0];
-		if (args[2] != null) 
-		  // see def of call & call-static in init.ss 
-		  // method args passed in as rest, if none then it's ()
-		{
-		  objs = (args[2] as Pair).ToArray();
-		  types = GetTypes(objs);
-		}
-		Type type;
-		if (static_call == true) // args.car is Symbol 
-		  type = Util.GetType(args[0].ToString());
-		else if (args[0] == null)
-		  type = Type.GetType("System.Object");
-		else
-		  type = args[0].GetType();
-		
-		object retval = null;
-	    MethodInfo method = null;
-		try 
-		{
-		  method = type.GetMethod(args[1].ToString(), types);
-	    } catch {
-		  throw new Exception("call: method sig not found " + args[1]);
-	    }
-	    if (method != null)
-		  retval = method.Invoke(args[0], objs);
-	    else { 
-		  throw new Exception("call: method sig not found " + args[1]);
-	    }
-		return retval;
-	  }
-	  
-	  public static Type GetType(String tname, Pair prefixes)
-	  {
-		Type type = GetType(tname);
-		if (type != null)
-		  return type;
-		foreach (string prefix in prefixes) 
-		{
-		  type = GetType(prefix + "." + tname);
-		  if (type != null)
-			return type;
-		}
-		return null;
-	  }
-	  
-	  public static Type GetType(String tname)
-	  {
-		Assembly[] assemblies = System.AppDomain.CurrentDomain.GetAssemblies();
-		
-		foreach (Assembly assembly in assemblies) 
-		{
-		  Type type = assembly.GetType(tname);
-		  // type = System.Reflection.Assembly.Load(aname).GetType(tname);
-		  if (type != null)
-			return type;
-		}
-		return null;
-	  }
-  */
+  static public Type[] MyGetTypes(object[] objs)
+  {
+	int i = 0;
+	Type[] retval = new Type[objs.Length];
+	foreach (Object obj in objs)
+	{
+	  if (obj == null)
+		retval[i] = Type.GetType("System.Object");
+	  else
+		retval[i] = obj.GetType();
+	  //Console.WriteLine("gtypes [" + retval[i] + "]");
+	  i++;
+	}
+	return retval;
+  }
+
+  // could move to scheme, but likely just take out of 
+  // prims & make part of Expressions.App
+  public static object Call_Method(Object[] args, bool static_call)
+  {
+	// Console.WriteLine("call: " + Util.arrayToString(args));
+	// Assembly a = System.Reflection.Assembly.Load("System");
+	Object[] objs = new Object[args.Length - 1];
+	Type[] types = new Type[0];
+	for (int i = 1; i < args.Length; i ++) { //args[2] != null) {
+	  // see def of call & call-static in init.ss 
+	  // method args passed in as rest, if none then it's ()
+	  objs[i - 1] = args[i];
+	  types = MyGetTypes(objs);
+	}
+	Type type;
+	if (static_call == true) // args.car is Symbol 
+	  type = MyGetType(args[0].ToString());
+	else if (args[0] == null)
+	  type = Type.GetType("System.Object");
+	else
+	  type = args[0].GetType();
+	
+	object retval = null;
+	MethodInfo method = null;
+	try 
+	{
+	  method = type.GetMethod(args[1].ToString(), types);
+	} catch {
+	  throw new Exception("call: method sig not found ");
+	}
+	if (method != null)
+	  retval = method.Invoke(args[0], objs);
+	else { 
+	  throw new Exception("call: method invoke failed ");
+	}
+	return retval;
+  }
+  
+}

@@ -242,142 +242,142 @@ namespace Scheme
             ((Pair)pair).proper = false;
         }
 
-        static public Object[] SubArray(Object[] array, int start)
-        {
-            object[] retval = new object[array.Length-start];
-
-            for (int pos=0;pos<retval.Length; pos++)
-                retval[pos] = array[pos+start];
-            return retval;
-        }        
-
-        static public Type[] GetTypes(object[] objs)
-        {
-            int i = 0;
-            Type[] retval = new Type[objs.Length];
-            foreach (Object obj in objs)
-            {
-                if (obj == null)
-                    retval[i] =Type.GetType("System.Object");
-                else
-                    retval[i] = obj.GetType();
-                //Console.WriteLine("gtypes [" + retval[i] + "]");
-                i++;
-            }
-            return retval;
-        }
-
-        // could move to scheme, but likely just take out of 
-	// prims & make part of Expressions.App
-        public static bool Defined(Object[] args)
-        {
+	  static public Object[] SubArray(Object[] array, int start)
+	  {
+		object[] retval = new object[array.Length-start];
+		
+		for (int pos=0;pos<retval.Length; pos++)
+		  retval[pos] = array[pos+start];
+		return retval;
+	  }        
+	  
+	  static public Type[] GetTypes(object[] objs)
+	  {
+		int i = 0;
+		Type[] retval = new Type[objs.Length];
+		foreach (Object obj in objs)
+		{
+		  if (obj == null)
+			retval[i] =Type.GetType("System.Object");
+		  else
+			retval[i] = obj.GetType();
+		  //Console.WriteLine("gtypes [" + retval[i] + "]");
+		  i++;
+		}
+		return retval;
+	  }
+	  
+	  // could move to scheme, but likely just take out of 
+	  // prims & make part of Expressions.App
+	  public static bool Defined(Object[] args)
+	  {
 	    // 'Class.Method (args)
 	    String [] parts = args[0].ToString().Split('.');
 	    String className = "";
 	    String methodName = "";
-            //Console.WriteLine(parts);	    
+		//Console.WriteLine(parts);	    
 	    if (parts.Length > 1) {
-		for (int i = 0; i < (parts.Length - 1); i++) {
+		  for (int i = 0; i < (parts.Length - 1); i++) {
 		    if (className != "") 
-			className += ".";
+			  className += ".";
 		    className += parts[i];
-		}
-		methodName = parts[parts.Length - 1];
-		
-		Type[] types = new Type[0];
-		if (args[1] != null) 
-		    {
+		  }
+		  methodName = parts[parts.Length - 1];
+		  
+		  Type[] types = new Type[0];
+		  if (args[1] != null) 
+		  {
 			types = GetTypes((args[1] as Pair).ToArray());
-		    }
-		Type type = Util.GetType(className);
-		MethodInfo method = null;
-		try {
+		  }
+		  Type type = Util.GetType(className);
+		  MethodInfo method = null;
+		  try {
 		    method = type.GetMethod(methodName, types);
-		} catch {
+		  } catch {
 		    // not defined
-		}
-		return (method != null);
+		  }
+		  return (method != null);
 	    } else {
-		return false;
+		  return false;
 	    }
-        }
-
-        // could move to scheme, but likely just take out of 
-	// prims & make part of Expressions.App
-        public static object Call_Method(Object[] args, bool static_call)
-        {
-            // Console.WriteLine("call: " + Util.arrayToString(args));
-            // Assembly a = System.Reflection.Assembly.Load("System");
-            Object[] objs = null;
-            Type[] types = new Type[0];
-            if (args[2] != null) 
-		// see def of call & call-static in init.ss 
-		// method args passed in as rest, if none then it's ()
-            {
-                objs = (args[2] as Pair).ToArray();
-                types = GetTypes(objs);
-            }
-            Type type;
-            if (static_call == true) // args.car is Symbol 
-                type = Util.GetType(args[0].ToString());
-            else if (args[0] == null)
-                type = Type.GetType("System.Object");
-            else
-                type = args[0].GetType();
-            
-            object retval = null;
+	  }
+	  
+	  // could move to scheme, but likely just take out of 
+	  // prims & make part of Expressions.App
+	  public static object Call_Method(Object[] args, bool static_call)
+	  {
+		// Console.WriteLine("call: " + Util.arrayToString(args));
+		// Assembly a = System.Reflection.Assembly.Load("System");
+		Object[] objs = null;
+		Type[] types = new Type[0];
+		if (args[2] != null) 
+		  // see def of call & call-static in init.ss 
+		  // method args passed in as rest, if none then it's ()
+		{
+		  objs = (args[2] as Pair).ToArray();
+		  types = GetTypes(objs);
+		}
+		Type type;
+		if (static_call == true) // args.car is Symbol 
+		  type = Util.GetType(args[0].ToString());
+		else if (args[0] == null)
+		  type = Type.GetType("System.Object");
+		else
+		  type = args[0].GetType();
+		
+		object retval = null;
 	    MethodInfo method = null;
-            try 
-            {
-                method = type.GetMethod(args[1].ToString(), types);
+		try 
+		{
+		  method = type.GetMethod(args[1].ToString(), types);
 	    } catch {
-		throw new Exception("call: method sig not found " + args[1]);
+		  throw new Exception("call: method sig not found " + args[1]);
 	    }
 	    if (method != null)
-		retval = method.Invoke(args[0], objs);
+		  retval = method.Invoke(args[0], objs);
 	    else { 
-		throw new Exception("call: method sig not found " + args[1]);
+		  throw new Exception("call: method sig not found " + args[1]);
 	    }
-            return retval;
-        }
-
-        public static Type GetType(String tname, Pair prefixes)
-        {
-            Type type = GetType(tname);
-            if (type != null)
-                return type;
-            foreach (string prefix in prefixes) 
-            {
-                type = GetType(prefix + "." + tname);
-                if (type != null)
-                    return type;
-            }
-            return null;
-        }
-
-        public static Type GetType(String tname)
-        {
-            Assembly[] assemblies = System.AppDomain.CurrentDomain.GetAssemblies();
-
-            foreach (Assembly assembly in assemblies) 
-            {
-                Type type = assembly.GetType(tname);
-                // type = System.Reflection.Assembly.Load(aname).GetType(tname);
-                if (type != null)
-                    return type;
-            }
-            return null;
-        }
-
-        static public String Dump(object exp)
-        {
-            if (exp is string)
-            {
-                return '"' + (string) exp + '"';
-            } 
-            else if (exp is bool) 
-            {
-                if ((bool) exp == true)
+		return retval;
+	  }
+	  
+	  public static Type GetType(String tname, Pair prefixes)
+	  {
+		Type type = GetType(tname);
+		if (type != null)
+		  return type;
+		foreach (string prefix in prefixes) 
+		{
+		  type = GetType(prefix + "." + tname);
+		  if (type != null)
+			return type;
+		}
+		return null;
+	  }
+	  
+	  public static Type GetType(String tname)
+	  {
+		Assembly[] assemblies = System.AppDomain.CurrentDomain.GetAssemblies();
+		
+		foreach (Assembly assembly in assemblies) 
+		{
+		  Type type = assembly.GetType(tname);
+		  // type = System.Reflection.Assembly.Load(aname).GetType(tname);
+		  if (type != null)
+			return type;
+		}
+		return null;
+	  }
+	  
+	  static public String Dump(object exp)
+	  {
+		if (exp is string)
+		{
+		  return '"' + (string) exp + '"';
+		} 
+		else if (exp is bool) 
+		{
+		  if ((bool) exp == true)
                     return "#t";
                 else
                     return "#f";

@@ -289,24 +289,27 @@ namespace Scheme
 	    this.rator = rator;
 	    this.rands = rands;
 	}
-        override public System.String ToString() { return "<primapp: prim=" + prim + " rands=[" + Util.arrayToString(rands) + "]> "; } 
-        public override object Eval(Env globalEnv, Env localEnv)
+        override public System.String ToString() { 
+		  return "<primapp: prim=" + prim + " rands=[" + Util.arrayToString(rands) + "]> "; 
+		} 
+        
+		public override object Eval(Env globalEnv, Env localEnv)
         {
-	    Object[] eval_Rands = null;
-	    try {
-		 eval_Rands = Eval_Rands(rands, globalEnv, localEnv);
-	    } catch {
-		throw new Exception(String.Format("bad rands ({0} {1})",
-						  prim.GetRator(),
-						  Util.arrayToString(rands)));
-	    }
-	    try {
-		return prim.Call(eval_Rands);
-	    } catch {
-		throw new Exception(String.Format("bad apply ({0} {1})",
-						  prim.GetRator(),
-						  Util.arrayToString(rands)));
-	    }
+		  Object[] eval_Rands = null;
+		  try {
+			eval_Rands = Eval_Rands(rands, globalEnv, localEnv);
+		  } catch {
+			throw new Exception(String.Format("bad rands ({0} {1})",
+					prim.GetRator(),
+					Util.arrayToString(rands)));
+		  }
+		  try {
+			return prim.Call(eval_Rands);
+		  } catch {
+			throw new Exception(String.Format("bad apply ({0} {1})",
+					prim.GetRator(),
+					Util.arrayToString(rands)));
+		  }
         }
     }
 
@@ -323,50 +326,50 @@ namespace Scheme
 	}
         public override object Eval(Env globalEnv, Env localEnv)
         {
-	    //if (key == "or") {
-	    //while ()
-	    //object retval = arg.Eval(globalEnv, localEnv);
-	    if (key == "globals")
-		return Util.arrayToList(globalEnv.Keys());
-	    else if (key == "locals")
-		return Util.arrayToList(localEnv.Keys());
-	    else if (key == "eval") {
-		// first eval to get a literal
-		object obj = arg.Eval(globalEnv, localEnv);
-		// now, parse and eval that
-		Expression newexp = Parse(obj);
-		return newexp.Eval(globalEnv, localEnv);
-	    } else if (key == "dir")
-		return new Pair(Util.arrayToList(localEnv.Keys()), Util.arrayToList(globalEnv.Keys()));
-	    else if (key == "import-prim") {
-		String assname = (String) arg.Eval(globalEnv, localEnv);
-		// FIXME: filenames only here
-		Assembly assembly = Assembly.LoadFrom(assname);
-		Type[] typeArray = assembly.GetTypes();
-		Object [] names = new Object[typeArray.Length];
-		int i = 0;
-		if (typeArray != null) {
-		    foreach (Type type in typeArray) {
-			int pos = type.FullName.IndexOf("+");
-			if (pos != -1) {
-			    string name = type.FullName.Substring(pos + 1, 
-								  type.FullName.Length - pos - 1);
-			    names[i++] = name;
-			    Symbol def = Symbol.Create(name);
-			    Pair body = new Pair(Pair.Cons(Symbol.Create("new-prim"),
-							   Pair.Cons(type.FullName,
-								     Pair.Cons(Symbol.Create("_using"),
-									       new Pair(Symbol.Create("args"))))));
-			    Expression expr = Expression.Parse(Pair.Cons(Symbol.Create("lambda"), 
-									 Pair.Cons(Symbol.Create("args"), body)));
-			    globalEnv.Bind(def, (object) expr.Eval(globalEnv, localEnv));                    
+		  //if (key == "or") {
+		  //while ()
+		  //object retval = arg.Eval(globalEnv, localEnv);
+		  if (key == "globals")
+			return Util.arrayToList(globalEnv.Keys());
+		  else if (key == "locals")
+			return Util.arrayToList(localEnv.Keys());
+		  else if (key == "eval") {
+			// first eval to get a literal
+			object obj = arg.Eval(globalEnv, localEnv);
+			// now, parse and eval that
+			Expression newexp = Parse(obj);
+			return newexp.Eval(globalEnv, localEnv);
+		  } else if (key == "dir")
+			return new Pair(Util.arrayToList(localEnv.Keys()), Util.arrayToList(globalEnv.Keys()));
+		  else if (key == "import-prim") {
+			String assname = (String) arg.Eval(globalEnv, localEnv);
+			// FIXME: filenames only here
+			Assembly assembly = Assembly.LoadFrom(assname);
+			Type[] typeArray = assembly.GetTypes();
+			Object [] names = new Object[typeArray.Length];
+			int i = 0;
+			if (typeArray != null) {
+			  foreach (Type type in typeArray) {
+				int pos = type.FullName.IndexOf("+");
+				if (pos != -1) {
+				  string name = type.FullName.Substring(pos + 1, 
+					  type.FullName.Length - pos - 1);
+				  names[i++] = name;
+				  Symbol def = Symbol.Create(name);
+				  Pair body = new Pair(Pair.Cons(Symbol.Create("new-prim"),
+						  Pair.Cons(type.FullName,
+							  Pair.Cons(Symbol.Create("_using"),
+								  new Pair(Symbol.Create("args"))))));
+				  Expression expr = Expression.Parse(Pair.Cons(Symbol.Create("lambda"), 
+						  Pair.Cons(Symbol.Create("args"), body)));
+				  globalEnv.Bind(def, (object) expr.Eval(globalEnv, localEnv));                    
+				}
+			  }
 			}
-		    }
-		}
-		return names;
-	    } else {
-		throw new Exception(String.Format("unknown eval for builtin '{0}'", key));
-	    }
+			return names;
+		  } else {
+			throw new Exception(String.Format("unknown eval for builtin '{0}'", key));
+		  }
         }
     }
 
