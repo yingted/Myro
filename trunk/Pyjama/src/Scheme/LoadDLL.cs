@@ -84,7 +84,10 @@ public class LoadDLL {
   public static void Main( )
   {
 
+#pragma warning disable 612
 	Assembly assembly = Assembly.LoadWithPartialName("System");
+#pragma warning restore 612
+ 	
 	
 	//Assembly assembly = Assembly.Load("System, Version=2.1.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089") ; //.BigInteger
 
