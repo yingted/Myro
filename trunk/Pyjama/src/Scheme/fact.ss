@@ -1,25 +1,34 @@
-;; chez scheme
-(define get-time
-   (lambda ()
-     (let ((now (current-time)))
-       (+ (time-second now)
- 	 (inexact (/ (time-nanosecond now)
- 		     1000000000))))))
-
-;;;; pyjama scheme
-;;(define get-time
-;;  (lambda ()
-;;    (current-time)))
-
-(define fact 
+(define fact
   (lambda (n)
-    (if (= n 1) 
-	n 
-	(* n (fact (- n 1))))))
+    (fact-cps n (lambda (v) v))))
 
-(define start (get-time))
-(define answer (fact 12000))
-(define stop (get-time))
+;;(define blah
+;;  (lambda ()
+;;    (let loop ((n 3) (m (+ 2 3)))
+;;      (loop n (* m m)))))
 
-(display (- stop start))
-(newline)
+(define fact-cps
+  (lambda (n k)
+    (if (= n 0)
+	(k 1)
+	(fact-cps (- n 1) (lambda (v) v)))))
+
+;;	(fact-cps (- n 1)
+;;	  (lambda (foo)
+;;	    `(,a b c ,(list one (lambda (v) (k (* n v foo))))))))))
+
+(define fib
+  (lambda (n)
+    (fib-cps n (lambda (v) v))))
+
+(define fib-cps
+  (lambda (n k)
+    (cond
+      ((= n 1) (k 1))
+      ((= n 2) (k 1))
+      (else (fib-cps (- n 1)
+	      (lambda (v1)
+		(fib-cps (- n 2)
+		  (lambda (v2)
+		    (k (+ v1 v2))))))))))
+

@@ -218,7 +218,7 @@
 	 (lambda (v)
 	   (k (assign-exp (cadr datum) v)))))
       ((define? datum)
-       (if (mit-define? datum)
+       (if (mit-style? datum)
 	 (parse (mit-define-transformer datum) handler k)
 	 (parse (caddr datum) handler
 	   (lambda (body)
@@ -330,7 +330,7 @@
       ((pair? (cdr formals)) (last (cdr formals)))
       (else (cdr formals)))))
 
-(define mit-define?
+(define mit-style?
   (lambda (datum)
     (not (symbol? (cadr datum)))))
 

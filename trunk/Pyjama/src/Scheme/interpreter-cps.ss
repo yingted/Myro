@@ -1,7 +1,3 @@
-;; to do:
-;; - transform environment-cps.ss functions for dotted identifiers to
-;;   ds representation in environments-ds.ss
-
 ;; Interpreter
 
 (load "environments-cps.ss")
@@ -309,7 +305,7 @@
 	     (lambda (v)
 	       (set! load-stack (cdr load-stack))
 	       (k v)))))))))
-		
+
 (define load-loop
   (lambda (tokens env handler k)
     (if (token-type? (first tokens) 'end-marker)
