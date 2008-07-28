@@ -391,7 +391,7 @@
 ;; file parser
 
 ;; for testing purposes
-(define parse-file
+(define print-parse-file
   (lambda (filename)
     (scan-input (read-content filename) test-handler
       (lambda (tokens)
@@ -408,3 +408,21 @@
 	    (lambda (exp)
 	      (pretty-print exp)
 	      (print-parsed-sexps tokens-left handler))))))))
+
+;; for testing purposes
+(define parse-file
+  (lambda (filename)
+    (scan-input (read-content filename) test-handler 
+      (lambda (tokens) 
+	(parse-sexps tokens test-handler (lambda (v) v))))))
+
+;; for testing purposes
+(define parse-sexps
+  (lambda (tokens handler k)
+    (if (token-type? (first tokens) 'end-marker)
+      (k '())
+      (read-sexp tokens handler
+	(lambda (datum tokens-left)
+	  (parse datum handler
+	    (lambda (exp)
+	      (cons exp (parse-sexps tokens-left handler k)))))))))

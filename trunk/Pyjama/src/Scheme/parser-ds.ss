@@ -100,6 +100,10 @@
        (print-parsed-sexps-cont (tokens-left handler)
 	 (pretty-print value)
 	 (print-parsed-sexps tokens-left handler))
+       (parse-sexps-cont (tokens-left handler k)
+	 (parse-sexps tokens-left handler (make-cont 'parser 'parse-sexps-cont-2 value k)))
+       (parse-sexps-cont-2 (previous k)
+	 (apply-cont k (cons previous value)))
        (else (error 'apply-parser-cont "bad continuation: ~a" k)))))
 
 ;;--------------------------------------------------------------------------
@@ -438,7 +442,7 @@
 	(parse sexp test-handler (make-cont 'parser 'init))))))
 
 ;; for testing purposes
-(define parse-file
+(define print-parse-file
   (lambda (filename)
     (print-parsed-sexps (scan-file filename) test-handler)))
 
@@ -454,6 +458,24 @@
 		(tokens-left (cdr result)))
 	    (parse sexp handler
 	      (make-cont 'parser 'print-parsed-sexps-cont tokens-left handler))))))))
+
+;; for testing purposes
+(define parse-file
+  (lambda (filename)
+    (parse-sexps (scan-file filename) test-handler (make-cont 'parser 'init))))
+
+;; for testing purposes
+(define parse-sexps
+  (lambda (tokens handler k)
+    (if (token-type? (first tokens) 'end-marker)
+      (apply-cont k '())
+      (let ((result (read-next-sexp tokens)))
+	(if (exception? result)
+	  (parser-apply-handler handler (cadr result))
+	  (let ((sexp (car result))
+		(tokens-left (cdr result)))
+	    (parse sexp handler
+	      (make-cont 'parser 'parse-sexps-cont tokens-left handler k))))))))
 
 ;; temporary
 (define parser-apply-handler
