@@ -9,6 +9,46 @@ using System.Collections.Generic;
 public class LoadDLL {
 
 
+  public static void Main( )
+  {
+
+#pragma warning disable 612
+	//Assembly assembly = Assembly.LoadWithPartialName("System");
+#pragma warning restore 612
+ 	
+	
+	//Assembly assembly = Assembly.Load("System, Version=2.1.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089") ; //.BigInteger
+
+	//DumpFile("/home/dblank/fepy/IPCE/IronPython-1.1.1/IronMath.dll");
+
+	//Dump(assembly);
+
+	DumpThis();
+
+	/*
+	Type theMathType = assembly.GetType("Cos");
+	Object theObj =
+		Activator.CreateInstance(theMathType);
+	
+	// array with one member
+	Type[] paramTypes = new Type[1];
+	paramTypes[0]= Type.GetType("System.Double");
+	
+	// Get method info for Cos( )
+	MethodInfo CosineInfo =
+		theMathType.GetMethod("Cos",paramTypes);
+	
+	// fill an array with the actual parameters
+	Object[] parameters = new Object[1];
+	parameters[0] = 45;
+	Object returnVal =
+		CosineInfo.Invoke(theObj,parameters);
+	Console.WriteLine(
+		"The cosine of a 45 degree angle {0}",
+		returnVal);
+	*/
+  }
+
   public static void DumpThis() {
 	int indent = 0;
 	// Display information about each assembly loading into this AppDomain.
@@ -83,45 +123,6 @@ public class LoadDLL {
 	Console.WriteLine(format, param);
   }
   
-  public static void Main( )
-  {
-
-#pragma warning disable 612
-	//Assembly assembly = Assembly.LoadWithPartialName("System");
-#pragma warning restore 612
- 	
-	
-	//Assembly assembly = Assembly.Load("System, Version=2.1.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089") ; //.BigInteger
-
-	//DumpFile("/home/dblank/fepy/IPCE/IronPython-1.1.1/IronMath.dll");
-
-	//Dump(assembly);
-
-	DumpThis();
-
-	/*
-	Type theMathType = assembly.GetType("Cos");
-	Object theObj =
-		Activator.CreateInstance(theMathType);
-	
-	// array with one member
-	Type[] paramTypes = new Type[1];
-	paramTypes[0]= Type.GetType("System.Double");
-	
-	// Get method info for Cos( )
-	MethodInfo CosineInfo =
-		theMathType.GetMethod("Cos",paramTypes);
-	
-	// fill an array with the actual parameters
-	Object[] parameters = new Object[1];
-	parameters[0] = 45;
-	Object returnVal =
-		CosineInfo.Invoke(theObj,parameters);
-	Console.WriteLine(
-		"The cosine of a 45 degree angle {0}",
-		returnVal);
-	*/
-  }
 
   public static void DumpFile(string filename) {
 	Assembly assembly = Assembly.LoadFrom(filename);
