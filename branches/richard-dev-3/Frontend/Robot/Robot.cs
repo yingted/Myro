@@ -235,7 +235,7 @@ namespace Myro
             ManualResetEvent evt = new ManualResetEvent(false);
             waitForService(new ServiceInfoType(scribbler.Contract.Identifier),
                 delegate(ServiceInfoType info) { brickService = info; evt.Set(); });
-            evt.WaitOne(Params.DefaultRecieveTimeout);
+            evt.WaitOne(Params.DefaultRecieveTimeout, false);
             if (brickService == null)
                 throw new MyroInitException("Could not find Scribbler service");
             var scribPort = DssEnvironment.ServiceForwarder<scribbler.ScribblerOperations>(new Uri(brickService.Service));

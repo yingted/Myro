@@ -20,7 +20,7 @@ using Myro.Utilities;
 using System.Linq;
 
 using brick = Myro.Services.Scribbler.ScribblerBase.Proxy;
-//using webcam = Microsoft.Robotics.Services.WebCam;
+using webcam = Microsoft.Robotics.Services.WebCam.Proxy;
 
 namespace Myro.Services.Scribbler.FlukeCam
 {
@@ -29,36 +29,36 @@ namespace Myro.Services.Scribbler.FlukeCam
         public const string Identifier = "http://www.roboteducation.org/schemas/2008/06/flukecam.html";
     }
 
-    [DataContract]
-    [DataMemberConstructor]
-    public class QueryFrameRequest
-    {
-        [DataMember]
-        public Guid Format;
-    }
-    [DataContract]
-    [DataMemberConstructor]
-    public class QueryFrameResponse
-    {
-        [DataMember]
-        public Guid Format;
-        [DataMember]
-        public System.Drawing.Size Size;
-        [DataMember]
-        public DateTime TimeStamp;
-        [DataMember]
-        public byte[] Frame;
-    }
-    public class QueryFrame : Get<QueryFrameRequest, PortSet<QueryFrameResponse,Fault>>
-    {
-        public QueryFrame() : base() {}
-        public QueryFrame(QueryFrameRequest b) : base(b) {}
-    }
+    //[DataContract]
+    //[DataMemberConstructor]
+    //public class QueryFrameRequest
+    //{
+    //    [DataMember]
+    //    public Guid Format;
+    //}
+    //[DataContract]
+    //[DataMemberConstructor]
+    //public class QueryFrameResponse
+    //{
+    //    [DataMember]
+    //    public Guid Format;
+    //    [DataMember]
+    //    public System.Drawing.Size Size;
+    //    [DataMember]
+    //    public DateTime TimeStamp;
+    //    [DataMember]
+    //    public byte[] Frame;
+    //}
+    //public class QueryFrame : Get<QueryFrameRequest, PortSet<QueryFrameResponse,Fault>>
+    //{
+    //    public QueryFrame() : base() {}
+    //    public QueryFrame(QueryFrameRequest b) : base(b) {}
+    //}
 
-    public class WebCamOperations : PortSet<
-        DsspDefaultLookup,
-        DsspDefaultDrop,
-        QueryFrame> { }
+    //public class WebCamOperations : PortSet<
+    //    DsspDefaultLookup,
+    //    DsspDefaultDrop,
+    //    QueryFrame> { }
 
     /// <summary>
     /// The Fluke obstacle Service
@@ -66,7 +66,7 @@ namespace Myro.Services.Scribbler.FlukeCam
     [DisplayName("Fluke Camera")]
     [Description("The Fluke Obstacle Detector")]
     [Contract(Contract.Identifier)]
-    //[AlternateContract(webcam.Contract.Identifier)] //implementing the generic contract
+    [AlternateContract(webcam.Contract.Identifier)] //implementing the generic contract
     class FlukeCamService : DsspServiceBase
     {
         /// <summary>
@@ -78,10 +78,10 @@ namespace Myro.Services.Scribbler.FlukeCam
 
         [ServicePort("webcam", AllowMultipleInstances = false, QueueDepthLimit = 10,
             QueuingPolicy = DsspOperationQueuingPolicy.DiscardWithFault)]
-        private WebCamOperations _mainPort = new WebCamOperations();
+        private webcam.WebCamOperations _mainPort = new webcam.WebCamOperations();
 
-        //[ServiceState()]
-        //webcam.WebCamState _state;
+        [ServiceState()]
+        webcam.WebCamState _state;
 
         /// <summary>
         /// Constructor
@@ -91,14 +91,14 @@ namespace Myro.Services.Scribbler.FlukeCam
             : base(port) { }
 
         [ServiceHandler(ServiceHandlerBehavior.Concurrent)]
-        public IEnumerator<ITask> QueryFrameHandler(QueryFrame req)
+        public IEnumerator<ITask> QueryFrameHandler(webcam.QueryFrame req)
         {
             yield return Arbiter.Choice(_scribblerPort.GetImage(req.Body.Format),
                 delegate(brick.ImageResponse r)
                 {
                     try
                     {
-                        var resp = new QueryFrameResponse()
+                        var resp = new webcam.QueryFrameResponse()
                         {
                             Format = req.Body.Format,
                             Size = new System.Drawing.Size(r.Width, r.Height),

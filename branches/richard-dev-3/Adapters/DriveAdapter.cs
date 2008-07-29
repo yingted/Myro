@@ -67,7 +67,7 @@ namespace Myro.Adapters
             Arbiter.Activate(DssEnvironment.TaskQueue,
                 Arbiter.Receive<drive.Update>(true, driveNotificationPort, NotifyDriveUpdate));
 
-            // For some reason the first requests to the service are giving Faults, so get
+            // For some reason the EnableDrive request to the service is giving a Fault, so get
             // it out of the way first
             //try
             //{

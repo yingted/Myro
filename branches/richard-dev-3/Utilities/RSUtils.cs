@@ -182,8 +182,7 @@ namespace Myro.Utilities
 
         /// <summary>
         /// This method searches for a primary or alternate contract of the
-        /// service that is present in the contracts list.  Requires a 
-        /// taskQueue to activate tasks on.  Throws NoContractFoundException
+        /// service that is present in the contracts list.  Throws NoContractFoundException
         /// if one cannot be found.
         /// </summary>
         /// <param name="taskQueue"></param>

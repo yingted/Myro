@@ -55,24 +55,6 @@ namespace Myro.Adapters
         public AdapterBank(List<IAdapterFactory> adapterFactories)
         {
             this.AdapterFactories = adapterFactories;
-
-            //readConfig(configFile);
-            //Console.WriteLine("Initializing DSS environment...");
-            //if (manifests.Count > 0)
-            //{
-            //    IEnumerable<string> manifestFullPaths =
-            //        from m in manifests
-            //        select "file://" + Path.GetFullPath(m);
-            //    foreach (var m in manifestFullPaths)
-            //        Console.WriteLine("Manifest: " + m);
-            //    DssEnvironment.Initialize(50000, 50001, manifestFullPaths.ToArray());
-            //}
-            //else
-            //    DssEnvironment.Initialize(50000, 50001);
-            //Console.WriteLine("DSS environment initialized");
-            //subscribeDirectory();
-            //if (autoStartServices)
-            //    startServices();
         }
 
         public void Dispose()
