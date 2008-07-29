@@ -14,13 +14,13 @@
  *
  *********************************************************************/
 
-using Gtk;
+//using Gtk;
 
 namespace PyjamaInterfaces
 {
     public interface IEditable
     {
-        TextBuffer Buffer { get; }
+	  //TextBuffer Buffer { get; }
         void Cut();
         void Copy();
         void Paste();
@@ -37,7 +37,7 @@ namespace PyjamaInterfaces
         void SaveAs(string value);
         void SetFilename(string value);
         string GetFilename();
-        Widget GetView();
+        //Widget GetView();
         bool GetDirty();
         int GetPage();
         void SetPage(int page);
@@ -54,7 +54,7 @@ namespace PyjamaInterfaces
         void Restart();
         void Quit();
         void Print();
-        Widget GetView();
+	  //Widget GetView();
         string command(string line);
     }
 }

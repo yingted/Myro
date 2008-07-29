@@ -14,17 +14,12 @@
  *
  *********************************************************************/
 
-using Gtk;
+using PyjamaGUI;
+using System.Windows.Forms;
 
-using PyjamaInterfaces;
-
-public class Pyjama
-{
-    public static void Main(string[] args)
-    {
-        Application.Init();
-        PyjamaGUI gui = new PyjamaGUI(args);
-        gui.ShowAll();
-        Application.Run();
-    }
+public class Pyjama {
+  public static void Main(string[] args) {
+	PyjamaForm form = new PyjamaForm(args);
+	Application.Run(form);
+  }
 }

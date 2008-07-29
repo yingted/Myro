@@ -14,40 +14,43 @@
  *
  *********************************************************************/
 
-using Gtk;
-using Glade;
-
 using System;
 using System.IO;
 using System.Collections.Generic;
 
+using System.Windows.Forms;
+
 using PyjamaInterfaces;
 
-public class PyjamaGUI
-{
-    // Widgets loaded by Glade
-    [Widget] Window main_window;
-    [Widget] Container shell_container;
-    [Widget] Notebook notebook;
+namespace PyjamaGUI {
+  /*
+  [Widget] Window main_window;
+  [Widget] Container shell_container;
+  [Widget] Notebook notebook;
+  */
     
-    List <IDocument> documents = new List <IDocument>();
-    FindDialog find;
-    
-    public PyjamaGUI(string[] args)
-    {
-        find = new FindDialog(this);
-        XML ui = new XML("main-default.glade", "main_window", null);
-        ui.Autoconnect(this);
-        
-        if (main_window == null)
-        {
-            //FIXME - MessageBox
-            Console.WriteLine("No main_window in glade file");
-            Application.Quit();
-            return;
-        }
-        
-        main_window.DeleteEvent += File_Exit;
+  public class PyjamaForm : Form {
+	List <IDocument> documents = new List <IDocument>();
+
+	public PyjamaForm(string[] args) {
+	  this.Text = "Pyjama Project";
+	}
+	
+	[STAThread] // for windows interop with clipboard, etc
+	public static void Main(string[] args) {
+	  
+	  PyjamaForm form = new PyjamaForm(args);
+	  
+	}
+	
+	
+  }
+  
+  
+}
+
+	/*
+       main_window.DeleteEvent += File_Exit;
         
         if (shell_container != null)
         {
@@ -348,3 +351,4 @@ public class PyjamaGUI
         dlg.Destroy();
     }
 }
+	*/
