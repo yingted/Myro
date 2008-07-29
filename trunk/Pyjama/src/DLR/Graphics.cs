@@ -35,20 +35,20 @@ using Microsoft.Scripting.Runtime;
 
 public class Graphics {
 
-    public static GraphWin _defaultWindow = null;
-    public static Color black     = new Color(0,     0,   0);
-    public static Color white     = new Color(255, 255, 255);
-    public static Color blue      = new Color(  0,   0, 255);
-    public static Color red       = new Color(255,   0,   0);
-    public static Color green     = new Color(  0, 255,   0);
-    public static Color gray      = new Color(128, 128, 128);
-    public static Color darkGray  = new Color( 64,  64,  64);
-    public static Color lightGray = new Color(192, 192, 192);
-    public static Color yellow    = new Color(255, 255,   0);
-    public static Color pink      = new Color(255, 175, 175);
-    public static Color magenta   = new Color(255,   0, 255);
-    public static Color cyan      = new Color(  0, 255, 255);
-    
+  public static GraphWin _defaultWindow = null;
+  public static Color black     = new Color(0,     0,   0);
+  public static Color white     = new Color(255, 255, 255);
+  public static Color blue      = new Color(  0,   0, 255);
+  public static Color red       = new Color(255,   0,   0);
+  public static Color green     = new Color(  0, 255,   0);
+  public static Color gray      = new Color(128, 128, 128);
+  public static Color darkGray  = new Color( 64,  64,  64);
+  public static Color lightGray = new Color(192, 192, 192);
+  public static Color yellow    = new Color(255, 255,   0);
+  public static Color pink      = new Color(255, 175, 175);
+  public static Color magenta   = new Color(255,   0, 255);
+  public static Color cyan      = new Color(  0, 255, 255);
+  
     public Graphics() {
 	// Gtk.Application.Init()
     }
@@ -213,7 +213,7 @@ public class Graphics {
     
     public class GraphWin : ICodeFormattable {
 	
-	public Gtk.Window window;
+	  public Gtk.Window window;
 	public Gnome.Canvas canvas;
 	Color background;
 	
@@ -871,7 +871,7 @@ public class Graphics {
 
     public class Pixmap : BaseGraphic, ICodeFormattable {
 	
-	public Gdk.Pixbuf pixbuf;
+	internal Gdk.Pixbuf pixbuf;
 	int bytesPerPixel;
 	
 	public Pixmap() {
