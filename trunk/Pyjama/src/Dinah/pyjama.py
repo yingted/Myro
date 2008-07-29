@@ -133,10 +133,16 @@ class Pyjama:
         #makes y a source for dnd
         self.wTree.get_widget("ydragbutton").drag_source_set(gtk.gdk.BUTTON1_MASK,[("y",0,38)],gtk.gdk.ACTION_COPY)
         
+        #makes line a source for dnd
         self.wTree.get_widget("linedragbutton").drag_source_set(gtk.gdk.BUTTON1_MASK,[("line",0,39)],gtk.gdk.ACTION_COPY)
+        
+        #makes circle a source for dnd
+        self.wTree.get_widget("circledragbutton").drag_source_set(gtk.gdk.BUTTON1_MASK,[("circle",0,40)],gtk.gdk.ACTION_COPY)
+        
+        listOfDraggables=[("print",0,4),("forward",0,5),("backward",0,6),("left",0,7),("right",0,8),("stop",0,9),("motors",0,10),("wait",0,11),("currenttime",0,12),("settimer",0,13),("elapsed",0,14),("askuser",0,15),("gamepad",0,16),("joystick",0,17),("takepic",0,18),("showpic",0,19),("loadpic",0,20),("savepic",0,21),("copypic",0,22),("pixels",0,23),("pixel",0,24),("playsound",0,25),("loadsound",0,26),("beep",0,27),("speak",0,28),("setvoice",0,29),("beep2",0,30),("graphwin",0,31),("close",0,32),("bg",0,33),("draw",0,34),("undraw",0,35),("point",0,36),("x",0,37),("y",0,38),("line",0,39),("circle",0,40)]
 
         #makes codevbox a drag destination
-        self.wTree.get_widget("codevbox").drag_dest_set(gtk.DEST_DEFAULT_MOTION|gtk.DEST_DEFAULT_HIGHLIGHT|gtk.DEST_DEFAULT_DROP, [("print",0,4),("forward",0,5),("backward",0,6),("left",0,7),("right",0,8),("stop",0,9),("motors",0,10),("wait",0,11),("currenttime",0,12),("settimer",0,13),("elapsed",0,14),("askuser",0,15),("gamepad",0,16),("joystick",0,17),("takepic",0,18),("showpic",0,19),("loadpic",0,20),("savepic",0,21),("copypic",0,22),("pixels",0,23),("pixel",0,24),("playsound",0,25),("loadsound",0,26),("beep",0,27),("speak",0,28),("setvoice",0,29),("beep2",0,30),("graphwin",0,31),("close",0,32),("bg",0,33),("draw",0,34),("undraw",0,35),("point",0,36),("x",0,37),("y",0,38),("line",0,39)],gtk.gdk.ACTION_COPY)
+        self.wTree.get_widget("codevbox").drag_dest_set(gtk.DEST_DEFAULT_MOTION|gtk.DEST_DEFAULT_HIGHLIGHT|gtk.DEST_DEFAULT_DROP, listOfDraggables,gtk.gdk.ACTION_COPY)
         #the next line is phrased wrong; fix it later
         self.wTree.get_widget("codevbox").connect("drag_drop",self.codeDragDrop)
 
@@ -193,7 +199,7 @@ class Pyjama:
             newReturn.pack_start(newReturnComboBox,False,False,0)
             self.wTree.get_widget("dinahscriptsnotebook").append_page(newScript,newScriptLabel)
             self.window.show_all()
-            newCodeVBox.drag_dest_set(gtk.DEST_DEFAULT_MOTION|gtk.DEST_DEFAULT_HIGHLIGHT|gtk.DEST_DEFAULT_DROP, [("print",0,4),("forward",0,5),("backward",0,6),("left",0,7),("right",0,8),("stop",0,9),("motors",0,10),("wait",0,11),("currenttime",0,12),("settimer",0,13),("elapsed",0,14),("askuser",0,15),("gamepad",0,16),("joystick",0,17),("takepic",0,18),("showpic",0,19),("loadpic",0,20),("savepic",0,21),("copypic",0,22),("pixels",0,23),("pixel",0,24),("playsound",0,25),("loadsound",0,26),("beep",0,27),("speak",0,28),("setvoice",0,29),("beep2",0,30),("graphwin",0,31),("close",0,32),("bg",0,33),("draw",0,34),("undraw",0,35),("point",0,36),("x",0,37),("y",0,38),("line",0,39)],gtk.gdk.ACTION_COPY)
+            newCodeVBox.drag_dest_set(gtk.DEST_DEFAULT_MOTION|gtk.DEST_DEFAULT_HIGHLIGHT|gtk.DEST_DEFAULT_DROP, listOfDraggables,gtk.gdk.ACTION_COPY)
             newCodeVBox.connect("drag_drop",self.codeDragDrop)
         else:
             pass
@@ -537,6 +543,7 @@ class Pyjama:
             yLabel=gtk.Label(" y coordinate ")
             blockHBox.pack_start(yLabel,False,False,0)
         elif context.targets==["line"]:
+            #this is how a block can be set up to allow other blocks to be dragged onto it as parameters. control statements will work differently--they will come with internal VBoxes to put code into. ideally, in the case of blocks-as-parameters, when an object is created that can serve as a parameter, it will be added to the combobox's list.
             lineLabel1=gtk.Label(" line from ")
             blockHBox.pack_start(lineLabel1,False,False,0)
             lineVBox1=gtk.VBox()
@@ -555,6 +562,20 @@ class Pyjama:
             lineVBox2.pack_start(lineComboBox2,False,False,0)
             lineVBox2.drag_dest_set(gtk.DEST_DEFAULT_MOTION|gtk.DEST_DEFAULT_HIGHLIGHT|gtk.DEST_DEFAULT_DROP,[("point",0,36)],gtk.gdk.ACTION_COPY)
             lineVBox2.connect("drag_drop",self.removeAndDrop)
+        elif context.targets==["circle"]:
+            circleLabel1=gtk.Label(" circle with center at ")
+            blockHBox.pack_start(circleLabel1,False,False,0)
+            circleVBox=gtk.VBox()
+            circleComboBox=gtk.combo_box_new_text()
+            circleComboBox.append_text("<point>")
+            circleVBox.pack_start(circleComboBox,False,False,0)
+            blockHBox.pack_start(circleVBox,False,False,0)
+            circleVBox.drag_dest_set(gtk.DEST_DEFAULT_MOTION|gtk.DEST_DEFAULT_HIGHLIGHT|gtk.DEST_DEFAULT_DROP,[("point",0,36)],gtk.gdk.ACTION_COPY)
+            circleVBox.connect("drag_drop",self.removeAndDrop)
+            circleLabel2=gtk.Label(" and radius ")
+            blockHBox.pack_start(circleLabel2,False,False,0)
+            circleSpin=gtk.SpinButton(gtk.Adjustment(5,1,200,5,20),0.0,0)
+            blockHBox.pack_start(circleSpin,False,False,0)
         else:
             pass
         self.window.show_all()
