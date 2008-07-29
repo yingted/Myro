@@ -139,7 +139,31 @@ class Pyjama:
         #makes circle a source for dnd
         self.wTree.get_widget("circledragbutton").drag_source_set(gtk.gdk.BUTTON1_MASK,[("circle",0,40)],gtk.gdk.ACTION_COPY)
         
-        listOfDraggables=[("print",0,4),("forward",0,5),("backward",0,6),("left",0,7),("right",0,8),("stop",0,9),("motors",0,10),("wait",0,11),("currenttime",0,12),("settimer",0,13),("elapsed",0,14),("askuser",0,15),("gamepad",0,16),("joystick",0,17),("takepic",0,18),("showpic",0,19),("loadpic",0,20),("savepic",0,21),("copypic",0,22),("pixels",0,23),("pixel",0,24),("playsound",0,25),("loadsound",0,26),("beep",0,27),("speak",0,28),("setvoice",0,29),("beep2",0,30),("graphwin",0,31),("close",0,32),("bg",0,33),("draw",0,34),("undraw",0,35),("point",0,36),("x",0,37),("y",0,38),("line",0,39),("circle",0,40)]
+        #makes rectangle a source for dnd
+        self.wTree.get_widget("rectangledragbutton").drag_source_set(gtk.gdk.BUTTON1_MASK,[("rectangle",0,41)],gtk.gdk.ACTION_COPY)
+        
+        #makes oval a source for dnd
+        self.wTree.get_widget("ovaldragbutton").drag_source_set(gtk.gdk.BUTTON1_MASK,[("oval",0,42)],gtk.gdk.ACTION_COPY)
+        
+        #makes polygon a source for dnd
+        self.wTree.get_widget("polygondragbutton").drag_source_set(gtk.gdk.BUTTON1_MASK,[("polygon",0,43)],gtk.gdk.ACTION_COPY)
+        
+        #makes text a source for dnd
+        self.wTree.get_widget("textdragbutton").drag_source_set(gtk.gdk.BUTTON1_MASK,[("text",0,44)],gtk.gdk.ACTION_COPY)
+        
+        #makes image a source for dnd
+        self.wTree.get_widget("imagedragbutton").drag_source_set(gtk.gdk.BUTTON1_MASK,[("image",0,45)],gtk.gdk.ACTION_COPY)
+        
+        #makes center a source for dnd
+        self.wTree.get_widget("centerdragbutton").drag_source_set(gtk.gdk.BUTTON1_MASK,[("center",0,46)],gtk.gdk.ACTION_COPY)
+        
+        #makes outline color a source for dnd
+        self.wTree.get_widget("outlinecolordragbutton").drag_source_set(gtk.gdk.BUTTON1_MASK,[("outlinecolor",0,47)],gtk.gdk.ACTION_COPY)
+        
+        #makes fill color a source for dnd
+        self.wTree.get_widget("fillcolordragbutton").drag_source_set(gtk.gdk.BUTTON1_MASK,[("fillcolor",0,48)],gtk.gdk.ACTION_COPY)
+        
+        listOfDraggables=[("print",0,4),("forward",0,5),("backward",0,6),("left",0,7),("right",0,8),("stop",0,9),("motors",0,10),("wait",0,11),("currenttime",0,12),("settimer",0,13),("elapsed",0,14),("askuser",0,15),("gamepad",0,16),("joystick",0,17),("takepic",0,18),("showpic",0,19),("loadpic",0,20),("savepic",0,21),("copypic",0,22),("pixels",0,23),("pixel",0,24),("playsound",0,25),("loadsound",0,26),("beep",0,27),("speak",0,28),("setvoice",0,29),("beep2",0,30),("graphwin",0,31),("close",0,32),("bg",0,33),("draw",0,34),("undraw",0,35),("point",0,36),("x",0,37),("y",0,38),("line",0,39),("circle",0,40),("rectangle",0,41),("oval",0,42),("polygon",0,43),("text",0,44),("image",0,45),("center",0,46),("outlinecolor",0,47),("fillcolor",0,48)]
 
         #makes codevbox a drag destination
         self.wTree.get_widget("codevbox").drag_dest_set(gtk.DEST_DEFAULT_MOTION|gtk.DEST_DEFAULT_HIGHLIGHT|gtk.DEST_DEFAULT_DROP, listOfDraggables,gtk.gdk.ACTION_COPY)
@@ -576,6 +600,86 @@ class Pyjama:
             blockHBox.pack_start(circleLabel2,False,False,0)
             circleSpin=gtk.SpinButton(gtk.Adjustment(5,1,200,5,20),0.0,0)
             blockHBox.pack_start(circleSpin,False,False,0)
+        elif context.targets==["rectangle"]:
+            rectangleLabel1=gtk.Label(" rectangle with opposite corners at ")
+            blockHBox.pack_start(rectangleLabel1,False,False,0)
+            rectangleVBox1=gtk.VBox()
+            rectangleComboBox1=gtk.combo_box_new_text()
+            rectangleComboBox1.append_text("<point>")
+            rectangleVBox1.pack_start(rectangleComboBox1,False,False,0)
+            blockHBox.pack_start(rectangleVBox1,False,False,0)
+            rectangleVBox1.drag_dest_set(gtk.DEST_DEFAULT_MOTION|gtk.DEST_DEFAULT_HIGHLIGHT|gtk.DEST_DEFAULT_DROP,[("point",0,36)],gtk.gdk.ACTION_COPY)
+            rectangleVBox1.connect("drag_drop",self.removeAndDrop)
+            rectangleLabel1=gtk.Label(" and ")
+            blockHBox.pack_start(rectangleLabel1,False,False,0)
+            rectangleVBox2=gtk.VBox()
+            rectangleComboBox2=gtk.combo_box_new_text()
+            rectangleComboBox2.append_text("<point>")
+            rectangleVBox2.pack_start(rectangleComboBox2,False,False,0)
+            blockHBox.pack_start(rectangleVBox2,False,False,0)
+            rectangleVBox2.drag_dest_set(gtk.DEST_DEFAULT_MOTION|gtk.DEST_DEFAULT_HIGHLIGHT|gtk.DEST_DEFAULT_DROP,[("point",0,36)],gtk.gdk.ACTION_COPY)
+            rectangleVBox2.connect("drag_drop",self.removeAndDrop)
+        elif context.targets==["oval"]:
+            ovalLabel=gtk.Label(" oval bounded by ")
+            blockHBox.pack_start(ovalLabel,False,False,0)
+            ovalVBox=gtk.VBox()
+            ovalComboBox=gtk.combo_box_new_text()
+            ovalComboBox.append_text("<rectangle>")
+            ovalVBox.pack_start(ovalComboBox,False,False,0)
+            blockHBox.pack_start(ovalVBox,False,False,0)
+            ovalVBox.drag_dest_set(gtk.DEST_DEFAULT_MOTION|gtk.DEST_DEFAULT_HIGHLIGHT|gtk.DEST_DEFAULT_DROP,[("rectangle",0,41)],gtk.gdk.ACTION_COPY)
+            ovalVBox.connect("drag_drop",self.removeAndDrop)
+        elif context.targets==["polygon"]:
+            polygonLabel1=gtk.Label(" polygon with ")
+            blockHBox.pack_start(polygonLabel1,False,False,0)
+            polygonSpin=gtk.SpinButton(gtk.Adjustment(3,3,50,1,5),0.0,0)
+            blockHBox.pack_start(polygonSpin,False,False,0)
+            polygonLabel2=gtk.Label(" points: ")
+            blockHBox.pack_start(polygonLabel2,False,False,0)
+            #when the number of points is changed, the number of combo boxes should change to reflect that. it should also set up dnd of points onto each combo box
+            polygonComboBox=gtk.combo_box_new_text()
+            polygonComboBox.append_text("<points>")
+            blockHBox.pack_start(polygonComboBox,False,False,0)
+        elif context.targets==["text"]:
+            text=gtk.Entry()
+            text.set_text("text")
+            blockHBox.pack_start(text,False,False,0)
+            textLabel=gtk.Label(" at ")
+            blockHBox.pack_start(textLabel,False,False,0)
+            textVBox=gtk.VBox()
+            textComboBox=gtk.combo_box_new_text()
+            textComboBox.append_text("<point>")
+            textVBox.pack_start(textComboBox,False,False,0)
+            blockHBox.pack_start(textVBox,False,False,0)
+            textVBox.drag_dest_set(gtk.DEST_DEFAULT_MOTION|gtk.DEST_DEFAULT_HIGHLIGHT|gtk.DEST_DEFAULT_DROP,[("point",0,36)],gtk.gdk.ACTION_COPY)
+            textVBox.connect("drag_drop",self.removeAndDrop)
+        elif context.targets==["image"]:
+            imageLabel1=gtk.Label(" image centered at ")
+            blockHBox.pack_start(imageLabel1,False,False,0)
+            imageVBox=gtk.VBox()
+            imageComboBox=gtk.combo_box_new_text()
+            imageComboBox.append_text("<point>")
+            imageVBox.pack_start(imageComboBox,False,False,0)
+            blockHBox.pack_start(imageVBox,False,False,0)
+            imageVBox.drag_dest_set(gtk.DEST_DEFAULT_MOTION|gtk.DEST_DEFAULT_HIGHLIGHT|gtk.DEST_DEFAULT_DROP,[("point",0,36)],gtk.gdk.ACTION_COPY)
+            imageVBox.connect("drag_drop",self.removeAndDrop)
+            imageLabel2=gtk.Label(" from file ")
+            blockHBox.pack_start(imageLabel2,False,False,0)
+            imageFileChooser=gtk.FileChooserButton("Choose an Image File")
+            blockHBox.pack_start(imageFileChooser,False,False,0)
+        elif context.targets==["center"]:
+            centerLabel=gtk.Label(" center point ")
+            blockHBox.pack_start(centerLabel,False,False,0)
+        elif context.targets==["outlinecolor"]:
+            outlineColorLabel=gtk.Label(" set outline color to ")
+            blockHBox.pack_start(outlineColorLabel,False,False,0)
+            outlineColorChooser=gtk.ColorButton()
+            blockHBox.pack_start(outlineColorChooser,False,False,0)
+        elif context.targets==["fillcolor"]:
+            fillColorLabel=gtk.Label(" set fill color to ")
+            blockHBox.pack_start(fillColorLabel,False,False,0)
+            fillColorChooser=gtk.ColorButton()
+            blockHBox.pack_start(fillColorChooser,False,False,0)
         else:
             pass
         self.window.show_all()
