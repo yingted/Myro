@@ -1,3 +1,5 @@
+(load "lambda-macros.ss")
+
 ;; Environments represented as data structures
 
 ;; bindings
@@ -84,7 +86,7 @@
 (define lookup-value
   (lambda (variable env handler k)
     (lookup-binding variable env handler
-      (lambda (binding)
+      (lambda-cont (binding)
 	(k (binding-value binding))))))
 
 (define lookup-binding
@@ -93,7 +95,7 @@
       (if binding
 	(k binding)
 	(split-variable variable
-	  (lambda (components)
+	  (lambda-cont (components)
 	    (if components
 	      (lookup-variable-components components "" env handler k)
 	      (handler (format "unbound variable ~a" variable)))))))))
@@ -114,7 +116,7 @@
   (lambda (components path env handler k)
     (let ((var (car components)))
       (lookup-module-binding var env path handler
-	(lambda (binding)
+	(lambda-cont (binding)
 	  (if (null? (cdr components))
 	    (k binding)
 	    (let ((result (binding-value binding))

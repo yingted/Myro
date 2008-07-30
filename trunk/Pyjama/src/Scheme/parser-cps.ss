@@ -1,3 +1,6 @@
+(load "lambda-macros.ss")
+
+;;--------------------------------------------------------------------------
 ;; List structure parser
 
 (load "petite-init.ss")
@@ -6,7 +9,6 @@
 (load "reader-cps.ss")
 (load "unifier-cps.ss")
 
-;;--------------------------------------------------------------------------
 ;; The core grammar
 ;;
 ;; <exp> ::= <literal>
@@ -21,14 +23,10 @@
 ;;         | (lambda (<formal> ...) <exp> ...)
 ;;         | (lambda <formal> <exp> ...)
 ;;         | (<exp> <exp> ...)
-
 ;;         | (try <body> (catch <var> <exp> ...))
 ;;         | (try <body> (finally <exp> ...))
 ;;         | (try <body> (catch <var> <exp> ...) (finally <exp> ...))
-
 ;;         | (raise <exp>)
-
-;;--------------------------------------------------------------------------
 
 (define-datatype expression expression?
   (lit-exp
@@ -91,7 +89,7 @@
 (define expand-once
   (lambda (datum handler k)
     (lookup-value (car datum) macro-env handler
-      (lambda (result)
+      (lambda-cont (result)
 	(if (list? result)
 	  (process-macro-clauses result datum handler k)
 	  (k (result datum)))))))
@@ -103,7 +101,7 @@
       (let ((left-pattern (caar clauses))
 	    (right-pattern (cadar clauses)))
 	(unify-patterns left-pattern datum
-	  (lambda (subst)
+	  (lambda-cont (subst)
 	    (if subst
 	      (instantiate right-pattern subst k)
 	      (process-macro-clauses (cdr clauses) datum handler k))))))))
@@ -114,6 +112,52 @@
 	  (formals (cdadr datum))
 	  (bodies (cddr datum)))
       `(define ,name (lambda ,formals ,@bodies)))))
+
+(define and-transformer
+  (lambda (datum)
+    (let ((exps (cdr datum)))
+      (cond
+	((null? exps) '#t)
+	((null? (cdr exps)) (car exps))
+	(else `(if ,(car exps) (and ,@(cdr exps)) #f))))))
+
+;; avoids variable capture
+(define or-transformer
+  (lambda (datum)
+    (let ((exps (cdr datum)))
+      (cond
+	((null? exps) '#f)
+	((null? (cdr exps)) (car exps))
+	(else `(let ((bool ,(car exps))
+		     (else-code (lambda () (or ,@(cdr exps)))))
+		 (if bool bool (else-code))))))))
+
+;; correctly handles single-expression clauses and avoids variable capture
+(define cond-transformer
+  (lambda (datum)
+    (let ((clauses (cdr datum)))
+      (if (null? clauses)
+	(error 'cond-transformer "bad concrete syntax: ~a" datum)
+	(let ((first-clause (car clauses))
+	      (other-clauses (cdr clauses)))
+	  (if (or (null? first-clause) (not (list? first-clause)))
+	    (error 'cond-transformer "bad concrete syntax: ~a" datum)
+	    (let ((test-exp (car first-clause))
+		  (then-exps (cdr first-clause)))
+	      (cond
+		((eq? test-exp 'else)
+		 (if (null? then-exps)
+		   (error 'cond-transformer "bad concrete syntax: (else)")
+		   `(begin ,@then-exps)))
+		((null? then-exps)
+		 (if (null? other-clauses)
+		   `(let ((bool ,test-exp))
+		      (if bool bool))
+		   `(let ((bool ,test-exp)
+			  (else-code (lambda () (cond ,@other-clauses))))
+		      (if bool bool (else-code)))))
+		((null? other-clauses) `(if ,test-exp (begin ,@then-exps)))
+		(else `(if ,test-exp (begin ,@then-exps) (cond ,@other-clauses)))))))))))
 
 (define let-transformer
   (lambda (datum)
@@ -142,31 +186,76 @@
 	   (assigns (map (lambda (var proc) `(set! ,var ,proc)) vars procs)))
       `(let ,bindings ,@assigns ,@bodies))))
 
+(define let*-transformer
+  (lambda (datum)
+    (let ((bindings (cadr datum))
+	  (bodies (cddr datum)))
+      (letrec
+	((nest
+	   (lambda (bindings)
+	     (if (or (null? bindings) (null? (cdr bindings)))
+	       `(let ,bindings ,@bodies)
+	       `(let (,(car bindings)) ,(nest (cdr bindings)))))))
+	(nest bindings)))))
+	   
+;; avoids variable capture
+(define record-case-transformer
+  (lambda (datum)
+    (letrec
+      ((rc-clause->cond-clause
+	 (lambda (clause)
+	   (let ((tag (if (symbol? (car clause)) (car clause) (caar clause))))
+	     (cond
+	       ((eq? (car clause) 'else) `(else (else-code)))
+	       ((symbol? (car clause)) `((eq? (car r) ',tag) (apply ,tag (cdr r))))
+	       (else `((memq (car r) ',(car clause)) (apply ,tag (cdr r))))))))
+       (rc-clause->let-binding
+	 (lambda (clause)
+	   (let ((tag (if (symbol? (car clause)) (car clause) (caar clause))))
+	     (if (eq? tag 'else)
+	       `(else-code (lambda () ,@(cdr clause)))
+	       `(,tag (lambda ,(cadr clause) ,@(cddr clause))))))))
+      (let ((exp (cadr datum))
+	    (clauses (cddr datum)))
+	`(let ((r ,exp) ,@(map rc-clause->let-binding clauses))
+	   (cond ,@(map rc-clause->cond-clause clauses)))))))
+
+(define cases-transformer
+  (lambda (datum)
+    (record-case-transformer (cons 'record-case (cddr datum)))))
+
 (define make-macro-env
   (lambda ()
     (make-initial-environment
-      (list 'and 'or 'cond 'let* 'let 'letrec)
-      (list '([(and) #t]
-	      [(and ?exp) ?exp]
-	      [(and ?exp . ?exp*) (if ?exp (and . ?exp*) #f)])
-	    '([(or) #f]
-	      [(or ?exp) ?exp]
+      (list 'and 'or 'cond 'let 'letrec 'let* 'record-case)
+      (list and-transformer
+	    or-transformer
+	    cond-transformer
+	    let-transformer
+	    letrec-transformer
+	    let*-transformer
+	    record-case-transformer))))
+
+;; macros as define-syntax patterns:
+;;            '([(and) #t]
+;;	      [(and ?exp) ?exp]
+;;	      [(and ?exp . ?exp*) (if ?exp (and . ?exp*) #f)])
+;;	    '([(or) #f]
+;;	      [(or ?exp) ?exp]
 	      ;; incorrect:
 	      ;;[(or ?exp . ?exp*) (if ?exp #t (or . ?exp*))]
-	      [(or ?exp . ?exp*)
-	       (let ((first ?exp) (rest (lambda () (or . ?exp*))))
-		 (if first first (rest)))])
+;;	      [(or ?exp . ?exp*)
+;;	       (let ((first ?exp) (rest (lambda () (or . ?exp*))))
+;;		 (if first first (rest)))])
 	    ;; not quite correct:
-	    '([(cond) #t]
-	      [(cond (else . ?results)) (begin . ?results)]
-	      [(cond (?test . ?results)) (if ?test (begin . ?results) #f)]
-	      [(cond (?test . ?results) . ?rest)
-	       (if ?test (begin . ?results) (cond . ?rest))])
-	    '([(let* () . ?bodies) (begin . ?bodies)]
-	      [(let* ((?var ?exp) . ?rest) . ?bodies)
-	       (let ((?var ?exp)) (let* ?rest . ?bodies))])
-	    let-transformer
-	    letrec-transformer))))
+;;	    '([(cond) #t]
+;;	      [(cond (else . ?results)) (begin . ?results)]
+;;	      [(cond (?test . ?results)) (if ?test (begin . ?results) #f)]
+;;	      [(cond (?test . ?results) . ?rest)
+;;	       (if ?test (begin . ?results) (cond . ?rest))])
+;;	    '([(let* () . ?bodies) (begin . ?bodies)]
+;;	      [(let* ((?var ?exp) . ?rest) . ?bodies)
+;;	       (let ((?var ?exp)) (let* ?rest . ?bodies))])
 
 (define macro-env (make-macro-env))
 
@@ -174,14 +263,14 @@
 
 ;; for testing purposes
 (define test-handler
-  (lambda (e) (list 'exception e)))
+  (lambda-handler (e) (list 'exception e)))
 
 ;; for testing purposes
 (define parse-string
   (lambda (string)
     (read-datum string test-handler
-      (lambda (datum tokens-left)
-	(parse datum test-handler (lambda (exp) exp))))))
+      (lambda-cont2 (datum tokens-left)
+	(parse datum test-handler (lambda-cont (exp) exp))))))
 
 (define parse
   (lambda (datum handler k)
@@ -190,49 +279,52 @@
       ((quote? datum) (k (lit-exp (cadr datum))))
       ((quasiquote? datum)
        (expand-quasiquote (cadr datum) handler
-	 (lambda (v)
+	 (lambda-cont (v)
 	   (parse v handler k))))
       ((unquote? datum) (handler (format "misplaced ~a" datum)))
       ((unquote-splicing? datum) (handler (format "misplaced ~a" datum)))
       ((symbol? datum) (k (var-exp datum)))
       ((syntactic-sugar? datum)
        (expand-once datum handler
-	 (lambda (v)
+	 (lambda-cont (v)
 	   (parse v handler k))))
       ((if-then? datum)
        (parse (cadr datum) handler
-	 (lambda (v1)
+	 (lambda-cont (v1)
 	   (parse (caddr datum) handler
-	     (lambda (v2)
+	     (lambda-cont (v2)
 	       (k (if-exp v1 v2 (lit-exp #f))))))))
       ((if-else? datum)
        (parse (cadr datum) handler
-	 (lambda (v1)
+	 (lambda-cont (v1)
 	   (parse (caddr datum) handler
-	     (lambda (v2)
+	     (lambda-cont (v2)
 	       (parse (cadddr datum) handler
-		 (lambda (v3)
+		 (lambda-cont (v3)
 		   (k (if-exp v1 v2 v3)))))))))
       ((assignment? datum)
        (parse (caddr datum) handler
-	 (lambda (v)
+	 (lambda-cont (v)
 	   (k (assign-exp (cadr datum) v)))))
       ((define? datum)
        (if (mit-style? datum)
 	 (parse (mit-define-transformer datum) handler k)
 	 (parse (caddr datum) handler
-	   (lambda (body)
+	   (lambda-cont (body)
 	     (k (define-exp (cadr datum) body))))))
       ((define-syntax? datum)
        (k (define-syntax-exp (cadr datum) (cddr datum))))
       ((begin? datum)
        (parse-all (cdr datum) handler
-	 (lambda (v)
-	   (k (begin-exp v)))))
+	 (lambda-cont (v)
+	   (cond
+	     ((null? v) (handler (format "bad concrete syntax: ~a" datum)))
+	     ((null? (cdr v)) (k (car v)))
+	     (else (k (begin-exp v)))))))
       ((lambda? datum)
        (parse (cons 'begin (cddr datum)) handler
-	 (lambda (body)
-	   (if (proper-list? (cadr datum))
+	 (lambda-cont (body)
+	   (if (list? (cadr datum))
 	     (k (lambda-exp (cadr datum) body))
 	     (k (mu-lambda-exp (head (cadr datum)) (last (cadr datum)) body))))))
       ((try? datum)
@@ -243,38 +335,38 @@
 	 ((and (= (length datum) 3) (catch? (caddr datum)))
 	  ;; (try <body> (catch <var> <exp> ...))
 	  (parse (try-body datum) handler
-	    (lambda (body)
+	    (lambda-cont (body)
 	      (parse-all (catch-exps (caddr datum)) handler
-		(lambda (cexps)
+		(lambda-cont (cexps)
 		  (let ((cvar (catch-var (caddr datum))))
 		    (k (try-catch-exp body cvar cexps))))))))
 	 ((and (= (length datum) 3) (finally? (caddr datum)))
 	  ;; (try <body> (finally <exp> ...))
 	  (parse (try-body datum) handler
-	    (lambda (body)
+	    (lambda-cont (body)
 	      (parse-all (finally-exps (caddr datum)) handler
-		(lambda (fexps)
+		(lambda-cont (fexps)
 		  (k (try-finally-exp body fexps)))))))
 	 ((and (= (length datum) 4) (catch? (caddr datum)) (finally? (cadddr datum)))
 	  ;; (try <body> (catch <var> <exp> ...) (finally <exp> ...))
 	  (parse (try-body datum) handler
-	    (lambda (body)
+	    (lambda-cont (body)
 	      (parse-all (catch-exps (caddr datum)) handler
-		(lambda (cexps)
+		(lambda-cont (cexps)
 		  (parse-all (finally-exps (cadddr datum)) handler
-		    (lambda (fexps)
+		    (lambda-cont (fexps)
 		      (let ((cvar (catch-var (caddr datum))))
 			(k (try-catch-finally-exp body cvar cexps fexps))))))))))
 	 (else (handler (format "bad try syntax: ~a" datum)))))
       ((raise? datum)
        (parse (cadr datum) handler
-	 (lambda (v)
+	 (lambda-cont (v)
 	   (k (raise-exp v)))))
       ((application? datum)
        (parse (car datum) handler
-	 (lambda (v1)
+	 (lambda-cont (v1)
 	   (parse-all (cdr datum) handler
-	     (lambda (v2)
+	     (lambda-cont (v2)
 	       (k (app-exp v1 v2)))))))
       (else (handler (format "bad concrete syntax: ~a" datum))))))
 
@@ -283,9 +375,9 @@
     (if (null? datum-list)
       (k '())
       (parse (car datum-list) handler
-	(lambda (a)
+	(lambda-cont (a)
 	  (parse-all (cdr datum-list) handler
-	    (lambda (b)
+	    (lambda-cont (b)
 	      (k (cons a b)))))))))
 
 (define expand-quasiquote
@@ -293,7 +385,7 @@
     (cond
       ((vector? datum)
        (expand-quasiquote (vector->list datum) handler
-	 (lambda (ls) (k `(list->vector ,ls)))))
+	 (lambda-cont (ls) (k `(list->vector ,ls)))))
       ((not (pair? datum)) (k `(quote ,datum)))
       ;; doesn't handle nested quasiquotes yet
       ((quasiquote? datum) (k `(quote ,datum)))
@@ -302,19 +394,13 @@
        (if (null? (cdr datum))
 	 (k (cadr (car datum)))
 	 (expand-quasiquote (cdr datum) handler
-	   (lambda (v) (k `(append ,(cadr (car datum)) ,v))))))
+	   (lambda-cont (v) (k `(append ,(cadr (car datum)) ,v))))))
       (else
 	(expand-quasiquote (car datum) handler
-	  (lambda (v1)
+	  (lambda-cont (v1)
 	    (expand-quasiquote (cdr datum) handler
-	      (lambda (v2)
+	      (lambda-cont (v2)
 		(k `(cons ,v1 ,v2))))))))))
-
-(define proper-list?
-  (lambda (x)
-    (or (null? x)
-	(and (pair? x)
-	     (proper-list? (cdr x))))))
 
 (define head
   (lambda (formals)
@@ -394,7 +480,7 @@
 (define print-parse-file
   (lambda (filename)
     (scan-input (read-content filename) test-handler
-      (lambda (tokens)
+      (lambda-cont (tokens)
 	(print-parsed-sexps tokens test-handler)))))
 
 ;; for testing purposes
@@ -403,9 +489,9 @@
     (if (token-type? (first tokens) 'end-marker)
       'done
       (read-sexp tokens handler
-	(lambda (datum tokens-left)
+	(lambda-cont2 (datum tokens-left)
 	  (parse datum handler
-	    (lambda (exp)
+	    (lambda-cont (exp)
 	      (pretty-print exp)
 	      (print-parsed-sexps tokens-left handler))))))))
 
@@ -413,8 +499,8 @@
 (define parse-file
   (lambda (filename)
     (scan-input (read-content filename) test-handler 
-      (lambda (tokens) 
-	(parse-sexps tokens test-handler (lambda (v) v))))))
+      (lambda-cont (tokens) 
+	(parse-sexps tokens test-handler (lambda-cont (v) v))))))
 
 ;; for testing purposes
 (define parse-sexps
@@ -422,7 +508,7 @@
     (if (token-type? (first tokens) 'end-marker)
       (k '())
       (read-sexp tokens handler
-	(lambda (datum tokens-left)
+	(lambda-cont2 (datum tokens-left)
 	  (parse datum handler
-	    (lambda (exp)
+	    (lambda-cont (exp)
 	      (cons exp (parse-sexps tokens-left handler k)))))))))

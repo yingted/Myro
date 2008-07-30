@@ -63,11 +63,14 @@
 	   (parse-all (catch-exps (caddr datum)) handler
 	     (make-cont 'parser 'parse-9 datum k value)))
        (parse-11 (datum k)
-	   (if (proper-list? (cadr datum))
+	   (if (list? (cadr datum))
 	     (apply-cont k (lambda-exp (cadr datum) value))
 	     (apply-cont k (mu-lambda-exp (head (cadr datum)) (last (cadr datum)) value))))
-       (parse-12 (k)
-	   (apply-cont k (begin-exp value)))
+       (parse-12 (datum handler k)
+	   (cond
+	     ((null? value) (apply-handler handler (format "bad concrete syntax: ~a" datum)))
+	     ((null? (cdr value)) (apply-cont k (car value)))
+	     (else (apply-cont k (begin-exp value)))))
        (parse-13 (k datum)
 	   (apply-cont k (define-exp (cadr datum) value)))
        (parse-14 (k datum)
@@ -209,6 +212,52 @@
 	  (bodies (cddr datum)))
       `(define ,name (lambda ,formals ,@bodies)))))
 
+(define and-transformer
+  (lambda (datum)
+    (let ((exps (cdr datum)))
+      (cond
+	((null? exps) '#t)
+	((null? (cdr exps)) (car exps))
+	(else `(if ,(car exps) (and ,@(cdr exps)) #f))))))
+
+;; avoids variable capture
+(define or-transformer
+  (lambda (datum)
+    (let ((exps (cdr datum)))
+      (cond
+	((null? exps) '#f)
+	((null? (cdr exps)) (car exps))
+	(else `(let ((bool ,(car exps))
+		     (else-code (lambda () (or ,@(cdr exps)))))
+		 (if bool bool (else-code))))))))
+
+;; correctly handles single-expression clauses and avoids variable capture
+(define cond-transformer
+  (lambda (datum)
+    (let ((clauses (cdr datum)))
+      (if (null? clauses)
+	(error 'cond-transformer "bad concrete syntax: ~a" datum)
+	(let ((first-clause (car clauses))
+	      (other-clauses (cdr clauses)))
+	  (if (or (null? first-clause) (not (list? first-clause)))
+	    (error 'cond-transformer "bad concrete syntax: ~a" datum)
+	    (let ((test-exp (car first-clause))
+		  (then-exps (cdr first-clause)))
+	      (cond
+		((eq? test-exp 'else)
+		 (if (null? then-exps)
+		   (error 'cond-transformer "bad concrete syntax: (else)")
+		   `(begin ,@then-exps)))
+		((null? then-exps)
+		 (if (null? other-clauses)
+		   `(let ((bool ,test-exp))
+		      (if bool bool))
+		   `(let ((bool ,test-exp)
+			  (else-code (lambda () (cond ,@other-clauses))))
+		      (if bool bool (else-code)))))
+		((null? other-clauses) `(if ,test-exp (begin ,@then-exps)))
+		(else `(if ,test-exp (begin ,@then-exps) (cond ,@other-clauses)))))))))))
+
 (define let-transformer
   (lambda (datum)
     (if (symbol? (cadr datum))
@@ -236,31 +285,72 @@
 	   (assigns (map (lambda (var proc) `(set! ,var ,proc)) vars procs)))
       `(let ,bindings ,@assigns ,@bodies))))
 
+(define let*-transformer
+  (lambda (datum)
+    (let ((bindings (cadr datum))
+	  (bodies (cddr datum)))
+      (letrec
+	((nest
+	   (lambda (bindings)
+	     (if (or (null? bindings) (null? (cdr bindings)))
+	       `(let ,bindings ,@bodies)
+	       `(let (,(car bindings)) ,(nest (cdr bindings)))))))
+	(nest bindings)))))
+	   
+;; avoids variable capture
+(define record-case-transformer
+  (lambda (datum)
+    (letrec
+      ((rc-clause->cond-clause
+	 (lambda (clause)
+	   (let ((tag (if (symbol? (car clause)) (car clause) (caar clause))))
+	     (cond
+	       ((eq? (car clause) 'else) `(else (else-code)))
+	       ((symbol? (car clause)) `((eq? (car r) ',tag) (apply ,tag (cdr r))))
+	       (else `((memq (car r) ',(car clause)) (apply ,tag (cdr r))))))))
+       (rc-clause->let-binding
+	 (lambda (clause)
+	   (let ((tag (if (symbol? (car clause)) (car clause) (caar clause))))
+	     (if (eq? tag 'else)
+	       `(else-code (lambda () ,@(cdr clause)))
+	       `(,tag (lambda ,(cadr clause) ,@(cddr clause))))))))
+      (let ((exp (cadr datum))
+	    (clauses (cddr datum)))
+	`(let ((r ,exp) ,@(map rc-clause->let-binding clauses))
+	   (cond ,@(map rc-clause->cond-clause clauses)))))))
+
 (define make-macro-env
   (lambda ()
     (make-initial-environment
-      (list 'and 'or 'cond 'let* 'let 'letrec)
-      (list '([(and) #t]
-	      [(and ?exp) ?exp]
-	      [(and ?exp . ?exp*) (if ?exp (and . ?exp*) #f)])
-	    '([(or) #f]
-	      [(or ?exp) ?exp]
+      (list 'and 'or 'cond 'let 'letrec 'let* 'record-case)
+      (list and-transformer
+	    or-transformer
+	    cond-transformer
+	    let-transformer
+	    letrec-transformer
+	    let*-transformer
+	    record-case-transformer))))
+
+;; macros as define-syntax patterns:
+;;            '([(and) #t]
+;;	      [(and ?exp) ?exp]
+;;	      [(and ?exp . ?exp*) (if ?exp (and . ?exp*) #f)])
+;;	    '([(or) #f]
+;;	      [(or ?exp) ?exp]
 	      ;; incorrect:
 	      ;;[(or ?exp . ?exp*) (if ?exp #t (or . ?exp*))]
-	      [(or ?exp . ?exp*)
-	       (let ((first ?exp) (rest (lambda () (or . ?exp*))))
-		 (if first first (rest)))])
+;;	      [(or ?exp . ?exp*)
+;;	       (let ((first ?exp) (rest (lambda () (or . ?exp*))))
+;;		 (if first first (rest)))])
 	    ;; not quite correct:
-	    '([(cond) #t]
-	      [(cond (else . ?results)) (begin . ?results)]
-	      [(cond (?test . ?results)) (if ?test (begin . ?results) #f)]
-	      [(cond (?test . ?results) . ?rest)
-	       (if ?test (begin . ?results) (cond . ?rest))])
-	    '([(let* () . ?bodies) (begin . ?bodies)]
-	      [(let* ((?var ?exp) . ?rest) . ?bodies)
-	       (let ((?var ?exp)) (let* ?rest . ?bodies))])
-	    let-transformer
-	    letrec-transformer))))
+;;	    '([(cond) #t]
+;;	      [(cond (else . ?results)) (begin . ?results)]
+;;	      [(cond (?test . ?results)) (if ?test (begin . ?results) #f)]
+;;	      [(cond (?test . ?results) . ?rest)
+;;	       (if ?test (begin . ?results) (cond . ?rest))])
+;;	    '([(let* () . ?bodies) (begin . ?bodies)]
+;;	      [(let* ((?var ?exp) . ?rest) . ?bodies)
+;;	       (let ((?var ?exp)) (let* ?rest . ?bodies))])
 
 (define macro-env (make-macro-env))
 
@@ -296,7 +386,7 @@
       ((define-syntax? datum)
        (apply-cont k (define-syntax-exp (cadr datum) (cddr datum))))
       ((begin? datum)
-       (parse-all (cdr datum) handler (make-cont 'parser 'parse-12 k)))
+       (parse-all (cdr datum) handler (make-cont 'parser 'parse-12 datum handler k)))
       ((lambda? datum)
        (parse (cons 'begin (cddr datum)) handler (make-cont 'parser 'parse-11 datum k)))
       ((try? datum)
@@ -345,12 +435,6 @@
       (else
        (expand-quasiquote (car datum) handler
 	 (make-cont 'parser 'expand-quasi-2 datum handler k))))))
-
-(define proper-list?
-  (lambda (x)
-    (or (null? x)
-	(and (pair? x)
-	     (proper-list? (cdr x))))))
 
 (define head
   (lambda (formals)

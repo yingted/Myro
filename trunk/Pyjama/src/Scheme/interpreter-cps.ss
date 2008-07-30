@@ -1,21 +1,22 @@
+(load "lambda-macros.ss")
+
+;;----------------------------------------------------------------------------
 ;; Interpreter
 
 (load "environments-cps.ss")
 (load "parser-cps.ss")
-
-;;----------------------------------------------------------------------------
 
 (define start
   (lambda ()
     (read-eval-print-temp)))
 
 (define REP-k
-  (lambda (v)
+  (lambda-cont (v)
     (pretty-print v)
     (read-eval-print-temp)))
 
 (define REP-handler
-  (lambda (e)
+  (lambda-handler (e)
     (REP-k `(uncaught exception: ,e))))
 
 ;; temporary version for use with non-registerized interpreter.  this
@@ -40,7 +41,7 @@
 	   (if (exception?-temp datum)
 	     (REP-handler (cadr datum))
 	     (parse datum REP-handler
-	       (lambda (exp)
+	       (lambda-cont (exp)
 		 (m exp toplevel-env REP-handler REP-k))))))))))
 
 (define read-eval-print
@@ -59,9 +60,9 @@
 	 (read-eval-print))
 	(else
 	 (read-datum input REP-handler
-	   (lambda (datum tokens-left)
+	   (lambda-cont2 (datum tokens-left)
 	     (parse datum REP-handler
-	       (lambda (exp)
+	       (lambda-cont (exp)
 		 (m exp toplevel-env REP-handler REP-k))))))))))
 
 (define m
@@ -71,27 +72,27 @@
       (var-exp (id) (lookup-value id env handler k))
       (if-exp (test-exp then-exp else-exp)
 	(m test-exp env handler
-	  (lambda (bool)
+	  (lambda-cont (bool)
 	    (if bool
 	      (m then-exp env handler k)
 	      (m else-exp env handler k)))))
       (assign-exp (var rhs-exp)
 	(m rhs-exp env handler
-	  (lambda (rhs-value)
+	  (lambda-cont (rhs-value)
 	    (lookup-binding var env handler
-	      (lambda (binding)
+	      (lambda-cont (binding)
 		(set-binding-value! binding rhs-value)
 		(k 'ok))))))
       (define-exp (var rhs-exp)
 	(m rhs-exp env handler
-	  (lambda (rhs-value)
+	  (lambda-cont (rhs-value)
 	    (lookup-binding-in-first-frame var env handler
-	      (lambda (binding)
+	      (lambda-cont (binding)
 		(set-binding-value! binding rhs-value)
 		(k 'ok))))))
       (define-syntax-exp (keyword clauses)
 	(lookup-binding-in-first-frame keyword macro-env handler
-	  (lambda (binding)
+	  (lambda-cont (binding)
 	    (set-binding-value! binding clauses)
 	    (k 'ok))))
       (begin-exp (exps) (eval-sequence exps env handler k))
@@ -105,32 +106,32 @@
       (try-finally-exp (body fexps)
 	(let ((new-handler (try-finally-handler fexps env handler)))
 	  (m body env new-handler
-	    (lambda (v)
+	    (lambda-cont (v)
 	      ;;(printf "executing finally block~%")
 	      (eval-sequence fexps env handler
-		(lambda (v2) (k v)))))))
+		(lambda-cont (v2) (k v)))))))
       (try-catch-finally-exp (body cvar cexps fexps)
 	(let ((new-handler (try-catch-finally-handler cvar cexps fexps env handler k)))
 	  (m body env new-handler
-	     (lambda (v)
+	     (lambda-cont (v)
 	       ;;(printf "executing finally block~%")
 	       (eval-sequence fexps env handler
-		 (lambda (v2) (k v)))))))
+		 (lambda-cont (v2) (k v)))))))
       (raise-exp (exp)
 	(m exp env handler
 	  ;; todo: pass in more info to handler (k, env)
-	  (lambda (e) (handler e))))
+	  (lambda-cont (e) (handler e))))
       (app-exp (operator operands)
 	(m operator env handler
-	  (lambda (proc)
+	  (lambda-cont (proc)
 	    (m* operands env handler
-	      (lambda (vals)
+	      (lambda-cont (vals)
 		(proc vals env handler k))))))
       (else (error 'm "bad abstract syntax: ~a" exp)))))
 
 (define try-catch-handler
   (lambda (cvar cexps env handler k)
-    (lambda (e)
+    (lambda-handler (e)
       ;;(printf "try-handler: handling ~a exception~%" e)
       (let ((new-env (extend env (list cvar) (list e))))
 	;;(printf "executing catch block~%")
@@ -138,36 +139,36 @@
 
 (define try-finally-handler
   (lambda (fexps env handler)
-    (lambda (e)
+    (lambda-handler (e)
       ;;(printf "executing finally block~%")
       (eval-sequence fexps env handler
-	(lambda (v)
+	(lambda-cont (v)
 	  ;;(printf "propagating ~a exception~%" e)
 	  (handler e))))))
 
 (define try-catch-finally-handler
   (lambda (cvar cexps fexps env handler k)
-    (lambda (e)
+    (lambda-handler (e)
       ;;(printf "try-handler: handling ~a exception~%" e)
       (let ((new-env (extend env (list cvar) (list e))))
 	(let ((catch-handler (try-finally-handler fexps env handler)))
 	  ;;(printf "executing catch block~%")
 	  (eval-sequence cexps new-env catch-handler
-	    (lambda (v)
+	    (lambda-cont (v)
 	      ;;(printf "executing finally block~%")
 	      (eval-sequence fexps env handler
-		(lambda (v2) (k v))))))))))
+		(lambda-cont (v2) (k v))))))))))
 
 (define closure
   (lambda (formals body env)
-    (lambda (args env2 handler k2)
+    (lambda-proc (args env2 handler k2)
       (if (= (length args) (length formals))
 	(m body (extend env formals args) handler k2)
 	(handler "incorrect number of arguments")))))
 
 (define mu-closure
   (lambda (formals runt body env)
-    (lambda (args env2 handler k2)
+    (lambda-proc (args env2 handler k2)
       (if (>= (length args) (length formals))
 	(let ((new-env
 		(extend env
@@ -182,15 +183,15 @@
     (if (null? exps)
       (k '())
       (m (car exps) env handler
-	(lambda (v1)
+	(lambda-cont (v1)
 	  (m* (cdr exps) env handler
-	    (lambda (v2)
+	    (lambda-cont (v2)
 	      (k (cons v1 v2)))))))))
 
 (define eval-sequence
   (lambda (exps env handler k)
     (m (car exps) env handler
-       (lambda (result)
+       (lambda-cont (result)
 	 (if (null? (cdr exps))
 	   (k result)
 	   (eval-sequence (cdr exps) env handler k))))))
@@ -203,44 +204,44 @@
 	    'import 'get 'call-with-current-continuation 'call/cc
 	    'reverse 'append 'list->vector 'dir 'env 'current-time)
       (list '()
-	    (lambda (args env2 handler k2)
+	    (lambda-proc (args env2 handler k2)
 	      (set! macro-env (make-macro-env))
 	      (set! toplevel-env (make-toplevel-env))
 	      ;; temporary
 	      (set! load-stack '())
 	      '(exiting the interpreter))
-	    (lambda (args env2 handler k2) (k2 (apply sqrt args)))
-	    (lambda (args env2 handler k2) (for-each pretty-print args) (k2 'ok))
-	    (lambda (args env2 handler k2) (apply display args) (k2 'ok))
-	    (lambda (args env2 handler k2) (newline) (k2 'ok))
+	    (lambda-proc (args env2 handler k2) (k2 (apply sqrt args)))
+	    (lambda-proc (args env2 handler k2) (for-each pretty-print args) (k2 'ok))
+	    (lambda-proc (args env2 handler k2) (apply display args) (k2 'ok))
+	    (lambda-proc (args env2 handler k2) (newline) (k2 'ok))
 	    ;; temporary
-	    (lambda (args env2 handler k2) (load-file-temp (car args) toplevel-env handler k2))
-	    (lambda (args env2 handler k2) (k2 (apply null? args)))
-	    (lambda (args env2 handler k2) (k2 (apply cons args)))
-	    (lambda (args env2 handler k2) (k2 (apply car args)))
-	    (lambda (args env2 handler k2) (k2 (apply cdr args)))
-	    (lambda (args env2 handler k2) (k2 args))
-	    (lambda (args env2 handler k2) (k2 (apply + args)))
-	    (lambda (args env2 handler k2) (k2 (apply - args)))
-	    (lambda (args env2 handler k2) (k2 (apply * args)))
-	    (lambda (args env2 handler k2) (k2 (apply / args)))
-	    (lambda (args env2 handler k2) (k2 (apply < args)))
-	    (lambda (args env2 handler k2) (k2 (apply > args)))
-	    (lambda (args env2 handler k2) (k2 (apply = args)))
-	    (lambda (args env2 handler k2) (k2 (apply equal? args)))
-	    (lambda (args env2 handler k2) (k2 (apply range args)))
-	    (lambda (args env2 handler k2) (k2 (apply set-car! args)))
-	    (lambda (args env2 handler k2) (k2 (apply set-cdr! args)))
-	    (lambda (args env2 handler k2) (import-primitive args env2 handler k2))
-	    (lambda (args env2 handler k2) (get-primitive args env2 handler k2))
-	    (lambda (args env2 handler k2) (call/cc-primitive (car args) env2 handler k2))
-	    (lambda (args env2 handler k2) (call/cc-primitive (car args) env2 handler k2))
-	    (lambda (args env2 handler k2) (k2 (apply reverse args)))
-	    (lambda (args env2 handler k2) (k2 (apply append args)))
-	    (lambda (args env2 handler k2) (k2 (apply list->vector args)))
-	    (lambda (args env2 handler k2) (k2 (get-variables env2)))
-	    (lambda (args env2 handler k2) (k2 env2))
-	    (lambda (args env2 handler k2) (k2 (let ((now (current-time)))
+	    (lambda-proc (args env2 handler k2) (load-file-temp (car args) toplevel-env handler k2))
+	    (lambda-proc (args env2 handler k2) (k2 (apply null? args)))
+	    (lambda-proc (args env2 handler k2) (k2 (apply cons args)))
+	    (lambda-proc (args env2 handler k2) (k2 (apply car args)))
+	    (lambda-proc (args env2 handler k2) (k2 (apply cdr args)))
+	    (lambda-proc (args env2 handler k2) (k2 args))
+	    (lambda-proc (args env2 handler k2) (k2 (apply + args)))
+	    (lambda-proc (args env2 handler k2) (k2 (apply - args)))
+	    (lambda-proc (args env2 handler k2) (k2 (apply * args)))
+	    (lambda-proc (args env2 handler k2) (k2 (apply / args)))
+	    (lambda-proc (args env2 handler k2) (k2 (apply < args)))
+	    (lambda-proc (args env2 handler k2) (k2 (apply > args)))
+	    (lambda-proc (args env2 handler k2) (k2 (apply = args)))
+	    (lambda-proc (args env2 handler k2) (k2 (apply equal? args)))
+	    (lambda-proc (args env2 handler k2) (k2 (apply range args)))
+	    (lambda-proc (args env2 handler k2) (k2 (apply set-car! args)))
+	    (lambda-proc (args env2 handler k2) (k2 (apply set-cdr! args)))
+	    (lambda-proc (args env2 handler k2) (import-primitive args env2 handler k2))
+	    (lambda-proc (args env2 handler k2) (get-primitive args env2 handler k2))
+	    (lambda-proc (args env2 handler k2) (call/cc-primitive (car args) env2 handler k2))
+	    (lambda-proc (args env2 handler k2) (call/cc-primitive (car args) env2 handler k2))
+	    (lambda-proc (args env2 handler k2) (k2 (apply reverse args)))
+	    (lambda-proc (args env2 handler k2) (k2 (apply append args)))
+	    (lambda-proc (args env2 handler k2) (k2 (apply list->vector args)))
+	    (lambda-proc (args env2 handler k2) (k2 (get-variables env2)))
+	    (lambda-proc (args env2 handler k2) (k2 env2))
+	    (lambda-proc (args env2 handler k2) (k2 (let ((now (current-time)))
 						 (+ (time-second now)
 						    (inexact (/ (time-nanosecond now)
 								1000000000))))))
@@ -250,7 +251,7 @@
   (lambda (args env handler k)
     (let ((sym (car args)))
       (lookup-value sym env handler
-	(lambda (v)
+	(lambda-cont (v)
 	  (cond
 	    ((null? (cdr args)) (k v))
 	    ((not (module? v)) (handler (format "~a is not a module" sym)))
@@ -269,7 +270,7 @@
 	  (load-file-temp filename env handler k)
 	  (let ((module-name (cadr args)))
 	    (lookup-binding-in-first-frame module-name env handler
-	      (lambda (binding)
+	      (lambda-cont (binding)
 		(let ((module (extend env '() '())))
 		  (set-binding-value! binding module)
 		  ;; temporary
@@ -277,7 +278,7 @@
 
 (define call/cc-primitive
   (lambda (proc env handler k)
-    (let ((fake-k (lambda (args env2 handler k2) (k (car args)))))
+    (let ((fake-k (lambda-proc (args env2 handler k2) (k (car args)))))
       (proc (list fake-k) env handler k))))
 
 (define get-variables
@@ -300,9 +301,9 @@
       (else
        (set! load-stack (cons filename load-stack))
        (scan-input (read-content filename) handler
-	 (lambda (tokens)
+	 (lambda-cont (tokens)
 	   (load-loop tokens env handler
-	     (lambda (v)
+	     (lambda-cont (v)
 	       (set! load-stack (cdr load-stack))
 	       (k v)))))))))
 
@@ -311,12 +312,12 @@
     (if (token-type? (first tokens) 'end-marker)
       (k 'ok)
       (read-sexp tokens handler
-	(lambda (datum tokens-left)
+	(lambda-cont2 (datum tokens-left)
 	  ;;(printf "read ~a~%" datum)
 	  (parse datum handler
-	    (lambda (exp)
+	    (lambda-cont (exp)
 	      (m exp env handler
-		(lambda (v)
+		(lambda-cont (v)
 		  (load-loop tokens-left env handler k))))))))))
 
 ;; temporary
@@ -347,7 +348,7 @@
 	     (handler (cadr result))
 	     (let ((tokens result))
 	       (load-loop-temp tokens env handler
-		 (lambda (v)
+		 (lambda-cont (v)
 		   (set! load-stack (cdr load-stack))
 		   (k v))))))))))
 
@@ -365,9 +366,9 @@
 		(tokens-left (cdr result)))
 	    ;;(printf "read ~a~%" datum)
 	    (parse datum handler
-	      (lambda (exp)
+	      (lambda-cont (exp)
 		(m exp env handler
-		   (lambda (v)
+		   (lambda-cont (v)
 		     (load-loop-temp tokens-left env handler k)))))))))))
 
 (define range

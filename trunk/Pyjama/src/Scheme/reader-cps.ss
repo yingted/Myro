@@ -1,3 +1,5 @@
+(load "lambda-macros.ss")
+
 ;; Scanner and s-expression reader
 
 ;; includes support for vectors, rationals, exponents, and backquote
@@ -24,18 +26,18 @@
 (define scan-input-loop
   (lambda (chars handler k)   ;; k receives a list of tokens
     (apply-action '(goto start-state) '() chars handler
-      (lambda (token chars-left)
+      (lambda-cont2 (token chars-left)
 	(if (token-type? token 'end-marker)
 	  (k (list token))
 	  (scan-input-loop chars-left handler
-	    (lambda (tokens)
+	    (lambda-cont (tokens)
 	      (k (cons token tokens)))))))))
 
 ;; for testing purposes
-(define test-handler (lambda (e) (list 'exception e)))
+(define test-handler (lambda-handler (e) (list 'exception e)))
 
 ;; for testing purposes
-(define test-cont (lambda (v) v))
+(define test-cont (lambda-cont (v) v))
 
 ;; for testing purposes
 (define scan-string
@@ -72,7 +74,7 @@
 	    (apply-action action buffer chars handler k))))
       (emit (token-type)
 	(convert-buffer-to-token token-type buffer handler
-	  (lambda (v) (k v chars))))
+	  (lambda-cont (v) (k v chars))))
       (else (error 'apply-action "invalid action: ~a" action)))))
       
 (define scan-error
@@ -340,14 +342,14 @@
 ;; for testing purposes
 (define read-string
   (lambda (input)
-    (read-datum input test-handler (lambda (sexp tokens-left) sexp))))
+    (read-datum input test-handler (lambda-cont2 (sexp tokens-left) sexp))))
 
 (define read-datum
   (lambda (input handler k)  ;; k receives 2 args:  sexp, tokens-left
     (scan-input input handler
-      (lambda (tokens)
+      (lambda-cont (tokens)
 	(read-sexp tokens handler
-	  (lambda (sexp tokens-left)
+	  (lambda-cont2 (sexp tokens-left)
 	    (if (token-type? (first tokens-left) 'end-marker)
 	      (k sexp tokens-left)
 	      (handler (format "tokens left over: ~a" tokens-left)))))))))
@@ -384,14 +386,14 @@
 	    (read-sexp-sequence tokens 'rbracket handler k))))
       (lvector ()
 	(read-vector (rest-of tokens) handler
-	  (lambda (sexps tokens-left)
+	  (lambda-cont2 (sexps tokens-left)
 	    (k (list->vector sexps) tokens-left))))
       (else (read-error tokens handler)))))
 
 (define read-abbreviation
   (lambda (tokens keyword handler k)  ;; k receives 2 args: sexp, tokens-left
     (read-sexp (rest-of tokens) handler
-      (lambda (sexp tokens-left)
+      (lambda-cont2 (sexp tokens-left)
 	(k (list keyword sexp) tokens-left)))))
 
 (define read-sexp-sequence
@@ -401,13 +403,13 @@
        (close-sexp-sequence '() tokens expected-terminator handler k))
       (dot ()
 	(read-sexp (rest-of tokens) handler
-	  (lambda (sexp tokens-left)
+	  (lambda-cont2 (sexp tokens-left)
 	    (close-sexp-sequence sexp tokens-left expected-terminator handler k))))
       (else
 	(read-sexp tokens handler
-	  (lambda (sexp1 tokens-left)
+	  (lambda-cont2 (sexp1 tokens-left)
 	    (read-sexp-sequence tokens-left expected-terminator handler
-	      (lambda (sexp2 tokens-left)
+	      (lambda-cont2 (sexp2 tokens-left)
 		(k (cons sexp1 sexp2) tokens-left)))))))))
 
 (define close-sexp-sequence
@@ -430,9 +432,9 @@
 	(k '() (rest-of tokens)))
       (else
 	(read-sexp tokens handler
-	  (lambda (sexp1 tokens-left)
+	  (lambda-cont2 (sexp1 tokens-left)
 	    (read-vector tokens-left handler
-	      (lambda (sexps tokens-left)
+	      (lambda-cont2 (sexps tokens-left)
 		(k (cons sexp1 sexps) tokens-left)))))))))
 
 (define read-error
@@ -449,7 +451,7 @@
 (define read-file
   (lambda (filename)
     (scan-input (read-content filename) test-handler
-      (lambda (tokens)
+      (lambda-cont (tokens)
 	(print-sexps tokens test-handler)))))
 
 ;; for testing purposes
@@ -461,7 +463,7 @@
 (define read-next-sexp
   (lambda (tokens)
     (read-sexp tokens test-handler
-      (lambda (sexp tokens-left)
+      (lambda-cont2 (sexp tokens-left)
 	(cons sexp tokens-left)))))
 
 ;; for testing purposes
@@ -470,7 +472,7 @@
     (if (token-type? (first tokens) 'end-marker)
       'done
       (read-sexp tokens handler
-	(lambda (sexp tokens-left)
+	(lambda-cont2 (sexp tokens-left)
 	  (pretty-print sexp)
 	  (print-sexps tokens-left handler))))))
 
