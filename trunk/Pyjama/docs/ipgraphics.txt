@@ -1,0 +1,31 @@
+ipgraphics.py
+Simple object oriented graphics library for IronPython
+
+Mark F. Russo
+russomf@gmail.com
+July 17,2008
+
+OVERVIEW: The ipgraphics.py module is a complete port of the graphics.py module by John Zelle of Wartburg College (http://mcsp.wartburg.edu/zelle/python/) to IronPython 1.1 (http://www.codeplex.com/IronPython). The original module was written for use with the book "Python Programming: An Introduction to Computer Science" (Franklin, Beedle & Associates). The purpose of this port is to allow the graphics module to be used for teaching IronPython. The ipgraphics module has been tested on as many example programs as I could find. The output is almost identical to the original version.
+
+DIFFERENCES: Where they exist, differences are very minor. IronPython cannot import and make use of all CPython modules. For those that can be used, such as the random module, it is necessary to tell IronPython where to find the module. For example, to load the random module into IronPython, add the following lines to your source code ... assuming you have CPython 2.5 installed on the C drive of your Windows computer, of course.
+
+import sys
+sys.path.append('c://Python25//Lib')
+
+Another minor difference is the colors and font faces that are available. In the original graphics module colors and font faces are referred to using strings, such as "red" and "helvetica". At the top of the ipgraphics module are several dictionaries that map these strings to actual .NET WinForms objects. All colors and font faces are not included in these dictionaries. Please add to these dictionaries as necesssary.
+
+USAGE: The multi-threading feature of the latest version of the original graphics module has been ported. Because IronPython has no equivalent to IDLE, ipgraphics is meant to be used from the IronPython command line. To get started, run the IronPython command line from teh console and import the ipgraphics module.
+
+C:\>ipy.exe -X:TabCompletion -X:ColorfulConsole
+IronPython 1.1 (1.1) on .NET 2.0.50727.1433
+Copyright (c) Microsoft Corporation. All rights reserved.
+>>> from ipgraphics import *
+>>>
+
+LICENSE: This is open-source software released under the terms of the GPL (http://www.gnu.org/licenses/gpl.html).
+
+PLATFORMS: The ipgraphics module is a wrapper around .NET WinForms and should run on Windows with IronPython 1.1 installed, and possibly on platforms where Mono is available.
+
+INSTALLATION: Put this file somewhere where IronPython can see it.
+
+DOCUMENTATION: For complete documentation, see Chapter 5 of "Python Programming: An Introduction to Computer Science" by John Zelle, published by Franklin, Beedle & Associates.  Also see http://mcsp.wartburg.edu/zelle/python for a quick reference
