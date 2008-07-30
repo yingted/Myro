@@ -4,6 +4,7 @@ import pygtk
 pygtk.require('2.0')
 import gtk
 import gtk.glade
+#import myro
 
 class Pyjama:
 
@@ -25,7 +26,7 @@ class Pyjama:
 
         #sets up drop signal over codevbox, running program, adding new script tab
         #add user-defined parameter to self.runProgram to run current tab's program
-        scriptDic={"on_codevbox_drag_drop": self.codeDragDrop,"on_playbutton_clicked": self.runProgram,"on_dobutton_toggled":self.scriptChanger,"on_whenbutton_toggled":self.scriptChanger,"on_givenbutton_toggled":self.scriptChanger,"on_whengivenbutton_toggled":self.scriptChanger,"on_addother_clicked":self.addOther}
+        scriptDic={"on_codevbox_drag_drop": self.codeDragDrop,"on_playbutton_clicked": self.setUpProgram,"on_dobutton_toggled":self.scriptChanger,"on_whenbutton_toggled":self.scriptChanger,"on_givenbutton_toggled":self.scriptChanger,"on_whengivenbutton_toggled":self.scriptChanger,"on_addother_clicked":self.addOther}
         self.wTree.signal_autoconnect(scriptDic)
 
         #makes print a source for dnd
@@ -163,7 +164,13 @@ class Pyjama:
         #makes fill color a source for dnd
         self.wTree.get_widget("fillcolordragbutton").drag_source_set(gtk.gdk.BUTTON1_MASK,[("fillcolor",0,48)],gtk.gdk.ACTION_COPY)
         
-        listOfDraggables=[("print",0,4),("forward",0,5),("backward",0,6),("left",0,7),("right",0,8),("stop",0,9),("motors",0,10),("wait",0,11),("currenttime",0,12),("settimer",0,13),("elapsed",0,14),("askuser",0,15),("gamepad",0,16),("joystick",0,17),("takepic",0,18),("showpic",0,19),("loadpic",0,20),("savepic",0,21),("copypic",0,22),("pixels",0,23),("pixel",0,24),("playsound",0,25),("loadsound",0,26),("beep",0,27),("speak",0,28),("setvoice",0,29),("beep2",0,30),("graphwin",0,31),("close",0,32),("bg",0,33),("draw",0,34),("undraw",0,35),("point",0,36),("x",0,37),("y",0,38),("line",0,39),("circle",0,40),("rectangle",0,41),("oval",0,42),("polygon",0,43),("text",0,44),("image",0,45),("center",0,46),("outlinecolor",0,47),("fillcolor",0,48)]
+        #makes outline thickness a source for dnd
+        self.wTree.get_widget("outlinethicknessdragbutton").drag_source_set(gtk.gdk.BUTTON1_MASK,[("thickness",0,49)],gtk.gdk.ACTION_COPY)
+        
+        self.wTree.get_widget("movexydragbutton").drag_source_set(gtk.gdk.BUTTON1_MASK,[("movexy",0,50)],gtk.gdk.ACTION_COPY)
+        
+        global listOfDraggables
+        listOfDraggables=[("print",0,4),("forward",0,5),("backward",0,6),("left",0,7),("right",0,8),("stop",0,9),("motors",0,10),("wait",0,11),("currenttime",0,12),("settimer",0,13),("elapsed",0,14),("askuser",0,15),("gamepad",0,16),("joystick",0,17),("takepic",0,18),("showpic",0,19),("loadpic",0,20),("savepic",0,21),("copypic",0,22),("pixels",0,23),("pixel",0,24),("playsound",0,25),("loadsound",0,26),("beep",0,27),("speak",0,28),("setvoice",0,29),("beep2",0,30),("graphwin",0,31),("close",0,32),("bg",0,33),("draw",0,34),("undraw",0,35),("point",0,36),("x",0,37),("y",0,38),("line",0,39),("circle",0,40),("rectangle",0,41),("oval",0,42),("polygon",0,43),("text",0,44),("image",0,45),("center",0,46),("outlinecolor",0,47),("fillcolor",0,48),("thickness",0,49),("movexy",0,50)]
 
         #makes codevbox a drag destination
         self.wTree.get_widget("codevbox").drag_dest_set(gtk.DEST_DEFAULT_MOTION|gtk.DEST_DEFAULT_HIGHLIGHT|gtk.DEST_DEFAULT_DROP, listOfDraggables,gtk.gdk.ACTION_COPY)
@@ -307,11 +314,11 @@ class Pyjama:
         blockHBox=gtk.HBox()
         frame.add(blockHBox)
         if context.targets==["print"]:
-            #global printString
             printLabel=gtk.Label(" print ")
             blockHBox.pack_start(printLabel,False,False,0)
             printString=gtk.Entry()
             blockHBox.pack_start(printString,False,False,0)
+            innerVBox.set_name("print")
         elif context.targets==["forward"]:
             forwardLabel1=gtk.Label(" forward at speed ")
             blockHBox.pack_start(forwardLabel1,False,False,0)
@@ -537,14 +544,25 @@ class Pyjama:
         elif context.targets==["draw"]:
             drawLabel1=gtk.Label(" draw ")
             blockHBox.pack_start(drawLabel1,False,False,0)
+            drawVBox1=gtk.VBox()
             drawComboBox1=gtk.combo_box_new_text()
             drawComboBox1.append_text("<image>")
-            blockHBox.pack_start(drawComboBox1,False,False,0)
+            drawComboBox1.set_name("combo1")
+            drawVBox1.pack_start(drawComboBox1,False,False,0)
+            blockHBox.pack_start(drawVBox1,False,False,0)
+            drawVBox1.drag_dest_set(gtk.DEST_DEFAULT_MOTION|gtk.DEST_DEFAULT_HIGHLIGHT|gtk.DEST_DEFAULT_DROP,[("point",0,36),("line",0,39),("circle",0,40),("rectangle",0,41),("oval",0,42),("polygon",0,43),("text",0,44),("image",0,45)],gtk.gdk.ACTION_COPY)
+            drawVBox1.connect("drag_drop",self.removeAndDrop)
             drawLabel2=gtk.Label(" on window ")
             blockHBox.pack_start(drawLabel2,False,False,0)
+            drawVBox2=gtk.VBox()
             drawComboBox2=gtk.combo_box_new_text()
             drawComboBox2.append_text("<graphics window>")
-            blockHBox.pack_start(drawComboBox2,False,False,0)
+            drawComboBox2.set_name("combo2")
+            drawVBox2.pack_start(drawComboBox2,False,False,0)
+            blockHBox.pack_start(drawVBox2,False,False,0)
+            drawVBox2.drag_dest_set(gtk.DEST_DEFAULT_MOTION|gtk.DEST_DEFAULT_HIGHLIGHT|gtk.DEST_DEFAULT_DROP,[("graphwin",0,31)],gtk.gdk.ACTION_COPY)
+            drawVBox2.connect("drag_drop",self.removeAndDrop)
+            innerVBox.set_name("draw")
         elif context.targets==["undraw"]:
             undrawLabel=gtk.Label(" undraw ")
             blockHBox.pack_start(undrawLabel,False,False,0)
@@ -560,6 +578,7 @@ class Pyjama:
             blockHBox.pack_start(pointLabel2,False,False,0)
             pointSpin2=gtk.SpinButton(gtk.Adjustment(100,0,400,1,10),0.0,0)
             blockHBox.pack_start(pointSpin2,False,False,0)
+            innerVBox.set_name("point")
         elif context.targets==["x"]:
             xLabel=gtk.Label(" x coordinate ")
             blockHBox.pack_start(xLabel,False,False,0)
@@ -568,6 +587,7 @@ class Pyjama:
             blockHBox.pack_start(yLabel,False,False,0)
         elif context.targets==["line"]:
             #this is how a block can be set up to allow other blocks to be dragged onto it as parameters. control statements will work differently--they will come with internal VBoxes to put code into. ideally, in the case of blocks-as-parameters, when an object is created that can serve as a parameter, it will be added to the combobox's list.
+            #alternatively, instead of using the extra VBox, you can use blockHBox.child_get_property(child,"position") in removeAndDrop (see removeAndDrop for details)
             lineLabel1=gtk.Label(" line from ")
             blockHBox.pack_start(lineLabel1,False,False,0)
             lineVBox1=gtk.VBox()
@@ -653,6 +673,7 @@ class Pyjama:
             blockHBox.pack_start(textVBox,False,False,0)
             textVBox.drag_dest_set(gtk.DEST_DEFAULT_MOTION|gtk.DEST_DEFAULT_HIGHLIGHT|gtk.DEST_DEFAULT_DROP,[("point",0,36)],gtk.gdk.ACTION_COPY)
             textVBox.connect("drag_drop",self.removeAndDrop)
+            innerVBox.set_name("text")
         elif context.targets==["image"]:
             imageLabel1=gtk.Label(" image centered at ")
             blockHBox.pack_start(imageLabel1,False,False,0)
@@ -680,11 +701,33 @@ class Pyjama:
             blockHBox.pack_start(fillColorLabel,False,False,0)
             fillColorChooser=gtk.ColorButton()
             blockHBox.pack_start(fillColorChooser,False,False,0)
+        elif context.targets==["thickness"]:
+            thicknessLabel=gtk.Label("set outline thickness to ")
+            blockHBox.pack_start(thicknessLabel,False,False,0)
+            thicknessSpin=gtk.SpinButton(gtk.Adjustment(1,1,10,1,2),0.0,0)
+            blockHBox.pack_start(thicknessSpin,False,False,0)
+        elif context.targets==["movexy"]:
+            movexyLabel1=gtk.Label(" move ")
+            blockHBox.pack_start(movexyLabel1,False,False,0)
+            movexySpin1=gtk.SpinButton(gtk.Adjustment(5,-400,400,5,10),0.0,0)
+            blockHBox.pack_start(movexySpin1,False,False,0)
+            movexyLabel2=gtk.Label(" units across and ")
+            blockHBox.pack_start(movexyLabel2,False,False,0)
+            movexySpin2=gtk.SpinButton(gtk.Adjustment(5,-400,400,5,10),0.0,0)
+            blockHBox.pack_start(movexySpin2,False,False,0)
+            movexyLabel3=gtk.Label(" units down ")
+            blockHBox.pack_start(movexyLabel3,False,False,0)
         else:
             pass
         self.window.show_all()
         
     def removeAndDrop(self,source,context,x,y,time):
+        #alternatively, if you haven't put the relevant widget in an extra VBox, and are using the combobox widget as the drag_dest, you can get the index of the combobox with source.get_parent().child_get_property(source,"position"), then source.destroy(), then add the new contents to the end, then reorder it with the index gotten from child_get_property, as follows:
+        #index=source.get_parent().child_get_property(source,"position")
+        #parent=source.get_parent()
+        #source.destroy()
+        #parent.pack_start(newthingtogohere,False,False,0)
+        #parent.reorder_child(newthingtogohere,index)
         for child in source.get_children():
             source.remove(child)
         self.codeDragDrop(source,context,x,y,time)
@@ -692,12 +735,45 @@ class Pyjama:
     def runProgram(self,widget,data=None):
         #get current page's code vbox. read first element, execute. read next element, execute. (use eval() or exec()).
         #add user-defined parameter to do this
-        #printString is no longer global, so this method does nothing
-        try:
-            print printString.get_text()
-        except NameError:
-            pass
+        for child in data.get_children():
+            if child.get_name()=="print":
+                textBox=child.get_children()[0].get_child().get_children()[-1]
+                print textBox.get_text()
+            elif child.get_name()=="draw":
+                image=child.get_children()[0].get_child().get_children()[1].get_children()[0]
+                if image.get_name()=="combo1":
+                    #itemToDraw=myro.Point(50,50)
+                elif image.get_name()=="point":
+                    xcoord=image.get_children()[0].get_child().get_children()[1].get_value()
+                    ycoord=image.get_children()[0].get_child().get_children()[3].get_value()
+                    #itemToDraw=myro.Point(xcoord,ycoord)
+                elif image.get_name()=="text":
+                    text=image.get_children()[0].get_child().get_children()[0].get_text()
+                    point=image.get_children()[0].get_child().get_children()[2]
+                    xcoord=point.get_children()[0].get_children()[0].get_child().get_children()[1].get_value()
+                    ycoord=point.get_children()[0].get_children()[0].get_child().get_children()[3].get_value()
+                    #itemToDraw=myro.Text(Point(xcoord,ycoord),text)
+                else:
+                    #will add other categories later--line, circle, rectangle, oval, polygon, text, image
+                    pass
+                graphwin=child.get_children()[0].get_child().get_children()[3].get_children()[0]
+                if graphwin.get_name()=="combo2":
+                    #win=myro.GraphWin()
+                else:
+                    title=graphwin.get_children()[0].get_child().get_children()[1].get_text()
+                    width=graphwin.get_children()[0].get_child().get_children()[3].get_value()
+                    height=graphwin.get_children()[0].get_child().get_children()[5].get_value()
+                    #win=myro.GraphWin(title,width,height)
+                #itemToDraw.myro.draw(win)
         
+    def setUpProgram(self,widget,data=None):
+        #get current page's codevbox, run program from this vbox
+        if self.wTree.get_widget("dinahscriptsnotebook").get_current_page()==0:
+            codevbox=self.wTree.get_widget("codevbox")
+        else:
+            #get to correct vbox in other tab, set codevbox equal to that vbox
+            codevbox=None
+        self.runProgram(widget,codevbox)
 
     def main(self):
         gtk.main()
