@@ -2,6 +2,7 @@ using System;
 using System.Text;
 using System.Collections.Generic;
 using System.IO;
+using System.Collections;
 //using DotNetMatrix;
 
 
@@ -16,26 +17,14 @@ public class Functions
 	
 	public static double[] copyDoubleArray(double[] array)
 	{
-		double[] array2 = new double[array.Length];
-		
-		
-			Array.Copy(array,array2, array.Length);
-		
+		double[] array2 = (double[]) array.Clone();
 		return array2;
 	}
 	
 	public static double[][] copyDoubleMatrix(double[][] matrix)
 	{
 		
-		double[][] matrix2 = new double[matrix.Length][];
-		
-		
-			for(int i=0;i<matrix.Length;i++)
-			{
-				matrix2[i]= new double[matrix[i].Length];
-				Array.Copy(matrix[i], matrix2[i], matrix[i].Length);
-			}
-			
+		double[][] matrix2 = (double[][]) matrix;			
 		return matrix2;
 	}
 }
@@ -608,30 +597,30 @@ public class Network
 		  public static Random random = new Random();
 		  public List<Layer> layers = new List<Layer>();
         public int verbosity = 0;
-        public int complete = 0;
+        public bool complete = false;
         public string name = "Backprop Network";
         public Dictionary<string,Layer> layersByName = new Dictionary<string,Layer>();
         public List<Connection> connections = new List<Connection>();
         public List<List<object>> inputMap = new List<List<object>>();
         public List<List<object>> targetMap = new List<List<object>>();
-        public List<object> association = new List<object>();
-        public List<double[]> inputs = new List<double[]>();
-        public List<double[]> targets = new List<double[]>();
-        public int orderedInputs = 0;
-        public int[] loadOrder = new int[0];
-        public int learning = 1;
+        public List<string[]> association = new List<string[]>();
+        public double[][] inputs;
+        public double[][] targets;
+        public bool orderedInputs = false;
+        public int[] loadOrder;
+        public bool learning = true;
         public double momentum = .9;
         public int resetEpoch = 5000;
         public int resetCount = 1;
         public int resetLimit = 1;
-        public int batch = 0;
+        public bool batch = false;
         public int epoch = 0;
         public int totalEpoch = 0;
         public int count = 0;
         public double stopPercent = 1.0;
         public double sigmoid_prime_offset = 0.1;
         public double tolerance = .4;
-        public int interactive = 0;
+        public bool interactive = false;
         public double epsilon = .1;
         public int reportRate = 25;
         public int sweepReportRate = 1000;
@@ -640,10 +629,10 @@ public class Network
         public int crossValidationSampleRate = 0;
         public string crossValidationSampleFile = "dample.cv";
         public List<object> patterns = new List<object>();
-        public int patterned = 0;
-        public int sharedWeights = 0;
+        public bool patterned = false;
+        public bool sharedWeights = false;
         public List<object> results = new List<object>();
-        public int autoCrossValidation = 0;
+        public bool autoCrossValidation = false;
         public string autoSaveWeightsFile = "";
         public string autoSaveWeightsFileFormat = "conx";
         public string lastAutoSaveFile = "";
@@ -652,18 +641,18 @@ public class Network
         public string autoSaveNetworkFileFormat = "conx";
         public string lastAutoSaveNetworkFilename = "";
         public double lastLowestTSSError = Math.Pow(10,308);
-        public int cv = 0;
-        public int sweeping = 0;
+        public bool cv = false;
+        public bool sweeping = false;
         public double maxRandom =.1;
         public int currentSweepCount = 0;
-        public double hyperbolicError = 0;
-        public int quickprop = 0;
+        public bool hyperbolicError = false;
+        public bool quickprop = false;
         public double mu = 1.75;
         public double splitEpsilon = 0;
         public double decay = 0;
         public List<Connection> cacheConnections = new List<Connection>();
         public List<Layer> cacheLayers = new List<Layer>();
-        public int useCrossValidationToStop = 0;
+        public bool useCrossValidationToStop = false;
 
         
 
@@ -701,19 +690,19 @@ public class Network
 			}
 		 
 		 
-		 	public void setQuickprop(int value)
+		 	public void setQuickprop(bool value)
 		 	{
-		 		if (value==0)
+		 		if (!value)
 		 		{
-		 			this.quickprop = 0;
+		 			this.quickprop = false;
 		 			this.splitEpsilon = 0;
 		 			this.decay = 0.000;
 		 			this.epsilon = .1;
 		 		}
 		 		else
 		 		{
-		 			this.batch = 1;
-		 			this.quickprop = 1;
+		 			this.batch = true;
+		 			this.quickprop = true;
 		 			this.mu = 1.75;
 		 			this.splitEpsilon = 1;
 		 			this.decay = -.0001;
@@ -722,7 +711,7 @@ public class Network
 		 		}
 		 	}
 		 	
-		 	public int getQuickprop(){ return this.quickprop;}
+		 	public bool getQuickprop(){ return this.quickprop;}
 		 	
 		 	
 			public int path(Layer startLayer, Layer endLayer)
@@ -868,7 +857,7 @@ public class Network
 			public void initialize()
 			{
 				Console.WriteLine("Initializing {0} weights...", this.name);
-				if(this.sharedWeights != 0) {Exception e = new Exception("Shared weights broken."); throw e;}
+				if(!this.sharedWeights) {Exception e = new Exception("Shared weights broken."); throw e;}
 				this.count = 0;
 				foreach(Connection con in this.connections){con.initialize();}
 				foreach(Layer layer in this.layers){layer.initialize();}
@@ -895,7 +884,7 @@ public class Network
 			public void setEpsilon(double value)
 			{this.epsilon = value;}
 			
-			public void setInteractive(int value)
+			public void setInteractive(bool value)
 			{this.interactive = value;}
 			
 			public void setTolerance(double value)
@@ -907,7 +896,7 @@ public class Network
 			public int getActive(string layerName)
 			{return this.getLayer(layerName).getActive();}
 			
-			public void setLearning(int value)
+			public void setLearning(bool value)
 			{this.learning = value;}
 			
 			public void setMomentum(double value)
@@ -919,7 +908,7 @@ public class Network
 			public void setResetEpoch(int value)
 			{this.resetEpoch = value;}
 			
-			public void setBatch(int value)
+			public void setBatch(bool value)
 			{this.batch = value;}
 			
 			public Connection getConnection(string lfrom, string lto)
@@ -939,7 +928,7 @@ public class Network
 			public void setStopPercent(double value)
 			{this.stopPercent = value;}
 			
-			public void setUseCrossValidationToStop(int value)
+			public void setUseCrossValidationToStop(bool value)
 			{this.useCrossValidationToStop = value;}
 			
 			public void setSigmoid_prime_offset(int value)
@@ -974,37 +963,37 @@ public class Network
 				{if((con.fromLayer.name==fromName)&&(con.toLayer.name==toName)){con.weight[fromPos][toPos] = value;}}
 			Exception e = new Exception("Connection was not found."); throw e;}
 			
-			public void setOrderedInputs(int value)
+			public void setOrderedInputs(bool value)
 			{
 				this.orderedInputs = value;
-				if (this.orderedInputs != 0)
-					{this.loadOrder = new int[this.inputs.Count]; for(int i = 0; i< this.inputs.Count; i++){ this.loadOrder[i]=i;}}
+				if (this.orderedInputs)
+					{this.loadOrder = new int[this.inputs.Length]; for(int i = 0; i< this.inputs.Length; i++){ this.loadOrder[i]=i;}}
 			}
 			
 			
-			public void setInputs(List<double[]> inputs)
+			public void setInputs(double[][] inputs)
 			{
-				//if((this.verifyArguments(inputs)!=0)&&(this.patterned == 0)){raise Exception}
+				//if(!this.verifyArguments(inputs)&&!this.patterned){raise Exception}
 				this.inputs = inputs;
-				this.loadOrder = new int[inputs.Count]; 
-				for(int i = 0; i< this.inputs.Count; i++){ this.loadOrder[i]=i;}
+				this.loadOrder = new int[inputs.Length]; 
+				for(int i = 0; i< this.inputs.Length; i++){ this.loadOrder[i]=i;}
 			}
 			
-			public void setOutputs(List<double[]> outputs)
+			public void setOutputs(double[][] outputs)
 			{this.setTargets(outputs);}
 			
-			public void setTargets(List<double[]> targets)
+			public void setTargets(double[][] targets)
 			{
-				//if((this.verifyArguments(inputs)!=0)&&(this.patterned == 0)){raise Exception}
+				//if(!this.verifyArguments(inputs) && !this.patterned){raise Exception}
 				this.targets = targets;
 			}
 			
 			
 			public void associate(string inName, string outName)
 			{ 
-				List<string> list = new List<string>();
-				list.Add(inName);
-				list.Add(outName);
+				string[] list = new string[2];
+				list[0]=inName;
+				list[2]=outName;
 				this.association.Add(list);
 			}
 			
@@ -1124,7 +1113,7 @@ public class Network
 		public bool doWhile(int totalCount, int totalCorrect)
 		{
 			if ((totalCount != 0) && ((totalCorrect*1.0/totalCount < this.stopPercent)||
-				(this.useCrossValidationToStop!=0))){return true;}
+				(this.useCrossValidationToStop))){return true;}
 			else {return false;}
 		}
 		
@@ -1133,7 +1122,7 @@ public class Network
 		
 		public void train()
 		{	
-			this.complete = 0;
+			this.complete = false;
 			double tssErr = 0.0;
 			double rmsErr = 0.0;
 			int totalCorrect = 0;
@@ -1155,13 +1144,12 @@ public class Network
 				if (this.epoch%this.reportRate == 0)
 				{
 					this.reportEpoch(this.epoch, tssErr, totalCorrect, totalCount, rmsErr, totalPCorrect);
-					if ((this.autoCrossValidation==1)||(this.crossValidationCorpus.Count>0))
+					if ((this.autoCrossValidation)||(this.crossValidationCorpus.Count>0))
 					{
 						List<object> retval = this.sweepCrossValidation();
 						double tssCVErr = (double) retval[0]; 
 						int totalCVCorrect = (int) retval[1];
 						int totalCVCount = (int) retval[2];
-						Dictionary<string,double[]> totalCVPCorrect = (Dictionary<string, double[]>) retval[3];					
 						double rmsCVErr = Math.Sqrt(tssCVErr/totalCVCount);
 						Console.WriteLine("CV #{0,-9} | TSS Error: {1:F2} | Correct: {2:F4} | RMS Error: {3:F4}", 
 							this.epoch, tssCVErr, (double) totalCVCorrect/totalCVCount, rmsCVErr);
@@ -1186,7 +1174,7 @@ public class Network
 					if(this.resetLimit==this.resetCount)
 					{
 						Console.WriteLine("Reset limit reached; ending without reaching goal.");
-						this.complete = 0;
+						this.complete = false;
 						break;
 					}
 					this.resetCount++;
@@ -1203,14 +1191,13 @@ public class Network
 			}
 			if(totalCount > 0) 
 			{
-				this.reportFinal(this.epoch-1, tssErr, totalCorrect, totalCount, rmsErr, totalPCorrect);
-				if ((this.autoCrossValidation==1)||(this.crossValidationCorpus.Count>0))
+				this.reportFinal(this.epoch, tssErr, totalCorrect, totalCount, rmsErr, totalPCorrect);
+				if ((this.autoCrossValidation)||(this.crossValidationCorpus.Count>0))
 				{
 					List<object> retval = this.sweepCrossValidation();
 					double tssCVErr = (double) retval[0]; 
 					int totalCVCorrect = (int) retval[1];
 					int totalCVCount = (int) retval[2];
-					Dictionary<string,double[]> totalCVPCorrect = (Dictionary<string, double[]>) retval[3];					
 					double rmsCVErr = Math.Sqrt(tssCVErr/totalCVCount);
 					Console.WriteLine("CV #{0,-9} | TSS Error: {1:F2} | Correct: {2:F4} | RMS Error: {3:F4}", 
 						this.epoch, tssCVErr, (double) totalCVCorrect/totalCVCount, rmsCVErr);
@@ -1226,8 +1213,6 @@ public class Network
 						this.saveNetworkToFile(this.autoSaveNetworkFile);
 						Console.WriteLine("auto saving weights to '{0}'...", this.autoSaveNetworkFile);
 					}
-					if(((double) totalCVCorrect/totalCVCount >= this.stopPercent)&&(this.useCrossValidationToStop))
-					{ this.epoch++; break;}
 				}
 			}
 			else{Console.WriteLine("Final: nothing done.");}
@@ -1237,7 +1222,7 @@ public class Network
 		public void train(int cont)
 		
 		{
-			this.complete = 0;
+			this.complete = false;
 			double tssErr = 0.0;
 			double rmsErr =0.0;
 			int totalCorrect = 0;
@@ -1260,13 +1245,12 @@ public class Network
 				if (this.epoch%this.reportRate == 0)
 				{
 					this.reportEpoch(this.epoch, tssErr, totalCorrect, totalCount, rmsErr, totalPCorrect);
-					if ((this.autoCrossValidation==1)||(this.crossValidationCorpus.Count>0))
+					if ((this.autoCrossValidation)||(this.crossValidationCorpus.Count>0))
 					{
 						List<object> retval = this.sweepCrossValidation();
 						double tssCVErr = (double) retval[0]; 
 						int totalCVCorrect = (int) retval[1];
 						int totalCVCount = (int) retval[2];
-						Dictionary<string,double[]> totalCVPCorrect = (Dictionary<string, double[]>) retval[3];					
 						double rmsCVErr = Math.Sqrt(tssCVErr/totalCVCount);
 						Console.WriteLine("CV #{0,-9} | TSS Error: {1:F2} | Correct: {2:F4} | RMS Error: {3:F4}", 
 							this.epoch, tssCVErr, (double) totalCVCorrect/totalCVCount, rmsCVErr);
@@ -1291,7 +1275,7 @@ public class Network
 					if(this.resetCount==this.resetLimit)
 					{
 						Console.WriteLine("Reset limit reached; ending without reaching goal.");
-						this.complete = 0;
+						this.complete = false;
 						break;
 					}
 					this.resetCount++;
@@ -1308,14 +1292,13 @@ public class Network
 			}
 			if(totalCount > 0) 
 			{
-				this.reportFinal(this.epoch-1, tssErr, totalCorrect, totalCount, rmsErr, totalPCorrect);
-				if ((this.autoCrossValidation==1)||(this.crossValidationCorpus.Count>0))
+				this.reportFinal(this.epoch, tssErr, totalCorrect, totalCount, rmsErr, totalPCorrect);
+				if ((this.autoCrossValidation)||(this.crossValidationCorpus.Count>0))
 				{
 					List<object> retval = this.sweepCrossValidation();
 					double tssCVErr = (double) retval[0]; 
 					int totalCVCorrect = (int) retval[1];
 					int totalCVCount = (int) retval[2];
-					Dictionary<string,double[]> totalCVPCorrect = (Dictionary<string, double[]>) retval[3];					
 					double rmsCVErr = Math.Sqrt(tssCVErr/totalCVCount);
 					Console.WriteLine("CV #{0,-9} | TSS Error: {1:F2} | Correct: {2:F4} | RMS Error: {3:F4}", 
 						this.epoch, tssCVErr, (double) totalCVCorrect/totalCVCount, rmsCVErr);
@@ -1331,8 +1314,6 @@ public class Network
 						this.saveNetworkToFile(this.autoSaveNetworkFile);
 						Console.WriteLine("auto saving weights to '{0}'...", this.autoSaveNetworkFile);
 					}
-					if(((double) totalCVCorrect/totalCVCount >= this.stopPercent)&&(this.useCrossValidationToStop))
-					{ this.epoch++; break;}
 				}
 			}
 			else{Console.WriteLine("Final: nothing done.");}
@@ -1343,7 +1324,7 @@ public class Network
 		
 		{
 			
-			this.complete = 0;
+			this.complete = false;
 			double tssErr = 0.0;
 			double rmsErr =0.0;
 			int totalCorrect = 0;
@@ -1368,13 +1349,12 @@ public class Network
 				if (this.epoch%this.reportRate == 0)
 				{
 					this.reportEpoch(this.epoch, tssErr, totalCorrect, totalCount, rmsErr, totalPCorrect);
-					if ((this.autoCrossValidation==1)||(this.crossValidationCorpus.Count>0))
+					if ((this.autoCrossValidation)||(this.crossValidationCorpus.Count>0))
 					{
 						List<object> retval = this.sweepCrossValidation();
 						double tssCVErr = (double) retval[0]; 
 						int totalCVCorrect = (int) retval[1];
 						int totalCVCount = (int) retval[2];
-						Dictionary<string,double[]> totalCVPCorrect = (Dictionary<string, double[]>) retval[3];					
 						double rmsCVErr = Math.Sqrt(tssCVErr/totalCVCount);
 						Console.WriteLine("CV #{0,-9} | TSS Error: {1:F2} | Correct: {2:F4} | RMS Error: {3:F4}", 
 							this.epoch, tssCVErr, (double) totalCVCorrect/totalCVCount, rmsCVErr);
@@ -1399,7 +1379,7 @@ public class Network
 					if(this.resetCount==this.resetLimit)
 					{
 						Console.WriteLine("Reset limit reached; ending without reaching goal.");
-						this.complete = 0;
+						this.complete = false;
 						break;
 					}
 					this.resetCount++;
@@ -1416,14 +1396,13 @@ public class Network
 			}
 			if(totalCount > 0) 
 			{
-				this.reportFinal(this.epoch-1, tssErr, totalCorrect, totalCount, rmsErr, totalPCorrect);
-				if ((this.autoCrossValidation==1)||(this.crossValidationCorpus.Count>0))
+				this.reportFinal(this.epoch, tssErr, totalCorrect, totalCount, rmsErr, totalPCorrect);
+				if ((this.autoCrossValidation)||(this.crossValidationCorpus.Count>0))
 				{
 					List<object> retval = this.sweepCrossValidation();
 					double tssCVErr = (double) retval[0]; 
 					int totalCVCorrect = (int) retval[1];
 					int totalCVCount = (int) retval[2];
-					Dictionary<string,double[]> totalCVPCorrect = (Dictionary<string, double[]>) retval[3];					
 					double rmsCVErr = Math.Sqrt(tssCVErr/totalCVCount);
 					Console.WriteLine("CV #{0,-9} | TSS Error: {1:F2} | Correct: {2:F4} | RMS Error: {3:F4}", 
 						this.epoch-1, tssCVErr, (double) totalCVCorrect/totalCVCount, rmsCVErr);
@@ -1456,14 +1435,14 @@ public class Network
 		
 		public void randomizeOrder()
 		{
-			int[] flag = new int[this.inputs.Count];
+			int[] flag = new int[this.inputs.Length];
 			flag.Initialize();
-			this.loadOrder = new int[this.inputs.Count];
+			this.loadOrder = new int[this.inputs.Length];
 			int pos;
-			for(int i=0; i<this.inputs.Count; i++)
+			for(int i=0; i<this.inputs.Length; i++)
 			{
-				pos = Network.random.Next(0,this.inputs.Count);
-				while(flag[pos]==1){pos = Network.random.Next(0,this.inputs.Count);}
+				pos = Network.random.Next(0,this.inputs.Length);
+				while(flag[pos]==1){pos = Network.random.Next(0,this.inputs.Length);}
 				flag[pos]=1;
 				this.loadOrder[pos]=i;
 			}		
@@ -1476,9 +1455,9 @@ public class Network
 		public List<object> sweep()
 		{
 			if(this.loadOrder.Length == 0){throw new Exception("No loadOrder for inputs. Make sure inputs are properly set.");}
-			if(this.targets.Count != this.inputs.Count){throw new Exception("Number of inputs does not equal number of targets.");}
+			if(this.targets.Length != this.inputs.Length){throw new Exception("Number of inputs does not equal number of targets.");}
 			if(this.verbosity >= 1){Console.WriteLine("Epoch # {0}, Cycle...", this.epoch);}
-			if(this.orderedInputs==0){this.randomizeOrder();}
+			if(!this.orderedInputs){this.randomizeOrder();}
 			double tssError = 0.0;
 			int totalCorrect = 0;
 			int totalCount =0;
@@ -1486,18 +1465,18 @@ public class Network
 			int cnt = 0;
 			foreach(int i in this.loadOrder)
 			{
-				if ((this.verbosity >= 1)||(this.interactive !=0))
+				if ((this.verbosity >= 1)||(this.interactive))
 					{Console.WriteLine("\n-----------------------------------------------------------Pattern #{0}", this.loadOrder[i]+1);}
 				Dictionary<string,double[]> datum = this.getData(i);
 				if (cnt < this.loadOrder.Length -1) {this.currentSweepCount = cnt;}
 				else { this.currentSweepCount = 0;}
-				this.sweeping = 1;
+				this.sweeping = true;
 				List<object> list = this.step(datum);
 				double error = (double) list[0];
 				int correct = (int) list[1];
 				int total = (int) list[2];
 				Dictionary<string,double[]> pcorrect = (Dictionary<string,double[]>) list[3];
-				this.sweeping = 0; 
+				this.sweeping = false; 
 				//save Results
 				tssError += error;
 				totalCorrect += correct;
@@ -1511,7 +1490,7 @@ public class Network
 				//Crossvalidation check
 				cnt +=1;
 			 }
-			 if ((this.learning !=0) && (this.batch != 0)){this.change_weights();}
+			 if (this.learning && this.batch){this.change_weights();}
 			 List<object> ret = new List<object>();
 			 ret.Add(tssError);
 			 ret.Add(totalCorrect);
@@ -1525,7 +1504,7 @@ public class Network
 		{
 			string name; int offset; double[] temp; 
 			Dictionary<string,double[]> retval = new Dictionary<string,double[]>();
-			if (pos >= this.inputs.Count){throw new Exception("getData() pattern beyond range.");}
+			if (pos >= this.inputs.Length){throw new Exception("getData() pattern beyond range.");}
 			if (this.verbosity >=1){Console.WriteLine("Getting input {0}...", pos);}
 			if (this.inputMap.Count == 0) {retval.Add(this.layers[0].name, this.inputs[pos]);}
 			else{ foreach (List<object> vals in this.inputMap) 
@@ -1535,7 +1514,7 @@ public class Network
 					
 				 }
 			if (this.verbosity > 1){Console.WriteLine("Loading target {0}...", pos);}
-			if (this.targets.Count == 0){}
+			if (this.targets.Length == 0){}
 			else { if(this.targetMap.Count ==0)
 						{retval.Add(this.layers[this.layers.Count - 1].name, this.targets[pos]);}
 					 else { 	foreach (List<object> vals in this.targetMap) 
@@ -1549,7 +1528,7 @@ public class Network
 
 		public double[] getDataMap(string intype, int pos, string name, int offset)
 		{
-			List<double[]> vector;			
+			double[][] vector;			
 			if(intype == "Input"){vector = this.inputs;}
 			else{ if(intype == "target"){vector = this.targets;}
 					else{throw new Exception("invalid map type");}
@@ -1569,7 +1548,7 @@ public class Network
 			this.propagate(args);
 			Dictionary<string,double[]> retval2 = this.postpropagate(args);
 			if(retval2.Count>0){args=retval2;}
-			foreach(List<string> aa in this.association)
+			foreach(string[] aa in this.association)
 			{
 				string inname = aa[0];
 				string outname = aa[1];
@@ -1584,15 +1563,15 @@ public class Network
 			
 			List<object> list = backprop(args);
 			if(this.verbosity > 2) {this.display();}
-			if((this.learning == 1)&&(this.batch == 0)){this.change_weights();}
+			if(this.learning && !this.batch){this.change_weights();}
 			//this.reportPattern();
 			return list; 
 		}
 		
-		public Dictionary<string,double[]> prepropagate()
+		public Dictionary<string,double[]> prepropagate(Dictionary<string,double[]> args)
 		{return new Dictionary<string,double[]>();}
 		
-		public Dictionary<string,double[]> postpropagate()
+		public Dictionary<string,double[]> postpropagate(Dictionary<string,double[]> args)
 		{return new Dictionary<string,double[]>();}				
 		
 		
@@ -1600,7 +1579,7 @@ public class Network
 		public List<object> backprop(Dictionary<string,double[]> args)
 		{
 			List<object> retval = this.compute_error(args);
-			if (this.learning == 1) {this.compute_wed();}
+			if (this.learning) {this.compute_wed();}
 			return retval;
 		}
 		
@@ -1722,7 +1701,7 @@ public class Network
 		public double[] errorFunction(double[] tar, double[] act)
 		{	
 			double[] array = new double[tar.Length];
-			if(this.hyperbolicError==1)
+			if(this.hyperbolicError)
 			{	
 				double err;
 				for(int i =0; i<tar.Length; i++)
@@ -1745,7 +1724,7 @@ public class Network
 			nextStep.Initialize();
 			double shrinkFactor = this.mu/(1+this.mu);
 			if (this.splitEpsilon!=0){e = e/n;}
-			if (this.quickprop==1)
+			if (this.quickprop)
 			{
 			    double s; double d; double p;
 			    for(int i=0; i<dweightLast.Length; i++)
@@ -1790,7 +1769,7 @@ public class Network
 			{
 				if((layer.active==1)&&(layer.type!="Input")&&(layer.frozen==0))
 				{
-					if ((this.quickprop==1)||(this.splitEpsilon==1)) 
+					if ((this.quickprop)||(this.splitEpsilon==1)) 
 					{
 						layer.dweight = this.deltaWeight(this.epsilon, layer.wed, this.momentum, layer.dweight, 
 									layer.wedLast, layer.weight, this.numConnects(layer.name));
@@ -1805,7 +1784,7 @@ public class Network
 					}
 										
 					layer.wedLast = Functions.copyDoubleArray(layer.wed);
-					if(this.quickprop==1)
+					if(this.quickprop)
 					{ for(int i=0; i<layer.size;i++){layer.wed[i]=layer.weight[i]*this.decay;}}
 					else { for(int i=0;i<layer.size;i++){layer.wed[i]=0;}}
 					dw_count += layer.dweight.Length;
@@ -1819,7 +1798,7 @@ public class Network
 			{
 				if((connect.active==1)&&(connect.fromLayer.active==1)&&(connect.toLayer.active==1)&&(connect.frozen==0))
 				{
-					if ((this.quickprop==1) ||(this.splitEpsilon==1))
+					if ((this.quickprop) ||(this.splitEpsilon==1))
 					{
 						for (int i = 0; i<connect.fromLayer.size; i++)
 						{
@@ -1842,7 +1821,7 @@ public class Network
 							 connect.weight[i][j]+= connect.dweight[i][j];}}
 						
 					}
-					if(this.quickprop==1)
+					if(this.quickprop)
 					{
 						connect.wedLast = Functions.copyDoubleMatrix(connect.wed);
 						for(int i=0;i<connect.fromLayer.size; i++)
@@ -2031,7 +2010,7 @@ public class Network
 			this.connect(lastName, "Output");
 		}
 				
-		public void setHyperbolicError(int value)
+		public void setHyperbolicError(bool value)
 		{this.hyperbolicError = value;}
 
 
@@ -2128,19 +2107,19 @@ public class Network
 		
 		public List<object> sweepCrossValidation()
 		{
-			int oldLearning = this.learning;
-			this.learning = 0;
+			bool oldLearning = this.learning;
+			this.learning = false;
 			double tssError = 0; int totalCorrect=0; int totalCount = 0; 
 			Dictionary<string, double[]> totalPCorrect = new Dictionary<string, double[]>();
-			this.cv = 1;
-			if(this.autoCrossValidation==1)
+			this.cv = true;
+			if(this.autoCrossValidation)
 			{
-				for(int i =0; i < this.inputs.Count; i++)
+				for(int i =0; i < this.inputs.Length; i++)
 				{
 					Dictionary<string,double[]> set = this.getDataCrossValidation(i);
-					this.sweeping = 1;
+					this.sweeping = true;
 					List<object> lyst = this.step(set);
-					this.sweeping = 0;
+					this.sweeping = false;
 					tssError += (double) lyst[0];
 					totalCorrect += (int) lyst[1];
 					totalCount += (int) lyst[2];
@@ -2151,9 +2130,9 @@ public class Network
 			{
 				foreach(Dictionary<string,double[]> set in this.crossValidationCorpus)
 				{
-					this.sweeping = 1;
+					this.sweeping = true;
 					List<object> lyst = this.step(set);
-					this.sweeping = 0;
+					this.sweeping = false;
 					if (this.crossValidationReportLayers.Count > 0)
 					{
 						lyst = this.getError(this.crossValidationReportLayers);
@@ -2165,7 +2144,7 @@ public class Network
 				}
 			}
 			this.learning = oldLearning;
-			this.cv = 0;
+			this.cv = false;
 			List<object> ret = new List<object>();
 			ret.Add(tssError); ret.Add(totalCorrect); ret.Add(totalCount); ret.Add(totalPCorrect);
 			return ret;
@@ -2218,11 +2197,11 @@ public class Network
 		{
 			Dictionary<string, double[]> set = new Dictionary<string, double[]>();
 			set.Add("Input", this.inputs[pos]);
-			if (this.targets.Count >0){set.Add("Output", this.targets[pos]);}
+			if (this.targets.Length >0){set.Add("Output", this.targets[pos]);}
 			return set;
 		}
 		
-		public void setAutoCrossValidation(int value)
+		public void setAutoCrossValidation(bool value)
 		{this.autoCrossValidation = value;}
 		
 		public void setAutoSaveNetworkFile(string filename)
@@ -2246,8 +2225,8 @@ public class Network
 		public void loadInputsFromFile(string filename)
 		{
 			this.inputs = this.loadVectorsFromFile(filename);
-			this.loadOrder = new int[this.inputs.Count];
-			for(int i=0;i<this.inputs.Count;i++) {	this.loadOrder[i]=i; }
+			this.loadOrder = new int[this.inputs.Length];
+			for(int i=0;i<this.inputs.Length;i++) {	this.loadOrder[i]=i; }
 		}
 		 
 		public void saveInputsToFile(string filename)
@@ -2261,40 +2240,44 @@ public class Network
 				}
 				tw.Write("\n");
 			}	
+			tw.Write("\n");
+			tw.Close();
 		}
 		
 		public void loadTargetsFromFile(string filename)
-		{ this.targets = this.loadVectorsFromFile();}
+		{ this.targets = this.loadVectorsFromFile(filename);}
 		
 		
 		public void saveTargetsToFile(string filename)
 		{
 			TextWriter tw = new StreamWriter(filename);
-			foreach(double[] input in this.targets)
+			foreach(double[] target in this.targets)
 			{
 				foreach(double value in target)
 				{
 					tw.Write("{0} ", value);
 				}
 				tw.Write("\n");
-			}	
+			}
+			tw.Write("\n");
+			tw.Close();	
 		}
 		
-		public List<double[]> loadVectorsFromFile(string filename)
+		public double[][] loadVectorsFromFile(string filename)
 		{
 			TextReader tr = new StreamReader(filename);	
 			string line = tr.ReadLine();
 			int lineno = 0;
 			int lastLength =-1;
-			List<double[]> data = new List<double[]>();
-			while(line.Length>0)
+			ArrayList data = new ArrayList();
+			while(line.Length>2)
 			{
 				line.Replace("\n","");
 				string[] linedata = line.Split(' ');					
-				List<double> newdata = new List<double>();
+				ArrayList newdata = new ArrayList();
 				foreach(string str in linedata){newdata.Add(double.Parse(str));}
-				if((lastLength==-1)||(newData.Count==lastLength))
-				{ data.Add(newdata.ToArray());}
+				if((lastLength==-1)||(newdata.Count==lastLength))
+				{ data.Add((double[]) newdata.ToArray(typeof(double[])));}
 				else
 				{
 					Console.WriteLine("Data Format Error: line = {0}", lineno);
@@ -2304,55 +2287,69 @@ public class Network
 				lineno++;
 				line = tr.ReadLine();
 			}
-			return data;
+			double[][] adata = (double[][]) data.ToArray(typeof(double[]));			
+			return adata;
 		}
 					
-
-				
-/*			
-
-    def saveDataToFile(self, filename):
-        """
-        Saves data (targets/inputs) to file.
-        """
-        fp = open(filename, 'w')
-        for i in range(len(self.inputs)):
-            try:
-                vec = self.replacePatterns(self.inputs[i])
-                for item in vec:
-                    fp.write("%f " % item)
-            except:
-                pass
-            try:
-                vec = self.replacePatterns(self.targets[i])
-                for item in vec:
-                    fp.write("%f " % item)
-            except:
-                pass
-            fp.write("\n")
-    def loadDataFromFile(self, filename, ocnt = -1):
-        """
-        Loads data (targets/inputs) from file.
-        """
-        if ocnt == -1:
-            ocnt = int(self.layers[len(self.layers) - 1].size)
-        fp = open(filename, 'r')
-        line = fp.readline()
-        self.targets = []
-        self.inputs = []
-        while line:
-            data = map(float, line.split())
-            cnt = len(data)
-            icnt = cnt - ocnt
-            self.inputs.append(self.patternVector(data[0:icnt]))
-            self.targets.append(self.patternVector(data[icnt:]))
-            line = fp.readline()
-        self.loadOrder = [0] * len(self.inputs)
-        for i in range(len(self.inputs)):
-            self.loadOrder[i] = i
-*/
-
-
+		public void saveDataToFile(string filename)
+		{
+			TextWriter tw = new StreamWriter(filename);
+			for(int i=0; i<inputs.Length; i++)
+			{
+				foreach(double item in this.inputs[i])
+				{
+					tw.Write("{0} ", item);
+				}
+				foreach(double item in this.targets[i])
+				{
+					tw.Write("{0} ", item);
+				}
+				tw.Write("\n");
+			}
+			tw.Write("\n");
+			tw.Close();
+		}
+		
+		public void loadDataFromFile(string filename)
+		{
+			int insize = this.layersByName["Input"].size;
+			int outsize = this.layersByName["Output"].size;
+			TextReader tr = new StreamReader(filename);
+			string line = tr.ReadLine();
+			ArrayList targetsList = new ArrayList();
+			ArrayList inputsList = new ArrayList();
+			while(line.Length>2)
+			{
+				string[] linedata = line.Split(' ');
+				if(linedata.Length!=(insize+outsize+1))
+				{	
+					Console.WriteLine("Size mismatch.");
+					Console.WriteLine("Input Layer size: {0}, Output Layer size: {1}, Data: {2}", 
+											insize, outsize, linedata.Length-1);
+					Console.Write("Data in line: ");
+					foreach(string item in linedata){Console.Write("'{0}' ", item);}					
+					
+					
+					throw new Exception();
+				}
+				double[] inarray = new double[insize];
+				double[] outarray = new double[outsize];	
+				Console.WriteLine("In size: {0}, out size: {1}", insize, outsize);
+				for(int i=0; i<insize;i++)
+				{Console.Write(i); inarray[i]=double.Parse(linedata[i]);}
+				Console.Write(" ");
+				for(int j=insize;j<insize+outsize;j++)
+				{outarray[j-insize]=double.Parse(linedata[j]);}				
+				inputsList.Add(inarray);
+				targetsList.Add(outarray);
+				line = tr.ReadLine();
+			}
+			this.inputs = (double[][]) inputsList.ToArray(typeof(double[]));
+			this.targets = (double[][]) targetsList.ToArray(typeof(double[]));
+			this.loadOrder = new int[insize];
+			for (int i=0; i<insize;i++){this.loadOrder[i]=i;}
+		}
+					
 
  		static void Main()
  		{
@@ -2360,18 +2357,18 @@ public class Network
  		
  		   // Network learning 8-digit binary numbers for speed comparison with Python
  		 
- 			
- 			List<double[]> inputs = new List<double[]>();
- 			List<double[]> targets = new List<double[]>();
+ 			/*
+ 			double[][] inputs = new double[256][];
+ 			double[][] targets = new double[256][];
  			int r;
  			int temp;
  			int count;
- 			for(int i=0;i<4;i++)
+ 			for(int i=0;i<256;i++)
  			{	temp = i;
  				count = 0;
- 				double[] array = new double[2];
+ 				double[] array = new double[8];
  				array.Initialize();
- 				for(int j=0;j<2;j++)
+ 				for(int j=0;j<8;j++)
  				{
  					r = temp%2;
  					array[j]=r;
@@ -2379,22 +2376,21 @@ public class Network
  					count+=r;
  				}
  				double[] tar = new double[]{count%2};
- 				inputs.Add(Functions.copyDoubleArray(array));
- 				targets.Add(Functions.copyDoubleArray(tar));				 				
+ 				inputs[i]=Functions.copyDoubleArray(array);
+ 				targets[i]=Functions.copyDoubleArray(tar);				 				
  			}
- 				
  		 	Network net = new Network();
- 		 	net.addLayers(2,2,1);
+ 		 	net.addLayers(8,8,1);
  		 	net.setInputs(inputs);
  		 	net.setTargets(targets);
  		 	net.setReportRate(25);
  		 	net.setResetEpoch(100000);
- 		 	net.setHyperbolicError(1);
+ 		 	net.setHyperbolicError(true);
  		 	DateTime start = DateTime.Now;
  		 	net.train(0,1000);
  		 	TimeSpan timeTaken = DateTime.Now - start;
  		 	Console.WriteLine("Milliseconds: " + timeTaken.Milliseconds);
-				
+			*/	
 			
  			
  		
@@ -2404,17 +2400,17 @@ public class Network
 			
 			//very simple Network for debugging
 			
-			/*
-			List<double[]> inputs = new List<double[]>();
-		   List<double[]> targets = new List<double[]>();		
+			
+			double[][] inputs = new double[2][];
+		   double[][] targets = new double[2][];		
 			double[] a1 = new double[]{0,1};
 			double[] a2 = new double[]{1,0};
 			double[] b1 = new double[]{1};
 			double[] b2 = new double[]{0};
-			inputs.Add(a1);
-			inputs.Add(a2);
-			targets.Add(b1);
-			targets.Add(b2);
+			inputs[0]=a1;
+			inputs[1]=a2;
+			targets[0]=b1;
+			targets[1]=b2;
 			
 			Network net = new Network();
 			net.addThreeLayers(2,1,1);
@@ -2423,17 +2419,18 @@ public class Network
 			net.setTolerance(.4);
 			net.setVerbosity(0);
 			net.setReportRate(25);
-				
+			net.saveDataToFile("/home/kbar/Desktop/testdata.conx");
+			net.loadDataFromFile("/home/kbar/Desktop/testdata.conx");
 			net.layers[0].weight[0]=0;
 			net.layers[0].weight[1]=0;
 			net.layers[1].weight[0]=0;
 			net.layers[2].weight[0]=0;
-			net.connections[0].weight[0][0]=1;
+			net.connections[0].weight[0][0]=0;
 			net.connections[0].weight[1][0]=0;
 			net.connections[1].weight[0][0]=0;
-			net.setOrderedInputs(1);
+			net.setOrderedInputs(true);
 			net.train(0,1000);
-			*/
+			
 
 			Console.WriteLine("Done.");
  		}
