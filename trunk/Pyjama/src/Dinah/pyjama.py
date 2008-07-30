@@ -4,7 +4,7 @@ import pygtk
 pygtk.require('2.0')
 import gtk
 import gtk.glade
-#import myro
+import pango
 
 class Pyjama:
 
@@ -110,12 +110,6 @@ class Pyjama:
         #makes beep2 a source for dnd
         self.wTree.get_widget("beep2dragbutton").drag_source_set(gtk.gdk.BUTTON1_MASK,[("beep2",0,30)],gtk.gdk.ACTION_COPY)
         
-        #makes graphwin a source for dnd
-        self.wTree.get_widget("graphwindragbutton").drag_source_set(gtk.gdk.BUTTON1_MASK,[("graphwin",0,31)],gtk.gdk.ACTION_COPY)
-        
-        #makes close a source for dnd
-        self.wTree.get_widget("closedragbutton").drag_source_set(gtk.gdk.BUTTON1_MASK,[("close",0,32)],gtk.gdk.ACTION_COPY)
-        
         #makes change bg color a source for dnd
         self.wTree.get_widget("bgdragbutton").drag_source_set(gtk.gdk.BUTTON1_MASK,[("bg",0,33)],gtk.gdk.ACTION_COPY)
         
@@ -170,7 +164,7 @@ class Pyjama:
         self.wTree.get_widget("movexydragbutton").drag_source_set(gtk.gdk.BUTTON1_MASK,[("movexy",0,50)],gtk.gdk.ACTION_COPY)
         
         global listOfDraggables
-        listOfDraggables=[("print",0,4),("forward",0,5),("backward",0,6),("left",0,7),("right",0,8),("stop",0,9),("motors",0,10),("wait",0,11),("currenttime",0,12),("settimer",0,13),("elapsed",0,14),("askuser",0,15),("gamepad",0,16),("joystick",0,17),("takepic",0,18),("showpic",0,19),("loadpic",0,20),("savepic",0,21),("copypic",0,22),("pixels",0,23),("pixel",0,24),("playsound",0,25),("loadsound",0,26),("beep",0,27),("speak",0,28),("setvoice",0,29),("beep2",0,30),("graphwin",0,31),("close",0,32),("bg",0,33),("draw",0,34),("undraw",0,35),("point",0,36),("x",0,37),("y",0,38),("line",0,39),("circle",0,40),("rectangle",0,41),("oval",0,42),("polygon",0,43),("text",0,44),("image",0,45),("center",0,46),("outlinecolor",0,47),("fillcolor",0,48),("thickness",0,49),("movexy",0,50)]
+        listOfDraggables=[("print",0,4),("forward",0,5),("backward",0,6),("left",0,7),("right",0,8),("stop",0,9),("motors",0,10),("wait",0,11),("currenttime",0,12),("settimer",0,13),("elapsed",0,14),("askuser",0,15),("gamepad",0,16),("joystick",0,17),("takepic",0,18),("showpic",0,19),("loadpic",0,20),("savepic",0,21),("copypic",0,22),("pixels",0,23),("pixel",0,24),("playsound",0,25),("loadsound",0,26),("beep",0,27),("speak",0,28),("setvoice",0,29),("beep2",0,30),("bg",0,33),("draw",0,34),("undraw",0,35),("point",0,36),("x",0,37),("y",0,38),("line",0,39),("circle",0,40),("rectangle",0,41),("oval",0,42),("polygon",0,43),("text",0,44),("image",0,45),("center",0,46),("outlinecolor",0,47),("fillcolor",0,48),("thickness",0,49),("movexy",0,50)]
 
         #makes codevbox a drag destination
         self.wTree.get_widget("codevbox").drag_dest_set(gtk.DEST_DEFAULT_MOTION|gtk.DEST_DEFAULT_HIGHLIGHT|gtk.DEST_DEFAULT_DROP, listOfDraggables,gtk.gdk.ACTION_COPY)
@@ -517,25 +511,6 @@ class Pyjama:
             blockHBox.pack_start(beep2Spin3,False,False,0)
             beep2Label4=gtk.Label(" seconds ")
             blockHBox.pack_start(beep2Label4,False,False,0)
-        elif context.targets==["graphwin"]:
-            graphwinLabel1=gtk.Label(" graphics window titled ")
-            blockHBox.pack_start(graphwinLabel1,False,False,0)
-            graphwinTextEntry=gtk.Entry()
-            blockHBox.pack_start(graphwinTextEntry,False,False,0)
-            graphwinLabel2=gtk.Label(" with width ")
-            blockHBox.pack_start(graphwinLabel2,False,False,0)
-            graphwinSpin1=gtk.SpinButton(gtk.Adjustment(400,1,1000,10,50,0),0.0,0)
-            blockHBox.pack_start(graphwinSpin1,False,False,0)
-            graphwinLabel3=gtk.Label(" and height ")
-            blockHBox.pack_start(graphwinLabel3,False,False,0)
-            graphwinSpin2=gtk.SpinButton(gtk.Adjustment(400,1,1000,10,50,0),0.0,0)
-            blockHBox.pack_start(graphwinSpin2,False,False,0)
-        elif context.targets==["close"]:
-            closeLabel=gtk.Label(" close ")
-            blockHBox.pack_start(closeLabel,False,False,0)
-            closeComboBox=gtk.combo_box_new_text()
-            closeComboBox.append_text("<graphics window>")
-            blockHBox.pack_start(closeComboBox,False,False,0)
         elif context.targets==["bg"]:
             bgLabel=gtk.Label(" change background color to ")
             blockHBox.pack_start(bgLabel,False,False,0)
@@ -552,16 +527,6 @@ class Pyjama:
             blockHBox.pack_start(drawVBox1,False,False,0)
             drawVBox1.drag_dest_set(gtk.DEST_DEFAULT_MOTION|gtk.DEST_DEFAULT_HIGHLIGHT|gtk.DEST_DEFAULT_DROP,[("point",0,36),("line",0,39),("circle",0,40),("rectangle",0,41),("oval",0,42),("polygon",0,43),("text",0,44),("image",0,45)],gtk.gdk.ACTION_COPY)
             drawVBox1.connect("drag_drop",self.removeAndDrop)
-            drawLabel2=gtk.Label(" on window ")
-            blockHBox.pack_start(drawLabel2,False,False,0)
-            drawVBox2=gtk.VBox()
-            drawComboBox2=gtk.combo_box_new_text()
-            drawComboBox2.append_text("<graphics window>")
-            drawComboBox2.set_name("combo2")
-            drawVBox2.pack_start(drawComboBox2,False,False,0)
-            blockHBox.pack_start(drawVBox2,False,False,0)
-            drawVBox2.drag_dest_set(gtk.DEST_DEFAULT_MOTION|gtk.DEST_DEFAULT_HIGHLIGHT|gtk.DEST_DEFAULT_DROP,[("graphwin",0,31)],gtk.gdk.ACTION_COPY)
-            drawVBox2.connect("drag_drop",self.removeAndDrop)
             innerVBox.set_name("draw")
         elif context.targets==["undraw"]:
             undrawLabel=gtk.Label(" undraw ")
@@ -740,31 +705,27 @@ class Pyjama:
                 textBox=child.get_children()[0].get_child().get_children()[-1]
                 print textBox.get_text()
             elif child.get_name()=="draw":
+                drawingArea=self.wTree.get_widget("maindrawingarea").window
                 image=child.get_children()[0].get_child().get_children()[1].get_children()[0]
                 if image.get_name()=="combo1":
-                    #itemToDraw=myro.Point(50,50)
+                    drawingArea.draw_point(gtk.gdk.GC(drawingArea, gtk.gdk.Color()),50,50)
                 elif image.get_name()=="point":
-                    xcoord=image.get_children()[0].get_child().get_children()[1].get_value()
-                    ycoord=image.get_children()[0].get_child().get_children()[3].get_value()
-                    #itemToDraw=myro.Point(xcoord,ycoord)
+                    xcoord=image.get_children()[0].get_child().get_children()[1].get_value_as_int()
+                    ycoord=image.get_children()[0].get_child().get_children()[3].get_value_as_int()
+                    drawingArea.draw_point(gtk.gdk.GC(drawingArea,gtk.gdk.Color()),xcoord,ycoord)
                 elif image.get_name()=="text":
                     text=image.get_children()[0].get_child().get_children()[0].get_text()
+                    pangoText=pango.Layout(pango.Context())
+                    pangoText.set_text(text)
                     point=image.get_children()[0].get_child().get_children()[2]
-                    xcoord=point.get_children()[0].get_children()[0].get_child().get_children()[1].get_value()
-                    ycoord=point.get_children()[0].get_children()[0].get_child().get_children()[3].get_value()
-                    #itemToDraw=myro.Text(Point(xcoord,ycoord),text)
+                    xcoord=point.get_children()[0].get_children()[0].get_children()[0].get_children()[1].get_value_as_int()
+                    ycoord=point.get_children()[0].get_children()[0].get_children()[0].get_children()[3].get_value_as_int()
+                    drawingArea.draw_layout(gtk.gdk.GC(drawingArea),xcoord,ycoord,pangoText)
                 else:
                     #will add other categories later--line, circle, rectangle, oval, polygon, text, image
                     pass
-                graphwin=child.get_children()[0].get_child().get_children()[3].get_children()[0]
-                if graphwin.get_name()=="combo2":
-                    #win=myro.GraphWin()
-                else:
-                    title=graphwin.get_children()[0].get_child().get_children()[1].get_text()
-                    width=graphwin.get_children()[0].get_child().get_children()[3].get_value()
-                    height=graphwin.get_children()[0].get_child().get_children()[5].get_value()
-                    #win=myro.GraphWin(title,width,height)
-                #itemToDraw.myro.draw(win)
+            else:
+                pass
         
     def setUpProgram(self,widget,data=None):
         #get current page's codevbox, run program from this vbox
