@@ -471,6 +471,11 @@ void serve_set_uart0()
   int baud;
   int format;
   int fifo;
+
+  uint16_t nbaud = 0;
+  int nformat = 0;
+  int nfifo = 0;
+
   // get the magic key
   key = getchblock();
   if (key == 0x01)
@@ -478,7 +483,73 @@ void serve_set_uart0()
       baud = getchblock(); //getchblock2b();
       format = getchblock(); //getchblock2b();
       fifo = getchblock(); //getchblock2b();
-      uart0Init(baud, format, fifo); // setup UART 0
+      if (baud == NB1200) {
+	nbaud = B1200;
+      } else if (baud == NB2400) {
+	nbaud = B2400;
+      } else if (baud == NB4800) {
+	nbaud = B4800;
+      } else if (baud == NB9600) {
+	nbaud = B9600;
+      } else if (baud == NB19200) {
+	nbaud = B19200;
+      } else if (baud == NB38400) {
+	nbaud = B38400;
+      } else if (baud == NB57600) {
+	nbaud = B57600;
+      } else if (baud == NB115200) {
+	nbaud = B115200;
+      } else if (baud == NB230400) {
+	nbaud = B230400;
+      } else if (baud == NB460800) {
+	nbaud = B460800;
+      } else if (baud == NB921600) {
+	nbaud = B921600;
+      } else if (baud == NB1843200) {
+	nbaud = B1843200;
+      } else if (baud == NB3686400) {
+	nbaud = B3686400;
+      }
+
+      if (format == NUART_8N1) {
+	nformat = UART_8N1;
+      } else if (format == NUART_7N1) {
+	nformat = UART_7N1;
+      } else if (format == NUART_8N2) {
+	nformat = UART_8N2;
+      } else if (format == NUART_7N2) {
+	nformat = UART_7N2;
+      } else if (format == NUART_8E1) {
+	nformat = UART_8E1;
+      } else if (format == NUART_7E1) {
+	nformat = UART_7E1;
+      } else if (format == NUART_8E2) {
+	nformat = UART_8E2;
+      } else if (format == NUART_7E2) {
+	nformat = UART_7E2;
+      } else if (format == NUART_8O1) {
+	nformat = UART_8O1;
+      } else if (format == NUART_7O1) {
+	nformat = UART_7O1;
+      } else if (format == NUART_8O2) {
+	nformat = UART_8O2;
+      } else if (format == NUART_7O2) {
+	nformat = UART_7O2;
+      }
+
+      if (fifo == NUART_FIFO_OFF) {
+	nfifo = UART_FIFO_OFF;
+      } else if (fifo == NUART_FIFO_1) {
+	nfifo = UART_FIFO_1;
+      } else if (fifo == NUART_FIFO_4) {
+	nfifo = UART_FIFO_4;
+      } else if (fifo == NUART_FIFO_8) {
+	nfifo = UART_FIFO_8;
+      } else if (fifo == NUART_FIFO_14) {
+	nfifo = UART_FIFO_14;
+      }
+
+      uart0Init(nbaud, nformat, nfifo); // setup UART 0
     }  
 }
 

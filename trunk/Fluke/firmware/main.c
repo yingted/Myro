@@ -79,6 +79,11 @@ int main (void)
   
   // The scribbler UART(0) is 38400 8N1
   uart0Init(B38400, UART_8N1, UART_FIFO_8); // setup UART 0
+  
+  // The CM-5 UART (0) is 57600 8N1
+  //  uart0Init(B57600, UART_8N1, UART_FIFO_8); // setup UART 0
+  // The Robonova UART (0) is 9600 or 115200 8N1
+  //  uart0Init(B115200, UART_8N1, UART_FIFO_8); // setup UART 0
 
   
   // The bluetooth UART(1)

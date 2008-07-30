@@ -53,6 +53,20 @@
 #define B1843200      UART_BAUD(1843200)
 #define B3686400      UART_BAUD(3686400)
 
+#define NB1200        0
+#define NB2400        1
+#define NB4800        2
+#define NB9600        3
+#define NB19200       4
+#define NB38400       5
+#define NB57600       6
+#define NB115200      7
+#define NB230400      8
+#define NB460800      9
+#define NB921600      10
+#define NB1843200     11
+#define NB3686400     12
+
 ///////////////////////////////////////////////////////////////////////////////
 // Definitions for typical UART 'mode' settings
 #define UART_8N1      (uint8_t)(ULCR_CHAR_8 + ULCR_PAR_NO   + ULCR_STOP_1)
@@ -68,6 +82,19 @@
 #define UART_8O2      (uint8_t)(ULCR_CHAR_8 + ULCR_PAR_ODD  + ULCR_STOP_2)
 #define UART_7O2      (uint8_t)(ULCR_CHAR_7 + ULCR_PAR_ODD  + ULCR_STOP_2)
 
+#define NUART_8N1     0
+#define NUART_7N1     1
+#define NUART_8N2     2
+#define NUART_7N2     3
+#define NUART_8E1     4
+#define NUART_7E1     5
+#define NUART_8E2     6
+#define NUART_7E2     7
+#define NUART_8O1     8
+#define NUART_7O1     9
+#define NUART_8O2     10
+#define NUART_7O2     11
+
 ///////////////////////////////////////////////////////////////////////////////
 // Definitions for typical UART 'fmode' settings
 #define UART_FIFO_OFF (0x00)
@@ -75,6 +102,12 @@
 #define UART_FIFO_4   (uint8_t)(UFCR_FIFO_ENABLE + UFCR_FIFO_TRIG4)
 #define UART_FIFO_8   (uint8_t)(UFCR_FIFO_ENABLE + UFCR_FIFO_TRIG8)
 #define UART_FIFO_14  (uint8_t)(UFCR_FIFO_ENABLE + UFCR_FIFO_TRIG14)
+
+#define NUART_FIFO_OFF 0
+#define NUART_FIFO_1   1
+#define NUART_FIFO_4   2
+#define NUART_FIFO_8   3
+#define NUART_FIFO_14  4
 
 void uart0Init(uint16_t baud, uint8_t mode, uint8_t fmode);
 int uart0Putch(int ch);
