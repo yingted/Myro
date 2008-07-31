@@ -5,9 +5,9 @@
 (define make-all-datatypes
   (lambda ()
     (list
-      (make-datatype 'continuation 'cont '((k k2) value))
+      (make-datatype 'continuation 'cont '((k k2 rep-k) value))
       (make-datatype 'continuation2 'cont2 '((k k2) value1 value2))
-      (make-datatype 'handler 'handler '(handler exception))
+      (make-datatype 'handler 'handler '((handler rep-handler) exception))
       (make-datatype 'procedure 'proc '(proc args env2 handler k2))
       )))
 
