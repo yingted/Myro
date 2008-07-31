@@ -236,8 +236,7 @@ public class Node
         }
         catch
         {
-            Console.WriteLine("No node values initialized yet.")
-            ;
+            Console.WriteLine("No node values initialized yet.");
         }
 
     }
@@ -255,8 +254,7 @@ public void update()
         }
         catch
         {
-            Exception e = new Exception("Problem getting vlues from layer.")
-                  ;
+            Exception e = new Exception("Problem getting vlues from layer.");
             throw e;
         }
     }
@@ -567,10 +565,10 @@ public class Layer
     public void print(double[] array, string name)
     {
         Console.Write(name);
-        Console.Write("     ");
+        Console.Write("\t");
         foreach (double tar in array)
         {
-            Console.Write("{0:G4}    ", tar);
+            Console.Write("{0:G4}\t", tar);
         }
         Console.Write("\n");
     }
@@ -1323,7 +1321,7 @@ public class Network
         this.connections.Insert(position, con);
     }
 
-    public void addThreeLayers(int inc, int hidc, int outc)
+    public virtual void addThreeLayers(int inc, int hidc, int outc)
     {
         this.addLayer("Input", inc);
         this.addLayer("Hidden", hidc);
@@ -2286,7 +2284,7 @@ public class Network
     }
 
 
-    public List<object> step(Dictionary<string,double[]> args)
+    public virtual List<object> step(Dictionary<string,double[]> args)
     {
         Layer inLayer;
         Layer outLayer;
@@ -2317,11 +2315,20 @@ public class Network
             }
             outLayer.copyTargets(inLayer.activation);
         }
-
+        Dictionary<string,double[]> retval2 = this.prebackprop(args);
+        if(retval2.Count>0)
+        {
+            args=retval2;
+        }
         List<object> list = backprop(args);
         if(this.verbosity > 2)
         {
             this.display();
+        }
+        Dictionary<string,double[]> retval2 = this.postbackprop(args);
+        if(retval2.Count>0)
+        {
+            args=retval2;
         }
         if(this.learning && !this.batch)
         {
@@ -2331,16 +2338,25 @@ public class Network
         return list;
     }
 
-    public Dictionary<string,double[]> prepropagate(Dictionary<string,double[]> args)
+    public virtual Dictionary<string,double[]> prepropagate(Dictionary<string,double[]> args)
     {
-        return new Dictionary<string,double[]>();
+        return args;
     }
 
-    public Dictionary<string,double[]> postpropagate(Dictionary<string,double[]> args)
+    public virtual Dictionary<string,double[]> postpropagate(Dictionary<string,double[]> args)
     {
-        return new Dictionary<string,double[]>();
+        return args;
     }
 
+    public virtual Dictionary<string,double[]> prebackprop(Dictionary<string,double[]> args)
+    {
+        return args;
+    }
+    
+    public virtual Dictionary<string,double[]> postpropagate(Dictionary<string,double[]> args)
+    {
+        return args;
+    }
 
 
     public List<object> backprop(Dictionary<string,double[]> args)
@@ -3485,6 +3501,18 @@ public class Network
     }
     
 
+    public void add(Layer layer)
+    {
+        layer.maxRandom = this.maxRandom;
+        layer.minTarget = this.act.minTarget;
+        layer.minActivation = this.act.minActivation;
+        layer.maxTarget = this.act.maxTarget;
+        layer.maxActivation = this.act.maxActivation;
+        this.layers.Add(layer);
+        this.layersByName.Add(layer.name, layer);
+    }
+
+
     static void Main()
     {
 
@@ -3572,3 +3600,319 @@ public class Network
     }
 }
 
+
+
+
+
+
+
+
+public class SRN: Network
+{
+	bool initContext = false;
+	bool learningDuringSequencing = true;
+	bool contextCopying = true;
+	Dictionary<string, Layer> contextLayers = new Dictionary<string, Layer>();
+	List<string[]> prediction;
+	string sequenceType="";
+
+	public SRN(): base()
+	{
+		this.name = "Simple Recurrent Network";
+		Console.WriteLine("Remember to set sequence type.");
+	}
+	
+	public setSequenceType(string value)
+	{
+		if (value == "ordered-continuous")
+		{
+			this.orderedInputs = true;
+			this.initContext = false;
+			this.sequenceType = value;
+		}
+		if (value == "random-segmented")
+		{
+			this.orderedInputs = false;
+			this.initContext = true;
+			this.sequenceType = value;
+		}
+		if (value == "random-continuous")
+		{
+			this.orderedInputs = false;
+			this.initContext = false;
+			this.sequenceType = value;
+		}
+		if (value == "ordered-segmented")
+		{
+			this.orderedInputs = true;
+			this.initContext = true;
+			this.sequenceType = value;
+		}
+		if (this.sequenceType.Count<1)try
+		{
+			Console.WriteLine("Please set valid sequence type.");
+			Console.WriteLine("Options: \"ordered-continuous\", \"random-segmented\", \"random-continuous\", \"ordered-segmented\");
+			throw new Exception("Sequence type not set.");
+		}
+	}
+	
+	
+	public void predict(string inName, string outName)
+	{
+		string[] array = new string[]{inName, outName};
+		this.prediction.Add(array);
+	}
+	
+	
+	public void setInitContext(bool value)
+	{
+		this.initContext = value;
+	}
+	
+			
+	public setLearningDuringSequence(bool value)
+	{
+		this.learningDuringSequence = value;
+	}
+	
+	
+	public override void addThreeLayers(int inc, int hidc, int outc)
+    {
+        this.addLayer("Input", inc);
+        this.addContextLayer("Context", hidc, "Hidden");
+        this.addLayer("Hidden", hidc);
+        this.addLayer("Output", outc);
+        this.connect("Input", "Hidden");
+        this.connect("Context", "Hidden");
+        this.connect("Hidden", "Output");
+    }
+	
+
+	public addSRNLayers(int inc, int hidc, int outc)
+	{
+		this.addThreeLayers(inc, hidc, outc)
+	}
+	
+	
+	public addContextLayer(string name, int size, string hiddenLayerName)
+	{
+		Layer layer = Layer(name, size);
+		this.addContext(layer, hiddenLayerName);
+	}
+	
+
+	public addContextLayer(string name, int size, string hiddenLayerName, int verbosity)
+	{
+		Layer layer = Layer(name, size);
+		layer.verbosity = verbosity;
+		this.addContext(layer, hiddenLayerName);
+	}
+
+
+	public addContext(Layer layer, string hiddenLayerName)
+	{
+		SRN.add(layer);
+		if (this.contextLayers.ContainsKey(hiddenLayerName))
+		{
+			throw new Exception("There is already a context Layer associated with this layer.");
+		}
+		else
+		{
+			this.contextLayers.Add(hiddenLayerName, layer);
+			layer.kind = "Context";
+		}
+	}
+
+
+	public copyHiddenToContext()
+	{
+		foreach(string key in this.contextLayers.Keys)
+		{
+			if(this.verbosity>2)
+			{
+				Console.WriteLine("Hidden Layer: {0}", this.getLayer(key).activation);
+				Console.WriteLine("Context Layer before copy: {0}", this.contextLayers[key].activation);
+			}
+			this.contextLayers[key].copyActivations(this.getLayer(item[0]).activation);
+			if(this.verbosity>2)
+			{
+				Console.WriteLine("Context Layer after copy: {0}", this.contextLayers[key].activation);
+			}
+		}
+	}
+	
+		
+
+	public void setContext(double value)
+	{
+		foreach( Layer context in this.contextLayers.Values)
+		{
+			context.resetFlags();
+			context.setActivations(value);
+		}
+	}
+	
+	
+	public override Dictionary<string, double[]> prepropagate(Dictionary<string, double[]> args)
+	{
+		if(!this.contextCopying)
+		{
+			foreach(Layer layer in this.layers)
+			{
+				if (layer.kind == "Context")
+				{
+					layer.activationSet = true;
+				}
+			}
+		}
+		return args;
+	}
+	
+	
+	public override Disctionary<string, double[]> postbackprop(Dictionary<string,double[]>)
+	{
+		if(this.contextCopying)
+		{
+			this.copyHiddenToContext
+		}
+		return args;
+	}
+
+
+	public List<object> networkStep(Dictionary<string,double> args)
+	{
+		return base.step(args);
+	}
+	
+	
+	public override List<object> step(Dictionary<string,double> args)
+	{
+		if(this.sequenceType.Couont<1)
+		{
+			throw new Exception("sequenceType not set! Use SRN.setSequenceType()");
+		}
+		if (this.initContext)
+		{
+			this.setContext();
+		}
+		else
+		{
+			foreach(Layer context in this.contextLayers.Values)
+			{
+				context.activationSet = true;
+			}
+		}
+		List<string> inputBankNames = new List<string>();
+		List<string> outputBankNames = new List<string>();
+		int inputBankSize =0;
+		List<int> inputArgSizes = new List<int>();
+		int inputArgSize = 0;
+		foreach(Layer layer in this.layers)
+		{
+			if (layer.kind == "Input")
+			{
+				inputBankNames.Add(layer.name);
+				inputBankSize+=layer.size;
+				if (args.ContainsKey(layer.name))
+				{
+					inputArgSize+= args[layer.name].Length;
+				}
+			}
+			if (layer.kind == "Output")
+			{
+				outputBankNames.Add(layer.name);
+			}
+		}
+		int sequenceLength = inputArgSize/inputTotalSize;
+		bool learning = this.learning;
+			
+
+    /*
+    def step(self, **args):
+
+        # replace all patterns
+        for key in args:
+            args[key] = self.replacePatterns( args[key], key )
+        # Get all of the input/output layer names:
+        inputBankNames = [layer.name for layer in self.layers if layer.kind == 'Input']
+        outputBankNames = [layer.name for layer in self.layers if layer.kind == 'Output']
+        inputBankSizes = [layer.size for layer in self.layers if layer.kind == 'Input']
+        inputBankTotalSize = sum(inputBankSizes)
+        inputArgSizes = [len(args[name]) for name in inputBankNames if name in args]
+        inputArgTotalSize = sum(inputArgSizes)
+        sequenceLength = inputArgTotalSize / inputBankTotalSize
+        learning = self.learning
+        totalRetvals = (0.0, 0, 0) # error, correct, total
+        totalPCorrect = {}
+        for step in range(sequenceLength):
+            if self.verbosity >= 1 or self.interactive:
+                print "-----------------------------------Step #", step + 1
+            dict = {}
+            dict.update(args) # in case context, or others
+            # now, overwrite input and output, if necessary
+            for name in inputBankNames:
+                if name in args:
+                    patternLength = self[name].size
+                    offset = step * patternLength
+                    if (offset + patternLength) >= len(args[name]):
+                        # if this seq is too big, use last part:
+                        dict[name] = args[name][-patternLength:]
+                    else:
+                        # else, go to the right spot in seq:
+                        dict[name] = args[name][offset:offset+patternLength]
+            for name in outputBankNames:
+                if name in args:
+                    patternLength = self[name].size
+                    offset = step * patternLength
+                    if (offset + patternLength) >= len(args[name]):
+                        # if this seq is too big, use last part:
+                        dict[name] = args[name][-patternLength:]
+                    else:
+                        # else, go to the right spot in seq:
+                        dict[name] = args[name][offset:offset+patternLength]
+            # get info for predicition -------------------------
+            for p in self.prediction:
+                (inName, outName) = p
+                inLayer = self.getLayer(inName)
+                if not inLayer.type == 'Input':
+                    raise LayerError, ('Prediction input layer not type \'Input\'.', inLayer.type)
+                outLayer = self.getLayer(outName)
+                if not outLayer.type == 'Output':
+                    raise LayerError, ('Prediction output layer not type \'Output\'.', outLayer.type)
+                if step == sequenceLength - 1: # last one in sequence; what do we do?
+                    start = 0 # wrap to next input vector
+                    if not self._sweeping: # not in sweep, in step, no target
+                        raise LayerError, "Attempting to predict last item in sequence, but using step(). Use sweep() instead."
+                    else: # in a sweep, so get the next pattern if one:
+                        if self.currentSweepCount == None: # last item in epoch, predict back to first pattern
+                            # Train it to predict first pattern, first sequence item
+                            pattern = self.getData(self.loadOrder[0])
+                            for key in pattern:
+                                pattern[key] = self.replacePatterns( pattern[key], key )
+                            if inName in inputBankNames:
+                                if inName in pattern:
+                                    dict[outName] = pattern[inName][start:start+patternLength]
+                            #dict[outName] = pattern["input"][start:start+patternLength]
+                        else:
+                            pattern = self.getData(self.loadOrder[self.currentSweepCount+1]) 
+                            for key in pattern:
+                                pattern[key] = self.replacePatterns( pattern[key], key )
+                            if inName in inputBankNames:
+                                if inName in pattern:
+                                    dict[outName] = pattern[inName][start:start+patternLength]
+                            #dict[outName] = pattern["input"][start:start+patternLength]
+                else: # in middle of sequence
+                    start = (step + 1) * inLayer.size
+                    dict[outName] = args[inName][start:start+patternLength]
+            # end predicition code -----------------------------
+            if step < sequenceLength - 1: # not the last one
+                if not self.learnDuringSequence:
+                    self.learning = 0
+            retvals = self.networkStep(**dict)
+            self.learning = learning # in case we turned it off
+            totalRetvals = map(lambda x,y: x+y, totalRetvals[:3], retvals[:3])
+            sumMerge(totalPCorrect, retvals[3])
+            totalRetvals.append( totalPCorrect)
+        return totalRetvals
+
+			*/
