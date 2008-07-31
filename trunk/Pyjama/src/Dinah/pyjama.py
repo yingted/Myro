@@ -713,6 +713,7 @@ class Pyjama:
                     xcoord=image.get_children()[0].get_child().get_children()[1].get_value_as_int()
                     ycoord=image.get_children()[0].get_child().get_children()[3].get_value_as_int()
                     drawingArea.draw_point(gtk.gdk.GC(drawingArea,gtk.gdk.Color()),xcoord,ycoord)
+                #the next section crashes the entire program when run. no idea why, though i sent an e-mail out to the pygtk mailing list to ask why.
                 elif image.get_name()=="text":
                     text=image.get_children()[0].get_child().get_children()[0].get_text()
                     pangoText=pango.Layout(pango.Context())
