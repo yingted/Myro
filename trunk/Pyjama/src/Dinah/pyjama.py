@@ -22,7 +22,11 @@ class Pyjama:
 
         #Switches the interpreter and the code window.
         #Can probably be set up using turning pack start on and off, though it isn't working right now.
-
+        
+        #changes background color of graphics window. unfortunately, I can only get it to change to black, which doesn't help.
+        self.wTree.get_widget("maindrawingarea").modify_bg(gtk.STATE_NORMAL,gtk.gdk.Color(50,50,50))
+        style=gtk.Style()
+        style.set_background(self.wTree.get_widget("maindrawingarea").window,gtk.STATE_NORMAL)
 
         #sets up drop signal over codevbox, running program, adding new script tab
         #add user-defined parameter to self.runProgram to run current tab's program
