@@ -14,9 +14,6 @@
  *
  *********************************************************************/
 
-using Gtk;
-using Gdk;
-using GtkSourceView;
 using System;
 using System.IO;
 using System.Collections.Generic;
@@ -39,25 +36,17 @@ public class PythonShell: BaseShell, PyjamaInterfaces.IShell
     
     public PythonShell() : base()
     {
-        mgr = new SourceLanguagesManager();
-        language = mgr.GetLanguageFromMimeType("text/x-python");
+	  //mgr = new SourceLanguagesManager();
+	  //language = mgr.GetLanguageFromMimeType("text/x-python");
         
         // Set up syntax highlighting
-        buffer = new SourceBuffer(language);
-        buffer.Highlight = true;
-        source_view = new ShellSourceView(buffer, ">>> ");
+        //buffer = new SourceBuffer(language);
+        //buffer.Highlight = true;
+        //source_view = new ShellSourceView(buffer, ">>> ");
         
         // Change the font to fixed-width:
-        Pango.FontDescription font = new Pango.FontDescription();
-        font.Family = "Monospace";
-        source_view.ModifyFont(font);
-        
-        // Event Handlers:
-        source_view.WrapMode = Gtk.WrapMode.Word;
-        source_view.AutoIndent = true;
-        source_view.Execute += execute;
 
-        output_stream = new TextBufferOutputStream(buffer);
+	  //output_stream = new TextBufferOutputStream(buffer);
         
         runtime = ScriptRuntime.Create();
         runtime.LoadAssembly(typeof(string).Assembly);
@@ -75,11 +64,11 @@ public class PythonShell: BaseShell, PyjamaInterfaces.IShell
         command("sys.path.append('.')");
         command("sys.path.append('python')");
         command("sys.path.append('DLLs')");
-        buffer.Text += "# Python " + command("sys.version") + "\n" +
-                       "# " + command("sys.copyright") + "\n";
+        //buffer.Text += "# Python " + command("sys.version") + "\n" +
+		//"# " + command("sys.copyright") + "\n";
         command("del sys");
         
-        source_view.AddPrompt();
+        //source_view.AddPrompt();
     }
 
     // Evaluates an expression or executes a statement.

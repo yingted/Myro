@@ -22,27 +22,17 @@ using System.Windows.Forms;
 
 using PyjamaInterfaces;
 
-namespace PyjamaGUI {
-  /*
-  [Widget] Window main_window;
-  [Widget] Container shell_container;
-  [Widget] Notebook notebook;
-  */
-    
-  public class PyjamaForm : Form {
-	List <IDocument> documents = new List <IDocument>();
-
-	public PyjamaForm(string[] args) {
-	  this.Text = "Pyjama Project";
-	}
+public class PyjamaForm : Form {
+  List <IDocument> documents = new List <IDocument>();
+  
+  public PyjamaForm(string[] args) {
+	this.Text = "Pyjama Project";
+  }
+  
+  [STAThread] // for windows interop with clipboard, etc
+	  public static void Main(string[] args) {
 	
-	[STAThread] // for windows interop with clipboard, etc
-	public static void Main(string[] args) {
-	  
-	  PyjamaForm form = new PyjamaForm(args);
-	  
-	}
-	
+	PyjamaForm form = new PyjamaForm(args);
 	
   }
   

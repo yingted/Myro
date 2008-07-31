@@ -43,7 +43,7 @@ namespace PyjamaInterfaces
         void SetPage(int page);
         int GetSize();
         void Print();
-        bool Untitled { get; }
+        //bool Untitled { get; }
     }
 
     public interface IShell

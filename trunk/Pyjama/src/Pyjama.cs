@@ -14,7 +14,6 @@
  *
  *********************************************************************/
 
-using PyjamaGUI;
 using System.Windows.Forms;
 
 public class Pyjama {
