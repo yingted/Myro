@@ -4,7 +4,7 @@ import pygtk
 pygtk.require('2.0')
 import gtk
 import gtk.glade
-import pango
+#import pango
 
 class Pyjama:
 
@@ -170,6 +170,9 @@ class Pyjama:
         self.wTree.get_widget("codevbox").drag_dest_set(gtk.DEST_DEFAULT_MOTION|gtk.DEST_DEFAULT_HIGHLIGHT|gtk.DEST_DEFAULT_DROP, listOfDraggables,gtk.gdk.ACTION_COPY)
         #the next line is phrased wrong; fix it later
         self.wTree.get_widget("codevbox").connect("drag_drop",self.codeDragDrop)
+        
+        #doesn't work yet, but connect usedBlocks to contents of current codevbox, when dragged to trash can icon, delete them
+        #self.wTree.get_widget("deletebutton").drag_dest_set(gtk.DEST_DEFAULT_MOTION|gtk.DEST_DEFAULT_HIGHLIGHT|gtk.DEST_DEFAULT_DROP, usedBlocks,gtk.gdk.ACTION_MOVE)
 
     def addOther(self,widget,data=None):
         #pops up a dialog which asks for a name for the script
@@ -715,9 +718,8 @@ class Pyjama:
                     drawingArea.draw_point(gtk.gdk.GC(drawingArea,gtk.gdk.Color()),xcoord,ycoord)
                 #the next section crashes the entire program when run. no idea why, though i sent an e-mail out to the pygtk mailing list to ask why.
                 elif image.get_name()=="text":
-                    text=image.get_children()[0].get_child().get_children()[0].get_text()
-                    pangoText=pango.Layout(pango.Context())
-                    pangoText.set_text(text)
+                    text=image.get_children()[0].get_child().get_children()[0]
+                    pangoText=text.get_parent().create_pango_layout(text.get_text())
                     point=image.get_children()[0].get_child().get_children()[2]
                     xcoord=point.get_children()[0].get_children()[0].get_children()[0].get_children()[1].get_value_as_int()
                     ycoord=point.get_children()[0].get_children()[0].get_children()[0].get_children()[3].get_value_as_int()
