@@ -12,7 +12,7 @@
 
 (define REP-k
   (lambda-cont (v)
-    (pretty-print v)
+    (safe-print v)
     (read-eval-print-temp)))
 
 (define REP-handler
@@ -64,6 +64,20 @@
 	     (parse datum REP-handler
 	       (lambda-cont (exp)
 		 (m exp toplevel-env REP-handler REP-k))))))))))
+
+;; used by the data structure version of the code
+(define data-structure-procedure?
+  (lambda (x)
+    (and (list? x)
+	 (not (null? x))
+	 (eq? (car x) 'procedure))))
+
+;; we'll need to fully implement safe-print
+(define safe-print
+  (lambda (x)
+    (if (data-structure-procedure? x)
+      (printf "#[procedure]~%")
+      (pretty-print x))))
 
 (define m
   (lambda (exp env handler k)
@@ -215,7 +229,7 @@
 		    (proc-args (cadr args)))
 		(proc proc-args env2 handler k2)))
 	    (lambda-proc (args env2 handler k2) (k2 (apply sqrt args)))
-	    (lambda-proc (args env2 handler k2) (for-each pretty-print args) (k2 'ok))
+	    (lambda-proc (args env2 handler k2) (for-each safe-print args) (k2 'ok))
 	    (lambda-proc (args env2 handler k2) (apply display args) (k2 'ok))
 	    (lambda-proc (args env2 handler k2) (newline) (k2 'ok))
 	    ;; temporary
