@@ -161,6 +161,7 @@ class Pyjama:
         #makes outline thickness a source for dnd
         self.wTree.get_widget("outlinethicknessdragbutton").drag_source_set(gtk.gdk.BUTTON1_MASK,[("thickness",0,49)],gtk.gdk.ACTION_COPY)
         
+        #makes move by x, y a source for dnd
         self.wTree.get_widget("movexydragbutton").drag_source_set(gtk.gdk.BUTTON1_MASK,[("movexy",0,50)],gtk.gdk.ACTION_COPY)
         
         global listOfDraggables
@@ -172,7 +173,7 @@ class Pyjama:
         self.wTree.get_widget("codevbox").connect("drag_drop",self.codeDragDrop)
         
         #doesn't work yet, but connect usedBlocks to contents of current codevbox, when dragged to trash can icon, delete them
-        #self.wTree.get_widget("deletebutton").drag_dest_set(gtk.DEST_DEFAULT_MOTION|gtk.DEST_DEFAULT_HIGHLIGHT|gtk.DEST_DEFAULT_DROP, usedBlocks,gtk.gdk.ACTION_MOVE)
+        self.wTree.get_widget("deletebutton").drag_dest_set(gtk.DEST_DEFAULT_MOTION|gtk.DEST_DEFAULT_HIGHLIGHT|gtk.DEST_DEFAULT_DROP,[("usedblock",0,0)],gtk.gdk.ACTION_MOVE)
 
     def addOther(self,widget,data=None):
         #pops up a dialog which asks for a name for the script
@@ -574,6 +575,7 @@ class Pyjama:
             lineVBox2.pack_start(lineComboBox2,False,False,0)
             lineVBox2.drag_dest_set(gtk.DEST_DEFAULT_MOTION|gtk.DEST_DEFAULT_HIGHLIGHT|gtk.DEST_DEFAULT_DROP,[("point",0,36)],gtk.gdk.ACTION_COPY)
             lineVBox2.connect("drag_drop",self.removeAndDrop)
+            innerVBox.set_name("line")
         elif context.targets==["circle"]:
             circleLabel1=gtk.Label(" circle with center at ")
             blockHBox.pack_start(circleLabel1,False,False,0)
@@ -687,6 +689,8 @@ class Pyjama:
             blockHBox.pack_start(movexyLabel3,False,False,0)
         else:
             pass
+        #needs to be a button for this to work, I think. when it works, it will allow blocks to be dragged to the trash
+        #innerVBox.drag_source_set(gtk.gdk.BUTTON1_MASK,[("usedblock",0,0)],gtk.gdk.ACTION_MOVE)
         self.window.show_all()
         
     def removeAndDrop(self,source,context,x,y,time):
@@ -711,11 +715,11 @@ class Pyjama:
                 drawingArea=self.wTree.get_widget("maindrawingarea").window
                 image=child.get_children()[0].get_child().get_children()[1].get_children()[0]
                 if image.get_name()=="combo1":
-                    drawingArea.draw_point(gtk.gdk.GC(drawingArea, gtk.gdk.Color()),50,50)
+                    drawingArea.draw_point(gtk.gdk.GC(drawingArea),50,50)
                 elif image.get_name()=="point":
                     xcoord=image.get_children()[0].get_child().get_children()[1].get_value_as_int()
                     ycoord=image.get_children()[0].get_child().get_children()[3].get_value_as_int()
-                    drawingArea.draw_point(gtk.gdk.GC(drawingArea,gtk.gdk.Color()),xcoord,ycoord)
+                    drawingArea.draw_point(gtk.gdk.GC(drawingArea),xcoord,ycoord)
                 #the next section crashes the entire program when run. no idea why, though i sent an e-mail out to the pygtk mailing list to ask why.
                 elif image.get_name()=="text":
                     text=image.get_children()[0].get_child().get_children()[0]
@@ -724,6 +728,12 @@ class Pyjama:
                     xcoord=point.get_children()[0].get_children()[0].get_children()[0].get_children()[1].get_value_as_int()
                     ycoord=point.get_children()[0].get_children()[0].get_children()[0].get_children()[3].get_value_as_int()
                     drawingArea.draw_layout(gtk.gdk.GC(drawingArea),xcoord,ycoord,pangoText)
+                elif image.get_name()=="line":
+                    point1xcoord=image.get_children()[0].get_children()[0].get_children()[1].get_children()[0].get_children()[0].get_children()[0].get_children()[1].get_value_as_int()
+                    point1ycoord=image.get_children()[0].get_children()[0].get_children()[1].get_children()[0].get_children()[0].get_children()[0].get_children()[3].get_value_as_int()
+                    point2xcoord=image.get_children()[0].get_children()[0].get_children()[3].get_children()[0].get_children()[0].get_children()[0].get_children()[1].get_value_as_int()
+                    point2ycoord=image.get_children()[0].get_children()[0].get_children()[3].get_children()[0].get_children()[0].get_children()[0].get_children()[3].get_value_as_int()
+                    drawingArea.draw_line(gtk.gdk.GC(drawingArea),point1xcoord,point1ycoord,point2xcoord,point2ycoord)
                 else:
                     #will add other categories later--line, circle, rectangle, oval, polygon, text, image
                     pass
