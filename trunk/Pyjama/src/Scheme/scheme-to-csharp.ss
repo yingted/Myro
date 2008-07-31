@@ -1,27 +1,18 @@
-(load "interpreter-ds.ss")
-
-(define indent 0)
-
 (define scheme-to-csharp
   (lambda (filename)
-    (printf "public class Classname {~%")
-    (set! indent (+ indent 1))
-    (convert-list (parse-file filename))
-    (set! indent (- indent 1))
-    (tabs)
-    (printf "}~%")))
+    (let ((port (open-input-file filename)))
+      (let ((sexps (read-sexps port))
+	    (name (car (split filename #\.))))
+	(printf "public class ~a {~%" name)
+	(convert-list sexps)
+	(printf "}~%")))))
 
-(define tabs
-  (lambda ()
-    (tab indent)))
-
-(define tab
-  (lambda (n)
-    (if (= n 0)
-	'done
-	(begin
-	  (printf "   ")
-	  (tab (- n 1))))))
+(define read-sexps
+  (lambda (port)
+    (let ((sexp (read port)))
+      (if (eq? sexp #!eof)
+	  '()
+	  (cons sexp (read-sexps port))))))
 
 (define convert-list
   (lambda (sexps)
@@ -31,60 +22,95 @@
 	  (convert-exp (car sexps))
 	  (convert-list (cdr sexps))))))
 
+(define split
+  (lambda (s delim)
+    (let ((list (string->list s)))
+      (reverse (split-help delim list '() '())))))
+
+(define split-clean
+  (lambda (items)
+    (cond
+     ((null? items) ())
+     (else (cons (list->string (reverse (car items)))
+		 (split-clean (cdr items)))))))
+
+(define split-help
+  (lambda (delim in buffer out)
+    (cond 
+     ((null? in) (split-clean (if (null? buffer)
+				  out
+				  (cons buffer out))))
+     ((eq? (car in) delim) 
+      (split-help delim (cdr in) '() (cons buffer out)))
+     (else (split-help delim (cdr in) (cons (car in) buffer) out)))))
+
+(define make-list
+  (lambda (args)
+    (cond
+     ((null? args) "")
+     (else
+      (let ((rest (make-list (cdr args))))
+	(if (eq? rest "")
+	    (string-append (symbol->string (car args)) rest)
+	    (string-append (symbol->string (car args)) ", " rest)))))))
+
+(define print-cases
+  (lambda (cases)
+    (cond
+     ((null? cases) "~%}~%")
+     (else 
+      (printf "if ~a {~%" (caar cases))
+      (printf "   return ~a;~%" (cdar cases))
+      (print-cases (cdr cases))))))
+
 (define convert-exp
   (lambda (exp)
-;;     (display exp)
-;;     (newline)
     (record-case exp
-      (define-exp (name body)  ;; always a lambda?
-	(tabs)
+      (define (name body)  ;; always a lambda!
 	(printf "public static void ~s(" name)
-	(printf "~s" (cadr body))
+	(printf (make-list (cadr body)))
 	(printf ") {~%")
-	(set! indent (+ indent 1))
 	(convert-exp (caddr body))
-	(tabs)
 	(printf "}~%"))
-      (if-exp (test-part true-part false-part)
-	(tabs)
+      (if (test-part true-part false-part)
 	(printf " if (")
 	(convert-exp test-part)
 	(printf ") {~%")
-	(tabs)
 	(convert-exp true-part)
 	(convert-exp false-part))
-      (assign-exp (sym exp)
-	(tabs)
+      (set! (sym exp)
 	(convert-exp sym)
 	(printf "= ")
 	(convert-exp exp)
 	(printf ";~%"))
-      (begin-exp (exps)
+      (begin (exps)
 	(if (null? (cdr exps))
 	    (begin
 	      ;;(printf "begin: ~s~%" exps)
-	      (tabs)
 	      (printf "return ")
 	      (convert-exp (car exps))
-	      (set! indent (- indent 1)))
 	    (begin
-	      (tabs)
 	      (convert-exp (car exps))
-	      (convert-exp (cons 'begin-exp (cdr exps))))))
-      (app-exp (proc args)
-	(if (and (variable? proc) (equal? (get-var-name proc)
-					  "load"))
-	    'ignore
-	    (begin
-	      (tabs)
-	      (convert-exp proc)
-	      (printf "(")
-	      (convert-list args)
-	      (printf ");~%"))))
-      (var-exp (sym)
-	       (printf " ~s " sym))
-      (lit-exp (val)
-	       (printf " ~s " val))
-      (else (error 'convert-exp (format "~s" exp))))))
+	      (convert-exp (cons 'begin (cdr exps)))))))
+      (load (filename) 'ignore)
+      (cond cases
+       (print-cases cases))
+      (else ;; apply
+       (begin
+	 (printf "~a();~%" exp)
+	 )))))
+;;       (app-exp (proc args)
+;; 	(if (and (variable? proc) (equal? (get-var-name proc)
+;; 					  "load"))
+;; 	    'ignore
+;; 	    (begin
+;; 	      (convert-exp proc)
+;; 	      (printf "(")
+;; 	      (convert-list args)
+;; 	      (printf ");~%"))))
+;;       (var-exp (sym)
+;; 	       (printf " ~s " sym))
+;;       (lit-exp (val)
+;; 	       (printf " ~s " val))
 
 ;;(scheme-to-csharp "fact-cps.ss")
