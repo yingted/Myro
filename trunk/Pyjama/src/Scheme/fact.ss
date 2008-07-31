@@ -26,10 +26,14 @@
 	(fact-cps (- n 1)
 	  (lambda-cont (v) (k (* n v)))))))
 
+
+
 ;;	  (lambda-cont (foo)
 ;;	    `(,a b c ,(list one (lambda-cont (v) (k (* n v foo))))))))))
 
 ;;	  (lambda-cont (foo)
-;;	    (letrec ((n 3) (m (lambda-cont (a) (a n))) (loop 3))
+;;	    (letrec ((n 3)
+;;		     (m (lambda-cont (a) (k n)))
+;;		     (k 3))
 ;;	      (loop n (* m foo))))))))
 

@@ -1,25 +1,33 @@
-;; todo:
-;; - add apply-function calls
-
 (load "parser-cps.ss")
-
-(define all-source-files
-  '("interpreter-cps.ss" "parser-cps.ss" "environments-cps.ss" "reader-cps.ss"
-    "unifier-cps.ss" "fact.ss"
-    ))
 
 ;;-------------------------------------------------------------------------------
 
-(define default-global-symbols
-  (environment-symbols (scheme-environment)))
+(define make-all-datatypes
+  (lambda ()
+    (list
+      (make-datatype 'continuation 'cont '((k k2) value))
+      (make-datatype 'continuation2 'cont2 '((k k2) value1 value2))
+      (make-datatype 'handler 'handler '(handler exception))
+      (make-datatype 'procedure 'proc '(proc args env2 handler k2))
+      )))
+
+(define record-field-order '(env env2 handler k k2))
+
+;;-------------------------------------------------------------------------------
+
+(define all-datatypes 'undefined)
+(define need-eopl-support? #f)
+
+(define default-top-level-symbols
+  (filter top-level-bound? (environment-symbols (scheme-environment))))
 
 (define syntactic-keywords
   (filter (lambda (x) (not (top-level-bound? x)))
 	  (environment-symbols (scheme-environment))))
 
 (define get-global-symbols
-  (lambda (filename)
-    (call-with-input-file filename
+  (lambda (source-file)
+    (call-with-input-file source-file
       (lambda (port)
 	(let loop ((exp (read port)) (vars '()))
 	  (cond
@@ -28,41 +36,56 @@
 	     (if (mit-style? exp)
 		 (loop (read port) (union (caadr exp) vars))
 		 (loop (read port) (union (cadr exp) vars))))
+	    ((eopl-define-datatype? exp)
+	     (loop (read port) (union (map car (cdddr exp)) vars)))
 	    (else (loop (read port) vars))))))))
 
 (define get-all-global-symbols
-  (lambda ()
-    (union (union-all (map get-global-symbols all-source-files))
-	   default-global-symbols)))
+  (lambda (source-files)
+    (union-all (map get-global-symbols source-files))))
 
-(define make-datatype-generator
-  (lambda (type abbreviation params field-order)
-    (let ((make-name (string->symbol (format "make-~a" abbreviation)))
+(define make-datatype
+  (lambda (type abbreviation application-template)
+    (let ((lambda-name (string->symbol (format "lambda-~a" abbreviation)))
+	  (make-name (string->symbol (format "make-~a" abbreviation)))
 	  (apply-name (string->symbol (format "apply-~a" abbreviation)))
-	  (counter 0)
-	  (clauses '()))
-      (let ((globals (get-all-global-symbols)))
-	(if (memq make-name globals)
-	    (error 'source "~a is already defined at top level" make-name))
-	(if (memq apply-name globals)
-	    (error 'source "~a is already defined at top level" apply-name)))
+	  (obj-name (if (list? (car application-template))
+		      (caar application-template)
+		      (car application-template)))
+	  (arg-names (cdr application-template))
+	  (all-obj-names (if (list? (car application-template))
+			   (car application-template)
+			   (list (car application-template))))
+	  (clauses '())
+	  (counter 0))
       (lambda msg
 	(record-case msg
 	  (info ()
 	    (let ((tag (string->symbol (format "<~a-N>" abbreviation))))
 	      (printf "type: ~a~%" type)
-	      (printf "(~a '~a ...)\n~a~%" make-name tag `(,apply-name ,@params))))
+	      (printf "(~a '~a ...)~%" make-name tag)
+	      (printf "~a~%" `(,apply-name ,all-obj-names ,@arg-names))))
+	  (get-type () type)
 	  (get-make-name () make-name)
 	  (get-apply-name () apply-name)
-	  (get-field-order () field-order)
 	  (reset ()
-	    (set! counter 0)
 	    (set! clauses '())
+	    (set! counter 0)
 	    'ok)
-	  (add-clause (formals bodies fields)
+	  (datatype-lambda? (code)
+	    (eq? (car code) lambda-name))
+	  (datatype-application? (code)
+	    (or (and (symbol? (car code))
+		     (memq (car code) all-obj-names)
+		     (= (length (cdr code)) (length arg-names)))
+		(and (list? (car code))
+		     (not (null? (car code)))
+		     (symbol? (caar code))
+		     (eq? (caar code) make-name))))
+	  (add-clause (formals bodies fields params)
 	    (let* ((new-lambda
-		     (rename-lambda-formals
-		       type (cdr params) `(lambda ,formals ,@(map transform bodies))))
+		     (rename-lambda-formals type arg-names
+		       `(lambda ,formals ,@(map (transform (union formals params)) bodies))))
 		   (new-code (cddr new-lambda))
 		   (identical-clause (find-clause fields new-code clauses)))
 	      (if identical-clause
@@ -74,25 +97,27 @@
 		    (set! clauses (cons new-clause clauses))
 		    new-tag)))))
 	  (print-code port
-	    (let* ((output-port (if (null? port) (current-output-port) (car port)))
-		   (error-string (format "bad ~a: ~~a" type))
-		   (apply-function-code
-		     `(define ,apply-name
-			(lambda ,params
-			  (record-case (cdr ,(car params))
-			    ,@(reverse clauses)
-			    (else (error (quote ,apply-name) ,error-string ,(car params)))))))
-		   (make-function-code
-		     `(define ,make-name
-			(lambda args
-			  (cons (quote ,type) args)))))
-	      (fprintf output-port ";;----------------------------------------------------~%")
-	      (fprintf output-port ";; ~a datatype~%~%" type)
-	      (pretty-print make-function-code output-port)
-	      (newline output-port)
-	      (pretty-print apply-function-code output-port)
-	      (newline output-port)))
-	  (else (error 'datatype-generator "bad message: ~a" msg)))))))
+	    (if (null? clauses)
+	      `(,type datatype contains no code)
+	      (let* ((output-port (if (null? port) (current-output-port) (car port)))
+		     (error-string (format "bad ~a: ~~a" type))
+		     (apply-function-code
+		       `(define ,apply-name
+			  (lambda ,(cons obj-name arg-names)
+			    (record-case (cdr ,obj-name)
+			      ,@(reverse clauses)
+			      (else (error (quote ,apply-name) ,error-string ,obj-name))))))
+		     (make-function-code
+		       `(define ,make-name
+			  (lambda args
+			    (cons (quote ,type) args)))))
+		(fprintf output-port ";;~a~%" (make-string 70 #\-))
+		(fprintf output-port ";; ~a datatype~%~%" type)
+		(pretty-print make-function-code output-port)
+		(newline output-port)
+		(pretty-print apply-function-code output-port)
+		(newline output-port))))
+	  (else (error 'datatype "bad message: ~a" msg)))))))
 
 (define find-clause
   (lambda (fields code clauses)
@@ -103,166 +128,266 @@
       (else (find-clause fields code (cdr clauses))))))
 
 (define transform-file
-  (lambda (sourcefile . opts)
-    ;; temporary
-    (if (not (member sourcefile all-source-files))
-	(error #f "\"~a\" is not in all-source-files list" sourcefile))
-    (set! all-global-symbols (get-all-global-symbols))
-    (datatype-generator 'reset)
-    (letrec
-      ((load? (lambda (x) (and (list? x) (not (null? x)) (eq? (car x) 'load))))
-       (loop (lambda (input-port output-port)
-	       (let ((exp (read input-port)))
-		 (cond
-		   ((eof-object? exp) (datatype-generator 'print-code output-port))
-		   ;; ignore calls to load at top level
-		   ((load? exp) (loop input-port output-port))
-		   (else (pretty-print (transform exp) output-port)
-			 (newline output-port)
-			 (loop input-port output-port)))))))
-      (call-with-input-file sourcefile
-	(lambda (input-port)
-	  (if (null? opts)
-	      (begin
-		(newline)
-		(loop input-port (current-output-port)))
-	      (let ((output-filename (car opts)))
-		(call-with-output-file output-filename
-		  (lambda (output-port)
-		    (loop input-port output-port)
-		    (printf "Output written to ~a~%" output-filename))))))))))
+  (lambda (source-file . opts)
+    (set! all-datatypes (make-all-datatypes))
+    (set! need-eopl-support? #f)
+    ;; check for name conflicts
+    (let ((globally-defined-symbols (get-global-symbols source-file)))
+      (for-each
+	(lambda (dt)
+	  (let ((type (dt 'get-type))
+		(make-name (dt 'get-make-name))
+		(apply-name (dt 'get-apply-name)))
+	    (if (memq make-name globally-defined-symbols)
+	      (error-in-source #f
+		(format "Cannot create ~a datatype because ~a is already defined in ~a"
+			type make-name source-file)))
+	    (if (memq apply-name globally-defined-symbols)
+	      (error-in-source #f
+		(format "Cannot create ~a datatype because ~a is already defined in ~a"
+			type apply-name source-file)))
+	    (if (memq make-name default-top-level-symbols)
+	      (printf "~%*** Warning: ~a datatype will redefine top-level symbol ~a~%"
+			type make-name))
+	    (if (memq apply-name default-top-level-symbols)
+	      (printf "~%*** Warning: ~a datatype will redefine top-level symbol ~a~%"
+			type apply-name))))
+	all-datatypes))
+    (let ((eopl-defs '())
+	  (procedure-defs '())
+	  (other-defs '()))
+      (letrec
+	((read-transformed-exps
+	   (lambda (input-port)
+	     (let ((exp (read input-port)))
+	       (cond
+	         ((eof-object? exp)
+		  (set! procedure-defs (reverse procedure-defs))
+		  (set! other-defs (reverse other-defs)))
+		 ;; skip top level calls to load
+		 ((load? exp) (read-transformed-exps input-port))
+		 ;; must transform the expression before calling the recursion
+		 (else (let ((texp ((transform '()) exp)))
+			 (cond
+			   ((eopl-define-datatype? texp)
+			    (set! eopl-defs (cons texp eopl-defs)))
+			   ((procedure-definition? texp)
+			    (set! procedure-defs (cons texp procedure-defs)))
+			   (else (set! other-defs (cons texp other-defs))))
+			 (read-transformed-exps input-port)))))))
+	 (print-exp
+	   (lambda (output-port)
+	     (lambda (exp)
+	       (pretty-print exp output-port)
+	       (newline output-port))))
+	 (print-code
+	   (lambda (output-port)
+	     ;; did we see a define-datatype or cases form?
+	     (if need-eopl-support?
+	       (begin
+		 (fprintf output-port ";;~a~%" (make-string 70 #\-))
+		 (fprintf output-port ";; EOPL support~%~%")
+		 (fprintf output-port "(load \"petite-init.ss\")~%")
+		 (fprintf output-port "(load \"define-datatype.ss\")~%~%")
+		 (for-each (print-exp output-port) eopl-defs)))
+	     ;; write datatype code
+	     (for-each
+	       (lambda (dt) (dt 'print-code output-port))
+	       all-datatypes)
+	     ;; write representation independent code
+	     (fprintf output-port ";;~a~%" (make-string 70 #\-))
+	     (fprintf output-port ";; main program~%~%")
+	     (for-each (print-exp output-port) procedure-defs)
+	     (for-each (print-exp output-port) other-defs))))
+	(call-with-input-file source-file
+	  (lambda (input-port)
+	    (read-transformed-exps input-port)))
+	(if (null? opts)
+	  (begin
+	    (newline)
+	    (print-code (current-output-port)))
+	  (let ((output-filename (car opts)))
+	    (call-with-output-file output-filename
+	      (lambda (output-port)
+		(print-code output-port)
+		(printf "Output written to ~a~%" output-filename)))))))))
+
+(define eopl-define-datatype?
+  (lambda (exp)
+    (and (list? exp)
+	 (not (null? exp))
+	 (eq? (car exp) 'define-datatype))))
+
+(define procedure-definition?
+  (lambda (exp)
+    (and (define? exp)
+	 (or (mit-style? exp)
+	     (lambda? (caddr exp))))))
+
+(define load?
+  (lambda (x)
+    (and (list? x)
+	 (not (null? x))
+	 (eq? (car x) 'load))))
 
 (define datatype-lambda?
   (lambda (code)
     (and (list? code)
-	 (not (null? code))
+	 (>= (length code) 3)
 	 (symbol? (car code))
-	 (memq (car code) '(lambda-cont lambda-cont2 lambda-proc lambda-handler)))))
+	 (ormap (lambda (dt) (dt 'datatype-lambda? code))
+		all-datatypes))))
 
 (define datatype-application?
   (lambda (code)
-    (and (symbol? (car code))
-;;	 (not (memq (car code) all-global-symbols))
-	 (memq (car code) '(k k2 handler proc)))))
+    (and (list? code)
+	 (ormap (lambda (dt) (dt 'datatype-application? code))
+		all-datatypes))))
+
+(define get-datatype
+  (lambda (msg code datatypes)
+    (if ((car datatypes) msg code)
+      (car datatypes)
+      (get-datatype msg code (cdr datatypes)))))
 
 (define transform
-  (lambda (code)
-    (cond
-      ((null? code) code)
-      ((literal? code) code)
-      ((symbol? code) code)
-      ((datatype-lambda? code)
-       (let* ((formals (cadr code))
-	      (bodies (cddr code))
-	      (field-order (datatype-generator 'get-field-order))
-	      (fields (sort-fields (free-vars code) field-order))
-	      (tag (datatype-generator 'add-clause formals bodies fields))
-	      (make-name (datatype-generator 'get-make-name)))
-	 `(,make-name (quote ,tag) ,@fields)))
-      ((datatype-application? code)
-;       (printf "datatype application: ~a~%" code)
-       (transform (cons (datatype-generator 'get-apply-name) code)))
-      (else
-	(record-case code
-	  (quote (datum) code)
-	  (quasiquote (datum)
-	    (list 'quasiquote (transform-quasiquote datum)))
-	  (if (test . conseqs)
-	    `(if ,(transform test) ,@(map transform conseqs)))
-	  (cond clauses
-	    `(cond ,@(map transform-cond-clause clauses)))
-	  (lambda (formals . bodies)
-	    `(lambda ,formals ,@(map transform bodies)))
-	  (let (bindings . bodies)
-	    (if (symbol? bindings)
-	      ;; named let
-	      (let ((name (cadr code))
-		    (vars (map car (caddr code)))
-		    (exps (map cadr (caddr code)))
-		    (bodies (cdddr code)))
-		`(let ,name ,(map list vars (map transform exps))
-		   ,@(map transform bodies)))
-	      ;; ordinary let
+  (lambda (params)
+    (lambda (code)
+      (cond
+        ((null? code) code)
+	((literal? code) code)
+	((symbol? code) code)
+	((datatype-lambda? code)
+	 (let* ((dt (get-datatype 'datatype-lambda? code all-datatypes))
+		(formals (cadr code))
+		(bodies (cddr code))
+		(fields (sort-fields
+			  (filter
+			    ;; remove any vars that are not lexically bound
+			    (lambda (var) (memq var params))
+			    (free code '()))
+			  record-field-order))
+		(tag (dt 'add-clause formals bodies fields params))
+		(make-name (dt 'get-make-name)))
+	   `(,make-name (quote ,tag) ,@fields)))
+	((datatype-application? code)
+	 (let ((dt (get-datatype 'datatype-application? code all-datatypes)))
+	   ((transform params) (cons (dt 'get-apply-name) code))))
+	(else
+	  (record-case code
+	    (quote (datum) code)
+	    (quasiquote (datum)
+	      (list 'quasiquote (transform-quasiquote datum params)))
+	    (if (test . conseqs)
+	      `(if ,@(map (transform params) (cdr code))))
+	    (cond clauses
+	      `(cond ,@(map (transform-cond-clause params) clauses)))
+	    (lambda (formals . bodies)
+	      `(lambda ,formals ,@(map (transform (union formals params)) bodies)))
+	    (let (bindings . bodies)
+	      (if (symbol? bindings)
+		;; named let
+		(let ((name (cadr code))
+		      (vars (map car (caddr code)))
+		      (exps (map cadr (caddr code)))
+		      (bodies (cdddr code)))
+		  `(let ,name ,(map list vars (map (transform params) exps))
+		     ,@(map (transform (union name (union vars params))) bodies)))
+		;; ordinary let
+		(let ((vars (map car bindings))
+		      (exps (map cadr bindings)))
+		  `(let ,(map list vars (map (transform params) exps))
+		     ,@(map (transform (union vars params)) bodies)))))
+	    (let* (bindings . bodies)
 	      (let ((vars (map car bindings))
 		    (exps (map cadr bindings)))
-		`(let ,(map list vars (map transform exps))
-		   ,@(map transform bodies)))))
-	  (let* (bindings . bodies)
-	    (let ((vars (map car bindings))
-		  (exps (map cadr bindings)))
-	      `(let* ,(map list vars (map transform exps))
-		 ,@(map transform bodies))))
-	  (letrec (decls . bodies)
-	    `(letrec ,(transform-letrec-decls decls)
-	       ,@(map transform bodies)))
-	  (set! (var rhs-exp)
-	    `(set! ,var ,(transform rhs-exp)))
-	  (begin exps
-	    `(begin ,@(map transform exps)))
-	  (define (name . bodies)
-	    (if (mit-style? code)
-	      `(define ,name ,@(map transform bodies))
-	      `(define ,name ,(transform (car bodies)))))
-	  (define-syntax (keyword rules) code)
-	  (and exps
-	    `(and ,@(map transform exps)))
-	  (or exps
-	    `(or ,@(map transform exps)))
-	  (case (exp . clauses)
-	    `(case ,(transform exp) ,@(transform-case-clauses clauses)))
-	  (record-case (exp . clauses)
-	    `(record-case ,(transform exp) ,@(transform-rc-clauses clauses)))
-	  (cases (type exp . clauses)
-	    `(cases ,type ,(transform exp) ,@(transform-rc-clauses clauses)))
-	  (else (if (memq (car code) syntactic-keywords)
-		  (error 'transform "don't know how to process ~a" code)
-		  (map transform code))))))))
+		`(let* ,(transform-let*-bindings vars exps params)
+		   ,@(map (transform (union vars params)) bodies))))
+	    (letrec (decls . bodies)
+	      (let ((vars (map car decls))
+		    (procs (map cadr decls)))
+		`(letrec ,(map list vars (map (transform (union vars params)) procs))
+		   ,@(map (transform (union vars params)) bodies))))
+	    (set! (var rhs-exp)
+	      `(set! ,var ,((transform params) rhs-exp)))
+	    (begin exps
+	      `(begin ,@(map (transform params) exps)))
+	    (define (name . bodies)
+	      (if (mit-style? code)
+		`(define ,name ,@(map (transform params) bodies))
+		`(define ,name ,((transform params) (car bodies)))))
+	    (define-syntax args code)
+	    (and exps
+	      `(and ,@(map (transform params) exps)))
+	    (or exps
+	      `(or ,@(map (transform params) exps)))
+	    (case (exp . clauses)
+	      `(case ,((transform params) exp)
+		 ,@(transform-case-clauses clauses params)))
+	    (record-case (exp . clauses)
+	      `(record-case ,((transform params) exp)
+		 ,@(transform-rc-clauses clauses params)))
+	    ;; EOPL
+	    (define-datatype args
+	      (set! need-eopl-support? #t)
+	      code)
+	    (cases (type exp . clauses)
+	      (set! need-eopl-support? #t)
+	      `(cases ,type ,((transform params) exp)
+		 ,@(transform-rc-clauses clauses params)))
+	    (else (if (memq (car code) syntactic-keywords)
+		    (error-in-source code
+		      "I don't know how to process the above code.")
+		    (map (transform params) code)))))))))
+  
+(define transform-let*-bindings
+  (lambda (vars exps params)
+    (if (null? vars)
+      '()
+      (let ((var (car vars))
+	    (exp (car exps)))
+	(cons (list var ((transform params) exp))
+	      (transform-let*-bindings (cdr vars) (cdr exps) (union var params)))))))
 
 (define transform-cond-clause
-  (lambda (clause)
-    (if (eq? (car clause) 'else)
-      `(else ,@(map transform (cdr clause)))
-      `(,(transform (car clause)) ,@(map transform (cdr clause))))))
+  (lambda (params)
+    (lambda (clause)
+      (if (eq? (car clause) 'else)
+	  `(else ,@(map (transform params) (cdr clause)))
+	  (map (transform params) clause)))))
 
 (define transform-quasiquote
-  (lambda (datum)
+  (lambda (datum params)
     (cond
-      ((vector? datum) (list->vector (transform-quasiquote (vector->list datum))))
+      ((vector? datum) (list->vector (transform-quasiquote (vector->list datum) params)))
       ((not (pair? datum)) datum)
       ;; doesn't handle nested quasiquotes yet
       ((quasiquote? datum) datum)
-      ((unquote? datum) (list 'unquote (transform (cadr datum))))
+      ((unquote? datum) (list 'unquote ((transform params) (cadr datum))))
       ((unquote-splicing? (car datum))
        (let* ((uqs (car datum))
-	      (transformed-uqs (list 'unquote-splicing (transform (cadr uqs)))))
+	      (transformed-uqs (list 'unquote-splicing ((transform params) (cadr uqs)))))
 	 (if (null? (cdr datum))
 	     (cons transformed-uqs '())
-	     (cons transformed-uqs (transform-quasiquote (cdr datum))))))
+	     (cons transformed-uqs (transform-quasiquote (cdr datum) params)))))
       (else
-	(cons (transform-quasiquote (car datum))
-	      (transform-quasiquote (cdr datum)))))))
-
-(define transform-letrec-decls
-  (lambda (decls)
-    (map (lambda (decl)
-	   (let ((var (car decl))
-		 (proc (cadr decl)))
-	     (if (lambda? proc)
-	       (list var `(lambda ,(cadr proc) ,@(map transform (cddr proc))))
-	       (list var (transform proc)))))
-      decls)))
+	(cons (transform-quasiquote (car datum) params)
+	      (transform-quasiquote (cdr datum) params))))))
 
 (define transform-rc-clauses
-  (lambda (clauses)
+  (lambda (clauses params)
     (map (lambda (clause)
 	   (if (eq? (car clause) 'else)
-	     `(else ,@(map transform (cdr clause)))
-	     (cons (car clause) (cons (cadr clause) (map transform (cddr clause))))))
+	     `(else ,@(map (transform params) (cdr clause)))
+	     (let ((tags (car clause))
+		   (formals (cadr clause))
+		   (bodies (cddr clause)))
+	       `(,tags ,formals ,@(map (transform (union formals params)) bodies)))))
 	 clauses)))
 
 (define transform-case-clauses
-  (lambda (clauses)
-    (map (lambda (clause) (cons (car clause) (map transform (cdr clause))))
+  (lambda (clauses params)
+    (map (lambda (clause) (cons (car clause) (map (transform params) (cdr clause))))
 	 clauses)))
 
 (define sort-fields
@@ -279,19 +404,22 @@
 		  ((and f1-mem f2-mem) (< (pos f1 field-order) (pos f2 field-order)))
 		  ((and (not f1-mem) f2-mem) #t)
 		  ((and f1-mem (not f2-mem)) #f)
-		  (else (< (pos f1 fields) (pos f2 fields))))))
+		  (else (string<? (symbol->string f1) (symbol->string f2))))))
 	    fields))))
+
+(define error-in-source
+  (lambda (code . messages)
+    (printf "~%*** ERROR:~%~%")
+    (if code
+      (begin
+	(pretty-print code)
+	(newline)))
+    (for-each (lambda (m) (printf "~a~%" m)) messages)
+    (newline)
+    (reset)))
 
 ;;-------------------------------------------------------------------------------
 ;; free variables
-
-(define free-vars
-  (lambda (code)
-    (free code all-global-symbols)))
-
-(define all-free-vars
-  (lambda (exps)
-    (all-free exps all-global-symbols)))
 
 (define free
   (lambda (code params)
@@ -321,7 +449,7 @@
 	    (if (mit-style? code)
 	      (all-free bodies (union name params))
 	      (free (car bodies) (union name params))))
-	  (define-syntax (keyword rules) '())
+	  (define-syntax args '())
 	  (and exps (all-free exps params))
 	  (or exps (all-free exps params))
 	  (case (exp . clauses)
@@ -331,12 +459,13 @@
 	  (record-case (exp . clauses)
 	    (union (free exp params)
 		   (union-all (map (free-in-record-case-clause params) clauses))))
+	  ;; EOPL
+	  (define-datatype args '())
 	  (cases (type exp . clauses)
 	    (union (free exp params)
 		   (union-all (map (free-in-record-case-clause params) clauses))))
 	  (else (if (memq (car code) syntactic-keywords)
 		  (error 'free "don't know how to process ~a" code)
-		  ;; application
 		  (all-free code params))))))))
 
 (define all-free
@@ -364,6 +493,7 @@
 	      (bodies (cddr clause)))
 	  (all-free bodies (union formals params)))))))
 
+;; s1 can be an improper list or a symbol and s2 can be a symbol
 (define union
   (lambda (s1 s2)
     (cond
@@ -412,8 +542,9 @@
     (let ((formals (cadr lambda-exp)))
       ;; formals and new-formals can be improper lists
       (if (not (lengths=? formals new-formals))
-	  (error 'source "lambda parameters do not match ~a parameters ~a:\n~a\n"
-		 type new-formals lambda-exp)
+	  (error-in-source lambda-exp
+	    (format "Lambda parameters are not compatible with ~a datatype parameters ~a."
+	      type new-formals))
 	  (letrec
 	    ((loop
 	       (lambda (old new exp)
@@ -429,16 +560,20 @@
 	  (bodies (cddr lambda-exp)))
       (cond
 	((not (mem? old-var formals))
-	 (error 'rename-formal "~a is not a parameter in ~a" old-var lambda-exp))
+	 (error-in-source lambda-exp
+	   (format "~a is not a parameter in the above lambda expression." old-var)))
 	((eq? new-var old-var) lambda-exp)
 	((mem? new-var formals)
-	 (error 'rename-formal "parameter ~a already exists in ~a" new-var lambda-exp))
+	 (error-in-source lambda-exp
+	   (format "~a is already a parameter in the above lambda expression." new-var)))
 	((memq new-var (all-free bodies '()))
-	 (error 'rename-formal "cannot safely rename ~a to ~a in ~a"
-	   old-var new-var lambda-exp))
+	 (error-in-source lambda-exp
+	   (format "Cannot safely rename ~a to ~a in the above lambda expression" old-var new-var)
+	   (format "because ~a already occurs free within its body." new-var)))
 	((ormap (contains-unsafe-lambda? old-var new-var) bodies)
-	 (error 'rename-formal "cannot safely rename ~a to ~a in ~a"
-	   old-var new-var lambda-exp))
+	 (error-in-source lambda-exp
+	   (format "Cannot safely rename ~a to ~a in the above lambda expression" old-var new-var)
+	   (format "because it would be captured by an inner binding.")))
 	(else `(lambda ,(subst old-var new-var formals)
 		 ,@(map (rename-free-occurrences old-var new-var)
 			bodies)))))))
@@ -449,14 +584,19 @@
 ;; (rename-formal 'x 'z '(lambda (x) (y (lambda (z x) (x z)))))
 ;; (rename-formal 'a 'foo '(lambda (a) (let loop ((a loop) (b a)) (loop a b c))))
 ;; (rename-formal 'list 'cdr '(lambda (list) (let* ((a a) (b a) (c (+ b z))) (list a (car b) c) y)))
+;; (rename-formal 'z 'c '(lambda (list z) (let* ((a a) (b a) (c (+ b z))) (list a (car b) c) y)))
 ;; should not work:
 ;; (rename-formal 'x 'foo '(lambda (x) (y (lambda (z) (foo x)))))
 ;; (rename-formal 'x 'foo '(lambda (x) (y (lambda (z foo) (z x)))))
+;; (rename-formal 'x 'foo '(lambda (x y foo) (y (lambda (z) (foo x)))))
 ;; (rename-formal 'x 'y '(lambda (x) (y (lambda (z) (z x)))))
 ;; (rename-formal 'x 'z '(lambda (x) (y (lambda (z) (z x)))))
 ;; (rename-formal 'a 'loop '(lambda (a) (let loop ((a loop) (b a)) (loop a b c))))
 ;; (rename-formal 'list 'c '(lambda (list) (let* ((a a) (b a) (c (+ b z))) (list a (car b) c) y)))
 ;; (rename-formal 'list 'y '(lambda (list) (let* ((a a) (b a) (c (+ b z))) (list a (car b) c) y)))
+;; (rename-formal 'z 'b '(lambda (list) (let* ((a a) (b a) (c (+ b z))) (list a (car b) c) y)))
+;; (rename-formal 'z 'b '(lambda (list z) (let* ((a a) (b a) (c (+ b z))) (list a (car b) c) y)))
+;; (rename-formal 'z 'a '(lambda (list z) (let* ((a a) (b a) (c (+ b z))) (list a (car b) c) y)))
 
 (define rename-free-occurrences
   (lambda (old-var new-var)
@@ -545,7 +685,6 @@
 		    ,@(map rename-record-case-clause clauses)))
 	       (else (if (memq (car exp) syntactic-keywords)
 		       (error 'rename "don't know how to process ~a" exp)
-		       ;; application
 		       (map rename exp))))))))
        (rename-in-quasiquote
 	 (lambda (datum)
@@ -612,7 +751,6 @@
 		 (unsafe? (record-case-transformer `(record-case ,rexp ,@clauses))))
 	       (else (if (memq (car exp) syntactic-keywords)
 		       (error 'unsafe? "don't know how to process ~a" exp)
-		       ;; application
 		       (ormap unsafe? exp))))))))
        (unsafe-in-quasiquote?
 	 (lambda (datum)
@@ -634,7 +772,6 @@
 	(let loop ((exp (read port)) (sigs '()))
 	  (cond
 	    ((eof-object? exp)
-;;	     (reverse sigs))
 	     (newline))
 	    ((define? exp)
 	     (cond
@@ -647,11 +784,4 @@
 		  (loop (read port) (cons sig sigs))))
 	       (else (loop (read port) sigs))))
 	    (else (loop (read port) sigs))))))))
-
-;;-------------------------------------------------------------------------------
-
-(define all-global-symbols (get-all-global-symbols))
-
-(define datatype-generator
-  (make-datatype-generator 'continuation 'cont '(k value) '(v v1 v2 env handler k)))
 

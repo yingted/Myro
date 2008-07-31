@@ -125,8 +125,8 @@
 	(m operator env handler
 	  (lambda-cont (proc)
 	    (m* operands env handler
-	      (lambda-cont (vals)
-		(proc vals env handler k))))))
+	      (lambda-cont (args)
+		(proc args env handler k))))))
       (else (error 'm "bad abstract syntax: ~a" exp)))))
 
 (define try-catch-handler
@@ -199,8 +199,8 @@
 (define make-toplevel-env
   (lambda ()
     (make-initial-environment
-      (list 'nil 'exit 'sqrt 'print 'display 'newline 'load 'null? 'cons 'car 'cdr
-	    'list '+ '- '* '/ '< '> '= 'equal? 'range 'set-car! 'set-cdr!
+      (list 'nil 'exit 'apply 'sqrt 'print 'display 'newline 'load 'null? 'cons 'car 'cdr
+	    'list '+ '- '* '/ '< '> '= 'equal? 'eq? 'range 'set-car! 'set-cdr!
 	    'import 'get 'call-with-current-continuation 'call/cc
 	    'reverse 'append 'list->vector 'dir 'env 'current-time)
       (list '()
@@ -210,6 +210,10 @@
 	      ;; temporary
 	      (set! load-stack '())
 	      '(exiting the interpreter))
+	    (lambda-proc (args env2 handler k2)
+	      (let ((proc (car args))
+		    (proc-args (cadr args)))
+		(proc proc-args env2 handler k2)))
 	    (lambda-proc (args env2 handler k2) (k2 (apply sqrt args)))
 	    (lambda-proc (args env2 handler k2) (for-each pretty-print args) (k2 'ok))
 	    (lambda-proc (args env2 handler k2) (apply display args) (k2 'ok))
@@ -229,6 +233,7 @@
 	    (lambda-proc (args env2 handler k2) (k2 (apply > args)))
 	    (lambda-proc (args env2 handler k2) (k2 (apply = args)))
 	    (lambda-proc (args env2 handler k2) (k2 (apply equal? args)))
+	    (lambda-proc (args env2 handler k2) (k2 (apply eq? args)))
 	    (lambda-proc (args env2 handler k2) (k2 (apply range args)))
 	    (lambda-proc (args env2 handler k2) (k2 (apply set-car! args)))
 	    (lambda-proc (args env2 handler k2) (k2 (apply set-cdr! args)))
