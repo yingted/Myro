@@ -20,7 +20,7 @@ from myro.system import *
 # Check versions of things:
 _pil_version = None
 try:
-    import Image
+    import PIL.Image as Image
     _pil_version = Image.VERSION
     del Image
 except:

@@ -128,7 +128,7 @@ import time, os, sys
 import Tkinter
 import globvars
 try: 	 
-     import Image as PyImage	     
+     import PIL.Image as PyImage	     
 except: 	 
      print >> sys.stderr, "WARNING: Image not found; do you need Python Imaging Library?" 	 
 
