@@ -14,28 +14,107 @@
  *
  *********************************************************************/
 
-//using Gtk;
-//using GtkSourceView;
-//using Glade;
 using System.IO;
 using System;
 using System.Collections.Generic;
-
+using System.Windows.Forms;
+using System.Drawing;
 using PyjamaInterfaces;
 
-public class TextDocument: PyjamaInterfaces.IDocument
-{
+public class TextDocument: System.Windows.Forms.TextBox, 
+                               PyjamaInterfaces.IDocument {
   string filename;
-  //SourceBuffer buffer;
-  //SourceLanguage language;
-  //SourceView source_view;
   int page;
   bool untitled;
-  
-  public TextDocument(string fn, int page) {
-	filename = fn;
+  string mime_type;
+  PyjamaForm mainForm;
+
+  public TextDocument(PyjamaForm form, string filename, int page) {
+	mainForm = form;
+	this.filename = filename;
 	this.page = page;
-	string mime_type = GetMimeType(filename);
+	untitled = true;
+	mime_type = GetMimeType(this.filename);
+
+	// Windows Forms Settings
+
+	// Optional:
+	WordWrap = true;
+ 	Size = new System.Drawing.Size(196, 77);
+	setFont();
+
+	// System:
+ 	Multiline = true;
+	AcceptsTab = true;
+	AcceptsReturn = true;
+	ScrollBars = ScrollBars.Both;
+	Dock = DockStyle.Fill;
+		
+	// 	AllowDrop = true;
+	// 	Location = new System.Drawing.Point(28, 129);
+	// 	DragDrop += new DragEventHandler(TextBox_DragDrop);
+	// 	DragEnter += new DragEventHandler(TextBox_DragEnter);
+	// 	MouseDown += new MouseEventHandler(TextBox_MouseDown);
+
+	if (filename != null && File.Exists(this.filename)) {
+	  StreamReader file = File.OpenText(this.filename);
+	  //buffer.BeginNotUndoableAction();
+	  Text = file.ReadToEnd();
+	  //buffer.EndNotUndoableAction();
+	  //buffer.PlaceCursor(buffer.StartIter);
+	  untitled = false;
+	  file.Close();
+	} else {
+	  filename = Utils.Tran("Untitled") + "-" + (this.page + 1) + ".py";
+	  untitled = true;
+	}
+  }
+
+  public void setFont() {
+	this.Font = new Font("Courier", 18.0f,
+		FontStyle.Regular, GraphicsUnit.Pixel);
+  }
+
+  public void setFont(string fontName, float size, FontStyle style) {
+	Font testFont = new Font(fontName, size, style, GraphicsUnit.Pixel);
+	if (testFont.Name == fontName) {
+	  this.Font = testFont;
+	} else {
+	  setFont();
+	}
+  }
+
+  private void TextBox_MouseDown(object sender, MouseEventArgs e) {
+	TextBox txt = (TextBox)sender;
+	txt.SelectAll();
+	txt.DoDragDrop(txt.Text, DragDropEffects.Copy);
+  }
+  
+  private void TextBox_DragEnter(object sender, DragEventArgs e) {
+	if (e.Data.GetDataPresent(DataFormats.Text)) {
+	  e.Effect = DragDropEffects.Copy;
+	} else {
+	  e.Effect = DragDropEffects.None;
+	}
+  }
+  
+  private void TextBox_DragDrop(object sender, DragEventArgs e) {
+	TextBox txt = (TextBox)sender;
+	txt.Text = (string)e.Data.GetData(DataFormats.Text);
+  }
+  
+  protected override bool ProcessCmdKey(ref 
+	  System.Windows.Forms.Message m, 
+	  System.Windows.Forms.Keys k) 
+  {
+	// Just testing
+	//if(m.Msg == 256 && k == System.Windows.Forms.Keys.Enter) {
+	//System.Windows.Forms.SendKeys.Send("\t");
+	//return true; 
+	//}
+	return base.ProcessCmdKey(ref m,k);
+  }
+
 	//SourceLanguagesManager mgr = new SourceLanguagesManager();
 	// mgr.LangFilesDirs.Append("./language-specs");
 	//source_view = new SourceView();
@@ -73,20 +152,6 @@ public class TextDocument: PyjamaInterfaces.IDocument
 // 	source_view.Buffer.Changed += new EventHandler(OnSourceViewChanged);
 // 	source_view.KeyPressEvent += new KeyPressEventHandler(OnKeyPressBefore);
 	
-	if (filename != null) {
-	  // TODO: make sure it exists, and can be read; readonly?
-	  StreamReader file = File.OpenText(fn);
-	  //buffer.BeginNotUndoableAction();
-	  //buffer.Text = file.ReadToEnd();
-	  //buffer.EndNotUndoableAction();
-	  //buffer.PlaceCursor(buffer.StartIter);
-	  untitled = false;
-	  file.Close();
-	} else {
-	  filename = Utils.Tran("Untitled") + "-" + (this.page + 1) + ".py";
-	  untitled = true;
-	}
-  }
   
 //   private void OnKeyPressBefore(object obj, KeyPressEventArgs args) 
 //     {
@@ -135,123 +200,120 @@ public class TextDocument: PyjamaInterfaces.IDocument
     
   public bool GetModified()
   {
-	// 	return buffer.Modified;
-	return true;
+	return Modified;
   }
         
   public void SetModified(bool value)
   {
-	// 	buffer.Modified = value;
+	Modified = value;
   }
-  
-     public void Save()
-     {
-//         StreamWriter file = new StreamWriter(filename);
-//         file.Write(buffer.Text);
-//         file.Close();
-// 	buffer.Modified = false;
+
+  public void Save() {
+	StreamWriter file = new StreamWriter(filename);
+	file.Write(Text);
+	file.Close();
+	Modified = false;
 // 	gui.SetDirty(page, false);
 // 	// Forces no redo past this point
 // 	//buffer.BeginNotUndoableAction(); 
 // 	//buffer.EndNotUndoableAction();
-     }
-    
-     public void SaveAs(string fn)
-     {
-// 	if (File.Exists(fn)) {
-//             MessageDialog dlg = new MessageDialog(gui.MainWindow, DialogFlags.Modal,
-//                 MessageType.Question, ButtonsType.None,
-//                 "Do you want to overwrite \"{0}\"?", fn);
-//             dlg.AddButton("Overwrite", ResponseType.Accept);
-//             dlg.AddButton("Cancel", ResponseType.Cancel);
-//             ResponseType ret = (ResponseType)dlg.Run();
-//             dlg.Destroy();
-//             if (ret == ResponseType.Cancel) {
-// 		return;
-// 	    }
-// 	} 
-// 	untitled = false;
-// 	filename = fn;
-// 	string mime_type = GetMimeType(filename);
-// 	SourceLanguagesManager mgr = new SourceLanguagesManager();
-// 	language = mgr.GetLanguageFromMimeType(mime_type);
-// 	if (buffer.Language != language && language != null) {
-// 	    buffer.Language = language;
-// 	}
-// 	Save();
-     }
-
-    public void SetFilename(string fn)
-    {
-    	filename = fn;
-    }
-
-    public string GetFilename()
-    {
-    	return filename;
-    }
-
-    string GetMimeType(string filename) {
+  }
+  
+  public void SaveAs(string filename) {
+	// 	if (File.Exists(fn)) {
+	//             MessageDialog dlg = new MessageDialog(gui.MainWindow, DialogFlags.Modal,
+	//                 MessageType.Question, ButtonsType.None,
+	//                 "Do you want to overwrite \"{0}\"?", fn);
+	//             dlg.AddButton("Overwrite", ResponseType.Accept);
+	//             dlg.AddButton("Cancel", ResponseType.Cancel);
+	//             ResponseType ret = (ResponseType)dlg.Run();
+	//             dlg.Destroy();
+	//             if (ret == ResponseType.Cancel) {
+	// 		return;
+	// 	    }
+	// 	} 
+	// 	untitled = false;
+	// 	filename = fn;
+	// 	string mime_type = GetMimeType(filename);
+	// 	SourceLanguagesManager mgr = new SourceLanguagesManager();
+	// 	language = mgr.GetLanguageFromMimeType(mime_type);
+	// 	if (buffer.Language != language && language != null) {
+	// 	    buffer.Language = language;
+	// 	}
+	// 	Save();
+  }
+  
+  public void SetFilename(string filename)
+  {
+	this.filename = filename;
+  }
+  
+  public string GetFilename()
+  {
+	return filename;
+  }
+  
+  string GetMimeType(string filename) {
 	if (filename != null) {
-	    string extension = System.IO.Path.GetExtension(filename);
-	    return Utils.GetMimeType(extension);
+	  string extension = System.IO.Path.GetExtension(filename);
+	  return Utils.GetMimeType(extension);
 	} else {
-	    return "text/x-python";
+	  return "text/x-python";
 	}
-    }
-
-	public bool GetDirty() {
-	  //return buffer.CanUndo();
-	  return true;
+  }
+  
+  public bool GetDirty() {
+	//return buffer.CanUndo();
+	return true;
 	
-     }
-
-	public int GetPage() {
-	  return page;
-	}
-
-	public void SetPage(int value) {
-	  page = value;
-	}
-    
-	public int GetSize() {
-	  //return buffer.CharCount;
-	  return 0;
-	}
-    
-//     public TextBuffer Buffer
-//     {
-//         get
-//         {
-//             return buffer;
-//         }
-//     }
-    
-     public void Cut()
-     {
-//         Clipboard clipboard = Clipboard.Get(Gdk.Atom.Intern("CLIPBOARD", true));
-//         buffer.CutClipboard(clipboard, true);
-     }
-    
-     public void Copy()
-     {
-//         Clipboard clipboard = Clipboard.Get(Gdk.Atom.Intern("CLIPBOARD", true));
-//         buffer.CopyClipboard(clipboard);
-     }
-    
-     public void Paste()
-     {
-//         Clipboard clipboard = Clipboard.Get(Gdk.Atom.Intern("CLIPBOARD", true));
-//         buffer.PasteClipboard(clipboard);
-     }
-    
-     public void Delete()
-     {
-//         buffer.DeleteSelection(true, true);
-     }
-
-     public void Print()
-     {
-//         PrintText print = new PrintText(source_view);
-     }
+  }
+  
+  public int GetPage() {
+	return page;
+  }
+  
+  public void SetPage(int value) {
+	page = value;
+  }
+  
+  public int GetSize() {
+	//return buffer.CharCount;
+	return 0;
+  }
+  
+  //     public TextBuffer Buffer
+  //     {
+  //         get
+  //         {
+  //             return buffer;
+  //         }
+  //     }
+  
+  public void Cut()
+  {
+	//         Clipboard clipboard = Clipboard.Get(Gdk.Atom.Intern("CLIPBOARD", true));
+	//         buffer.CutClipboard(clipboard, true);
+  }
+  
+  public void Copy()
+  {
+	//         Clipboard clipboard = Clipboard.Get(Gdk.Atom.Intern("CLIPBOARD", true));
+	//         buffer.CopyClipboard(clipboard);
+  }
+  
+  public void Paste()
+  {
+	//         Clipboard clipboard = Clipboard.Get(Gdk.Atom.Intern("CLIPBOARD", true));
+	//         buffer.PasteClipboard(clipboard);
+  }
+  
+  public void Delete()
+  {
+	//         buffer.DeleteSelection(true, true);
+  }
+  
+  public void Print()
+  {
+	//         PrintText print = new PrintText(source_view);
+  }
 }

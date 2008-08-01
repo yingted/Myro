@@ -14,9 +14,12 @@
  *
  *********************************************************************/
 
+using System;
 using System.Windows.Forms;
 
 public class Pyjama {
+
+  [STAThread] // for windows interop with clipboard, etc
   public static void Main(string[] args) {
 	PyjamaForm form = new PyjamaForm(args);
 	Application.Run(form);

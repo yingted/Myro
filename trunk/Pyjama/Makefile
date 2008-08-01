@@ -4,7 +4,7 @@ PROJECT=pyjama
 
 DLLS=-lib:DLLs -r:Mono.Posix.dll -r:IronPython.dll -r:IronPython.Modules.dll \
 	-r:Microsoft.Scripting.dll -r:Microsoft.Scripting.Core.dll \
-	-r:System.Windows.Forms.dll
+	-r:System.Windows.Forms.dll -r:System.Drawing.dll
 
 SRCS=src/Pyjama.cs src/PyjamaInterfaces.cs src/Utils.cs \
 	src/TextDocument.cs src/Shell.cs \

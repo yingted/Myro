@@ -17,26 +17,62 @@
 using System;
 using System.IO;
 using System.Collections.Generic;
-
 using System.Windows.Forms;
-
+using System.Drawing;
 using PyjamaInterfaces;
 
 public class PyjamaForm : Form {
   List <IDocument> documents = new List <IDocument>();
+  private System.Windows.Forms.TabControl notebook;
   
   public PyjamaForm(string[] args) {
-	this.Text = "Pyjama Project";
+	Text = "Pyjama Project";
+	setFontFinal();
+	InitializeComponent();
   }
-  
+
+  private void InitializeComponent() {
+	notebook = new System.Windows.Forms.TabControl();
+	TabPage newPage = new TabPage("Untitled");	
+	notebook.TabPages.Add(newPage);	
+	notebook.Dock = DockStyle.Fill;
+
+	TextDocument textBox = new TextDocument(this, "Untitled", 0);
+	newPage.Controls.Add(textBox);
+
+	SuspendLayout();
+	AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+	ClientSize = new System.Drawing.Size(640, 480);
+	Controls.Add(notebook);
+	ResumeLayout(false);
+	PerformLayout();
+  }
+
+  public void setFontFinal() {
+	// Options:
+  }
+
+  public void AddFile(string filename) {
+	IDocument textdoc;
+	//int page = notebook.NPages;
+	// FIXME: select what type of IDocument to create:
+	textdoc = new TextDocument(this, filename, 0);
+	// FIXME: why does the cursor not stay in view?
+	//ScrolledWindow sw = new ScrolledWindow();
+	//sw.Add(textdoc.GetView());
+	//sw.HscrollbarPolicy = PolicyType.Automatic;
+	//sw.VscrollbarPolicy = PolicyType.Automatic;
+	//notebook.AppendPage(sw, new Label(textdoc.GetShortName()));
+	//documents.Add(textdoc);
+	//notebook.ShowAll();
+	//notebook.Page = notebook.NPages - 1;
+	//textdoc.GetView().GrabFocus();
+  }
+    
   [STAThread] // for windows interop with clipboard, etc
-	  public static void Main(string[] args) {
-	
+  public static void Main(string[] args) {
 	PyjamaForm form = new PyjamaForm(args);
-	
   }
-  
-  
 }
 
 	/*
@@ -69,24 +105,6 @@ public class PyjamaForm : Form {
     public void ShowAll()
     {
         main_window.ShowAll();
-    }
-    
-    public void AddFile(string filename)
-    {
-        IDocument textdoc;
-        int page = notebook.NPages;
-        // FIXME: select what type of IDocument to create:
-        textdoc = new TextDocument(this, filename, page);
-        // FIXME: why does the cursor not stay in view?
-        ScrolledWindow sw = new ScrolledWindow();
-        sw.Add(textdoc.GetView());
-        sw.HscrollbarPolicy = PolicyType.Automatic;
-        sw.VscrollbarPolicy = PolicyType.Automatic;
-        notebook.AppendPage(sw, new Label(textdoc.GetShortName()));
-        documents.Add(textdoc);
-        notebook.ShowAll();
-        notebook.Page = notebook.NPages - 1;
-        textdoc.GetView().GrabFocus();
     }
     
     public void SetDirty(int page, bool dirty)
@@ -331,12 +349,7 @@ public class PyjamaForm : Form {
     {
         AboutDialog dlg = new AboutDialog();
         //FIXME - Real information
-	//FIXME - we should be targeting Mono >= 1.9
-#if GTKVER1
-        dlg.ProgramName = "Pyjama";
-#else        
         dlg.Name = "Pyjama";
-#endif
         dlg.Run();
         dlg.Destroy();
     }
