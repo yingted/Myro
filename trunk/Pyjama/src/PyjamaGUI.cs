@@ -38,7 +38,7 @@ public class PyjamaForm : Form {
   private void InitializeComponent() {
 	notebook = new System.Windows.Forms.TabControl();
 
-	TabPage newPage = new TabPage("Untitled");	
+	TabPage newPage = new TabPage(_.s("Untitled-1.py"));	
 	notebook.TabPages.Add(newPage);	
 	notebook.Dock = DockStyle.Top;
 	notebook.Height = 240; //this.Height / 2;

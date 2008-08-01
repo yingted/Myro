@@ -24,6 +24,7 @@ public class Pyjama {
   public static void Main(string[] args) {
 	Catalog.Init("pyjama","./locale");
 	PyjamaForm form = new PyjamaForm(args);
+	Application.EnableVisualStyles();
 	Application.Run(form);
   }
 }

@@ -70,7 +70,7 @@ public class TextDocument: TextBox, PyjamaInterfaces.IDocument {
   }
 
   public void setFont() {
-	this.Font = new Font("Courier New", 18.0f,
+	this.Font = new Font("Courier New", 14.0f,
 		FontStyle.Regular, GraphicsUnit.Pixel);
   }
 
