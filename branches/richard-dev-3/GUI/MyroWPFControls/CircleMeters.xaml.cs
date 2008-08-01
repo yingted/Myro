@@ -21,21 +21,46 @@ namespace Myro.GUI.WPFControls
     /// </summary>
     public partial class CircleMeters : UserControl
     {
+        /// <summary>
+        /// Arguments for the ValueChange event, which this control raises
+        /// when the user clicks on one of the meters to change its value.
+        /// </summary>
         public class ValueChangeArgs
         {
+            /// <summary>
+            /// The Vector index of the modified value
+            /// </summary>
             public int Index { get; internal set; }
+            /// <summary>
+            /// The new value
+            /// </summary>
             public double Value { get; internal set; }
         }
+        /// <summary>
+        /// The delegate type for the ValueChange event, which this control raises
+        /// when the user clicks on one of the meters to change its value.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         public delegate void ValueChangeHandler(object sender, ValueChangeArgs e);
+        /// <summary>
+        /// The ValueChange event, which this control raises
+        /// when the user clicks on one of the meters to change its value.
+        /// </summary>
         public event ValueChangeHandler ValueChange;
 
+        #region private variables
         List<Canvas> canvases = new List<Canvas>();
         List<TextBlock> labels = new List<TextBlock>();
         List<Label> valueLabels = new List<Label>();
         Color curColor = Brushes.DarkGray.Color;
         double[] curValues = null;
-        public static double widthOne = 30;
+        static double widthOne = 30;
+        #endregion
 
+        /// <summary>
+        /// Constructor, nothing unusual.
+        /// </summary>
         public CircleMeters()
         {
             InitializeComponent();
@@ -43,12 +68,22 @@ namespace Myro.GUI.WPFControls
             //AddLogicalChild(mainVisual);
         }
 
+        /// <summary>
+        /// Change the color of the circle meters.  This must be called or
+        /// the meters will have the default gray color.
+        /// </summary>
+        /// <param name="color"></param>
         public void SetColor(Color color)
         {
             curColor = color;
             layoutVisuals(canvases.Count);
         }
 
+        /// <summary>
+        /// Helper method that populates the private variables containing
+        /// the UI visuals.
+        /// </summary>
+        /// <param name="count"></param>
         private void layoutVisuals(int count)
         {
             //double[] centers = new double[count];
@@ -138,25 +173,29 @@ namespace Myro.GUI.WPFControls
             }
         }
 
+        /// <summary>
+        /// Update the meters.  Call this method every time new data is available
+        /// </summary>
+        /// <param name="values">The numeric meter values</param>
+        /// <param name="labels">The string labels for the meters</param>
+        /// <param name="min">The minimum meter value (for circle scaling)</param>
+        /// <param name="max">The maximum meter value (for circle scaling)</param>
         public void SetData(double[] values, string[] labels, double min, double max)
         {
             this.curValues = values;
             double maxCircleRadius = widthOne / 2;
             if (values.Length != canvases.Count)
                 layoutVisuals(values.Length);
-            //Console.WriteLine("L: " + vals[0] + "  R: " + vals[1]);
+
             List<double> radii = new List<double>(
                 from v in values
                 let normalized = (v - min) / (max - min)
                 let normalizedBoundedM = (normalized > 0 ? normalized : 0)
                 let normalizedBounded = (normalizedBoundedM < 1 ? normalizedBoundedM : 1)
                 select normalizedBounded * maxCircleRadius);
-            //StringFormat format = StringFormat.GenericDefault;
-            //format.Alignment = StringAlignment.Center;
-            //Font font = new Font("Sans Serif", 7);
+
             for (int i = 0; i < values.Length; i++)
             {
-                //Console.WriteLine("Radius: " + radii.ElementAt(i));
                 double offset = maxCircleRadius - radii[i];
                 ((Path)canvases[i].Children[0]).Data = new EllipseGeometry(
                     new Point(widthOne / 2.0, widthOne / 2.0), maxCircleRadius, maxCircleRadius);
@@ -168,17 +207,15 @@ namespace Myro.GUI.WPFControls
                     this.valueLabels[i].Content = "";
                 else
                     this.valueLabels[i].Content = Math.Round(values[i], 2).ToString();
-                //g.FillEllipse(brush, xs[i] + offset, offset, 2 * radii.ElementAt(i), 2 * radii.ElementAt(i));
-                //g.DrawString(vals[i].ToString(), font, black, xs[i] + maxCircleRadius, (float)maxCircleRadius * 1.8f, format);
-                //Console.WriteLine(labels.Length + " labels");
-                //if (i < labels.Length)
-                //{
-                //    g.DrawString(labels[i].ToString(), font, black, xs[i] + maxCircleRadius, 0, format);
-                //    //Console.WriteLine("Label: " + labels[i]);
-                //}
             }
         }
 
+        /// <summary>
+        /// Internal helper method called by the mouse button handlers of the circle
+        /// meter visuals.
+        /// </summary>
+        /// <param name="index"></param>
+        /// <param name="e"></param>
         private void valueChangeHelper(int index, MouseButtonEventArgs e)
         {
             if (curValues != null && index >= 0 && index < curValues.Length)

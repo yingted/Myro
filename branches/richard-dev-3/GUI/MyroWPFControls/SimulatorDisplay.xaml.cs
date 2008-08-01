@@ -32,6 +32,10 @@ namespace Myro.GUI.WPFControls
     /// </summary>
     public partial class SimulatorDisplay : UserControl
     {
+        /// <summary>
+        /// This event is raised when the simulator starts.  The GUI uses this
+        /// to add the 'Simulator' tab.
+        /// </summary>
         public event EventHandler SimulatorFound;
 
         SimulationEnginePort _notifyTarget = null;
@@ -56,11 +60,17 @@ namespace Myro.GUI.WPFControls
         int frameInterval = 50;
         DateTime lastFrameTime = DateTime.Now;
 
+        /// <summary>
+        /// Constructor.  Dispose must be called on this class.
+        /// </summary>
         public SimulatorDisplay()
         {
             InitializeComponent();
         }
 
+        /// <summary>
+        /// Stop DispatcherQueues and threads.
+        /// </summary>
         public void Dispose()
         {
             queue.Dispose();
@@ -68,6 +78,9 @@ namespace Myro.GUI.WPFControls
             shouldStay = false;
         }
 
+        /// <summary>
+        /// Call to initialize the control and start threads.  The main GUI 
+        /// </summary>
         public void Start()
         {
             queue = new DispatcherQueue("SimulatorDisplay", new Dispatcher());

@@ -40,7 +40,7 @@ namespace Myro.Adapters
     {
         //protected List<ServiceInfoType> services = new List<ServiceInfoType>();
         //protected List<string> manifests = new List<string>();
-        private Dictionary<string, AdapterSpecN> adapterNames = new Dictionary<string, AdapterSpecN>();
+        private Dictionary<string, AdapterTokenN> adapterNames = new Dictionary<string, AdapterTokenN>();
         //protected Dictionary<string, AdapterSpec> adapterServices;
         //ManualResetEvent adaptersReady = new ManualResetEvent(false);
         
@@ -73,18 +73,18 @@ namespace Myro.Adapters
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        public AdapterSpec<T> GetAdapterSpec<T>(string name) where T:IAdapter
+        public AdapterToken<T> GetAdapterSpec<T>(string name) where T:IAdapter
         {
             lock (this)
             {
                 try
                 {
-                    return (AdapterSpec<T>)adapterNames[name];
+                    return (AdapterToken<T>)adapterNames[name];
                 }
                 catch (KeyNotFoundException)
                 {
-                    AdapterSpec<T> adapterSpec = new AdapterSpec<T>(name, AdapterFactories);
-                    adapterNames.Add(name, (AdapterSpecN)adapterSpec);
+                    AdapterToken<T> adapterSpec = new AdapterToken<T>(name, AdapterFactories);
+                    adapterNames.Add(name, (AdapterTokenN)adapterSpec);
                     return adapterSpec;
                 }
             }

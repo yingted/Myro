@@ -70,7 +70,7 @@ namespace Myro.Utilities
         /// <returns></returns>
         public static T ReceiveSync<T>(PortSet<T, Fault> port)
         {
-            return ReceiveSync(port, -1);
+            return ReceiveSync(port, Params.DefaultRecieveTimeout);
         }
 
         /// <summary>
@@ -96,7 +96,7 @@ namespace Myro.Utilities
         /// <returns></returns>
         public static T ReceiveSync<T>(DispatcherQueue taskQueue, PortSet<T, Fault> port)
         {
-            return ReceiveSync(taskQueue, port, -1);
+            return ReceiveSync(taskQueue, port, Params.DefaultRecieveTimeout);
         }
 
 

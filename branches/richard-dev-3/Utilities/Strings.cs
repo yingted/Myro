@@ -30,6 +30,13 @@ namespace Myro.Utilities
                     msg += r.Value;
             return msg;
         }
+        public static string FromExceptionMessage(Exception e)
+        {
+            if (e.Message != null && e.Message.Length > 0)
+                return e.Message;
+            else
+                return e.ToString();
+        }
         public static string FromException(Exception e)
         {
             return buildExceptionMessage("", e, 6);

@@ -150,7 +150,7 @@ namespace Myro.GUI.SimpleIDE
         {
             try
             {
-                Robot.StateChangeEvent += OnRobotStateChange;
+                Robot.RobotStateChangeEvent += OnRobotStateChange;
 
                 commandWindow.StartScripting();
                 commandWindow.PythonExecuting +=
@@ -488,7 +488,7 @@ namespace Myro.GUI.SimpleIDE
             e.CanExecute = (Robot.CurrentConfig != null);
         }
 
-        private void OnRobotStateChange(Robot.StateChangeEventArgs e)
+        private void OnRobotStateChange(Robot.RobotStateChangeEventArgs e)
         {
             switch (e.StateChange)
             {

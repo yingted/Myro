@@ -135,7 +135,7 @@ namespace Myro.GUI.SimpleIDE
         {
             try
             {
-                Robot.StateChangeEvent += OnRobotStateChange;
+                Robot.RobotStateChangeEvent += OnRobotStateChange;
 
                 jewelAnimation = (Storyboard)JewelButton.FindResource("JewelGlow");
                 jewelAnimation.Begin(JewelButton, true);
@@ -156,7 +156,7 @@ namespace Myro.GUI.SimpleIDE
 
         #region External event handlers
 
-        private void OnRobotStateChange(Robot.StateChangeEventArgs e)
+        private void OnRobotStateChange(Robot.RobotStateChangeEventArgs e)
         {
             switch (e.StateChange)
             {

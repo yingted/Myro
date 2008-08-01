@@ -8,7 +8,7 @@
             <RowDefinition />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
-        <RichTextBox GotFocus="OnGotFocus" Grid.Row="0" Name="historyBlock" VerticalAlignment="Stretch" Background="White" IsReadOnly="True" TextChanged="OnHistoryChanged" MinWidth="100" FontFamily="Courier" FontSize="11" BorderThickness="0" BorderBrush="Transparent" IsEnabled="False" IsUndoEnabled="False" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto" SizeChanged="OnSizeChanged" LayoutUpdated="OnLayoutUpdated">
+        <RichTextBox PreviewTextInput="historyBlock_PreviewTextInput" Grid.Row="0" Name="historyBlock" VerticalAlignment="Stretch" Background="White" IsReadOnly="True" TextChanged="OnHistoryChanged" MinWidth="100" FontFamily="Courier" FontSize="11" BorderThickness="0" BorderBrush="Transparent" IsEnabled="False" IsUndoEnabled="False" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto" SizeChanged="OnSizeChanged" LayoutUpdated="OnLayoutUpdated">
                 <RichTextBox.Resources>
                     <Style TargetType="{x:Type Paragraph}">
                         <Setter Property="Margin" Value="0" />

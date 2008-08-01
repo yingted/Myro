@@ -7,7 +7,7 @@ using System.Text;
 
 namespace Myro.Adapters
 {
-    interface AdapterSpecN
+    interface AdapterTokenN
     {
         string Name { get; }
         IAdapter AdapterIfAttached { get; }

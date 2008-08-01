@@ -30,96 +30,76 @@ namespace Myro
     public static class Robot
     {
         private static AdapterBank bank = null;
-        private static AdapterSpec<DriveAdapter> driveAdapter = null;
-        private static AdapterSpec<VectorAdapter> soundAdapter = null;
-        private static AdapterSpec<WebcamAdapter> webcamAdapter = null;
-        private static AdapterSpec<FlukeControlAdapter> controlAdapter = null;
+        private static AdapterToken<DriveAdapter> driveAdapter = null;
+        private static AdapterToken<VectorAdapter> soundAdapter = null;
+        private static AdapterToken<WebcamAdapter> webcamAdapter = null;
+        private static AdapterToken<FlukeControlAdapter> controlAdapter = null;
         private static int httpPort;
         private static int dsspPort;
         private static ServiceInfoType brickService = null;
 
+        /// <summary>
+        /// This enumeration indicates the type of state change in a StateChangeEventArgs
+        /// class.  The GUI uses this enumeration and event to change the connection
+        /// status indicator.
+        /// </summary>
         public enum RobotStateChange
         {
             NONE, CONNECTING, CONNECTING_FAILED, CONNECTING_SUCCEEDED, SHUTDOWN, SHUTDOWN_COMPLETE
         }
-        public class StateChangeEventArgs : EventArgs
+        /// <summary>
+        /// This class contains a single member that indicates the type of state change in a StateChangeEventArgs
+        /// class.  The GUI uses this enumeration and event to change the connection
+        /// status indicator.
+        /// </summary>
+        public class RobotStateChangeEventArgs : EventArgs
         {
             public RobotStateChange StateChange;
         }
-        public delegate void StateChangeEventHandler(StateChangeEventArgs e);
-        public static event StateChangeEventHandler StateChangeEvent;
-        public static RobotStateChange _lastStateChange = RobotStateChange.NONE;
+        /// <summary>
+        /// This is the delegate type for a RobotStateChange handler.  The GUI
+        /// uses this event to change the connection status indicator.
+        /// </summary>
+        /// <param name="e"></param>
+        public delegate void RobotStateChangeEventHandler(RobotStateChangeEventArgs e);
+        /// <summary>
+        /// The GUI uses the RobotStateChange event
+        /// uses this event to change the connection status indicator.
+        /// </summary>
+        /// <param name="e"></param>
+        public static event RobotStateChangeEventHandler RobotStateChangeEvent;
+        private static RobotStateChange _lastStateChange = RobotStateChange.NONE;
+        /// <summary>
+        /// This property makes the type of the last state change event available.
+        /// </summary>
         public static RobotStateChange LastStateChange
         {
             get
             {
                 return _lastStateChange;
             }
-            set
+            private set
             {
                 _lastStateChange = value;
-                StateChangeEvent.Invoke(new StateChangeEventArgs() { StateChange = value });
+                RobotStateChangeEvent.Invoke(new RobotStateChangeEventArgs() { StateChange = value });
             }
         }
 
+        /// <summary>
+        /// This property exposes the configuration for the currently-connected robot.
+        /// </summary>
         public static MyroConfigFiles CurrentConfig { get; private set; }
 
         #region Startup and shutdown
 
+        /// <summary>
+        /// This version of Init is generally not called by the end-user.  It
+        /// uses a configuation that is already found by a MyroConfigFinder class.
+        /// </summary>
+        /// <param name="config"></param>
         public static void Init(MyroConfigFiles config)
         {
             Init(config, null);
-            //string manifestFile = Path.Combine(Path.Combine(Params.ConfigPath, config.BaseName + ".manifest"), config.BaseName + ".manifest.xml");
-
-            //if (bank == null)
-            //{
-            //    Robot.httpPort = Params.DefaultHttpPort;
-            //    Robot.dsspPort = Params.DefaultDsspPort;
-            //    FileAttributes att = File.GetAttributes(manifestFile);
-            //    if ((att & (FileAttributes.Device | FileAttributes.Directory | FileAttributes.Offline)) != 0)
-            //        throw new IOException("Manifest file is not a normal file");
-            //    Console.Write("Starting DSS environment...");
-            //    DssEnvironment.Initialize(httpPort, dsspPort, "file://" + manifestFile);
-            //    Console.WriteLine("Done");
-
-            //    // If this is a Scribbler, wait for it to start
-            //    if (config.BaseName.ToLower().Equals("scribbler"))
-            //    {
-            //        ManualResetEvent evt = new ManualResetEvent(false);
-            //        waitForService(new ServiceInfoType(scribbler.Contract.Identifier),
-            //            delegate(ServiceInfoType info) { brickService = info; evt.Set(); });
-            //        evt.WaitOne(Params.DefaultRecieveTimeout);
-            //        if (brickService == null)
-            //            throw new MyroInitException("Could not find Scribbler service");
-            //        var scribPort = DssEnvironment.ServiceForwarder<scribbler.ScribblerOperations>(new Uri(brickService.Service));
-            //        DispatcherQueue queue = new DispatcherQueue("init", new Dispatcher());
-            //        try
-            //        {
-            //            RSUtils.ReceiveSync(queue, scribPort.Reconnect(), Params.DefaultRecieveTimeout);
-            //        }
-            //        catch (Exception)
-            //        {
-            //            throw;
-            //        }
-            //        finally
-            //        {
-            //            queue.Dispose();
-            //        }
-            //    }
-
-            //    bank = new AdapterBank(new List<IAdapterFactory>() {
-            //        new Myro.Adapters.DriveAdapterFactory(),
-            //        new Myro.Adapters.VectorAdapterFactory(),
-            //        new Myro.Adapters.WebcamAdapterFactory(),
-            //        new Myro.Adapters.FlukeControlAdapterFactory()
-            //    });
-            //    driveAdapter = bank.GetAdapterSpec<DriveAdapter>("drive");
-            //    soundAdapter = bank.GetAdapterSpec<VectorAdapter>("tonegen");
-            //    webcamAdapter = bank.GetAdapterSpec<WebcamAdapter>("webcam");
-            //    controlAdapter = bank.GetAdapterSpec<FlukeControlAdapter>("flukecontrol");
-            //}
-            //else
-            //    throw new Exception("Myro is already initialized");
         }
 
         /// <summary>
@@ -146,6 +126,13 @@ namespace Myro
             Init(new MyroConfigFinder(Params.ConfigPath).FindFromBaseName(baseName), comPort);
         }
 
+        /// <summary>
+        /// This is another init method that is generally not called by the end-user.
+        /// The purpose of the comPort argument is the same as with the string version,
+        /// init(string baseName, string comPort).
+        /// </summary>
+        /// <param name="config"></param>
+        /// <param name="comPort"></param>
         public static void Init(MyroConfigFiles config, string comPort)
         {
             bool isScribbler = config.BaseName.ToLower().Equals("scribbler");
@@ -203,6 +190,11 @@ namespace Myro
             }
         }
 
+        /// <summary>
+        /// This is an internal helper method that starts the DSS environment,
+        /// using the manifest file specified in the MyroConfigFiles argument.
+        /// </summary>
+        /// <param name="config"></param>
         private static void startDSS(MyroConfigFiles config)
         {
             string manifestFile = Path.Combine(Path.Combine(Params.ConfigPath, config.BaseName + ".manifest"), config.BaseName + ".manifest.xml");
@@ -216,6 +208,10 @@ namespace Myro
             Console.WriteLine("Done");
         }
 
+        /// <summary>
+        /// This is an internal helper method that creates the AdapterBank, and
+        /// caches the pre-known adapters.
+        /// </summary>
         private static void createAdapters()
         {
             bank = new AdapterBank(new List<IAdapterFactory>() {
@@ -230,6 +226,12 @@ namespace Myro
             controlAdapter = bank.GetAdapterSpec<FlukeControlAdapter>("flukecontrol");
         }
 
+        /// <summary>
+        /// This is a helper mehtod that connects the Scribbler on the specified
+        /// COM port.  It waits for the connection to complete, and re-throws any
+        /// exceptions generated by the Scribbler service.
+        /// </summary>
+        /// <param name="comPort"></param>
         private static void connectWaitForScribbler(string comPort)
         {
             ManualResetEvent evt = new ManualResetEvent(false);
@@ -270,7 +272,7 @@ namespace Myro
 
         /// <summary>
         /// Shut down the DSS node and MSRDS services.  This method waits
-        /// for everything to shut down before returning
+        /// for everything to shut down before returning.
         /// </summary>
         public static void Shutdown()
         {
@@ -295,6 +297,12 @@ namespace Myro
             LastStateChange = RobotStateChange.SHUTDOWN_COMPLETE;
         }
 
+        /// <summary>
+        /// Helper method that waits for a service to start and runs a handler when it does.
+        /// This subscribes to and queries the DSS directory.
+        /// </summary>
+        /// <param name="serviceInfo"></param>
+        /// <param name="handler"></param>
         private static void waitForService(ServiceInfoType serviceInfo, Handler<ServiceInfoType> handler)
         {
             var dirPort = DssEnvironment.ServiceForwarder<directory.DirectoryPort>(new Uri("dssp.tcp://localhost/directory"));
@@ -655,36 +663,6 @@ namespace Myro
         }
 
         #endregion
-
-        //AdapterBank bank;
-        //public MyroSensors Sensors { get; private set; }
-        //public MyroMovement Movement { get; private set; }
-        //public IMyroSound Sound { get; private set; }
-
-        //public Robot(string manifestFile)
-        //{
-        //    FileAttributes att = File.GetAttributes(manifestFile);
-        //    if ((att & (FileAttributes.Device | FileAttributes.Directory | FileAttributes.Offline)) != 0)
-        //        throw new IOException("Manifest file is not a normal file");
-        //    Console.Write("Starting DSS environment...");
-        //    DssEnvironment.Initialize(50000, 50001, "file://" + manifestFile);
-        //    Console.WriteLine("Done");
-        //    bank = new AdapterBank(new List<IAdapterFactory>() {
-        //        new Myro.Adapters.DriveAdapterFactory(),
-        //        new Myro.Adapters.VectorAdapterFactory()
-        //    });
-
-        //    Sensors = new MyroSensors(bank);
-        //    Movement = new MyroMovement(bank);
-        //    Sound = new MyroSound(bank);
-        //}
-
-        //public void Shutdown()
-        //{
-        //    bank.Dispose();
-        //    DssEnvironment.Shutdown();
-        //    DssEnvironment.WaitForShutdown();
-        //}
     }
 
     /// <summary>
@@ -694,8 +672,17 @@ namespace Myro
     /// </summary>
     public class MyroImage
     {
+        /// <summary>
+        /// The width of the image, in pixels
+        /// </summary>
         public int Width;
+        /// <summary>
+        /// The height of the image, in pixels
+        /// </summary>
         public int Height;
+        /// <summary>
+        /// The image data, in 24-bit RGB format
+        /// </summary>
         public byte[] Image;
     }
 

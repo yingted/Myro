@@ -19,12 +19,18 @@ using Myro;
 
 namespace Myro.GUI.WPFControls
 {
+    /// <summary>
+    /// The sensor and actuator control panel
+    /// </summary>
     public partial class ControlPanel : UserControl
     {
-        //Robot rbt = null;
         bool shouldExit = false;
         Thread updateThread = null;
 
+        /// <summary>
+        /// This is the list of services the control panel will look for when
+        /// populating the sersor displays.
+        /// </summary>
         List<ServicePanelInfo> origPanelList = new List<ServicePanelInfo>()
         {
             new ServicePanelInfo() { Description="IR", Name="ir", Min=0.0, Max=1.0, Color=Colors.Blue },
@@ -41,12 +47,20 @@ namespace Myro.GUI.WPFControls
         int delayMs = 500;
         bool shouldUpdate = true;
 
+        /// <summary>
+        /// Constructor.  Dispose must be called on this class.
+        /// </summary>
         public ControlPanel()
         {
             InitializeComponent();
             reset();
         }
 
+        /// <summary>
+        /// Helper method to clear the populated sensors so they can be
+        /// repopulated.  This is currently not used, but was intended to
+        /// be called when the connected robot changes.
+        /// </summary>
         private void reset()
         {
             if (livePanelList.Count > 0)
@@ -61,13 +75,16 @@ namespace Myro.GUI.WPFControls
                             catch (Exception e)
                             {
                                 GUIUtilities.ReportUnexpectedException(e);
-                                //Console.WriteLine(e.ToString());
                             }
                         }));
             panelList = origPanelList;
             livePanelList.Clear();
         }
 
+        /// <summary>
+        /// Initialize the control and start polling thread.  The main GUI
+        /// calls this.  Putting it in the constructor breaks the VS designer.
+        /// </summary>
         public void SetRobot()
         {
             shouldExit = true;
@@ -84,18 +101,15 @@ namespace Myro.GUI.WPFControls
             //}
         }
 
+        /// <summary>
+        /// Entry point for the polling thread.
+        /// </summary>
         private void updateLoop()
         {
             int updateCounter = 0;
             Thread checker = null;
-            //bool driveSet = false;
             while (!shouldExit)
             {
-                //if (!driveSet && drive != null)
-                //{
-                //    drive.SetDrive(rbt.Movement);
-                //    driveSet = true;
-                //}
 
                 if (shouldUpdate)
                 {
@@ -129,6 +143,10 @@ namespace Myro.GUI.WPFControls
             }
         }
 
+        /// <summary>
+        /// Helper method that checks for new sensor services having started.
+        /// This is called every few seconds by the polling thread.
+        /// </summary>
         private void checkNewPanels()
         {
             List<ServicePanelInfo> toRemove = new List<ServicePanelInfo>();
@@ -201,11 +219,9 @@ namespace Myro.GUI.WPFControls
             signal.WaitOne();
         }
 
-        //private void BumperValueChange(object sender, Myro.GUI.WPFControls.CircleMeters.ValueChangeArgs e)
-        //{
-        //    Robot.Set("bumpers", e.Index, e.Value);
-        //}
-
+        /// <summary>
+        /// Stops polling thread and disposes children.
+        /// </summary>
         public void Dispose()
         {
             shouldExit = true;

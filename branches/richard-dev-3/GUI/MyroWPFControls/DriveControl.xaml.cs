@@ -24,22 +24,18 @@ namespace Myro.GUI.WPFControls
     /// </summary>
     public partial class DriveControl : UserControl
     {
-        //Myro.API.MyroMovement drive = null;
-
         Port<Tuple<double, double>> drivePort = new Port<Tuple<double, double>>();
         DispatcherQueue taskQueue;
 
+        /// <summary>
+        /// Constructor.  Dispose must be called on this class.
+        /// </summary>
         public DriveControl()
         {
             InitializeComponent();
         }
 
-        //public void SetDrive(Myro.API.MyroMovement drive)
-        //{
-        //    Robot.drive = drive;
-        //}
-
-        public void driveHandler(Tuple<double, double> motors)
+        private void driveHandler(Tuple<double, double> motors)
         {
             try
             {
@@ -52,7 +48,7 @@ namespace Myro.GUI.WPFControls
         /// From SimpleDashboard sample
         /// </summary>
         /// <param name="axes"></param>
-        public void UpdateJoystickAxes(game.Axes axes)
+        private void UpdateJoystickAxes(game.Axes axes)
         {
             DrawJoystick(axes.X, -axes.Y);
 
@@ -226,7 +222,6 @@ namespace Myro.GUI.WPFControls
 
         public void Dispose()
         {
-            //Console.WriteLine("****** Unloading ********");
             taskQueue.Dispose();
         }
 

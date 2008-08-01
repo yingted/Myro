@@ -37,7 +37,7 @@ namespace Myro.Adapters
     /// an AdapterSpec class contains a drive adapter, you can call
     /// GetDriveAdapter() to return the drive adapter.
     /// </summary>
-    public class AdapterSpec<T> : AdapterSpecN where T : IAdapter
+    public class AdapterToken<T> : AdapterTokenN where T : IAdapter
     {
         ///// <summary>
         ///// The runtime type of the adapter.
@@ -151,7 +151,7 @@ namespace Myro.Adapters
         //    ServiceConfig = serviceConfig;
         //}
 
-        public AdapterSpec(string name, List<IAdapterFactory> adapterFactories)
+        public AdapterToken(string name, List<IAdapterFactory> adapterFactories)
         {
             Name = name;
             this.adapterFactories = adapterFactories;
