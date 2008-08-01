@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.Windows.Forms;
 using System.Drawing;
 using PyjamaInterfaces;
+using Utils;
 
 public class TextDocument: TextBox, PyjamaInterfaces.IDocument {
   string filename;
@@ -33,7 +34,7 @@ public class TextDocument: TextBox, PyjamaInterfaces.IDocument {
 	this.filename = filename;
 	this.page = page;
 	untitled = true;
-	mime_type = GetMimeType(this.filename);
+	mime_type = Mime.GetMimeType(this.filename);
 
 	// Windows Forms Settings
 
@@ -63,7 +64,7 @@ public class TextDocument: TextBox, PyjamaInterfaces.IDocument {
 	  untitled = false;
 	  file.Close();
 	} else {
-	  filename = Utils.Tran("Untitled") + "-" + (this.page + 1) + ".py";
+	  filename = _.s("Untitled") + "-" + (this.page + 1) + ".py";
 	  untitled = true;
 	}
   }
@@ -267,7 +268,7 @@ public class TextDocument: TextBox, PyjamaInterfaces.IDocument {
   string GetMimeType(string filename) {
 	if (filename != null) {
 	  string extension = System.IO.Path.GetExtension(filename);
-	  return Utils.GetMimeType(extension);
+	  return Mime.GetMimeType(extension);
 	} else {
 	  return "text/x-python";
 	}

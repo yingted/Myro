@@ -16,18 +16,22 @@
 
 using Mono.Unix;
 
-class Utils
-{
-    public static string Tran(string msg) {
-      return Catalog.GetString(msg);
-    }
+namespace Utils {
 
-    public static string Trans(string msg1, string msg2, int count) {
-      return Catalog.GetPluralString(msg1, msg2, count);
-    }
+  public class _ {
 
-    public static string GetMimeType(string extension) 
-    {
+	public static string s(string msg) {
+	  return Catalog.GetString(msg);
+	}
+	
+	public static string s(string msg1, string msg2, int count) {
+	  return Catalog.GetPluralString(msg1, msg2, count);
+	}
+  }
+
+  public class Mime {
+
+  public static string GetMimeType(string extension) {
 	string mime_type = "text/plain";
 	switch(extension) {
 	case ".cs":
@@ -92,38 +96,40 @@ class Utils
 	return mime_type;
     }
 
-    public static char GetPathSeparatorChar() {
-    	string os = GetOS();
-    	char c = ':';
-    	switch (os) {
-    	case "WINDOWS":
-    	    c = ';';
-    	    break;
-    	case "UNIX":
-    	    c = ':';
-    	    break;
-    	default:
-    	    c = ':';
-    	    break;
-    	}
-    	return c;
-    }
-
-    public static string GetOS() {
-	System.OperatingSystem osInfo = System.Environment.OSVersion;
-	string operatingSystem = "UNKNOWN";
-
-	switch ( osInfo.Platform )
-	{
-	case System.PlatformID.Win32Windows:
-        case System.PlatformID.Win32NT:
-            operatingSystem = "WINDOWS";
-	    break;
-        case System.PlatformID.Unix:
-            operatingSystem = "UNIX";
-	    break;
-	}
-	return operatingSystem;
-     }
+  }
 }
+//     public static char GetPathSeparatorChar() {
+//     	string os = GetOS();
+//     	char c = ':';
+//     	switch (os) {
+//     	case "WINDOWS":
+//     	    c = ';';
+//     	    break;
+//     	case "UNIX":
+//     	    c = ':';
+//     	    break;
+//     	default:
+//     	    c = ':';
+//     	    break;
+//     	}
+//     	return c;
+//     }
+
+//     public static string GetOS() {
+// 	System.OperatingSystem osInfo = System.Environment.OSVersion;
+// 	string operatingSystem = "UNKNOWN";
+
+// 	switch ( osInfo.Platform )
+// 	{
+// 	case System.PlatformID.Win32Windows:
+//         case System.PlatformID.Win32NT:
+//             operatingSystem = "WINDOWS";
+// 	    break;
+//         case System.PlatformID.Unix:
+//             operatingSystem = "UNIX";
+// 	    break;
+// 	}
+// 	return operatingSystem;
+//      }
+// }
 

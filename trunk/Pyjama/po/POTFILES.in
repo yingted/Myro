@@ -1,5 +1,6 @@
 [encoding: UTF-8]
 
-Pyjama.cs
-PyjamaInterfaces.cs
+src/Pyjama.cs
+src/PyjamaGUI.cs
+src/PyjamaInterfaces.cs
 

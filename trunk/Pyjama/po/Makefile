@@ -1,10 +1,11 @@
 top_srcdir=..
 
 pre:
-	intltool-update --pot -g pyjama
+#	intltool-update --pot -g pyjama
+	xgettext -a --from-code=UTF-8 ../src/*.cs -o de.po
 
-init:
-	msginit -l de --output-file=de.po
+#init:
+#	msginit -l de --output-file=de.po
 
 post:
 	mkdir -p ../locale/de/LC_MESSAGES/

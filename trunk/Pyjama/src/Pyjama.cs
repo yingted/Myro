@@ -16,11 +16,13 @@
 
 using System;
 using System.Windows.Forms;
+using Mono.Unix;
 
 public class Pyjama {
 
   [STAThread] // for windows interop with clipboard, etc
   public static void Main(string[] args) {
+	Catalog.Init("pyjama","./locale");
 	PyjamaForm form = new PyjamaForm(args);
 	Application.Run(form);
   }

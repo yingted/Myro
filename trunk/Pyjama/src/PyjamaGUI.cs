@@ -21,13 +21,15 @@ using System.Windows.Forms;
 using System.Drawing;
 using PyjamaInterfaces;
 
+using Utils;
+
 public class PyjamaForm : Form {
   List <IDocument> documents = new List <IDocument>();
   private TabControl notebook;
   internal StatusBar statusBar1;
   
   public PyjamaForm(string[] args) {
-	Text = "Pyjama Project";
+	Text = _.s("Pyjama Project");
 	setFontFinal();
 	InitializeComponent();
 	InitializeStatusBarPanels();
