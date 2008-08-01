@@ -23,29 +23,114 @@ using PyjamaInterfaces;
 
 public class PyjamaForm : Form {
   List <IDocument> documents = new List <IDocument>();
-  private System.Windows.Forms.TabControl notebook;
+  private TabControl notebook;
+  internal StatusBar statusBar1;
   
   public PyjamaForm(string[] args) {
 	Text = "Pyjama Project";
 	setFontFinal();
 	InitializeComponent();
+	InitializeStatusBarPanels();
   }
 
   private void InitializeComponent() {
 	notebook = new System.Windows.Forms.TabControl();
+
 	TabPage newPage = new TabPage("Untitled");	
 	notebook.TabPages.Add(newPage);	
-	notebook.Dock = DockStyle.Fill;
-
+	notebook.Dock = DockStyle.Top;
+	notebook.Height = 240; //this.Height / 2;
+	notebook.TabIndex = 0;
 	TextDocument textBox = new TextDocument(this, "Untitled", 0);
 	newPage.Controls.Add(textBox);
+
+	Splitter splitter = new Splitter();
+	splitter.BorderStyle = BorderStyle.FixedSingle;
+	//splitter.BackColor = Color.Red;
+	//splitter.Location = new Point (0, 240);
+	//splitter.Size = new Size(0, 7);
+	splitter.TabStop = false;
+	splitter.Dock = DockStyle.Top;
+	//splitter.Size = new System.Drawing.Size(3, 273);
+	//splitter.BackColor = Color.LightGray;
+	splitter.Height = 6;
+
+	TextBox shell = new TextBox();
+	shell.WordWrap = true;
+ 	shell.Multiline = true;
+	shell.AcceptsTab = true;
+	shell.AcceptsReturn = true;
+	shell.ScrollBars = ScrollBars.Both;
+	shell.Dock = DockStyle.Fill;
 
 	SuspendLayout();
 	AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 	ClientSize = new System.Drawing.Size(640, 480);
+
+	Controls.Add(splitter);
 	Controls.Add(notebook);
+	Controls.Add(shell);
+
 	ResumeLayout(false);
 	PerformLayout();
+  }
+
+  private void InitializeStatusBarPanels() {
+    statusBar1 = new StatusBar();
+    statusBar1.Dock = DockStyle.Bottom;
+    statusBar1.SizingGrip = true;
+    statusBar1.PanelClick += 
+        new StatusBarPanelClickEventHandler(statusBar1_PanelClick);
+
+    // Create two StatusBarPanel objects to display in statusBar1.
+    StatusBarPanel panel1 = new StatusBarPanel();
+    StatusBarPanel panel2 = new StatusBarPanel();
+
+    // Set the width of panel2 explicitly and set
+    // panel1 to fill in the remaining space.
+    panel2.Width = 80;
+    panel1.AutoSize = StatusBarPanelAutoSize.Spring;
+
+    // Set the text alignment within each panel.
+    panel1.Alignment = HorizontalAlignment.Left;
+    panel2.Alignment = HorizontalAlignment.Right;
+
+    // Display the first panel without a border and the second
+    // with a raised border.
+    panel1.BorderStyle = StatusBarPanelBorderStyle.None;
+    panel2.BorderStyle = StatusBarPanelBorderStyle.Raised;
+
+    // Set the text of the panels. The panel1 object is reserved
+    // for line numbers, while panel2 is set to the current time.
+    panel1.Text = "Reserved for important information.";
+    panel2.Text = System.DateTime.Now.ToShortTimeString();
+
+    // Set a tooltip for panel2
+    panel2.ToolTipText = "Click time to display seconds";
+
+    // Display panels in statusBar1 and add them to the
+    // status bar's StatusBarPanelCollection.
+    statusBar1.ShowPanels = true;
+    statusBar1.Panels.Add(panel1);
+    statusBar1.Panels.Add(panel2);
+
+    // Add the StatusBar to the form.
+    this.Controls.Add(statusBar1);
+  }
+
+
+  // If the user clicks the status bar, check the text of the 
+  // StatusBarPanel.  If the text equals a short time string,
+  // change it to long time display.
+  private void statusBar1_PanelClick(object sender, 
+	  StatusBarPanelClickEventArgs e)
+  {
+    if (e.StatusBarPanel.Text == 
+        System.DateTime.Now.ToShortTimeString())
+    {
+	  e.StatusBarPanel.Text = 
+		  System.DateTime.Now.ToLongTimeString();
+    }
   }
 
   public void setFontFinal() {

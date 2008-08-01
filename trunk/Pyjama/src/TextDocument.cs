@@ -21,8 +21,7 @@ using System.Windows.Forms;
 using System.Drawing;
 using PyjamaInterfaces;
 
-public class TextDocument: System.Windows.Forms.TextBox, 
-                               PyjamaInterfaces.IDocument {
+public class TextDocument: TextBox, PyjamaInterfaces.IDocument {
   string filename;
   int page;
   bool untitled;
@@ -40,7 +39,6 @@ public class TextDocument: System.Windows.Forms.TextBox,
 
 	// Optional:
 	WordWrap = true;
- 	Size = new System.Drawing.Size(196, 77);
 	setFont();
 
 	// System:
@@ -71,7 +69,7 @@ public class TextDocument: System.Windows.Forms.TextBox,
   }
 
   public void setFont() {
-	this.Font = new Font("Courier", 18.0f,
+	this.Font = new Font("Courier New", 18.0f,
 		FontStyle.Regular, GraphicsUnit.Pixel);
   }
 
@@ -104,14 +102,27 @@ public class TextDocument: System.Windows.Forms.TextBox,
   }
   
   protected override bool ProcessCmdKey(ref 
-	  System.Windows.Forms.Message m, 
-	  System.Windows.Forms.Keys k) 
+	  Message m, 
+	  Keys k) 
   {
-	// Just testing
-	//if(m.Msg == 256 && k == System.Windows.Forms.Keys.Enter) {
-	//System.Windows.Forms.SendKeys.Send("\t");
-	//return true; 
-	//}
+	// Need Customizable key bindings
+	if(m.Msg == 256) {
+	  // Control + keys
+	  if (k == (Keys.Control | Keys.E)) {
+		SendKeys.SendWait("{END}");
+		return true; 
+	  } else {
+		// Plain keys
+		if (k == Keys.Tab) {
+		  SendKeys.SendWait("    ");
+		  return true; 
+		} else if (k == Keys.Return) {
+		  // does not get rehandled:
+		  SendKeys.SendWait("{ENTER}    ");
+		  return true; 
+		}
+	  }
+	}
 	return base.ProcessCmdKey(ref m,k);
   }
 
