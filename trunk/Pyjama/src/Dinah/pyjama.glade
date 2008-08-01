@@ -9,8 +9,8 @@
   <property name="type">GTK_WINDOW_TOPLEVEL</property>
   <property name="window_position">GTK_WIN_POS_NONE</property>
   <property name="modal">False</property>
-  <property name="default_width">1000</property>
-  <property name="default_height">800</property>
+  <property name="default_width">800</property>
+  <property name="default_height">600</property>
   <property name="resizable">True</property>
   <property name="destroy_with_parent">False</property>
   <property name="decorated">True</property>
@@ -26,7 +26,7 @@
     <widget class="GtkHPaned" id="mainhpane">
       <property name="visible">True</property>
       <property name="can_focus">True</property>
-      <property name="position">800</property>
+      <property name="position">600</property>
 
       <child>
 	<widget class="GtkVBox" id="leftvbox">
@@ -455,7 +455,7 @@
 	    <widget class="GtkVPaned" id="leftvpane">
 	      <property name="visible">True</property>
 	      <property name="can_focus">True</property>
-	      <property name="position">675</property>
+	      <property name="position">500</property>
 
 	      <child>
 		<widget class="GtkHandleBox" id="codehandlebox">
@@ -7876,15 +7876,40 @@ expression</property>
 					      <property name="spacing">0</property>
 
 					      <child>
-						<widget class="GtkHandleBox" id="handlebox70">
+						<widget class="GtkHBox" id="hbox218">
 						  <property name="border_width">1</property>
 						  <property name="visible">True</property>
-						  <property name="shadow_type">GTK_SHADOW_OUT</property>
-						  <property name="handle_position">GTK_POS_LEFT</property>
-						  <property name="snap_edge">GTK_POS_TOP</property>
+						  <property name="homogeneous">False</property>
+						  <property name="spacing">0</property>
 
 						  <child>
-						    <widget class="GtkLabel" id="label151">
+						    <widget class="GtkButton" id="pendowndragbutton">
+						      <property name="visible">True</property>
+						      <property name="can_focus">True</property>
+						      <property name="relief">GTK_RELIEF_NORMAL</property>
+						      <property name="focus_on_click">True</property>
+
+						      <child>
+							<widget class="GtkImage" id="image152">
+							  <property name="visible">True</property>
+							  <property name="stock">gtk-dnd</property>
+							  <property name="icon_size">4</property>
+							  <property name="xalign">0.5</property>
+							  <property name="yalign">0.5</property>
+							  <property name="xpad">0</property>
+							  <property name="ypad">0</property>
+							</widget>
+						      </child>
+						    </widget>
+						    <packing>
+						      <property name="padding">0</property>
+						      <property name="expand">False</property>
+						      <property name="fill">False</property>
+						    </packing>
+						  </child>
+
+						  <child>
+						    <widget class="GtkLabel" id="label315">
 						      <property name="visible">True</property>
 						      <property name="label" translatable="yes"> pen down </property>
 						      <property name="use_underline">False</property>
@@ -7901,6 +7926,11 @@ expression</property>
 						      <property name="single_line_mode">False</property>
 						      <property name="angle">0</property>
 						    </widget>
+						    <packing>
+						      <property name="padding">0</property>
+						      <property name="expand">False</property>
+						      <property name="fill">False</property>
+						    </packing>
 						  </child>
 						</widget>
 						<packing>
@@ -7911,15 +7941,40 @@ expression</property>
 					      </child>
 
 					      <child>
-						<widget class="GtkHandleBox" id="handlebox71">
+						<widget class="GtkHBox" id="hbox219">
 						  <property name="border_width">1</property>
 						  <property name="visible">True</property>
-						  <property name="shadow_type">GTK_SHADOW_OUT</property>
-						  <property name="handle_position">GTK_POS_LEFT</property>
-						  <property name="snap_edge">GTK_POS_TOP</property>
+						  <property name="homogeneous">False</property>
+						  <property name="spacing">0</property>
 
 						  <child>
-						    <widget class="GtkLabel" id="label152">
+						    <widget class="GtkButton" id="penupdragbutton">
+						      <property name="visible">True</property>
+						      <property name="can_focus">True</property>
+						      <property name="relief">GTK_RELIEF_NORMAL</property>
+						      <property name="focus_on_click">True</property>
+
+						      <child>
+							<widget class="GtkImage" id="image153">
+							  <property name="visible">True</property>
+							  <property name="stock">gtk-dnd</property>
+							  <property name="icon_size">4</property>
+							  <property name="xalign">0.5</property>
+							  <property name="yalign">0.5</property>
+							  <property name="xpad">0</property>
+							  <property name="ypad">0</property>
+							</widget>
+						      </child>
+						    </widget>
+						    <packing>
+						      <property name="padding">0</property>
+						      <property name="expand">False</property>
+						      <property name="fill">False</property>
+						    </packing>
+						  </child>
+
+						  <child>
+						    <widget class="GtkLabel" id="label316">
 						      <property name="visible">True</property>
 						      <property name="label" translatable="yes"> pen up </property>
 						      <property name="use_underline">False</property>
@@ -7936,6 +7991,11 @@ expression</property>
 						      <property name="single_line_mode">False</property>
 						      <property name="angle">0</property>
 						    </widget>
+						    <packing>
+						      <property name="padding">0</property>
+						      <property name="expand">False</property>
+						      <property name="fill">False</property>
+						    </packing>
 						  </child>
 						</widget>
 						<packing>
@@ -7946,17 +8006,42 @@ expression</property>
 					      </child>
 
 					      <child>
-						<widget class="GtkHandleBox" id="handlebox72">
+						<widget class="GtkHBox" id="hbox220">
 						  <property name="border_width">1</property>
 						  <property name="visible">True</property>
-						  <property name="shadow_type">GTK_SHADOW_OUT</property>
-						  <property name="handle_position">GTK_POS_LEFT</property>
-						  <property name="snap_edge">GTK_POS_TOP</property>
+						  <property name="homogeneous">False</property>
+						  <property name="spacing">0</property>
 
 						  <child>
-						    <widget class="GtkLabel" id="label153">
+						    <widget class="GtkButton" id="cleardragbutton">
 						      <property name="visible">True</property>
-						      <property name="label" translatable="yes"> clear </property>
+						      <property name="can_focus">True</property>
+						      <property name="relief">GTK_RELIEF_NORMAL</property>
+						      <property name="focus_on_click">True</property>
+
+						      <child>
+							<widget class="GtkImage" id="image154">
+							  <property name="visible">True</property>
+							  <property name="stock">gtk-dnd</property>
+							  <property name="icon_size">4</property>
+							  <property name="xalign">0.5</property>
+							  <property name="yalign">0.5</property>
+							  <property name="xpad">0</property>
+							  <property name="ypad">0</property>
+							</widget>
+						      </child>
+						    </widget>
+						    <packing>
+						      <property name="padding">0</property>
+						      <property name="expand">False</property>
+						      <property name="fill">False</property>
+						    </packing>
+						  </child>
+
+						  <child>
+						    <widget class="GtkLabel" id="label317">
+						      <property name="visible">True</property>
+						      <property name="label" translatable="yes"> clear graphics window</property>
 						      <property name="use_underline">False</property>
 						      <property name="use_markup">False</property>
 						      <property name="justify">GTK_JUSTIFY_LEFT</property>
@@ -7971,6 +8056,11 @@ expression</property>
 						      <property name="single_line_mode">False</property>
 						      <property name="angle">0</property>
 						    </widget>
+						    <packing>
+						      <property name="padding">0</property>
+						      <property name="expand">False</property>
+						      <property name="fill">False</property>
+						    </packing>
 						  </child>
 						</widget>
 						<packing>
@@ -7981,58 +8071,61 @@ expression</property>
 					      </child>
 
 					      <child>
-						<widget class="GtkHandleBox" id="handlebox73">
+						<widget class="GtkHBox" id="hbox221">
 						  <property name="border_width">1</property>
 						  <property name="visible">True</property>
-						  <property name="shadow_type">GTK_SHADOW_OUT</property>
-						  <property name="handle_position">GTK_POS_LEFT</property>
-						  <property name="snap_edge">GTK_POS_TOP</property>
+						  <property name="homogeneous">False</property>
+						  <property name="spacing">0</property>
 
 						  <child>
-						    <widget class="GtkHBox" id="hbox74">
+						    <widget class="GtkButton" id="pencolordragbutton">
 						      <property name="visible">True</property>
-						      <property name="homogeneous">False</property>
-						      <property name="spacing">0</property>
+						      <property name="can_focus">True</property>
+						      <property name="relief">GTK_RELIEF_NORMAL</property>
+						      <property name="focus_on_click">True</property>
 
 						      <child>
-							<widget class="GtkLabel" id="label154">
+							<widget class="GtkImage" id="image155">
 							  <property name="visible">True</property>
-							  <property name="label" translatable="yes"> set pen color to </property>
-							  <property name="use_underline">False</property>
-							  <property name="use_markup">False</property>
-							  <property name="justify">GTK_JUSTIFY_LEFT</property>
-							  <property name="wrap">False</property>
-							  <property name="selectable">False</property>
+							  <property name="stock">gtk-dnd</property>
+							  <property name="icon_size">4</property>
 							  <property name="xalign">0.5</property>
 							  <property name="yalign">0.5</property>
 							  <property name="xpad">0</property>
 							  <property name="ypad">0</property>
-							  <property name="ellipsize">PANGO_ELLIPSIZE_NONE</property>
-							  <property name="width_chars">-1</property>
-							  <property name="single_line_mode">False</property>
-							  <property name="angle">0</property>
 							</widget>
-							<packing>
-							  <property name="padding">0</property>
-							  <property name="expand">False</property>
-							  <property name="fill">False</property>
-							</packing>
-						      </child>
-
-						      <child>
-							<widget class="GtkColorButton" id="colorbutton1">
-							  <property name="visible">True</property>
-							  <property name="can_focus">True</property>
-							  <property name="use_alpha">False</property>
-							  <property name="focus_on_click">True</property>
-							</widget>
-							<packing>
-							  <property name="padding">0</property>
-							  <property name="expand">False</property>
-							  <property name="fill">False</property>
-							</packing>
 						      </child>
 						    </widget>
+						    <packing>
+						      <property name="padding">0</property>
+						      <property name="expand">False</property>
+						      <property name="fill">False</property>
+						    </packing>
+						  </child>
+
+						  <child>
+						    <widget class="GtkLabel" id="label318">
+						      <property name="visible">True</property>
+						      <property name="label" translatable="yes"> change pen color to &lt;color&gt;</property>
+						      <property name="use_underline">False</property>
+						      <property name="use_markup">False</property>
+						      <property name="justify">GTK_JUSTIFY_LEFT</property>
+						      <property name="wrap">False</property>
+						      <property name="selectable">False</property>
+						      <property name="xalign">0.5</property>
+						      <property name="yalign">0.5</property>
+						      <property name="xpad">0</property>
+						      <property name="ypad">0</property>
+						      <property name="ellipsize">PANGO_ELLIPSIZE_NONE</property>
+						      <property name="width_chars">-1</property>
+						      <property name="single_line_mode">False</property>
+						      <property name="angle">0</property>
+						    </widget>
+						    <packing>
+						      <property name="padding">0</property>
+						      <property name="expand">False</property>
+						      <property name="fill">False</property>
+						    </packing>
 						  </child>
 						</widget>
 						<packing>
@@ -8043,63 +8136,61 @@ expression</property>
 					      </child>
 
 					      <child>
-						<widget class="GtkHandleBox" id="handlebox74">
+						<widget class="GtkHBox" id="hbox222">
 						  <property name="border_width">1</property>
 						  <property name="visible">True</property>
-						  <property name="shadow_type">GTK_SHADOW_OUT</property>
-						  <property name="handle_position">GTK_POS_LEFT</property>
-						  <property name="snap_edge">GTK_POS_TOP</property>
+						  <property name="homogeneous">False</property>
+						  <property name="spacing">0</property>
 
 						  <child>
-						    <widget class="GtkHBox" id="hbox75">
+						    <widget class="GtkButton" id="penthicknessdragbutton">
 						      <property name="visible">True</property>
-						      <property name="homogeneous">False</property>
-						      <property name="spacing">0</property>
+						      <property name="can_focus">True</property>
+						      <property name="relief">GTK_RELIEF_NORMAL</property>
+						      <property name="focus_on_click">True</property>
 
 						      <child>
-							<widget class="GtkLabel" id="label155">
+							<widget class="GtkImage" id="image156">
 							  <property name="visible">True</property>
-							  <property name="label" translatable="yes"> set pen thickness to </property>
-							  <property name="use_underline">False</property>
-							  <property name="use_markup">False</property>
-							  <property name="justify">GTK_JUSTIFY_LEFT</property>
-							  <property name="wrap">False</property>
-							  <property name="selectable">False</property>
+							  <property name="stock">gtk-dnd</property>
+							  <property name="icon_size">4</property>
 							  <property name="xalign">0.5</property>
 							  <property name="yalign">0.5</property>
 							  <property name="xpad">0</property>
 							  <property name="ypad">0</property>
-							  <property name="ellipsize">PANGO_ELLIPSIZE_NONE</property>
-							  <property name="width_chars">-1</property>
-							  <property name="single_line_mode">False</property>
-							  <property name="angle">0</property>
 							</widget>
-							<packing>
-							  <property name="padding">0</property>
-							  <property name="expand">False</property>
-							  <property name="fill">False</property>
-							</packing>
-						      </child>
-
-						      <child>
-							<widget class="GtkSpinButton" id="spinbutton67">
-							  <property name="visible">True</property>
-							  <property name="can_focus">True</property>
-							  <property name="climb_rate">1</property>
-							  <property name="digits">0</property>
-							  <property name="numeric">True</property>
-							  <property name="update_policy">GTK_UPDATE_ALWAYS</property>
-							  <property name="snap_to_ticks">False</property>
-							  <property name="wrap">False</property>
-							  <property name="adjustment">1 0 100 1 10 10</property>
-							</widget>
-							<packing>
-							  <property name="padding">0</property>
-							  <property name="expand">True</property>
-							  <property name="fill">True</property>
-							</packing>
 						      </child>
 						    </widget>
+						    <packing>
+						      <property name="padding">0</property>
+						      <property name="expand">False</property>
+						      <property name="fill">False</property>
+						    </packing>
+						  </child>
+
+						  <child>
+						    <widget class="GtkLabel" id="label319">
+						      <property name="visible">True</property>
+						      <property name="label" translatable="yes"> set pen thickness to &lt;number&gt;</property>
+						      <property name="use_underline">False</property>
+						      <property name="use_markup">False</property>
+						      <property name="justify">GTK_JUSTIFY_LEFT</property>
+						      <property name="wrap">False</property>
+						      <property name="selectable">False</property>
+						      <property name="xalign">0.5</property>
+						      <property name="yalign">0.5</property>
+						      <property name="xpad">0</property>
+						      <property name="ypad">0</property>
+						      <property name="ellipsize">PANGO_ELLIPSIZE_NONE</property>
+						      <property name="width_chars">-1</property>
+						      <property name="single_line_mode">False</property>
+						      <property name="angle">0</property>
+						    </widget>
+						    <packing>
+						      <property name="padding">0</property>
+						      <property name="expand">False</property>
+						      <property name="fill">False</property>
+						    </packing>
 						  </child>
 						</widget>
 						<packing>
@@ -8110,63 +8201,61 @@ expression</property>
 					      </child>
 
 					      <child>
-						<widget class="GtkHandleBox" id="handlebox75">
+						<widget class="GtkHBox" id="hbox223">
 						  <property name="border_width">1</property>
 						  <property name="visible">True</property>
-						  <property name="shadow_type">GTK_SHADOW_OUT</property>
-						  <property name="handle_position">GTK_POS_LEFT</property>
-						  <property name="snap_edge">GTK_POS_TOP</property>
+						  <property name="homogeneous">False</property>
+						  <property name="spacing">0</property>
 
 						  <child>
-						    <widget class="GtkHBox" id="hbox76">
+						    <widget class="GtkButton" id="changepenthicknessdragbutton">
 						      <property name="visible">True</property>
-						      <property name="homogeneous">False</property>
-						      <property name="spacing">0</property>
+						      <property name="can_focus">True</property>
+						      <property name="relief">GTK_RELIEF_NORMAL</property>
+						      <property name="focus_on_click">True</property>
 
 						      <child>
-							<widget class="GtkLabel" id="label156">
+							<widget class="GtkImage" id="image157">
 							  <property name="visible">True</property>
-							  <property name="label" translatable="yes"> change pen thickness by </property>
-							  <property name="use_underline">False</property>
-							  <property name="use_markup">False</property>
-							  <property name="justify">GTK_JUSTIFY_LEFT</property>
-							  <property name="wrap">False</property>
-							  <property name="selectable">False</property>
+							  <property name="stock">gtk-dnd</property>
+							  <property name="icon_size">4</property>
 							  <property name="xalign">0.5</property>
 							  <property name="yalign">0.5</property>
 							  <property name="xpad">0</property>
 							  <property name="ypad">0</property>
-							  <property name="ellipsize">PANGO_ELLIPSIZE_NONE</property>
-							  <property name="width_chars">-1</property>
-							  <property name="single_line_mode">False</property>
-							  <property name="angle">0</property>
 							</widget>
-							<packing>
-							  <property name="padding">0</property>
-							  <property name="expand">False</property>
-							  <property name="fill">False</property>
-							</packing>
-						      </child>
-
-						      <child>
-							<widget class="GtkSpinButton" id="spinbutton68">
-							  <property name="visible">True</property>
-							  <property name="can_focus">True</property>
-							  <property name="climb_rate">1</property>
-							  <property name="digits">0</property>
-							  <property name="numeric">True</property>
-							  <property name="update_policy">GTK_UPDATE_ALWAYS</property>
-							  <property name="snap_to_ticks">False</property>
-							  <property name="wrap">False</property>
-							  <property name="adjustment">5 0 100 1 10 10</property>
-							</widget>
-							<packing>
-							  <property name="padding">0</property>
-							  <property name="expand">True</property>
-							  <property name="fill">True</property>
-							</packing>
 						      </child>
 						    </widget>
+						    <packing>
+						      <property name="padding">0</property>
+						      <property name="expand">False</property>
+						      <property name="fill">False</property>
+						    </packing>
+						  </child>
+
+						  <child>
+						    <widget class="GtkLabel" id="label320">
+						      <property name="visible">True</property>
+						      <property name="label" translatable="yes"> change pen thickness by &lt;number&gt;</property>
+						      <property name="use_underline">False</property>
+						      <property name="use_markup">False</property>
+						      <property name="justify">GTK_JUSTIFY_LEFT</property>
+						      <property name="wrap">False</property>
+						      <property name="selectable">False</property>
+						      <property name="xalign">0.5</property>
+						      <property name="yalign">0.5</property>
+						      <property name="xpad">0</property>
+						      <property name="ypad">0</property>
+						      <property name="ellipsize">PANGO_ELLIPSIZE_NONE</property>
+						      <property name="width_chars">-1</property>
+						      <property name="single_line_mode">False</property>
+						      <property name="angle">0</property>
+						    </widget>
+						    <packing>
+						      <property name="padding">0</property>
+						      <property name="expand">False</property>
+						      <property name="fill">False</property>
+						    </packing>
 						  </child>
 						</widget>
 						<packing>
