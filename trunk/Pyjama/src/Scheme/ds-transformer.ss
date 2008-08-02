@@ -1,5 +1,10 @@
 (load "parser-cps.ss")
 
+;; assumes:
+;; - lambda-cont, lambda-proc, etc. datatype forms
+;; - define*
+;; - no internal define/define*'s
+
 ;;-------------------------------------------------------------------------------
 
 (define make-all-datatypes
@@ -84,8 +89,10 @@
 		     (eq? (caar code) make-name))))
 	  (add-clause (formals bodies fields params)
 	    (let* ((new-lambda
-		     (rename-lambda-formals type arg-names
-		       `(lambda ,formals ,@(map (transform (union formals params)) bodies))))
+		     (rename-lambda-formals
+		       arg-names
+		       `(lambda ,formals ,@(map (transform (union formals params)) bodies))
+		       type))
 		   (new-code (cddr new-lambda))
 		   (identical-clause (find-clause fields new-code clauses)))
 	      (if identical-clause
@@ -154,7 +161,7 @@
 			type apply-name))))
 	all-datatypes))
     (let ((eopl-defs '())
-	  (procedure-defs '())
+	  (function-defs '())
 	  (other-defs '()))
       (letrec
 	((read-transformed-exps
@@ -162,7 +169,7 @@
 	     (let ((exp (read input-port)))
 	       (cond
 	         ((eof-object? exp)
-		  (set! procedure-defs (reverse procedure-defs))
+		  (set! function-defs (reverse function-defs))
 		  (set! other-defs (reverse other-defs)))
 		 ;; skip top level calls to load
 		 ((load? exp) (read-transformed-exps input-port))
@@ -171,8 +178,8 @@
 			 (cond
 			   ((eopl-define-datatype? texp)
 			    (set! eopl-defs (cons texp eopl-defs)))
-			   ((procedure-definition? texp)
-			    (set! procedure-defs (cons texp procedure-defs)))
+			   ((function-definition? texp)
+			    (set! function-defs (cons texp function-defs)))
 			   (else (set! other-defs (cons texp other-defs))))
 			 (read-transformed-exps input-port)))))))
 	 (print-exp
@@ -198,7 +205,7 @@
 	     ;; write representation independent code
 	     (fprintf output-port ";;~a~%" (make-string 70 #\-))
 	     (fprintf output-port ";; main program~%~%")
-	     (for-each (print-exp output-port) procedure-defs)
+	     (for-each (print-exp output-port) function-defs)
 	     (for-each (print-exp output-port) other-defs))))
 	(call-with-input-file source-file
 	  (lambda (input-port)
@@ -219,7 +226,7 @@
 	 (not (null? exp))
 	 (eq? (car exp) 'define-datatype))))
 
-(define procedure-definition?
+(define function-definition?
   (lambda (exp)
     (and (or (define? exp)
 	     (define*? exp))
@@ -253,6 +260,11 @@
     (if ((car datatypes) msg code)
       (car datatypes)
       (get-datatype msg code (cdr datatypes)))))
+
+;;(define transform-exp
+;;  (lambda (exp)
+;;    (set! all-datatypes (make-all-datatypes))
+;;    ((transform '()) exp)))
 
 (define transform
   (lambda (params)
@@ -318,11 +330,11 @@
 	      `(begin ,@(map (transform params) exps)))
 	    (define (name . bodies)
 	      (if (mit-style? code)
-		`(define ,name ,@(map (transform params) bodies))
+		((transform params) `(define ,(car name) (lambda ,(cdr name) ,@bodies)))
 		`(define ,name ,((transform params) (car bodies)))))
 	    (define* (name . bodies)
 	      (if (mit-style? code)
-		`(define* ,name ,@(map (transform params) bodies))
+		((transform params) `(define* ,(car name) (lambda ,(cdr name) ,@bodies)))
 		`(define* ,name ,((transform params) (car bodies)))))
 	    (define-syntax args code)
 	    (and exps
@@ -546,13 +558,13 @@
       (else (lengths=? (cdr ls1) (cdr ls2))))))
 
 (define rename-lambda-formals
-  (lambda (type new-formals lambda-exp)
+  (lambda (new-formals lambda-exp . opt)
     (let ((formals (cadr lambda-exp)))
       ;; formals and new-formals can be improper lists
       (if (not (lengths=? formals new-formals))
 	  (error-in-source lambda-exp
 	    (format "Lambda parameters are not compatible with ~a datatype parameters ~a."
-	      type new-formals))
+		    (car opt) new-formals))
 	  (letrec
 	    ((loop
 	       (lambda (old new exp)

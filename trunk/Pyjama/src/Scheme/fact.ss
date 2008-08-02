@@ -27,6 +27,12 @@
 	  (lambda-cont (v) (k (* n v)))))))
 
 
+;;(define foo
+;;  (lambda-cont (v) (foo v a b)))
+
+;;(define foo2
+;;  (lambda-cont (v) (list v a b)))
+
 
 ;;	  (lambda-cont (foo)
 ;;	    `(,a b c ,(list one (lambda-cont (v) (k (* n v foo))))))))))
