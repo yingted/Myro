@@ -25,3 +25,9 @@
 (define-syntax define*
   (syntax-rules ()
     [(_ name body ...) (define name body ...)]))
+
+;; where the computation should halt
+
+(define-syntax halt*
+  (syntax-rules ()
+    [(_ value) value]))

@@ -8,56 +8,107 @@
 
 ;;-------------------------------------------------------------------------------
 
-(define get-defined-symbols
-  (lambda (source-file)
-    (call-with-input-file source-file
-      (lambda (port)
-	(let loop ((exp (read port)) (syms '()) (syms* '()))
-	  (cond
-	    ((eof-object? exp) (cons syms syms*))
-	    ((define? exp)
-	     (if (mit-style? exp)
-		 (loop (read port) (union (caadr exp) syms) syms*)
-		 (loop (read port) (union (cadr exp) syms) syms*)))
-	    ((define*? exp)
-	     (if (mit-style? exp)
-		 (loop (read port) syms (union (caadr exp) syms*))
-		 (loop (read port) syms (union (cadr exp) syms*))))
-	    ((eopl-define-datatype? exp)
-	     (loop (read port) (union (map car (cdddr exp)) syms) syms*))
-	    (else (loop (read port) syms syms*))))))))
+;;(define get-define*-symbols
+;;  (lambda (source-file)
+;;    (call-with-input-file source-file
+;;      (lambda (port)
+;;	(let loop ((exp (read port)) (syms* '()))
+;;	  (cond
+;;	    ((eof-object? exp) syms*)
+;;	    ((define? exp) (loop (read port) syms*))
+;;	    ((define*? exp)
+;;	     (if (mit-style? exp)
+;;		 (loop (read port) (union (caadr exp) syms*))
+;;		 (loop (read port) (union (cadr exp) syms*))))
+;;	    ((eopl-define-datatype? exp) (loop (read port) syms*))
+;;	    (else (loop (read port) syms*))))))))
 
-(define get-all-defined-symbols
-  (lambda (source-files)
-    (union-all (map get-defined-symbols source-files))))
+;;(define get-all-define*-symbols
+;;  (lambda (source-files)
+;;    (union-all (map get-define*-symbols source-files))))
 
-(define register-transform-file
+;;(define get-defined-symbols
+;;  (lambda (source-file)
+;;    (call-with-input-file source-file
+;;      (lambda (port)
+;;	(let loop ((exp (read port)) (syms '()) (syms* '()))
+;;	  (cond
+;;	    ((eof-object? exp) (cons syms syms*))
+;;	    ((define? exp)
+;;	     (if (mit-style? exp)
+;;		 (loop (read port) (union (caadr exp) syms) syms*)
+;;		 (loop (read port) (union (cadr exp) syms) syms*)))
+;;	    ((define*? exp)
+;;	     (if (mit-style? exp)
+;;		 (loop (read port) syms (union (caadr exp) syms*))
+;;		 (loop (read port) syms (union (cadr exp) syms*))))
+;;	    ((eopl-define-datatype? exp)
+;;	     (loop (read port) (union (map car (cdddr exp)) syms) syms*))
+;;	    (else (loop (read port) syms syms*))))))))
+
+;;(define get-all-defined-symbols
+;;  (lambda (source-files)
+;;    (union-all (map get-defined-symbols source-files))))
+
+(define make-register-table
+  (lambda ()
+    (let ((all-registers '(final_reg))
+	  (registerized-functions '()))
+      (lambda msg
+	(record-case msg
+	  (info ()
+	    (printf "registers:~%")
+	    (for-each (lambda (r) (printf "   ~a~%" r))
+		      all-registers)
+	    (for-each (lambda (f) (printf "~a: ~a~%" (car f) (cdr f)))
+		      registerized-functions))
+	  (get-registers () (sort alphabetical? all-registers))
+	  (registerize-application? (code)
+	    (and (symbol? (car code))
+		 (assq (car code) registerized-functions)))
+	  (registerize (code)
+	    (let* ((operator (car code))
+		   (operands (cdr code))
+		   (params (cdr (assq operator registerized-functions)))
+		   (assigns (params->assignments params operands))
+		   (assigns2 (remove-redundancies assigns))
+		   (final-assigns (sort-assignments code assigns2))
+		   (pc-assign `(set! pc ,operator)))
+	      `(begin ,@final-assigns ,pc-assign)))
+	  (add-function (name regs)
+	    (if (assq name registerized-functions)
+	      (error-in-source #f
+		(format "Symbol ~a is defined more than once at top level." name)))
+	    (set! all-registers (union regs all-registers))
+	    (set! registerized-functions (cons (cons name regs) registerized-functions))
+	    'ok)
+	  (else (error 'register-table "bad message: ~a" msg)))))))
+
+(define register-table (make-register-table))
+
+(define reg-transform-file
   (lambda (source-file . opts)
-    (let* ((eopl-defs '())
-	   (procedure-defs '())
-	   (other-defs '())
-	   (all-defined-syms (get-defined-symbols source-file))
-	   (syms (car all-defined-syms))
-	   (syms* (cdr all-defined-syms)))
+    (set! register-table (make-register-table))
+    (let ((eopl-defs '())
+	  (defs '()))
       (letrec
-	((read-transformed-exps
+	((transform-definitions
 	   (lambda (input-port)
 	     (let ((exp (read input-port)))
-	       (printf "read ~s~%" exp)
-	       (cond
-	         ((eof-object? exp)
-		  (set! other-defs (reverse other-defs)))
-		 ;; skip top level calls to load
-		 ((load? exp) (read-transformed-exps input-port))
-		 ;; must transform the expression before calling the recursion
-		 (else (let ((texp ((register-transform syms*) exp)))
-			 (cond
-			   ((eopl-define-datatype? texp)
-			    (set! eopl-defs (cons texp eopl-defs)))
-			   ((procedure-definition? texp)
-			    (set! procedure-defs (cons texp procedure-defs)))
-			   (else (set! other-defs (cons texp other-defs))))
-			 (read-transformed-exps input-port)))))))
+	       (if (eof-object? exp)
+		 (begin
+		  (set! eopl-defs (reverse eopl-defs))
+		  (set! defs (reverse (map reg-transform defs))))
+		 (begin
+		   (cond
+		     ((or (define? exp) (define*? exp))
+		      (set! defs (cons (preprocess-define exp) defs)))
+		     ((eopl-define-datatype? exp)
+		      (set! eopl-defs (cons exp eopl-defs))
+		      (set! need-eopl-support? #t))
+		     ;; skip top level calls to load
+		     (else 'skip))
+		   (transform-definitions input-port))))))
 	 (print-exp
 	   (lambda (output-port)
 	     (lambda (exp)
@@ -74,13 +125,36 @@
 		 (fprintf output-port "(load \"define-datatype.ss\")~%~%")
 		 (for-each (print-exp output-port) eopl-defs)))
 	     ;; write register machine code
-	     (fprintf output-port ";;~a~%" (make-string 70 #\-))
-	     (fprintf output-port ";; main program~%~%")
-	     (for-each (print-exp output-port) procedure-defs)
-	     (for-each (print-exp output-port) other-defs))))
+	     (fprintf output-port ";;~a~%~%" (make-string 70 #\-))
+	     (fprintf output-port ";; global registers~%")
+	     (for-each
+	       (lambda (r) (fprintf output-port "(define ~a 'undefined)~%" r))
+	       (register-table 'get-registers))
+	     (fprintf output-port "(define pc 'undefined)~%")
+	     (newline output-port)
+	     (for-each (print-exp output-port) defs)
+	     ;; write trampoline code
+	     (fprintf output-port ";; the trampoline~%")
+	     (pretty-print
+	       '(define trampoline
+		  (lambda ()
+		    (if pc
+		      (begin
+			(pc)
+			(trampoline))
+		      final_reg)))
+	       output-port)
+	     (newline output-port)
+	     (pretty-print
+	       '(define run
+		  (lambda (setup . args)
+		    (apply setup args)
+		    (trampoline)))
+	       output-port)
+	     (newline output-port))))
 	(call-with-input-file source-file
 	  (lambda (input-port)
-	    (read-transformed-exps input-port)))
+	    (transform-definitions input-port)))
 	(if (null? opts)
 	  (begin
 	    (newline)
@@ -91,137 +165,182 @@
 		(print-code output-port)
 		(printf "Output written to ~a~%" output-filename)))))))))
 
-(define register-transform
-  (lambda (syms*)
-    (letrec
-       ((transform
-	  (lambda (code)
-	    (cond
-	     ((null? code) code)
-	     ((literal? code) code)
-	     ((symbol? code) code)
-	     (else
-	      (record-case code
-		(quote (datum) code)
-		(quasiquote (datum)
-		  (list 'quasiquote (transform-quasiquote datum)))
-		(if (test . conseqs)
-		  `(if ,@(map transform (cdr code))))
-		(cond clauses
-		  `(cond ,@(map (lambda (clause)
-				  (if (eq? (car clause) 'else)
-				      `(else ,@(map transform (cdr clause)))
-				      (map transform clause)))
-				clauses)))
-		(lambda (formals . bodies)
-		  `(lambda ,formals ,@(map transform bodies)))
-		(let (bindings . bodies)
-		  (if (symbol? bindings)
-		      ;; named let
-		      (let ((name (cadr code))
-			    (vars (map car (caddr code)))
-			    (exps (map cadr (caddr code)))
-			    (bodies (cdddr code)))
-			`(let ,name ,(map list vars (map transform exps))
-			      ,@(map transform bodies)))
-		      ;; ordinary let
-		      (let ((vars (map car bindings))
-			    (exps (map cadr bindings)))
-			`(let ,(map list vars (map transform exps))
-			   ,@(map transform bodies)))))
-		(let* (bindings . bodies)
-		  (let ((vars (map car bindings))
-			(exps (map cadr bindings)))
-		    `(let* ,(map list vars (map transform exps))
-		       ,@(map transform bodies))))
-		(letrec (decls . bodies)
-		  (let ((vars (map car decls))
-			(procs (map cadr decls)))
-		    `(letrec ,(map list vars (map transform procs))
-		       ,@(map transform bodies))))
-		(set! (var rhs-exp)
-		  `(set! ,var ,(transform rhs-exp)))
-		(begin exps
-		  `(begin ,@(map transform exps)))
-		((define define*) (name . bodies)
-		 (cond
-		   ((mit-style? code)
-		    (error-in-source code "MIT-style define not allowed."))
-		   ((lambda? (car bodies))
-		    (let* ((lambda-exp (car bodies))
-			   (formals (cadr lambda-exp))
-;; formals could be an improper list
-			   (registers (get-register-names formals)))
-		      (if (memq name syms*)
-			;; define*
-			(let* ((new-lambda (rename-lambda-formals registers lambda-exp))
-			       (new-bodies (cddr new-lambda)))
-			  `(define ,name
-			     (lambda ()
-			       ,@(map transform new-bodies))))
-			;; define
-			(let ((lambda-bodies (cddr lambda-exp)))
-			  `(define ,name
-			     (lambda ,formals
-			       ,@(map transform lambda-bodies)))))))
-		   (else `(define ,name ,(transform (car bodies))))))
-		(define-syntax args code)
-		(and exps
-		  `(and ,@(map transform exps)))
-		(or exps
-		  `(or ,@(map transform exps)))
-		(case (exp . clauses)
-		  `(case ,(transform exp)
-		     ,@(transform-case-clauses clauses)))
-		(record-case (exp . clauses)
-		  `(record-case ,(transform exp)
-		     ,@(transform-rc-clauses clauses)))
-		;; EOPL
-		(define-datatype args
-		  (set! need-eopl-support? #t)
-		  code)
-		(cases (type exp . clauses)
-		  (set! need-eopl-support? #t)
-		  `(cases ,type ,(transform exp)
-		     ,@(transform-rc-clauses clauses)))
-		(else (if (memq (car code) syntactic-keywords)
-			  (error-in-source code
-			    "I don't know how to process the above code.")
-			  (map transform code))))))))
-	(transform-quasiquote
-	  (lambda (datum)
-	    (cond
-	     ((vector? datum) (list->vector (transform-quasiquote (vector->list datum))))
-	     ((not (pair? datum)) datum)
-	     ;; doesn't handle nested quasiquotes yet
-	     ((quasiquote? datum) datum)
-	     ((unquote? datum) (list 'unquote (transform (cadr datum))))
-	     ((unquote-splicing? (car datum))
-	      (let* ((uqs (car datum))
-		     (transformed-uqs (list 'unquote-splicing (transform (cadr uqs)))))
-		(if (null? (cdr datum))
-		    (cons transformed-uqs '())
-		    (cons transformed-uqs (transform-quasiquote (cdr datum))))))
-	     (else
-	      (cons (transform-quasiquote (car datum))
-		    (transform-quasiquote (cdr datum)))))))
-	(transform-rc-clauses
-	  (lambda (clauses)
-	    (map (lambda (clause)
-		   (if (eq? (car clause) 'else)
-		       `(else ,@(map transform (cdr clause)))
-		       (let ((tags (car clause))
-			     (formals (cadr clause))
-			     (bodies (cddr clause)))
-			 `(,tags ,formals ,@(map transform bodies)))))
-		 clauses)))
-	(transform-case-clauses
-	  (lambda (clauses)
-	    (map (lambda (clause) (cons (car clause) (map transform (cdr clause))))
-		 clauses))))
-       transform)))
+(define preprocess-define
+  (lambda (def)
+    (cond
+      ((mit-style? def) (preprocess-define (mit-define->define def)))
+      ((define*? def)
+       (let* ((name (cadr def))
+	      (lambda-exp (caddr def))
+	      (formals (cadr lambda-exp))
+	      (registers (get-register-names formals))
+	      (new-lambda (rename-lambda-formals registers lambda-exp))
+	      (new-bodies (cddr new-lambda)))
+	 (register-table 'add-function name registers)
+	 `(define ,name (lambda () ,@new-bodies))))
+      (else def))))
 
+(define reg-transform
+  (letrec
+    ((transform
+      (lambda (code)
+	(cond
+	 ((null? code) code)
+	 ((literal? code) code)
+	 ((symbol? code) code)
+	 (else
+	  (record-case code
+	    (quote (datum) code)
+	    (quasiquote (datum)
+	      (list 'quasiquote (transform-quasiquote datum)))
+	    (if (test . conseqs)
+	      `(if ,@(map transform (cdr code))))
+	    (cond clauses
+	      `(cond ,@(map (lambda (clause)
+			      (if (eq? (car clause) 'else)
+				`(else ,@(map transform (cdr clause)))
+				(map transform clause)))
+			 clauses)))
+	    (lambda (formals . bodies)
+	      `(lambda ,formals ,@(map transform bodies)))
+	    (let (bindings . bodies)
+	      (if (symbol? bindings)
+		;; named let
+		(let ((name (cadr code))
+		      (vars (map car (caddr code)))
+		      (exps (map cadr (caddr code)))
+		      (bodies (cdddr code)))
+		  `(let ,name ,(map list vars (map transform exps))
+		     ,@(map transform bodies)))
+		;; ordinary let
+		(let ((vars (map car bindings))
+		      (exps (map cadr bindings)))
+		  `(let ,(map list vars (map transform exps))
+		     ,@(map transform bodies)))))
+	    (let* (bindings . bodies)
+	      (let ((vars (map car bindings))
+		    (exps (map cadr bindings)))
+		`(let* ,(map list vars (map transform exps))
+		   ,@(map transform bodies))))
+	    (letrec (decls . bodies)
+	      (let ((vars (map car decls))
+		    (procs (map cadr decls)))
+		`(letrec ,(map list vars (map transform procs))
+		   ,@(map transform bodies))))
+	    (set! (var rhs-exp)
+	      `(set! ,var ,(transform rhs-exp)))
+	    (begin exps
+	      `(begin ,@(map transform exps)))
+	    (define (name body)
+	      `(define ,name ,(transform body)))
+	    (define-syntax args code)
+	    (and exps
+	      `(and ,@(map transform exps)))
+	    (or exps
+	      `(or ,@(map transform exps)))
+	    (case (exp . clauses)
+	      `(case ,(transform exp)
+		 ,@(transform-case-clauses clauses)))
+	    (record-case (exp . clauses)
+	      `(record-case ,(transform exp)
+		 ,@(transform-record-case-clauses clauses)))
+	    ;; EOPL (should never see a define-datatype at this point)
+	    (cases (type exp . clauses)
+	      (set! need-eopl-support? #t)
+	      `(cases ,type ,(transform exp)
+		 ,@(transform-record-case-clauses clauses)))
+	    (halt* (value)
+	      `(begin (set! final_reg ,value) (set! pc #f)))
+	    (else (cond
+		    ((memq (car code) syntactic-keywords)
+		     (error-in-source code "I don't know how to process the above code."))
+		    ((register-table 'registerize-application? code)
+		     (register-table 'registerize code))
+		    (else (map transform code)))))))))
+     (transform-quasiquote
+       (lambda (datum)
+	 (cond
+	   ((vector? datum) (list->vector (transform-quasiquote (vector->list datum))))
+	   ((not (pair? datum)) datum)
+	   ;; doesn't handle nested quasiquotes yet
+	   ((quasiquote? datum) datum)
+	   ((unquote? datum) (list 'unquote (transform (cadr datum))))
+	   ((unquote-splicing? (car datum))
+	    (let* ((uqs (car datum))
+		   (transformed-uqs (list 'unquote-splicing (transform (cadr uqs)))))
+	      (if (null? (cdr datum))
+		(cons transformed-uqs '())
+		(cons transformed-uqs (transform-quasiquote (cdr datum))))))
+	   (else
+	     (cons (transform-quasiquote (car datum))
+	       (transform-quasiquote (cdr datum)))))))
+     (transform-record-case-clauses
+       (lambda (clauses)
+	 (map (lambda (clause)
+		(if (eq? (car clause) 'else)
+		  `(else ,@(map transform (cdr clause)))
+		  (let ((tags (car clause))
+			(formals (cadr clause))
+			(bodies (cddr clause)))
+		    `(,tags ,formals ,@(map transform bodies)))))
+	   clauses)))
+     (transform-case-clauses
+       (lambda (clauses)
+	 (map (lambda (clause) (cons (car clause) (map transform (cdr clause))))
+	   clauses))))
+    transform))
+
+;; a1 = (set! x (..... y .....))
+;; a2 = (set! y (..... z .....))
+
+(define sort-assignments
+  (lambda (code assigns)
+    (call/cc
+      (lambda (panic)
+	(sort (lambda (a1 a2)
+		(let ((var1 (cadr a1))
+		      (free-vars1 (free (caddr a1) '()))
+		      (var2 (cadr a2))
+		      (free-vars2 (free (caddr a2) '())))
+		  (cond
+		   ((and (memq var1 free-vars2) (memq var2 free-vars1))
+		    (begin
+		      (pretty-print code)
+		      (pretty-print assigns)
+		      (error #f "uh-oh, we have a problem")))
+		   ((memq var1 free-vars2) #f)
+		   ((memq var2 free-vars1) #t)
+		   (else #t))))
+	      assigns)))))
+
+(define remove-redundancies
+  (lambda (assigns)
+    (filter (lambda (a) (not (eq? (cadr a) (caddr a))))
+	    assigns)))
+
+(define param->assign
+  (lambda (param operand)
+    `(set! ,param ,operand)))
+
+;; params could be an improper list
+(define params->assignments
+  (lambda (params operands)
+    (cond
+      ((null? params) '())
+      ((symbol? params) (list (param->assign params `(list ,@operands))))
+      (else (cons (param->assign (car params) (car operands))
+		  (params->assignments (cdr params) (cdr operands)))))))
+
+(define param->reg-name
+  (lambda (param)
+    (string->symbol (format "~a_reg" param))))
+
+;; params could be an improper list
 (define get-register-names
   (lambda (params)
-    (map (lambda (x) (string->symbol (string-append (symbol->string x) "_reg")))
-	 params)))
+    (cond
+      ((null? params) '())
+      ((symbol? params) (param->reg-name params))
+      (else (cons (param->reg-name (car params)) (get-register-names (cdr params)))))))
+
+

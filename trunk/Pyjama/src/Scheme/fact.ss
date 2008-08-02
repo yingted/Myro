@@ -2,7 +2,7 @@
 
 (define fib
   (lambda (n)
-    (fib-cps n (lambda-cont (v) v))))
+    (fib-cps n (lambda-cont (v) (halt* v)))))
 
 (define* fib-cps
   (lambda (n k)
@@ -15,16 +15,25 @@
 		  (lambda-cont (v2)
 		    (k (+ v1 v2))))))))))
 
-(define fact
-  (lambda (n)
-    (fact-cps n (lambda-cont (v) v))))
+;;(define fact
+;;  (lambda (n)
+;;    (fact-cps n (lambda-cont (v) v))))
 
-(define* fact-cps
-  (lambda (n k)
-    (if (= n 0)
-	(k 1)
-	(fact-cps (- n 1)
-	  (lambda-cont (v) (k (* n v)))))))
+;;(define* fact-cps
+;;  (lambda (n k)
+;;    (if (= n 0)
+;;	(k 1)
+;;	(fact-cps (- n 1)
+;;	  (lambda-cont (v) (k (* n v)))))))
+
+(define (fact n)
+  (fact-cps n (lambda-cont (v) (halt* v))));;`(+ 2 ,v)))))
+
+(define* (fact-cps n k)
+  (if (= n 0)
+      (k 1)
+      (fact-cps (- n 1)
+		(lambda-cont (v) (k (* n v))))))
 
 
 ;;(define foo

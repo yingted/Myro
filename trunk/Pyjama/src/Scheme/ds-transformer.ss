@@ -20,7 +20,6 @@
 
 ;;-------------------------------------------------------------------------------
 
-(define all-datatypes 'undefined)
 (define need-eopl-support? #f)
 
 (define default-top-level-symbols
@@ -169,6 +168,7 @@
 	     (let ((exp (read input-port)))
 	       (cond
 	         ((eof-object? exp)
+		  (set! eopl-defs (reverse eopl-defs))
 		  (set! function-defs (reverse function-defs))
 		  (set! other-defs (reverse other-defs)))
 		 ;; skip top level calls to load
@@ -235,6 +235,14 @@
 
 (define define*? (tagged-list 'define* >= 3))
 
+(define mit-define->define
+  (lambda (def)
+    ;; could be a define or a define*
+    (let ((name (caadr def))
+	  (formals (cdadr def))
+	  (bodies (cddr def)))
+      `(,(car def) ,name (lambda ,formals ,@bodies)))))
+
 (define load?
   (lambda (x)
     (and (list? x)
@@ -260,11 +268,6 @@
     (if ((car datatypes) msg code)
       (car datatypes)
       (get-datatype msg code (cdr datatypes)))))
-
-;;(define transform-exp
-;;  (lambda (exp)
-;;    (set! all-datatypes (make-all-datatypes))
-;;    ((transform '()) exp)))
 
 (define transform
   (lambda (params)
@@ -328,14 +331,10 @@
 	      `(set! ,var ,((transform params) rhs-exp)))
 	    (begin exps
 	      `(begin ,@(map (transform params) exps)))
-	    (define (name . bodies)
-	      (if (mit-style? code)
-		((transform params) `(define ,(car name) (lambda ,(cdr name) ,@bodies)))
-		`(define ,name ,((transform params) (car bodies)))))
-	    (define* (name . bodies)
-	      (if (mit-style? code)
-		((transform params) `(define* ,(car name) (lambda ,(cdr name) ,@bodies)))
-		`(define* ,name ,((transform params) (car bodies)))))
+	    ((define define*) (name . bodies)
+	     (if (mit-style? code)
+	       ((transform params) (mit-define->define code))
+	       `(,(car code) ,name ,((transform params) (car bodies)))))
 	    (define-syntax args code)
 	    (and exps
 	      `(and ,@(map (transform params) exps)))
@@ -346,7 +345,7 @@
 		 ,@(transform-case-clauses clauses params)))
 	    (record-case (exp . clauses)
 	      `(record-case ,((transform params) exp)
-		 ,@(transform-rc-clauses clauses params)))
+		 ,@(transform-record-case-clauses clauses params)))
 	    ;; EOPL
 	    (define-datatype args
 	      (set! need-eopl-support? #t)
@@ -354,7 +353,7 @@
 	    (cases (type exp . clauses)
 	      (set! need-eopl-support? #t)
 	      `(cases ,type ,((transform params) exp)
-		 ,@(transform-rc-clauses clauses params)))
+		 ,@(transform-record-case-clauses clauses params)))
 	    (else (if (memq (car code) syntactic-keywords)
 		    (error-in-source code
 		      "I don't know how to process the above code.")
@@ -394,7 +393,7 @@
 	(cons (transform-quasiquote (car datum) params)
 	      (transform-quasiquote (cdr datum) params))))))
 
-(define transform-rc-clauses
+(define transform-record-case-clauses
   (lambda (clauses params)
     (map (lambda (clause)
 	   (if (eq? (car clause) 'else)
@@ -424,8 +423,12 @@
 		  ((and f1-mem f2-mem) (< (pos f1 field-order) (pos f2 field-order)))
 		  ((and (not f1-mem) f2-mem) #t)
 		  ((and f1-mem (not f2-mem)) #f)
-		  (else (string<? (symbol->string f1) (symbol->string f2))))))
+		  (else (alphabetical? f1 f2)))))
 	    fields))))
+
+(define alphabetical?
+  (lambda (sym1 sym2)
+    (string<? (symbol->string sym1) (symbol->string sym2))))
 
 (define error-in-source
   (lambda (code . messages)
@@ -559,19 +562,21 @@
 
 (define rename-lambda-formals
   (lambda (new-formals lambda-exp . opt)
-    (let ((formals (cadr lambda-exp)))
+    (let ((formals (cadr lambda-exp))
+	  (type (if (null? opt) "" (format " ~a" (car opt)))))
       ;; formals and new-formals can be improper lists
       (if (not (lengths=? formals new-formals))
 	  (error-in-source lambda-exp
-	    (format "Lambda parameters are not compatible with ~a datatype parameters ~a."
-		    (car opt) new-formals))
+	    (format "Lambda parameters are not compatible with~a datatype parameters ~a."
+		    type new-formals))
 	  (letrec
 	    ((loop
 	       (lambda (old new exp)
-		 (if (null? old)
-		   exp
-		   (let ((new-exp (rename-formal (car old) (car new) exp)))
-		     (loop (cdr old) (cdr new) new-exp))))))
+		 (cond
+		   ((null? old) exp)
+		   ((symbol? old) (rename-formal old new exp))
+		   (else (let ((new-exp (rename-formal (car old) (car new) exp)))
+			   (loop (cdr old) (cdr new) new-exp)))))))
 	    (loop formals new-formals lambda-exp))))))
 
 (define rename-formal
@@ -723,7 +728,9 @@
 	     (cons 'else (map rename (cdr clause)))
 	     (let ((tags (car clause))
 		   (formals (cadr clause)))
-	       `(,tags ,formals ,@(map rename (cddr clause))))))))
+	       (if (memq old-var formals)
+		 clause
+		 `(,tags ,formals ,@(map rename (cddr clause)))))))))
       rename)))
 
 (define contains-unsafe-lambda?
@@ -804,4 +811,7 @@
 		  (loop (read port) (cons sig sigs))))
 	       (else (loop (read port) sigs))))
 	    (else (loop (read port) sigs))))))))
+
+
+(define all-datatypes (make-all-datatypes))
 
