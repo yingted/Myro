@@ -14,16 +14,25 @@ using Myro.Utilities;
 
 namespace Myro.Adapters
 {
+    /// <summary>
+    /// See documentation for IAdapterFactory in IAdapter.cs
+    /// </summary>
     public class VectorAdapterFactory : IAdapterFactory
     {
         #region IAdapterFactory Members
 
         private List<string> supportedContracts = new List<string>() { vector.Contract.Identifier };
+        /// <summary>
+        /// See documentation for IAdapterFactory in IAdapter.cs
+        /// </summary>
         public List<string> SupportedContracts
         {
             get { return supportedContracts; }
         }
 
+        /// <summary>
+        /// See documentation for IAdapterFactory in IAdapter.cs
+        /// </summary>
         public IAdapter Create(ServiceInfoType service)
         {
             return new VectorAdapter(service);
@@ -33,20 +42,26 @@ namespace Myro.Adapters
     }
 
     /// <summary>
-    /// This class provides access to a Vector service.  It also allows lookup
-    /// of values by tag, by caching a local dictionary of tags and values.
-    /// If the TagTimestamp member of the VectorState becomes more recent than
-    /// the cached tag-value dictionary, the dictionary is rebuilt.
-    /// TODO: Implement setting by tag
+    /// This class provides access to a Vector service.
+    /// See adapter documentation in the Myro 3 developer manual.
+    /// http://wiki.roboteducation.org/Myro_3.0_Developer_Manual
     /// </summary>
     public class VectorAdapter : IAdapter
     {
+        /// <summary>
+        /// See adapter documentation in the Myro 3 developer manual.
+        /// http://wiki.roboteducation.org/Myro_3.0_Developer_Manual
+        /// </summary>
         public ServiceInfoType ServiceInfo { get; private set; }
 
         vector.VectorOperations opPort;
 
         DispatcherQueue taskQueue = new DispatcherQueue("VectorAdapter", new Dispatcher(1, "VectorAdapter"));
 
+        /// <summary>
+        /// See adapter documentation in the Myro 3 developer manual.
+        /// http://wiki.roboteducation.org/Myro_3.0_Developer_Manual
+        /// </summary>
         public VectorAdapter(ServiceInfoType serviceRecord)
         {
             ServiceInfo = serviceRecord;
@@ -55,6 +70,10 @@ namespace Myro.Adapters
             //    throw new AdapterCreationException("Service forwarder port was null");
         }
 
+        /// <summary>
+        /// See adapter documentation in the Myro 3 developer manual.
+        /// http://wiki.roboteducation.org/Myro_3.0_Developer_Manual
+        /// </summary>
         public void Dispose()
         {
             taskQueue.Dispose();
@@ -78,15 +97,8 @@ namespace Myro.Adapters
         /// <returns></returns>
         public double Get(int index)
         {
-            //try
-            //{
             var resp = RSUtils.ReceiveSync<vector.GetElementResponseType>(taskQueue, opPort.GetByIndex(index), Myro.Utilities.Params.DefaultRecieveTimeout);
-                return resp.Value;
-            //}
-            //catch (ArgumentOutOfRangeException)
-            //{
-            //    throw new AdapterArgumentException(Strings.IndexOutOfBounds(index));
-            //}
+            return resp.Value;
         }
 
         /// <summary>
@@ -98,15 +110,8 @@ namespace Myro.Adapters
         /// <returns></returns>
         public double Get(string key)
         {
-            //try
-            //{
             var resp = RSUtils.ReceiveSync<vector.GetElementResponseType>(taskQueue, opPort.GetByKey(key), Myro.Utilities.Params.DefaultRecieveTimeout);
-                return resp.Value;
-            //}
-            //catch (KeyNotFoundException)
-            //{
-            //    throw new AdapterArgumentException(Strings.KeyNotFound(key));
-            //}
+            return resp.Value;
         }
 
         /// <summary>
@@ -125,14 +130,7 @@ namespace Myro.Adapters
         /// <param name="value"></param>
         public void Set(int index, double value)
         {
-            //try
-            //{
             RSUtils.ReceiveSync<DefaultUpdateResponseType>(taskQueue, opPort.SetByIndex(new List<int>() { index }, new List<double>() { value }, DateTime.Now), Myro.Utilities.Params.DefaultRecieveTimeout);
-            //}
-            //catch (ArgumentOutOfRangeException)
-            //{
-            //    throw new AdapterArgumentException(Strings.IndexOutOfBounds(index));
-            //}
         }
 
         /// <summary>
@@ -142,17 +140,7 @@ namespace Myro.Adapters
         /// <param name="value"></param>
         public void Set(List<int> indices, List<double> values)
         {
-            //try
-            //{
             RSUtils.ReceiveSync<DefaultUpdateResponseType>(taskQueue, opPort.SetByIndex(indices, values, DateTime.Now), Myro.Utilities.Params.DefaultRecieveTimeout);
-            //}
-            //catch (ArgumentOutOfRangeException e)
-            //{
-            //    throw new AdapterArgumentException(
-            //        e.ActualValue is Int32 ?
-            //        Strings.IndexOutOfBounds((Int32)e.ActualValue) :
-            //        Strings.IndexOutOfBounds());
-            //}
         }
 
         /// <summary>
@@ -162,14 +150,7 @@ namespace Myro.Adapters
         /// <param name="value"></param>
         public void Set(string key, double value)
         {
-            //try
-            //{
             RSUtils.ReceiveSync<DefaultUpdateResponseType>(taskQueue, opPort.SetByKey(new List<string>() { key }, new List<double>() { value }, DateTime.Now), Myro.Utilities.Params.DefaultRecieveTimeout);
-            //}
-            //catch (KeyNotFoundException)
-            //{
-            //    throw new AdapterArgumentException(Strings.KeyNotFound(key));
-            //}
         }
 
         /// <summary>
@@ -179,16 +160,8 @@ namespace Myro.Adapters
         /// <param name="value"></param>
         public void Set(List<string> keys, List<double> values)
         {
-            //try
-            //{
             RSUtils.ReceiveSync<DefaultUpdateResponseType>(taskQueue, opPort.SetByKey(keys, values, DateTime.Now), Myro.Utilities.Params.DefaultRecieveTimeout);
-            //}
-            //catch (KeyNotFoundException)
-            //{
-            //    throw new AdapterArgumentException(Strings.KeyNotFound());
-            //}
         }
-
 
         /// <summary>
         /// Set all elements in the vector.

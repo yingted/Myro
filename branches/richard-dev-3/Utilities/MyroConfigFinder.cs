@@ -9,6 +9,9 @@ using System.IO;
 
 namespace Myro.Utilities
 {
+    /// <summary>
+    /// The Myro configuation that is serialized and stored in the config directory.
+    /// </summary>
     [XmlRoot()]
     public class MyroRobotConfiguration
     {
@@ -22,6 +25,10 @@ namespace Myro.Utilities
         public int DsspPort = Myro.Utilities.Params.DefaultDsspPort;
     }
 
+    /// <summary>
+    /// The list of files associated with a particular robot, this is returned by
+    /// a MyroConfigFinder class.
+    /// </summary>
     public class MyroConfigFiles
     {
         public string ConfigFilePath { get; internal set; }
@@ -32,12 +39,20 @@ namespace Myro.Utilities
         public bool MyroConfigExisted { get; internal set; }
     }
 
+    /// <summary>
+    /// This class enumerates robot configurations, and deals with saving them when
+    /// they are modified using the configuration editor.
+    /// </summary>
     public class MyroConfigFinder
     {
         string configPath;
         public const string ManifestSuffix = ".manifest";
         public const string IconSuffix = ".icon";
 
+        /// <summary>
+        /// Use the configPath from the Params class
+        /// </summary>
+        /// <param name="configPath">This should be the config path from the Params class for normal operation.</param>
         public MyroConfigFinder(string configPath)
         {
             this.configPath = configPath;
@@ -66,6 +81,10 @@ namespace Myro.Utilities
             };
         }
 
+        /// <summary>
+        /// Enumerate the available robot configurations
+        /// </summary>
+        /// <returns></returns>
         public List<MyroConfigFiles> FindConfigFiles()
         {
             // Find manifest files of the form
@@ -79,6 +98,12 @@ namespace Myro.Utilities
                 select readConfig(baseName));
         }
 
+        /// <summary>
+        /// Look for a robot configuration matching the base name, ignoring case.  Throws
+        /// BaseNameNotFoundException.
+        /// </summary>
+        /// <param name="baseName"></param>
+        /// <returns></returns>
         public MyroConfigFiles FindFromBaseName(string baseName)
         {
             MyroConfigFiles config = FindConfigFiles().Find(
@@ -89,6 +114,11 @@ namespace Myro.Utilities
                 return config;
         }
 
+        /// <summary>
+        /// Store the MyroRobotConfiguration member of the MyroConfigFiles parameter.
+        /// The GUI calls this when the user modifies a robot configuration.
+        /// </summary>
+        /// <param name="config"></param>
         public void WriteConfig(MyroConfigFiles config)
         {
             using (var writer = new StreamWriter(config.ConfigFilePath))
@@ -99,6 +129,11 @@ namespace Myro.Utilities
             }
         }
 
+        /// <summary>
+        /// Copy the image to the proper location and name, i.e. make it the robot's icon.
+        /// </summary>
+        /// <param name="config"></param>
+        /// <param name="imagePath"></param>
         public void WriteImage(MyroConfigFiles config, string imagePath)
         {
             string iconPath = Path.Combine(configPath,
@@ -108,6 +143,9 @@ namespace Myro.Utilities
         }
     }
 
+    /// <summary>
+    /// This exception is thrown when FindFromBaseName cannot find the specified robot configuration in the config directory.
+    /// </summary>
     public class BaseNameNotFoundException : Exception
     {
         public BaseNameNotFoundException() : base(Strings.BaseNameNotFound) { }

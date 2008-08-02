@@ -8,45 +8,6 @@ using Myro;
 
 namespace Myro.Adapters
 {
-    //public class AdapterCreationException : Exception
-    //{
-    //    public AdapterCreationException(string reason)
-    //        : base(reason)
-    //    {
-    //    }
-    //    public AdapterCreationException(string reason, Exception innerException)
-    //        : base(reason, innerException)
-    //    {
-    //    }
-    //}
-
-    //public class AdapterOperationException : Exception
-    //{
-    //    public AdapterOperationException(string reason)
-    //        : base(reason)
-    //    {
-    //        Console.WriteLine("*** AdapterOperationException *** " + reason);
-    //    }
-    //    //public AdapterOperationException(W3C.Soap.Fault failure)
-    //    //    : base(Strings.FaultReceived, failure.ToException())
-    //    //{
-    //    //    Console.WriteLine("*** AdapterOperationException *** " + failure.Reason[0]);
-    //    //}
-    //    public AdapterOperationException(string reason, Exception innerException)
-    //        : base(reason, innerException)
-    //    {
-    //        Console.WriteLine("*** AdapterOperationException *** " + reason);
-    //    }
-    //}
-
-    public class AdapterArgumentException : Exception
-    {
-        public AdapterArgumentException(string reason)
-            : base(reason)
-        {
-        }
-    }
-
     /// <summary>
     /// Every adapter class must implement this IAdapter interface
     /// </summary>
@@ -57,11 +18,16 @@ namespace Myro.Adapters
         /// </summary>
         ServiceInfoType ServiceInfo { get; }
 
-        //AdapterTypeEnum AdapterType { get; }
-
         void Dispose();
     }
 
+    /// <summary>
+    /// Every adapter must come with an adapter factory to create it.  The
+    /// AdapterBank is created with a list of adapter factories, which it
+    /// uses to hook up adapters to services.  You can add custom adapter
+    /// factories to the AdapterBank by adding them to the AdapterFactories
+    /// property.
+    /// </summary>
     public interface IAdapterFactory
     {
         /// <summary>
@@ -79,42 +45,4 @@ namespace Myro.Adapters
         /// <returns></returns>
         IAdapter Create(ServiceInfoType service);
     }
-
-
-    ///// <summary>
-    ///// All adapter types
-    ///// </summary>
-    //public enum AdapterTypes
-    //{
-    //    DriveAdapter,
-    //    AnalogSensorAdapter,
-    //    AnalogSensorArrayAdapter,
-    //    WebcamAdapter,
-    //    ContactSensorArrayAdapter,
-    //    SonarAdapter,
-    //    ToneGeneratorAdapter,
-    //    LEDArrayAdapter,
-    //    TextToSpeech,
-    //    OtherAdapter
-    //}
-
-    ///// <summary>
-    ///// All sensor types
-    ///// </summary>
-    //public enum SensorTypes
-    //{
-    //    IRSensor,
-    //    LightSensor,
-    //    LineSensor,
-    //    AnalogSensor,
-    //    BumperSensor,
-    //    StallSensor,
-    //    ContactSensorArray,
-    //    DiffDrive,
-    //    ToneGenerator,
-    //    LEDArray,
-    //    SoundSensor,
-    //    UltraSonicSonar,
-    //    OtherSensor
-    //}
 }

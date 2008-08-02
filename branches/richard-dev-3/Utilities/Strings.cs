@@ -7,6 +7,10 @@ using System.Text;
 
 namespace Myro.Utilities
 {
+    /// <summary>
+    /// This class contains all of the messages that could be shown to the user, as a facility for internationalization.
+    /// It also contains methods for computing messages, based on arguments, or from Exceptions or Faults.
+    /// </summary>
     public static class Strings
     {
         public static string FaultReceived = "Fault received.";
@@ -30,6 +34,12 @@ namespace Myro.Utilities
                     msg += r.Value;
             return msg;
         }
+        /// <summary>
+        /// Returns the Message parameter of the exception, if it has one.  If it does not
+        /// have a Message, or it is of zero length, this returns Exception.ToString().
+        /// </summary>
+        /// <param name="e"></param>
+        /// <returns></returns>
         public static string FromExceptionMessage(Exception e)
         {
             if (e.Message != null && e.Message.Length > 0)
@@ -37,6 +47,12 @@ namespace Myro.Utilities
             else
                 return e.ToString();
         }
+        /// <summary>
+        /// Build a detailed exception message, recursively including inner exceptions up to a recursion limit of 6.
+        /// This also will print the exception message, source, and stack trace for each exception.
+        /// </summary>
+        /// <param name="e"></param>
+        /// <returns></returns>
         public static string FromException(Exception e)
         {
             return buildExceptionMessage("", e, 6);

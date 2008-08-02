@@ -306,6 +306,9 @@ namespace Myro.Utilities
         }
     }
 
+    /// <summary>
+    /// This class is used internally for encapsulating exceptions in Faults.
+    /// </summary>
     class CloneableException : ICloneable
     {
         public Exception Exception { get; private set; }

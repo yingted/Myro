@@ -18,16 +18,25 @@ using drive = Microsoft.Robotics.Services.Drive.Proxy;
 
 namespace Myro.Adapters
 {
+    /// <summary>
+    /// See documentation for IAdapterFactory in IAdapter.cs
+    /// </summary>
     public class DriveAdapterFactory : IAdapterFactory
     {
         #region IAdapterFactory Members
 
         private List<string> supportedContracts = new List<string>() { drive.Contract.Identifier };
+        /// <summary>
+        /// See documentation for IAdapterFactory in IAdapter.cs
+        /// </summary>
         public List<string> SupportedContracts
         {
             get { return supportedContracts; }
         }
 
+        /// <summary>
+        /// See documentation for IAdapterFactory in IAdapter.cs
+        /// </summary>
         public IAdapter Create(ServiceInfoType service)
         {
             return new DriveAdapter(service);
@@ -36,20 +45,38 @@ namespace Myro.Adapters
         #endregion
     }
 
+    /// <summary>
+    /// The adapter for MSRDS drive contracts.
+    /// </summary>
     public class DriveAdapter : IAdapter
     {
+        /// <summary>
+        /// See adapter documentation in the Myro 3 developer manual.
+        /// http://wiki.roboteducation.org/Myro_3.0_Developer_Manual
+        /// </summary>
+        /// <param name="serviceRecord"></param>
         public ServiceInfoType ServiceInfo { get; private set; }
         protected drive.DriveOperations drivePort;
         protected bool motorsOn;
 
         DispatcherQueue taskQueue = new DispatcherQueue("VectorAdapter", new Dispatcher(1, "VectorAdapter"));
 
+        /// <summary>
+        /// See adapter documentation in the Myro 3 developer manual.
+        /// http://wiki.roboteducation.org/Myro_3.0_Developer_Manual
+        /// </summary>
+        /// <param name="serviceRecord"></param>
         public DriveAdapter(ServiceInfoType serviceRecord)
         {
             ServiceInfo = serviceRecord;
             Initialize();
         }
 
+        /// <summary>
+        /// See adapter documentation in the Myro 3 developer manual.
+        /// http://wiki.roboteducation.org/Myro_3.0_Developer_Manual
+        /// </summary>
+        /// <param name="serviceRecord"></param>
         public void Dispose()
         {
             taskQueue.Dispose();
@@ -66,17 +93,13 @@ namespace Myro.Adapters
             // Set up notifications
             Arbiter.Activate(DssEnvironment.TaskQueue,
                 Arbiter.Receive<drive.Update>(true, driveNotificationPort, NotifyDriveUpdate));
-
-            // For some reason the EnableDrive request to the service is giving a Fault, so get
-            // it out of the way first
-            //try
-            //{
-            //    SetMotors(0.0, 0.0);
-            //}
-            //catch (Exception)
-            //{ }
         }
 
+        /// <summary>
+        /// Set the motor power.
+        /// </summary>
+        /// <param name="leftPower"></param>
+        /// <param name="rightPower"></param>
         public void SetMotors(double leftPower, double rightPower)
         {
             if (!motorsOn)
@@ -94,11 +117,18 @@ namespace Myro.Adapters
             motorsOn = notification.Body.IsEnabled;
         }
 
+        /// <summary>
+        /// Stop the motors (sets power to 0)
+        /// </summary>
         public void Stop()
         {
             RSUtils.ReceiveSync<DefaultUpdateResponseType>(taskQueue, drivePort.AllStop(), Myro.Utilities.Params.DefaultRecieveTimeout);
         }
 
+        /// <summary>
+        /// Return the MSRDS DriveDifferentialTwoWheelState of the service.
+        /// </summary>
+        /// <returns></returns>
         public drive.DriveDifferentialTwoWheelState Get()
         {
             return RSUtils.ReceiveSync<drive.DriveDifferentialTwoWheelState>(taskQueue, drivePort.Get(), Myro.Utilities.Params.DefaultRecieveTimeout);

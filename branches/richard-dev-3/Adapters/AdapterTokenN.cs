@@ -7,6 +7,10 @@ using System.Text;
 
 namespace Myro.Adapters
 {
+    /// <summary>
+    /// This is an internally-used type to deal with the adapter type
+    /// argument.
+    /// </summary>
     interface AdapterTokenN
     {
         string Name { get; }

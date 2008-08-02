@@ -177,6 +177,9 @@ namespace Myro.Services.Scribbler.ScribblerBase
                     throw new ScribblerProtocolException("Could not find magic string, not a Scribbler robot.");
                 }
 
+                // Sending Echo off command
+                SendCommand(new ScribblerCommand(ScribblerHelper.Commands.SET_ECHO_MODE, (byte)1, (byte)1));
+
                 // Now get robotname
                 srp = SendCommand(new ScribblerCommand(ScribblerHelper.Commands.GET_NAME));
                 enc = new UTF8Encoding();
@@ -188,9 +191,6 @@ namespace Myro.Services.Scribbler.ScribblerBase
 #endif
                     robotname = "Noname";
                 }
-
-                // Sending Echo off command
-                SendCommand(new ScribblerCommand(ScribblerHelper.Commands.SET_ECHO_MODE, (byte)1, (byte)1));
 
 #if DEBUG
                 Console.WriteLine("TrySerialPort found: " + robotname); //DEBUG

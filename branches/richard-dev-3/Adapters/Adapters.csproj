@@ -69,8 +69,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AdapterBank.cs" />
-    <Compile Include="AdapterSpec.cs" />
-    <Compile Include="AdapterSpecN.cs" />
+    <Compile Include="AdapterToken.cs" />
+    <Compile Include="AdapterTokenN.cs" />
     <Compile Include="DriveAdapter.cs" />
     <Compile Include="FlukeControlAdapter.cs" />
     <Compile Include="IAdapter.cs" />
