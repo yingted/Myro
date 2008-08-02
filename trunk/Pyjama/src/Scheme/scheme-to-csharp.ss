@@ -3,9 +3,10 @@
     (let ((port (open-input-file filename)))
       (let ((sexps (read-sexps port))
 	    (name (car (split filename #\.))))
-	(printf "public class ~a {~%" (proper-name name))
-	(convert-list sexps)
-	(printf "}~%")))))
+	(string-append
+	 (format "public class ~a {~%" (proper-name name))
+	 (convert-list sexps)
+	 (format "}~%"))))))
 
 (define read-sexps
   (lambda (port)
@@ -17,10 +18,9 @@
 (define convert-list
   (lambda (sexps)
     (if (null? sexps)
-	'done
-	(begin
-	  (convert-exp (car sexps))
-	  (convert-list (cdr sexps))))))
+	""
+	(string-append (convert-exp (car sexps))
+		       (convert-list (cdr sexps))))))
 
 (define proper-name
   (lambda (name)
@@ -28,7 +28,10 @@
 
 (define replace
   (lambda (s old new)
-    (list->string (sreplace (string->list s) old new '()))))
+    (list->string 
+     (sreplace 
+      (string->list 
+       (make-string s)) old new '()))))
 
 (define sreplace
   (lambda (lyst old new accum)
@@ -40,9 +43,17 @@
      (else (sreplace (cdr lyst) old new
 		     (cons (car lyst) accum))))))
 
+(define make-string
+  (lambda (thing)
+    (cond
+     ((string? thing) thing)
+     ((symbol? thing) (format "~a" thing))
+     ((list? thing) (make-list thing))
+     (else (format "~s" thing)))))
+
 (define split
   (lambda (s delim)
-    (let ((list (string->list s)))
+    (let ((list (string->list (make-string s))))
       (reverse (split-help delim list '() '())))))
 
 (define split-clean
@@ -69,17 +80,20 @@
      (else
       (let ((rest (make-list (cdr args))))
 	(if (eq? rest "")
-	    (string-append (symbol->string (car args)) rest)
-	    (string-append (symbol->string (car args)) ", " rest)))))))
+	    (string-append (make-string 
+			    (convert-exp (car args))) rest)
+	    (string-append (make-string 
+			    (convert-exp (car args))) ", " rest)))))))
 
-(define print-cases
+(define get-cases
   (lambda (cases)
     (cond
-     ((null? cases) "~%}~%")
+     ((null? cases) (format "~%}~%"))
      (else 
-      (printf "if ~a {~%" (caar cases))
-      (printf "   return ~a;~%" (cdar cases))
-      (print-cases (cdr cases))))))
+      (string-append
+       (format "if ~a {~%" (convert-exp (caar cases)))
+       (format "   return ~a;~%" (cdar cases))
+       (get-cases (cdr cases)))))))
 
 (define join
   (lambda (slist delim)
@@ -95,61 +109,53 @@
 
 (define convert-exp
   (lambda (exp)
-    ;;(printf "processing: '~s'~%" exp)
+    (printf "processing: '~s'~%" exp)
+    (if (pair? exp)
     (record-case exp
       (define (name body)  ;; always a lambda!
-	(printf "public static void ~a(" 
-		(proper-name (symbol->string name)))
-	(printf (let ((args (cadr body)))
-		  (if (not (list? args))
-		      (proper-name (symbol->string args))
-		      (join (map (lambda (name)
-				   (proper-name (symbol->string name)))
-				 args)
-			    ", "))))
-	(printf ") {~%")
-	(convert-exp (caddr body))
-	(printf "}~%"))
+	(string-append
+	 (format "public static void ~a(" 
+		 (proper-name (make-string name)))
+	 (format (let ((args (cadr body)))
+		   (if (not (list? args))
+		       (proper-name (make-string args))
+		       (join (map (lambda (name)
+				    (proper-name (make-string name)))
+				  args)
+			     ", "))))
+	 (format ") {~%")
+	 (convert-exp (caddr body))
+	 (format "}~%")))
       (if (test-part true-part false-part)
-	(printf " if (")
-	(convert-exp test-part)
-	(printf ") {~%")
-	(convert-exp true-part)
-	(convert-exp false-part))
+	(string-append
+	 (format " if (")
+	 (convert-exp test-part)
+	 (format ") {~%")
+	 (convert-exp true-part)
+	 (convert-exp false-part)))
       (set! (sym exp)
-	(dispplay (proper-name sym))
-	(printf "= ")
-	(convert-exp exp)
-	(printf ";~%"))
+	(string-append
+	 (proper-name sym)
+	 (format "= ")
+	 (convert-exp exp)
+	 (format ";~%")))
       (begin (exps)
 	(if (null? (cdr exps))
-	    (begin
-	      ;;(printf "begin: ~s~%" exps)
-	      (printf "return ")
-	      (convert-exp (car exps))
-	    (begin
-	      (convert-exp (car exps))
-	      (convert-exp (cons 'begin (cdr exps)))))))
-      (load (filename) 'ignore)
-      (define-datatype (filename) 'ignore)
+	    (string-append
+	     "return "
+	     (convert-exp (car exps)))
+	    (string-append
+	     (convert-exp (car exps))
+	     (convert-exp (cons 'begin (cdr exps))))))
+      (load (filename) "")
+      (define-datatype (filename) "")
       (cond cases
-       (print-cases cases))
+       (get-cases cases))
+      (quote (item)
+       (format "\"~a\"" (convert-exp item)))
       (id (sym)
-       (printf " ~a " (proper-name sym)))
-      (else ;; apply
-       (begin
-	 (printf "~a();~%" exp)
-	 )))))
-;;       (app-exp (proc args)
-;; 	(if (and (variable? proc) (equal? (get-var-name proc)
-;; 					  "load"))
-;; 	    'ignore
-;; 	    (begin
-;; 	      (convert-exp proc)
-;; 	      (printf "(")
-;; 	      (convert-list args)
-;; 	      (printf ");~%"))))
-;;       (lit-exp (val)
-;; 	       (printf " ~s " val))
-
-;;(scheme-to-csharp "fact-cps.ss")
+       (format " ~a " (proper-name sym)))
+      (else ;; apply (proc args...)
+       (let ((proc (proper-name (car exp))))
+	 (format "~a(~a)" proc (make-list (cdr exp))))))
+    (make-string exp))))
