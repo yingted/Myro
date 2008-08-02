@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation.  All rights reserved.
+
 //------------------------------------------------------------------------------
 // ScribblerTypes.cs
 //
@@ -25,26 +27,57 @@ namespace Myro.Services.Scribbler.ScribblerBase
     /// <summary>
     /// Main operations port
     /// </summary>
-    public class ScribblerOperations : PortSet<
-        DsspDefaultLookup,
-        DsspDefaultDrop,
-        Get,
-        HttpGet,
-        HttpPost,
-        Replace,
-        SetMotors,
-        SetLED,
-        SetAllLEDs,
-        SetLEDFront,
-        SetLEDBack,
-        PlayTone,
-        SetLoud,
-        SetName,
-        GetObstacle,
-        ScribblerResponseMessage,
-        SelectiveSubscribe, //IMPORTANT: Because SelectiveSubscribe inherits from Subscribe, it must go on top.
-        Subscribe>
+    public class ScribblerOperations : PortSet //<
+    //    DsspDefaultLookup,
+    //    DsspDefaultDrop,
+    //    Get,
+    //    HttpGet,
+    //    HttpPost,
+    //    Replace,
+    //    SetMotors,
+    //    SetLED,
+    //    SetAllLEDs,
+    //    SetLEDFront,
+    //    SetLEDBack,
+    //    PlayTone,
+    //    SetLoud,
+    //    SetName,
+    //    GetObstacle,
+    //    GetImage,
+    //    GetWindow,
+    //    GetCamParam,
+    //    SetCamParam,
+    //    ScribblerResponseMessage,
+    //    SelectiveSubscribe, //IMPORTANT: Because SelectiveSubscribe inherits from Subscribe, it must go on top.
+    //    Subscribe>
     {
+        public ScribblerOperations() :
+            base(
+                typeof(DsspDefaultLookup),
+                typeof(DsspDefaultDrop),
+                typeof(Get),
+                typeof(HttpGet),
+                typeof(HttpPost),
+                typeof(Replace),
+                typeof(SetMotors),
+                typeof(SetLED),
+                typeof(SetAllLEDs),
+                typeof(SetLEDFront),
+                typeof(SetLEDBack),
+                typeof(PlayTone),
+                typeof(SetLoud),
+                typeof(SetName),
+                typeof(GetObstacle),
+                typeof(GetImage),
+                typeof(GetWindow),
+                typeof(GetCamParam),
+                typeof(SetCamParam),
+                typeof(SendScribblerCommand),
+                typeof(ScribblerResponseMessage),
+                typeof(Reconnect),
+                typeof(SelectiveSubscribe), //IMPORTANT: Because SelectiveSubscribe inherits from Subscribe, it must go on top.
+                typeof(Subscribe))
+        { }
     }
 
     public class SendScribblerCommand : Submit<ScribblerCommand, PortSet<ScribblerResponse, Fault>>
@@ -79,6 +112,12 @@ namespace Myro.Services.Scribbler.ScribblerBase
             base.Body = b;
         }
     }
+
+    [DataContract]
+    public class ReconnectBody
+    {
+    }
+    public class Reconnect : Update<ReconnectBody, PortSet<DefaultUpdateResponseType, Fault>> { }
 
 
     /// <summary>
@@ -166,7 +205,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
     {
         [DataMember]
         public Int32 Value;
-        public Int32Body() {  }
+        public Int32Body() { }
         public Int32Body(Int32 value) { Value = value; }
     }
 
@@ -176,8 +215,18 @@ namespace Myro.Services.Scribbler.ScribblerBase
     {
         [DataMember]
         public UInt16 Value;
-        public UInt16Body() {  }
+        public UInt16Body() { }
         public UInt16Body(UInt16 value) { Value = value; }
+    }
+
+    [DataContract]
+    [DataMemberConstructor]
+    public class ByteBody
+    {
+        [DataMember]
+        public byte Value;
+        public ByteBody() { }
+        public ByteBody(byte value) { Value = value; }
     }
 
     /// <summary>
@@ -188,6 +237,84 @@ namespace Myro.Services.Scribbler.ScribblerBase
         public GetObstacle() { }
         public GetObstacle(Int32Body b) : base(b) { }
     }
+
+    [DataContract]
+    [DataMemberConstructor]
+    public class GetImageBody
+    {
+        [DataMember]
+        public Guid ImageType;
+    }
+    [DataContract]
+    [DataMemberConstructor]
+    public class GetWindowBody
+    {
+        [DataMember]
+        public byte Window;
+        [DataMember]
+        public byte XLow;
+        [DataMember]
+        public byte YLow;
+        [DataMember]
+        public byte XHigh;
+        [DataMember]
+        public byte YHigh;
+        [DataMember]
+        public byte XStep;
+        [DataMember]
+        public byte YStep;
+    }
+    [DataContract]
+    [DataMemberConstructor]
+    public class ImageResponse
+    {
+        [DataMember]
+        public int Width;
+        [DataMember]
+        public int Height;
+        [DataMember]
+        public byte[] Data;
+        [DataMember]
+        public DateTime Timestamp;
+    }
+
+    [DataContract]
+    [DataMemberConstructor]
+    public class CameraParamBody
+    {
+        [DataMember]
+        public byte Addr;
+        [DataMember]
+        public byte Value;
+    }
+
+    /// <summary>
+    /// Retreieve an image from the Fluke's camera
+    /// </summary>
+    public class GetImage : Get<GetImageBody, PortSet<ImageResponse, Fault>>
+    {
+        public GetImage() { }
+        public GetImage(GetImageBody body) : base(body) { }
+    }
+
+    public class GetWindow : Get<GetWindowBody, PortSet<ImageResponse, Fault>>
+    {
+        public GetWindow() { }
+        public GetWindow(GetWindowBody b) : base(b) { }
+    }
+
+    public class GetCamParam : Get<ByteBody, PortSet<ByteBody, Fault>>
+    {
+        public GetCamParam() { }
+        public GetCamParam(ByteBody b) : base(b) { }
+    }
+
+    public class SetCamParam : Update<CameraParamBody, PortSet<DefaultUpdateResponseType, Fault>>
+    {
+        public SetCamParam() { }
+        public SetCamParam(CameraParamBody b) : base(b) { }
+    }
+
 
     /// <summary>
     /// updates the state after a return packet from robot

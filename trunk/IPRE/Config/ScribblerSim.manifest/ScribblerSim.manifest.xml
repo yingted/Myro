@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!--This file was created with the Microsoft Visual Programming Language.-->
-<Manifest xmlns:simulatedbumper="http://schemas.microsoft.com/robotics/simulation/services/2006/05/simulatedbumper.html" xmlns:simulation="http://schemas.microsoft.com/robotics/2006/04/simulation.html" xmlns:scribblersim="http://www.roboteducation.org/schemas/2008/06/scribblersim.html" xmlns:this="urn:uuid:91c5eebc-d145-49b2-9241-059fe6ada81e" xmlns:simulateddifferentialdrive="http://schemas.microsoft.com/robotics/simulation/services/2006/05/simulateddifferentialdrive.html" xmlns:dssp="http://schemas.microsoft.com/xw/2004/10/dssp.html" xmlns:vector="http://www.roboteducation.org/schemas/2008/06/vector.html" xmlns="http://schemas.microsoft.com/xw/2004/10/manifest.html">
+<Manifest xmlns:simulatedbumper="http://schemas.microsoft.com/robotics/simulation/services/2006/05/simulatedbumper.html" xmlns:simulation="http://schemas.microsoft.com/robotics/2006/04/simulation.html" xmlns:scribblersim="http://www.roboteducation.org/schemas/2008/06/scribblersim.html" xmlns:this="urn:uuid:6d2b2fc1-f838-4f88-b2e8-5d85abaad291" xmlns:simulateddifferentialdrive="http://schemas.microsoft.com/robotics/simulation/services/2006/05/simulateddifferentialdrive.html" xmlns:dssp="http://schemas.microsoft.com/xw/2004/10/dssp.html" xmlns:vector="http://www.roboteducation.org/schemas/2008/06/vector.html" xmlns="http://schemas.microsoft.com/xw/2004/10/manifest.html">
   <CreateServiceList>
     <ServiceRecordType>
       <dssp:Contract>http://schemas.microsoft.com/robotics/simulation/services/2006/05/simulatedbumper.html</dssp:Contract>
@@ -32,11 +32,11 @@
     </ServiceRecordType>
     <ServiceRecordType>
       <dssp:Contract>http://www.roboteducation.org/schemas/2008/06/vector.html</dssp:Contract>
-      <dssp:Service>http://localhost:80/bumpers</dssp:Service>
+      <dssp:Service>http://localhost:80/ir</dssp:Service>
       <dssp:PartnerList>
         <dssp:Partner>
           <dssp:Contract>http://www.roboteducation.org/schemas/2008/06/vector.html</dssp:Contract>
-          <dssp:Service>bumpers.config.xml</dssp:Service>
+          <dssp:Service>vectorservice.config.xml</dssp:Service>
           <dssp:PartnerList />
           <dssp:Name>dssp:StateService</dssp:Name>
         </dssp:Partner>
@@ -47,7 +47,33 @@
           <dssp:ServiceName>this:SimulatedGenericContactSensors</dssp:ServiceName>
         </dssp:Partner>
       </dssp:PartnerList>
-      <Name>this:Bumpers</Name>
+      <Name>this:IR</Name>
+    </ServiceRecordType>
+    <ServiceRecordType>
+      <dssp:Contract>http://www.roboteducation.org/schemas/2008/06/vector.html</dssp:Contract>
+      <dssp:Service>http://localhost:80/led</dssp:Service>
+      <dssp:PartnerList>
+        <dssp:Partner>
+          <dssp:Contract>http://www.roboteducation.org/schemas/2008/06/vector.html</dssp:Contract>
+          <dssp:Service>led.config.xml</dssp:Service>
+          <dssp:PartnerList />
+          <dssp:Name>dssp:StateService</dssp:Name>
+        </dssp:Partner>
+      </dssp:PartnerList>
+      <Name>this:LED</Name>
+    </ServiceRecordType>
+    <ServiceRecordType>
+      <dssp:Contract>http://www.roboteducation.org/schemas/2008/06/vector.html</dssp:Contract>
+      <dssp:Service>http://localhost:80/line</dssp:Service>
+      <dssp:PartnerList>
+        <dssp:Partner>
+          <dssp:Contract>http://www.roboteducation.org/schemas/2008/06/vector.html</dssp:Contract>
+          <dssp:Service>line.config.xml</dssp:Service>
+          <dssp:PartnerList />
+          <dssp:Name>dssp:StateService</dssp:Name>
+        </dssp:Partner>
+      </dssp:PartnerList>
+      <Name>this:line</Name>
     </ServiceRecordType>
   </CreateServiceList>
 </Manifest>

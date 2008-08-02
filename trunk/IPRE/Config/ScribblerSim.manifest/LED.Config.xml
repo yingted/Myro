@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<VectorState xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.roboteducation.org/schemas/2008/06/vector.html">
+	<Values>
+		<double>0</double>
+		<double>0</double>
+		<double>0</double>
+		<double>0</double>
+		<double>0</double>
+	</Values>
+	<Keys>
+		<string>left</string>
+		<string>center</string>
+		<string>right</string>
+		<string>front</string>
+		<string>back</string>
+	</Keys>
+	<Timestamp>2008-07-15T18:15:35.1716978-07:00</Timestamp>
+	<AutoSubsets />
+</VectorState>

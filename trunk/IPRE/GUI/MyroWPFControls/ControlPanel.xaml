@@ -1,0 +1,64 @@
+﻿<!-- Copyright (c) Microsoft Corporation.  All rights reserved. -->
+
+<UserControl x:Class="Myro.GUI.WPFControls.ControlPanel"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:Myro.GUI.WPFControls">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="auto" />
+            <ColumnDefinition Width="200*"/>
+        </Grid.ColumnDefinitions>
+        <StackPanel Grid.Row="0" Grid.Column="0">
+            <GroupBox Header="Drive" Name="driveBox" Height="auto" VerticalAlignment="Top" Margin="5">
+                <local:DriveControl x:Name="drive" />
+            </GroupBox>
+            <GroupBox Header="Tone generator" Margin="5" Name="groupBox1" VerticalAlignment="Top">
+                <StackPanel Name="stackPanel1">
+                    <Slider ValueChanged="Frequency1Changed" Name="freq1Slider" Minimum="400" Maximum="1200" TickPlacement="BottomRight" TickFrequency="0" LostMouseCapture="PlayTone" />
+                    <Label Name="freq1Label" HorizontalAlignment="Right">Frequency 1</Label>
+                    <Slider ValueChanged="Frequency2Changed" Name="freq2Slider" Minimum="400" Maximum="1200" TickPlacement="BottomRight" TickFrequency="0" LostMouseCapture="PlayTone" />
+                    <Label Name="freq2Label" HorizontalAlignment="Right">Frequency 2</Label>
+                    <Slider ValueChanged="DurationChanged" Name="durSlider" Maximum="1" TickPlacement="BottomRight" TickFrequency="0" LostMouseCapture="PlayTone" SmallChange="0.05" LargeChange="0.1" />
+                    <Grid>
+                        <CheckBox Checked="SetLoud" Unchecked="SetLoud" Name="loudCheck" Margin="5" VerticalAlignment="Center" HorizontalAlignment="Left" IsChecked="True" ClickMode="Press">Loud</CheckBox>
+                        <Label Name="durLabel" Padding="5" HorizontalAlignment="Right">Tone duration</Label>
+                    </Grid>
+                </StackPanel>
+            </GroupBox>
+        </StackPanel>
+        <StackPanel Grid.Row="0" Grid.Column="1" Name="servicePanel" />
+        <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Orientation="Horizontal" HorizontalAlignment="Right">
+            <Label>Polling</Label>
+            <Slider Name="pollingSlider" Width="100" IsSnapToTickEnabled="False" TickPlacement="BottomRight" ValueChanged="OnPollValueChanged" Minimum="0.1" Maximum="1.1" TickFrequency="0" Value="0.5" LostMouseCapture="OnPollLostMouse" LargeChange="0.2">
+                <Slider.BitmapEffect>
+                    <OuterGlowBitmapEffect x:Name="PollSliderGlowEffect" GlowColor="Cyan" GlowSize="5" Opacity="0" />
+                </Slider.BitmapEffect>
+                <Slider.Triggers>
+                    <EventTrigger RoutedEvent="Slider.GotMouseCapture">
+                        <BeginStoryboard Name="PollSliderGlowBegin">
+                            <Storyboard Name="PollSliderGlow">
+                                <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PollSliderGlowEffect"
+                                                               Storyboard.TargetProperty="Opacity"
+                                                               Duration="0:0:1"
+                                                               RepeatBehavior="Forever">
+                                    <LinearDoubleKeyFrame Value="0.0" KeyTime="0:0:0" />
+                                    <LinearDoubleKeyFrame Value="1.0" KeyTime="0:0:0.15" />
+                                    <LinearDoubleKeyFrame Value="1.0" KeyTime="0:0:0.20" />
+                                    <LinearDoubleKeyFrame Value="0.0" KeyTime="0:0:0.35" />
+                                </DoubleAnimationUsingKeyFrames>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </EventTrigger>
+                    <EventTrigger RoutedEvent="Slider.LostMouseCapture">
+                        <StopStoryboard BeginStoryboardName="PollSliderGlowBegin" />
+                    </EventTrigger>
+                </Slider.Triggers>
+            </Slider>
+        </StackPanel>
+    </Grid>
+</UserControl>

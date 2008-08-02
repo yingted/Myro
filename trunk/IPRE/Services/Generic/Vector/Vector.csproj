@@ -12,7 +12,7 @@
     </AssemblyKeyContainerName>
     <AssemblyName>Vector.Y2008.M06</AssemblyName>
     <RootNamespace>Myro.Services.Generic.Vector</RootNamespace>
-    <AssemblyOriginatorKeyFile>C:\Microsoft Robotics Dev Studio 2008\samples\mrisamples.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>myroKey.snk</AssemblyOriginatorKeyFile>
     <DefaultClientScript>JScript</DefaultClientScript>
     <DefaultHTMLPageLayout>Grid</DefaultHTMLPageLayout>
     <DefaultTargetSchema>IE50</DefaultTargetSchema>
@@ -30,14 +30,14 @@
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <OutputPath>C:\Microsoft Robotics Dev Studio 2008\bin\</OutputPath>
+    <OutputPath>..\..\..\bin\</OutputPath>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
     <BaseAddress>285212672</BaseAddress>
     <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
     <ConfigurationOverrideFile>
     </ConfigurationOverrideFile>
     <DefineConstants>DEBUG;TRACE;INSTRUMENTED</DefineConstants>
-    <DocumentationFile>..\..\..\..\..\..\..\Microsoft Robotics Dev Studio 2008\bin\Vector.Y2008.M06.XML</DocumentationFile>
+    <DocumentationFile>..\..\..\bin\Vector.Y2008.M06.XML</DocumentationFile>
     <DebugSymbols>true</DebugSymbols>
     <FileAlignment>4096</FileAlignment>
     <NoStdLib>false</NoStdLib>
@@ -70,23 +70,24 @@
     <WarningLevel>1</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DssRuntime">
+    <Reference Include="Accessibility" />
+    <Reference Include="Microsoft.Ccr.Core, Version=2.0.826.3, Culture=neutral, PublicKeyToken=d12f30389d94881d, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <Private>False</Private>
+    </Reference>
+    <Reference Include="Microsoft.Dss.Base, Version=2.0.826.3, Culture=neutral, PublicKeyToken=d12f30389d94881d, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="Microsoft.Dss.Runtime, Version=2.0.826.3, Culture=neutral, PublicKeyToken=d12f30389d94881d, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="mscorlib">
       <SpecificVersion>False</SpecificVersion>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Ccr.Core">
+    <Reference Include="RoboticsCommon.proxy, Version=2.0.831.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <Private>False</Private>
+      <HintPath>..\..\..\bin-extra\RoboticsCommon.proxy.dll</HintPath>
     </Reference>
-    <Reference Include="DssBase">
-      <SpecificVersion>False</SpecificVersion>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="RoboticsCommon.proxy, Version=2.0.730.3, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System">
       <SpecificVersion>False</SpecificVersion>
       <Private>False</Private>
@@ -94,6 +95,7 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Data" />
     <Reference Include="System.Xml">
       <SpecificVersion>False</SpecificVersion>
       <Private>False</Private>
@@ -102,6 +104,7 @@
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="Vector.cs" />
+    <Compile Include="VectorService.cs" />
     <Compile Include="VectorTypes.cs" />
     <AppDesigner Include="Properties" />
   </ItemGroup>
@@ -110,6 +113,9 @@
       <Project>{481FEFE3-E033-464C-A1D4-7C95C5AC95C5}</Project>
       <Name>Utilities</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="myroKey.snk" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
@@ -121,6 +127,6 @@
   <PropertyGroup>
     <PreBuildEvent>
     </PreBuildEvent>
-    <PostBuildEvent>"C:\Microsoft Robotics Dev Studio 2008\bin\dssproxy.exe" /dll:"$(TargetPath)" /vstarget:VS2008 /proxyprojectpath:"$(ProjectDir)Proxy " /keyfile:"$(AssemblyOriginatorKeyFile)" $(ProxyDelaySign) $(CompactFrameworkProxyGen) /binpath:". " /referencepath:"C:\Microsoft Robotics Dev Studio 2008\bin\ " /referencepath:"C:\Microsoft Robotics Dev Studio 2008\bin\ " </PostBuildEvent>
+    <PostBuildEvent>"C:\Users\t-richr\Microsoft Robotics Dev Studio 2008\bin\DssProxy.exe" /dll:"$(TargetPath)" /proxyprojectpath:"$(ProjectDir)Proxy " /keyfile:"..\myroKey.snk" $(ProxyDelaySign) $(CompactFrameworkProxyGen) /binpath:". " @(ReferencePath->'/referencepath:"%25(RootDir)%25(Directory) "', ' ')</PostBuildEvent>
   </PropertyGroup>
 </Project>

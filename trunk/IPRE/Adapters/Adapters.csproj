@@ -3,7 +3,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{01EDA09F-EDD7-488F-B512-48FA7E32AAB2}</ProjectGuid>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30428</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <OutputType>Library</OutputType>
     <NoStandardLibraries>false</NoStandardLibraries>
@@ -18,11 +18,11 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>..\bin\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Debug\MyroAdapters.XML</DocumentationFile>
+    <DocumentationFile>..\bin\MyroAdapters.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -33,35 +33,27 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Ccr.Core, Version=2.0.730.3, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+    <Reference Include="Microsoft.Ccr.Core, Version=2.0.826.3, Culture=neutral, PublicKeyToken=d12f30389d94881d, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Microsoft Robotics Dev Studio 2008\bin\Ccr.Core.dll</HintPath>
-      <Private>False</Private>
     </Reference>
-    <Reference Include="DssBase, Version=2.0.730.3, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+    <Reference Include="Microsoft.Dss.Base, Version=2.0.826.3, Culture=neutral, PublicKeyToken=d12f30389d94881d, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Microsoft Robotics Dev Studio 2008\bin\DssBase.dll</HintPath>
-      <Private>False</Private>
     </Reference>
-    <Reference Include="DssEnvironment, Version=2.0.730.3, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+    <Reference Include="Microsoft.Dss.Environment, Version=2.0.826.3, Culture=neutral, PublicKeyToken=d12f30389d94881d, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Microsoft Robotics Dev Studio 2008\bin\DssEnvironment.dll</HintPath>
-      <Private>False</Private>
     </Reference>
-    <Reference Include="DssRuntime, Version=2.0.730.3, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+    <Reference Include="Microsoft.Dss.Runtime, Version=2.0.826.3, Culture=neutral, PublicKeyToken=d12f30389d94881d, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Microsoft Robotics Dev Studio 2008\bin\DssRuntime.dll</HintPath>
-      <Private>False</Private>
     </Reference>
-    <Reference Include="DssRuntime.proxy, Version=2.0.730.3, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+    <Reference Include="Microsoft.Dss.Runtime.proxy, Version=2.0.826.3, Culture=neutral, PublicKeyToken=d12f30389d94881d, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Microsoft Robotics Dev Studio 2008\bin\DssRuntime.proxy.dll</HintPath>
-      <Private>False</Private>
     </Reference>
-    <Reference Include="RoboticsCommon.proxy, Version=2.0.730.3, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+    <Reference Include="RoboticsCommon.proxy, Version=2.0.826.3, Culture=neutral, PublicKeyToken=6f5a65c6ba7cb1d3, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Microsoft Robotics Dev Studio 2008\bin\RoboticsCommon.proxy.dll</HintPath>
-      <Private>False</Private>
+    </Reference>
+    <Reference Include="ScribblerServices.Proxy, Version=0.0.0.0, Culture=neutral, PublicKeyToken=b55f232c1146389e, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\bin\ScribblerServices.Proxy.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -70,21 +62,21 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
-    <Reference Include="Vector.Y2008.M06.Proxy, Version=0.0.0.0, Culture=neutral, PublicKeyToken=8b70575c4d29de37, processorArchitecture=MSIL">
+    <Reference Include="Vector.Y2008.M06.Proxy, Version=0.0.0.0, Culture=neutral, PublicKeyToken=b55f232c1146389e, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\Microsoft Robotics Dev Studio 2008\bin\Vector.Y2008.M06.Proxy.dll</HintPath>
-      <Private>False</Private>
+      <HintPath>..\bin\Vector.Y2008.M06.Proxy.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AdapterBank.cs" />
-    <Compile Include="AdapterSpec.cs" />
-    <Compile Include="AdapterSpecN.cs" />
+    <Compile Include="AdapterToken.cs" />
+    <Compile Include="AdapterTokenN.cs" />
     <Compile Include="DriveAdapter.cs" />
+    <Compile Include="FlukeControlAdapter.cs" />
     <Compile Include="IAdapter.cs" />
-    <Compile Include="ImageAdapter.cs" />
     <Compile Include="SpeechAdapter.cs" />
     <Compile Include="VectorAdapter.cs" />
+    <Compile Include="WebcamAdapter.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".svn\entries" />
@@ -99,6 +91,10 @@
     <None Include="myroKey.snk" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Services\Scribbler\ScribblerBase\ScribblerBase.csproj">
+      <Project>{90C2F23D-A2DD-4EAB-9923-CAAC83BE5416}</Project>
+      <Name>ScribblerBase</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Utilities\Utilities.csproj">
       <Project>{481FEFE3-E033-464C-A1D4-7C95C5AC95C5}</Project>
       <Name>Utilities</Name>

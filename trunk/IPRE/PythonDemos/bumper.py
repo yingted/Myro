@@ -1,6 +1,3 @@
-from myro import *
-#initialize("com4")
-
 setIRPower(140)
 
 print "Welcome, this program avoids obstacles (usually)..."

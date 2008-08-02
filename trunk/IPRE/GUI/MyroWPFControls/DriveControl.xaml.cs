@@ -1,4 +1,6 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,7 +13,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using game = Microsoft.Robotics.Services.GameController.Proxy;
+using game = Myro.Services.GameController.Proxy;
 using Microsoft.Ccr.Core;
 using Myro;
 
@@ -22,26 +24,22 @@ namespace Myro.GUI.WPFControls
     /// </summary>
     public partial class DriveControl : UserControl
     {
-        //Myro.API.MyroMovement drive = null;
-
         Port<Tuple<double, double>> drivePort = new Port<Tuple<double, double>>();
         DispatcherQueue taskQueue;
 
+        /// <summary>
+        /// Constructor.  Dispose must be called on this class.
+        /// </summary>
         public DriveControl()
         {
             InitializeComponent();
         }
 
-        //public void SetDrive(Myro.API.MyroMovement drive)
-        //{
-        //    Robot.drive = drive;
-        //}
-
-        public void driveHandler(Tuple<double, double> motors)
+        private void driveHandler(Tuple<double, double> motors)
         {
             try
             {
-                Robot.SetMotors(motors.Item0, motors.Item1);
+                Robot.motors(motors.Item0, motors.Item1);
             }
             catch (Exception) { }
         }
@@ -50,7 +48,7 @@ namespace Myro.GUI.WPFControls
         /// From SimpleDashboard sample
         /// </summary>
         /// <param name="axes"></param>
-        public void UpdateJoystickAxes(game.Axes axes)
+        private void UpdateJoystickAxes(game.Axes axes)
         {
             DrawJoystick(axes.X, -axes.Y);
 
@@ -59,13 +57,13 @@ namespace Myro.GUI.WPFControls
 
             if (axes.Y < 0)
             {
-                left = (-axes.Y + axes.X / 2) / 1000.0;
-                right = (-axes.Y - axes.X / 2) / 1000.0;
+                left = (-axes.Y + axes.X / (-2.0 / 1000.0 * Math.Abs(axes.X) + 3.0)) / 1000.0;
+                right = (-axes.Y - axes.X / (-2.0 / 1000.0 * Math.Abs(axes.X) + 3.0)) / 1000.0;
             }
             else
             {
-                left = (-axes.Y + axes.X / 2) / 1000.0;
-                right = (-axes.Y - axes.X / 2) / 1000.0;
+                left = (-axes.Y + axes.X / (-2.0 / 1000.0 * Math.Abs(axes.X) + 3.0)) / 1000.0;
+                right = (-axes.Y - axes.X / (-2.0 / 1000.0 * Math.Abs(axes.X) + 3.0)) / 1000.0;
             }
             if (left > 1.0) left = 1.0;
             if (left < -1.0) left = -1.0;
@@ -224,7 +222,6 @@ namespace Myro.GUI.WPFControls
 
         public void Dispose()
         {
-            //Console.WriteLine("****** Unloading ********");
             taskQueue.Dispose();
         }
 

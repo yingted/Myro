@@ -1,4 +1,6 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,7 +15,11 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Media.Animation;
-using System.Diagnostics;
+using System.Windows.Media.Effects;
+using System.Threading;
+
+using Myro.GUI.WPFControls;
+using Myro.Utilities;
 
 namespace Myro.GUI.SimpleIDE
 {
@@ -51,26 +57,29 @@ namespace Myro.GUI.SimpleIDE
                         JewelImage.Source = value;
             }
         }
-        private MyroConfigFiles currentConfig;
-        public MyroConfigFiles CurrentConfig
+        private int runningCount = 0;
+        public bool IsRunning
         {
-            get { return currentConfig; }
             set
             {
-                if (currentConfig != value)
-                {
-                    var evt = new RobotChangeEventArgs() { ConfigFiles = value };
-                    RobotChange.Invoke(this, new RobotChangeEventArgs() { ConfigFiles = value });
-                    if (evt.Cancel != true)
-                    {
-                        currentConfig = value;
-                        DisplayedBaseName = value.BaseName;
-                        DisplayedFriendlyName = value.MyroConfiguration.FriendlyName;
-                        DisplayedIcon = value.IconFilePath == null ? null :
-                            new BitmapImage(new Uri("file://" + value.IconFilePath));
-                    }
-                }
+                if (value == true)
+                    runningCount++;
+                else
+                    runningCount--;
+                if (runningCount > 0)
+                    Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal,
+                        new ThreadStart(delegate()
+                        {
+                            JewelButton.BitmapEffect = (BitmapEffect)JewelButton.Resources["RunGlowEffect"];
+                        }));
+                else
+                    Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal,
+                        new ThreadStart(delegate()
+                        {
+                            JewelButton.BitmapEffect = null;
+                        }));
             }
+            get { return runningCount > 0; }
         }
         #endregion
 
@@ -79,7 +88,6 @@ namespace Myro.GUI.SimpleIDE
         public class RobotChangeEventArgs : EventArgs
         {
             public MyroConfigFiles ConfigFiles;
-            public bool Cancel = false;
         }
         public delegate void RobotChangeEventHandler(object sender, RobotChangeEventArgs e);
         public event RobotChangeEventHandler RobotChange;
@@ -87,13 +95,14 @@ namespace Myro.GUI.SimpleIDE
         #endregion
 
         #region Commands
-        public static RoutedCommand ShowServices = new RoutedCommand();
         #endregion
 
         #region Private variables
 
         ContextMenu robotChooserMenu;
         Storyboard jewelAnimation;
+
+        List<MenuItem> cachedConfigMenu;
 
         #endregion
 
@@ -106,31 +115,73 @@ namespace Myro.GUI.SimpleIDE
 
         private void OnJewelClick(object sender, RoutedEventArgs e)
         {
-            if (jewelAnimation != null)
+            try
             {
-                jewelAnimation.Stop(JewelButton);
-                jewelAnimation = null;
+                if (jewelAnimation != null)
+                {
+                    jewelAnimation.Stop(JewelButton);
+                    jewelAnimation = null;
+                }
+                if (Robot.CurrentConfig == null)
+                    displayJewelRobotChooser();
             }
-            if (CurrentConfig == null)
-                displayJewelRobotChooser();
+            catch (Exception err)
+            {
+                GUIUtilities.ReportUnexpectedException(err);
+            }
         }
 
         private void OnInitialized(object sender, EventArgs e)
         {
-            jewelAnimation = (Storyboard)JewelButton.FindResource("JewelGlow");
-            jewelAnimation.Begin(JewelButton, true);
+            try
+            {
+                Robot.RobotStateChangeEvent += OnRobotStateChange;
+
+                jewelAnimation = (Storyboard)JewelButton.FindResource("JewelGlow");
+                jewelAnimation.Begin(JewelButton, true);
+            }
+            catch (Exception err)
+            {
+                GUIUtilities.ReportUnexpectedException(err);
+            }
+            try
+            {
+                cachedConfigMenu = makeConfigMenuItems();
+            }
+            catch (Exception) { }
         }
 
-        private void IsConfigLoaded(object sender, CanExecuteRoutedEventArgs e)
-        {
-            e.CanExecute = (CurrentConfig != null);
-        }
+        #endregion
 
-        private void OnShowServices(object sender, ExecutedRoutedEventArgs e)
+
+        #region External event handlers
+
+        private void OnRobotStateChange(Robot.RobotStateChangeEventArgs e)
         {
-            if (CurrentConfig != null)
-                Process.Start(new ProcessStartInfo(
-                    "http://localhost:" + CurrentConfig.MyroConfiguration.HttpPort.ToString() + "/directory"));
+            switch (e.StateChange)
+            {
+                case Robot.RobotStateChange.CONNECTING:
+                    IsRunning = true;
+                    break;
+                case Robot.RobotStateChange.CONNECTING_SUCCEEDED:
+                    Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal, new ThreadStart(delegate()
+                    {
+                        DisplayedBaseName = Robot.CurrentConfig.BaseName;
+                        DisplayedFriendlyName = Robot.CurrentConfig.MyroConfiguration.FriendlyName;
+                        DisplayedIcon = Robot.CurrentConfig.IconFilePath == null ? null :
+                            new BitmapImage(new Uri("file://" + Robot.CurrentConfig.IconFilePath));
+                    }));
+
+                    IsRunning = false;
+
+                    // Call this to update the state of grayed-out controls
+                    // that depend on CurrentConfig being set to become ungrayed.
+                    CommandManager.InvalidateRequerySuggested();
+                    break;
+                case Robot.RobotStateChange.CONNECTING_FAILED:
+                    IsRunning = false;
+                    break;
+            }
         }
 
         #endregion
@@ -138,8 +189,29 @@ namespace Myro.GUI.SimpleIDE
 
         #region Helper methods
 
+        private List<MenuItem> makeConfigMenuItems()
+        {
+            var ret = new List<MenuItem>();
+            var finder = new MyroConfigFinder(Myro.Utilities.Params.ConfigPath);
+            foreach (var config in finder.FindConfigFiles())
+            {
+                MenuItem menuitem = new MenuItem()
+                {
+                    Header = MyroConfigGUI.MakeListItem(config),
+                };
+                var myConfig = config;
+                menuitem.Click += delegate
+                {
+                    RobotChange.Invoke(this, new RobotChangeEventArgs() { ConfigFiles = myConfig });
+                };
+                ret.Add(menuitem);
+            }
+            return ret;
+        }
+
         private void displayJewelRobotChooser()
         {
+            //Console.WriteLine(robotChooserMenu);
             if (robotChooserMenu == null)
             {
                 JewelButton.SetValue(CheckBox.IsCheckedProperty, true);
@@ -155,22 +227,30 @@ namespace Myro.GUI.SimpleIDE
                     robotChooserMenu = null;
                     JewelButton.SetValue(CheckBox.IsCheckedProperty, false);
                 };
-                var finder = new MyroConfigFinder(Myro.Utilities.Params.ConfigPath);
-                foreach (var config in finder.FindConfigFiles())
+
+                // Use the cached menu the first time - speeds up the first
+                // time the user clicks the menu because files are read from
+                // disk.  Rebuild it from scratch after the first time though,
+                // so that new configs are read.
+                List<MenuItem> menuitems;
+                if (cachedConfigMenu != null)
                 {
-                    MenuItem menuitem = new MenuItem()
-                    {
-                        Header = finder.MakeListItem(config),
-                    };
-                    var myConfig = config;
-                    menuitem.Click += delegate { CurrentConfig = myConfig; };
-                    robotChooserMenu.Items.Add(menuitem);
+                    Console.WriteLine("Using cached menu items");
+                    menuitems = cachedConfigMenu;
+                    cachedConfigMenu = null;
                 }
+                else
+                {
+                    menuitems = makeConfigMenuItems();
+                }
+
+                foreach (var menuitem in menuitems)
+                    robotChooserMenu.Items.Add(menuitem);
 
                 robotChooserMenu.IsOpen = true;
             }
-            else
-                robotChooserMenu.IsOpen = false;
+            //else
+            //    robotChooserMenu.IsOpen = false;
         }
 
         #endregion

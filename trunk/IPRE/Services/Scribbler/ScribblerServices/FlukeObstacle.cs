@@ -1,4 +1,6 @@
-﻿using Microsoft.Ccr.Core;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+
+using Microsoft.Ccr.Core;
 using Microsoft.Dss.Core;
 using Microsoft.Dss.Core.Attributes;
 using Microsoft.Dss.ServiceModel.Dssp;
@@ -14,7 +16,7 @@ using System.Linq;
 using brick = Myro.Services.Scribbler.ScribblerBase.Proxy;
 using vector = Myro.Services.Generic.Vector;
 
-namespace Myro.Services.Scribbler
+namespace Myro.Services.Scribbler.FlukeObstacle
 {
     public static class Contract
     {
@@ -28,8 +30,12 @@ namespace Myro.Services.Scribbler
     [Description("The Fluke Obstacle Detector")]
     [Contract(Contract.Identifier)]
     [AlternateContract(vector.Contract.Identifier)] //implementing the generic contract
-    class FlukeObstacle : vector.VectorService
+    class FlukeObstacle : vector.VectorServiceBase
     {
+        [ServicePort(AllowMultipleInstances = false)]
+        vector.VectorOperations _operationsPort = new vector.VectorOperations();
+        protected override vector.VectorOperations OperationsPort { get { return _operationsPort; } }
+
         /// <summary>
         /// Robot base partner
         /// </summary>
@@ -60,7 +66,8 @@ namespace Myro.Services.Scribbler
                     Activate(Arbiter.Choice(_scribblerPort.GetObstacle(i),
                         delegate(brick.UInt16Body r)
                         {
-                            _state.Set(myI, RSUtils.NormalizeUShort(r.Value), DateTime.Now);
+                            //_state.Set(myI, RSUtils.NormalizeUShort(r.Value), DateTime.Now);
+                            _state.Set(myI, r.Value, DateTime.Now);
                             responses.Post(DefaultQueryResponseType.Instance);
                         },
                         delegate(Fault f) { responses.Post(f); }));
@@ -72,10 +79,12 @@ namespace Myro.Services.Scribbler
                             responsePort.Post(vector.CallbackResponseType.Instance);
                         else
                         {
-                            var reasons = new List<ReasonText>();
-                            foreach (var f in fs)
-                                reasons.AddRange(f.Reason.AsEnumerable());
-                            responsePort.Post(new Fault() { Detail = new Detail() { Any = fs.ToArray() }, Reason = reasons.ToArray() });
+                            responsePort.Post(fs.First());
+                            //// f.Reason was sometimes null
+                            //var reasons = new List<ReasonText>();
+                            //foreach (var f in fs)
+                            //    reasons.AddRange(f.Reason.AsEnumerable());
+                            //responsePort.Post(new Fault() { Detail = new Detail() { Any = fs.ToArray() }, Reason = reasons.ToArray() });
                         }
                     });
             }

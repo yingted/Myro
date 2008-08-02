@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation.  All rights reserved.
+
 //------------------------------------------------------------------------------
 // Scribbler Drive Service
 //
@@ -13,13 +15,12 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Security.Permissions;
-using xml = System.Xml;
-using soap = W3C.Soap;
+using W3C.Soap;
 
 using submgr = Microsoft.Dss.Services.SubscriptionManager;
 using brick = Myro.Services.Scribbler.ScribblerBase.Proxy;
-using drive = Microsoft.Robotics.Services.Drive.Proxy;
-using W3C.Soap;
+using drive = Microsoft.Robotics.Services.Drive;
+using motor = Microsoft.Robotics.Services.Motor;
 
 namespace Myro.Services.Scribbler.Drive
 {
@@ -32,7 +33,6 @@ namespace Myro.Services.Scribbler.Drive
     [Description("The Scribbler Drive Service")]
     [Contract(Contract.Identifier)]
     [AlternateContract(drive.Contract.Identifier)] //implementing the generic motor contract
-
     public class ScribblerDrive : DsspServiceBase
     {
         private drive.DriveDifferentialTwoWheelState _state = null;
@@ -49,11 +49,8 @@ namespace Myro.Services.Scribbler.Drive
         /// <summary>
         /// Default Service Constructor
         /// </summary>
-        public ScribblerDrive(DsspServiceCreationPort creationPort) : 
-                base(creationPort)
-        {
-
-        }
+        public ScribblerDrive(DsspServiceCreationPort creationPort) :
+            base(creationPort) { }
 
         /// <summary>
         /// Service Start
@@ -69,14 +66,14 @@ namespace Myro.Services.Scribbler.Drive
                 _state = new drive.DriveDifferentialTwoWheelState();
                 _state.IsEnabled = true;
 
-                _state.LeftWheel = new Microsoft.Robotics.Services.Motor.Proxy.WheeledMotorState();
+                _state.LeftWheel = new motor.WheeledMotorState();
                 _state.LeftWheel.Name = "Left Wheel";
-                _state.LeftWheel.MotorState = new Microsoft.Robotics.Services.Motor.Proxy.MotorState();
+                _state.LeftWheel.MotorState = new motor.MotorState();
                 _state.LeftWheel.MotorState.Name = "Left Motor";
 
-                _state.RightWheel = new Microsoft.Robotics.Services.Motor.Proxy.WheeledMotorState();
+                _state.RightWheel = new motor.WheeledMotorState();
                 _state.RightWheel.Name = "Right Wheel";
-                _state.RightWheel.MotorState = new Microsoft.Robotics.Services.Motor.Proxy.MotorState();
+                _state.RightWheel.MotorState = new motor.MotorState();
                 _state.RightWheel.MotorState.Name = "Right Motor";
             }
 
@@ -86,8 +83,8 @@ namespace Myro.Services.Scribbler.Drive
             // Publish the service to the local Node Directory
             DirectoryInsert();
 
-			// display HTTP service Uri
-			LogInfo(LogGroups.Console, "Service uri: ");
+            // display HTTP service Uri
+            LogInfo(LogGroups.Console, "Service uri: ");
         }
 
         #region Standard Port Operations
@@ -224,7 +221,7 @@ namespace Myro.Services.Scribbler.Drive
                      setDrivePower.ResponsePort.Post(DefaultUpdateResponseType.Instance);
                      RequestPending--;
                  },
-                 delegate(soap.Fault failure)
+                 delegate(Fault failure)
                  {
                      setDrivePower.ResponsePort.Post(failure);
                      RequestPending--;
@@ -290,108 +287,6 @@ namespace Myro.Services.Scribbler.Drive
 
         #endregion
 
-#if false
-        #region IMyroMovement Members
-
-        public void Backward(float power)
-        {
-            drive.SetDrivePowerRequest request = new drive.SetDrivePowerRequest(-power, -power);
-            _mainPort.SetDrivePower(request);
-        }
-
-        public void BackwardFor(float power, float seconds)
-        {
-            SpawnIterator<float, float, float>(-power, -power, seconds * 1000, MoveForHelper);
-        }
-
-        public void Forward(float power)
-        {
-            drive.SetDrivePowerRequest forwards = new drive.SetDrivePowerRequest(power, power);
-            _mainPort.SetDrivePower(forwards);
-        }
-
-        public void ForwardFor(float power, float seconds)
-        {
-            SpawnIterator<float, float, float>(power, power, seconds * 1000, MoveForHelper);
-        }
-
-        public void Move(float translate, float rotate)
-        {
-            throw new Exception("The method or operation is not implemented.");
-        }
-
-        public void SetMotors(float leftPower, float rightPower)
-        {
-            drive.SetDrivePowerRequest request = new drive.SetDrivePowerRequest(leftPower, rightPower);
-            _mainPort.SetDrivePower(request);
-        }
-
-        public void SetMotorsFor(float leftPower, float rightPower, float seconds)
-        {
-            SpawnIterator<float, float, float>(leftPower, rightPower, seconds * 1000, MoveForHelper);
-        }
-
-        public void Stop()
-        {
-            drive.SetDrivePowerRequest request = new drive.SetDrivePowerRequest(0, 0);
-            _mainPort.SetDrivePower(request);
-        }
-
-        public void Turn(string direction, float power)
-        {
-            if (direction.ToLower().CompareTo("left") == 0)
-                TurnLeft(power);
-            else if (direction.ToLower().CompareTo("right") == 0)
-                TurnRight(power);
-            else
-                Console.WriteLine("Unrecognized direction");
-        }
-
-        public void TurnFor(string direction, float power, float seconds)
-        {
-            if (direction.ToLower().CompareTo("left") == 0)
-                TurnLeftFor(power, seconds);
-            else if (direction.ToLower().CompareTo("right") == 0)
-                TurnRightFor(power, seconds);
-            else
-                Console.WriteLine("Unrecognized direction");
-        }
-
-        public void TurnLeft(float power)
-        {
-            drive.SetDrivePowerRequest left = new drive.SetDrivePowerRequest(-power, power);
-            _mainPort.SetDrivePower(left);
-        }
-
-        public void TurnLeftFor(float power, float seconds)
-        {
-            SpawnIterator<float, float, float>(-power, power, seconds * 1000, MoveForHelper);
-        }
-
-        public void TurnRight(float power)
-        {
-            drive.SetDrivePowerRequest right = new drive.SetDrivePowerRequest(power, -power);
-            _mainPort.SetDrivePower(right);
-        }
-
-        public void TurnRightFor(float power, float seconds)
-        {
-            SpawnIterator<float, float, float>(power, -power, seconds * 1000, MoveForHelper);
-        }
-
-        IEnumerator<ITask> MoveForHelper(float leftpower, float rightpower, float milliseconds)
-        {
-            drive.SetDrivePowerRequest request = new drive.SetDrivePowerRequest(leftpower, rightpower);
-            _mainPort.SetDrivePower(request);
-
-            yield return Arbiter.Receive(false, TimeoutPort((int)milliseconds), delegate(DateTime t) { });
-
-            drive.SetDrivePowerRequest stop = new drive.SetDrivePowerRequest(0, 0);
-            _mainPort.SetDrivePower(stop);
-        }
-
-        #endregion
-#endif
     }
 
 

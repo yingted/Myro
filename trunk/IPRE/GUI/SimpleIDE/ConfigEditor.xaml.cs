@@ -1,4 +1,6 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,6 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using Myro.Utilities;
 using Microsoft.Win32;
+using Myro.GUI.WPFControls;
 
 namespace Myro.GUI.SimpleIDE
 {
@@ -36,83 +39,146 @@ namespace Myro.GUI.SimpleIDE
 
         private void OnInitialized(object sender, EventArgs e)
         {
-            configFinder = new MyroConfigFinder(Params.ConfigPath);
-            rebuildConfigList();
+        }
+
+        private void OnLoaded(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                configFinder = new MyroConfigFinder(Params.ConfigPath);
+                rebuildConfigList();
+            }
+            catch (Exception err)
+            {
+                GUIUtilities.ReportUnexpectedException(err);
+                this.Close();
+            }
         }
 
         private void OnSelectConfig(object sender, SelectionChangedEventArgs e)
         {
-            bool cancelled;
-            if (currentModified && ConfigList.SelectedIndex != configFiles.IndexOf(currentConfigFiles))
+            try
             {
-                if (promptApplyChanges() == true)
+                bool cancelled;
+                if (currentModified && ConfigList.SelectedIndex != configFiles.IndexOf(currentConfigFiles))
+                {
+                    if (promptApplyChanges() == true)
+                        cancelled = false;
+                    else
+                    {
+                        ConfigList.SelectedIndex = configFiles.IndexOf(currentConfigFiles);
+                        cancelled = true;
+                    }
+                }
+                else
                     cancelled = false;
-                else
-                {
-                    ConfigList.SelectedIndex = configFiles.IndexOf(currentConfigFiles);
-                    cancelled = true;
-                }
-            }
-            else
-                cancelled = false;
 
-            if (!currentModified && !cancelled)
-                if (ConfigList.SelectedIndex >= 0 && ConfigList.SelectedIndex < configFiles.Count)
-                {
-                    currentConfigFiles = configFiles[ConfigList.SelectedIndex];
-                    fillInConfig(currentConfigFiles);
-                }
-                else
-                {
-                    currentConfigFiles = null;
-                    fillInConfig(null);
-                }
+                if (!currentModified && !cancelled)
+                    if (ConfigList.SelectedIndex >= 0 && ConfigList.SelectedIndex < configFiles.Count)
+                    {
+                        currentConfigFiles = configFiles[ConfigList.SelectedIndex];
+                        fillInConfig(currentConfigFiles);
+                    }
+                    else
+                    {
+                        currentConfigFiles = null;
+                        fillInConfig(null);
+                    }
+            }
+            catch (Exception err)
+            {
+                GUIUtilities.ReportUnexpectedException(err);
+                this.Close();
+            }
         }
 
         private void OnClosing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (currentModified && promptApplyChanges() == false)
-                e.Cancel = true;
+            try
+            {
+                if (currentModified && promptApplyChanges() == false)
+                    e.Cancel = true;
+            }
+            catch (Exception err)
+            {
+                GUIUtilities.ReportUnexpectedException(err);
+                this.Close();
+            }
         }
 
         private void OnIconClick(object sender, MouseButtonEventArgs e)
         {
-            if (currentConfigFiles != null)
+            try
             {
-                var dlg = new OpenFileDialog();
-                if (currentConfigFiles.IconFilePath != null)
-                    dlg.FileName = currentConfigFiles.IconFilePath;
-                if (dlg.ShowDialog(this) == true)
+                if (currentConfigFiles != null)
                 {
-                    setIcon(new BitmapImage(new Uri("file://" + dlg.FileName)));
-                    modifiedIconPath = dlg.FileName;
-                    currentModified = true;
-                    setModifiedStyle();
+                    var dlg = new OpenFileDialog();
+                    if (currentConfigFiles.IconFilePath != null)
+                        dlg.FileName = currentConfigFiles.IconFilePath;
+                    if (dlg.ShowDialog(this) == true)
+                    {
+                        try
+                        {
+                            setIcon(new BitmapImage(new Uri("file://" + dlg.FileName)));
+                            modifiedIconPath = dlg.FileName;
+                            currentModified = true;
+                            setModifiedStyle();
+                        }
+                        catch (NotSupportedException)
+                        {
+                            MessageBox.Show(this, "We cannot understand this image type.  Try another image type such as png, bmp, gif, jpeg, etc.", "Image type not supported", MessageBoxButton.OK, MessageBoxImage.Exclamation, MessageBoxResult.OK);
+                        }
+                    }
                 }
+            }
+            catch (Exception err)
+            {
+                GUIUtilities.ReportUnexpectedException(err);
             }
         }
 
         private void OnSave(object sender, RoutedEventArgs e)
         {
-            saveChanges();
+            try
+            {
+                saveChanges();
+            }
+            catch (Exception err)
+            {
+                GUIUtilities.ReportUnexpectedException(err);
+            }
         }
 
         private void OnRevert(object sender, RoutedEventArgs e)
         {
-            revertChanges();
+            try
+            {
+                revertChanges();
+            }
+            catch (Exception err)
+            {
+                GUIUtilities.ReportUnexpectedException(err);
+            }
         }
 
         private void OnTextChanged(object sender, TextChangedEventArgs e)
         {
-            if (currentConfigFiles != null)
-                if (
-                    (sender == FriendlyNameBox && (!currentConfigFiles.MyroConfiguration.FriendlyName.Equals(FriendlyNameBox.Text))) ||
-                    (sender == HttpPortBox && (!currentConfigFiles.MyroConfiguration.HttpPort.ToString().Equals(HttpPortBox.Text))) ||
-                    (sender == DsspPortBox && (!currentConfigFiles.MyroConfiguration.DsspPort.ToString().Equals(DsspPortBox.Text))))
-                {
-                    currentModified = true;
-                    setModifiedStyle();
-                }
+            try
+            {
+                if (currentConfigFiles != null)
+                    if (
+                        (sender == FriendlyNameBox && (!currentConfigFiles.MyroConfiguration.FriendlyName.Equals(FriendlyNameBox.Text))) ||
+                        (sender == HttpPortBox && (!currentConfigFiles.MyroConfiguration.HttpPort.ToString().Equals(HttpPortBox.Text))) ||
+                        (sender == DsspPortBox && (!currentConfigFiles.MyroConfiguration.DsspPort.ToString().Equals(DsspPortBox.Text))))
+                    {
+                        currentModified = true;
+                        setModifiedStyle();
+                    }
+            }
+            catch (Exception err)
+            {
+                GUIUtilities.ReportUnexpectedException(err);
+            }
         }
 
         #endregion
@@ -126,7 +192,7 @@ namespace Myro.GUI.SimpleIDE
             ConfigList.Items.Clear();
             configFiles = configFinder.FindConfigFiles();
             foreach (var c in configFiles)
-                ConfigList.Items.Add(configFinder.MakeListItem(c));
+                ConfigList.Items.Add(MyroConfigGUI.MakeListItem(c));
             if (oldIndex < ConfigList.Items.Count)
                 ConfigList.SelectedIndex = oldIndex;
         }
@@ -216,7 +282,7 @@ namespace Myro.GUI.SimpleIDE
             if (currentConfigFiles != null)
             {
                 // Create new config based on controls' text
-                currentConfigFiles.MyroConfiguration = new MyroConfiguration()
+                currentConfigFiles.MyroConfiguration = new MyroRobotConfiguration()
                 {
                     FriendlyName = FriendlyNameBox.Text,
                     HttpPort = int.Parse(HttpPortBox.Text),

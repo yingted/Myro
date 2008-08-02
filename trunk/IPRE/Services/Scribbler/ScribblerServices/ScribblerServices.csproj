@@ -53,14 +53,14 @@
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <OutputPath>..\..\..\..\..\..\..\Microsoft Robotics Dev Studio 2008\bin\</OutputPath>
+    <OutputPath>..\..\..\bin\</OutputPath>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
     <BaseAddress>285212672</BaseAddress>
     <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
     <ConfigurationOverrideFile>
     </ConfigurationOverrideFile>
     <DefineConstants>DEBUG;TRACE;INSTRUMENTED</DefineConstants>
-    <DocumentationFile>..\..\..\..\..\..\..\Microsoft Robotics Dev Studio 2008\bin\ScribblerServices.XML</DocumentationFile>
+    <DocumentationFile>..\..\..\bin\ScribblerServices.XML</DocumentationFile>
     <DebugSymbols>true</DebugSymbols>
     <FileAlignment>4096</FileAlignment>
     <NoStdLib>false</NoStdLib>
@@ -95,37 +95,25 @@
     <WarningLevel>1</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DssRuntime">
+    <Reference Include="Microsoft.Ccr.Core, Version=2.0.826.3, Culture=neutral, PublicKeyToken=d12f30389d94881d, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <Private>False</Private>
-      <HintPath>..\..\..\..\bin\DssRuntime.dll</HintPath>
     </Reference>
-    <Reference Include="DssRuntime.proxy, Version=1.0.282.3, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+    <Reference Include="Microsoft.Dss.Base, Version=2.0.826.3, Culture=neutral, PublicKeyToken=d12f30389d94881d, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <Private>False</Private>
-      <HintPath>..\..\..\..\bin\DssRuntime.proxy.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Dss.Runtime, Version=2.0.826.3, Culture=neutral, PublicKeyToken=d12f30389d94881d, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="mscorlib">
       <SpecificVersion>False</SpecificVersion>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Ccr.Core">
+    <Reference Include="RoboticsCommon, Version=2.0.831.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="RoboticsCommon.proxy, Version=2.0.831.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="RoboticsCommon.transform, Version=2.0.831.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="ScribblerBase.Proxy, Version=0.0.0.0, Culture=neutral, PublicKeyToken=b55f232c1146389e, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <Private>False</Private>
-      <HintPath>..\..\..\..\bin\Ccr.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="DssBase">
-      <SpecificVersion>False</SpecificVersion>
-      <Private>False</Private>
-      <HintPath>..\..\..\..\bin\DssBase.dll</HintPath>
-    </Reference>
-    <Reference Include="RoboticsCommon.proxy, Version=1.0.229.2, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="ScribblerBase.Proxy, Version=0.0.0.0, Culture=neutral, PublicKeyToken=e0b11879e3df6c79, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <Private>False</Private>
+      <HintPath>..\..\..\bin\ScribblerBase.Proxy.dll</HintPath>
     </Reference>
     <Reference Include="System">
       <SpecificVersion>False</SpecificVersion>
@@ -135,6 +123,7 @@
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
     <Reference Include="System.Data" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Runtime.Serialization">
       <SpecificVersion>False</SpecificVersion>
       <Private>False</Private>
@@ -146,14 +135,34 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
-    <Compile Include="FlukeObstacle.cs" />
-    <Compile Include="LightSensor.cs" />
-    <Compile Include="LineSensor.cs" />
-    <Compile Include="ScribblerDrive.cs" />
-    <Compile Include="Bumper.cs" />
-    <Compile Include="ScribblerLED.cs" />
-    <Compile Include="ScribblerToneGenerator.cs" />
-    <Compile Include="StallSensor.cs" />
+    <Compile Include="Bumper.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FlukeCam.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="FlukeControl.cs" />
+    <Compile Include="FlukeObstacle.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="LightSensor.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="LineSensor.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ScribblerDrive.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ScribblerLED.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="ScribblerToneGenerator.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="StallSensor.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <AppDesigner Include="Properties" />
   </ItemGroup>
   <ItemGroup>
@@ -187,12 +196,10 @@
     <ProjectReference Include="..\..\Generic\Vector\Vector.csproj">
       <Project>{6BF981B1-88CF-4497-967D-0E4F39F5B440}</Project>
       <Name>Vector</Name>
-      <Private>False</Private>
     </ProjectReference>
     <ProjectReference Include="..\ScribblerBase\ScribblerBase.csproj">
       <Project>{90C2F23D-A2DD-4EAB-9923-CAAC83BE5416}</Project>
       <Name>ScribblerBase</Name>
-      <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
@@ -202,6 +209,6 @@
   <PropertyGroup>
     <PreBuildEvent>
     </PreBuildEvent>
-    <PostBuildEvent>"C:\Microsoft Robotics Dev Studio 2008\bin\DssProxy.exe" /dll:"$(TargetPath)" /proxyprojectpath:"$(ProjectDir)Proxy" /keyfile:"$(AssemblyOriginatorKeyFile)" $(ProxyDelaySign) $(CompactFrameworkProxyGen) /binpath:". " @(ReferencePath->'/referencepath:"%25(RootDir)%25(Directory) "', ' ')</PostBuildEvent>
+    <PostBuildEvent>"C:\Users\t-richr\Microsoft Robotics Dev Studio 2008\bin\DssProxy.exe" /dll:"$(TargetPath)" /proxyprojectpath:"$(ProjectDir)Proxy " /keyfile:"..\myroKey.snk" $(ProxyDelaySign) $(CompactFrameworkProxyGen) /binpath:". " @(ReferencePath->'/referencepath:"%25(RootDir)%25(Directory) "', ' ')</PostBuildEvent>
   </PropertyGroup>
 </Project>

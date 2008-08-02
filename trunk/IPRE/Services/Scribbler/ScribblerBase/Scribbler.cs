@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation.  All rights reserved.
+
 //------------------------------------------------------------------------------
 // Scribbler.cs
 //
@@ -22,6 +24,9 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Security.Permissions;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.Threading;
 using W3C.Soap;
 using Myro.Utilities;
 
@@ -73,7 +78,9 @@ namespace Myro.Services.Scribbler.ScribblerBase
         /// <summary>
         /// Main operations port
         /// </summary>
-        [ServicePort("/scribbler", AllowMultipleInstances = false)]
+        [ServicePort("/scribbler", AllowMultipleInstances = false,
+            QueueDepthLimit = 10,
+            QueuingPolicy = DsspOperationQueuingPolicy.DiscardWithFault)]
         private ScribblerOperations _mainPort = new ScribblerOperations();
 
         /// <summary>
@@ -86,13 +93,18 @@ namespace Myro.Services.Scribbler.ScribblerBase
         private System.Timers.Timer PollTimer;
         private static int TimerDelay = 250;           //4 Hz
 
+        private byte[] cachedJpegHeaderColor = null;
+        private byte[] cachedJpegHeaderGray = null;
+        private ColorPalette grayscalePallette = new Bitmap(128, 192, PixelFormat.Format8bppIndexed).Palette;
+
         /// <summary>
         /// Default Service Constructor
         /// </summary>
         public ScribblerService(DsspServiceCreationPort creationPort)
             : base(creationPort)
         {
-
+            for (int i = 0; i < grayscalePallette.Entries.Length; i++)
+                grayscalePallette.Entries[i] = Color.FromArgb(i, i, i);
         }
 
         /// <summary>
@@ -117,42 +129,26 @@ namespace Myro.Services.Scribbler.ScribblerBase
             // display HTTP service Uri
             LogInfo(LogGroups.Console, "Service uri: ");
 
+            //_mainPort.PostUnknownType(new Reconnect());
+
             //open Scribbler Communications port
-            if (ConnectToScribbler())
-            {
-                // Listen for a single Serial port request with an acknowledgement
-                Activate(Arbiter.ReceiveWithIterator<SendScribblerCommand>(false, _scribblerComPort, SendScribblerCommandHandler));
+            //if (ConnectToScribbler())
+            //{
+            // Listen for a single Serial port request with an acknowledgement
 
-                PollTimer = new System.Timers.Timer();
-                PollTimer.Interval = TimerDelay;
-                PollTimer.AutoReset = true;
-                PollTimer.Elapsed += new System.Timers.ElapsedEventHandler(PollTimer_Elapsed);
-                PollTimer.Start();
+            //debug
+            //ScribblerCommand cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.GET_INFO);
+            //SendScribblerCommand sendcmd = new SendScribblerCommand(cmd);
+            //_scribblerComPort.Post(sendcmd);
 
+            //}
+            //else
+            //{
+            //no scribbler found. Open state page for manual settings.
+            //OpenServiceInBrowser();
+            //}
 
-                //play startup tone
-                PlayToneBody startTone = new PlayToneBody(200, 1000, 2000);
-                _mainPort.Post(new PlayTone(startTone));
-
-                //debug
-                //ScribblerCommand cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.GET_INFO);
-                //SendScribblerCommand sendcmd = new SendScribblerCommand(cmd);
-                //_scribblerComPort.Post(sendcmd);
-
-
-                //fix state
-                _state.MotorLeft = 100;
-                _state.MotorRight = 100;
-                _state.LEDLeft = false;
-                _state.LEDRight = false;
-                _state.LEDCenter = false;
-            }
-            else
-            {
-                //no scribbler found. Open state page for manual settings.
-                //OpenServiceInBrowser();
-            }
-
+            Activate(Arbiter.ReceiveWithIterator<SendScribblerCommand>(false, _scribblerComPort, SendScribblerCommandHandler));
 
             // Listen on the main port for requests and call the appropriate handler.
             Interleave mainInterleave = ActivateDsspOperationHandlers();
@@ -165,18 +161,44 @@ namespace Myro.Services.Scribbler.ScribblerBase
 
             //add custom handlers to interleave
             mainInterleave.CombineWith(new Interleave(
-                new TeardownReceiverGroup(),
                 new ExclusiveReceiverGroup(
-                    Arbiter.ReceiveWithIterator<SetMotors>(true, _mainPort, SetMotorHandler),
-                    Arbiter.ReceiveWithIterator<SetLED>(true, _mainPort, SetLEDHandler),
-                    Arbiter.ReceiveWithIterator<SetAllLEDs>(true, _mainPort, SetAllLEDsHandler),
-                    Arbiter.ReceiveWithIterator<PlayTone>(true, _mainPort, PlayToneHandler),
-                    Arbiter.ReceiveWithIterator<SetName>(true, _mainPort, SetNameHandler),
-                    Arbiter.ReceiveWithIterator<ScribblerResponseMessage>(true, _mainPort, ScribblerResponseHandler)
+                    Arbiter.ReceiveWithIteratorFromPortSet<SetMotors>(true, _mainPort, SetMotorHandler),
+                    Arbiter.ReceiveWithIteratorFromPortSet<SetLED>(true, _mainPort, SetLEDHandler),
+                    Arbiter.ReceiveWithIteratorFromPortSet<SetAllLEDs>(true, _mainPort, SetAllLEDsHandler),
+                    Arbiter.ReceiveWithIteratorFromPortSet<PlayTone>(true, _mainPort, PlayToneHandler),
+                    Arbiter.ReceiveWithIteratorFromPortSet<SetName>(true, _mainPort, SetNameHandler),
+                    Arbiter.ReceiveWithIteratorFromPortSet<ScribblerResponseMessage>(true, _mainPort, ScribblerResponseHandler),
+                    Arbiter.ReceiveWithIteratorFromPortSet<SetLoud>(true, _mainPort, SetLoudHandler),
+                    Arbiter.ReceiveWithIteratorFromPortSet<SetLEDFront>(true, _mainPort, SetLEDFrontHandler),
+                    Arbiter.ReceiveWithIteratorFromPortSet<SetLEDBack>(true, _mainPort, SetLEDBackHandler),
+                    Arbiter.ReceiveWithIteratorFromPortSet<Reconnect>(true, _mainPort, ReconnectHandler)
                 ),
+                new ConcurrentReceiverGroup()));
+
+            // These handlers do not use the state, so can run concurrently to those above.
+            Activate(Arbiter.ReceiveWithIteratorFromPortSet<GetObstacle>(true, _mainPort, GetObstacleHandler));
+            Activate(Arbiter.ReceiveWithIteratorFromPortSet<GetImage>(true, _mainPort, GetImageHandler));
+            Activate(Arbiter.ReceiveWithIteratorFromPortSet<GetCamParam>(true, _mainPort, GetCamParamHandler));
+            Activate(Arbiter.ReceiveWithIteratorFromPortSet<SetCamParam>(true, _mainPort, SetCamParamHandler));
+            Activate(Arbiter.ReceiveWithIteratorFromPortSet<SendScribblerCommand>(true, _mainPort, SendScribblerCommandHandlerExternal));
+            Activate(Arbiter.ReceiveWithIteratorFromPortSet<HttpPost>(true, _mainPort, HttpPostHandler));
+
+            // These don't use the state either.
+            // GetWindow has to set up the window, then retrieve it, so it must run one at a time.
+            Activate(new Interleave(
+                new ExclusiveReceiverGroup(
+                    Arbiter.ReceiveWithIteratorFromPortSet<GetWindow>(true, _mainPort, GetWindowHandler)
+                    ),
                 new ConcurrentReceiverGroup()
             ));
 
+        }
+
+        private PortSet<ScribblerResponse, Fault> _scribblerComPortPost(ScribblerCommand cmd)
+        {
+            SendScribblerCommand sendcmd = new SendScribblerCommand(cmd);
+            _scribblerComPort.Post(sendcmd);
+            return sendcmd.ResponsePort;
         }
 
         /// <summary>
@@ -198,7 +220,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
         /// <param name="e"></param>
         private void PollTimer_Elapsed(object sender, EventArgs e)
         {
-            ScribblerCommand cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.GET_ALL);
+            ScribblerCommand cmd = new ScribblerCommand(ScribblerHelper.Commands.GET_ALL);
             SendScribblerCommand sendcmd = new SendScribblerCommand(cmd);
             _scribblerComPort.Post(sendcmd);
         }
@@ -227,7 +249,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
 
             _state.RobotName = shortenedname;
 
-            ScribblerCommand cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.SET_NAME, shortenedname);
+            ScribblerCommand cmd = new ScribblerCommand(ScribblerHelper.Commands.SET_NAME, shortenedname);
             SendScribblerCommand sendcmd = new SendScribblerCommand(cmd);
             _scribblerComPort.Post(sendcmd);
 
@@ -252,13 +274,27 @@ namespace Myro.Services.Scribbler.ScribblerBase
         private IEnumerator<ITask> SendScribblerCommandHandler(SendScribblerCommand command)
         {
             // Send command to robot and wait for echo and response
-            ScribblerResponse validResponse = _scribblerCom.SendCommand(command.Body);
-            if (validResponse == null)
+            ScribblerResponse validResponse;
+            try
             {
-                LogError(LogGroups.Console, "Send Scribbler Command null response");
-                command.ResponsePort.Post(new Fault());
+                validResponse = _scribblerCom.SendCommand(command.Body);
+                if (validResponse == null)
+                    throw new Exception("Send Scribbler Command null response");
             }
-            else
+            catch (TimeoutException e)
+            {
+                Console.WriteLine("Serial port timeout");
+                command.ResponsePort.Post(RSUtils.FaultOfException(e));
+                validResponse = null;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("SendCommand exception: " + e.ToString());
+                command.ResponsePort.Post(RSUtils.FaultOfException(e));
+                validResponse = null;
+            }
+
+            if (validResponse != null)
             {
                 //reset timer
                 PollTimer.Enabled = false;
@@ -266,7 +302,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
 
                 //Update our state with the scribbler's response
                 //UpdateState(validResponse);
-                _mainPort.Post(new ScribblerResponseMessage(validResponse));
+                _mainPort.PostUnknownType(new ScribblerResponseMessage(validResponse));
 
                 command.ResponsePort.Post(validResponse);
             }
@@ -277,63 +313,82 @@ namespace Myro.Services.Scribbler.ScribblerBase
             yield break;
         }
 
-
-
-        private bool ConnectToScribbler()
+        private IEnumerator<ITask> SendScribblerCommandHandlerExternal(SendScribblerCommand command)
         {
-            try
-            {
-                _state.Connected = false;
+            _scribblerComPort.Post(command);
+            yield break;
+        }
 
-                //look for scribbler on last known Com port
-                if (_state.ComPort > 0)
+        private IEnumerator<ITask> ReconnectHandler(Reconnect req)
+        {
+            //try
+            //{
+            _state.Connected = false;
+
+            //look for scribbler on last known Com port
+            if (_state.ComPort > 0)
+            {
+                var rPort = new Port<EmptyValue>();
+                Exception ex = null;
+                new Thread(new ThreadStart(delegate()
                 {
-                    _state.Connected = _scribblerCom.Open(_state.ComPort);
+                    try
+                    {
+                        _scribblerCom.Open(_state.ComPort);
+                    }
+                    catch (Exception e)
+                    {
+                        ex = e;
+                    }
+                    rPort.Post(new EmptyValue());
+                })).Start();
+                yield return Arbiter.Receive(false, rPort, delegate(EmptyValue v) { });
+                if (ex != null)
+                {
+                    req.ResponsePort.Post(RSUtils.FaultOfException(ex));
+                    yield break;
                 }
 
-                //scan all ports for the name of our Robot
-                /*
-                if (_state.Connected == false)
-                {
-                    _state.Connected = _scribblerCom.FindRobot(_state.RobotName);
-                }
-                */
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                LogError(ex);
-            }
-            catch (IOException ex)
-            {
-                LogError(ex);
-            }
-            catch (ArgumentOutOfRangeException ex)
-            {
-                LogError(ex);
-            }
-            catch (ArgumentException ex)
-            {
-                LogError(ex);
-            }
-            catch (InvalidOperationException ex)
-            {
-                LogError(ex);
-            }
-
-            if (!_state.Connected)
-            {
-                LogError(LogGroups.Console, "No Scribbler robot found.");
-            }
-
-            if (_state.Connected)
-            {
                 _state.RobotName = _scribblerCom.foundRobotName;
                 _state.ComPort = _scribblerCom.openedComPort;
                 LogInfo(LogGroups.Console, "Now connected to robot \"" + _state.RobotName + "\" on COM" + _state.ComPort);
                 SaveState(_state);
+
+                PollTimer = new System.Timers.Timer();
+                PollTimer.Interval = TimerDelay;
+                PollTimer.AutoReset = true;
+                PollTimer.Elapsed += new System.Timers.ElapsedEventHandler(PollTimer_Elapsed);
+                //PollTimer.Start();
+
+                //fix state
+                _state.MotorLeft = 100;
+                _state.MotorRight = 100;
+                _state.LEDLeft = false;
+                _state.LEDRight = false;
+                _state.LEDCenter = false;
+
+                _state.Connected = true;
+
+                //play startup tone
+                LogInfo("playing startup tone...");
+                PlayTone startTone = new PlayTone(new PlayToneBody(.2, 1000, 2000));
+                _mainPort.PostUnknownType(startTone);
+                //yield return Arbiter.Choice(startTone.ResponsePort,
+                //    delegate(DefaultUpdateResponseType r) { },
+                //    delegate(Fault f) { throw new Exception("Could not play startup tone"); });
+                LogInfo("done playing");
+
+                req.ResponsePort.Post(DefaultUpdateResponseType.Instance);
+
+                LogInfo("reconnect sent success");
+            }
+            else
+            {
+                req.ResponsePort.Post(RSUtils.FaultOfException(new ScribblerBadCOMPortException()));
+                LogInfo("reconnect sent failure");
             }
 
-            return _state.Connected;
+            yield break;
         }
 
 
@@ -350,26 +405,29 @@ namespace Myro.Services.Scribbler.ScribblerBase
                 yield break;
             }
 
-            ScribblerCommand cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.SET_SPEAKER_2,
-                                                        message.Body.Duration,
+            ScribblerCommand cmd = new ScribblerCommand(ScribblerHelper.Commands.SET_SPEAKER_2,
+                                                        (int)(message.Body.Duration * 1000.0),
                                                         message.Body.Frequency1,
                                                         message.Body.Frequency2);
 
             SendScribblerCommand sendcmd = new SendScribblerCommand(cmd);
             _scribblerComPort.Post(sendcmd);
 
-            yield return Arbiter.Receive<ScribblerResponse>(false, sendcmd.ResponsePort,
+            yield return Arbiter.Choice(sendcmd.ResponsePort,
                 delegate(ScribblerResponse response)
                 {
                     //reply to sender
                     message.ResponsePort.Post(DefaultUpdateResponseType.Instance);
+                },
+                delegate(Fault f)
+                {
+                    message.ResponsePort.Post(f);
                 }
             );
 
             yield break;
         }
 
-        [ServiceHandler(ServiceHandlerBehavior.Exclusive)]
         public IEnumerator<ITask> SetLoudHandler(SetLoud message)
         {
             if (!_state.Connected)
@@ -378,7 +436,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
                 message.ResponsePort.Post(new Fault());
                 yield break;
             }
-            ScribblerCommand cmd = new ScribblerCommand((byte)
+            ScribblerCommand cmd = new ScribblerCommand(
                 (message.Body.IsLoud ? ScribblerHelper.Commands.SET_LOUD : ScribblerHelper.Commands.SET_QUIET));
             SendScribblerCommand sendcmd = new SendScribblerCommand(cmd);
             _scribblerComPort.Post(sendcmd);
@@ -408,32 +466,32 @@ namespace Myro.Services.Scribbler.ScribblerBase
                 case 0: //left LED
                     _state.LEDLeft = message.Body.State;
                     if (message.Body.State)
-                        cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.SET_LED_LEFT_ON);
+                        cmd = new ScribblerCommand(ScribblerHelper.Commands.SET_LED_LEFT_ON);
                     else
-                        cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.SET_LED_LEFT_OFF);
+                        cmd = new ScribblerCommand(ScribblerHelper.Commands.SET_LED_LEFT_OFF);
                     break;
                 case 1: //center LED
                     _state.LEDCenter = message.Body.State;
                     if (message.Body.State)
-                        cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.SET_LED_CENTER_ON);
+                        cmd = new ScribblerCommand(ScribblerHelper.Commands.SET_LED_CENTER_ON);
                     else
-                        cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.SET_LED_CENTER_OFF);
+                        cmd = new ScribblerCommand(ScribblerHelper.Commands.SET_LED_CENTER_OFF);
                     break;
                 case 2: //right LED
                     _state.LEDRight = message.Body.State;
                     if (message.Body.State)
-                        cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.SET_LED_RIGHT_ON);
+                        cmd = new ScribblerCommand(ScribblerHelper.Commands.SET_LED_RIGHT_ON);
                     else
-                        cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.SET_LED_RIGHT_OFF);
+                        cmd = new ScribblerCommand(ScribblerHelper.Commands.SET_LED_RIGHT_OFF);
                     break;
                 case 3: //all LEDs
                     _state.LEDLeft = message.Body.State;
                     _state.LEDCenter = message.Body.State;
                     _state.LEDRight = message.Body.State;
                     if (message.Body.State)
-                        cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.SET_LED_ALL_ON);
+                        cmd = new ScribblerCommand(ScribblerHelper.Commands.SET_LED_ALL_ON);
                     else
-                        cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.SET_LED_ALL_OFF);
+                        cmd = new ScribblerCommand(ScribblerHelper.Commands.SET_LED_ALL_OFF);
                     break;
                 default:
                     LogError("LED number set incorrect");
@@ -456,7 +514,6 @@ namespace Myro.Services.Scribbler.ScribblerBase
             yield break;
         }
 
-        [ServiceHandler(ServiceHandlerBehavior.Exclusive)]
         public IEnumerator<ITask> SetLEDFrontHandler(SetLEDFront set)
         {
             if (!_state.Connected)
@@ -468,9 +525,9 @@ namespace Myro.Services.Scribbler.ScribblerBase
 
             ScribblerCommand cmd;
             if (set.Body.FrontLED == true)
-                cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.SET_DONGLE_LED_ON);
+                cmd = new ScribblerCommand(ScribblerHelper.Commands.SET_DONGLE_LED_ON);
             else
-                cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.SET_DONGLE_LED_OFF);
+                cmd = new ScribblerCommand(ScribblerHelper.Commands.SET_DONGLE_LED_OFF);
 
             SendScribblerCommand sendcmd = new SendScribblerCommand(cmd);
             _scribblerComPort.Post(sendcmd);
@@ -484,7 +541,6 @@ namespace Myro.Services.Scribbler.ScribblerBase
         }
 
 
-        [ServiceHandler(ServiceHandlerBehavior.Exclusive)]
         public IEnumerator<ITask> SetLEDBackHandler(SetLEDBack set)
         {
             if (!_state.Connected)
@@ -494,7 +550,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
                 yield break;
             }
 
-            ScribblerCommand cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.SET_DIMMER_LED, set.Body.BackLED);
+            ScribblerCommand cmd = new ScribblerCommand(ScribblerHelper.Commands.SET_DIMMER_LED, set.Body.BackLED);
 
             SendScribblerCommand sendcmd = new SendScribblerCommand(cmd);
             _scribblerComPort.Post(sendcmd);
@@ -525,7 +581,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
             _state.LEDRight = message.Body.RightLED;
 
             //send command
-            ScribblerCommand cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.SET_LED_ALL,
+            ScribblerCommand cmd = new ScribblerCommand(ScribblerHelper.Commands.SET_LED_ALL,
                                                             _state.LEDLeft,
                                                             _state.LEDCenter,
                                                             _state.LEDRight);
@@ -560,7 +616,9 @@ namespace Myro.Services.Scribbler.ScribblerBase
             //debug
             if (message.Body.LeftSpeed < 0 || message.Body.LeftSpeed > 200 || message.Body.RightSpeed < 0 || message.Body.RightSpeed > 200)
             {
-                LogError("Scribbler SetMotorHandler: target power set incorrect");
+                //LogError("Scribbler SetMotorHandler: target power set incorrect");
+                message.ResponsePort.Post(RSUtils.FaultOfException(new ArgumentOutOfRangeException("Motor speed", "Motor speed out of range")));
+                yield break;
             }
 
             //update state
@@ -568,7 +626,7 @@ namespace Myro.Services.Scribbler.ScribblerBase
             _state.MotorRight = message.Body.RightSpeed;
 
             //send command
-            ScribblerCommand cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.SET_MOTORS, (byte)_state.MotorRight, (byte)_state.MotorLeft);
+            ScribblerCommand cmd = new ScribblerCommand(ScribblerHelper.Commands.SET_MOTORS, (byte)_state.MotorRight, (byte)_state.MotorLeft);
             SendScribblerCommand sendcmd = new SendScribblerCommand(cmd);
             _scribblerComPort.Post(sendcmd);
 
@@ -594,7 +652,6 @@ namespace Myro.Services.Scribbler.ScribblerBase
             yield break;
         }
 
-        [ServiceHandler(ServiceHandlerBehavior.Exclusive)]
         public IEnumerator<ITask> GetObstacleHandler(GetObstacle get)
         {
             if (!_state.Connected)
@@ -607,13 +664,13 @@ namespace Myro.Services.Scribbler.ScribblerBase
             switch (get.Body.Value)
             {
                 case 0:
-                    cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.GET_DONGLE_L_IR);
+                    cmd = new ScribblerCommand(ScribblerHelper.Commands.GET_DONGLE_L_IR);
                     break;
                 case 1:
-                    cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.GET_DONGLE_C_IR);
+                    cmd = new ScribblerCommand(ScribblerHelper.Commands.GET_DONGLE_C_IR);
                     break;
                 case 2:
-                    cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.GET_DONGLE_R_IR);
+                    cmd = new ScribblerCommand(ScribblerHelper.Commands.GET_DONGLE_R_IR);
                     break;
                 default:
                     get.ResponsePort.Post(RSUtils.FaultOfException(
@@ -627,7 +684,14 @@ namespace Myro.Services.Scribbler.ScribblerBase
             yield return Arbiter.Choice(sendcmd.ResponsePort,
                 delegate(ScribblerResponse r)
                 {
-                    get.ResponsePort.Post(new UInt16Body(ScribblerHelper.GetShort(r.Data, 0)));
+                    try
+                    {
+                        get.ResponsePort.Post(new UInt16Body(ScribblerHelper.GetShort(r.Data, 0)));
+                    }
+                    catch (Exception e)
+                    {
+                        get.ResponsePort.Post(RSUtils.FaultOfException(e));
+                    }
                 },
                 delegate(Fault f)
                 {
@@ -636,6 +700,331 @@ namespace Myro.Services.Scribbler.ScribblerBase
             yield break;
         }
 
+        public IEnumerator<ITask> GetImageHandler(GetImage get)
+        {
+            if (!_state.Connected)
+            {
+                get.ResponsePort.Post(new Fault() { Reason = new ReasonText[] { new ReasonText() { Value = "Not connected" } } });
+                yield break;
+            }
+
+            MyroImageType imageType = null;
+            byte[] responseData = null;
+            Fault fault = null;
+            // Retrieve image data based on image type
+            if (get.Body.ImageType.Equals(MyroImageType.Color.Guid))
+            {
+                imageType = MyroImageType.Color;
+                yield return Arbiter.Choice(_scribblerComPortPost(
+                    new ScribblerCommand(ScribblerHelper.Commands.GET_IMAGE)),
+                    delegate(ScribblerResponse r) { responseData = r.Data; },
+                    delegate(Fault f) { fault = f; });
+            }
+            else if (get.Body.ImageType.Equals(MyroImageType.Gray.Guid))
+            {
+                imageType = MyroImageType.Gray;
+                var gw = new GetWindow(new GetWindowBody()
+                {
+                    Window = 0,
+                    XLow = 1,
+                    YLow = 0,
+                    XHigh = 255,
+                    YHigh = 191,
+                    XStep = 2,
+                    YStep = 1
+                });
+                _mainPort.PostUnknownType(gw);
+                yield return Arbiter.Choice(gw.ResponsePort,
+                    delegate(ImageResponse r)
+                    {
+                        if (r.Data.Length != 128 * 192)
+                            fault = RSUtils.FaultOfException(new Exception("Invalid grayscale image from GetWindow"));
+                        else
+                        {
+                            // Scale image up and copy bits
+                            Bitmap bmp = new Bitmap(128, 192, PixelFormat.Format8bppIndexed);
+                            bmp.Palette = grayscalePallette;
+                            BitmapData bmpData = bmp.LockBits(new Rectangle(0, 0, 128, 192), ImageLockMode.WriteOnly, PixelFormat.Format8bppIndexed);
+                            System.Runtime.InteropServices.Marshal.Copy(r.Data, 0, bmpData.Scan0, 128 * 192);
+                            bmp.UnlockBits(bmpData);
+                            Bitmap bmp2 = new Bitmap(256, 192, PixelFormat.Format24bppRgb);
+                            Graphics g = Graphics.FromImage(bmp2);
+                            g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.Bilinear;
+                            g.DrawImage(bmp, 0, 0, 256, 192);
+                            BitmapData bmpData2 = bmp2.LockBits(new Rectangle(0, 0, 256, 192), ImageLockMode.ReadOnly, PixelFormat.Format24bppRgb);
+                            responseData = new byte[256 * 192 * 3];
+                            System.Runtime.InteropServices.Marshal.Copy(bmpData2.Scan0, responseData, 0, 256 * 192 * 3);
+                            bmp2.UnlockBits(bmpData2);
+                            bmp.Dispose();
+                            bmp2.Dispose();
+                            g.Dispose();
+                        }
+                    },
+                    delegate(Fault f) { fault = f; });
+            }
+            else if (get.Body.ImageType.Equals(MyroImageType.JpegColor.Guid) ||
+                get.Body.ImageType.Equals(MyroImageType.JpegColorFast.Guid))
+            {
+                imageType = MyroImageType.JpegColor;
+
+                // Get Header
+                if (cachedJpegHeaderColor == null)
+                {
+                    // NOTE: Hack here, in ScribblerComm.SendCommand, if the command is to
+                    // get a JPEG header, it will get the header length from the first two
+                    // bytes from the serial port.
+                    yield return Arbiter.Choice(_scribblerComPortPost(new ScribblerCommand(
+                        ScribblerHelper.Commands.GET_JPEG_COLOR_HEADER)),
+                        delegate(ScribblerResponse r) { cachedJpegHeaderColor = r.Data; },
+                        delegate(Fault f) { fault = f; });
+                    //if (fault == null)
+                    //    Console.WriteLine("JPEG: header is " + cachedJpegHeaderColor.Length + " bytes");
+                }
+
+                // Get scans
+                byte[] scans = null;
+                if (fault == null)
+                {
+                    byte reliable = get.Body.ImageType.Equals(MyroImageType.JpegColor.Guid) ? (byte)1 : (byte)0;
+                    yield return Arbiter.Choice(_scribblerComPortPost(new ScribblerCommand(
+                        ScribblerHelper.Commands.GET_JPEG_COLOR_SCAN, reliable) { EndMarker1 = 0xff, EndMarker2 = 0xd9 }),
+                        delegate(ScribblerResponse r) { scans = r.Data; },
+                        delegate(Fault f) { fault = f; });
+                }
+                //if (fault == null)
+                //    Console.WriteLine("JPEG: scans is " + scans.Length + " bytes");
+
+                // Decode JPEG
+                if (fault == null)
+                {
+                    if (cachedJpegHeaderColor == null || scans == null)
+                        fault = RSUtils.FaultOfException(new ScribblerDataException("Had null header or scans in GetImageHandler for jpeg"));
+                    else
+                    {
+                        try
+                        {
+                            byte[] jpeg = new byte[cachedJpegHeaderColor.Length - 2 + scans.Length];
+                            Array.Copy(cachedJpegHeaderColor, 2, jpeg, 0, cachedJpegHeaderColor.Length - 2);
+                            Array.Copy(scans, 0, jpeg, cachedJpegHeaderColor.Length - 2, scans.Length);
+
+                            // Create Bitmap from jpeg and scale (jpegs from Fluke are half-width)
+                            Bitmap obmp = new Bitmap(new MemoryStream(jpeg));
+                            Bitmap bmp = new Bitmap(imageType.Width, imageType.Height, PixelFormat.Format24bppRgb);
+                            Graphics g = Graphics.FromImage(bmp);
+                            g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.Bilinear;
+                            g.DrawImage(obmp, 0, 0, imageType.Width, imageType.Height);
+                            obmp.Dispose();
+                            g.Dispose();
+
+                            if (bmp.Width != imageType.Width || bmp.Height != imageType.Height ||
+                                    bmp.PixelFormat != PixelFormat.Format24bppRgb)
+                                throw new ScribblerDataException("Bitmap from JPEG had wrong size or format");
+
+                            // Copy frame
+                            //Console.WriteLine("Copying frame...");
+                            BitmapData bitmapData = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height),
+                                System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+                            responseData = new byte[imageType.Width * imageType.Height * 3];
+                            System.Runtime.InteropServices.Marshal.Copy(
+                                bitmapData.Scan0, responseData, 0, imageType.Width * imageType.Height * 3);
+                            bmp.UnlockBits(bitmapData);
+                            //Console.WriteLine("JPEG done");
+                        }
+                        catch (Exception e)
+                        {
+                            fault = RSUtils.FaultOfException(e);
+                        }
+
+                    }
+                }
+            }
+            else if (get.Body.ImageType.Equals(MyroImageType.JpegGray.Guid) ||
+                get.Body.ImageType.Equals(MyroImageType.JpegGrayFast.Guid))
+            {
+                imageType = MyroImageType.JpegGray;
+
+                // Get Header
+                if (cachedJpegHeaderGray == null)
+                {
+                    // NOTE: Hack here, in ScribblerComm.SendCommand, if the command is to
+                    // get a JPEG header, it will get the header length from the first two
+                    // bytes from the serial port.
+                    yield return Arbiter.Choice(_scribblerComPortPost(new ScribblerCommand(
+                        ScribblerHelper.Commands.GET_JPEG_GRAY_HEADER)),
+                        delegate(ScribblerResponse r) { cachedJpegHeaderGray = r.Data; },
+                        delegate(Fault f) { fault = f; });
+                    //if (fault == null)
+                    //    Console.WriteLine("JPEG: header is " + cachedJpegHeaderGray.Length + " bytes");
+                }
+
+                // Get scans
+                byte[] scans = null;
+                if (fault == null)
+                {
+                    byte reliable = get.Body.ImageType.Equals(MyroImageType.JpegGray.Guid) ? (byte)1 : (byte)0;
+                    yield return Arbiter.Choice(_scribblerComPortPost(new ScribblerCommand(
+                        ScribblerHelper.Commands.GET_JPEG_GRAY_SCAN, reliable) { EndMarker1 = 0xff, EndMarker2 = 0xd9 }),
+                        delegate(ScribblerResponse r) { scans = r.Data; },
+                        delegate(Fault f) { fault = f; });
+                }
+                //if (fault == null)
+                //    Console.WriteLine("JPEG: scans is " + scans.Length + " bytes");
+
+                // Decode JPEG
+                if (fault == null)
+                {
+                    if (cachedJpegHeaderGray == null || scans == null)
+                        fault = RSUtils.FaultOfException(new ScribblerDataException("Had null header or scans in GetImageHandler for jpeg"));
+                    else
+                    {
+                        try
+                        {
+                            byte[] jpeg = new byte[cachedJpegHeaderGray.Length - 2 + scans.Length];
+                            Array.Copy(cachedJpegHeaderGray, 2, jpeg, 0, cachedJpegHeaderGray.Length - 2);
+                            Array.Copy(scans, 0, jpeg, cachedJpegHeaderGray.Length - 2, scans.Length);
+
+                            // Create Bitmap from jpeg and scale (jpegs from Fluke are half-width)
+                            Bitmap obmp = new Bitmap(new MemoryStream(jpeg));
+                            Bitmap bmp = new Bitmap(imageType.Width, imageType.Height, PixelFormat.Format24bppRgb);
+                            Graphics g = Graphics.FromImage(bmp);
+                            g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.Bilinear;
+                            g.DrawImage(obmp, 0, 0, imageType.Width, imageType.Height);
+                            obmp.Dispose();
+                            g.Dispose();
+
+                            if (bmp.Width != imageType.Width || bmp.Height != imageType.Height ||
+                                    bmp.PixelFormat != PixelFormat.Format24bppRgb)
+                                throw new ScribblerDataException("Bitmap from JPEG had wrong size or format");
+
+                            // Copy frame
+                            BitmapData bitmapData = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height),
+                                System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+                            responseData = new byte[imageType.Width * imageType.Height * 3];
+                            System.Runtime.InteropServices.Marshal.Copy(
+                                bitmapData.Scan0, responseData, 0, imageType.Width * imageType.Height * 3);
+                            bmp.UnlockBits(bitmapData);
+                        }
+                        catch (Exception e)
+                        {
+                            fault = RSUtils.FaultOfException(e);
+                        }
+
+                    }
+                }
+            }
+            else
+            {
+                fault = RSUtils.FaultOfException(
+                        new ArgumentException("Invalid image type: " + get.Body.ImageType, "ImageType"));
+            }
+
+            // Send the image response
+            if (fault == null)
+            {
+                if (responseData != null && imageType != null)
+                    get.ResponsePort.Post(new ImageResponse()
+                        {
+                            Width = imageType.Width,
+                            Height = imageType.Height,
+                            Timestamp = DateTime.Now,
+                            Data = responseData
+                        });
+                else
+                    get.ResponsePort.Post(RSUtils.FaultOfException(new Exception("Internal error: in ScribblerBase.GetImageHandler")));
+            }
+            else
+                get.ResponsePort.Post(fault);
+
+            yield break;
+        }
+
+        public IEnumerator<ITask> GetWindowHandler(GetWindow get)
+        {
+            if (!_state.Connected)
+            {
+                get.ResponsePort.Post(new Fault() { Reason = new ReasonText[] { new ReasonText() { Value = "Not connected" } } });
+                yield break;
+            }
+
+            Fault fault = null;
+            yield return Arbiter.Choice(
+                _scribblerComPortPost(new ScribblerCommand(
+                    ScribblerHelper.Commands.SET_WINDOW,
+                    new byte[] {
+                        get.Body.Window,
+                        get.Body.XLow,
+                        get.Body.YLow,
+                        get.Body.XHigh,
+                        get.Body.YHigh,
+                        get.Body.XStep,
+                        get.Body.YStep },
+                        false, 0)),
+                    delegate(ScribblerResponse r) { },
+                    delegate(Fault f) { fault = f; });
+
+            int width = ((int)get.Body.XHigh - (int)get.Body.XLow) / get.Body.XStep + 1,
+                height = ((int)get.Body.YHigh - (int)get.Body.YLow) / get.Body.YStep + 1,
+                size = width * height;
+            if (fault == null)
+                yield return Arbiter.Choice(
+                    _scribblerComPortPost(new ScribblerCommand(
+                        ScribblerHelper.Commands.GET_WINDOW,
+                        new byte[] { get.Body.Window },
+                        false,
+                        size)),
+                    delegate(ScribblerResponse r)
+                    {
+                        get.ResponsePort.Post(new ImageResponse()
+                        {
+                            Width = width,
+                            Height = height,
+                            Timestamp = DateTime.Now,
+                            Data = r.Data
+                        });
+                    },
+                    delegate(Fault f) { fault = f; });
+
+            if (fault != null)
+                get.ResponsePort.Post(fault);
+
+            yield break;
+
+        }
+
+        public IEnumerator<ITask> GetCamParamHandler(GetCamParam get)
+        {
+            if (!_state.Connected)
+            {
+                get.ResponsePort.Post(new Fault() { Reason = new ReasonText[] { new ReasonText() { Value = "Not connected" } } });
+                yield break;
+            }
+
+            yield return Arbiter.Choice(
+                _scribblerComPortPost(new ScribblerCommand(
+                    ScribblerHelper.Commands.GET_CAM_PARAM,
+                    get.Body.Value)),
+                delegate(ScribblerResponse r) { get.ResponsePort.Post(new ByteBody(r.Data[0])); },
+                delegate(Fault f) { get.ResponsePort.Post(f); });
+            yield break;
+        }
+
+        public IEnumerator<ITask> SetCamParamHandler(SetCamParam set)
+        {
+            if (!_state.Connected)
+            {
+                set.ResponsePort.Post(new Fault() { Reason = new ReasonText[] { new ReasonText() { Value = "Not connected" } } });
+                yield break;
+            }
+
+            yield return Arbiter.Choice(
+                _scribblerComPortPost(new ScribblerCommand(
+                    ScribblerHelper.Commands.SET_CAM_PARAM,
+                    set.Body.Addr,
+                    set.Body.Value)),
+                delegate(ScribblerResponse r) { set.ResponsePort.Post(DefaultUpdateResponseType.Instance); },
+                delegate(Fault f) { set.ResponsePort.Post(f); });
+            yield break;
+        }
 
         /// <summary>
         /// Update state after recieving return data from robot
@@ -919,250 +1308,230 @@ namespace Myro.Services.Scribbler.ScribblerBase
         /// <summary>
         /// Http Post Handler.  Handles http form inputs
         /// </summary>
-        [ServiceHandler(ServiceHandlerBehavior.Concurrent)]
+        //[ServiceHandler(ServiceHandlerBehavior.Concurrent)]
         public IEnumerator<ITask> HttpPostHandler(HttpPost httpPost)
         {
             // Use helper to read form data
-            ReadFormData readForm = new ReadFormData(httpPost.Body.Context);
+            ReadFormData readForm = new ReadFormData(httpPost);
             _httpUtilities.Post(readForm);
 
-            // Wait for result
-            Activate(Arbiter.Choice(readForm.ResultPort,
-                delegate(NameValueCollection parameters)
+            // Read form data
+            NameValueCollection parameters = null;
+            yield return Arbiter.Choice(readForm.ResultPort,
+                delegate(NameValueCollection p) { parameters = p; },
+                delegate(Exception e) { throw new Exception("Error reading form data", e); });
+
+            // Act on form data
+            if (!string.IsNullOrEmpty(parameters["Action"])
+                  && parameters["Action"] == "ScribblerConfig")
+            {
+                if (parameters["buttonOk"] == "Change" && _state.Connected)
                 {
-                    if (!string.IsNullOrEmpty(parameters["Action"])
-                          && parameters["Action"] == "ScribblerConfig")
-                    {
-                        if (parameters["buttonOk"] == "Change" && _state.Connected)
-                        {
-                            SetNameBody newname = new SetNameBody(parameters["Name"]);
-                            SetName newnamemessage = new SetName(newname);
-                            _mainPort.Post(newnamemessage);
-                            Activate(
-                                Arbiter.Choice(
-                                    Arbiter.Receive<DefaultUpdateResponseType>(false, newnamemessage.ResponsePort,
-                                        delegate(DefaultUpdateResponseType response)
-                                        {
-                                            HttpPostSuccess(httpPost);
-                                        }),
-                                    Arbiter.Receive<Fault>(false, newnamemessage.ResponsePort,
-                                        delegate(Fault f)
-                                        {
-                                            HttpPostFailure(httpPost, f.Reason[0].Value);
-                                        })
-                                )
-                            );
+                    SetNameBody newname = new SetNameBody(parameters["Name"]);
+                    SetName newnamemessage = new SetName(newname);
+                    _mainPort.PostUnknownType(newnamemessage);
+                    Activate(
+                        Arbiter.Choice(
+                            Arbiter.Receive<DefaultUpdateResponseType>(false, newnamemessage.ResponsePort,
+                                delegate(DefaultUpdateResponseType response)
+                                {
+                                    HttpPostSuccess(httpPost);
+                                }),
+                            Arbiter.Receive<Fault>(false, newnamemessage.ResponsePort,
+                                delegate(Fault f)
+                                {
+                                    HttpPostFailure(httpPost, f.Reason[0].Value);
+                                })
+                        )
+                    );
 
-                        }
-                        else if (parameters["buttonOk"] == "Connect" && _state.Connected)
-                        {
-                            //close down this connection to make a new connection below
-
-                            PollTimer.Close();
-
-                            System.Threading.Thread.Sleep(100);
-
-                            _scribblerCom.Close();
-
-                            _state.Connected = false;
-                        }
-
-                        if (parameters["buttonOk"] == "Connect" && !_state.Connected)
-                        {
-                            int port = 0;
-                            int.TryParse(parameters["ComPort"], out port);
-                            string name = parameters["Name"];
-                            if (!string.IsNullOrEmpty(name) && name.Length > 8)
-                                name = name.Substring(0, 8);
-
-                            _state.ComPort = port;
-                            _state.RobotName = name;
-
-                            //open Scribbler Communications port
-                            if (ConnectToScribbler())
-                            {
-                                // Listen for a single Serial port request with an acknowledgement
-                                Activate(Arbiter.ReceiveWithIterator<SendScribblerCommand>(false, _scribblerComPort, SendScribblerCommandHandler));
-
-                                PollTimer = new System.Timers.Timer();
-                                PollTimer.Interval = TimerDelay;
-                                PollTimer.AutoReset = true;
-                                PollTimer.Elapsed += new System.Timers.ElapsedEventHandler(PollTimer_Elapsed);
-                                PollTimer.Start();
-
-                                //play startup tone
-                                PlayToneBody startTone = new PlayToneBody(200, 1000, 2000);
-                                PlayTone playToneMessage = new PlayTone(startTone);
-                                _mainPort.Post(playToneMessage);
-
-                                Activate(
-                                    Arbiter.Choice(
-                                        Arbiter.Receive<DefaultUpdateResponseType>(false, playToneMessage.ResponsePort,
-                                            delegate(DefaultUpdateResponseType response)
-                                            {
-                                                HttpPostSuccess(httpPost);
-                                            }),
-                                        Arbiter.Receive<Fault>(false, playToneMessage.ResponsePort,
-                                            delegate(Fault f)
-                                            {
-                                                HttpPostFailure(httpPost, f.Reason[0].Value);
-                                            })
-                                    )
-                                );
-                            }
-                            else
-                                HttpPostFailure(httpPost, "Connection to Scribbler failed");
-                        }
-                    }
-                    else if (!string.IsNullOrEmpty(parameters["Action"])
-                          && parameters["Action"] == "ScribblerSensors")
-                    {
-                        if (parameters["buttonOk"] == "Poll" && _state.Connected)
-                        {
-                            ScribblerCommand cmd = new ScribblerCommand((byte)ScribblerHelper.Commands.GET_ALL);
-                            SendScribblerCommand sendcmd = new SendScribblerCommand(cmd);
-                            _scribblerComPort.Post(sendcmd);
-                            Activate(
-                                Arbiter.Choice(
-                                    Arbiter.Receive<ScribblerResponse>(false, sendcmd.ResponsePort,
-                                        delegate(ScribblerResponse response)
-                                        {
-                                            HttpPostSuccess(httpPost);
-                                        }),
-                                    Arbiter.Receive<Fault>(false, sendcmd.ResponsePort,
-                                        delegate(Fault f)
-                                        {
-                                            HttpPostFailure(httpPost, f.Reason[0].Value);
-                                        })
-                                )
-                            );
-                        }
-                    }
-                    else if (!string.IsNullOrEmpty(parameters["Action"])
-                        && parameters["Action"] == "ScribblerMotors")
-                    {
-                        if (parameters["buttonOk"] == "Set" && _state.Connected)
-                        {
-                            int left = _state.MotorLeft;
-                            int right = _state.MotorRight;
-                            int.TryParse(parameters["LeftMotor"], out left);
-                            int.TryParse(parameters["RightMotor"], out right);
-
-                            SetMotorsBody setMotorsBody = new SetMotorsBody(left, right);
-                            SetMotors setMotorsRequest = new SetMotors(setMotorsBody);
-
-                            _mainPort.Post(setMotorsRequest);
-
-                            Activate(
-                                Arbiter.Choice(
-                                    Arbiter.Receive<DefaultUpdateResponseType>(false, setMotorsRequest.ResponsePort,
-                                        delegate(DefaultUpdateResponseType response)
-                                        {
-                                            HttpPostSuccess(httpPost);
-                                        }),
-                                    Arbiter.Receive<Fault>(false, setMotorsRequest.ResponsePort,
-                                        delegate(Fault f)
-                                        {
-                                            HttpPostFailure(httpPost, f.Reason[0].Value);
-                                        })
-                                )
-                            );
-                        }
-                        else if (parameters["buttonOk"] == "All Stop" && _state.Connected)
-                        {
-                            SetMotorsBody setMotorsBody = new SetMotorsBody(100, 100);
-                            SetMotors setMotorsRequest = new SetMotors(setMotorsBody);
-
-                            _mainPort.Post(setMotorsRequest);
-
-                            Activate(
-                                Arbiter.Choice(
-                                    Arbiter.Receive<DefaultUpdateResponseType>(false, setMotorsRequest.ResponsePort,
-                                        delegate(DefaultUpdateResponseType response)
-                                        {
-                                            HttpPostSuccess(httpPost);
-                                        }),
-                                    Arbiter.Receive<Fault>(false, setMotorsRequest.ResponsePort,
-                                        delegate(Fault f)
-                                        {
-                                            HttpPostFailure(httpPost, f.Reason[0].Value);
-                                        })
-                                )
-                            );
-                        }
-                    }
-                    else if (!string.IsNullOrEmpty(parameters["Action"])
-                        && parameters["Action"] == "ScribblerLEDs")
-                    {
-                        if (parameters["buttonOk"] == "Set" && _state.Connected)
-                        {
-                            bool left = ((parameters["LeftLED"] ?? "off") == "on");
-                            bool center = ((parameters["CenterLED"] ?? "off") == "on");
-                            bool right = ((parameters["RightLED"] ?? "off") == "on");
-
-                            SetAllLedsBody leds = new SetAllLedsBody(left, center, right);
-                            SetAllLEDs setAllLeds = new SetAllLEDs(leds);
-                            _mainPort.Post(setAllLeds);
-
-                            Activate(
-                                Arbiter.Choice(
-                                    Arbiter.Receive<DefaultUpdateResponseType>(false, setAllLeds.ResponsePort,
-                                        delegate(DefaultUpdateResponseType response)
-                                        {
-                                            HttpPostSuccess(httpPost);
-                                        }),
-                                    Arbiter.Receive<Fault>(false, setAllLeds.ResponsePort,
-                                        delegate(Fault f)
-                                        {
-                                            HttpPostFailure(httpPost, f.Reason[0].Value);
-                                        })
-                                )
-                            );
-
-                        }
-                    }
-                    else if (!string.IsNullOrEmpty(parameters["Action"])
-                   && parameters["Action"] == "ScribblerSpeaker")
-                    {
-                        if (parameters["buttonOk"] == "Play" && _state.Connected)
-                        {
-                            int tone1 = 0;
-                            int tone2 = 0;
-                            int duration = 0;
-                            int.TryParse(parameters["Tone1"], out tone1);
-                            int.TryParse(parameters["Tone2"], out tone2);
-                            int.TryParse(parameters["Duration"], out duration);
-
-                            PlayToneBody playTone = new PlayToneBody(duration, tone1, tone2);
-                            PlayTone playToneMessage = new PlayTone(playTone);
-                            _mainPort.Post(playToneMessage);
-
-                            Activate(
-                                Arbiter.Choice(
-                                    Arbiter.Receive<DefaultUpdateResponseType>(false, playToneMessage.ResponsePort,
-                                        delegate(DefaultUpdateResponseType response)
-                                        {
-                                            HttpPostSuccess(httpPost);
-                                        }),
-                                    Arbiter.Receive<Fault>(false, playToneMessage.ResponsePort,
-                                        delegate(Fault f)
-                                        {
-                                            HttpPostFailure(httpPost, f.Reason[0].Value);
-                                        })
-                                )
-                            );
-                        }
-                    }
-                    else
-                    {
-                        HttpPostFailure(httpPost, "Unknown Http Post");
-                    }
-                },
-                delegate(Exception Failure)
+                }
+                else if (parameters["buttonOk"] == "Connect" && _state.Connected)
                 {
-                    LogError(Failure.Message);
-                })
-            );
+                    //close down this connection to make a new connection below
+
+                    PollTimer.Close();
+
+                    System.Threading.Thread.Sleep(100);
+
+                    _scribblerCom.Close();
+
+                    _state.Connected = false;
+
+                    //HttpPostSuccess(httpPost);
+                }
+
+                if (parameters["buttonOk"] == "Connect" && !_state.Connected)
+                {
+                    int port = 0;
+                    int.TryParse(parameters["ComPort"], out port);
+                    string name = parameters["Name"];
+                    if (!string.IsNullOrEmpty(name) && name.Length > 8)
+                        name = name.Substring(0, 8);
+
+                    _state.ComPort = port;
+                    _state.RobotName = name;
+
+                    //open Scribbler Communications port
+                    LogInfo("connecting to scribbler...");
+                    Reconnect rec = new Reconnect();
+                    _mainPort.PostUnknownType(rec);
+                    yield return Arbiter.Choice(rec.ResponsePort,
+                        delegate(DefaultUpdateResponseType r)
+                        {
+                            LogInfo("connected, sending http reply");
+                            HttpPostSuccess(httpPost);
+                            LogInfo("http reply sent");
+                        },
+                        delegate(Fault f)
+                        {
+                            httpPost.ResponsePort.Post(f);
+                        });
+                }
+            }
+            else if (!string.IsNullOrEmpty(parameters["Action"])
+                  && parameters["Action"] == "ScribblerSensors")
+            {
+                if (parameters["buttonOk"] == "Poll" && _state.Connected)
+                {
+                    ScribblerCommand cmd = new ScribblerCommand(ScribblerHelper.Commands.GET_ALL);
+                    SendScribblerCommand sendcmd = new SendScribblerCommand(cmd);
+                    _scribblerComPort.Post(sendcmd);
+                    Activate(
+                        Arbiter.Choice(
+                            Arbiter.Receive<ScribblerResponse>(false, sendcmd.ResponsePort,
+                                delegate(ScribblerResponse response)
+                                {
+                                    HttpPostSuccess(httpPost);
+                                }),
+                            Arbiter.Receive<Fault>(false, sendcmd.ResponsePort,
+                                delegate(Fault f)
+                                {
+                                    HttpPostFailure(httpPost, f.Reason[0].Value);
+                                })
+                        )
+                    );
+                }
+            }
+            else if (!string.IsNullOrEmpty(parameters["Action"])
+                && parameters["Action"] == "ScribblerMotors")
+            {
+                if (parameters["buttonOk"] == "Set" && _state.Connected)
+                {
+                    int left = _state.MotorLeft;
+                    int right = _state.MotorRight;
+                    int.TryParse(parameters["LeftMotor"], out left);
+                    int.TryParse(parameters["RightMotor"], out right);
+
+                    SetMotorsBody setMotorsBody = new SetMotorsBody(left, right);
+                    SetMotors setMotorsRequest = new SetMotors(setMotorsBody);
+
+                    _mainPort.PostUnknownType(setMotorsRequest);
+
+                    Activate(
+                        Arbiter.Choice(
+                            Arbiter.Receive<DefaultUpdateResponseType>(false, setMotorsRequest.ResponsePort,
+                                delegate(DefaultUpdateResponseType response)
+                                {
+                                    HttpPostSuccess(httpPost);
+                                }),
+                            Arbiter.Receive<Fault>(false, setMotorsRequest.ResponsePort,
+                                delegate(Fault f)
+                                {
+                                    HttpPostFailure(httpPost, f.Reason[0].Value);
+                                })
+                        )
+                    );
+                }
+                else if (parameters["buttonOk"] == "All Stop" && _state.Connected)
+                {
+                    SetMotorsBody setMotorsBody = new SetMotorsBody(100, 100);
+                    SetMotors setMotorsRequest = new SetMotors(setMotorsBody);
+
+                    _mainPort.PostUnknownType(setMotorsRequest);
+
+                    Activate(
+                        Arbiter.Choice(
+                            Arbiter.Receive<DefaultUpdateResponseType>(false, setMotorsRequest.ResponsePort,
+                                delegate(DefaultUpdateResponseType response)
+                                {
+                                    HttpPostSuccess(httpPost);
+                                }),
+                            Arbiter.Receive<Fault>(false, setMotorsRequest.ResponsePort,
+                                delegate(Fault f)
+                                {
+                                    HttpPostFailure(httpPost, f.Reason[0].Value);
+                                })
+                        )
+                    );
+                }
+            }
+            else if (!string.IsNullOrEmpty(parameters["Action"])
+                && parameters["Action"] == "ScribblerLEDs")
+            {
+                if (parameters["buttonOk"] == "Set" && _state.Connected)
+                {
+                    bool left = ((parameters["LeftLED"] ?? "off") == "on");
+                    bool center = ((parameters["CenterLED"] ?? "off") == "on");
+                    bool right = ((parameters["RightLED"] ?? "off") == "on");
+
+                    SetAllLedsBody leds = new SetAllLedsBody(left, center, right);
+                    SetAllLEDs setAllLeds = new SetAllLEDs(leds);
+                    _mainPort.PostUnknownType(setAllLeds);
+
+                    Activate(
+                        Arbiter.Choice(
+                            Arbiter.Receive<DefaultUpdateResponseType>(false, setAllLeds.ResponsePort,
+                                delegate(DefaultUpdateResponseType response)
+                                {
+                                    HttpPostSuccess(httpPost);
+                                }),
+                            Arbiter.Receive<Fault>(false, setAllLeds.ResponsePort,
+                                delegate(Fault f)
+                                {
+                                    HttpPostFailure(httpPost, f.Reason[0].Value);
+                                })
+                        )
+                    );
+
+                }
+            }
+            else if (!string.IsNullOrEmpty(parameters["Action"])
+                && parameters["Action"] == "ScribblerSpeaker")
+            {
+                if (parameters["buttonOk"] == "Play" && _state.Connected)
+                {
+                    int tone1 = 0;
+                    int tone2 = 0;
+                    int duration = 0;
+                    int.TryParse(parameters["Tone1"], out tone1);
+                    int.TryParse(parameters["Tone2"], out tone2);
+                    int.TryParse(parameters["Duration"], out duration);
+
+                    PlayToneBody playTone = new PlayToneBody(duration, tone1, tone2);
+                    PlayTone playToneMessage = new PlayTone(playTone);
+                    _mainPort.PostUnknownType(playToneMessage);
+
+                    Activate(
+                        Arbiter.Choice(
+                            Arbiter.Receive<DefaultUpdateResponseType>(false, playToneMessage.ResponsePort,
+                                delegate(DefaultUpdateResponseType response)
+                                {
+                                    HttpPostSuccess(httpPost);
+                                }),
+                            Arbiter.Receive<Fault>(false, playToneMessage.ResponsePort,
+                                delegate(Fault f)
+                                {
+                                    HttpPostFailure(httpPost, f.Reason[0].Value);
+                                })
+                        )
+                    );
+                }
+            }
+            else
+            {
+                HttpPostFailure(httpPost, "Unknown Http Post");
+            }
             yield break;
         }
 
@@ -1182,9 +1551,9 @@ namespace Myro.Services.Scribbler.ScribblerBase
         /// </summary>
         private void HttpPostFailure(HttpPost httpPost, string faultMessage)
         {
-            HttpResponseType rsp =
-                new HttpResponseType(HttpStatusCode.ExpectationFailed, faultMessage);
-            httpPost.ResponsePort.Post(rsp);
+            //HttpResponseType rsp =
+            //    new HttpResponseType(HttpStatusCode.OK, RSUtils.FaultOfException(new Exception(faultMessage)));
+            httpPost.ResponsePort.Post(new Fault() { Reason = new ReasonText[] { new ReasonText() { Value = faultMessage } } });
         }
 
 
@@ -1194,8 +1563,20 @@ namespace Myro.Services.Scribbler.ScribblerBase
         [ServiceHandler(ServiceHandlerBehavior.Exclusive)]
         public virtual IEnumerator<ITask> ReplaceHandler(Replace replace)
         {
+            //if (_state.ComPort != replace.Body.ComPort)
+            //{
+            //    _state = replace.Body;
+            //    var ePort = new Port<Exception>();
+            //    Dispatcher.AddCausality(new Causality("connect to scribbler", ePort));
+            //    Activate(ePort.Receive(delegate(Exception e) { replace.ResponsePort.Post(RSUtils.FaultOfException(e)); }));
+            //    yield return new IterativeTask(ConnectToScribbler);
+            //    replace.ResponsePort.Post(DefaultReplaceResponseType.Instance);
+            //}
+            //else
+            //{
             _state = replace.Body;
             replace.ResponsePort.Post(DefaultReplaceResponseType.Instance);
+            //}
             yield break;
         }
 

@@ -1,4 +1,6 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,6 +17,9 @@ using System.IO;
 using System.IO.Pipes;
 using System.Threading;
 using Microsoft.Ccr.Core;
+using System.Reflection;
+
+using Myro.Utilities;
 
 using IronPython.Hosting;
 using IronPython.Compiler;
@@ -26,8 +31,18 @@ namespace Myro.GUI.WPFControls
     /// </summary>
     public partial class CommandWindow : UserControl
     {
+        /// <summary>
+        /// This event is raised when a Python command begins to execute.
+        /// The GUI uses this event to set the "busy" status indicator.
+        /// </summary>
         public event EventHandler PythonExecuting;
+        /// <summary>
+        /// This event is raised when a Python command finishes executing.
+        /// The GUI uses this event to set the "busy" status indicator.
+        /// </summary>
         public event EventHandler PythonFinished;
+
+        #region Private variables
 
         PythonEngine pe;
         Stream stdout;
@@ -37,7 +52,12 @@ namespace Myro.GUI.WPFControls
         Thread readThreadOut;
         Thread readThreadErr;
 
-        Port<string> commandQueue;
+        struct Command
+        {
+            public bool IsInteractive;
+            public string CommandString;
+        }
+        Port<Command> commandQueue;
         DispatcherQueue commandDispatcherQueue;
 
         Paragraph paragraph;
@@ -46,14 +66,28 @@ namespace Myro.GUI.WPFControls
         LinkedList<string> commandHistory = new LinkedList<string>();
         LinkedListNode<string> currentHistPos = null;
 
+        #endregion
+
+        /// <summary>
+        /// The color of normal text in the history buffer
+        /// </summary>
         public static readonly Color TextColor = Colors.Black;
+        /// <summary>
+        /// The color of error text in the history buffer
+        /// </summary>
         public static readonly Color ErrColor = Colors.Crimson;
 
+        /// <summary>
+        /// Constructor.  You must call Dispose on this class on exit.
+        /// </summary>
         public CommandWindow()
         {
             InitializeComponent();
         }
 
+        /// <summary>
+        /// This must be called to stop threads and the DispatcherQueue.
+        /// </summary>
         public void Dispose()
         {
             if (stdout != null)
@@ -71,6 +105,10 @@ namespace Myro.GUI.WPFControls
                 commandDispatcherQueue.Dispose();
         }
 
+        /// <summary>
+        /// Initialize the control and start the Python engine.  This is not in the constructor or
+        /// OnLoaded because it breaks the VS designer.  The main GUI window calls this.
+        /// </summary>
         public void StartScripting()
         {
             pe = new PythonEngine();
@@ -78,6 +116,7 @@ namespace Myro.GUI.WPFControls
             //pe.Sys.path.Add(Myro.Utilities.Params.PythonPath);
             //pe.Sys.path.Add("C:\\Users\\t-richr\\Myro-dev\\richard-dev-2\\Frontend\\Python");
             //pe.Import("site");
+            pe.Sys.path.Add(System.IO.Path.GetDirectoryName(Assembly.GetEntryAssembly().Location));
 
             var s = new AnonymousPipeServerStream(PipeDirection.In);
             stdout = s;
@@ -91,12 +130,17 @@ namespace Myro.GUI.WPFControls
             readThreadErr = new Thread(new ThreadStart(delegate() { readLoop(stderr, Colors.Crimson); }));
             readThreadErr.Start();
 
-            commandQueue = new Port<string>();
+            commandQueue = new Port<Command>();
             commandDispatcherQueue = new DispatcherQueue("Python command queue", new Dispatcher(1, "Python command queue"));
             Arbiter.Activate(commandDispatcherQueue, Arbiter.Receive(true, commandQueue, commandHandler));
 
             pe.SetStandardOutput(stdoutpipe);
             pe.SetStandardError(stderrpipe);
+            //Console.SetOut(new StreamWriter(stdoutpipe));
+            //Console.SetError(new StreamWriter(stderrpipe));
+
+            //Console.OpenStandardOutput();
+            //Console.OpenStandardError();
 
             historyBlock.Document.PageWidth = historyBlock.ViewportWidth;
             historyBlock.Document.Blocks.Clear();
@@ -105,6 +149,11 @@ namespace Myro.GUI.WPFControls
             historyBlock.IsEnabled = true;
         }
 
+        /// <summary>
+        /// Add text to the history buffer, with a certain color.
+        /// </summary>
+        /// <param name="text"></param>
+        /// <param name="color"></param>
         public void LogText(string text, Color color)
         {
             int toTrim;
@@ -136,38 +185,61 @@ namespace Myro.GUI.WPFControls
                     toAdd = text;
                 lastNewlineTrimmed = false;
             }
-            Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal, new ThreadStart(
+            Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new ThreadStart(
                 delegate() { paragraph.Inlines.Add(new Run() { Foreground = new SolidColorBrush(color), Text = toAdd }); }));
         }
 
+        /// <summary>
+        /// Add text to the history buffer with the default color (black)
+        /// </summary>
+        /// <param name="text"></param>
         public void LogText(string text)
         {
             LogText(text, TextColor);
         }
 
+        /// <summary>
+        /// Add text to the history buffer with the default error color (red)
+        /// </summary>
+        /// <param name="text"></param>
         public void LogError(string text)
         {
             LogText(text, ErrColor);
         }
 
-        public void ExecuteCommand(string command)
+        /// <summary>
+        /// Execute a Python command in "interactive" mode, meaning the result of
+        /// the command will appear in the history buffer as well as the command
+        /// itself (prepended with "> ").
+        /// </summary>
+        /// <param name="command"></param>
+        public void ExecuteCommandInteractive(string command)
         {
             LogText("> " + command + "\n");
-            ExecuteCommandSilently(command);
+            commandQueue.Post(new Command() { IsInteractive = true, CommandString = command });
         }
 
+        /// <summary>
+        /// Execute a Python command silently, that is, it will not be printed
+        /// in the history buffer, and the result will be ignored instead of
+        /// printed.
+        /// </summary>
+        /// <param name="command"></param>
         public void ExecuteCommandSilently(string command)
         {
-            commandQueue.Post(command);
+            commandQueue.Post(new Command() { IsInteractive = false, CommandString = command });
         }
 
+        /// <summary>
+        /// Handler for text input in the command line.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void OnTextInput(object sender, TextCompositionEventArgs e)
         {
-            //foreach (char c in e.Text)
-            //    Console.WriteLine((byte)c);
             if (e.Text.EndsWith("\n") || e.Text.EndsWith("\r"))
             {
-                ExecuteCommand(commandLineBox.Text);
+                ExecuteCommandInteractive(commandLineBox.Text);
 
                 // If the user went up in the history and came back down to the in-progress command,
                 // update the in-progress command in the history, otherwise, add a new history item.
@@ -180,11 +252,34 @@ namespace Myro.GUI.WPFControls
             }
         }
 
+        /// <summary>
+        /// Passes typing in the history buffer to the command line box, and transferrs
+        /// focus as well.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void historyBlock_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            commandLineBox.Focus();
+            commandLineBox.RaiseEvent(e);
+        }
+
+        /// <summary>
+        /// Scrolls the history buffer to the end when it is modified.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void OnHistoryChanged(object sender, TextChangedEventArgs e)
         {
             historyBlock.ScrollToEnd();
         }
 
+        /// <summary>
+        /// Entry point for the threads that read from stdout and stderr of
+        /// the Python engine.
+        /// </summary>
+        /// <param name="stream"></param>
+        /// <param name="color"></param>
         private void readLoop(Stream stream, Color color)
         {
             bool shouldStay = true;
@@ -200,38 +295,57 @@ namespace Myro.GUI.WPFControls
             }
         }
 
-        private void commandHandler(string command)
+        /// <summary>
+        /// Handler for the Command port.  ExecuteCommandInteractive and ExecuteCommandSilently
+        /// post commands to this port.
+        /// </summary>
+        /// <param name="cmd"></param>
+        private void commandHandler(Command cmd)
         {
             PythonExecuting.Invoke(this, new EventArgs());
+            Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal, new ThreadStart(
+                delegate() { commandLineBox.IsEnabled = false; }));
             try
             {
-                pe.Execute(command);
+                if (cmd.IsInteractive)
+                    pe.ExecuteToConsole(cmd.CommandString);
+                else
+                    pe.Execute(cmd.CommandString);
             }
             catch (Exception err)
             {
-                if (err.Message != null && err.Message.Length > 0)
-                    LogText(err.Message + "\n", ErrColor);
-                else
-                    LogText(err.ToString() + "\n", ErrColor);
+                LogText(Strings.FromExceptionMessage(err) + "\n", ErrColor);
             }
+            Dispatcher.Invoke(System.Windows.Threading.DispatcherPriority.Normal, new ThreadStart(
+                delegate() { commandLineBox.IsEnabled = true; commandLineBox.Focus(); }));
             PythonFinished.Invoke(this, new EventArgs());
         }
 
+        /// <summary>
+        /// This attempts to prevent the horizontal scroll bar from showing up
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void OnSizeChanged(object sender, SizeChangedEventArgs e)
         {
             historyBlock.Document.PageWidth = historyBlock.ViewportWidth;
         }
 
-        private void OnGotFocus(object sender, RoutedEventArgs e)
-        {
-            commandLineBox.Focus();
-        }
-
+        /// <summary>
+        /// This attempts to prevent the horizontal scroll bar from showing up
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void OnLayoutUpdated(object sender, EventArgs e)
         {
             historyBlock.Document.PageWidth = historyBlock.ViewportWidth;
         }
 
+        /// <summary>
+        /// Key handler for the command line box, for navigating history.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void OnKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Up)

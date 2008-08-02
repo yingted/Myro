@@ -1,3 +1,5 @@
+// Copyright (c) Microsoft Corporation.  All rights reserved.
+
 //------------------------------------------------------------------------------
 // Scribbler Stall Service
 //
@@ -35,8 +37,12 @@ namespace Myro.Services.Scribbler.StallSensor
     [Description("The Scribbler Stall Service")]
     [Contract(Contract.Identifier)]
     [AlternateContract(vector.Contract.Identifier)] //implementing the generic contract
-    public class StallService : vector.VectorService
+    public class StallService : vector.VectorServiceBase
     {
+
+        [ServicePort(AllowMultipleInstances = false)]
+        vector.VectorOperations _operationsPort = new vector.VectorOperations();
+        protected override vector.VectorOperations OperationsPort { get { return _operationsPort; } }
 
         [Partner("ScribblerBase",
             Contract = brick.Contract.Identifier,

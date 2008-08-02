@@ -1,4 +1,6 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,24 +25,11 @@ namespace Myro.Adapters
     /// This class is the main interface between the higher-level Myro API
     /// and the service adapters.
     /// 
-    /// This class deals with managing the "bank" of adapters at runtime.  It
-    /// parses the config file, creating AdapterSpec's for each Adapter
-    /// section, and plain ServiceInfoType's for each StartService section.
-    /// 
-    /// It subscribes to the DSS directory, watching for services to start
-    /// that match those from the config file, attaching adapters as soon as
-    /// they do start.  It can also automatically start the services from the
-    /// config file.
-    /// 
-    /// It also allows AdapterSpec's to be retrieved by name.
+    /// It allows AdapterSpec's to be retrieved by name.
     /// </summary>
     public class AdapterBank
     {
-        //protected List<ServiceInfoType> services = new List<ServiceInfoType>();
-        //protected List<string> manifests = new List<string>();
-        private Dictionary<string, AdapterSpecN> adapterNames = new Dictionary<string, AdapterSpecN>();
-        //protected Dictionary<string, AdapterSpec> adapterServices;
-        //ManualResetEvent adaptersReady = new ManualResetEvent(false);
+        private Dictionary<string, AdapterTokenN> adapterNames = new Dictionary<string, AdapterTokenN>();
         
         /// <summary>
         /// This is the list of adapter factories that will be tried in order
@@ -50,29 +39,23 @@ namespace Myro.Adapters
         /// </summary>
         public List<IAdapterFactory> AdapterFactories { get; private set; }
 
+        /// <summary>
+        /// Call the constructor with the initial list of adapter factories.
+        /// You can add additional factories (for custom adapters) by appending
+        /// to the AdapterFactories property at runtime.
+        /// 
+        /// You must call Dispose() on exiting to clean up.
+        /// </summary>
+        /// <param name="adapterFactories"></param>
         public AdapterBank(List<IAdapterFactory> adapterFactories)
         {
             this.AdapterFactories = adapterFactories;
-
-            //readConfig(configFile);
-            //Console.WriteLine("Initializing DSS environment...");
-            //if (manifests.Count > 0)
-            //{
-            //    IEnumerable<string> manifestFullPaths =
-            //        from m in manifests
-            //        select "file://" + Path.GetFullPath(m);
-            //    foreach (var m in manifestFullPaths)
-            //        Console.WriteLine("Manifest: " + m);
-            //    DssEnvironment.Initialize(50000, 50001, manifestFullPaths.ToArray());
-            //}
-            //else
-            //    DssEnvironment.Initialize(50000, 50001);
-            //Console.WriteLine("DSS environment initialized");
-            //subscribeDirectory();
-            //if (autoStartServices)
-            //    startServices();
         }
 
+        /// <summary>
+        /// You must call this method on exiting.  It disposes each
+        /// adapter.
+        /// </summary>
         public void Dispose()
         {
             foreach (var a in adapterNames.Values)
@@ -84,23 +67,23 @@ namespace Myro.Adapters
         }
 
         /// <summary>
-        /// Return the AdapterSpec associated with the name, as specified in
-        /// the config file.  Throws UnknownAdapterNameException.
+        /// Return the AdapterSpec associated with the name.  This call will never fail.
+        /// Attempting to use the Adapter will fail if it cannot connect to the service.
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        public AdapterSpec<T> GetAdapterSpec<T>(string name) where T:IAdapter
+        public AdapterToken<T> GetAdapterSpec<T>(string name) where T:IAdapter
         {
             lock (this)
             {
                 try
                 {
-                    return (AdapterSpec<T>)adapterNames[name];
+                    return (AdapterToken<T>)adapterNames[name];
                 }
                 catch (KeyNotFoundException)
                 {
-                    AdapterSpec<T> adapterSpec = new AdapterSpec<T>(name, AdapterFactories);
-                    adapterNames.Add(name, (AdapterSpecN)adapterSpec);
+                    AdapterToken<T> adapterSpec = new AdapterToken<T>(name, AdapterFactories);
+                    adapterNames.Add(name, (AdapterTokenN)adapterSpec);
                     return adapterSpec;
                 }
             }
@@ -346,33 +329,5 @@ namespace Myro.Adapters
         //        return getChild(node, name, false);
         //    }
     }
-
-    #region Exception Definitions
-    ///// <summary>
-    ///// This exception is thrown when there is a problem with the content of
-    ///// the config file.  The exception will print a line containing the 
-    ///// reason for the exception.
-    ///// </summary>
-    //public class ConfigException : Exception
-    //{
-    //    public ConfigException(string reason)
-    //        : base(reason)
-    //    {
-    //        Console.WriteLine("*** Config Exception *** " + reason);
-    //    }
-    //}
-
-    ///// <summary>
-    ///// This exception is thrown if an unknown adapter is requested from the
-    ///// AdapterBank.
-    ///// </summary>
-    //public class UnknownAdapterNameException : Exception
-    //{
-    //    public UnknownAdapterNameException(string name)
-    //        : base("Unknown adapter name: \"" + name + "\"")
-    //    {
-    //    }
-    //}
-    #endregion
 
 }

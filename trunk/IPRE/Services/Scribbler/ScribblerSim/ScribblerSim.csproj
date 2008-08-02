@@ -11,7 +11,7 @@
     <AssemblyKeyContainerName>
     </AssemblyKeyContainerName>
     <AssemblyName>ScribblerSim</AssemblyName>
-    <RootNamespace>IPRE.ScribblerSim</RootNamespace>
+    <RootNamespace>Myro.Services.Scribbler.ScribblerSim</RootNamespace>
     <AssemblyOriginatorKeyFile>myroKey.snk</AssemblyOriginatorKeyFile>
     <DefaultClientScript>JScript</DefaultClientScript>
     <DefaultHTMLPageLayout>Grid</DefaultHTMLPageLayout>
@@ -53,14 +53,14 @@
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <OutputPath>..\..\..\..\..\..\..\Microsoft Robotics Dev Studio 2008\bin\</OutputPath>
+    <OutputPath>..\..\..\bin\</OutputPath>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
     <BaseAddress>285212672</BaseAddress>
     <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
     <ConfigurationOverrideFile>
     </ConfigurationOverrideFile>
     <DefineConstants>DEBUG;TRACE;INSTRUMENTED</DefineConstants>
-    <DocumentationFile>..\..\..\..\..\..\..\Microsoft Robotics Dev Studio 2008\bin\ScribblerSim.XML</DocumentationFile>
+    <DocumentationFile>..\..\..\bin\ScribblerSim.XML</DocumentationFile>
     <DebugSymbols>true</DebugSymbols>
     <FileAlignment>4096</FileAlignment>
     <NoStdLib>false</NoStdLib>
@@ -96,56 +96,42 @@
     <WarningLevel>1</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DssRuntime">
+    <Reference Include="Microsoft.Ccr.Core, Version=2.0.826.3, Culture=neutral, PublicKeyToken=d12f30389d94881d, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <Private>False</Private>
-      <HintPath>..\..\..\..\bin\DssRuntime.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Dss.Base, Version=2.0.826.3, Culture=neutral, PublicKeyToken=d12f30389d94881d, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="Microsoft.Dss.Runtime, Version=2.0.826.3, Culture=neutral, PublicKeyToken=d12f30389d94881d, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="mscorlib">
       <SpecificVersion>False</SpecificVersion>
       <Private>False</Private>
     </Reference>
-    <Reference Include="Ccr.Core">
+    <Reference Include="PhysicsEngine, Version=2.0.826.3, Culture=neutral, PublicKeyToken=d12f30389d94881d, processorArchitecture=x86">
       <SpecificVersion>False</SpecificVersion>
-      <Private>False</Private>
-      <HintPath>..\..\..\..\bin\Ccr.Core.dll</HintPath>
     </Reference>
-    <Reference Include="DssBase">
+    <Reference Include="RoboticsCommon, Version=2.0.826.3, Culture=neutral, PublicKeyToken=6f5a65c6ba7cb1d3, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <Private>False</Private>
-      <HintPath>..\..\..\..\bin\DssBase.dll</HintPath>
     </Reference>
-    <Reference Include="PhysicsEngine, Version=1.0.2470.14848, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=x86">
+    <Reference Include="SimulatedBumper.Y2006.M05.proxy, Version=2.0.826.3, Culture=neutral, PublicKeyToken=6f5a65c6ba7cb1d3, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <Private>False</Private>
     </Reference>
-    <Reference Include="RoboticsCommon, Version=1.0.250.1, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+    <Reference Include="SimulatedDifferentialDrive.2006.M06.proxy, Version=2.0.826.3, Culture=neutral, PublicKeyToken=6f5a65c6ba7cb1d3, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <Private>False</Private>
     </Reference>
-    <Reference Include="SimulatedBumper.Y2006.M05.proxy, Version=1.0.282.3, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+    <Reference Include="SimulatedWebcam.Y2006.M09.proxy, Version=2.0.826.3, Culture=neutral, PublicKeyToken=6f5a65c6ba7cb1d3, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <Private>False</Private>
     </Reference>
-    <Reference Include="SimulatedDifferentialDrive.2006.M06.proxy, Version=0.0.0.0, Culture=neutral, PublicKeyToken=923def1892b58c9b, processorArchitecture=MSIL">
+    <Reference Include="SimulationCommon, Version=2.0.826.3, Culture=neutral, PublicKeyToken=d12f30389d94881d, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <Private>False</Private>
     </Reference>
-    <Reference Include="SimulatedWebcam.Y2006.M09.proxy, Version=1.0.282.3, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+    <Reference Include="SimulationEngine, Version=2.0.826.3, Culture=neutral, PublicKeyToken=d12f30389d94881d, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <Private>False</Private>
     </Reference>
-    <Reference Include="SimulationCommon, Version=1.0.250.1, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+    <Reference Include="SimulationEngine.proxy, Version=2.0.826.3, Culture=neutral, PublicKeyToken=d12f30389d94881d, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="SimulationEngine, Version=1.0.250.1, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="SimulationEngine.proxy, Version=1.0.250.1, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <Private>False</Private>
     </Reference>
     <Reference Include="System">
       <SpecificVersion>False</SpecificVersion>
@@ -175,6 +161,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="myroKey.snk" />
+    <EmbeddedResource Include="Scribbler.bos" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Framework.2.0">
@@ -203,6 +190,6 @@
   <PropertyGroup>
     <PreBuildEvent>
     </PreBuildEvent>
-    <PostBuildEvent>"C:\Microsoft Robotics Dev Studio 2008\bin\DssProxy.exe" /dll:"$(TargetPath)" /proxyprojectpath:"$(ProjectDir)Proxy" /keyfile:"$(AssemblyOriginatorKeyFile)" $(ProxyDelaySign) $(CompactFrameworkProxyGen) /binpath:". " @(ReferencePath->'/referencepath:"%25(RootDir)%25(Directory) "', ' ')</PostBuildEvent>
+    <PostBuildEvent>"C:\Users\t-richr\Microsoft Robotics Dev Studio 2008\bin\DssProxy.exe" /dll:"$(TargetPath)" /proxyprojectpath:"$(ProjectDir)Proxy " /keyfile:"..\myroKey.snk" $(ProxyDelaySign) $(CompactFrameworkProxyGen) /binpath:". " @(ReferencePath->'/referencepath:"%25(RootDir)%25(Directory) "', ' ')</PostBuildEvent>
   </PropertyGroup>
 </Project>

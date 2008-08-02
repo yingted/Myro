@@ -1,4 +1,6 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -68,7 +70,7 @@ namespace Myro.Utilities
         /// <returns></returns>
         public static T ReceiveSync<T>(PortSet<T, Fault> port)
         {
-            return ReceiveSync(port, -1);
+            return ReceiveSync(port, Params.DefaultRecieveTimeout);
         }
 
         /// <summary>
@@ -94,7 +96,7 @@ namespace Myro.Utilities
         /// <returns></returns>
         public static T ReceiveSync<T>(DispatcherQueue taskQueue, PortSet<T, Fault> port)
         {
-            return ReceiveSync(taskQueue, port, -1);
+            return ReceiveSync(taskQueue, port, Params.DefaultRecieveTimeout);
         }
 
 
@@ -180,8 +182,7 @@ namespace Myro.Utilities
 
         /// <summary>
         /// This method searches for a primary or alternate contract of the
-        /// service that is present in the contracts list.  Requires a 
-        /// taskQueue to activate tasks on.  Throws NoContractFoundException
+        /// service that is present in the contracts list.  Throws NoContractFoundException
         /// if one cannot be found.
         /// </summary>
         /// <param name="taskQueue"></param>
@@ -298,17 +299,16 @@ namespace Myro.Utilities
     public class FaultReceivedException : Exception
     {
         public Fault Fault { get; private set; }
-        public FaultReceivedException(Fault fault)
+        public FaultReceivedException(Fault fault) : base(Strings.FromFault(fault))
         {
             Fault = fault;
             //Console.WriteLine("***" + this.ToString());
         }
-        public override string ToString()
-        {
-            return Strings.FromFault(Fault);
-        }
     }
 
+    /// <summary>
+    /// This class is used internally for encapsulating exceptions in Faults.
+    /// </summary>
     class CloneableException : ICloneable
     {
         public Exception Exception { get; private set; }

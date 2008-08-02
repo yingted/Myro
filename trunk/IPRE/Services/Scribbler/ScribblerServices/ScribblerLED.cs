@@ -1,4 +1,6 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation.  All rights reserved.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,8 +25,12 @@ namespace Myro.Services.Scribbler.LED
     [Description("The Scribbler LED service")]
     [Contract(Contract.Identifier)]
     [AlternateContract(vector.Contract.Identifier)]
-    class ScribblerLED : vector.VectorService
+    class ScribblerLED : vector.VectorServiceBase
     {
+        [ServicePort(AllowMultipleInstances = false)]
+        vector.VectorOperations _operationsPort = new vector.VectorOperations();
+        protected override vector.VectorOperations OperationsPort { get { return _operationsPort; } }
+
         [Partner("ScribblerBase",
             Contract = brick.Contract.Identifier,
             CreationPolicy = PartnerCreationPolicy.UseExistingOrCreate,
@@ -71,7 +77,12 @@ namespace Myro.Services.Scribbler.LED
                         else if (i == 4)
                         {
                             nResponses++;
-                            Activate(Arbiter.Choice(_scribblerPort.SetLEDBack(RSUtils.UnnormalizeDouble(_state.Get(4))),
+                            byte val =
+                                (_state.Get(4) <= 0.0) ?
+                                (byte)0 :
+                                (byte)(_state.Get(4) * (255.0 - 170.0) + 170.0);
+                            Activate(Arbiter.Choice(
+                                _scribblerPort.SetLEDBack(val),
                                 delegate(DefaultUpdateResponseType s) { responses.Post(DefaultUpdateResponseType.Instance); },
                                 delegate(Fault f) { responses.Post(f); }));
                         }
@@ -99,11 +110,13 @@ namespace Myro.Services.Scribbler.LED
                             responsePort.Post(vector.CallbackResponseType.Instance);
                         else
                         {
-                            var reasons = new List<ReasonText>();
-                            foreach (var f in fs)
-                                if (f.Reason != null)
-                                    reasons.AddRange(f.Reason.AsEnumerable());
-                            responsePort.Post(new Fault() { Detail = new Detail() { Any = fs.ToArray() }, Reason = reasons.ToArray() });
+                            responsePort.Post(fs.First());
+                            ////f.Readon could be null
+                            //var reasons = new List<ReasonText>();
+                            //foreach (var f in fs)
+                            //    if (f.Reason != null)
+                            //        reasons.AddRange(f.Reason.AsEnumerable());
+                            //responsePort.Post(new Fault() { Detail = new Detail() { Any = fs.ToArray() }, Reason = reasons.ToArray() });
                         }
                     }));
             }
