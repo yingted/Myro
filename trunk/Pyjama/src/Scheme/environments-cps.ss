@@ -1,4 +1,4 @@
-(load "lambda-macros.ss")
+(load "transformer-macros.ss")
 
 ;; Environments represented as data structures
 
@@ -83,13 +83,13 @@
           binding
           (search-env (rest-of-frames env) variable))))))
 
-(define lookup-value
+(define* lookup-value
   (lambda (variable env handler k)
     (lookup-binding variable env handler
       (lambda-cont (binding)
 	(k (binding-value binding))))))
 
-(define lookup-binding
+(define* lookup-binding
   (lambda (variable env handler k)
     (let ((binding (search-env env variable)))
       (if binding
@@ -101,7 +101,7 @@
 	      (handler (format "unbound variable ~a" variable)))))))))
 
 ;; adds a new binding for var to the first frame if one doesn't exist
-(define lookup-binding-in-first-frame
+(define* lookup-binding-in-first-frame
   (lambda (var env handler k)
     (let ((frame (first-frame env)))
       (let ((binding (search-frame frame var)))
@@ -112,7 +112,7 @@
               (set-first-frame! env new-frame)
 	      (k new-binding))))))))
 
-(define lookup-variable-components
+(define* lookup-variable-components
   (lambda (components path env handler k)
     (let ((var (car components)))
       (lookup-module-binding var env path handler
@@ -128,7 +128,7 @@
 		  (lookup-variable-components
 		    (cdr components) new-path result handler k)))))))))
 
-(define lookup-module-binding
+(define* lookup-module-binding
   (lambda (var env path handler k)
     (let ((binding (search-env env var)))
       (cond
@@ -136,7 +136,7 @@
 	((string=? path "") (handler (format "unbound variable ~a" var)))
 	(else (handler (format "unbound variable ~a in module ~a" var path)))))))
 
-(define split-variable
+(define* split-variable
   (lambda (variable k)
     (let ((strings (group (string->list (symbol->string variable)) #\.)))
       (if (or (member "" strings) (= (length strings) 1))

@@ -20,3 +20,8 @@
   (syntax-rules ()
     [(_ formals body ...) (lambda formals body ...)]))
 
+;; definitions to registerize
+
+(define-syntax define*
+  (syntax-rules ()
+    [(_ name body ...) (define name body ...)]))

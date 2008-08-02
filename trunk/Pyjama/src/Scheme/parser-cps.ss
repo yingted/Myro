@@ -1,4 +1,4 @@
-(load "lambda-macros.ss")
+(load "transformer-macros.ss")
 
 ;;--------------------------------------------------------------------------
 ;; List structure parser
@@ -86,7 +86,7 @@
 	 (symbol? (car datum))
 	 (search-env macro-env (car datum)))))
 
-(define expand-once
+(define* expand-once
   (lambda (datum handler k)
     (lookup-value (car datum) macro-env handler
       (lambda-cont (result)
@@ -94,7 +94,7 @@
 	  (process-macro-clauses result datum handler k)
 	  (k (result datum)))))))
 
-(define process-macro-clauses
+(define* process-macro-clauses
   (lambda (clauses datum handler k)
     (if (null? clauses)
       (handler (format "no matching clause found for ~a" datum))
@@ -272,7 +272,7 @@
       (lambda-cont2 (datum tokens-left)
 	(parse datum test-handler (lambda-cont (exp) exp))))))
 
-(define parse
+(define* parse
   (lambda (datum handler k)
     (cond
       ((literal? datum) (k (lit-exp datum)))
@@ -370,7 +370,7 @@
 	       (k (app-exp v1 v2)))))))
       (else (handler (format "bad concrete syntax: ~a" datum))))))
 
-(define parse-all
+(define* parse-all
   (lambda (datum-list handler k)
     (if (null? datum-list)
       (k '())
@@ -380,7 +380,7 @@
 	    (lambda-cont (b)
 	      (k (cons a b)))))))))
 
-(define expand-quasiquote
+(define* expand-quasiquote
   (lambda (datum handler k)
     (cond
       ((vector? datum)
@@ -477,33 +477,19 @@
 ;; file parser
 
 ;; for testing purposes
-(define print-parse-file
-  (lambda (filename)
-    (scan-input (read-content filename) test-handler
-      (lambda-cont (tokens)
-	(print-parsed-sexps tokens test-handler)))))
-
-;; for testing purposes
 (define print-parsed-sexps
-  (lambda (tokens handler)
-    (if (token-type? (first tokens) 'end-marker)
-      'done
-      (read-sexp tokens handler
-	(lambda-cont2 (datum tokens-left)
-	  (parse datum handler
-	    (lambda-cont (exp)
-	      (pretty-print exp)
-	      (print-parsed-sexps tokens-left handler))))))))
+  (lambda (filename)
+    (for-each pretty-print (get-parsed-sexps filename))))
 
 ;; for testing purposes
-(define parse-file
+(define get-parsed-sexps
   (lambda (filename)
     (scan-input (read-content filename) test-handler 
       (lambda-cont (tokens) 
 	(parse-sexps tokens test-handler (lambda-cont (v) v))))))
 
 ;; for testing purposes
-(define parse-sexps
+(define* parse-sexps
   (lambda (tokens handler k)
     (if (token-type? (first tokens) 'end-marker)
       (k '())
@@ -511,4 +497,6 @@
 	(lambda-cont2 (datum tokens-left)
 	  (parse datum handler
 	    (lambda-cont (exp)
-	      (cons exp (parse-sexps tokens-left handler k)))))))))
+	      (parse-sexps tokens-left handler
+		(lambda (v)
+		  (k (cons exp v)))))))))))

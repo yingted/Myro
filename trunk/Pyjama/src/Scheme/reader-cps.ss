@@ -1,4 +1,4 @@
-(load "lambda-macros.ss")
+(load "transformer-macros.ss")
 
 ;; Scanner and s-expression reader
 
@@ -18,12 +18,12 @@
 ;; scan-input takes a string and returns a list of tokens created
 ;; from all of the characters in the string
 
-(define scan-input
+(define* scan-input
   (lambda (input handler k)   ;; k receives a list of tokens
     (set! chars-to-scan (string-append input (string #\nul)))
     (scan-input-loop 0 handler k)))
 
-(define scan-input-loop
+(define* scan-input-loop
   (lambda (chars handler k)   ;; k receives a list of tokens
     (apply-action '(goto start-state) '() chars handler
       (lambda-cont2 (token chars-left)
@@ -58,7 +58,7 @@
 ;;            | (goto <state>)
 ;;            | (emit <token-type>)
 
-(define apply-action
+(define* apply-action
   (lambda (action buffer chars handler k)  ;; k receives 2 args: token, chars-left
     (record-case action
       (shift (next)
@@ -77,14 +77,14 @@
 	  (lambda-cont (v) (k v chars))))
       (else (error 'apply-action "invalid action: ~a" action)))))
       
-(define scan-error
+(define* scan-error
   (lambda (chars handler)
     (let ((c (1st chars)))
       (if (char=? c #\nul)
 	(handler "unexpected end of input")
 	(handler (format "unexpected character ~a encountered" c))))))
 
-(define convert-buffer-to-token
+(define* convert-buffer-to-token
   (lambda (token-type buffer handler k)
     (let ((buffer (reverse buffer)))
       (case token-type
@@ -344,7 +344,7 @@
   (lambda (input)
     (read-datum input test-handler (lambda-cont2 (sexp tokens-left) sexp))))
 
-(define read-datum
+(define* read-datum
   (lambda (input handler k)  ;; k receives 2 args:  sexp, tokens-left
     (scan-input input handler
       (lambda-cont (tokens)
@@ -354,7 +354,7 @@
 	      (k sexp tokens-left)
 	      (handler (format "tokens left over: ~a" tokens-left)))))))))
 
-(define read-sexp
+(define* read-sexp
   (lambda (tokens handler k)   ;; k receives 2 args:  sexp, tokens-left
     (record-case (first tokens)
       (integer (str)
@@ -390,13 +390,13 @@
 	    (k (list->vector sexps) tokens-left))))
       (else (read-error tokens handler)))))
 
-(define read-abbreviation
+(define* read-abbreviation
   (lambda (tokens keyword handler k)  ;; k receives 2 args: sexp, tokens-left
     (read-sexp (rest-of tokens) handler
       (lambda-cont2 (sexp tokens-left)
 	(k (list keyword sexp) tokens-left)))))
 
-(define read-sexp-sequence
+(define* read-sexp-sequence
   (lambda (tokens expected-terminator handler k)
     (record-case (first tokens)
       ((rparen rbracket) ()
@@ -412,7 +412,7 @@
 	      (lambda-cont2 (sexp2 tokens-left)
 		(k (cons sexp1 sexp2) tokens-left)))))))))
 
-(define close-sexp-sequence
+(define* close-sexp-sequence
   (lambda (sexp tokens expected-terminator handler k)
     (record-case (first tokens)
       ((rparen rbracket) ()
@@ -425,7 +425,7 @@
 	  (handler "bracketed list terminated by parenthesis"))))
       (else (read-error tokens handler)))))
 
-(define read-vector
+(define* read-vector
   (lambda (tokens handler k)
     (record-case (first tokens)
       (rparen ()
@@ -437,7 +437,7 @@
 	      (lambda-cont2 (sexps tokens-left)
 		(k (cons sexp1 sexps) tokens-left)))))))))
 
-(define read-error
+(define* read-error
   (lambda (tokens handler)
     (let ((token (first tokens)))
       (if (token-type? token 'end-marker)
@@ -452,7 +452,17 @@
   (lambda (filename)
     (scan-input (read-content filename) test-handler
       (lambda-cont (tokens)
-	(print-sexps tokens test-handler)))))
+	(print-unparsed-sexps tokens test-handler)))))
+
+;; for testing purposes
+(define print-unparsed-sexps
+  (lambda (tokens handler)
+    (if (token-type? (first tokens) 'end-marker)
+      'done
+      (read-sexp tokens handler
+	(lambda-cont2 (sexp tokens-left)
+	  (pretty-print sexp)
+	  (print-unparsed-sexps tokens-left handler))))))
 
 ;; for testing purposes
 
@@ -465,16 +475,6 @@
     (read-sexp tokens test-handler
       (lambda-cont2 (sexp tokens-left)
 	(cons sexp tokens-left)))))
-
-;; for testing purposes
-(define print-sexps
-  (lambda (tokens handler)
-    (if (token-type? (first tokens) 'end-marker)
-      'done
-      (read-sexp tokens handler
-	(lambda-cont2 (sexp tokens-left)
-	  (pretty-print sexp)
-	  (print-sexps tokens-left handler))))))
 
 ;; returns the entire file contents as a single string
 (define read-content

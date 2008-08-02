@@ -1,4 +1,4 @@
-(load "lambda-macros.ss")
+(load "transformer-macros.ss")
 
 ;; Unification pattern-matcher
 
@@ -22,7 +22,7 @@
     (and (not (pattern-variable? x))
 	 (not (pair? x)))))
 
-(define occurs?
+(define* occurs?
   (lambda (var pattern k)
     (cond
       ((constant? pattern) (k #f))
@@ -33,7 +33,7 @@
 		  (k #t)
 		  (occurs? var (cdr pattern) k))))))))
 
-(define unify-patterns
+(define* unify-patterns
   (lambda (p1 p2 k)
     (cond
       ((pattern-variable? p1)
@@ -49,7 +49,7 @@
       ((and (pair? p1) (pair? p2)) (unify-pairs p1 p2 k))
       (else (k #f)))))
 
-(define unify-pairs
+(define* unify-pairs
   (lambda (pair1 pair2 k)
     (unify-patterns (car pair1) (car pair2)
       (lambda-cont (s-car)
@@ -65,7 +65,7 @@
 			(k #f)
 			(k (make-sub 'composite s-car s-cdr))))))))))))))
 
-(define instantiate
+(define* instantiate
   (lambda (pattern s k)
     (cond
       ((constant? pattern) (k pattern))
@@ -89,7 +89,7 @@
 ;;  (lambda (old-s new-var new-pattern)
 ;;    (list 'extended new-var new-pattern old-s)))
 
-(define apply-sub
+(define* apply-sub
   (lambda (s var k)
     (record-case (cdr s)
       (empty () (k var))

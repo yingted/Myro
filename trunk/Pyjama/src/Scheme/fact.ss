@@ -1,10 +1,10 @@
-(load "lambda-macros.ss")
+(load "transformer-macros.ss")
 
 (define fib
   (lambda (n)
     (fib-cps n (lambda-cont (v) v))))
 
-(define fib-cps
+(define* fib-cps
   (lambda (n k)
     (cond
       ((= n 1) (k 1))
@@ -19,7 +19,7 @@
   (lambda (n)
     (fact-cps n (lambda-cont (v) v))))
 
-(define fact-cps
+(define* fact-cps
   (lambda (n k)
     (if (= n 0)
 	(k 1)

@@ -1,4 +1,4 @@
-(load "lambda-macros.ss")
+(load "transformer-macros.ss")
 
 ;;----------------------------------------------------------------------------
 ;; Interpreter
@@ -79,7 +79,7 @@
       (printf "#[procedure]~%")
       (pretty-print x))))
 
-(define m
+(define* m
   (lambda (exp env handler k)
     (cases expression exp
       (lit-exp (datum) (k datum))
@@ -192,7 +192,7 @@
 	  (m body new-env handler k2))
 	(handler "not enough arguments given")))))
 
-(define m*
+(define* m*
   (lambda (exps env handler k)
     (if (null? exps)
       (k '())
@@ -202,7 +202,7 @@
 	    (lambda-cont (v2)
 	      (k (cons v1 v2)))))))))
 
-(define eval-sequence
+(define* eval-sequence
   (lambda (exps env handler k)
     (m (car exps) env handler
        (lambda-cont (result)
@@ -266,7 +266,7 @@
 								1000000000))))))
 	    ))))
 
-(define get-primitive
+(define* get-primitive
   (lambda (args env handler k)
     (let ((sym (car args)))
       (lookup-value sym env handler
@@ -281,7 +281,7 @@
   (lambda (x)
     (and (list? x) (not (null? x)) (list? (car x)))))
 
-(define import-primitive
+(define* import-primitive
   (lambda (args env handler k)
     (let ((filename (car args)))
 	(if (null? (cdr args))
@@ -295,7 +295,7 @@
 		  ;; temporary
 		  (load-file-temp filename module handler k)))))))))
 
-(define call/cc-primitive
+(define* call/cc-primitive
   (lambda (proc env handler k)
     (let ((fake-k (lambda-proc (args env2 handler k2) (k (car args)))))
       (proc (list fake-k) env handler k))))
@@ -306,7 +306,7 @@
 
 (define load-stack '())
 
-(define load-file
+(define* load-file
   (lambda (filename env handler k)
     ;;(printf "calling load-file~%")
     (cond
@@ -326,7 +326,7 @@
 	       (set! load-stack (cdr load-stack))
 	       (k v)))))))))
 
-(define load-loop
+(define* load-loop
   (lambda (tokens env handler k)
     (if (token-type? (first tokens) 'end-marker)
       (k 'ok)
@@ -349,7 +349,7 @@
 ;; temporary version for use with non-registerized interpreter.  this
 ;; will be replaced by a fully registerized version of load-loop when
 ;; the interpreter is registerized.
-(define load-file-temp
+(define* load-file-temp
   (lambda (filename env handler k)
     ;;(printf "calling load-file-temp~%")
     (cond
@@ -374,7 +374,7 @@
 ;; temporary version for use with non-registerized interpreter.  this
 ;; will be replaced by a fully registerized version of load-loop when
 ;; the interpreter is registerized.
-(define load-loop-temp
+(define* load-loop-temp
   (lambda (tokens env handler k)
     (if (token-type? (first tokens) 'end-marker)
       (k 'ok)
