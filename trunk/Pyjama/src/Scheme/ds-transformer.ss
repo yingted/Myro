@@ -32,7 +32,7 @@
 	(let loop ((exp (read port)) (vars '()))
 	  (cond
 	    ((eof-object? exp) vars)
-	    ((define? exp)
+	    ((or (define? exp) (define*? exp))
 	     (if (mit-style? exp)
 		 (loop (read port) (union (caadr exp) vars))
 		 (loop (read port) (union (cadr exp) vars))))
@@ -102,7 +102,7 @@
 	      (let* ((output-port (if (null? port) (current-output-port) (car port)))
 		     (error-string (format "bad ~a: ~~a" type))
 		     (apply-function-code
-		       `(define ,apply-name
+		       `(define* ,apply-name
 			  (lambda ,(cons obj-name arg-names)
 			    (record-case (cdr ,obj-name)
 			      ,@(reverse clauses)
@@ -182,6 +182,7 @@
 	       (newline output-port))))
 	 (print-code
 	   (lambda (output-port)
+	     (fprintf output-port "(load \"transformer-macros.ss\")~%~%")
 	     ;; did we see a define-datatype or cases form?
 	     (if need-eopl-support?
 	       (begin
@@ -220,9 +221,12 @@
 
 (define procedure-definition?
   (lambda (exp)
-    (and (define? exp)
+    (and (or (define? exp)
+	     (define*? exp))
 	 (or (mit-style? exp)
 	     (lambda? (caddr exp))))))
+
+(define define*? (tagged-list 'define* >= 3))
 
 (define load?
   (lambda (x)
@@ -316,6 +320,10 @@
 	      (if (mit-style? code)
 		`(define ,name ,@(map (transform params) bodies))
 		`(define ,name ,((transform params) (car bodies)))))
+	    (define* (name . bodies)
+	      (if (mit-style? code)
+		`(define* ,name ,@(map (transform params) bodies))
+		`(define* ,name ,((transform params) (car bodies)))))
 	    (define-syntax args code)
 	    (and exps
 	      `(and ,@(map (transform params) exps)))
@@ -445,7 +453,7 @@
 	  (letrec (decls . bodies) (free (letrec-transformer code) params))
 	  (set! (var rhs-exp) (free rhs-exp params))
 	  (begin exps (all-free exps params))
-	  (define (name . bodies)
+	  ((define define*) (name . bodies)
 	    (if (mit-style? code)
 	      (all-free bodies (union name params))
 	      (free (car bodies) (union name params))))
@@ -773,7 +781,7 @@
 	  (cond
 	    ((eof-object? exp)
 	     (newline))
-	    ((define? exp)
+	    ((or (define? exp) (define*? exp))
 	     (cond
 	       ((mit-style? exp)
 		(pretty-print (cadr exp))
