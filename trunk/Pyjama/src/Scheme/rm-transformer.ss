@@ -53,16 +53,19 @@
 (define make-register-table
   (lambda ()
     (let ((all-registers '(final_reg))
-	  (registerized-functions '()))
+	  (registerized-functions '())
+	  (temp-vars '()))
       (lambda msg
 	(record-case msg
 	  (info ()
 	    (printf "registers:~%")
-	    (for-each (lambda (r) (printf "   ~a~%" r))
-		      all-registers)
+	    (for-each (lambda (r) (printf "   ~a~%" r)) all-registers)
+	    (printf "temporary vars:~%")
+	    (for-each (lambda (r) (printf "   ~a~%" r)) temp-vars)
 	    (for-each (lambda (f) (printf "~a: ~a~%" (car f) (cdr f)))
 		      registerized-functions))
 	  (get-registers () (sort alphabetical? all-registers))
+	  (get-temp-vars () temp-vars)
 	  (registerize-application? (code)
 	    (and (symbol? (car code))
 		 (assq (car code) registerized-functions)))
@@ -71,8 +74,7 @@
 		   (operands (cdr code))
 		   (params (cdr (assq operator registerized-functions)))
 		   (assigns (params->assignments params operands))
-		   (assigns2 (remove-redundancies assigns))
-		   (final-assigns (sort-assignments code assigns2))
+		   (final-assigns (sort-assignments (remove-redundancies assigns)))
 		   (pc-assign `(set! pc ,operator)))
 	      `(begin ,@final-assigns ,pc-assign)))
 	  (add-function (name regs)
@@ -81,6 +83,9 @@
 		(format "Symbol ~a is defined more than once at top level." name)))
 	    (set! all-registers (union regs all-registers))
 	    (set! registerized-functions (cons (cons name regs) registerized-functions))
+	    'ok)
+	  (add-temps (temps)
+	    (set! temp-vars (union temps temp-vars))
 	    'ok)
 	  (else (error 'register-table "bad message: ~a" msg)))))))
 
@@ -124,16 +129,25 @@
 		 (fprintf output-port "(load \"petite-init.ss\")~%")
 		 (fprintf output-port "(load \"define-datatype.ss\")~%~%")
 		 (for-each (print-exp output-port) eopl-defs)))
-	     ;; write register machine code
+	     ;; global registers
 	     (fprintf output-port ";;~a~%~%" (make-string 70 #\-))
 	     (fprintf output-port ";; global registers~%")
+	     (fprintf output-port "(define pc 'undefined)~%")
 	     (for-each
 	       (lambda (r) (fprintf output-port "(define ~a 'undefined)~%" r))
 	       (register-table 'get-registers))
-	     (fprintf output-port "(define pc 'undefined)~%")
 	     (newline output-port)
+	     ;; temporary registers
+	     (if (not (null? (register-table 'get-temp-vars)))
+	       (begin
+		 (fprintf output-port ";; temporary registers~%")
+		 (for-each
+		   (lambda (t) (fprintf output-port "(define ~a 'undefined)~%" t))
+		   (register-table 'get-temp-vars))
+		 (newline output-port)))
+	     ;; registerized function definitions
 	     (for-each (print-exp output-port) defs)
-	     ;; write trampoline code
+	     ;; trampoline
 	     (fprintf output-port ";; the trampoline~%")
 	     (pretty-print
 	       '(define trampoline
@@ -294,9 +308,9 @@
 ;; a2 = (set! y (..... z .....))
 
 (define sort-assignments
-  (lambda (code assigns)
+  (lambda (assigns)
     (call/cc
-      (lambda (panic)
+      (lambda (return)
 	(sort (lambda (a1 a2)
 		(let ((var1 (cadr a1))
 		      (free-vars1 (free (caddr a1) '()))
@@ -304,14 +318,31 @@
 		      (free-vars2 (free (caddr a2) '())))
 		  (cond
 		   ((and (memq var1 free-vars2) (memq var2 free-vars1))
-		    (begin
-		      (pretty-print code)
-		      (pretty-print assigns)
-		      (error #f "uh-oh, we have a problem")))
+		    (make-temp-assignments assigns return))
 		   ((memq var1 free-vars2) #f)
 		   ((memq var2 free-vars1) #t)
 		   (else #t))))
 	      assigns)))))
+
+(define make-temp-assignments
+  (lambda (assigns return)
+    (let ((registers (map cadr assigns))
+	  (exps (map caddr assigns))
+	  (free-vars (all-free assigns '())))
+      (letrec
+	((make-safe-temps
+	   (lambda (i temps)
+	     (if (= (length temps) (length assigns))
+	       (reverse temps)
+	       (let ((sym (string->symbol (format "temp_~a" i))))
+		 (if (memq sym free-vars)
+		   (make-safe-temps (+ i 1) temps)
+		   (make-safe-temps (+ i 1) (cons sym temps))))))))
+	(let* ((temps (make-safe-temps 1 '()))
+	       (temp-assigns (map (lambda (t e) `(set! ,t ,e)) temps exps))
+	       (reg-assigns (map (lambda (r t) `(set! ,r ,t)) registers temps)))
+	  (register-table 'add-temps temps)
+	  (return (append temp-assigns reg-assigns)))))))
 
 (define remove-redundancies
   (lambda (assigns)
