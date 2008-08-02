@@ -1,18 +1,20 @@
 (define scheme-to-csharp
   (lambda (filename . output)
-    (let ((port (open-input-file filename)))
-      (let ((sexps (read-sexps port))
-	    (name (string->symbol (car (split filename #\.)))))
-	(let ((results 
-	       (list
-		'public 'class (proper-name name) #\{ #\newline 
-		(convert-list sexps)
-		#\newline
-		#\} #\newline)))
-	  (if (not (null? output))
-	      (begin
-		(let ((port (open-output-file (car output))))
-		  (fprintf port "~a" (pp-help results))))))))))
+    (let* ((port (open-input-file filename))
+	   (sexps (read-sexps port))
+	   (prog (convert-list sexps)))
+      (if (null? output)
+	  prog
+	  (let ((name (string->symbol (car (split filename #\.))))
+		(port (open-output-file (car output))))
+	    (display (flatten prog) port))))))
+
+(define flatten
+  (lambda (l)
+    (cond
+     ((not (list? l)) (list l))
+     ((null? l) '())
+     (else (apply append (map flatten l))))))
 
 (define read-sexps
   (lambda (port)
@@ -25,7 +27,7 @@
 (define db
   (lambda args
     ;; or nothing to debug off
-    (apply printf args)
+    ;;(apply printf args)
     'ok
     ))
 
@@ -140,9 +142,12 @@
     (if (not (pair? statement))
 	(list (convert-exp statement) #\; #\newline)
 	(record-case statement
-	 (define (name lamb)  ;; always a (define name (lambda (args) body))
-	   (if (not (pair? lamb))
-	       (error 'convert-statement "define needs lambda: ~a" statement)
+	 (define (name lamb)  ;; (define name (lambda (args) body))
+	   (if (or (not (and (list? lamb) (eq? (car lamb) 'lambda)))
+		   (equal? name 'run))
+	       (begin 
+		 (printf "skipping: ~a" statement)
+		 '())
 	       (let ((args (cadr lamb))
 		     (body (cddr lamb)))
 		 (if (symbol? args)
@@ -178,6 +183,12 @@
 		      (caar case-list)
 		      (cadar case-list)
 		      (cdr case-list)))
+	 (record-case (item case-list) ;; (record-case a (a () 1) ...)
+	   (make-record-case case item 
+			     (caar case-list)
+			     (cadar case-list)
+			     (caddar case-list)
+			     (cdr case-list)))
 	 (cond cond-list ;; (cond (test ret) (test ret))
 	   (begin
 	     (db "case-list: ~s~%" cond-list)
@@ -232,6 +243,25 @@
 	      (make-case item (caar rest) (cadar rest)
 			 (cdr rest))))))
 
+(define make-record-case
+  ;; (record-case item (m () body) ...)
+  (lambda (item if-exp args then-statements rest)
+    (db "make-record-case: ")
+    (db "   item: ~a" item)
+    (db "   if: ~a" if-exp)
+    (db "   then: ~a" then-statements)
+    (db "   rest: ~a" rest)
+    (db "~%")
+    (if (null? rest) ;; if () { body }
+	(list 'if #\( (convert-exp if-exp) '== item #\) #\{ 
+	      (convert-statements then-statements)
+	      #\})
+	(list 'if #\( (convert-exp if-exp) '== item #\) #\{ 
+	      (convert-statements then-statements)
+	      #\} 'else 
+	      (make-case item (caar rest) (cadar rest)
+			 (cdr rest))))))
+
 (define make-cond
   (lambda (if-exp then-statements rest)
     (db "make-cond: ")
@@ -246,7 +276,7 @@
 	(list 'if #\( (convert-exp if-exp) #\) #\{ 
 	      (convert-statements then-statements)
 	      #\} 'else 
-	      (make-case (caar rest) (cadar rest)
+	      (make-cond (caar rest) (cadar rest)
 			 (cdr rest))))))
 
 (define pp
