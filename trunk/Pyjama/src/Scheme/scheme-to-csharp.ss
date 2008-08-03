@@ -2,12 +2,14 @@
   (lambda (filename . output)
     (let* ((port (open-input-file filename))
 	   (sexps (read-sexps port))
-	   (prog (convert-statement-list sexps)))
-      (if (null? output)
-	  prog
-	  (let ((name (string->symbol (car (split filename #\.))))
-		(port (open-output-file (car output))))
-	    (display (flatten prog) port))))))
+	   (prog (convert-file sexps filename)))
+      prog)))
+
+;;       (if (null? output)
+;; 	  prog
+;; 	  (let ((name (string->symbol (car (split filename #\.))))
+;; 		(port (open-output-file (car output))))
+;; 	    (display (flatten prog) port))))))
 
 (define flatten
   (lambda (l)
@@ -33,11 +35,11 @@
 
 (define convert-file
   (lambda (sexps filename)
-    (db "convert-list: '~s'~%" sexps)
+    (db "convert-file: '~s'~%" sexps)
     (let ((name (string->symbol (car (split filename #\.)))))
-      (list 'public 'class name #\{
+      (list 'public 'class name #\{ #\newline
 	    (convert-statement-list sexps)
-	    #\}))))
+	    #\} #\newline))))
 
 (define convert-statement-list
   (lambda (sexps)
@@ -122,36 +124,48 @@
        (list
 	'if 
 	(convert-exp (caar cases))  
-	#\{ 
-	#\newline 
-	'return 
-	(convert-exp (cadar cases)) 
-	#\; 
-	#\newline 
-	#\} 	
-	#\newline )
-       (convert-case (cdr cases)))))))
+	(convert-block (cadar cases))
+	(convert-case (cdr cases))))))))
 
-(define convert-statements
+(define convert-block
   (lambda (statements)
-    (db "convert-statements: '~s'~%" statements)
-    (#\{ (convert-statements-2 statements) #\})))
+    (db "convert-block: '~s'~%" statements)
+    (list #\{ #\newline (convert-block-2 statements) #\} #\newline)))
 
-(define convert-statements-2
+(define convert-block-2
   (lambda (statements)
-    (db "convert-statements-2: '~s'~%" statements)
+    (db "convert-function-def: '~s'~%" statements)
+    (cond
+     ((null? statements) '())
+     ((null? (car statements))
+      (convert-block-2 (cdr statements)))
+     ((null? (cdr statements))
+      (list (convert-statement (car statements))))
+     (else (cons (convert-statement (car statements))
+		 (convert-block-2 (cdr statements)))))))
+
+(define convert-function-def
+  (lambda (statements)
+    (db "convert-function-def: '~s'~%" statements)
+    (list #\{ #\newline (convert-function-def-2 statements) #\} #\newline)))
+
+(define convert-function-def-2
+  (lambda (statements)
+    (db "convert-function-def-2: '~s'~%" statements)
     (cond
      ((null? statements) '(return null #\; #\newline))
+     ((null? (car statements))
+      (convert-function-def-2 (cdr statements)))
      ((null? (cdr statements))
-      (list 'return (convert-statement statements) #\; #\newline))
+      (list 'return (convert-statement (car statements))))
      (else (cons (convert-statement (car statements))
-		 (convert-statements-2 (cdr statements)))))))
+		 (convert-function-def-2 (cdr statements)))))))
 
 (define convert-statement
   (lambda (statement)
     (db "convert-statement: '~s'~%" statement)
     (if (not (pair? statement))
-	(convert-exp statement)
+	(list (convert-exp statement) #\; #\newline)
 	(record-case statement
 	 (define (name lamb)  ;; (define name (lambda (args) body))
 	   (if (not (and (list? lamb) 
@@ -170,7 +184,10 @@
 				      args)
 				 #\,)
 		      #\) 
-		      (convert-statements body))))))
+		      ;; FIXME if void convert-block, else convert-function-def
+		      (convert-block body)
+		      ;; (convert-function def body)
+		      )))))
 	 (if (test-part true-part false-part)
 	   (list
 	    'if #\(
@@ -178,6 +195,8 @@
 	    #\) #\{ #\newline
 	    (convert-exp true-part)
 	    (convert-exp false-part)))
+	 (quote (item)
+	     (list (convert-string item) #\; #\newline))
 	 (set! (sym exp)
 	       (list
 		(proper-name sym)
@@ -185,7 +204,7 @@
 		(convert-exp exp)
 		#\; #\newline))
 	 (begin (exps)
-	   (convert-statements exps))
+	   (convert-block exps))
 	 (load (filename) '())
 	 (define-datatype (filename) '())
 	 (case (item case-list) ;; (case a (a 1) ...)
@@ -193,12 +212,12 @@
 		      (caar case-list)
 		      (cadar case-list)
 		      (cdr case-list)))
-	 (record-case (item case-list) ;; (record-case a (a () 1) ...)
-	   (convert-record-case case item 
-			     (caar case-list)
-			     (cadar case-list)
-			     (caddar case-list)
-			     (cdr case-list)))
+	 (record-case (item case-list)   ;; (record-case a (a () 1) ...)
+	   (convert-record-case item 
+				(caar case-list)
+				(cadar case-list)
+				(caddar case-list)
+				(cdr case-list)))
 	 (cond cond-list ;; (cond (test ret) (test ret))
 	   (begin
 	     (db "case-list: ~s~%" cond-list)
@@ -206,8 +225,7 @@
 			(cadar cond-list)
 			(cdr cond-list))))
 	 (else ;; apply (proc args...)
-	  (append (convert-application (car statement) (cdr statement)) 
-		  (list #\;)))))))
+	  (convert-application (car statement) (cdr statement)))))))
   
 (define convert-exp
   (lambda (exp)
@@ -244,12 +262,11 @@
     (db "   rest: ~a" rest)
     (db "~%")
     (if (null? rest) ;; if () { body }
-	(list 'if #\( (convert-exp if-exp) '== item #\) #\{ 
-	      (convert-statements then-statements)
-	      #\})
-	(list 'if #\( (convert-exp if-exp) '== item #\) #\{ 
-	      (convert-statements then-statements)
-	      #\} 'else 
+	(list 'if #\( (convert-exp if-exp) '== item #\) 
+	      (convert-block then-statements))
+	(list 'if #\( (convert-exp if-exp) '== item #\) 
+	      (convert-block then-statements)
+	      'else 
 	      (convert-case item (caar rest) (cadar rest)
 			 (cdr rest))))))
 
@@ -263,14 +280,13 @@
     (db "   rest: ~a" rest)
     (db "~%")
     (if (null? rest) ;; if () { body }
-	(list 'if #\( (convert-exp if-exp) '== item #\) #\{ 
-	      (convert-statements then-statements)
-	      #\})
-	(list 'if #\( (convert-exp if-exp) '== item #\) #\{ 
-	      (convert-statements then-statements)
-	      #\} 'else 
+	(list 'if #\( (convert-exp if-exp) '== item #\) 
+	      (convert-block then-statements))
+	(list 'if #\( (convert-exp if-exp) '== item #\) 
+	      (convert-block then-statements)
+	      'else 
 	      (convert-case item (caar rest) (cadar rest)
-			 (cdr rest))))))
+			    (cdr rest))))))
 
 (define convert-cond
   (lambda (if-exp then-statements rest)
@@ -280,12 +296,11 @@
     (db "   rest: ~a" rest)
     (db "~%")
     (if (null? rest) ;; if () { body }
-	(list 'if #\( (convert-exp if-exp) #\) #\{ 
-	      (convert-statements then-statements)
-	      #\})
-	(list 'if #\( (convert-exp if-exp) #\) #\{ 
-	      (convert-statements then-statements)
-	      #\} 'else 
+	(list 'if #\( (convert-exp if-exp) #\) 
+	      (convert-block then-statements))
+	(list 'if #\( (convert-exp if-exp) #\) 
+	      (convert-block then-statements)
+	      'else 
 	      (convert-cond (caar rest) (cadar rest)
 			 (cdr rest))))))
 
