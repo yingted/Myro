@@ -34,20 +34,19 @@
 	      (k (cons token tokens)))))))))
 
 ;; for testing purposes
-(define test-handler (lambda-handler (e) (list 'exception e)))
-
-;; for testing purposes
-(define test-cont (lambda-cont (v) v))
+(define init-cont (lambda-cont (v) (halt* v)))
+(define init-cont2 (lambda-cont2 (v1 v2) (halt* v1)))
+(define init-handler (lambda-handler (e) (halt* (list 'exception e))))
 
 ;; for testing purposes
 (define scan-string
   (lambda (input)
-    (scan-input input test-handler test-cont)))
+    (scan-input input init-handler init-cont)))
 
 ;; for testing purposes
 (define scan-file
   (lambda (filename)
-    (scan-input (read-content filename) test-handler test-cont)))
+    (scan-input (read-content filename) init-handler init-cont)))
 
 ;;------------------------------------------------------------------------
 ;; scanner actions
@@ -342,7 +341,7 @@
 ;; for testing purposes
 (define read-string
   (lambda (input)
-    (read-datum input test-handler (lambda-cont2 (sexp tokens-left) sexp))))
+    (read-datum input init-handler init-cont2)))
 
 (define* read-datum
   (lambda (input handler k)  ;; k receives 2 args:  sexp, tokens-left
@@ -450,19 +449,19 @@
 ;; for testing purposes
 (define read-file
   (lambda (filename)
-    (scan-input (read-content filename) test-handler
+    (scan-input (read-content filename) init-handler
       (lambda-cont (tokens)
-	(print-unparsed-sexps tokens test-handler)))))
+	(print-unparsed-sexps tokens init-handler init-cont)))))
 
 ;; for testing purposes
-(define print-unparsed-sexps
-  (lambda (tokens handler)
+(define* print-unparsed-sexps
+  (lambda (tokens handler k)
     (if (token-type? (first tokens) 'end-marker)
-      'done
+      (k 'done)
       (read-sexp tokens handler
 	(lambda-cont2 (sexp tokens-left)
 	  (pretty-print sexp)
-	  (print-unparsed-sexps tokens-left handler))))))
+	  (print-unparsed-sexps tokens-left handler k))))))
 
 ;; for testing purposes
 
@@ -472,7 +471,7 @@
 
 (define read-next-sexp
   (lambda (tokens)
-    (read-sexp tokens test-handler
+    (read-sexp tokens init-handler
       (lambda-cont2 (sexp tokens-left)
 	(cons sexp tokens-left)))))
 

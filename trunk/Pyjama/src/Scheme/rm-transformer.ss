@@ -307,25 +307,118 @@
 ;; a1 = (set! x (..... y .....))
 ;; a2 = (set! y (..... z .....))
 
+;;(define sort-assignments
+;;  (lambda (assigns)
+;;    (call/cc
+;;      (lambda (return)
+;;	(sort (lambda (a1 a2)
+;;		(let ((var1 (cadr a1))
+;;		      (free-vars1 (free (caddr a1) '()))
+;;		      (var2 (cadr a2))
+;;		      (free-vars2 (free (caddr a2) '())))
+;;		  (cond
+;;		   ((and (memq var1 free-vars2) (memq var2 free-vars1))
+;;		    (make-temp-assignments assigns return))
+;;		   ((memq var1 free-vars2) #f)
+;;		   ((memq var2 free-vars1) #t)
+;;		   (else #t))))
+;;	      assigns)))))
+
 (define sort-assignments
   (lambda (assigns)
+    (let ((graph (map node assigns)))
+      (if (contains-cycle? graph)
+	(make-temp-assignments assigns)
+	(map cdr (cdr (topological-sort graph)))))))
+
+(define node (lambda (x) (cons 'unvisited x)))
+(define a1 '(set! y (list a b x 'a1)))
+(define a2 '(set! x (list 1 2 3 'a2)))
+(define a3 '(set! z (list x 'a3)))
+(define a4 '(set! x (list z 'a4)))
+(define n1 (node a1))
+(define n2 (node a2))
+(define n3 (node a3))
+(define n4 (node a4))
+
+(define graph1 (list n1 n2 n3))
+(define graph2 (list n3 n4))
+
+(define mark! set-car!)
+(define value cdr)
+(define visited? (lambda (x) (eq? (car x) 'visited)))
+(define tag? (lambda (n tag) (eq? (car n) tag)))
+(define push!
+  (lambda (x s)
+    (set-cdr! s (cons x (cdr s)))))
+
+;; a1 --> a2
+;; a3 --> a2
+
+(define neighbors
+  (lambda (n1 nodes)
+    (filter (lambda (n2)
+	      (and (not (eq? n1 n2))
+		   (let ((free-vars1 (free (caddr (value n1)) '()))
+			 (var2 (cadr (value n2))))
+		     (memq var2 free-vars1))))
+	    nodes)))
+
+(define mark-all
+  (lambda (nodes tag)
+    (for-each (lambda (n) (mark! n tag)) nodes)))
+
+(define contains-cycle?
+  (lambda (nodes)
     (call/cc
       (lambda (return)
-	(sort (lambda (a1 a2)
-		(let ((var1 (cadr a1))
-		      (free-vars1 (free (caddr a1) '()))
-		      (var2 (cadr a2))
-		      (free-vars2 (free (caddr a2) '())))
-		  (cond
-		   ((and (memq var1 free-vars2) (memq var2 free-vars1))
-		    (make-temp-assignments assigns return))
-		   ((memq var1 free-vars2) #f)
-		   ((memq var2 free-vars1) #t)
-		   (else #t))))
-	      assigns)))))
+	(mark-all nodes 'white)
+	(for-each (lambda (v)
+		    (if (tag? v 'white)
+			(if (visit v nodes)
+			    (return #t))))
+	  nodes)
+	#f))))
+
+(define visit
+  (lambda (v nodes)
+    (call/cc
+      (lambda (return)
+	(mark! v 'grey)
+	(for-each
+	 (lambda (u)
+	   (if (tag? u 'grey)
+	       (return #t)
+	       (if (tag? u 'white)
+		 (if (visit u nodes)
+		   (return #t)))))
+	 (neighbors v nodes))
+	(mark! v 'black)
+	#f))))
+
+(define topological-sort
+  (lambda (nodes)
+    (mark-all nodes 'unvisited)
+    (let ((stack (list 'stack)))
+      (for-each
+	(lambda (n)
+	  (if (not (visited? n))
+	    (topological-helper n nodes stack)))
+	nodes)
+      stack)))
+
+(define topological-helper
+  (lambda (n nodes stack)
+    (mark! n 'visited)
+    (for-each
+      (lambda (neighbor)
+	(if (not (visited? neighbor))
+	    (topological-helper neighbor nodes stack)))
+      (neighbors n nodes))
+    (push! n stack)))
 
 (define make-temp-assignments
-  (lambda (assigns return)
+  (lambda (assigns)
     (let ((registers (map cadr assigns))
 	  (exps (map caddr assigns))
 	  (free-vars (all-free assigns '())))
@@ -342,7 +435,7 @@
 	       (temp-assigns (map (lambda (t e) `(set! ,t ,e)) temps exps))
 	       (reg-assigns (map (lambda (r t) `(set! ,r ,t)) registers temps)))
 	  (register-table 'add-temps temps)
-	  (return (append temp-assigns reg-assigns)))))))
+	  (append temp-assigns reg-assigns))))))
 
 (define remove-redundancies
   (lambda (assigns)

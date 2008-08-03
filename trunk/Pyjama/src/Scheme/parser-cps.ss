@@ -262,15 +262,11 @@
 ;;--------------------------------------------------------------------------
 
 ;; for testing purposes
-(define test-handler
-  (lambda-handler (e) (list 'exception e)))
-
-;; for testing purposes
 (define parse-string
   (lambda (string)
-    (read-datum string test-handler
+    (read-datum string init-handler
       (lambda-cont2 (datum tokens-left)
-	(parse datum test-handler (lambda-cont (exp) exp))))))
+	(parse datum init-handler init-cont)))))
 
 (define* parse
   (lambda (datum handler k)
@@ -484,9 +480,9 @@
 ;; for testing purposes
 (define get-parsed-sexps
   (lambda (filename)
-    (scan-input (read-content filename) test-handler 
+    (scan-input (read-content filename) init-handler 
       (lambda-cont (tokens) 
-	(parse-sexps tokens test-handler (lambda-cont (v) v))))))
+	(parse-sexps tokens init-handler init-cont)))))
 
 ;; for testing purposes
 (define* parse-sexps

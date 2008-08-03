@@ -133,7 +133,7 @@
        (car clauses))
       (else (find-clause fields code (cdr clauses))))))
 
-(define transform-file
+(define ds-transform-file
   (lambda (source-file . opts)
     (set! all-datatypes (make-all-datatypes))
     (set! need-eopl-support? #f)

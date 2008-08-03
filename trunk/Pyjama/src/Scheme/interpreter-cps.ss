@@ -8,62 +8,27 @@
 
 (define start
   (lambda ()
-    (read-eval-print-temp)))
+    (read-eval-print)))
 
 (define REP-k
   (lambda-cont (v)
     (safe-print v)
-    (read-eval-print-temp)))
+    (read-eval-print)))
 
 (define REP-handler
   (lambda-handler (e)
     (REP-k `(uncaught exception: ,e))))
 
-;; temporary version for use with non-registerized interpreter.  this
-;; will be replaced by a fully registerized version of load-loop when
-;; the interpreter is registerized.
-(define read-eval-print-temp
-  (lambda ()
-    (printf "==> ")
-    (let ((input (read)))
-      (cond
-        ((eq? input 'quit)
-	 ;; temporary
-	 (set! macro-env (make-macro-env))
-	 (set! toplevel-env (make-toplevel-env))
-	 (set! load-stack '())
-	 '(exiting the interpreter))
-	((not (string? input))
-	 (printf "give me a string~%")
-	 (read-eval-print-temp))
-	(else
-	 (let ((datum (read-string input)))
-	   (if (exception?-temp datum)
-	     (REP-handler (cadr datum))
-	     (parse datum REP-handler
-	       (lambda-cont (exp)
-		 (m exp toplevel-env REP-handler REP-k))))))))))
-
 (define read-eval-print
   (lambda ()
     (printf "==> ")
-    (let ((input (read)))
-      (cond
-        ((eq? input 'quit)
-	 ;; temporary
-	 (set! macro-env (make-macro-env))
-	 (set! toplevel-env (make-toplevel-env))
-	 (set! load-stack '())
-	 '(exiting the interpreter))
-	((not (string? input))
-	 (printf "give me a string~%")
-	 (read-eval-print))
-	(else
-	 (read-datum input REP-handler
-	   (lambda-cont2 (datum tokens-left)
-	     (parse datum REP-handler
-	       (lambda-cont (exp)
-		 (m exp toplevel-env REP-handler REP-k))))))))))
+    (let* ((input (read))
+	   (input-string (format "~s" input)))
+      (read-datum input-string REP-handler
+	(lambda-cont2 (datum tokens-left)
+	  (parse datum REP-handler
+	    (lambda-cont (exp)
+	      (m exp toplevel-env REP-handler REP-k))))))))
 
 ;; used by the data structure version of the code
 (define data-structure-procedure?
@@ -223,7 +188,7 @@
 	      (set! toplevel-env (make-toplevel-env))
 	      ;; temporary
 	      (set! load-stack '())
-	      '(exiting the interpreter))
+	      (halt* '(exiting the interpreter)))
 	    (lambda-proc (args env2 handler k2)
 	      (let ((proc (car args))
 		    (proc-args (cadr args)))
@@ -232,8 +197,7 @@
 	    (lambda-proc (args env2 handler k2) (for-each safe-print args) (k2 'ok))
 	    (lambda-proc (args env2 handler k2) (apply display args) (k2 'ok))
 	    (lambda-proc (args env2 handler k2) (newline) (k2 'ok))
-	    ;; temporary
-	    (lambda-proc (args env2 handler k2) (load-file-temp (car args) toplevel-env handler k2))
+	    (lambda-proc (args env2 handler k2) (load-file (car args) toplevel-env handler k2))
 	    (lambda-proc (args env2 handler k2) (k2 (apply null? args)))
 	    (lambda-proc (args env2 handler k2) (k2 (apply cons args)))
 	    (lambda-proc (args env2 handler k2) (k2 (apply car args)))
@@ -285,15 +249,13 @@
   (lambda (args env handler k)
     (let ((filename (car args)))
 	(if (null? (cdr args))
-	  ;; temporary
-	  (load-file-temp filename env handler k)
+	  (load-file filename env handler k)
 	  (let ((module-name (cadr args)))
 	    (lookup-binding-in-first-frame module-name env handler
 	      (lambda-cont (binding)
 		(let ((module (extend env '() '())))
 		  (set-binding-value! binding module)
-		  ;; temporary
-		  (load-file-temp filename module handler k)))))))))
+		  (load-file filename module handler k)))))))))
 
 (define* call/cc-primitive
   (lambda (proc env handler k)
@@ -308,7 +270,6 @@
 
 (define* load-file
   (lambda (filename env handler k)
-    ;;(printf "calling load-file~%")
     (cond
       ((member filename load-stack)
        (printf "skipping recursive load of ~a~%" filename)
@@ -332,63 +293,11 @@
       (k 'ok)
       (read-sexp tokens handler
 	(lambda-cont2 (datum tokens-left)
-	  ;;(printf "read ~a~%" datum)
 	  (parse datum handler
 	    (lambda-cont (exp)
 	      (m exp env handler
 		(lambda-cont (v)
 		  (load-loop tokens-left env handler k))))))))))
-
-;; temporary
-(define exception?-temp
-  (lambda (x)
-    (and (list? x)
-	 (not (null? x))
-	 (eq? (car x) 'exception))))
-
-;; temporary version for use with non-registerized interpreter.  this
-;; will be replaced by a fully registerized version of load-loop when
-;; the interpreter is registerized.
-(define* load-file-temp
-  (lambda (filename env handler k)
-    ;;(printf "calling load-file-temp~%")
-    (cond
-      ((member filename load-stack)
-       (printf "skipping recursive load of ~a~%" filename)
-       (k 'ok))
-      ((not (string? filename))
-       (handler (format "filename is not a string: ~a" filename)))
-      ((not (file-exists? filename))
-       (handler (format "file does not exist: ~a" filename)))
-      (else
-       (set! load-stack (cons filename load-stack))
-       (let ((result (scan-string (read-content filename))))
-	 (if (exception?-temp result)
-	     (handler (cadr result))
-	     (let ((tokens result))
-	       (load-loop-temp tokens env handler
-		 (lambda-cont (v)
-		   (set! load-stack (cdr load-stack))
-		   (k v))))))))))
-
-;; temporary version for use with non-registerized interpreter.  this
-;; will be replaced by a fully registerized version of load-loop when
-;; the interpreter is registerized.
-(define* load-loop-temp
-  (lambda (tokens env handler k)
-    (if (token-type? (first tokens) 'end-marker)
-      (k 'ok)
-      (let ((result (read-next-sexp tokens)))
-	(if (exception?-temp result)
-	  (handler (cadr result))
-	  (let ((datum (car result))
-		(tokens-left (cdr result)))
-	    ;;(printf "read ~a~%" datum)
-	    (parse datum handler
-	      (lambda-cont (exp)
-		(m exp env handler
-		   (lambda-cont (v)
-		     (load-loop-temp tokens-left env handler k)))))))))))
 
 (define range
   (lambda args
