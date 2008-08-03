@@ -39,7 +39,8 @@
         (apply-cont k 1)
         (fact-cps (- n 1) (make-cont '<cont-4> n k)))))
 
-;;(define* fake
-;;  (lambda (p1 p2 p3 p4 k)
+(define* fake
+  (lambda (p1 p2 p3 p4 k)
+    (fake p4 p1 p1 p4 k)))
 ;;    (fake p4 p1 p1 p1 k)))
 

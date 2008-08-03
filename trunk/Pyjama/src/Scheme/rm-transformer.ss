@@ -1,5 +1,7 @@
 (load "ds-transformer.ss")
 
+(define *remove-record-case?* #t)
+
 ;; assumes:
 ;; - code in first-order tail form
 ;; - define*
@@ -304,138 +306,107 @@
 	   clauses))))
     transform))
 
-;; a1 = (set! x (..... y .....))
-;; a2 = (set! y (..... z .....))
-
-;;(define sort-assignments
-;;  (lambda (assigns)
-;;    (call/cc
-;;      (lambda (return)
-;;	(sort (lambda (a1 a2)
-;;		(let ((var1 (cadr a1))
-;;		      (free-vars1 (free (caddr a1) '()))
-;;		      (var2 (cadr a2))
-;;		      (free-vars2 (free (caddr a2) '())))
-;;		  (cond
-;;		   ((and (memq var1 free-vars2) (memq var2 free-vars1))
-;;		    (make-temp-assignments assigns return))
-;;		   ((memq var1 free-vars2) #f)
-;;		   ((memq var2 free-vars1) #t)
-;;		   (else #t))))
-;;	      assigns)))))
-
 (define sort-assignments
   (lambda (assigns)
-    (let ((graph (map node assigns)))
+    (let ((graph (make-graph assigns)))
       (if (contains-cycle? graph)
 	(make-temp-assignments assigns)
-	(map cdr (cdr (topological-sort graph)))))))
+	(map vertex-contents (topological-sort graph))))))
 
-(define node (lambda (x) (cons 'unvisited x)))
-(define a1 '(set! y (list a b x 'a1)))
-(define a2 '(set! x (list 1 2 3 'a2)))
-(define a3 '(set! z (list x 'a3)))
-(define a4 '(set! x (list z 'a4)))
-(define n1 (node a1))
-(define n2 (node a2))
-(define n3 (node a3))
-(define n4 (node a4))
-
-(define graph1 (list n1 n2 n3))
-(define graph2 (list n3 n4))
-
-(define mark! set-car!)
-(define value cdr)
-(define visited? (lambda (x) (eq? (car x) 'visited)))
-(define tag? (lambda (n tag) (eq? (car n) tag)))
-(define push!
-  (lambda (x s)
-    (set-cdr! s (cons x (cdr s)))))
-
-;; a1 --> a2
-;; a3 --> a2
-
-(define neighbors
-  (lambda (n1 nodes)
-    (filter (lambda (n2)
-	      (and (not (eq? n1 n2))
-		   (let ((free-vars1 (free (caddr (value n1)) '()))
-			 (var2 (cadr (value n2))))
+(define get-neighbors
+  (lambda (v graph)
+    (filter (lambda (u)
+	      (and (not (eq? v u))
+		   (let* ((assign1 (vertex-contents v))
+			  (assign2 (vertex-contents u))
+			  (free-vars1 (free assign1 '()))
+			  (var2 (cadr assign2)))
 		     (memq var2 free-vars1))))
-	    nodes)))
+	    graph)))
 
-(define mark-all
-  (lambda (nodes tag)
-    (for-each (lambda (n) (mark! n tag)) nodes)))
+(define make-vertex (lambda (x) (cons 'unmarked x)))
+(define vertex-contents cdr)
+(define vertex-tag? (lambda (v tag) (eq? (car v) tag)))
+(define mark-vertex! set-car!)
+
+(define make-graph (lambda (values) (map make-vertex values)))
+
+(define mark-all-vertices!
+  (lambda (graph tag)
+    (for-each (lambda (v) (mark-vertex! v tag)) graph)))
+
+(define make-stack (lambda () (cons 'stack '())))
+(define stack-contents cdr)
+(define push-stack! (lambda (x s) (set-cdr! s (cons x (cdr s)))))
 
 (define contains-cycle?
-  (lambda (nodes)
+  (lambda (graph)
     (call/cc
       (lambda (return)
-	(mark-all nodes 'white)
-	(for-each (lambda (v)
-		    (if (tag? v 'white)
-			(if (visit v nodes)
-			    (return #t))))
-	  nodes)
-	#f))))
-
-(define visit
-  (lambda (v nodes)
-    (call/cc
-      (lambda (return)
-	(mark! v 'grey)
-	(for-each
-	 (lambda (u)
-	   (if (tag? u 'grey)
-	       (return #t)
-	       (if (tag? u 'white)
-		 (if (visit u nodes)
-		   (return #t)))))
-	 (neighbors v nodes))
-	(mark! v 'black)
-	#f))))
+	(letrec
+	  ((visit-vertex
+	     (lambda (v)
+	       (mark-vertex! v 'grey)
+	       (for-each
+		 (lambda (u)
+		   (cond
+		     ((vertex-tag? u 'grey) (return #t))
+		     ((vertex-tag? u 'white) (visit-vertex u))))
+		 (get-neighbors v graph))
+	       (mark-vertex! v 'black))))
+	  (mark-all-vertices! graph 'white)
+	  (for-each
+	    (lambda (v)
+	      (if (vertex-tag? v 'white)
+		  (visit-vertex v)))
+	    graph)
+	  #f)))))
 
 (define topological-sort
-  (lambda (nodes)
-    (mark-all nodes 'unvisited)
-    (let ((stack (list 'stack)))
-      (for-each
-	(lambda (n)
-	  (if (not (visited? n))
-	    (topological-helper n nodes stack)))
-	nodes)
-      stack)))
+  (lambda (graph)
+    (let ((stack (make-stack)))
+      (letrec
+	((depth-first-search
+	   (lambda (v)
+	     (mark-vertex! v 'visited)
+	     (for-each
+	       (lambda (neighbor)
+		 (if (not (vertex-tag? neighbor 'visited))
+		     (depth-first-search neighbor)))
+	       (get-neighbors v graph))
+	     (push-stack! v stack))))
+	(mark-all-vertices! graph 'unvisited)
+	(for-each
+	  (lambda (v)
+	    (if (not (vertex-tag? v 'visited))
+		(depth-first-search v)))
+	  graph)
+	(stack-contents stack)))))
 
-(define topological-helper
-  (lambda (n nodes stack)
-    (mark! n 'visited)
-    (for-each
-      (lambda (neighbor)
-	(if (not (visited? neighbor))
-	    (topological-helper neighbor nodes stack)))
-      (neighbors n nodes))
-    (push! n stack)))
-
-(define make-temp-assignments
-  (lambda (assigns)
-    (let ((registers (map cadr assigns))
-	  (exps (map caddr assigns))
-	  (free-vars (all-free assigns '())))
+(define make-temp-vars
+  (lambda (num exps)
+    (let ((free-vars (all-free exps '())))
       (letrec
 	((make-safe-temps
 	   (lambda (i temps)
-	     (if (= (length temps) (length assigns))
+	     (if (= (length temps) num)
 	       (reverse temps)
 	       (let ((sym (string->symbol (format "temp_~a" i))))
 		 (if (memq sym free-vars)
 		   (make-safe-temps (+ i 1) temps)
 		   (make-safe-temps (+ i 1) (cons sym temps))))))))
-	(let* ((temps (make-safe-temps 1 '()))
-	       (temp-assigns (map (lambda (t e) `(set! ,t ,e)) temps exps))
-	       (reg-assigns (map (lambda (r t) `(set! ,r ,t)) registers temps)))
-	  (register-table 'add-temps temps)
-	  (append temp-assigns reg-assigns))))))
+	(let ((temp-vars (make-safe-temps 1 '())))
+	  (register-table 'add-temps temp-vars)
+	  temp-vars)))))
+
+(define make-temp-assignments
+  (lambda (assigns)
+    (let* ((registers (map cadr assigns))
+	   (exps (map caddr assigns))
+	   (temp-vars (make-temp-vars (length assigns) assigns))
+	   (temp-assigns (map (lambda (t e) `(set! ,t ,e)) temp-vars exps))
+	   (reg-assigns (map (lambda (r t) `(set! ,r ,t)) registers temp-vars)))
+      (append temp-assigns reg-assigns))))
 
 (define remove-redundancies
   (lambda (assigns)
