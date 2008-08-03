@@ -1,5 +1,9 @@
 (load "parser-cps.ss")
 
+;; default transformer settings
+(define *include-eopl-define-datatype-in-ds-code?* #t)
+(define *include-define*-in-ds-code?* #t)
+
 ;; assumes:
 ;; - lambda-cont, lambda-proc, etc. datatype forms
 ;; - define*
@@ -107,8 +111,9 @@
 	      `(,type datatype contains no code)
 	      (let* ((output-port (if (null? port) (current-output-port) (car port)))
 		     (error-string (format "bad ~a: ~~a" type))
+		     (define-sym (if *include-define*-in-ds-code?* 'define* 'define))
 		     (apply-function-code
-		       `(define* ,apply-name
+		       `(,define-sym ,apply-name
 			  (lambda ,(cons obj-name arg-names)
 			    (record-case (cdr ,obj-name)
 			      ,@(reverse clauses)
@@ -167,7 +172,7 @@
 	   (lambda (input-port)
 	     (let ((exp (read input-port)))
 	       (cond
-	         ((eof-object? exp)
+		 ((eof-object? exp)
 		  (set! eopl-defs (reverse eopl-defs))
 		  (set! function-defs (reverse function-defs))
 		  (set! other-defs (reverse other-defs)))
@@ -177,6 +182,7 @@
 		 (else (let ((texp ((transform '()) exp)))
 			 (cond
 			   ((eopl-define-datatype? texp)
+			    (set! need-eopl-support? #t)
 			    (set! eopl-defs (cons texp eopl-defs)))
 			   ((function-definition? texp)
 			    (set! function-defs (cons texp function-defs)))
@@ -189,15 +195,27 @@
 	       (newline output-port))))
 	 (print-code
 	   (lambda (output-port)
-	     (fprintf output-port "(load \"transformer-macros.ss\")~%~%")
+	     (if *include-define*-in-ds-code?*
+		 (fprintf output-port "(load \"transformer-macros.ss\")~%~%"))
 	     ;; did we see a define-datatype or cases form?
 	     (if need-eopl-support?
 	       (begin
 		 (fprintf output-port ";;~a~%" (make-string 70 #\-))
 		 (fprintf output-port ";; EOPL support~%~%")
-		 (fprintf output-port "(load \"petite-init.ss\")~%")
-		 (fprintf output-port "(load \"define-datatype.ss\")~%~%")
-		 (for-each (print-exp output-port) eopl-defs)))
+		 (if *include-eopl-define-datatype-in-ds-code?*
+		   (begin
+		     (fprintf output-port "(load \"petite-init.ss\")~%")
+		     (fprintf output-port "(load \"define-datatype.ss\")~%~%")
+		     (for-each (print-exp output-port) eopl-defs))
+		   (begin
+		     (for-each
+		       (lambda (dd)
+			 (fprintf output-port ";; ~a datatype~%" (cadr dd))
+			 (for-each
+			   (lambda (def) (pretty-print def output-port))
+			   (expand-eopl-define-datatype dd))
+			 (newline output-port))
+		       eopl-defs)))))
 	     ;; write datatype code
 	     (for-each
 	       (lambda (dt) (dt 'print-code output-port))
@@ -225,6 +243,11 @@
     (and (list? exp)
 	 (not (null? exp))
 	 (eq? (car exp) 'define-datatype))))
+
+(define expand-eopl-define-datatype
+  (lambda (def)
+    (map (lambda (name) `(define ,name (lambda args (cons ',name args))))
+	 (map car (cdddr def)))))
 
 (define function-definition?
   (lambda (exp)
@@ -332,9 +355,12 @@
 	    (begin exps
 	      `(begin ,@(map (transform params) exps)))
 	    ((define define*) (name . bodies)
-	     (if (mit-style? code)
-	       ((transform params) (mit-define->define code))
-	       `(,(car code) ,name ,((transform params) (car bodies)))))
+	     (cond
+	       ((mit-style? code)
+		((transform params) (mit-define->define code)))
+	       (*include-define*-in-ds-code?*
+		`(,(car code) ,name ,((transform params) (car bodies))))
+	       (else `(define ,name ,((transform params) (car bodies))))))
 	    (define-syntax args code)
 	    (and exps
 	      `(and ,@(map (transform params) exps)))
@@ -347,13 +373,17 @@
 	      `(record-case ,((transform params) exp)
 		 ,@(transform-record-case-clauses clauses params)))
 	    ;; EOPL
-	    (define-datatype args
-	      (set! need-eopl-support? #t)
-	      code)
+	    (define-datatype args code)
 	    (cases (type exp . clauses)
 	      (set! need-eopl-support? #t)
-	      `(cases ,type ,((transform params) exp)
-		 ,@(transform-record-case-clauses clauses params)))
+	      (if *include-eopl-define-datatype-in-ds-code?*
+		`(cases ,type ,((transform params) exp)
+		   ,@(transform-record-case-clauses clauses params))
+		((transform params) `(record-case ,exp ,@clauses))))
+	    (halt* (value)
+	      (if *include-define*-in-ds-code?*
+		`(halt* ,((transform params) value))
+		((transform params) value)))
 	    (else (if (memq (car code) syntactic-keywords)
 		    (error-in-source code
 		      "I don't know how to process the above code.")

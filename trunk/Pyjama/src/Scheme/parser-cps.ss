@@ -220,10 +220,6 @@
 	`(let ((r ,exp) ,@(map rc-clause->let-binding clauses))
 	   (cond ,@(map rc-clause->cond-clause clauses)))))))
 
-(define cases-transformer
-  (lambda (datum)
-    (record-case-transformer (cons 'record-case (cddr datum)))))
-
 (define make-macro-env
   (lambda ()
     (make-initial-environment

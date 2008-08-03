@@ -1,6 +1,8 @@
 (load "ds-transformer.ss")
 
-(define *remove-record-case?* #t)
+;; default transformer settings
+(define *include-eopl-define-datatype-in-registerized-code?* #f)
+(define *include-define*-in-registerized-code?* #t)
 
 ;; assumes:
 ;; - code in first-order tail form
@@ -52,6 +54,8 @@
 ;;  (lambda (source-files)
 ;;    (union-all (map get-defined-symbols source-files))))
 
+(define need-eopl-support? #f)
+
 (define make-register-table
   (lambda ()
     (let ((all-registers '(final_reg))
@@ -96,6 +100,7 @@
 (define reg-transform-file
   (lambda (source-file . opts)
     (set! register-table (make-register-table))
+    (set! need-eopl-support? #f)
     (let ((eopl-defs '())
 	  (defs '()))
       (letrec
@@ -104,15 +109,15 @@
 	     (let ((exp (read input-port)))
 	       (if (eof-object? exp)
 		 (begin
-		  (set! eopl-defs (reverse eopl-defs))
-		  (set! defs (reverse (map reg-transform defs))))
+		   (set! eopl-defs (reverse eopl-defs))
+		   (set! defs (reverse (map reg-transform defs))))
 		 (begin
 		   (cond
+		     ((eopl-define-datatype? exp)
+		      (set! need-eopl-support? #t)
+		      (set! eopl-defs (cons exp eopl-defs)))
 		     ((or (define? exp) (define*? exp))
 		      (set! defs (cons (preprocess-define exp) defs)))
-		     ((eopl-define-datatype? exp)
-		      (set! eopl-defs (cons exp eopl-defs))
-		      (set! need-eopl-support? #t))
 		     ;; skip top level calls to load
 		     (else 'skip))
 		   (transform-definitions input-port))))))
@@ -123,15 +128,27 @@
 	       (newline output-port))))
 	 (print-code
 	   (lambda (output-port)
-	     (fprintf output-port "(load \"transformer-macros.ss\")~%~%")
+	     (if *include-define*-in-registerized-code?*
+		 (fprintf output-port "(load \"transformer-macros.ss\")~%~%"))
 	     ;; did we see a define-datatype or cases form?
 	     (if need-eopl-support?
 	       (begin
 		 (fprintf output-port ";;~a~%" (make-string 70 #\-))
 		 (fprintf output-port ";; EOPL support~%~%")
-		 (fprintf output-port "(load \"petite-init.ss\")~%")
-		 (fprintf output-port "(load \"define-datatype.ss\")~%~%")
-		 (for-each (print-exp output-port) eopl-defs)))
+		 (if *include-eopl-define-datatype-in-registerized-code?*
+		   (begin
+		     (fprintf output-port "(load \"petite-init.ss\")~%")
+		     (fprintf output-port "(load \"define-datatype.ss\")~%~%")
+		     (for-each (print-exp output-port) eopl-defs))
+		   (begin
+		     (for-each
+		       (lambda (dd)
+			 (fprintf output-port ";; ~a datatype~%" (cadr dd))
+			 (for-each
+			   (lambda (def) (pretty-print def output-port))
+			   (expand-eopl-define-datatype dd))
+			 (newline output-port))
+		       eopl-defs)))))
 	     ;; global registers
 	     (fprintf output-port ";;~a~%~%" (make-string 70 #\-))
 	     (fprintf output-port ";; global registers~%")
@@ -194,7 +211,9 @@
 	      (new-lambda (rename-lambda-formals registers lambda-exp))
 	      (new-bodies (cddr new-lambda)))
 	 (register-table 'add-function name registers)
-	 `(define* ,name (lambda () ,@new-bodies))))
+	 (if *include-define*-in-registerized-code?*
+	     `(define* ,name (lambda () ,@new-bodies))
+	     `(define ,name (lambda () ,@new-bodies)))))
       (else def))))
 
 (define reg-transform
@@ -261,11 +280,14 @@
 	    (record-case (exp . clauses)
 	      `(record-case ,(transform exp)
 		 ,@(transform-record-case-clauses clauses)))
-	    ;; EOPL (should never see a define-datatype at this point)
+	    ;; EOPL
+	    (define-datatype args code)
 	    (cases (type exp . clauses)
 	      (set! need-eopl-support? #t)
-	      `(cases ,type ,(transform exp)
-		 ,@(transform-record-case-clauses clauses)))
+	      (if *include-eopl-define-datatype-in-registerized-code?*
+		`(cases ,type ,(transform exp)
+		   ,@(transform-record-case-clauses clauses))
+		(transform `(record-case ,exp ,@clauses))))
 	    (halt* (value)
 	      `(begin (set! final_reg ,value) (set! pc #f)))
 	    (else (cond
