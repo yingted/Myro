@@ -29,7 +29,7 @@
 (define db
   (lambda args
     ;; or nothing to debug off
-    (apply printf args)
+    ;;(apply printf args)
     'ok
     ))
 
@@ -134,9 +134,11 @@
 
 (define convert-block-2
   (lambda (statements)
-    (db "convert-function-def: '~s'~%" statements)
+    (db "convert-block-2: '~s'~%" statements)
     (cond
      ((null? statements) '())
+     ((not (list? statements))
+      (convert-exp statements))
      ((null? (car statements))
       (convert-block-2 (cdr statements)))
      ((null? (cdr statements))
@@ -154,12 +156,54 @@
     (db "convert-function-def-2: '~s'~%" statements)
     (cond
      ((null? statements) '(return null #\; #\newline))
+     ((not (list? statements))
+      (list 'return (convert-exp statements) #\; #\newline))
      ((null? (car statements))
       (convert-function-def-2 (cdr statements)))
      ((null? (cdr statements))
       (list 'return (convert-statement (car statements))))
      (else (cons (convert-statement (car statements))
 		 (convert-function-def-2 (cdr statements)))))))
+
+(define signatures
+  '(
+    (function void (int int int))
+    (fact int (int))
+    (Main void ("string []"))
+    ))
+
+(define get-sig
+  (lambda (name signatures)
+    (cond
+     ((null? signatures) '(void ())) ;; no return, no params
+     ((eq? name (caar signatures)) (list (cadar signatures)
+					 (caddar signatures)))
+     (else (get-sig name (cdr signatures))))))
+
+(define convert-parameters
+  (lambda (name args param-types)
+    (join-list (map (lambda (type arg)
+		      (list (format "~a" type)
+			    (convert-string (proper-name arg))))
+		    param-types args)
+	       #\,)))
+
+
+(define convert-define
+  (lambda (name args body)
+    (db "convert-define: (~a ~a ~a)~%" name args body)
+    (let ((types (get-sig name signatures)))
+      (let ((return-type (car types))
+	    (param-types (cadr types)))
+	(if (symbol? args) ;; (lambda args body)
+	    (list 'public 'static (format "~a" return-type) (proper-name name) #\(
+		  'params 'object #\[ #\] args 
+		  (convert-block body))
+	    (list
+	     'public 'static return-type (proper-name name) #\(
+	     (convert-parameters name args param-types)
+	     #\) 
+	     (convert-block body)))))))
 
 (define convert-statement
   (lambda (statement)
@@ -175,23 +219,11 @@
 		 '())
 	       (let ((args (cadr lamb))
 		     (body (cddr lamb)))
-		 (if (symbol? args)
-		     (set! args (list 'varargs args))
-		     (list
-		      'public 'static 'void (proper-name name) #\(
-		      (join-list (map (lambda (name)
-					(proper-name name))
-				      args)
-				 #\,)
-		      #\) 
-		      ;; FIXME if void convert-block, else convert-function-def
-		      (convert-block body)
-		      ;; (convert-function def body)
-		      )))))
+		 (convert-define name args body))))
 	 (if (test-part true-part false-part)
 	   (list
 	    'if #\(
-	    (convert-exp test-part)
+	    (convert-exp test-part) 
 	    #\) #\{ #\newline
 	    (convert-exp true-part)
 	    (convert-exp false-part)))
@@ -221,11 +253,12 @@
 	 (cond cond-list ;; (cond (test ret) (test ret))
 	   (begin
 	     (db "case-list: ~s~%" cond-list)
-	     (convert-cond (caar cond-list)
-			(cadar cond-list)
-			(cdr cond-list))))
+	     (convert-cond cond-list)))
 	 (else ;; apply (proc args...)
-	  (convert-application (car statement) (cdr statement)))))))
+	  (cond
+	   ((list? statement) 
+	    (convert-application (car statement) (cdr statement)))
+	   (else (list (convert-exp statement) #\;))))))))
   
 (define convert-exp
   (lambda (exp)
@@ -289,20 +322,27 @@
 			    (cdr rest))))))
 
 (define convert-cond
-  (lambda (if-exp then-statements rest)
-    (db "convert-cond: ")
-    (db "   if: ~a" if-exp)
-    (db "   then: ~a" then-statements)
-    (db "   rest: ~a" rest)
-    (db "~%")
-    (if (null? rest) ;; if () { body }
-	(list 'if #\( (convert-exp if-exp) #\) 
-	      (convert-block then-statements))
-	(list 'if #\( (convert-exp if-exp) #\) 
-	      (convert-block then-statements)
-	      'else 
-	      (convert-cond (caar rest) (cadar rest)
-			 (cdr rest))))))
+  (lambda (cond-list)
+    (if (null? cond-list)
+	'()
+	(let ((if-exp (caar cond-list))
+	      (then-statements (cadar cond-list))
+	      (rest (cdr cond-list)))
+	  (db "convert-cond: ")
+	  (db "   if: ~a" if-exp)
+	  (db "   then: ~a" then-statements)
+	  (db "   rest: ~a" rest)
+	  (db "~%")
+	  (let ((test-exp (convert-exp if-exp)))
+	    (if (eq? test-exp 'else)
+		(convert-function-def (list then-statements))		
+		(if (null? rest) ;; if () { body }
+		    (list 'if #\( text-exp  #\)
+			  (convert-function-def (list then-statements)))
+		    (list 'if #\( (convert-exp if-exp) #\)
+			  (convert-function-def (list then-statements))
+			  'else
+			  (convert-cond rest)))))))))
 
 (define pp
   (lambda (exp)
@@ -327,7 +367,11 @@
      ((eq? thing #\;) ";")
      ((eq? thing #\newline) "\n")
      ((char? thing) (string-append (list->string (list thing)) ""))
-     ((string? thing) (format "\"~a\"" thing))
+     ((string? thing) 
+      (if (and (> (string-length thing) 0)
+	       (eq? (string-ref thing 0) '!))
+	  (format "~a" (substr thing 1 (- (string-length thing) 1)))
+	  (format "\"~a\"" thing)))
      ((symbol? thing) (format "~a" thing))
      ((list? thing) 
       (apply string-append (map convert-string thing)))
