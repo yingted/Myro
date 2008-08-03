@@ -1,7 +1,7 @@
 MCS=gmcs
 
 
-pjscheme.ss: environments-cps.ss parser-cps.ss unifier-cps.ss interpreter-cps.ss reader-cps.ss
+pjscheme-reg.ss: environments-cps.ss parser-cps.ss unifier-cps.ss interpreter-cps.ss reader-cps.ss
 	cat *cps.ss > pjscheme.ss
 	echo "(load \"rm-transformer.ss\")(ds-transform-file \"pjscheme.ss\" \"pjscheme-ds.ss\")(reg-transform-file \"pjscheme-ds.ss\" \"pjscheme-reg.ss\")(exit)" > compile.ss
 	petite compile.ss
