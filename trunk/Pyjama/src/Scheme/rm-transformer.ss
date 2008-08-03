@@ -462,3 +462,12 @@
       (else (cons (param->reg-name (car params)) (get-register-names (cdr params)))))))
 
 
+(define compile
+  (lambda (base-filename)
+    (delete-file (string-append base-filename "-ds.ss"))
+    (delete-file (string-append base-filename "-rm.ss"))
+    (ds-transform-file (string-append base-filename ".ss")
+		       (string-append base-filename "-ds.ss"))
+    (reg-transform-file (string-append base-filename "-ds.ss")
+		       (string-append base-filename "-rm.ss"))
+    'done!))
