@@ -21,7 +21,7 @@
 (define convert-program
   (lambda (defs filename)
     (db "convert-program: '~s'~%" defs)
-    (let ((name (string->symbol (car (split filename #\.)))))
+    (let ((name (proper-name (string->symbol (car (split filename #\.))))))
       `(public class ,name #\{ #\newline
 	       ,@(flatmap convert-define defs)
 	       #\} #\newline))))
@@ -183,7 +183,7 @@
 	 '())
 	((define? def)
 	 ;; def = (define name value)
-	 `(static object ,name = null #\; #\newline))
+	 `(static object ,(proper-name name) = null #\; #\newline))
 	(else
 	 (begin
 	   (printf "Ignoring application ~a~%" def)
@@ -203,11 +203,11 @@
 	    #\ 'else
 	    (convert-block (list false-part))))
        (quote (item)
-	     (list (convert-string item) #\; #\newline))
+	     (list (format "\"~a\"" item) #\; #\newline))
        (set! (sym exp)
 	       (list
 		(proper-name sym)
-		#\= 
+		#\= #\( 'object #\)
 		(convert-exp exp)
 		#\; #\newline))
        (let (args . exps)
@@ -219,15 +219,19 @@
        (load (filename) '())
        (define-datatype (filename) '())
        (case (item . case-list) ;; (case a (a 1) ...)
-	   (convert-case item case-list))
-       (cases (items-case-list) ;; (case a (a 1) ...)
-	   (convert-case item case-list))
+	   ;;(convert-case item case-list))
+	   '())
+       (cases items-case-list ;; (case a (a 1) ...)
+	   ;;(convert-case item case-list))
+	   '())
        (record-case (item . case-list)   ;; (record-case a (a () 1) ...)
-	   (convert-record-case item case-list))
+	   ;;(convert-record-case item case-list))
+	   '())
        (cond cond-list ;; (cond (test ret) (test ret))
-	   (convert-cond cond-list))
+	   ;;(convert-cond cond-list))
+	   '())
        (else ;; apply (proc args...)
-	   (convert-application (car statement) (cdr statement))))))
+	   (list (convert-application (car statement) (cdr statement)) #\; #\newline)))))
   
 (define convert-exp
   (lambda (exp)
@@ -235,7 +239,7 @@
     (if (pair? exp)
 	(cond
 	 ((eq? (car exp) 'quote) 
-	  (convert-string (cadr exp)))
+	  (format "\"~a\"" (cadr exp)))
 	 (else
 	  (convert-application (car exp) (cdr exp))))
 	exp)))
@@ -255,7 +259,7 @@
      (else
       (list (proper-name proc) 
 	    #\( (join-list (map convert-exp args) #\,)
-	    #\) #\; #\newline)))))
+	    #\))))))
 
 (define convert-case
   ;; (case item (test then)(test then)...)
