@@ -1,3 +1,5 @@
+(case-sensitive #t)
+
 (define scheme-to-csharp
   (lambda (filename . output)
     (let* ((port (open-input-file filename))
