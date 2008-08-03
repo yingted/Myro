@@ -1,17 +1,42 @@
+;; temporary - to access various utilities (define*? etc.)
+(load "rm-transformer.ss")
+
 (case-sensitive #t)
 
-(define scheme-to-csharp
-  (lambda (filename . output)
-    (let* ((port (open-input-file filename))
-	   (sexps (read-sexps port))
-	   (prog (convert-file sexps filename)))
-      prog)))
+;; for testing
+(define get-sexps
+  (lambda (filename)
+    (call-with-input-file filename
+      (lambda (port)
+	(read-defs port)))))
 
-;;       (if (null? output)
-;; 	  prog
-;; 	  (let ((name (string->symbol (car (split filename #\.))))
-;; 		(port (open-output-file (car output))))
-;; 	    (display (flatten prog) port))))))
+(define convert-file
+  (lambda (filename . output)
+    (call-with-input-file filename
+      (lambda (port)
+	(let* ((defs (read-defs port))
+	       (prog (convert-program defs filename)))
+	  prog)))))
+
+(define convert-program
+  (lambda (defs filename)
+    (db "convert-program: '~s'~%" defs)
+    (let ((name (string->symbol (car (split filename #\.)))))
+      `(public class ,name #\{ #\newline
+	       ,@(map convert-define defs)
+	       #\} #\newline))))
+
+;;(define convert-definitions
+;;  (lambda (defs)
+;;    (db "convert-definitions: '~s'~%" defs)
+;;    (if (null? defs)
+;;	'()
+;;	(cons (convert-definition (car defs))
+;;	      (convert-definitions (cdr defs))))))
+
+(define flatmap
+  (lambda (f l)
+    (apply append (map f l))))
 
 (define flatten
   (lambda (l)
@@ -20,12 +45,12 @@
      ((null? l) '())
      (else (apply append (map flatten l))))))
 
-(define read-sexps
+(define read-defs
   (lambda (port)
     (let ((sexp (read port)))
-      (if (eq? sexp #!eof)
+      (if (eof-object? sexp)
 	  '()
-	  (cons sexp (read-sexps port))))))
+	  (cons sexp (read-defs port))))))
 
 ;; debug
 (define db
@@ -34,22 +59,6 @@
     ;;(apply printf args)
     'ok
     ))
-
-(define convert-file
-  (lambda (sexps filename)
-    (db "convert-file: '~s'~%" sexps)
-    (let ((name (string->symbol (car (split filename #\.)))))
-      (list 'public 'class name #\{ #\newline
-	    (convert-statement-list sexps)
-	    #\} #\newline))))
-
-(define convert-statement-list
-  (lambda (sexps)
-    (db "convert-statement-list: '~s'~%" sexps)
-    (if (null? sexps)
-	'()
-	(cons (convert-statement (car sexps))
-	      (convert-statement-list (cdr sexps))))))
 
 (define proper-name
   (lambda (name)
@@ -132,40 +141,7 @@
 (define convert-block
   (lambda (statements)
     (db "convert-block: '~s'~%" statements)
-    (list #\{ #\newline (convert-block-2 statements) #\} #\newline)))
-
-(define convert-block-2
-  (lambda (statements)
-    (db "convert-block-2: '~s'~%" statements)
-    (cond
-     ((null? statements) '())
-     ((not (list? statements))
-      (convert-exp statements))
-     ((null? (car statements))
-      (convert-block-2 (cdr statements)))
-     ((null? (cdr statements))
-      (list (convert-statement (car statements))))
-     (else (cons (convert-statement (car statements))
-		 (convert-block-2 (cdr statements)))))))
-
-(define convert-function-def
-  (lambda (statements)
-    (db "convert-function-def: '~s'~%" statements)
-    (list #\{ #\newline (convert-function-def-2 statements) #\} #\newline)))
-
-(define convert-function-def-2
-  (lambda (statements)
-    (db "convert-function-def-2: '~s'~%" statements)
-    (cond
-     ((null? statements) '(return null #\; #\newline))
-     ((not (list? statements))
-      (list 'return (convert-exp statements) #\; #\newline))
-     ((null? (car statements))
-      (convert-function-def-2 (cdr statements)))
-     ((null? (cdr statements))
-      (list 'return (convert-statement (car statements))))
-     (else (cons (convert-statement (car statements))
-		 (convert-function-def-2 (cdr statements)))))))
+    `(#\{ #\newline ,@(flatmap convert-statement statements) #\} #\newline)))
 
 (define signatures
   '(
@@ -185,27 +161,32 @@
 (define convert-parameters
   (lambda (name args param-types)
     (join-list (map (lambda (type arg)
-		      (list (format "~a" type)
-			    (convert-string (proper-name arg))))
+		      (format "~a ~a" type (proper-name arg)))
 		    param-types args)
 	       #\,)))
 
-
 (define convert-define
-  (lambda (name args body)
-    (db "convert-define: (~a ~a ~a)~%" name args body)
-    (let ((types (get-sig name signatures)))
-      (let ((return-type (car types))
-	    (param-types (cadr types)))
-	(if (symbol? args) ;; (lambda args body)
-	    (list 'public 'static (format "~a" return-type) (proper-name name) #\(
-		  'params 'object #\[ #\] args 
-		  (convert-block body))
-	    (list
-	     'public 'static return-type (proper-name name) #\(
-	     (convert-parameters name args param-types)
-	     #\) 
-	     (convert-block body)))))))
+  (lambda (def)
+    (db "convert-define: (~a)~%" def)
+    (let ((name (cadr def)))
+      (cond
+	((define*? def)
+	 (let* ((types (get-sig name signatures))
+		(return-type (car types))
+		(param-types (cadr types)))
+	   ;; def = (define* name (lambda args body ...))
+	   (let ((args (cadr (caddr def)))
+		 (bodies (cddr (caddr def))))
+	     `(public static ,return-type ,(proper-name name)
+		      #\( ,@(convert-parameters name args param-types) #\) 
+		      ,@(convert-block bodies)))))
+	((lambda? (caddr def))
+	 ;; primitive function
+	 ;; def = (define name (lambda args body ...))
+	 (printf "Ignoring primitive function ~a~%" name))
+	(else
+	  ;; def = (define name value)
+	 `(static object ,name = null))))))
 
 (define convert-statement
   (lambda (statement)
@@ -217,7 +198,7 @@
 	   (if (not (and (list? lamb) 
 			 (eq? (car lamb) 'lambda)))
 	       (begin 
-		 (printf "skipping: ~a" statement)
+		 (printf "skipping: ~a~%" statement)
 		 '())
 	       (let ((args (cadr lamb))
 		     (body (cddr lamb)))

@@ -123,6 +123,7 @@
 	       (newline output-port))))
 	 (print-code
 	   (lambda (output-port)
+	     (fprintf output-port "(load \"transformer-macros.ss\")~%~%")
 	     ;; did we see a define-datatype or cases form?
 	     (if need-eopl-support?
 	       (begin
@@ -193,7 +194,7 @@
 	      (new-lambda (rename-lambda-formals registers lambda-exp))
 	      (new-bodies (cddr new-lambda)))
 	 (register-table 'add-function name registers)
-	 `(define ,name (lambda () ,@new-bodies))))
+	 `(define* ,name (lambda () ,@new-bodies))))
       (else def))))
 
 (define reg-transform
@@ -247,8 +248,8 @@
 	      `(set! ,var ,(transform rhs-exp)))
 	    (begin exps
 	      `(begin ,@(map transform exps)))
-	    (define (name body)
-	      `(define ,name ,(transform body)))
+	    ((define define*) (name body)
+	      `(,(car code) ,name ,(transform body)))
 	    (define-syntax args code)
 	    (and exps
 	      `(and ,@(map transform exps)))
