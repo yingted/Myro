@@ -23,16 +23,8 @@
     (db "convert-program: '~s'~%" defs)
     (let ((name (string->symbol (car (split filename #\.)))))
       `(public class ,name #\{ #\newline
-	       ,@(map convert-define defs)
+	       ,@(flatmap convert-define defs)
 	       #\} #\newline))))
-
-;;(define convert-definitions
-;;  (lambda (defs)
-;;    (db "convert-definitions: '~s'~%" defs)
-;;    (if (null? defs)
-;;	'()
-;;	(cons (convert-definition (car defs))
-;;	      (convert-definitions (cdr defs))))))
 
 (define flatmap
   (lambda (f l)
@@ -133,15 +125,16 @@
      (else 
       (append
        (list
-	'if 
-	(convert-exp (caar cases))  
-	(convert-block (cadar cases))
+	'if #\( (convert-exp (caar cases)) #\)
+	(convert-block (cdar cases))
 	(convert-case (cdr cases))))))))
 
 (define convert-block
   (lambda (statements)
     (db "convert-block: '~s'~%" statements)
-    `(#\{ #\newline ,@(flatmap convert-statement statements) #\} #\newline)))
+    (if (eq? (car statements) 'begin)
+	(convert-block (cdr statements))
+	`(#\{ #\newline ,@(flatmap convert-statement statements) #\} #\newline))))
 
 (define signatures
   '(
@@ -160,14 +153,17 @@
 
 (define convert-parameters
   (lambda (name args param-types)
-    (join-list (map (lambda (type arg)
-		      (format "~a ~a" type (proper-name arg)))
-		    param-types args)
-	       #\,)))
+    (db "convert-parameters: ~a(~a) <= ~a ~%" name args param-types)
+    (if (not (eq? (length args) (length param-types)))
+	(error 'convert-parameters "Incorrect param sig for '~a'" name)
+	(join-list (map (lambda (type arg)
+			  (format "~a ~a" type (proper-name arg)))
+			param-types args)
+		   #\,))))
 
 (define convert-define
   (lambda (def)
-    (db "convert-define: (~a)~%" def)
+    (db "convert-define: ~a~%" def)
     (let ((name (cadr def)))
       (cond
 	((define*? def)
@@ -180,84 +176,76 @@
 	     `(public static ,return-type ,(proper-name name)
 		      #\( ,@(convert-parameters name args param-types) #\) 
 		      ,@(convert-block bodies)))))
-	((lambda? (caddr def))
+	((and (> (length def) 2) (lambda? (caddr def)))
 	 ;; primitive function
 	 ;; def = (define name (lambda args body ...))
-	 (printf "Ignoring primitive function ~a~%" name))
+	 (printf "Ignoring primitive function ~a~%" name)
+	 '())
+	((define? def)
+	 ;; def = (define name value)
+	 `(static object ,name = null #\; #\newline))
 	(else
-	  ;; def = (define name value)
-	 `(static object ,name = null))))))
+	 (begin
+	   (printf "Ignoring application ~a~%" def)
+	   '()))))))
 
 (define convert-statement
   (lambda (statement)
     (db "convert-statement: '~s'~%" statement)
-    (if (not (pair? statement))
-	(list (convert-exp statement) #\; #\newline)
-	(record-case statement
-	 (define (name lamb)  ;; (define name (lambda (args) body))
-	   (if (not (and (list? lamb) 
-			 (eq? (car lamb) 'lambda)))
-	       (begin 
-		 (printf "skipping: ~a~%" statement)
-		 '())
-	       (let ((args (cadr lamb))
-		     (body (cddr lamb)))
-		 (convert-define name args body))))
-	 (if (test-part true-part false-part)
+    (record-case statement
+       (if (test-part true-part false-part)
+	   ;; FIXME: if false-part
 	   (list
 	    'if #\(
 	    (convert-exp test-part) 
-	    #\) #\{ #\newline
-	    (convert-exp true-part)
-	    (convert-exp false-part)))
-	 (quote (item)
+	    #\) 
+	    (convert-block true-part)
+	    #\ 'else
+	    (convert-block (list false-part))))
+       (quote (item)
 	     (list (convert-string item) #\; #\newline))
-	 (set! (sym exp)
+       (set! (sym exp)
 	       (list
 		(proper-name sym)
 		#\= 
 		(convert-exp exp)
 		#\; #\newline))
-	 (begin (exps)
+       (let (args . exps)
+	 ;; FIXME: do temp vars
+	 ;; FIXME: block?
+	 (list 'let '...))
+       (begin exps
 	   (convert-block exps))
-	 (load (filename) '())
-	 (define-datatype (filename) '())
-	 (case (item case-list) ;; (case a (a 1) ...)
-	   (convert-case item 
-		      (caar case-list)
-		      (cadar case-list)
-		      (cdr case-list)))
-	 (record-case (item case-list)   ;; (record-case a (a () 1) ...)
-	   (convert-record-case item 
-				(caar case-list)
-				(cadar case-list)
-				(caddar case-list)
-				(cdr case-list)))
-	 (cond cond-list ;; (cond (test ret) (test ret))
-	   (begin
-	     (db "case-list: ~s~%" cond-list)
-	     (convert-cond cond-list)))
-	 (else ;; apply (proc args...)
-	  (cond
-	   ((list? statement) 
-	    (convert-application (car statement) (cdr statement)))
-	   (else (list (convert-exp statement) #\;))))))))
+       (load (filename) '())
+       (define-datatype (filename) '())
+       (case (item . case-list) ;; (case a (a 1) ...)
+	   (convert-case item case-list))
+       (cases (items-case-list) ;; (case a (a 1) ...)
+	   (convert-case item case-list))
+       (record-case (item . case-list)   ;; (record-case a (a () 1) ...)
+	   (convert-record-case item case-list))
+       (cond cond-list ;; (cond (test ret) (test ret))
+	   (convert-cond cond-list))
+       (else ;; apply (proc args...)
+	   (convert-application (car statement) (cdr statement))))))
   
 (define convert-exp
   (lambda (exp)
     (db "convert-exp: '~s'~%" exp)
     (if (pair? exp)
 	(cond
-	 ((eq? (car exp) 'quote) (convert-string (cadr exp)))
+	 ((eq? (car exp) 'quote) 
+	  (convert-string (cadr exp)))
 	 (else
 	  (convert-application (car exp) (cdr exp))))
 	exp)))
 
 (define convert-application
   (lambda (proc args)
+    (db "convert-application: ~a(~a)~%" proc args)
     (case proc
      ((+ - * / eq? =? = set! && ||)  ;; infix
-      ;; handles only binary procs
+      ;; infix: handles only binary procs
       (list 
        #\(
        (convert-exp (car args))
@@ -267,82 +255,84 @@
      (else
       (list (proper-name proc) 
 	    #\( (join-list (map convert-exp args) #\,)
-	    #\))))))
+	    #\) #\; #\newline)))))
 
 (define convert-case
-  (lambda (item if-exp then-statements rest)
-    (db "convert-case: ")
-    (db "   item: ~a" item)
-    (db "   if: ~a" if-exp)
-    (db "   then: ~a" then-statements)
-    (db "   rest: ~a" rest)
-    (db "~%")
-    (if (null? rest) ;; if () { body }
+  ;; (case item (test then)(test then)...)
+  ;; item ((test then) (test then)...)
+  (lambda (item case-list)
+    (let ((if-exp (caar case-list))
+	  (then-exp (cdar case-list))
+	  (rest (cdr case-list)))
+      (db "convert-case: ~%")
+      (db "   item: ~a~%" item)
+      (db "     if: ~a~%" if-exp)
+      (db "   then: ~a~%" then-exp)
+      (db "   rest: ~a~%" rest)
+      (db "~%")
+      (cond ;; else 
+       ((eq? if-exp 'else)
+	(list 'else (convert-block then-exp)))
+       ((null? rest) ;; if () { body }
 	(list 'if #\( (convert-exp if-exp) '== item #\) 
-	      (convert-block then-statements))
+	      (convert-block then-exp)))
+       (else 
 	(list 'if #\( (convert-exp if-exp) '== item #\) 
-	      (convert-block then-statements)
+	      (convert-block then-exp)
 	      'else 
-	      (convert-case item (caar rest) (cadar rest)
-			 (cdr rest))))))
+	      (convert-case item rest)))))))
+
+(define convert-cond 
+  ;; (cond (test then)(test then)...)
+  ;; ((test then) (test then)...)
+  (lambda (cond-list)
+    (let ((if-exp (caar cond-list))
+	  (then-exp (cdar cond-list))
+	  (rest (cdr cond-list)))
+      (printf "convert-cond: ~%")
+      (printf "     if: ~a~%" if-exp)
+      (printf "   then: ~a~%" then-exp)
+      (printf "   rest: ~a~%" rest)
+      (printf "~%")
+      (cond ;; else 
+       ((eq? if-exp 'else)
+	(list 'else (convert-block then-exp)))
+       ((null? rest) ;; if () { body }
+	(list 'if #\( (convert-exp if-exp) #\) 
+	      (convert-block then-exp)))
+       (else 
+	(list 'if #\( (convert-exp if-exp) #\) 
+	      (convert-block then-exp)
+	      'else 
+	      (convert-cond rest)))))))
 
 (define convert-record-case
   ;; (record-case item (m () body) ...)
-  (lambda (item if-exp args then-statements rest)
-    (db "convert-record-case: ")
-    (db "   item: ~a" item)
-    (db "   if: ~a" if-exp)
-    (db "   then: ~a" then-statements)
-    (db "   rest: ~a" rest)
-    (db "~%")
-    (if (null? rest) ;; if () { body }
+  ;; item ((m () body)...)
+  (lambda (item case-list)
+    (let ((if-exp (caar case-list))
+	  (then-exp (cddar case-list))
+	  (vars (cadar case-list))
+	  (rest (cdr case-list)))
+      (db "convert-record-case: ~%")
+      (db "   item: ~a~%" item)
+      (db "     if: ~a~%" if-exp)
+      (db "   then: ~a~%" then-exp)
+      (db "   vars: ~a~%" vars)
+      (db "   rest: ~a~%" rest)
+      (db "~%")
+      ;; FIXME: set temp vars
+      (cond ;; else 
+       ((eq? if-exp 'else)
+	(list 'else (convert-block (list vars))))
+       ((null? rest) ;; if () { body }
 	(list 'if #\( (convert-exp if-exp) '== item #\) 
-	      (convert-block then-statements))
+	      (convert-block then-exp)))
+       (else 
 	(list 'if #\( (convert-exp if-exp) '== item #\) 
-	      (convert-block then-statements)
+	      (convert-block then-exp)
 	      'else 
-	      (convert-case item (caar rest) (cadar rest)
-			    (cdr rest))))))
-
-(define convert-cond
-  (lambda (cond-list)
-    (if (null? cond-list)
-	'()
-	(let ((if-exp (caar cond-list))
-	      (then-statements (cadar cond-list))
-	      (rest (cdr cond-list)))
-	  (db "convert-cond: ")
-	  (db "   if: ~a" if-exp)
-	  (db "   then: ~a" then-statements)
-	  (db "   rest: ~a" rest)
-	  (db "~%")
-	  (let ((test-exp (convert-exp if-exp)))
-	    (if (eq? test-exp 'else)
-		(convert-function-def (list then-statements))		
-		(if (null? rest) ;; if () { body }
-		    (list 'if #\( text-exp  #\)
-			  (convert-function-def (list then-statements)))
-		    (list 'if #\( (convert-exp if-exp) #\)
-			  (convert-function-def (list then-statements))
-			  'else
-			  (convert-cond rest)))))))))
-
-(define pp
-  (lambda (exp)
-    (display (pp-help exp))))
-
-(define pp-help
-  (lambda (args)
-    (cond
-     ((null? args) "")
-     (else (if (list? (car args))
-	       (begin 
-		 (pp-help (car args)) 
-		 (pp-help (cdr args)))
-	       (begin 
-		 (string-append (convert-string (car args))
-				" "
-				(pp-help (cdr args)))))))))
+	      (convert-record-case item rest)))))))
 
 (define convert-string
   (lambda (thing)
@@ -371,14 +361,4 @@
 	(if (eq? rest "")
 	    (car slist)
 	    (string-append (car slist) delim rest)))))))
-
-(define convert-list
-  (lambda (args)
-    (cond
-     ((null? args) "")
-     (else
-      (let ((rest (convert-list (cdr args))))
-	(if (eq? rest "")
-	    (list (convert-exp (car args)) rest)
-	    (list (convert-exp (car args)) #\, rest)))))))
 
