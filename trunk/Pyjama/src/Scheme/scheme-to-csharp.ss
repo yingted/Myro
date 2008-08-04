@@ -99,7 +99,11 @@
 			   (convert-statement true-part)
 			   (convert-statement false-part))))))
        (set! (sym exp)
-	 (format "~a = ~a;\n" (proper-name sym) (convert-exp exp)))
+	 (if (eq? sym 'pc)
+	     (if (eq? exp #f)
+		 "pc = \"\";\n"
+		 (format "pc = \"~a\";\n" (proper-name exp)))
+	     (format "~a = ~a;\n" (proper-name sym) (convert-exp exp))))
        (let (bindings . bodies)
 	 (let* ((vars (map car bindings))
 		(temps (map (lambda (v) (format "object ~a = null;\n"
