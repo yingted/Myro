@@ -223,8 +223,12 @@
 	       `(,tag (lambda ,(cadr clause) ,@(cddr clause))))))))
       (let ((exp (cadr datum))
 	    (clauses (cddr datum)))
+	;; could optimize this by first checking if exp is a variable.
+	;; if so, no need to introduce r binding
 	`(let ((r ,exp) ,@(map rc-clause->let-binding clauses))
 	   (cond ,@(map rc-clause->cond-clause clauses)))))))
+
+;; need case macro too
 
 (define make-macro-env
   (lambda ()
@@ -459,7 +463,7 @@
   (lambda (x)
     (and (symbol? x)
 	 (memq x '(quote quasiquote lambda if set! define begin
-		    cond and or let let* letrec ;; do delay case
+		    cond and or let let* letrec record-case ;; do delay case
 		    try catch finally raise
 		    )))))
 

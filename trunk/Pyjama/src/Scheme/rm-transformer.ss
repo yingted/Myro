@@ -1,33 +1,35 @@
-;; assumes:
+;; assumptions:
 ;; - code in first-order tail form
-;; - define*
+;; - define* functions will be converted to 0 arguments
 ;; - no internal define/define*'s
-;; - no mit-style define/define*'s
 
 (load "ds-transformer.ss")
 
 ;; default transformer settings
 (define *include-eopl-define-datatype-in-registerized-code?* #f)
 (define *include-define*-in-registerized-code?* #t)
-(define *generate-low-level-registerized-code?* #t)
+(define *generate-low-level-registerized-code?* #f)
 
 (define low-level-output
   (lambda ()
     (set! *include-eopl-define-datatype-in-registerized-code?* #f)
     (set! *include-define*-in-registerized-code?* #f)
-    (set! *generate-low-level-registerized-code?* #t)))
+    (set! *generate-low-level-registerized-code?* #t)
+    (printf "compile level: low-level register code, no define-datatype, no define*~%")))
 
 (define compile-level-output
   (lambda ()
     (set! *include-eopl-define-datatype-in-registerized-code?* #f)
     (set! *include-define*-in-registerized-code?* #t)
-    (set! *generate-low-level-registerized-code?* #t)))
+    (set! *generate-low-level-registerized-code?* #t)
+    (printf "compile level: low-level register code, define* included, no define-datatype~%")))
 
 (define high-level-output
   (lambda ()
     (set! *include-eopl-define-datatype-in-registerized-code?* #t)
     (set! *include-define*-in-registerized-code?* #f)
-    (set! *generate-low-level-registerized-code?* #f)))
+    (set! *generate-low-level-registerized-code?* #f)
+    (printf "compile level: high-level register code, define-datatype included, no define*~%")))
 
 (define compile
   (lambda (base-filename)
@@ -258,11 +260,11 @@
 		(transform (cond-transformer code))
 		`(cond ,@(map (lambda (clause)
 				(if (eq? (car clause) 'else)
-				  `(else ,@(map transform (cdr clause)))
-				  (map transform clause)))
+				  `(else ,@(consolidate (map transform (cdr clause))))
+				  (consolidate (map transform clause))))
 			      clauses))))
 	    (lambda (formals . bodies)
-	      `(lambda ,formals ,@(map transform bodies)))
+	      `(lambda ,formals ,@(consolidate (map transform bodies))))
 	    (let (bindings . bodies)
 	      (if (symbol? bindings)
 		 ;; named let
@@ -272,46 +274,52 @@
 			  (bindings (caddr code))
 			  (bodies (cdddr code))
 			  (vars (map car bindings))
-			  (exps (map cadr bindings)))
-		     `(let ,name ,(map list vars (map transform exps))
-			,@(map transform bodies))))
+			  (exps (map cadr bindings))
+			  (new-bindings (map list vars (map transform exps)))
+			  (new-bodies (consolidate (map transform bodies))))
+		     `(let ,name ,new-bindings ,@new-bodies)))
 		 ;; ordinary let
 		 (if *generate-low-level-registerized-code?*
 		   (let* ((vars (map car bindings))
-			  (texps (map transform (map cadr bindings)))
+			  (exps (map cadr bindings))
+			  (texps (map transform exps))
 			  (assigns (map (lambda (v e) `(set! ,v ,e)) vars texps))
-			  (local-decls (map (lambda (v) `(,v 'undefined)) vars)))
-		     `(let ,local-decls
-			,@(sort-assignments assigns)
-			,@(map transform bodies)))
-		   (let ((vars (map car bindings))
-			 (exps (map cadr bindings)))
-		     `(let ,(map list vars (map transform exps))
-			,@(map transform bodies))))))
+			  (local-decls (map (lambda (v) `(,v 'undefined)) vars))
+			  (new-bodies (consolidate
+					(append (sort-assignments assigns)
+						(map transform bodies)))))
+		     `(let ,local-decls ,@new-bodies))
+		   (let* ((vars (map car bindings))
+			  (exps (map cadr bindings))
+			  (new-bindings (map list vars (map transform exps)))
+			  (new-bodies (consolidate (map transform bodies))))
+		     `(let ,new-bindings ,@new-bodies)))))
 	    (let* (bindings . bodies)
 	      (if *generate-low-level-registerized-code?*
 		(let* ((vars (map car bindings))
-		       (texps (map transform (map cadr bindings)))
+		       (exps (map cadr bindings))
+		       (texps (map transform exps))
 		       (assigns (map (lambda (v e) `(set! ,v ,e)) vars texps))
-		       (local-decls (map (lambda (v) `(,v 'undefined)) vars)))
-		  `(let ,local-decls
-		     ,@assigns
-		     ,@(map transform bodies)))
-		(let ((vars (map car bindings))
-		      (exps (map cadr bindings)))
-		  `(let* ,(map list vars (map transform exps))
-		     ,@(map transform bodies)))))
+		       (local-decls (map (lambda (v) `(,v 'undefined)) vars))
+		       (new-bodies (consolidate (append assigns (map transform bodies)))))
+		  `(let ,local-decls ,@new-bodies))
+		(let* ((vars (map car bindings))
+		       (exps (map cadr bindings))
+		       (new-bindings (map list vars (map transform exps)))
+		       (new-bodies (consolidate (map transform bodies))))
+		  `(let* ,new-bindings ,@new-bodies))))
 	    (letrec (decls . bodies)
 	      (if *generate-low-level-registerized-code?*
 		(transform (letrec-transformer code))
-		(let ((vars (map car decls))
-		      (procs (map cadr decls)))
-		  `(letrec ,(map list vars (map transform procs))
-		     ,@(map transform bodies)))))
+		(let* ((vars (map car decls))
+		       (procs (map cadr decls))
+		       (new-procs (map list vars (map transform procs)))
+		       (new-bodies (consolidate (map transform bodies))))
+		  `(letrec ,new-procs ,@new-bodies))))
 	    (set! (var rhs-exp)
 	      `(set! ,var ,(transform rhs-exp)))
 	    (begin exps
-	      `(begin ,@(map transform exps)))
+	      `(begin ,@(consolidate (map transform exps))))
 	    ((define define*) (name body)
 	      `(,(car code) ,name ,(transform body)))
 	    (define-syntax args code)
@@ -321,7 +329,9 @@
 	      `(or ,@(map transform exps)))
 	    (case (exp . clauses)
 	      (if *generate-low-level-registerized-code?*
-		(let* ((temp (car (make-temp-vars 1 (list code))))
+		(let* ((var (if (symbol? exp)
+			      exp
+			      (car (make-temp-vars 1 (list code)))))
 		       (cond-clauses
 			 (map (lambda (clause)
 				(if (eq? (car clause) 'else)
@@ -329,16 +339,20 @@
 				  (let ((tags (car clause))
 					(conseqs (cdr clause)))
 				    (if (symbol? tags)
-				      `((eq? ,temp ',tags) ,@conseqs)
-				      `((memq ,temp ',tags) ,@conseqs)))))
+				      `((eq? ,var ',tags) ,@conseqs)
+				      `((memq ,var ',tags) ,@conseqs)))))
 			      clauses))
 		       (cond-exp `(cond ,@cond-clauses)))
-		  (transform `(let ((,temp ,exp)) ,cond-exp)))
+		  (if (symbol? exp)
+		    (transform cond-exp)
+		    (transform `(let ((,var ,exp)) ,cond-exp))))
 		`(case ,(transform exp)
 		   ,@(transform-case-clauses clauses))))
 	    (record-case (exp . clauses)
 	      (if *generate-low-level-registerized-code?*
-		(let* ((temp (car (make-temp-vars 1 (list code))))
+		(let* ((var (if (symbol? exp)
+			      exp
+			      (car (make-temp-vars 1 (list code)))))
 		       (cond-clauses
 			 (map (lambda (clause)
 				(if (eq? (car clause) 'else)
@@ -347,13 +361,15 @@
 					(formals (cadr clause))
 					(conseqs (cddr clause)))
 				    (if (symbol? tags)
-				      `((eq? (car ,temp) ',tags)
-					,@(rc-clause->let temp formals conseqs))
-				      `((memq (car ,temp) ',tags)
-					,@(rc-clause->let temp formals conseqs))))))
+				      `((eq? (car ,var) ',tags)
+					,@(rc-clause->let var formals conseqs))
+				      `((memq (car ,var) ',tags)
+					,@(rc-clause->let var formals conseqs))))))
 			      clauses))
 		       (cond-exp `(cond ,@cond-clauses)))
-		  (transform `(let ((,temp ,exp)) ,cond-exp)))
+		  (if (symbol? exp)
+		    (transform cond-exp)
+		    (transform `(let ((,var ,exp)) ,cond-exp))))
 		`(record-case ,(transform exp)
 		   ,@(transform-record-case-clauses clauses))))
 	    ;; EOPL
@@ -388,31 +404,39 @@
 		(cons transformed-uqs (transform-quasiquote (cdr datum))))))
 	   (else
 	     (cons (transform-quasiquote (car datum))
-	       (transform-quasiquote (cdr datum)))))))
+		   (transform-quasiquote (cdr datum)))))))
      (transform-record-case-clauses
        (lambda (clauses)
 	 (map (lambda (clause)
 		(if (eq? (car clause) 'else)
-		  `(else ,@(map transform (cdr clause)))
+		  `(else ,@(consolidate (map transform (cdr clause))))
 		  (let ((tags (car clause))
 			(formals (cadr clause))
 			(bodies (cddr clause)))
-		    `(,tags ,formals ,@(map transform bodies)))))
+		    `(,tags ,formals ,@(consolidate (map transform bodies))))))
 	   clauses)))
      (transform-case-clauses
        (lambda (clauses)
-	 (map (lambda (clause) (cons (car clause) (map transform (cdr clause))))
+	 (map (lambda (clause)
+		(cons (car clause) (consolidate (map transform (cdr clause)))))
 	   clauses))))
     transform))
 
+(define consolidate
+  (lambda (exps)
+    (cond
+      ((null? exps) '())
+      ((begin? (car exps)) (append (cdar exps) (consolidate (cdr exps))))
+      (else (cons (car exps) (consolidate (cdr exps)))))))
+
 (define rc-clause->let
-  (lambda (temp formals conseqs)
+  (lambda (var formals conseqs)
     (letrec
       ((make-bindings
 	 (lambda (i formals)
 	   (if (null? formals)
 	     '()
-	     (cons (list (car formals) `(list-ref ,temp ,i))
+	     (cons (list (car formals) `(list-ref ,var ,i))
 		   (make-bindings (+ i 1) (cdr formals)))))))
       (if (null? formals)
 	conseqs
