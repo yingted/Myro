@@ -8,7 +8,7 @@
 ;; default transformer settings
 (define *include-eopl-define-datatype-in-registerized-code?* #f)
 (define *include-define*-in-registerized-code?* #t)
-(define *generate-low-level-registerized-code?* #f)
+(define *generate-low-level-registerized-code?* #t)
 
 (define low-level-output
   (lambda ()
