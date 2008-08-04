@@ -3,39 +3,35 @@
 
 (case-sensitive #t)
 
-;; for testing
-(define get-sexps
-  (lambda (filename)
-    (call-with-input-file filename
-      (lambda (port)
-	(read-defs port)))))
+(define signatures
+  '(
+    (function void (int int int))
+    (fact int (int))
+    (Main void ("string []"))
+    ;; temporary
+    (foo int (int string "long double"))
+    ))
+
+(define get-sig
+  (lambda (name signatures)
+    (cond
+     ((null? signatures) '(void ())) ;; no return, no params
+     ((eq? name (caar signatures)) (list (cadar signatures)
+					 (caddar signatures)))
+     (else (get-sig name (cdr signatures))))))
 
 (define convert-file
-  (lambda (filename)
+  (lambda (filename . opt)
     (call-with-input-file filename
       (lambda (port)
 	(let* ((defs (read-defs port))
 	       (prog (convert-program defs filename)))
-	  prog)))))
-
-(define convert-program
-  (lambda (defs filename)
-    (db "convert-program: '~s'~%" defs)
-    (let ((name (proper-name (string->symbol (car (split filename #\.))))))
-      `(public class ,name #\{ #\newline
-	       ,@(flatmap convert-define defs)
-	       #\} #\newline))))
-
-(define flatmap
-  (lambda (f l)
-    (apply append (map f l))))
-
-(define flatten
-  (lambda (l)
-    (cond
-     ((not (list? l)) (list l))
-     ((null? l) '())
-     (else (apply append (map flatten l))))))
+	  (if (null? opt)
+	    (printf "~a~%" prog)
+	    (call-with-output-file (car opt)
+	      (lambda (output-port)
+		(fprintf output-port "~a~%" prog)
+		(printf "Wrote ~a~%" (car opt))))))))))
 
 (define read-defs
   (lambda (port)
@@ -44,13 +40,122 @@
 	  '()
 	  (cons sexp (read-defs port))))))
 
-;; debug
-(define db
-  (lambda args
-    ;; or nothing to debug off
-    ;;(apply printf args)
-    'ok
-    ))
+(define convert-program
+  (lambda (forms filename)
+    (db "convert-program: '~s'~%" forms)
+    (let ((defs (filter (lambda (x) (or (define? x) (define*? x))) forms)))
+      (let ((name (proper-name (string->symbol (car (split filename #\.))))))
+	(format "public class ~a {\n~a}\n"
+		name (apply string-append (map convert-define defs)))))))
+
+(define convert-parameters
+  (lambda (name args param-types)
+    (db "convert-parameters: ~a(~a) <= ~a ~%" name args param-types)
+    (if (not (= (length args) (length param-types)))
+	(error 'convert-parameters "Incorrect param sig for '~a'" name)
+	(glue (join-list (map (lambda (type arg)
+				(format "~a ~a" type (proper-name arg)))
+			      param-types args)
+			 ", ")))))
+
+(define convert-define
+  (lambda (def)
+    (db "convert-define: ~a~%" def)
+    (let ((name (cadr def)))
+      (cond
+	((define*? def)
+	 (let* ((types (get-sig name signatures))
+		(return-type (car types))
+		(param-types (cadr types)))
+	   ;; def = (define* name (lambda args body ...))
+	   (let ((args (cadr (caddr def)))
+		 (bodies (cddr (caddr def))))
+	     (format "public static ~a ~a(~a) ~a\n"
+	       return-type (proper-name name)
+	       (convert-parameters name args param-types)
+	       (convert-block bodies)))))
+	((lambda? (caddr def))
+	 ;; primitive function
+	 ;; def = (define name (lambda args body ...))
+	 (printf "Ignoring primitive function ~a~%" name)
+	 "")
+	(else
+	 ;; def = (define name 'undefined)
+	 (format "static object ~a = null;\n" (proper-name name)))))))
+
+(define convert-statement
+  (lambda (statement)
+    (db "convert-statement: '~s'~%" statement)
+    (record-case statement
+       (if (test-part . conseqs)  ;true-part false-part)
+	   (let ((true-part (car conseqs)))
+	     (if (null? (cdr conseqs))
+		 (format "if ((bool) (~a)) ~a"
+			 (convert-exp test-part)
+			 (convert-statement true-part))
+		 (let ((false-part (cadr conseqs)))
+		   (format "if ((bool) (~a)) ~a else ~a"
+			   (convert-exp test-part)
+			   (convert-statement true-part)
+			   (convert-statement false-part))))))
+       (set! (sym exp)
+	 (format "~a = ~a;\n" (proper-name sym) (convert-exp exp)))
+       (let (bindings . bodies)
+	 (let* ((vars (map car bindings))
+		(temps (map (lambda (v) (format "object ~a = null;\n"
+					  (proper-name v))) vars)))
+	   (format "{ ~a ~a }"
+		   (apply string-append temps)
+		   (apply string-append (map convert-statement bodies)))))
+       (begin statements
+	 (if (null? (cdr statements))
+	   (convert-statement (car statements))
+	   (convert-block statements)))
+       (else ;; apply (proc args...)
+	(format "~a;\n" (convert-application (car statement) (cdr statement)))))))
+  
+(define convert-block
+  (lambda (statements)
+    (db "convert-block: '~s'~%" statements)
+    (format "{ ~a }" (apply string-append (map convert-statement statements)))))
+
+(define convert-exp
+  (lambda (exp)
+    (db "convert-exp: '~s'~%" exp)
+    (cond
+      ((pair? exp)
+       (cond
+	 ((eq? (car exp) 'quote) (format "\"~a\"" (cadr exp)))
+	 (else (convert-application (car exp) (cdr exp)))))
+      ((boolean? exp) (if exp "true" "false"))
+      ((char? exp)
+       (cond
+	 ((char=? exp #\newline) "'\\n'")
+	 ((char=? exp #\space) "' '")
+	 ((char=? exp #\tab) "'\\t'")
+	 ;; maybe others?
+	 ((char=? exp #\') "'\\''")
+	 ((char=? exp #\") "'\\\"'")
+	 (else (format "'~a'" exp))))
+      ((string? exp) (format "\"~a\"" exp))
+      ((symbol? exp) (format "~a" (proper-name exp)))
+      (else (format "~a" exp)))))
+
+(define convert-application
+  (lambda (proc args)
+    (db "convert-application: ~a(~a)~%" proc args)
+    (let ((cargs (map convert-exp args)))
+      (case proc
+	((+ *) (format "(~a)" (glue (join-list cargs (format " ~a " (proper-name proc))))))
+	((- / eq? =)  ;; infix
+	 ;; infix: handles only binary procs
+	 (format "(~a ~a ~a)" (car cargs) (proper-name proc) (cadr cargs)))
+	((and) (format "(~a)" (glue (join-list cargs " && "))))
+	((or) (format "(~a)" (glue (join-list cargs " || "))))
+	(else
+	 (format "~a(~a)"
+		 (proper-name proc)
+		 (glue (join-list cargs ", "))))))))
 
 (define proper-name
   (lambda (name)
@@ -60,7 +165,13 @@
      ((eq? name 'cons) 'Cons)
      ((eq? name '-) '-)
      ((eq? name 'set!) '=)
-     (else (replace (replace name #\- #\_) #\? "_q")))))
+     ((eq? name 'and) "&&")
+     ((eq? name 'or) "||")
+     (else (replace (replace (replace name #\- #\_) #\? "_q") #\! "_b")))))
+
+(define glue
+  (lambda (things)
+    (apply string-append (map (lambda (x) (format "~a" x)) things))))
 
 (define replace
   (lambda (s old new)
@@ -115,169 +226,13 @@
     (cond
      ((null? lyst) '())
      ((null? (cdr lyst)) lyst)
-     (else (cons (car lyst) (cons #\, (join-list (cdr lyst) delim)))))))
+     (else (cons (car lyst) (cons delim (join-list (cdr lyst) delim)))))))
 
-(define convert-case
-  (lambda (cases)
-    (db "convert-case: '~s'~%" cases)
-    (cond
-     ((null? cases) '())
-     (else 
-      (append
-       (list
-	'if #\( (convert-exp (caar cases)) #\)
-	(convert-block (cdar cases))
-	(convert-case (cdr cases))))))))
-
-(define convert-block
-  (lambda (statements)
-    (db "convert-block: '~s'~%" statements)
-    (if (eq? (car statements) 'begin)
-	(convert-block (cdr statements))
-	`(#\{ #\newline ,@(flatmap convert-statement statements) #\} #\newline))))
-
-(define signatures
-  '(
-    (function void (int int int))
-    (fact int (int))
-    (Main void ("string []"))
+;; debug
+(define db
+  (lambda args
+    ;; or nothing to debug off
+    ;;(apply printf args)
+    'ok
     ))
-
-(define get-sig
-  (lambda (name signatures)
-    (cond
-     ((null? signatures) '(void ())) ;; no return, no params
-     ((eq? name (caar signatures)) (list (cadar signatures)
-					 (caddar signatures)))
-     (else (get-sig name (cdr signatures))))))
-
-(define convert-parameters
-  (lambda (name args param-types)
-    (db "convert-parameters: ~a(~a) <= ~a ~%" name args param-types)
-    (if (not (eq? (length args) (length param-types)))
-	(error 'convert-parameters "Incorrect param sig for '~a'" name)
-	(join-list (map (lambda (type arg)
-			  (format "~a ~a" type (proper-name arg)))
-			param-types args)
-		   #\,))))
-
-(define convert-define
-  (lambda (def)
-    (db "convert-define: ~a~%" def)
-    (let ((name (cadr def)))
-      (cond
-	((define*? def)
-	 (let* ((types (get-sig name signatures))
-		(return-type (car types))
-		(param-types (cadr types)))
-	   ;; def = (define* name (lambda args body ...))
-	   (let ((args (cadr (caddr def)))
-		 (bodies (cddr (caddr def))))
-	     `(public static ,return-type ,(proper-name name)
-		      #\( ,@(convert-parameters name args param-types) #\) 
-		      ,@(convert-block bodies)))))
-	((and (> (length def) 2) (lambda? (caddr def)))
-	 ;; primitive function
-	 ;; def = (define name (lambda args body ...))
-	 (printf "Ignoring primitive function ~a~%" name)
-	 '())
-	((define? def)
-	 ;; def = (define name value)
-	 `(static object ,(proper-name name) = null #\; #\newline))
-	(else
-	 (begin
-	   (printf "Ignoring application ~a~%" def)
-	   '()))))))
-
-(define convert-statement
-  (lambda (statement)
-    (db "convert-statement: '~s'~%" statement)
-    (record-case statement
-       (if (test-part true-part false-part)
-	   ;; FIXME: if false-part
-	   (list
-	    'if #\(
-	    (convert-exp test-part) 
-	    #\) 
-	    (convert-block true-part)
-	    #\ 'else
-	    (convert-block (list false-part))))
-       (quote (item)
-	     (list (format "\"~a\"" item) #\; #\newline))
-       (set! (sym exp)
-	       (list
-		(proper-name sym)
-		#\= #\( 'object #\)
-		(convert-exp exp)
-		#\; #\newline))
-       (let (args . bodies)
-	 (convert-let args bodies))
-       (begin exps
-	   (convert-block exps))
-       (load (filename) '())
-       (else ;; apply (proc args...)
-	   (list (convert-application (car statement) (cdr statement)) #\; #\newline)))))
-  
-(define convert-let
-  (lambda (args bodies)
-    (let* ((vars (map car args))
-	   (temps (map (lambda (v)
-			 `(object ,v #\= null #\; #\newline)) vars)))
-      (append temps (convert-block bodies)))))
-
-(define convert-exp
-  (lambda (exp)
-    (db "convert-exp: '~s'~%" exp)
-    (if (pair? exp)
-	(cond
-	 ((eq? (car exp) 'quote) 
-	  (format "\"~a\"" (cadr exp)))
-	 (else
-	  (convert-application (car exp) (cdr exp))))
-	exp)))
-
-(define convert-application
-  (lambda (proc args)
-    (db "convert-application: ~a(~a)~%" proc args)
-    (case proc
-     ((+ - * / eq? =? = set! && ||)  ;; infix
-      ;; infix: handles only binary procs
-      (list 
-       #\(
-       (convert-exp (car args))
-       (proper-name proc)
-       (convert-exp (cadr args))
-       #\)))
-     (else
-      (list (proper-name proc) 
-	    #\( (join-list (map convert-exp args) #\,)
-	    #\))))))
-
-(define convert-string
-  (lambda (thing)
-    (cond
-     ((eq? thing #\;) ";")
-     ((eq? thing #\newline) "\n")
-     ((char? thing) (string-append (list->string (list thing)) ""))
-     ((string? thing) 
-      (if (and (> (string-length thing) 0)
-	       (eq? (string-ref thing 0) '!))
-	  (format "~a" (substr thing 1 (- (string-length thing) 1)))
-	  (format "\"~a\"" thing)))
-     ((symbol? thing) (format "~a" thing))
-     ((list? thing) 
-      (apply string-append (map convert-string thing)))
-     (else (format "~s" thing)))))
-
-(define join-strings
-  (lambda (slist delim)
-    (cond
-     ((null? slist) "")
-     ((null? (cdr slist))
-      (car slist))
-     (else 
-      (let ((rest (join (cdr slist) delim)))
-	(if (eq? rest "")
-	    (car slist)
-	    (string-append (car slist) delim rest)))))))
 
