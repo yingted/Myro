@@ -3,9 +3,9 @@ MCS=gmcs
 
 pjscheme-rm.ss: environments-cps.ss parser-cps.ss unifier-cps.ss interpreter-cps.ss reader-cps.ss ds-transformer.ss rm-transformer.ss
 	cat *cps.ss > pjscheme.ss
-	echo "(load \"rm-transformer.ss\")(compile \"pjscheme\")(exit)" > compile.ss
+	echo "(load \"rm-transformer.ss\")(compile-level-output)(compile \"pjscheme\")(exit)" > compile.ss
 	petite compile.ss
-	echo "(run start)" >> pjscheme-rm.ss
+	echo "(begin (display (run start)) (newline))" >> pjscheme-rm.ss
 
 run: pjscheme-rm.ss pjscheme.ss
 	petite pjscheme-rm.ss

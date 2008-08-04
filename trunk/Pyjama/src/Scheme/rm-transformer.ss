@@ -31,7 +31,6 @@
 
 (define compile
   (lambda (base-filename)
-    (compile-level-output)
     (delete-file (format "~a-ds.ss" base-filename))
     (delete-file (format "~a-rm.ss" base-filename))
     (ds-transform-file (format "~a.ss" base-filename) (format "~a-ds.ss" base-filename))
