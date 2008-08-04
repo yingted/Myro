@@ -9,6 +9,14 @@ public class Util {
   public static List<object> makeList(params object[] args) {
 	return new List<object>(args);
   }
+
+  public object cdr(object obj) {
+	return ((Cons)obj).cdr;
+  }
+
+  public object car(object obj) {
+	return ((Cons)obj).car;
+  }
   
   public class Cons {
 	public object car;
