@@ -182,7 +182,7 @@
 	   (vars (map car decls))
 	   (procs (map cadr decls))
 	   (bodies (cddr datum))
-	   (bindings (map (lambda (var) `(,var #f)) vars))
+	   (bindings (map (lambda (var) `(,var 'undefined)) vars))
 	   (assigns (map (lambda (var proc) `(set! ,var ,proc)) vars procs)))
       `(let ,bindings ,@assigns ,@bodies))))
 

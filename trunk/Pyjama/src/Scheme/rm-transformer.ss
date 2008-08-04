@@ -1,8 +1,10 @@
 (load "ds-transformer.ss")
 
 ;; default transformer settings
-(define *include-eopl-define-datatype-in-registerized-code?* #f)
+(define *include-eopl-define-datatype-in-registerized-code?* #t)
 (define *include-define*-in-registerized-code?* #t)
+(define *include-record-case-in-registerized-code?* #t)
+(define *include-let-in-registerized-code?* #f)
 
 ;; assumes:
 ;; - code in first-order tail form
@@ -97,7 +99,7 @@
 
 (define register-table (make-register-table))
 
-(define reg-transform-file
+(define rm-transform-file
   (lambda (source-file . opts)
     (set! register-table (make-register-table))
     (set! need-eopl-support? #f)
@@ -110,7 +112,7 @@
 	       (if (eof-object? exp)
 		 (begin
 		   (set! eopl-defs (reverse eopl-defs))
-		   (set! defs (reverse (map reg-transform defs))))
+		   (set! defs (reverse (map rm-transform defs))))
 		 (begin
 		   (cond
 		     ((eopl-define-datatype? exp)
@@ -216,7 +218,7 @@
 	     `(define ,name (lambda () ,@new-bodies)))))
       (else def))))
 
-(define reg-transform
+(define rm-transform
   (letrec
     ((transform
       (lambda (code)
@@ -224,6 +226,7 @@
 	 ((null? code) code)
 	 ((literal? code) code)
 	 ((symbol? code) code)
+	 ;; should catch lambda-cont, lambda-whatever, etc. here
 	 (else
 	  (record-case code
 	    (quote (datum) code)
@@ -241,28 +244,49 @@
 	      `(lambda ,formals ,@(map transform bodies)))
 	    (let (bindings . bodies)
 	      (if (symbol? bindings)
-		;; named let
-		(let ((name (cadr code))
-		      (vars (map car (caddr code)))
-		      (exps (map cadr (caddr code)))
-		      (bodies (cdddr code)))
-		  `(let ,name ,(map list vars (map transform exps))
+		 ;; named let
+		 (if (not *include-let-in-registerized-code?*)
+		   (transform (let-transformer code))
+		   (let* ((name (cadr code))
+			  (bindings (caddr code))
+			  (bodies (cdddr code))
+			  (vars (map car bindings))
+			  (exps (map cadr bindings)))
+		     `(let ,name ,(map list vars (map transform exps))
+			,@(map transform bodies))))
+		 ;; ordinary let
+		 (if (not *include-let-in-registerized-code?*)
+		   (let* ((vars (map car bindings))
+			  (texps (map transform (map cadr bindings)))
+			  (assigns (map (lambda (v e) `(set! ,v ,e)) vars texps))
+			  (local-decls (map (lambda (v) `(,v 'undefined)) vars)))
+		     `(let ,local-decls
+			,@(sort-assignments assigns)
+			,@(map transform bodies)))
+		   (let ((vars (map car bindings))
+			 (exps (map cadr bindings)))
+		     `(let ,(map list vars (map transform exps))
+			,@(map transform bodies))))))
+	    (let* (bindings . bodies)
+	      (if (not *include-let-in-registerized-code?*)
+		(let* ((vars (map car bindings))
+		       (texps (map transform (map cadr bindings)))
+		       (assigns (map (lambda (v e) `(set! ,v ,e)) vars texps))
+		       (local-decls (map (lambda (v) `(,v 'undefined)) vars)))
+		  `(let ,local-decls
+		     ,@assigns
 		     ,@(map transform bodies)))
-		;; ordinary let
 		(let ((vars (map car bindings))
 		      (exps (map cadr bindings)))
-		  `(let ,(map list vars (map transform exps))
+		  `(let* ,(map list vars (map transform exps))
 		     ,@(map transform bodies)))))
-	    (let* (bindings . bodies)
-	      (let ((vars (map car bindings))
-		    (exps (map cadr bindings)))
-		`(let* ,(map list vars (map transform exps))
-		   ,@(map transform bodies))))
 	    (letrec (decls . bodies)
-	      (let ((vars (map car decls))
-		    (procs (map cadr decls)))
-		`(letrec ,(map list vars (map transform procs))
-		   ,@(map transform bodies))))
+	      (if (not *include-let-in-registerized-code?*)
+		(transform (letrec-transformer code))
+		(let ((vars (map car decls))
+		      (procs (map cadr decls)))
+		  `(letrec ,(map list vars (map transform procs))
+		     ,@(map transform bodies)))))
 	    (set! (var rhs-exp)
 	      `(set! ,var ,(transform rhs-exp)))
 	    (begin exps
@@ -468,6 +492,6 @@
     (delete-file (string-append base-filename "-rm.ss"))
     (ds-transform-file (string-append base-filename ".ss")
 		       (string-append base-filename "-ds.ss"))
-    (reg-transform-file (string-append base-filename "-ds.ss")
+    (rm-transform-file (string-append base-filename "-ds.ss")
 		       (string-append base-filename "-rm.ss"))
     'done!))

@@ -1,14 +1,14 @@
 MCS=gmcs
 
 
-pjscheme-reg.ss: environments-cps.ss parser-cps.ss unifier-cps.ss interpreter-cps.ss reader-cps.ss
+pjscheme-rm.ss: environments-cps.ss parser-cps.ss unifier-cps.ss interpreter-cps.ss reader-cps.ss ds-transformer.ss rm-transformer.ss
 	cat *cps.ss > pjscheme.ss
-	echo "(load \"rm-transformer.ss\")(ds-transform-file \"pjscheme.ss\" \"pjscheme-ds.ss\")(reg-transform-file \"pjscheme-ds.ss\" \"pjscheme-reg.ss\")(exit)" > compile.ss
+	echo "(load \"rm-transformer.ss\")(compile \"pjscheme\")(exit)" > compile.ss
 	petite compile.ss
-	echo "(run start)" >> pjscheme-reg.ss
+	echo "(run start)" >> pjscheme-rm.ss
 
-run: pjscheme-reg.ss
-	petite pjscheme-reg.ss
+run: pjscheme-rm.ss
+	petite pjscheme-rm.ss
 
 
 Reader.exe: Reader.cs Scanner.cs
