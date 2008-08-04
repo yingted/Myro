@@ -1,16 +1,42 @@
-(load "ds-transformer.ss")
-
-;; default transformer settings
-(define *include-eopl-define-datatype-in-registerized-code?* #t)
-(define *include-define*-in-registerized-code?* #t)
-(define *include-record-case-in-registerized-code?* #t)
-(define *include-let-in-registerized-code?* #f)
-
 ;; assumes:
 ;; - code in first-order tail form
 ;; - define*
 ;; - no internal define/define*'s
 ;; - no mit-style define/define*'s
+
+(load "ds-transformer.ss")
+
+;; default transformer settings
+(define *include-eopl-define-datatype-in-registerized-code?* #f)
+(define *include-define*-in-registerized-code?* #t)
+(define *generate-low-level-registerized-code?* #t)
+
+(define low-level-output
+  (lambda ()
+    (set! *include-eopl-define-datatype-in-registerized-code?* #f)
+    (set! *include-define*-in-registerized-code?* #f)
+    (set! *generate-low-level-registerized-code?* #t)))
+
+(define compile-level-output
+  (lambda ()
+    (set! *include-eopl-define-datatype-in-registerized-code?* #f)
+    (set! *include-define*-in-registerized-code?* #t)
+    (set! *generate-low-level-registerized-code?* #t)))
+
+(define high-level-output
+  (lambda ()
+    (set! *include-eopl-define-datatype-in-registerized-code?* #t)
+    (set! *include-define*-in-registerized-code?* #f)
+    (set! *generate-low-level-registerized-code?* #f)))
+
+(define compile
+  (lambda (base-filename)
+    (compile-level-output)
+    (delete-file (format "~a-ds.ss" base-filename))
+    (delete-file (format "~a-rm.ss" base-filename))
+    (ds-transform-file (format "~a.ss" base-filename) (format "~a-ds.ss" base-filename))
+    (rm-transform-file (format "~a-ds.ss" base-filename) (format "~a-rm.ss" base-filename))
+    'done!))
 
 ;;-------------------------------------------------------------------------------
 
@@ -172,34 +198,28 @@
 	     ;; trampoline
 	     (fprintf output-port ";; the trampoline~%")
 	     (pretty-print
-	       '(define trampoline
-		  (lambda ()
-		    (if pc
-		      (begin
-			(pc)
-			(trampoline))
-		      final_reg)))
+	       '(define trampoline (lambda () (if pc (begin (pc) (trampoline)) final_reg)))
 	       output-port)
 	     (newline output-port)
 	     (pretty-print
-	       '(define run
-		  (lambda (setup . args)
-		    (apply setup args)
-		    (trampoline)))
+	       '(define run (lambda (setup . args) (apply setup args) (trampoline)))
 	       output-port)
 	     (newline output-port))))
 	(call-with-input-file source-file
 	  (lambda (input-port)
 	    (transform-definitions input-port)))
-	(if (null? opts)
-	  (begin
-	    (newline)
-	    (print-code (current-output-port)))
-	  (let ((output-filename (car opts)))
-	    (call-with-output-file output-filename
-	      (lambda (output-port)
-		(print-code output-port)
-		(printf "Output written to ~a~%" output-filename)))))))))
+	(let ((line-length (pretty-line-length)))
+	  (pretty-line-length 160)
+	  (if (null? opts)
+	      (begin
+		(newline)
+		(print-code (current-output-port)))
+	      (let ((output-filename (car opts)))
+		(call-with-output-file output-filename
+		  (lambda (output-port)
+		    (print-code output-port)
+		    (printf "Output written to ~a~%" output-filename)))))
+	  (pretty-line-length line-length))))))
 
 (define preprocess-define
   (lambda (def)
@@ -235,17 +255,19 @@
 	    (if (test . conseqs)
 	      `(if ,@(map transform (cdr code))))
 	    (cond clauses
-	      `(cond ,@(map (lambda (clause)
-			      (if (eq? (car clause) 'else)
-				`(else ,@(map transform (cdr clause)))
-				(map transform clause)))
-			 clauses)))
+	      (if *generate-low-level-registerized-code?*
+		(transform (cond-transformer code))
+		`(cond ,@(map (lambda (clause)
+				(if (eq? (car clause) 'else)
+				  `(else ,@(map transform (cdr clause)))
+				  (map transform clause)))
+			      clauses))))
 	    (lambda (formals . bodies)
 	      `(lambda ,formals ,@(map transform bodies)))
 	    (let (bindings . bodies)
 	      (if (symbol? bindings)
 		 ;; named let
-		 (if (not *include-let-in-registerized-code?*)
+		 (if *generate-low-level-registerized-code?*
 		   (transform (let-transformer code))
 		   (let* ((name (cadr code))
 			  (bindings (caddr code))
@@ -255,7 +277,7 @@
 		     `(let ,name ,(map list vars (map transform exps))
 			,@(map transform bodies))))
 		 ;; ordinary let
-		 (if (not *include-let-in-registerized-code?*)
+		 (if *generate-low-level-registerized-code?*
 		   (let* ((vars (map car bindings))
 			  (texps (map transform (map cadr bindings)))
 			  (assigns (map (lambda (v e) `(set! ,v ,e)) vars texps))
@@ -268,7 +290,7 @@
 		     `(let ,(map list vars (map transform exps))
 			,@(map transform bodies))))))
 	    (let* (bindings . bodies)
-	      (if (not *include-let-in-registerized-code?*)
+	      (if *generate-low-level-registerized-code?*
 		(let* ((vars (map car bindings))
 		       (texps (map transform (map cadr bindings)))
 		       (assigns (map (lambda (v e) `(set! ,v ,e)) vars texps))
@@ -281,7 +303,7 @@
 		  `(let* ,(map list vars (map transform exps))
 		     ,@(map transform bodies)))))
 	    (letrec (decls . bodies)
-	      (if (not *include-let-in-registerized-code?*)
+	      (if *generate-low-level-registerized-code?*
 		(transform (letrec-transformer code))
 		(let ((vars (map car decls))
 		      (procs (map cadr decls)))
@@ -299,11 +321,42 @@
 	    (or exps
 	      `(or ,@(map transform exps)))
 	    (case (exp . clauses)
-	      `(case ,(transform exp)
-		 ,@(transform-case-clauses clauses)))
+	      (if *generate-low-level-registerized-code?*
+		(let* ((temp (car (make-temp-vars 1 (list code))))
+		       (cond-clauses
+			 (map (lambda (clause)
+				(if (eq? (car clause) 'else)
+				  `(else ,@(cdr clause))
+				  (let ((tags (car clause))
+					(conseqs (cdr clause)))
+				    (if (symbol? tags)
+				      `((eq? ,temp ',tags) ,@conseqs)
+				      `((memq ,temp ',tags) ,@conseqs)))))
+			      clauses))
+		       (cond-exp `(cond ,@cond-clauses)))
+		  (transform `(let ((,temp ,exp)) ,cond-exp)))
+		`(case ,(transform exp)
+		   ,@(transform-case-clauses clauses))))
 	    (record-case (exp . clauses)
-	      `(record-case ,(transform exp)
-		 ,@(transform-record-case-clauses clauses)))
+	      (if *generate-low-level-registerized-code?*
+		(let* ((temp (car (make-temp-vars 1 (list code))))
+		       (cond-clauses
+			 (map (lambda (clause)
+				(if (eq? (car clause) 'else)
+				  `(else ,@(cdr clause))
+				  (let ((tags (car clause))
+					(formals (cadr clause))
+					(conseqs (cddr clause)))
+				    (if (symbol? tags)
+				      `((eq? (car ,temp) ',tags)
+					,@(rc-clause->let temp formals conseqs))
+				      `((memq (car ,temp) ',tags)
+					,@(rc-clause->let temp formals conseqs))))))
+			      clauses))
+		       (cond-exp `(cond ,@cond-clauses)))
+		  (transform `(let ((,temp ,exp)) ,cond-exp)))
+		`(record-case ,(transform exp)
+		   ,@(transform-record-case-clauses clauses))))
 	    ;; EOPL
 	    (define-datatype args code)
 	    (cases (type exp . clauses)
@@ -352,6 +405,19 @@
 	 (map (lambda (clause) (cons (car clause) (map transform (cdr clause))))
 	   clauses))))
     transform))
+
+(define rc-clause->let
+  (lambda (temp formals conseqs)
+    (letrec
+      ((make-bindings
+	 (lambda (i formals)
+	   (if (null? formals)
+	     '()
+	     (cons (list (car formals) `(list-ref ,temp ,i))
+		   (make-bindings (+ i 1) (cdr formals)))))))
+      (if (null? formals)
+	conseqs
+	(list `(let ,(make-bindings 1 formals) ,@conseqs))))))
 
 (define sort-assignments
   (lambda (assigns)
@@ -485,13 +551,3 @@
       ((symbol? params) (param->reg-name params))
       (else (cons (param->reg-name (car params)) (get-register-names (cdr params)))))))
 
-
-(define compile
-  (lambda (base-filename)
-    (delete-file (string-append base-filename "-ds.ss"))
-    (delete-file (string-append base-filename "-rm.ss"))
-    (ds-transform-file (string-append base-filename ".ss")
-		       (string-append base-filename "-ds.ss"))
-    (rm-transform-file (string-append base-filename "-ds.ss")
-		       (string-append base-filename "-rm.ss"))
-    'done!))

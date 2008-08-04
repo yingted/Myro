@@ -146,9 +146,10 @@
 		  (then-exps (cdr first-clause)))
 	      (cond
 		((eq? test-exp 'else)
-		 (if (null? then-exps)
-		   (error 'cond-transformer "bad concrete syntax: (else)")
-		   `(begin ,@then-exps)))
+		 (cond
+		   ((null? then-exps) (error 'cond-transformer "bad concrete syntax: (else)"))
+		   ((null? (cdr then-exps)) (car then-exps))
+		   (else `(begin ,@then-exps))))
 		((null? then-exps)
 		 (if (null? other-clauses)
 		   `(let ((bool ,test-exp))
@@ -156,7 +157,12 @@
 		   `(let ((bool ,test-exp)
 			  (else-code (lambda () (cond ,@other-clauses))))
 		      (if bool bool (else-code)))))
-		((null? other-clauses) `(if ,test-exp (begin ,@then-exps)))
+		((null? other-clauses)
+		 (if (null? (cdr then-exps))
+		   `(if ,test-exp ,(car then-exps))
+		   `(if ,test-exp (begin ,@then-exps))))
+		((null? (cdr then-exps))
+		 `(if ,test-exp ,(car then-exps) (cond ,@other-clauses)))
 		(else `(if ,test-exp (begin ,@then-exps) (cond ,@other-clauses)))))))))))
 
 (define let-transformer

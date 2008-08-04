@@ -7,7 +7,7 @@ pjscheme-rm.ss: environments-cps.ss parser-cps.ss unifier-cps.ss interpreter-cps
 	petite compile.ss
 	echo "(run start)" >> pjscheme-rm.ss
 
-run: pjscheme-rm.ss
+run: pjscheme-rm.ss pjscheme.ss
 	petite pjscheme-rm.ss
 
 
