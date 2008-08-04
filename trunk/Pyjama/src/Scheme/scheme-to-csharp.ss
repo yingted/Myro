@@ -11,7 +11,7 @@
 	(read-defs port)))))
 
 (define convert-file
-  (lambda (filename . output)
+  (lambda (filename)
     (call-with-input-file filename
       (lambda (port)
 	(let* ((defs (read-defs port))
@@ -210,29 +210,21 @@
 		#\= #\( 'object #\)
 		(convert-exp exp)
 		#\; #\newline))
-       (let (args . exps)
-	 ;; FIXME: do temp vars
-	 ;; FIXME: block?
-	 (list 'let '...))
+       (let (args . bodies)
+	 (convert-let args bodies))
        (begin exps
 	   (convert-block exps))
        (load (filename) '())
-       (define-datatype (filename) '())
-       (case (item . case-list) ;; (case a (a 1) ...)
-	   ;;(convert-case item case-list))
-	   '())
-       (cases items-case-list ;; (case a (a 1) ...)
-	   ;;(convert-case item case-list))
-	   '())
-       (record-case (item . case-list)   ;; (record-case a (a () 1) ...)
-	   ;;(convert-record-case item case-list))
-	   '())
-       (cond cond-list ;; (cond (test ret) (test ret))
-	   ;;(convert-cond cond-list))
-	   '())
        (else ;; apply (proc args...)
 	   (list (convert-application (car statement) (cdr statement)) #\; #\newline)))))
   
+(define convert-let
+  (lambda (args bodies)
+    (let* ((vars (map car args))
+	   (temps (map (lambda (v)
+			 `(object ,v #\= null #\; #\newline)) vars)))
+      (append temps (convert-block bodies)))))
+
 (define convert-exp
   (lambda (exp)
     (db "convert-exp: '~s'~%" exp)
@@ -260,83 +252,6 @@
       (list (proper-name proc) 
 	    #\( (join-list (map convert-exp args) #\,)
 	    #\))))))
-
-(define convert-case
-  ;; (case item (test then)(test then)...)
-  ;; item ((test then) (test then)...)
-  (lambda (item case-list)
-    (let ((if-exp (caar case-list))
-	  (then-exp (cdar case-list))
-	  (rest (cdr case-list)))
-      (db "convert-case: ~%")
-      (db "   item: ~a~%" item)
-      (db "     if: ~a~%" if-exp)
-      (db "   then: ~a~%" then-exp)
-      (db "   rest: ~a~%" rest)
-      (db "~%")
-      (cond ;; else 
-       ((eq? if-exp 'else)
-	(list 'else (convert-block then-exp)))
-       ((null? rest) ;; if () { body }
-	(list 'if #\( (convert-exp if-exp) '== item #\) 
-	      (convert-block then-exp)))
-       (else 
-	(list 'if #\( (convert-exp if-exp) '== item #\) 
-	      (convert-block then-exp)
-	      'else 
-	      (convert-case item rest)))))))
-
-(define convert-cond 
-  ;; (cond (test then)(test then)...)
-  ;; ((test then) (test then)...)
-  (lambda (cond-list)
-    (let ((if-exp (caar cond-list))
-	  (then-exp (cdar cond-list))
-	  (rest (cdr cond-list)))
-      (printf "convert-cond: ~%")
-      (printf "     if: ~a~%" if-exp)
-      (printf "   then: ~a~%" then-exp)
-      (printf "   rest: ~a~%" rest)
-      (printf "~%")
-      (cond ;; else 
-       ((eq? if-exp 'else)
-	(list 'else (convert-block then-exp)))
-       ((null? rest) ;; if () { body }
-	(list 'if #\( (convert-exp if-exp) #\) 
-	      (convert-block then-exp)))
-       (else 
-	(list 'if #\( (convert-exp if-exp) #\) 
-	      (convert-block then-exp)
-	      'else 
-	      (convert-cond rest)))))))
-
-(define convert-record-case
-  ;; (record-case item (m () body) ...)
-  ;; item ((m () body)...)
-  (lambda (item case-list)
-    (let ((if-exp (caar case-list))
-	  (then-exp (cddar case-list))
-	  (vars (cadar case-list))
-	  (rest (cdr case-list)))
-      (db "convert-record-case: ~%")
-      (db "   item: ~a~%" item)
-      (db "     if: ~a~%" if-exp)
-      (db "   then: ~a~%" then-exp)
-      (db "   vars: ~a~%" vars)
-      (db "   rest: ~a~%" rest)
-      (db "~%")
-      ;; FIXME: set temp vars
-      (cond ;; else 
-       ((eq? if-exp 'else)
-	(list 'else (convert-block (list vars))))
-       ((null? rest) ;; if () { body }
-	(list 'if #\( (convert-exp if-exp) '== item #\) 
-	      (convert-block then-exp)))
-       (else 
-	(list 'if #\( (convert-exp if-exp) '== item #\) 
-	      (convert-block then-exp)
-	      'else 
-	      (convert-record-case item rest)))))))
 
 (define convert-string
   (lambda (thing)

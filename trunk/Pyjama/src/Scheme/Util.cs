@@ -1,6 +1,8 @@
+// Utility Functions for Running Scheme in CSharp
 
+public class Util {
 
-public class util {
+  delegate void Function();
 
   static SchemeSymbol EmptyList = new SchemeSymbol("()");
 
@@ -247,16 +249,6 @@ public class util {
   
   
   // () is represented as EmptyList
-  
-  //-----------------------------------------------------------------------
-  // examples:
-  // >>> readDatum("apple")
-  // >>> readDatum("#T")
-  // >>> readDatum("(a (b c (d)))")
-  // >>> readDatum("(a b c 1 2 -3.14 #f \"hello there\" #\\newline (e [f . x] . 4) ())")
-  // >>> readFile("reader.ss")
-  // >>> readDatum("(a 'b (quote c) #(1 2 d))")
-  // >>> readDatum("2/3") + readDatum("3/4")
   
   public static string prettyPrint(object obj) {
 	string retval = "";
