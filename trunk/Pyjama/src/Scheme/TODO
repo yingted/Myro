@@ -2,7 +2,7 @@
 Bugs
 ====
 
-1. registerized code crashes if you give it control+d or () with:
+1. registerized code crashes on unknown variables with:
 "Error: attempt to apply non-procedure (continuation <cont-4>)."
 
 

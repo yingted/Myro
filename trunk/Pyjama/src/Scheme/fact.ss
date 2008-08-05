@@ -32,6 +32,8 @@
     (fact void (int))
     (Main void ("string []"))))
 
+(define *ignore-functions* '())
+
 (define Main
   (lambda (args)
     (fact 5)
