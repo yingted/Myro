@@ -43,10 +43,11 @@
 		cs-trampoline)))))
 
 (define cs-trampoline
-  "    public static void trampoline() {
-        while (pc != null)
+  "    public static object trampoline() {
+        while (pc != null) {
             pc();
-        Console.WriteLine(final_reg);
+        }
+        return (final_reg);
     }
 ")
 

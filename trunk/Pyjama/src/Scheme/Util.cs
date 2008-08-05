@@ -10,6 +10,15 @@ public class Scheme {
 
   public static SchemeSymbol EmptyList = new SchemeSymbol("()");
 
+  public static void display(object obj) {
+	Console.Write(obj);
+  }
+
+  public static void display(object obj, object port) {
+	// FIXME: add output port type
+	Console.Write(obj);
+  }
+
   public static object make_cont(params object[] args) {
 	Object result = EmptyList;
 	int count = ((Array)args).Length;
@@ -24,7 +33,17 @@ public class Scheme {
   }
 
   public static void error(string code, string msg, params object[] rest) {
-	Console.WriteLine(code + " " + msg);
+	Console.WriteLine("Error in {0}: {1}", code, format(msg, rest));
+  }
+
+  public static void newline() {
+	Console.WriteLine("");
+  }
+
+  public static string format(string msg, params object[] rest) {
+	// FIXME: replace ~codes with {codes}
+	//String.Format(msg, rest);
+	return String.Format(msg);
   }
 
   public static object list_ref(object obj, int pos) {

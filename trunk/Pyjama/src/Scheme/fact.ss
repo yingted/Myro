@@ -35,8 +35,10 @@
 (define Main
   (lambda (args)
     (fact 5)
-    (trampoline)
+    (display (trampoline))
+    (newline)
     (fib 15)
-    (trampoline)))
+    (display (trampoline))
+    (newline)))
 
 ;; ---------------------------------------------
