@@ -1,6 +1,7 @@
 MCS=gmcs
 
-pjscheme-rm.ss: environments-cps.ss parser-cps.ss unifier-cps.ss interpreter-cps.ss reader-cps.ss ds-transformer.ss rm-transformer.ss
+pjscheme-rm.ss: environments-cps.ss parser-cps.ss unifier-cps.ss interpreter-cps.ss \
+		reader-cps.ss ds-transformer.ss rm-transformer.ss pjscheme-cps.ss
 	cat *cps.ss > pjscheme.ss
 	echo "(load \"rm-transformer.ss\")" > compile.ss
 	echo "(compile-level-output)" >> compile.ss
