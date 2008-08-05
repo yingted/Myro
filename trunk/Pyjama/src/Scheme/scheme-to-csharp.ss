@@ -201,9 +201,10 @@
      ((eq? name '-) 'Subtract)
      ((eq? name '*) 'Multiply)
      ((eq? name '/) 'Divide)
-     (else (map (lambda (old new)
-		  (replace name old new))
-		'((#\- #\_) (#\? "_q") (#\! "_b")))))))
+     (else (begin (map (lambda (old_new)
+			 (set! name (replace name (car old_new) (cadr old_new))))
+		       '((#\- #\_) (#\? "_q") (#\! "_b")))
+		  name)))))
 
 (define glue
   (lambda (things)
