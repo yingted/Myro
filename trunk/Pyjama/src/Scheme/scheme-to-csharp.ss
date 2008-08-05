@@ -81,12 +81,13 @@
 	    (memq name *ignore-functions*))
 	;; primitive function or system function
 	;; def = (define name (lambda args body ...))
-	(printf "Ignoring primitive function ~a~%" name)
+	(printf "Ignoring function ~a~%" name)
 	"")
        ((not (lambda? (caddr def)))
 	;; def = (define name 'undefined)
 	(let* ((pname (proper-name name))
 	       (types (lookup-signature pname '() *function-signatures*)))
+	  (printf " adding static variable ~a...~%" name)
 	  (cond
 	   ((eq? pname 'pc)
 	    (format "static Function pc = null;\n"))
@@ -97,6 +98,7 @@
        ((or (define*? def) (define? def))
 	(let ((args (cadr (caddr def)))
 	      (bodies (cddr (caddr def))))
+	  (printf " adding function ~a...~%" name)
 	  (let* ((types (lookup-signature name args *function-signatures*))
 		 (return-type (car types))
 		 (param-types (cadr types)))
@@ -159,13 +161,15 @@
       ((boolean? exp) (if exp "true" "false"))
       ((char? exp)
        (cond
-	 ((char=? exp #\newline) "'\\n'")
-	 ((char=? exp #\space) "' '")
-	 ((char=? exp #\tab) "'\\t'")
-	 ;; maybe others?
-	 ((char=? exp #\') "'\\''")
-	 ((char=? exp #\") "'\\\"'")
-	 (else (format "'~a'" exp))))
+	((char=? exp #\newline) "'\\n'")
+	((char=? exp #\space) "' '")
+	((char=? exp #\tab) "'\\t'")
+	((char=? exp #\nul) "''")
+	((char=? exp #\backspace) "'\\h'")
+	;; maybe others?
+	((char=? exp #\') "'\\''")
+	((char=? exp #\") "'\\\"'")
+	(else (format "'~a'" exp))))
       ((string? exp) (format "\"~a\"" exp))
       ((symbol? exp) (format "~a" (proper-name exp)))
       (else (format "~a" exp)))))
@@ -197,7 +201,9 @@
      ((eq? name '-) 'Subtract)
      ((eq? name '*) 'Multiply)
      ((eq? name '/) 'Divide)
-     (else (replace (replace (replace name #\- #\_) #\? "_q") #\! "_b")))))
+     (else (map (lambda (old new)
+		  (replace name old new))
+		'((#\- #\_) (#\? "_q") (#\! "_b")))))))
 
 (define glue
   (lambda (things)
@@ -258,11 +264,12 @@
      ((null? (cdr lyst)) lyst)
      (else (cons (car lyst) (cons delim (join-list (cdr lyst) delim)))))))
 
+(define *debug* #t)
+
 ;; debug
 (define db
   (lambda args
-    ;; or nothing to debug off
-    ;;(apply printf args)
+    (if *debug* (apply printf args))
     'ok
     ))
 
