@@ -2,9 +2,6 @@
 Bugs
 ====
 
-1. registerized code crashes on unknown variables with:
-"Error: attempt to apply non-procedure (continuation <cont-4>)."
-
 
 scheme-to-csharp
 ================
