@@ -73,11 +73,12 @@
     (let ((name (cadr def)))
       (cond
        ((or (equal? name '*function-signatures*)
+	    (equal? name '*ignore-functions*)
 	    (equal? name 'run)
 	    (equal? name 'trampoline)
 	    (equal? name 'make-cont)
 	    (equal? name 'make-sub)
-	    (not (null? (memq name *ignore-functions*))))
+	    (memq name *ignore-functions*))
 	;; primitive function or system function
 	;; def = (define name (lambda args body ...))
 	(printf "Ignoring primitive function ~a~%" name)
