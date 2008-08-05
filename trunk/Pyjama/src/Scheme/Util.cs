@@ -1,23 +1,68 @@
 // Utility Functions for Running Scheme in CSharp
 
-public class Util {
+using System;
+using System.Collections.Generic; // List
+using Microsoft.VisualBasic.CompilerServices;
 
-  delegate void Function();
+public class Scheme {
 
-  static SchemeSymbol EmptyList = new SchemeSymbol("()");
+  public delegate void Function();
+
+  public static SchemeSymbol EmptyList = new SchemeSymbol("()");
+
+  public static object make_cont(params object[] args) {
+	Object result = EmptyList;
+	int count = ((Array)args).Length;
+	for (int i = 0; i < count; i++) {
+	  result = new Cons(args[count - i - 1], result);
+	}
+	return ((object)new Cons("continuation", result));
+  }
 
   public static List<object> makeList(params object[] args) {
 	return new List<object>(args);
   }
 
-  public object cdr(object obj) {
+  public static void error(string code, string msg, params object[] rest) {
+	Console.WriteLine(code + " " + msg);
+  }
+
+  public static object list_ref(object obj, int pos) {
+	Cons result = ((Cons)obj);
+	for (int i = 0; i < pos; i++) {
+	  result = (Cons) cdr(result);
+	}
+	return (object)car(result);
+  }
+
+  public static object cdr(object obj) {
 	return ((Cons)obj).cdr;
   }
 
-  public object car(object obj) {
+  public static object car(object obj) {
 	return ((Cons)obj).car;
   }
-  
+
+  public static bool Compare(object obj1, object obj2) {
+	return (ObjectType.ObjTst(obj1, obj2, false) == 0);
+  }
+
+  public static object Add(object obj1, object obj2) {
+	return (ObjectType.AddObj(obj1, obj2));
+  }
+
+  public static object Subtract(object obj1, object obj2) {
+	return (ObjectType.SubObj(obj1, obj2));
+  }
+
+  public static object Multiply(object obj1, object obj2) {
+	return (ObjectType.MulObj(obj1, obj2));
+  }
+
+  public static object Divide(object obj1, object obj2) {
+	return (ObjectType.DivObj(obj1, obj2));
+  }
+
   public class Cons {
 	public object car;
 	public object cdr;
@@ -291,10 +336,6 @@ public class Util {
 
   public static void rest_of(List<object> list) {
 	list.RemoveAt(0);
-  }
-
-  public static List<object> first(List<object> list) {
-	return (List<object>) list[0];
   }
 
   public static string first(List<object> list) {

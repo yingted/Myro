@@ -15,19 +15,8 @@
 		  (lambda-cont (v2)
 		    (k (+ v1 v2))))))))))
 
-;;(define fact
-;;  (lambda (n)
-;;    (fact-cps n (lambda-cont (v) v))))
-
-;;(define* fact-cps
-;;  (lambda (n k)
-;;    (if (= n 0)
-;;	(k 1)
-;;	(fact-cps (- n 1)
-;;	  (lambda-cont (v) (k (* n v)))))))
-
 (define (fact n)
-  (fact-cps n (lambda-cont (v) (halt* v))));;`(+ 2 ,v)))))
+  (fact-cps n (lambda-cont (v) (halt* v))))
 
 (define* (fact-cps n k)
   (if (= n 0)
@@ -35,20 +24,19 @@
       (fact-cps (- n 1)
 		(lambda-cont (v) (k (* n v))))))
 
+;; ---------------------------------------------
+;; Interface for conversion to type systems:
 
-;;(define foo
-;;  (lambda-cont (v) (foo v a b)))
+(define *function-signatures*
+  '((fib void (int))
+    (fact void (int))
+    (Main void ("string []"))))
 
-;;(define foo2
-;;  (lambda-cont (v) (list v a b)))
+(define Main
+  (lambda (args)
+    (fact 5)
+    (trampoline)
+    (fib 15)
+    (trampoline)))
 
-
-;;	  (lambda-cont (foo)
-;;	    `(,a b c ,(list one (lambda-cont (v) (k (* n v foo))))))))))
-
-;;	  (lambda-cont (foo)
-;;	    (letrec ((n 3)
-;;		     (m (lambda-cont (a) (k n)))
-;;		     (k 3))
-;;	      (loop n (* m foo))))))))
-
+;; ---------------------------------------------
