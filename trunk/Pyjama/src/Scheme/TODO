@@ -1,0 +1,13 @@
+
+Bugs
+====
+
+1. registerized code crashes if you give it control+d or () with:
+"Error: attempt to apply non-procedure (continuation <cont-4>)."
+
+
+scheme-to-csharp
+================
+
+1. add DLR flag and code
+2. handle varargs: (lambda args ...)
