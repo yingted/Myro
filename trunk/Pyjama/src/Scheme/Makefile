@@ -17,6 +17,14 @@ Reader.exe: Reader.cs Scanner.cs
 Test.exe: Test.cs
 	$(MCS) Test.cs -r:Microsoft.VisualBasic.dll
 
+fact.exe: fact.ss
+	echo "(load \"rm-transformer.ss\")" > make-fact.ss
+	echo "(compile \"fact\")" >> make-fact.ss
+	echo "(delete-file \"fact.cs\")" >> make-fact.ss
+	echo "(convert-file \"fact-rm.ss\" \"fact.cs\")" >> make-fact.ss
+	$(MCS) fact.cs Util.cs -r:Microsoft.VisualBasic.dll
+	mono fact.exe
+
 clean:
-	$(RM) *.exe *~ pjscheme*.ss compile.ss
+	$(RM) *.exe *~ pjscheme*.ss compile.ss make-fact.ss
 
