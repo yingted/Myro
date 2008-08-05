@@ -39,3 +39,12 @@
         (apply-cont k 1)
         (fact-cps (- n 1) (make-cont '<cont-4> n k)))))
 
+(define Main
+  (lambda (args) (fact 5) (trampoline) (fib 15) (trampoline)))
+
+(define *function-signatures*
+  '((fib void (int))
+     (fact void (int))
+     (pc Function ())
+     (Main void ("string []"))))
+
