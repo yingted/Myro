@@ -110,7 +110,7 @@
 	      ((string=? name "backspace") (k (list 'character #\backspace)))
 	      ((string=? name "return") (k (list 'character #\return)))
 	      ((string=? name "page") (k (list 'character #\page)))
-	      (else (handler (format "invalid character name #\\~a" name))))))
+	      (else (handler (format "invalid character name '~a'" name))))))
 	(string
 	  (k (list 'string (list->string buffer))))
 	(else

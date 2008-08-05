@@ -215,6 +215,8 @@
      ((eq? name 'string) 'str)
      ((eq? name 'operator) 'rator)
      ((eq? name '1st) 'First)
+     ((eq? name 'bool) 'logical)
+     ((eq? name 'char) 'chr)
      (else (begin (map (lambda (old_new)
 			 (set! name (replace name (car old_new) (cadr old_new))))
 		       '((#\> "to_")(#\* "_star")(#\= "_is_")
