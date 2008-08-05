@@ -1,3 +1,4 @@
+(case-sensitive #t)
 (load "parser-cps.ss")
 
 ;; default transformer settings
