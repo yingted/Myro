@@ -152,23 +152,34 @@
 
 (define convert-exp
   (lambda (exp)
-    (db "convert-exp: '~s'~%" exp)
+    (printf "convert-exp: '~s'~%" exp)
     (cond
       ((pair? exp)
        (cond
 	 ((eq? (car exp) 'quote) (format "\"~a\"" (cadr exp)))
+	 ;; FIXME!
+	 ((eq? (car exp) 'quasiquote) (format "\"~a\"" (cadr exp)))
+	 ((eq? (car exp) 'if) ;; if expression
+	  (format "((~a) ? (~a) : (~a))"
+		  (convert-exp (cadr exp)) 
+		  (convert-exp (caddr exp)) 
+		  (convert-exp (cadddr exp))))
 	 (else (convert-application (car exp) (cdr exp)))))
       ((boolean? exp) (if exp "true" "false"))
       ((char? exp)
        (cond
+	((char=? exp #\return) "'\\r'")
 	((char=? exp #\newline) "'\\n'")
 	((char=? exp #\space) "' '")
 	((char=? exp #\tab) "'\\t'")
-	((char=? exp #\nul) "''")
-	((char=? exp #\backspace) "'\\h'")
+	((char=? exp #\nul) "'\\0'")
+	((char=? exp #\backspace) "'?'")
+	((char=? exp #\\) "BACKSLASH")
+	((char=? exp #\`) "BACKQUOTE")
 	;; maybe others?
-	((char=? exp #\') "'\\''")
-	((char=? exp #\") "'\\\"'")
+	((char=? exp #\") "DOUBLEQUOTE") 
+	((char=? exp #\') "SINGLEQUOTE")
+	((char=? exp #\~) "TILDE")
 	(else (format "'~a'" exp))))
       ((string? exp) (format "\"~a\"" exp))
       ((symbol? exp) (format "~a" (proper-name exp)))
@@ -201,9 +212,13 @@
      ((eq? name '-) 'Subtract)
      ((eq? name '*) 'Multiply)
      ((eq? name '/) 'Divide)
+     ((eq? name 'string) 'str)
+     ((eq? name 'operator) 'rator)
+     ((eq? name '1st) 'First)
      (else (begin (map (lambda (old_new)
 			 (set! name (replace name (car old_new) (cadr old_new))))
-		       '((#\- #\_) (#\? "_q") (#\! "_b")))
+		       '((#\> "to_")(#\* "_star")(#\= "_is_")
+			 (#\- #\_)(#\? "_q")(#\! "_b")(#\/ #\_)))
 		  name)))))
 
 (define glue
@@ -265,7 +280,7 @@
      ((null? (cdr lyst)) lyst)
      (else (cons (car lyst) (cons delim (join-list (cdr lyst) delim)))))))
 
-(define *debug* #t)
+(define *debug* #f)
 
 ;; debug
 (define db
