@@ -46,9 +46,9 @@ public class Scheme {
 	return String.Format(msg);
   }
 
-  public static object list_ref(object obj, int pos) {
+  public static object list_ref(object obj, object pos) {
 	Cons result = ((Cons)obj);
-	for (int i = 0; i < pos; i++) {
+	for (int i = 0; i < ((int)pos); i++) {
 	  result = (Cons) cdr(result);
 	}
 	return (object)car(result);

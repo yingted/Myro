@@ -28,9 +28,12 @@
 ;; Interface for conversion to type systems:
 
 (define *function-signatures*
-  '((fib void (int))
+  '(
+    (fib void (int))
     (fact void (int))
-    (Main void ("string []"))))
+    (Main void ("string []"))
+    (error void (string string "object[]"))
+    ))
 
 (define *ignore-functions* '())
 

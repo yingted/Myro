@@ -6,7 +6,7 @@
     ;; sigs: '((procname return-type (param-type ...))...)
     (cond
      ((null? sigs) `(void ,(repeat 'object (length args))))
-     ((eq? name (caar sigs)) 
+     ((equal? (format "~a" name) (format "~a" (caar sigs)))
       (list (cadar sigs) (caddar sigs)))
      (else (lookup-signature name args (cdr sigs))))))
 
@@ -51,8 +51,6 @@
     }
 ")
 
-
-
 (define repeat
   (lambda (item times)
     (if (= times 0)
@@ -60,10 +58,12 @@
 	(cons item (repeat item (- times 1))))))
 
 (define convert-parameters
-  (lambda (name args param-types)
+  (lambda (name args param-types cast)
     (db "convert-parameters: ~a(~a) <= ~a ~%" name args param-types)
     (glue (join-list (map (lambda (type arg)
-			    (format "~a ~a" type (proper-name arg)))
+			    (if cast
+				(format "((~a)~a)" type (proper-name arg))
+				(format "~a ~a" type (proper-name arg))))
 			  param-types args)
 		     ", "))))
 
@@ -89,7 +89,7 @@
 	       (types (lookup-signature pname '() *function-signatures*)))
 	  (printf " adding static variable ~a...~%" name)
 	  (cond
-	   ((eq? pname 'pc)
+	   ((equal? pname "pc")
 	    (format "static Function pc = null;\n"))
 	   ((eq? (car types) 'void)
 	    (format "static object ~a = null;\n" pname))
@@ -105,7 +105,7 @@
 	    ;; def = (define* name (lambda args body ...))
 	    (format "public static ~a ~a(~a) ~a\n"
 		    return-type (proper-name name)
-		    (convert-parameters name args param-types)
+		    (convert-parameters name args param-types #f)
 		    (convert-block bodies)))))
        (else
 	(error 'convert-define "unrecognized form: ~a" def))))))
@@ -190,20 +190,19 @@
     (db "convert-application: ~a(~a)~%" proc args)
     (let ((cargs (map convert-exp args)))
       (case proc
-;; 	((+ *) (format "(~a)" (glue (join-list cargs (format " ~a " (proper-name proc))))))
-;; 	((- / eq? =)  ;; infix
-;; 	 ;; infix: handles only binary procs
-;; 	 (format "(~a ~a ~a)" (car cargs) (proper-name proc) (cadr cargs)))
 	((and) (format "(~a)" (glue (join-list cargs " && "))))
 	((or) (format "(~a)" (glue (join-list cargs " || "))))
 	(else
-	 (format "~a(~a)"
-		 (proper-name proc)
-		 (glue (join-list cargs ", "))))))))
+	 (let* ((pname (proper-name proc))
+		(types (lookup-signature pname args *function-signatures*))
+		(param-types (cadr types))
+		(cargs+types (convert-parameters pname cargs param-types #t)))
+	   (format "~a(~a)" (proper-name proc) cargs+types)))))))
 
 (define proper-name
   (lambda (name)
     (cond
+     ((string? name) name)
      ((eq? name 'cons) 'Cons)
      ((eq? name 'set!) 'Assign)
      ((eq? name 'eq?) 'Compare)
@@ -229,11 +228,10 @@
 
 (define replace
   (lambda (s old new)
-    (string->symbol 
-     (list->string 
-      (sreplace 
-       (string->list 
-	(symbol->string s)) old new '())))))
+    (list->string 
+     (sreplace 
+      (string->list 
+       (format "~a" s)) old new '()))))
 
 (define string->chars
   (lambda (s)
