@@ -7,6 +7,16 @@ pjscheme-rm.ss: environments-cps.ss parser-cps.ss unifier-cps.ss interpreter-cps
 	petite compile.ss
 	echo "(begin (display (run start)) (newline))" >> pjscheme-rm.ss
 
+pjscheme.exe: pjscheme-rm.ss
+	echo "(load \"scheme-to-csharp.ss\")" > make-pjscheme.ss
+	echo "(delete-file \"pjscheme.cs\")" >> make-pjscheme.ss
+	echo "(convert-file \"pjscheme-rm.ss\" \"pjscheme.cs\")" >> make-pjscheme.ss
+	echo "(exit)" >> make-pjscheme.ss
+	petite make-pjscheme.ss
+	indent -di0 -i3 pjscheme.cs
+	$(MCS) pjscheme.cs Util.cs -r:Microsoft.VisualBasic.dll
+	mono pjscheme.exe
+
 run: pjscheme-rm.ss pjscheme.ss
 	petite pjscheme-rm.ss
 
@@ -30,5 +40,5 @@ fact.exe: fact.ss
 	mono fact.exe
 
 clean:
-	$(RM) *.exe *~ pjscheme*.ss compile.ss make-fact.ss fact.cs
+	$(RM) *.exe *~ pjscheme*.ss compile.ss make-fact.ss fact.cs make-pjscheme.ss pjscheme.exe pjscheme.cs
 
