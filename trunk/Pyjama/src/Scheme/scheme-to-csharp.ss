@@ -202,7 +202,10 @@
     (db "convert-application: ~a(~a)~%" proc args)
     (let ((cargs (map convert-exp args)))
       (case proc
-	((return) (format "return((~a ~a))" (car args) (glue (join-list (map convert-exp (cdr args)) ", "))))
+	((return) 
+	 (if (= (length args) 2)
+	     (format "return((~a ~a))" (car args) (glue (join-list (map convert-exp (cdr args)) ", ")))
+	     (format "return(((object) ~a))" (glue (join-list (map convert-exp args) ", ")))))
 	((and) (format "(~a)" (glue (join-list cargs " && "))))
 	((or) (format "(~a)" (glue (join-list cargs " || "))))
 	(else

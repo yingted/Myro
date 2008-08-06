@@ -216,16 +216,16 @@ public class Scheme {
 	return (ObjectType.ObjTst(obj1, obj2, false) == 0);
   }
 
-  public static bool IsTrue(object obj) {
+  public static bool true_q(object obj) {
 	return ((obj is bool) && ((bool)obj));
   }
 
-  public static bool IsFalse(object obj) {
+  public static bool false_q(object obj) {
 	return ((obj is bool) && !((bool)obj));
   }
 
-  public static bool Not(object obj) {
-	return (! IsTrue(obj));
+  public static object not(object obj) {
+	return (! ((bool)obj));
   }
 
   public static bool Compare(object obj1, object op, object obj2) {
@@ -556,10 +556,6 @@ public class Scheme {
 	return car(list);
   }
 
-  public static bool true_q(object obj) {
-	return ((bool)obj);
-  }
-  
 //   public static bool memq(object x, object list) {
 // 	if (null_q(x)) return false;
 // 	else if (Compare(x, list)) return true;
@@ -593,9 +589,6 @@ public class Scheme {
 
   public static object length(object obj) {
 	return null;
-  }
-  public static object not(object obj) {
-	return (! ((bool)obj));
   }
   public static bool quasiquote_q(object obj) {
 	return (test_tag(obj, "quasiquote", "=", 2));
@@ -723,19 +716,19 @@ public class Scheme {
 
   public static bool expression_q(object obj) {
 	object retval = lit_exp(obj);
-	if (!IsFalse(retval))
+	if (!false_q(retval))
 	  return true;
 
 	retval = var_exp(obj);
-	if (!IsFalse(retval))
+	if (!false_q(retval))
 	  return true;
 
 	retval = if_exp(obj);
-	if (!IsFalse(retval))
+	if (!false_q(retval))
 	  return true;
 
 	retval = assign_exp(obj);
-	if (!IsFalse(retval))
+	if (!false_q(retval))
 	  return true;
 
 	//	retval = define_exp(obj);
@@ -743,11 +736,11 @@ public class Scheme {
 	//return true;
 
 	retval = define_syntax_exp(obj);
-	if (!IsFalse(retval))
+	if (!false_q(retval))
 	  return true;
 
 	retval = begin_exp(obj);
-	if (!IsFalse(retval))
+	if (!false_q(retval))
 	  return true;
 	/*
 
