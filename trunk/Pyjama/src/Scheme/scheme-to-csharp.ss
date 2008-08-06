@@ -14,12 +14,18 @@
   '(*function-signatures* *ignore-functions* run trampoline make-cont
 	   make-sub string-to-number))
 
+(define make-default-signature
+  (lambda (args)
+    (if (symbol? args)
+	'(void ("object[]"))
+	`(void ,(repeat 'object (length args))))))
 
 (define lookup-signature
   (lambda (name args sigs)
+    (db "lookup-signature: '~s' ~a ~a ~%" name args sigs)
     ;; sigs: '((procname return-type (param-type ...))...)
     (cond
-     ((null? sigs) `(void ,(repeat 'object (length args))))
+     ((null? sigs) (make-default-signature args))
      ((equal? (format "~a" name) (format "~a" (caar sigs)))
       (list (cadar sigs) (caddar sigs)))
      (else (lookup-signature name args (cdr sigs))))))
@@ -74,12 +80,16 @@
 (define convert-parameters
   (lambda (name args param-types cast)
     (db "convert-parameters: ~a(~a) <= ~a ~%" name args param-types)
-    (glue (join-list (map (lambda (type arg)
-			    (if cast
-				(format "((~a)~a)" type (proper-name arg))
-				(format "~a ~a" type (proper-name arg))))
-			  param-types args)
-		     ", "))))
+    (if (symbol? args)
+	(if cast ;; making work with varargs
+	    (format "((~a)~a)" (car param-types) (proper-name args))
+	    (format "~a ~a" (car param-types) (proper-name args)))
+	(glue (join-list (map (lambda (type arg)
+				(if cast
+				    (format "((~a)~a)" type (proper-name arg))
+				    (format "~a ~a" type (proper-name arg))))
+			      param-types args)
+			 ", ")))))
 
 (define convert-define
   (lambda (def)
@@ -164,7 +174,7 @@
 
 (define convert-exp
   (lambda (exp)
-    (printf "convert-exp: '~s'~%" exp)
+    (db "convert-exp: '~s'~%" exp)
     (cond
       ((pair? exp)
        (cond
@@ -203,7 +213,7 @@
     (let ((cargs (map convert-exp args)))
       (case proc
 	((return) 
-	 (if (= (length args) 2)
+	 (if (= (length args) 2) ;; (return int exp) defaults to object
 	     (format "return((~a ~a))" (car args) (glue (join-list (map convert-exp (cdr args)) ", ")))
 	     (format "return(((object) ~a))" (glue (join-list (map convert-exp args) ", ")))))
 	((and) (format "(~a)" (glue (join-list cargs " && "))))
@@ -221,7 +231,6 @@
   (lambda (name)
     (cond
      ((string? name) name)
-     ((eq? name 'cons) 'Cons)
      ((eq? name 'set!) 'Assign)
      ((eq? name 'eq?) 'Compare)
      ((eq? name 'equal?) 'Compare)

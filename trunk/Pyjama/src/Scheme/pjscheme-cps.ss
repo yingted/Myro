@@ -5,17 +5,17 @@ REP-handler
 REP-k
 and-transformer
 anything?
-app-exp
+;;app-exp
 application?
 apply-proc
 apply-state
-assign-exp
+;;assign-exp
 assignment?
-begin-exp
+;;begin-exp
 begin?
-binding-value
+;;binding-value
 binding-variable
-catch-exps
+;;catch-exps
 catch-var
 catch?
 char-boolean?
@@ -30,13 +30,13 @@ cond-transformer
 constant?
 data-structure-procedure?
 data-structure-procedure?
-define-exp
-define-syntax-exp
+;;define-exp
+;;define-syntax-exp
 define-syntax?
 define?
 empty-frame?
 extend
-finally-exps
+;;finally-exps
 finally?
 first
 first-binding
@@ -46,37 +46,37 @@ get-variables
 group
 head
 if-else?
-if-exp
+;;if-exp
 if-then?
 init-cont
 init-cont2
 init-handler
-lambda-exp
+;;lambda-exp
 lambda?
 last
 let*-transformer
 let-transformer
 letrec-transformer
-lit-exp
+;; lit-exp
 literal?
 load-stack
 macro-env
 make-binding
-make-cont
-make-cont2
+;;make-cont
+;;make-cont2
 make-empty-environment
-make-frame
-make-handler
+
+;;make-handler
 make-initial-environment
-make-macro-env
-make-proc
-make-sub
+;;make-macro-env
+;;make-proc
+;;make-sub
 make-toplevel-env
 mit-define-transformer
 mit-style?
 module?
 mu-closure
-mu-lambda-exp
+;;mu-lambda-exp
 or-transformer
 parse-string
 pattern-variable?
@@ -84,7 +84,7 @@ pattern?
 print-parsed-sexps
 quasiquote?
 quote?
-raise-exp
+;;raise-exp
 raise?
 range
 read-content
@@ -116,20 +116,32 @@ token-type?
 toplevel-env
 true?
 try-body
-try-catch-exp
-try-catch-finally-exp
+;;try-catch-exp
+;;try-catch-finally-exp
 try-catch-finally-handler
 try-catch-handler
-try-finally-exp
+;;try-finally-exp
 try-finally-handler
 try?
 unquote-splicing?
 unquote?
-var-exp
+;;var-exp
     ))
 
 (define *function-signatures*
   '(
+     (lit-exp object ("object[]"))
+     (var-exp object ("object[]"))
+     (if-exp object ("object[]"))
+     (assign-exp object ("object[]"))
+     (define-exp object ("object[]"))
+     (define-syntax-exp object ("object[]"))
+     (begin-exp object ("object[]"))
+     (lambda-exp object ("object[]"))
+     (mu-lambda-exp object ("object[]"))
+     (app-exp object ("object[]"))
+     (try-catch-exp object ("object[]"))
+     (try-finally-exp object ("object[]"))
+     (try-catch-finally-exp object ("object[]"))
+     (raise-exp object ("object[]"))
     ))
-
-

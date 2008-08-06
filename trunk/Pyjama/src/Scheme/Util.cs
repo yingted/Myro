@@ -25,8 +25,6 @@ public class Scheme {
   public delegate void Function();
   public delegate bool Predicate(object obj);
 
-  public static Symbol EmptyList = new Symbol("()");
-
   public static void display(object obj) {
 	Console.Write(obj);
   }
@@ -44,24 +42,6 @@ public class Scheme {
     return (!pattern_variable_q(x) && !pair_q(x));
   }
 
-  public static bool pair_q(object x) {
-    return (x is Cons);
-  }
-
-  public static object reverse(object lyst) {
-	if (lyst is Cons) {
-	  object result = EmptyList;
-	  object current = ((Cons)lyst);
-	  while (current != EmptyList) {
-		result = new Cons(car(current), result);
-		current = cdr(current);
-	  }
-	  return result;
-	} else {
-	  return EmptyList;
-	}
-  }
-
   public static bool char_is__q(object c1, object c2) {
 	return ((c1 is char) && (c2 is char) && ((char)c1) == ((char)c2));
 	
@@ -71,24 +51,6 @@ public class Scheme {
 	return ((o1 is string) && (o2 is string) && ((string)o1) == ((string)o2));
   }
   
-  public static bool null_q(object o1) {
-	return ((o1 is Symbol) && (((Symbol)o1) == EmptyList));
-  }
-
-  public static bool list_q(object o1) {
-	return ((o1 is Cons) || null_q(o1));
-  }
-
-  public static object list_to_string(object lyst) {
-	String retval = "";
-	object current = (Cons)lyst;
-	while (current != EmptyList) {
-	  retval += car(current).ToString();
-	  current = cdr((Cons)current);
-	}
-	return retval;
-  }
-
   public static object string_to_symbol(object s) {
 	return new Symbol((string)s);
   }
@@ -101,35 +63,31 @@ public class Scheme {
 	return (car(token) == myclass);
   }
 
+  /*
   public static object make_cont2(params object[] args) {
-	return make_list("continuation2", args);
+	return list2("continuation2", args);
   }
   
   public static object make_sub(params object[] args) {
-	return make_list("substitution", args);
+	return list2("substitution", args);
   }
   
   public static object make_cont(params object[] args) {
-	return make_list("continuation", args);
+	return list2("continuation", args);
   }
+  */
 
-  public static object list(params object[] args) {
-	Object result = EmptyList;
-	int count = ((Array)args).Length;
-	for (int i = 0; i < count; i++) {
-	  result = new Cons(args[count - i - 1], result);
-	}
-	return result;
-  }
-  
-  public static object make_list(string kind, params object[] args) {
-	Object result = EmptyList;
-	int count = ((Array)args).Length;
-	for (int i = 0; i < count; i++) {
-	  result = new Cons(args[count - i - 1], result);
-	}
-	return new Cons(kind, result);
-  }
+  //;;make-binding
+  //;;make-cont
+  //;;make-cont2
+  //;;make-empty-environment
+  //;;make-frame
+  //;;make-handler
+  //;;make-initial-environment
+  //;;make-macro-env
+  //;;make-proc
+  //;;make-toplevel-env
+
 
   public static object string_to_integer(object str) {
 	return int.Parse((string)str);
@@ -157,60 +115,6 @@ public class Scheme {
 	//String.Format(msg, rest);
 	return String.Format(((string)msg), rest);
   }
-
-  public static object list_ref(object obj, object pos) {
-	if (obj is Cons) {
-	  Cons result = ((Cons)obj);
-	  for (int i = 0; i < ((int)pos); i++) {
-		result = (Cons) cdr(result);
-	  }
-	  return (object)car(result);
-	} else
-	  throw new Exception("error in list_ref: object is not a list");
-  }
-
-  public static object cdr(object obj) {
-	if (obj is Cons) 
-	  return ((Cons)obj).cdr;
-	else
-	  throw new Exception("error in cdr: object is not a list");
-  }
-
-  public static object car(object obj) {
-	if (obj is Cons) 
-	  return ((Cons)obj).car;
-	else
-	  throw new Exception("error in car: object is not a list");
-  }
-
-  public static object   caar(object x) {	return car(car(x));   }
-  public static object   cadr(object x) { 	return car(cdr(x));   }
-  public static object   cdar(object x) {	return cdr(car(x));   }
-  public static object   cddr(object x) {	return cdr(cdr(x));   }
-  public static object  caaar(object x) {	return car(car(car(x)));   }
-  public static object  caadr(object x) { 	return car(car(cdr(x)));   }
-  public static object  cadar(object x) {	return car(cdr(car(x)));   }
-  public static object  caddr(object x) {	return car(cdr(cdr(x)));   }
-  public static object  cdaar(object x) {	return cdr(car(car(x)));   }
-  public static object  cdadr(object x) { 	return cdr(car(cdr(x)));   }
-  public static object  cddar(object x) {	return cdr(cdr(car(x)));   }
-  public static object  cdddr(object x) {	return cdr(cdr(cdr(x)));   }
-  public static object caaaar(object x) {	return car(car(car(car(x))));   }
-  public static object caaadr(object x) {	return car(car(car(cdr(x))));   }
-  public static object caadar(object x) {	return car(car(cdr(car(x))));   }
-  public static object caaddr(object x) {	return car(car(cdr(cdr(x))));   }
-  public static object cadaar(object x) {	return car(cdr(car(car(x))));   }
-  public static object cadadr(object x) {	return car(cdr(car(cdr(x))));   }
-  public static object caddar(object x) {	return car(cdr(cdr(car(x))));   }
-  public static object cadddr(object x) {	return car(cdr(cdr(cdr(x))));   }
-  public static object cdaaar(object x) {	return cdr(car(car(car(x))));   }
-  public static object cdaadr(object x) {	return cdr(car(car(cdr(x))));   }
-  public static object cdadar(object x) {	return cdr(car(cdr(car(x))));   }
-  public static object cdaddr(object x) {	return cdr(car(cdr(cdr(x))));   }
-  public static object cddaar(object x) {	return cdr(cdr(car(car(x))));   }
-  public static object cddadr(object x) {	return cdr(cdr(car(cdr(x))));   }
-  public static object cdddar(object x) {	return cdr(cdr(cdr(car(x))));   }
-  public static object cddddr(object x) {	return cdr(cdr(cdr(cdr(x))));   }
 
   public static bool Compare(object obj1, object obj2) {
 	return (ObjectType.ObjTst(obj1, obj2, false) == 0);
@@ -281,6 +185,143 @@ public class Scheme {
   public static object Divide(object obj1, object obj2) {
 	return (ObjectType.DivObj(obj1, obj2));
   }
+
+  // List functions -----------------------------------------------
+
+  public static object list_ref(object obj, object pos) {
+	if (pair_q(obj)) {
+	  Cons result = ((Cons)obj);
+	  for (int i = 0; i < ((int)pos); i++) {
+		result = (Cons) cdr(result);
+	  }
+	  return (object)car(result);
+	} else
+	  throw new Exception("error in list_ref: object is not a list");
+  }
+
+  public static Symbol EmptyList = new Symbol("()");
+
+  public static bool null_q(object o1) {
+	return ((o1 is Symbol) && (((Symbol)o1) == EmptyList));
+  }
+
+  public static bool pair_q(object x) {
+    return (x is Cons);
+  }
+
+  public static object length(object obj) {
+	if (list_q(obj)) {
+	  if (null_q(obj)) 
+		return 0;
+	  else {
+		int len = 0;
+		object current = (Cons)obj;
+		while (!Compare(current, EmptyList)) {
+		  len++;
+		  current = cdr(current);
+		}
+		return len;
+	  }
+	} else
+	  throw new Exception("attempt to take length of a non-list");
+  }
+
+  public static bool list_q(object o1) {
+	return (pair_q(o1) || null_q(o1));
+  }
+
+  public static object list_to_string(object lyst) {
+	String retval = "";
+	object current = (Cons)lyst;
+	while (current != EmptyList) {
+	  retval += car(current).ToString();
+	  current = cdr((Cons)current);
+	}
+	return retval;
+  }
+
+  public static object reverse(object lyst) {
+	if (lyst is Cons) {
+	  object result = EmptyList;
+	  object current = ((Cons)lyst);
+	  while (current != EmptyList) {
+		result = new Cons(car(current), result);
+		current = cdr(current);
+	  }
+	  return result;
+	} else {
+	  return EmptyList;
+	}
+  }
+
+  public static object list2(object obj, params object[] args) {
+	// first is an object, second is an array. all to be in list
+	Object result = EmptyList;
+	int count = ((Array)args).Length;
+	for (int i = 0; i < count; i++) {
+	  result = new Cons(args[count - i - 1], result);
+	}
+	return new Cons(obj, result);
+  }
+
+  public static object list(params object[] args) {
+	Object result = EmptyList;
+	int count = ((Array)args).Length;
+	for (int i = 0; i < count; i++) {
+	  result = new Cons(args[count - i - 1], result);
+	}
+	return result;
+  }
+  
+  public static object cons(object obj1, object obj2) {
+	if (obj2 is object[])
+	  return new Cons(obj1, list(obj2));
+	else
+	  return new Cons(obj1, obj2);
+  }
+
+  public static object cdr(object obj) {
+	if (obj is Cons) 
+	  return ((Cons)obj).cdr;
+	else
+	  throw new Exception("error in cdr: object is not a list");
+  }
+
+  public static object car(object obj) {
+	if (obj is Cons) 
+	  return ((Cons)obj).car;
+	else
+	  throw new Exception("error in car: object is not a list");
+  }
+
+  public static object   caar(object x) {	return car(car(x));   }
+  public static object   cadr(object x) { 	return car(cdr(x));   }
+  public static object   cdar(object x) {	return cdr(car(x));   }
+  public static object   cddr(object x) {	return cdr(cdr(x));   }
+  public static object  caaar(object x) {	return car(car(car(x)));   }
+  public static object  caadr(object x) { 	return car(car(cdr(x)));   }
+  public static object  cadar(object x) {	return car(cdr(car(x)));   }
+  public static object  caddr(object x) {	return car(cdr(cdr(x)));   }
+  public static object  cdaar(object x) {	return cdr(car(car(x)));   }
+  public static object  cdadr(object x) { 	return cdr(car(cdr(x)));   }
+  public static object  cddar(object x) {	return cdr(cdr(car(x)));   }
+  public static object  cdddr(object x) {	return cdr(cdr(cdr(x)));   }
+  public static object caaaar(object x) {	return car(car(car(car(x))));   }
+  public static object caaadr(object x) {	return car(car(car(cdr(x))));   }
+  public static object caadar(object x) {	return car(car(cdr(car(x))));   }
+  public static object caaddr(object x) {	return car(car(cdr(cdr(x))));   }
+  public static object cadaar(object x) {	return car(cdr(car(car(x))));   }
+  public static object cadadr(object x) {	return car(cdr(car(cdr(x))));   }
+  public static object caddar(object x) {	return car(cdr(cdr(car(x))));   }
+  public static object cadddr(object x) {	return car(cdr(cdr(cdr(x))));   }
+  public static object cdaaar(object x) {	return cdr(car(car(car(x))));   }
+  public static object cdaadr(object x) {	return cdr(car(car(cdr(x))));   }
+  public static object cdadar(object x) {	return cdr(car(cdr(car(x))));   }
+  public static object cdaddr(object x) {	return cdr(car(cdr(cdr(x))));   }
+  public static object cddaar(object x) {	return cdr(cdr(car(car(x))));   }
+  public static object cddadr(object x) {	return cdr(cdr(car(cdr(x))));   }
+  public static object cdddar(object x) {	return cdr(cdr(cdr(car(x))));   }
+  public static object cddddr(object x) {	return cdr(cdr(cdr(cdr(x))));   }
 
   public class Cons {
 	public object car;
@@ -520,6 +561,7 @@ public class Scheme {
   public static string prettyPrint(object obj) {
 	string retval = "";
 	if (obj is List<object>) {
+	  // FIXME: handle Cons
 	  foreach (object item in (List<object>) obj) {
 		if (retval != "")
 		  retval += " ";
@@ -587,9 +629,6 @@ public class Scheme {
 				"try", "catch", "finally", "raise")));
   }
 
-  public static object length(object obj) {
-	return null;
-  }
   public static bool quasiquote_q(object obj) {
 	return (test_tag(obj, "quasiquote", "=", 2));
   }
@@ -689,9 +728,6 @@ public class Scheme {
 		vector_q(datum));
   }
 
-  //public static object lit_exp(object obj) {
-  //}
-
   public static bool quote_q(object obj) {
 	return test_tag(obj, "quote", "=", 2);
   }
@@ -701,10 +737,7 @@ public class Scheme {
   }
 
   public static object lit_exp(object obj) {
-	if (anything_q(obj))
-	  return list("lit-exp", obj);
-	else
-	  return false;
+	return list("lit-exp", obj);
   }
 
   public static object var_exp(object obj) {
@@ -795,7 +828,7 @@ public class Scheme {
 
   public static object assign_exp(object obj) {
 	if (symbol_q(car(obj)) && expression_q(cadr(obj)))
-	  return list("assign-exp", car(obj), cadr(obj));
+	  return list("assign", car(obj), cadr(obj));
 	else
 	  return false;
   }
