@@ -2,6 +2,7 @@
 (load "rm-transformer.ss")
 
 (define *system-function-signatures*
+  ;; use csharp function names in this format:
   ;; ((function-name return-type (param-types...))...)
   '(
     (error void (string string "object[]"))
@@ -11,6 +12,7 @@
     ))
 
 (define *system-ignore-functions*
+  ;; use scheme name of functions to not move to csharp
   '(*function-signatures* *ignore-functions* run trampoline make-cont
 	   make-sub string-to-number))
 

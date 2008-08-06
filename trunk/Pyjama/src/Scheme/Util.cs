@@ -63,7 +63,7 @@ public class Scheme {
 	return (car(token) == myclass);
   }
 
-  /*
+  
   public static object make_cont2(params object[] args) {
 	return list2("continuation2", args);
   }
@@ -75,7 +75,7 @@ public class Scheme {
   public static object make_cont(params object[] args) {
 	return list2("continuation", args);
   }
-  */
+  
 
   //;;make-binding
   //;;make-cont
