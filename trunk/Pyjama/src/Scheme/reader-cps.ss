@@ -353,16 +353,35 @@
 	      (k sexp tokens-left)
 	      (handler (format "tokens left over: ~a" tokens-left)))))))))
 
+(define return
+  (lambda (v) v))
+
+(define string->integer
+  (lambda (str)
+    (return (string->number str))))
+
+(define string->decimal
+  (lambda (str)
+    (return (string->number str))))
+
+(define string->rational
+  (lambda (str)
+    (return (string->number str))))
+
+(define true?
+  (lambda (v) 
+    (if v #t #f)))
+
 (define* read-sexp
   (lambda (tokens handler k)   ;; k receives 2 args:  sexp, tokens-left
     (record-case (first tokens)
       (integer (str)
-	(k (string->number str) (rest-of tokens)))
+	(k (string->integer str) (rest-of tokens)))
       (decimal (str)
-	(k (string->number str) (rest-of tokens)))
+	(k (string->decimal str) (rest-of tokens)))
       (rational (str)
-	(let ((num (string->number str)))
-	  (if num
+	(let ((num (string->rational str)))
+	  (if (true? num)
 	    (k num (rest-of tokens))
 	    (handler (format "cannot represent ~a" str)))))
       (boolean (bool) (k bool (rest-of tokens)))

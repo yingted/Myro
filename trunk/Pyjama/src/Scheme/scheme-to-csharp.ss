@@ -5,11 +5,15 @@
   ;; ((function-name return-type (param-types...))...)
   '(
     (error void (string string "object[]"))
+    (string_to_integer object (object))
+    (string_to_decimal object (object))
+    (string_to_rational object (object))
     ))
 
 (define *system-ignore-functions*
-  '(
-    ))
+  '(return *function-signatures* *ignore-functions* run trampoline make-cont
+	   make-sub string-to-number))
+
 
 (define lookup-signature
   (lambda (name args sigs)
@@ -82,13 +86,7 @@
     (db "convert-define: ~a~%" def)
     (let ((name (cadr def)))
       (cond
-       ((or (equal? name '*function-signatures*)
-	    (equal? name '*ignore-functions*)
-	    (equal? name 'run)
-	    (equal? name 'trampoline)
-	    (equal? name 'make-cont)
-	    (equal? name 'make-sub)
-	    (memq name (append *ignore-functions* *system-ignore-functions*)))
+       ((memq name (append *ignore-functions* *system-ignore-functions*))
 	;; primitive function or system function
 	;; def = (define name (lambda args body ...))
 	(printf "Ignoring function ~a~%" name)
@@ -110,7 +108,7 @@
        ((or (define*? def) (define? def))
 	(let ((args (cadr (caddr def)))
 	      (bodies (cddr (caddr def))))
-	  (printf " adding function ~a...~%" name)
+	  (db " adding function ~a...~%" name)
 	  (let* ((types (lookup-signature name args 
 					  (append *function-signatures*
 						  *system-function-signatures*)))
@@ -204,6 +202,7 @@
     (db "convert-application: ~a(~a)~%" proc args)
     (let ((cargs (map convert-exp args)))
       (case proc
+	((return) (format "~a(~a)" (proper-name proc) (glue (join-list cargs ", "))))
 	((and) (format "(~a)" (glue (join-list cargs " && "))))
 	((or) (format "(~a)" (glue (join-list cargs " || "))))
 	(else
@@ -222,6 +221,7 @@
      ((eq? name 'cons) 'Cons)
      ((eq? name 'set!) 'Assign)
      ((eq? name 'eq?) 'Compare)
+     ((eq? name 'equal?) 'Compare)
      ((eq? name '+) 'Add)
      ((eq? name '=) 'Compare)
      ((eq? name '-) 'Subtract)

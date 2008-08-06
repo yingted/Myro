@@ -40,6 +40,20 @@
 
 (define Main
   (lambda (args)
+
+    (display (+ (string->rational "22/7")
+		(string->rational "1/7")))
+    (newline)
+    (display (+ 5 (string->rational "1/7")))
+    (newline)
+    (display (+ (string->rational "1/7") 6))
+    (newline)
+    (display (+ 6.7 5.2))
+    (newline)
+    (display (+ (string->rational "1/7") 6.1))
+    (newline)
+    (display (+ 7.4 (string->rational "1/7")))
+    (newline)
     (fact 5)
     (display (trampoline))
     (newline)

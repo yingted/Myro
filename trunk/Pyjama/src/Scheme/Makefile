@@ -30,7 +30,7 @@ Reader.exe: Reader.cs Scanner.cs
 Test.exe: Test.cs
 	$(MCS) Test.cs -r:Microsoft.VisualBasic.dll
 
-fact.exe: fact.ss
+fact.exe: fact.ss Util.cs
 	echo "(load \"rm-transformer.ss\")" > make-fact.ss
 	echo "(compile \"fact\")" >> make-fact.ss
 	echo "(delete-file \"fact.cs\")" >> make-fact.ss

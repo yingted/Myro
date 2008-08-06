@@ -8,6 +8,7 @@
     app-exp mu-lambda-exp lambda-exp begin-exp define-syntax-exp
     define-exp assign-exp if-exp var-exp lit-exp
     data-structure-procedure? module? syntactic-sugar?
+true?
 lit-exp
 var-exp
 if-exp
