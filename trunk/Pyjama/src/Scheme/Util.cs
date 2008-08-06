@@ -1,6 +1,7 @@
 // Utility Functions for Running Scheme in CSharp
 
 using System;
+using System.IO; // File
 using System.Collections.Generic; // List
 using Microsoft.VisualBasic.CompilerServices;
 
@@ -13,15 +14,16 @@ public class Scheme {
 
   public static string chars_to_scan = "";
   
-  public static char First(int n) {
-	return chars_to_scan.Substring(n, 1)[0];
+  public static char First(object n) {
+	return chars_to_scan[(int)n];
   }
 
-  public static int remaining(int n) {
-	return (1 + n);
+  public static int remaining(object n) {
+	return (1 + ((int)n));
   }
   
   public delegate void Function();
+  public delegate bool Predicate(object obj);
 
   public static Symbol EmptyList = new Symbol("()");
 
@@ -212,6 +214,29 @@ public class Scheme {
 
   public static bool Compare(object obj1, object obj2) {
 	return (ObjectType.ObjTst(obj1, obj2, false) == 0);
+  }
+
+  public static bool IsTrue(object obj) {
+	return ((obj is bool) && ((bool)obj));
+  }
+
+  public static bool IsFalse(object obj) {
+	return ((obj is bool) && !((bool)obj));
+  }
+
+  public static bool Not(object obj) {
+	return (! IsTrue(obj));
+  }
+
+  public static bool Compare(object obj1, object op, object obj2) {
+	if (((string)op) == "=") {
+	  return (ObjectType.ObjTst(obj1, obj2, false) == 0);
+	} else if (((string)op) == "<") {
+	  return (ObjectType.ObjTst(obj1, obj2, false) < 0);
+	} else if (((string)op) == ">") {
+	  return (ObjectType.ObjTst(obj1, obj2, false) > 0);
+	} 
+	throw new Exception(String.Format("unknown compare operator: '{0}'", op));
   }
 
   public static object Add(object obj1, object obj2) {
@@ -535,10 +560,16 @@ public class Scheme {
 	return ((bool)obj);
   }
   
+//   public static bool memq(object x, object list) {
+// 	if (null_q(x)) return false;
+// 	else if (Compare(x, list)) return true;
+// 	else return (memq(x, cdr(list)));
+//   }
+
   public static bool memq(object item1, object list) {
 	if (list is Cons) {
 	  object current = list;
-	  while (current != EmptyList) {
+	  while (! Compare(current, EmptyList)) {
 		if (Compare(item1, car(current))) {
 		  return true;
 		}
@@ -547,41 +578,342 @@ public class Scheme {
 	return false;
   }
 
-  public static bool try_q (object o1, object key, object op, object size) {
-	return true;
+  public static bool application_q(object datum) {
+    return (list_q(datum) && 
+		(! null_q(datum)) && 
+		(! reserved_keyword_q(car(datum))));
   }
-  public static object application_q(object obj) {
-	return null;
+  public static bool reserved_keyword_q(object x) {
+    return (symbol_q(x) &&
+		memq(x, list("quote", "quasiquote", "lambda", "if", "set!",
+				"define",  "begin", "cond", "and", "or", "let", "let*",
+				"letrec", "record-case", ";;", "do", "delay", "case",
+				"try", "catch", "finally", "raise")));
   }
+
   public static object length(object obj) {
 	return null;
   }
   public static object not(object obj) {
-	return null;
+	return (! ((bool)obj));
   }
-  public static object quasiquote_q(object obj) {
-	return null;
+  public static bool quasiquote_q(object obj) {
+	return (test_tag(obj, "quasiquote", "=", 2));
   }
-  public static object raise_q(object obj) {
-	return null;
+  public static bool raise_q(object obj) {
+	return (test_tag(obj, "raise", "=", 2));
   }
-  public static object string_append(object obj) {
-	return null;
+  public static object string_append(object obj1, object obj2) {
+	return ((string)obj1) + ((string)obj2);
   }
+
+  public static bool try_q(object obj) {
+	return test_tag(obj, "try", ">=", 2);
+  }
+
   public static object try_body(object obj) {
-	return null;
+	return cadr(obj);
   }
-  public static object unquote_q(object obj) {
-	return null;
+  public static object catch_vars(object obj) {
+	return cadr(obj);
   }
-  public static object unquote_splicing_q(object obj) {
-	return null;
+  public static object catch_exps(object obj) {
+	return cddr(obj);
   }
-  public static object vector_q(object obj) {
-	return null;
+  public static object finally_exps(object obj) {
+	return cdr(obj);
   }
+
+  public static bool catch_q(object obj) {
+	return test_tag(obj, "catch", ">=", 3);
+  }
+
+  public static bool finally_q(object obj) {
+	return test_tag(obj, "finally", ">=", 2);
+  }
+
+  public static bool unquote_q(object obj) {
+	return test_tag(obj, "unquote", "=", 2);
+  }
+  public static bool unquote_splicing_q(object obj) {
+	return test_tag(obj, "unquote-splicing", "=", 2);
+  }
+
+  public static bool test_tag(object obj, object key, 
+	  object op, object size) {
+	return ((list_q(obj) &&
+			(! null_q(obj)) &&
+			Compare(car(obj), key) &&
+			Compare(length(obj), op, size)));
+  }
+
+  public static bool vector_q(object obj) {
+	return (obj is object[]);
+  }
+  //public static object vector_q(object datum) {
+  //return (datum is object[]);
+  //}
+
   public static object vector_to_list(object obj) {
+	return list(obj);
+  }
+
+  public static object load_stack(object obj) {
+	return EmptyList;
+  }
+
+  public static object read_content(object filename) {
+	return File.OpenText((string)filename).ReadToEnd();
+  }
+
+  public static object macro_env() {
 	return null;
   }
+
+  public static bool number_q(object datum) {
+	return ((datum is int) ||
+		(datum is double) ||
+		(datum is Rational));
+  }
+  
+  public static bool boolean_q(object datum) {
+	return (datum is bool);
+  }
+	
+  public static bool char_q(object datum) {
+	return (datum is char);
+  }
+
+  public static bool string_q(object datum) {
+	return (datum is string);
+  }
+
+  public static bool literal_q(object datum) {
+    return (number_q(datum) ||
+		boolean_q(datum) ||
+		char_q(datum) ||
+		string_q(datum) ||
+		vector_q(datum));
+  }
+
+  //public static object lit_exp(object obj) {
+  //}
+
+  public static bool quote_q(object obj) {
+	return test_tag(obj, "quote", "=", 2);
+  }
+
+  public static bool anything_q(object obj) {
+	return true;
+  }
+
+  public static object lit_exp(object obj) {
+	if (anything_q(obj))
+	  return list("lit-exp", obj);
+	else
+	  return false;
+  }
+
+  public static object var_exp(object obj) {
+	if (symbol_q(obj))
+	  return list("var-exp", obj);
+	else
+	  return false;
+  }
+
+  public static bool expression_q(object obj) {
+	object retval = lit_exp(obj);
+	if (!IsFalse(retval))
+	  return true;
+
+	retval = var_exp(obj);
+	if (!IsFalse(retval))
+	  return true;
+
+	retval = if_exp(obj);
+	if (!IsFalse(retval))
+	  return true;
+
+	retval = assign_exp(obj);
+	if (!IsFalse(retval))
+	  return true;
+
+	//	retval = define_exp(obj);
+	//	if (!IsFalse(retval))
+	//return true;
+
+	retval = define_syntax_exp(obj);
+	if (!IsFalse(retval))
+	  return true;
+
+	retval = begin_exp(obj);
+	if (!IsFalse(retval))
+	  return true;
+	/*
+
+	retval = lambda_exp(obj);
+	if (!IsFalse(retval))
+	  return true;
+
+	retval = mu_lambda_exp(obj);
+	if (!IsFalse(retval))
+	  return true;
+
+	retval = app_exp(obj);
+	if (!IsFalse(retval))
+	  return true;
+
+	retval = try_catch_exp(obj);
+	if (!IsFalse(retval))
+	  return true;
+
+	retval = try_finally_exp(obj);
+	if (!IsFalse(retval))
+	  return true;
+
+	retval = try_cath_finally_exp(obj);
+	if (!IsFalse(retval))
+	  return true;
+
+	retval = raise_exp(obj);
+	if (!IsFalse(retval))
+	  return true;
+	*/
+	return false;
+  }
+
+  public static bool if_q(object obj) {
+	return (expression_q(car(obj)) && 
+		expression_q(cadr(obj)) && 
+		expression_q(caddr(obj)));
+  }
+  
+  public static object if_exp(object obj) {
+	return list("if", car(obj), cadr(obj), caddr(obj));
+  }
+
+  public static bool if_else_q(object obj) {
+	return test_tag(obj, "if", "=", 4);
+  }
+  
+  public static bool if_then_q(object obj) {
+	return test_tag(obj, "if", "=", 3);
+  }
+
+  public static object assign_exp(object obj) {
+	if (symbol_q(car(obj)) && expression_q(cadr(obj)))
+	  return list("assign-exp", car(obj), cadr(obj));
+	else
+	  return false;
+  }
+
+  public static bool pattern_q(object x) {
+    return (null_q(x) ||
+		number_q(x) ||
+		boolean_q(x) ||
+		symbol_q(x) ||
+		(pair_q(x) &&
+			pattern_q(car(x)) &&
+			pattern_q(cdr(x))));
+  }
+
+  public static object define_syntax_exp(object obj) {
+	if (symbol_q(car(obj)) && list_of( list_of( (Predicate) pattern_q, obj)))
+	  return list("define-syntax-exp", car(obj), cadr(obj));
+	else
+	  return false;
+  }
+
+  public static bool list_of(bool obj) {
+	return false;
+  }
+
+  public static bool list_of(Predicate pred, object obj) {
+	object retval = list();
+	object current = obj;
+	while (!null_q(current)) {
+	  retval = new Cons(pred(car(obj)), retval);
+	}
+	//FIXME: go down list?
+	return false;
+  }
+  
+  //   (begin-exp
+  //     (exps (list-of expression?)))
+  
+  public static bool begin_exp(object obj) {
+	return list_of(expression_q, obj);
+  }
+
+  /*
+  public static object define_exp(object obj) {
+	if (symbol_q(car(obj)) &&
+		expression_q(cadr(obj))) 
+	  return test_tag("begin", cadr(obj));
+  }
+  */
+
+//   (lambda-exp
+//     (formals (list-of symbol?))
+//     (body expression?))
+//   (mu-lambda-exp
+//     (formals (list-of symbol?))
+//     (runt symbol?)
+//     (body expression?))
+//   (app-exp
+//     (operator expression?)
+//     (operands (list-of expression?)))
+//   (try-catch-exp
+//     (body expression?)
+//     (catch-var symbol?)
+//     (catch-exps (list-of expression?)))
+//   (try-finally-exp
+//     (body expression?)
+//     (finally-exps (list-of expression?)))
+//   (try-catch-finally-exp
+//     (body expression?)
+//     (catch-var symbol?)
+//     (catch-exps (list-of expression?))
+//     (finally-exps (list-of expression?)))
+//   (raise-exp
+//     (exp expression?))
+
+
+  public static bool syntactic_sugar_q(object datum) {
+    return (list_q(datum) && (! null_q(datum)) &&
+		symbol_q(car(datum)));
+	//FIXME:
+	//(search-env macro-env (car datum)))))
+  }
+
+  public static bool assignment_q(object obj) {
+	return test_tag(obj, "set!", "=", 3);
+  }
+
+  public static bool define_q(object obj) {
+	return test_tag(obj, "define", ">=", 3);
+  }
+
+  public static bool mit_style_q(object datum) {
+    return (! symbol_q(cadr(datum)));
+  }
+
+  public static object mit_define_transformer(object obj) {
+	return null;
+  }
+
+  public static bool define_syntax_q(object obj) {
+	return test_tag(obj, "define-syntax", ">=", 3);
+  }
+
+  public static bool begin_q(object obj) {
+	return test_tag(obj, "begin", ">=", 2);
+  }
+
+  public static bool lambda_q(object obj) {
+	return test_tag(obj, "lambda", ">=", 3);
+  }
+
+
 
 }
