@@ -1,6 +1,16 @@
 ;; temporary - to access various utilities (define*? etc.)
 (load "rm-transformer.ss")
 
+(define *system-function-signatures*
+  ;; ((function-name return-type (param-types...))...)
+  '(
+    (error void (string string "object[]"))
+    ))
+
+(define *system-ignore-functions*
+  '(
+    ))
+
 (define lookup-signature
   (lambda (name args sigs)
     ;; sigs: '((procname return-type (param-type ...))...)
@@ -78,7 +88,7 @@
 	    (equal? name 'trampoline)
 	    (equal? name 'make-cont)
 	    (equal? name 'make-sub)
-	    (memq name *ignore-functions*))
+	    (memq name (append *ignore-functions* *system-ignore-functions*)))
 	;; primitive function or system function
 	;; def = (define name (lambda args body ...))
 	(printf "Ignoring function ~a~%" name)
@@ -86,7 +96,9 @@
        ((not (lambda? (caddr def)))
 	;; def = (define name 'undefined)
 	(let* ((pname (proper-name name))
-	       (types (lookup-signature pname '() *function-signatures*)))
+	       (types (lookup-signature pname '() 
+					(append *function-signatures*
+						*system-function-signatures*))))
 	  (printf " adding static variable ~a...~%" name)
 	  (cond
 	   ((equal? pname "pc")
@@ -99,7 +111,9 @@
 	(let ((args (cadr (caddr def)))
 	      (bodies (cddr (caddr def))))
 	  (printf " adding function ~a...~%" name)
-	  (let* ((types (lookup-signature name args *function-signatures*))
+	  (let* ((types (lookup-signature name args 
+					  (append *function-signatures*
+						  *system-function-signatures*)))
 		 (return-type (car types))
 		 (param-types (cadr types)))
 	    ;; def = (define* name (lambda args body ...))
@@ -172,8 +186,8 @@
 	((char=? exp #\newline) "'\\n'")
 	((char=? exp #\space) "' '")
 	((char=? exp #\tab) "'\\t'")
-	((char=? exp #\nul) "'\\0'")
-	((char=? exp #\backspace) "'?'")
+	((char=? exp #\nul) "NULL")
+	((char=? exp #\backspace) "BACKSPACE")
 	((char=? exp #\\) "BACKSLASH")
 	((char=? exp #\`) "BACKQUOTE")
 	;; maybe others?
@@ -194,7 +208,9 @@
 	((or) (format "(~a)" (glue (join-list cargs " || "))))
 	(else
 	 (let* ((pname (proper-name proc))
-		(types (lookup-signature pname args *function-signatures*))
+		(types (lookup-signature pname args 
+					 (append *function-signatures*
+						 *system-function-signatures*)))
 		(param-types (cadr types))
 		(cargs+types (convert-parameters pname cargs param-types #t)))
 	   (format "~a(~a)" (proper-name proc) cargs+types)))))))

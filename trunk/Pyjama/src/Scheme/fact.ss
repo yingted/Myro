@@ -32,10 +32,11 @@
     (fib void (int))
     (fact void (int))
     (Main void ("string []"))
-    (error void (string string "object[]"))
     ))
 
 (define *ignore-functions* '())
+
+;; For testing with C# conversion:
 
 (define Main
   (lambda (args)
