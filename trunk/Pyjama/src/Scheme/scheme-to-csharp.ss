@@ -11,7 +11,7 @@
     ))
 
 (define *system-ignore-functions*
-  '(return *function-signatures* *ignore-functions* run trampoline make-cont
+  '(*function-signatures* *ignore-functions* run trampoline make-cont
 	   make-sub string-to-number))
 
 
@@ -202,7 +202,7 @@
     (db "convert-application: ~a(~a)~%" proc args)
     (let ((cargs (map convert-exp args)))
       (case proc
-	((return) (format "~a(~a)" (proper-name proc) (glue (join-list cargs ", "))))
+	((return) (format "return((~a ~a))" (car args) (glue (join-list (map convert-exp (cdr args)) ", "))))
 	((and) (format "(~a)" (glue (join-list cargs " && "))))
 	((or) (format "(~a)" (glue (join-list cargs " || "))))
 	(else

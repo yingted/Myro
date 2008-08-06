@@ -353,9 +353,6 @@
 	      (k sexp tokens-left)
 	      (handler (format "tokens left over: ~a" tokens-left)))))))))
 
-(define return
-  (lambda (v) v))
-
 (define string->integer
   (lambda (str)
     (return (string->number str))))

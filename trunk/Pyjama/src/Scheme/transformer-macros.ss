@@ -31,3 +31,11 @@
 (define-syntax halt*
   (syntax-rules ()
     [(_ value) value]))
+
+;; for languages that need a return statement
+
+(define-syntax return
+  (syntax-rules ()
+    [(_ value) value]
+    [(_ type value) value]))
+

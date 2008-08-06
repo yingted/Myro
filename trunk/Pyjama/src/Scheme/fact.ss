@@ -31,12 +31,18 @@
   '(
     (fib void (int))
     (fact void (int))
+    (fact-wrap int (int))
     (Main void ("string []"))
     ))
 
 (define *ignore-functions* '())
 
 ;; For testing with C# conversion:
+
+(define fact-wrap
+  (lambda (n)
+    (fact 5)
+    (return (int) (trampoline))))
 
 (define Main
   (lambda (args)
