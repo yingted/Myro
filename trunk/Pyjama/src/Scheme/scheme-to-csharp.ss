@@ -212,19 +212,22 @@
 (define convert-application
   (lambda (proc args)
     (db "convert-application: ~a(~a)~%" proc args)
-    (let ((cargs (map convert-exp args)))
+    (let ((cargs (map convert-exp args))
+	  (types (lookup-signature proc args 
+		   (append *function-signatures*
+		   *system-function-signatures*))))
       (case proc
 	((return) 
 	 (if (= (length args) 2) ;; (return int exp) defaults to object
-	     (format "return((~a ~a))" (car args) (glue (join-list (map convert-exp (cdr args)) ", ")))
-	     (format "return(((object) ~a))" (glue (join-list (map convert-exp args) ", ")))))
+	     (format "return(((~a) ~a))" (car args) (glue (join-list (map convert-exp (cdr args)) ", ")))
+	     (format "return(((~a) ~a))" (if (equal? (car types) 'void)
+					     'object
+					     (car types))
+		     (glue (join-list (map convert-exp args) ", ")))))
 	((and) (format "(~a)" (glue (join-list cargs " && "))))
 	((or) (format "(~a)" (glue (join-list cargs " || "))))
 	(else
 	 (let* ((pname (proper-name proc))
-		(types (lookup-signature proc args 
-					 (append *function-signatures*
-						 *system-function-signatures*)))
 		(param-types (cadr types))
 		(cargs+types (convert-parameters pname cargs param-types #t)))
 	   (format "~a(~a)" (proper-name proc) cargs+types)))))))

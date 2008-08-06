@@ -42,11 +42,12 @@
 (define fact-wrap
   (lambda (n)
     (fact 5)
-    (return (int) (trampoline))))
+    (return int (trampoline))))
 
 (define Main
   (lambda (args)
     (display (fact-wrap 5))
+    (newline)
     (display (+ (string->rational "22/7")
 		(string->rational "1/7")))
     (newline)

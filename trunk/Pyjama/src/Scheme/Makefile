@@ -30,17 +30,23 @@ Reader.exe: Reader.cs Scanner.cs
 Test.exe: Test.cs
 	$(MCS) Test.cs -r:Microsoft.VisualBasic.dll
 
-fact.exe: fact.ss Util.cs
+make-fact.ss: scheme-to-csharp.ss 
 	echo "(load \"rm-transformer.ss\")" > make-fact.ss
 	echo "(compile \"fact\")" >> make-fact.ss
 	echo "(delete-file \"fact.cs\")" >> make-fact.ss
 	echo "(load \"scheme-to-csharp.ss\")" >> make-fact.ss
 	echo "(convert-file \"fact-rm.ss\" \"fact.cs\")" >> make-fact.ss
 	echo "(exit)" >> make-fact.ss
+
+fact.cs: fact.ss Util.cs make-fact.ss rm-transformer.ss
 	petite make-fact.ss
 	indent -di0 -i3 fact.cs
 	$(MCS) fact.cs Util.cs -r:Microsoft.VisualBasic.dll
+
+run-fact.exe:
 	mono fact.exe
+
+fact.exe: fact.cs run-fact.exe
 
 clean:
 	$(RM) *.exe *~ pjscheme-ds.ss pjscheme-rm.ss compile.ss make-fact.ss \
