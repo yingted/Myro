@@ -106,7 +106,7 @@
        ((not (lambda? (caddr def)))
 	;; def = (define name 'undefined)
 	(let* ((pname (proper-name name))
-	       (types (lookup-signature pname '() 
+	       (types (lookup-signature name '() 
 					(append *function-signatures*
 						*system-function-signatures*))))
 	  (printf " adding static variable ~a...~%" name)
@@ -222,7 +222,7 @@
 	((or) (format "(~a)" (glue (join-list cargs " || "))))
 	(else
 	 (let* ((pname (proper-name proc))
-		(types (lookup-signature pname args 
+		(types (lookup-signature proc args 
 					 (append *function-signatures*
 						 *system-function-signatures*)))
 		(param-types (cadr types))

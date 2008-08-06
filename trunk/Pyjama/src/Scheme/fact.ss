@@ -46,7 +46,7 @@
 
 (define Main
   (lambda (args)
-
+    (display (fact-wrap 5))
     (display (+ (string->rational "22/7")
 		(string->rational "1/7")))
     (newline)
