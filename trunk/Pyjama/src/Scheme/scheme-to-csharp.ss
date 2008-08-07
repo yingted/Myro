@@ -346,7 +346,7 @@
      ((null? (cdr lyst)) lyst)
      (else (cons (car lyst) (cons delim (join-list (cdr lyst) delim)))))))
 
-(define *debug* #t)
+(define *debug* #f)
 
 ;; debug
 (define db
