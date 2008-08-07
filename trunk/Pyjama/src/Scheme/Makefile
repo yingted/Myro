@@ -1,8 +1,11 @@
 MCS=gmcs
 
-pjscheme-rm.ss: environments-cps.ss parser-cps.ss unifier-cps.ss interpreter-cps.ss \
-		reader-cps.ss ds-transformer.ss rm-transformer.ss pjscheme-cps.ss
+pjscheme-rm.ss: environments-cps.ss parser-cps.ss unifier-cps.ss \
+		interpreter-cps.ss reader-cps.ss ds-transformer.ss \
+		rm-transformer.ss pjscheme-data.ss
+	$(RM) pjscheme-cps.ss
 	cat *cps.ss > pjscheme.ss
+	cat pjscheme-data.ss >> pjscheme.ss
 	echo "(load \"rm-transformer.ss\")" > compile.ss
 	echo "(compile-level-output)" >> compile.ss
 	echo "(compile \"pjscheme\")" >> compile.ss
@@ -53,5 +56,6 @@ fact.exe: fact.cs run-fact.exe
 
 clean:
 	$(RM) *.exe *~ pjscheme-ds.ss pjscheme-rm.ss compile.ss make-fact.ss \
-		fact.cs make-pjscheme.ss pjscheme.exe pjscheme.cs pjscheme-run.ss
+		fact.cs make-pjscheme.ss pjscheme.exe pjscheme.cs \
+		pjscheme-run.ss pjscheme.ss fact-rm.ss fact-ds.ss 
 
