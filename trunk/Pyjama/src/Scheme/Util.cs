@@ -7,7 +7,10 @@ using Microsoft.VisualBasic.CompilerServices;
 
 public class Scheme {
 
+  public static char TILDE = '~';
   public static char NULL = '\0';
+  public static char DOUBLEQUOTE = '"';
+  public static char QUOTE = '\'';
   public static char BACKSPACE = '\b';
   public static char SLASH = '/';
   static char[] SPLITSLASH = {SLASH};
@@ -40,6 +43,18 @@ public class Scheme {
 
   public static bool constant_q(object x) {
     return (!pattern_variable_q(x) && !pair_q(x));
+  }
+
+  public static bool char_alphabetic_q(object o) {
+	return false;
+  }
+
+  public static bool char_whitespace_q(object o) {
+	return false;
+  }
+
+  public static bool char_special_subsequent_q(object o) {
+	return false;
   }
 
   public static bool char_is__q(object c1, object c2) {

@@ -269,6 +269,8 @@
     (cond
      ((string? name) name)
      ;;((eq? name 'finally-exps) 'cdr)
+     ((eq? name 'class) 'class_name)
+     ((eq? name 'goto) 'goto_name)
      ((eq? name 'set!) 'Assign)
      ((eq? name 'eq?) 'Compare)
      ((eq? name 'equal?) 'Compare)
