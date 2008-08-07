@@ -182,11 +182,11 @@
 	   (if (test-part . conseqs)  ;true-part false-part)
 	       (let ((true-part (car conseqs)))
 		 (if (null? (cdr conseqs))
-		     (format "if (~a) ~a"
+		     (format "if (((bool)~a)) ~a"
 			     (convert-exp test-part)
 			     (convert-statement true-part))
 		     (let ((false-part (cadr conseqs)))
-		       (format "if (~a) ~a else ~a"
+		       (format "if (((bool)~a)) ~a else ~a"
 			       (convert-exp test-part)
 			       (convert-statement true-part)
 			       (convert-statement false-part))))))
@@ -219,6 +219,7 @@
   (lambda (exp)
     (db "convert-exp: '~s'~%" exp)
     (cond
+      ((null? exp) "EmptyList")
       ((pair? exp)
        (cond
 	 ((eq? (car exp) 'quote) (format "\"~a\"" (cadr exp)))
@@ -267,6 +268,7 @@
   (lambda (name)
     (cond
      ((string? name) name)
+     ;;((eq? name 'finally-exps) 'cdr)
      ((eq? name 'set!) 'Assign)
      ((eq? name 'eq?) 'Compare)
      ((eq? name 'equal?) 'Compare)

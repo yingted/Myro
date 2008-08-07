@@ -59,14 +59,13 @@ let-transformer
 letrec-transformer
 ;; lit-exp
 literal?
-load-stack
+;;load-stack
 macro-env
 make-binding
-;;make-cont
-;;make-cont2
+make-cont
+make-cont2
 make-empty-environment
-
-;;make-handler
+make-handler
 make-initial-environment
 ;;make-macro-env
 ;;make-proc

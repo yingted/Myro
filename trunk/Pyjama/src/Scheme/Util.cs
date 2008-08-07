@@ -75,6 +75,10 @@ public class Scheme {
   public static object make_cont(params object[] args) {
 	return list2("continuation", args);
   }
+
+  public static object make_handler(params object[] args) {
+	return list2("handler", args);
+  }
   
 
   //;;make-binding
@@ -117,7 +121,11 @@ public class Scheme {
   }
 
   public static bool Compare(object obj1, object obj2) {
-	return (ObjectType.ObjTst(obj1, obj2, false) == 0);
+	try {
+	  return (ObjectType.ObjTst(obj1, obj2, false) == 0);
+	} catch {
+	  return false;
+	}
   }
 
   public static bool LessThan(object obj1, object obj2) {
@@ -147,6 +155,10 @@ public class Scheme {
 	  return (ObjectType.ObjTst(obj1, obj2, false) < 0);
 	} else if (((string)op) == ">") {
 	  return (ObjectType.ObjTst(obj1, obj2, false) > 0);
+	} else if (((string)op) == "<=") {
+	  return (ObjectType.ObjTst(obj1, obj2, false) <= 0);
+	} else if (((string)op) == ">=") {
+	  return (ObjectType.ObjTst(obj1, obj2, false) >= 0);
 	} 
 	throw new Exception(String.Format("unknown compare operator: '{0}'", op));
   }
@@ -195,6 +207,19 @@ public class Scheme {
   }
 
   // List functions -----------------------------------------------
+
+  public static object member(object obj1, object obj2) {
+	if (pair_q(obj2)) {
+	  object current = (Cons)obj2;
+	  while (!Compare(current, EmptyList)) {
+		if (Compare(obj1, car(current)))
+		  return current;
+		current = cdr(current);
+	  }
+	  return false;
+	}
+	throw new Exception("member takes an object and a list");
+  }
 
   public static object list_ref(object obj, object pos) {
 	if (pair_q(obj)) {
@@ -569,7 +594,6 @@ public class Scheme {
   public static string prettyPrint(object obj) {
 	string retval = "";
 	if (obj is List<object>) {
-	  // FIXME: handle Cons
 	  foreach (object item in (List<object>) obj) {
 		if (retval != "")
 		  retval += " ";
@@ -577,6 +601,19 @@ public class Scheme {
 		  retval += prettyPrint((List<object>) item);
 		else
 		  retval += item.ToString();
+	  }
+	  return "[" + retval + "]";
+	} else if (obj is String) {
+	  return String.Format("\"{0}\"", obj);
+	} else if (obj is Symbol && ((Symbol)obj) == EmptyList) {
+	  return "()";
+	} else if (obj is Cons) {
+	  object current = (Cons)obj;
+	  while (!Compare(current, EmptyList)) {
+		if (retval != "")
+		  retval += " ";
+		retval += prettyPrint(car(current));
+		current = cdr(current);
 	  }
 	  return "(" + retval + ")";
 	} else {
@@ -690,9 +727,6 @@ public class Scheme {
   public static bool vector_q(object obj) {
 	return (obj is object[]);
   }
-  //public static object vector_q(object datum) {
-  //return (datum is object[]);
-  //}
 
   public static object vector_to_list(object obj) {
 	return list(obj);
@@ -948,6 +982,33 @@ public class Scheme {
 	return test_tag(obj, "lambda", ">=", 3);
   }
 
+  public static bool lit_q(object obj) {
+	return test_tag(obj, "lit", "=", 2);
+  }
 
+  public static void Main(string [] args) {
+	display("Testing Add(1,1): ");
+	display(Add(1, 1));
+	newline();
+	display("Literal test: ");
+	object t = lit_exp(2);
+	display(list_q(t));
+	newline();
+	display(lit_q(t));
+	newline();
+	display(null_q(t));
+	newline();
+	display("Compare tests: ");
+	display(Compare("hello", "hello"));	newline();
+	display(Compare("hello", "hel"));	newline();
+	display(Compare("hello", "helloo"));	newline();
+	display(Compare(4.1, 4));	newline();
+	display(Compare("hello", true));	newline();
+	display("Member test: ");
+	t = cons("hello", t);
+	//prettyPrint(member("hello", t));
+	prettyPrint(list());
+	display("\n");
+  }
 
 }
