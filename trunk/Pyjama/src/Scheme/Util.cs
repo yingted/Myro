@@ -120,6 +120,14 @@ public class Scheme {
 	return (ObjectType.ObjTst(obj1, obj2, false) == 0);
   }
 
+  public static bool LessThan(object obj1, object obj2) {
+	return (ObjectType.ObjTst(obj1, obj2, false) < 0);
+  }
+
+  public static bool GreaterThan(object obj1, object obj2) {
+	return (ObjectType.ObjTst(obj1, obj2, false) > 0);
+  }
+
   public static bool true_q(object obj) {
 	return ((obj is bool) && ((bool)obj));
   }

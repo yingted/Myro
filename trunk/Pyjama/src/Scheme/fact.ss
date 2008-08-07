@@ -32,6 +32,8 @@
     (fib void (int))
     (fact void (int))
     (fact-wrap int (int))
+    (factorial-1 int (int))
+    (factorial-2 int (int))
     (Main void ("string []"))
     ))
 
@@ -42,10 +44,25 @@
 (define fact-wrap
   (lambda (n)
     (fact 5)
-    (return int (trampoline))))
+    (return (int) (trampoline))))
+
+;; This won't work:
+;; (define factorial-1
+;;    (lambda (n)
+;;       (cond
+;;         ((< n 3) 1)
+;;         (else (* (factorial-1 (- n 1)))))))
+
+(define factorial-2
+   (lambda (n)
+      (cond
+        ((< n 3) (return (int) 1))
+        (else (return (int) (* n (factorial-2 (- n 1))))))))
 
 (define Main
   (lambda (args)
+    (display (factorial-2 10))
+    (newline)
     (display (fact-wrap 5))
     (newline)
     (display (+ (string->rational "22/7")

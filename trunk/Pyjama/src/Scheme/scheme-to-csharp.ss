@@ -16,22 +16,6 @@
   '(*function-signatures* *ignore-functions* run trampoline make-cont
 	   make-sub string-to-number))
 
-(define make-default-signature
-  (lambda (args)
-    (if (symbol? args)
-	'(void ("object[]"))
-	`(void ,(repeat 'object (length args))))))
-
-(define lookup-signature
-  (lambda (name args sigs)
-    (db "lookup-signature: '~s' ~a ~a ~%" name args sigs)
-    ;; sigs: '((procname return-type (param-type ...))...)
-    (cond
-     ((null? sigs) (make-default-signature args))
-     ((equal? (format "~a" name) (format "~a" (caar sigs)))
-      (list (cadar sigs) (caddar sigs)))
-     (else (lookup-signature name args (cdr sigs))))))
-
 (define convert-file
   (lambda (filename . opt)
     (load filename) ;; to get *function-signatures*
@@ -73,25 +57,87 @@
     }
 ")
 
+(define lookup-signature
+  (lambda (name sigs)
+    (db "lookup-signature: '~s'~%" name)
+    ;; sigs: '((procname return-type (param-type ...))...)
+    (cond
+     ((null? sigs) '(()())) ;; no return type, no param types
+     ((equal? (format "~a" name) (format "~a" (caar sigs)))
+      (list (cadar sigs) (caddar sigs))) ;; return-type (params)
+     (else (lookup-signature name (cdr sigs))))))
+
 (define repeat
   (lambda (item times)
     (if (= times 0)
 	'()
 	(cons item (repeat item (- times 1))))))
 
-(define convert-parameters
-  (lambda (name args param-types cast)
-    (db "convert-parameters: ~a(~a) <= ~a ~%" name args param-types)
-    (if (symbol? args)
-	(if cast ;; making work with varargs
-	    (format "((~a)~a)" (car param-types) (proper-name args))
-	    (format "~a ~a" (car param-types) (proper-name args)))
-	(glue (join-list (map (lambda (type arg)
-				(if cast
-				    (format "((~a)~a)" type (proper-name arg))
-				    (format "~a ~a" type (proper-name arg))))
-			      param-types args)
-			 ", ")))))
+;;     (glue (join-list (map (lambda (type param)
+;; 			    (format "~a ~a" type (proper-name param))))
+;; 		     types params)
+;; 	  ", ")))
+
+(define format-definition
+  (lambda (name params)
+    (let* ((ret-params (get-definition-parameter-types name params 'def))
+	   (types (cadr ret-params))
+	   (return-type (car ret-params))
+	   (param-list (if (symbol? params)
+			   (list params)
+			   params))
+	   (sparms (glue (join-list (map (lambda (type param)
+					   (format "~a ~a" type (proper-name param)))
+					 types param-list)
+				    ", "))))
+      (format "public static ~a ~a(~a) " 
+	      return-type (proper-name name) sparms))))
+
+(define format-application
+  (lambda (name args return-cast)
+    (let* ((ret-args (get-definition-parameter-types name args 'app))
+	   (types (cadr ret-args))
+	   (return-type (car ret-args))
+	   (args-list (if (symbol? args)
+			   (list args)
+			   args))
+	   (sargs (glue (join-list (map (lambda (type arg)
+					  (if (equal? return-cast "") 
+					      (format "(~a)~a" type (convert-exp arg))
+					      (format "~a" (convert-exp arg))))
+					types args-list)
+				   ", "))))
+      (if (equal? return-cast "") ;; no return override
+	  (format "~a(~a) " 
+		  ;;return-type 
+		  (proper-name name) sargs)
+	  (format "return(~a ~a) " return-cast sargs)))))
+		  
+	   
+(define get-definition-parameter-types
+  (lambda (name params kind)
+    (db "get-definition-parameter-types: ~a(~a) ~%" name params)
+    (cond
+     ((symbol? params) 
+      (if (eq? kind 'def)
+	  (lookup-param-types name '("object" ("params object[]")))
+	  (lookup-param-types name '("object" ("object[]")))))
+     ((null? params) (lookup-param-types name '("void" ())))
+     (else (let ((times (length params)))
+	     (lookup-param-types name (list "object" (repeat "object" times))))))))
+
+(define lookup-param-types
+  (lambda (name defaults)
+    (let* ((sig (lookup-signature name 
+		  (append *function-signatures*
+			  *system-function-signatures*)))
+	   (return-type (if (null? (car sig))
+			    (car defaults)
+			    (car sig)))
+	   (param-types (if (null? (cadr sig))
+			    (cadr defaults)
+			    (cadr sig))))
+      (list return-type param-types))))
 
 (define convert-define
   (lambda (def)
@@ -106,68 +152,63 @@
        ((not (lambda? (caddr def)))
 	;; def = (define name 'undefined)
 	(let* ((pname (proper-name name))
-	       (types (lookup-signature name '() 
-					(append *function-signatures*
-						*system-function-signatures*))))
+	       (types (lookup-signature name 
+			(append *function-signatures*
+				*system-function-signatures*))))
 	  (printf " adding static variable ~a...~%" name)
 	  (cond
 	   ((equal? pname "pc")
 	    (format "static Function pc = null;\n"))
-	   ((eq? (car types) 'void)
+	   ((null? (car types))
 	    (format "static object ~a = null;\n" pname))
 	   (else
 	    (format "static ~a ~a = null;\n" (car types) pname)))))
        ((or (define*? def) (define? def))
-	(let ((args (cadr (caddr def)))
+	(let ((params (cadr (caddr def)))
 	      (bodies (cddr (caddr def))))
 	  (db " adding function ~a...~%" name)
-	  (let* ((types (lookup-signature name args 
-					  (append *function-signatures*
-						  *system-function-signatures*)))
-		 (return-type (car types))
-		 (param-types (cadr types)))
-	    ;; def = (define* name (lambda args body ...))
-	    (format "public static ~a ~a(~a) ~a\n"
-		    return-type (proper-name name)
-		    (convert-parameters name args param-types #f)
-		    (convert-block bodies)))))
+	  (format "~a ~a\n" 
+		  (format-definition name params)
+		  (convert-block bodies))))
        (else
 	(error 'convert-define "unrecognized form: ~a" def))))))
 
 (define convert-statement
   (lambda (statement)
     (db "convert-statement: '~s'~%" statement)
-    (record-case statement
-       (if (test-part . conseqs)  ;true-part false-part)
-	   (let ((true-part (car conseqs)))
-	     (if (null? (cdr conseqs))
-		 (format "if (~a) ~a"
-			 (convert-exp test-part)
-			 (convert-statement true-part))
-		 (let ((false-part (cadr conseqs)))
-		   (format "if (~a) ~a else ~a"
-			   (convert-exp test-part)
-			   (convert-statement true-part)
-			   (convert-statement false-part))))))
-       (set! (sym exp)
-	 (if (eq? sym 'pc)
-	     (if (eq? exp #f)
-		 "pc = null;\n"
-		 (format "pc = (Function) ~a;\n" (proper-name exp)))
-	     (format "~a = ~a;\n" (proper-name sym) (convert-exp exp))))
-       (let (bindings . bodies)
-	 (let* ((vars (map car bindings))
-		(temps (map (lambda (v) (format "object ~a = null;\n"
-					  (proper-name v))) vars)))
-	   (format "{\n ~a ~a }\n"
-		   (apply string-append temps)
-		   (apply string-append (map convert-statement bodies)))))
-       (begin statements
-	 (if (null? (cdr statements))
-	   (convert-statement (car statements))
-	   (convert-block statements)))
-       (else ;; apply (proc args...)
-	(format "~a;\n" (convert-application (car statement) (cdr statement)))))))
+    (if (not (pair? statement))
+	(format "~a; " statement)
+	(record-case statement
+	   (if (test-part . conseqs)  ;true-part false-part)
+	       (let ((true-part (car conseqs)))
+		 (if (null? (cdr conseqs))
+		     (format "if (~a) ~a"
+			     (convert-exp test-part)
+			     (convert-statement true-part))
+		     (let ((false-part (cadr conseqs)))
+		       (format "if (~a) ~a else ~a"
+			       (convert-exp test-part)
+			       (convert-statement true-part)
+			       (convert-statement false-part))))))
+	   (set! (sym exp)
+		 (if (eq? sym 'pc)
+		     (if (eq? exp #f)
+			 "pc = null;\n"
+			 (format "pc = (Function) ~a;\n" (proper-name exp)))
+		     (format "~a = ~a;\n" (proper-name sym) (convert-exp exp))))
+	   (let (bindings . bodies)
+	     (let* ((vars (map car bindings))
+		    (temps (map (lambda (v) (format "object ~a = null;\n"
+						    (proper-name v))) vars)))
+	       (format "{\n ~a ~a }\n"
+		       (apply string-append temps)
+		       (apply string-append (map convert-statement bodies)))))
+	   (begin statements
+		  (if (null? (cdr statements))
+		      (convert-statement (car statements))
+		      (convert-block statements)))
+	   (else ;; apply (proc args...)
+	    (format "~a; " (convert-application (car statement) (cdr statement))))))))
   
 (define convert-block
   (lambda (statements)
@@ -212,25 +253,15 @@
 (define convert-application
   (lambda (proc args)
     (db "convert-application: ~a(~a)~%" proc args)
-    (let ((cargs (map convert-exp args))
-	  (types (lookup-signature proc args 
-		   (append *function-signatures*
-		   *system-function-signatures*))))
+    (let ((cargs (map convert-exp args)))
       (case proc
-	((return) 
-	 (if (= (length args) 2) ;; (return int exp) defaults to object
-	     (format "return(((~a) ~a))" (car args) (glue (join-list (map convert-exp (cdr args)) ", ")))
-	     (format "return(((~a) ~a))" (if (equal? (car types) 'void)
-					     'object
-					     (car types))
-		     (glue (join-list (map convert-exp args) ", ")))))
 	((and) (format "(~a)" (glue (join-list cargs " && "))))
 	((or) (format "(~a)" (glue (join-list cargs " || "))))
-	(else
-	 (let* ((pname (proper-name proc))
-		(param-types (cadr types))
-		(cargs+types (convert-parameters pname cargs param-types #t)))
-	   (format "~a(~a)" (proper-name proc) cargs+types)))))))
+	((return)
+	 (if (= (length args) 2) ;; extra cast place
+	     (format-application proc (cdr args) (car args))
+	     (format-application proc args " "))) ;; space will make it a return
+	(else (format-application proc args ""))))))
 
 (define proper-name
   (lambda (name)
@@ -239,6 +270,8 @@
      ((eq? name 'set!) 'Assign)
      ((eq? name 'eq?) 'Compare)
      ((eq? name 'equal?) 'Compare)
+     ((eq? name '<) 'LessThan)
+     ((eq? name '>) 'GreaterThan)
      ((eq? name '+) 'Add)
      ((eq? name '=) 'Compare)
      ((eq? name '-) 'Subtract)
@@ -313,7 +346,7 @@
      ((null? (cdr lyst)) lyst)
      (else (cons (car lyst) (cons delim (join-list (cdr lyst) delim)))))))
 
-(define *debug* #f)
+(define *debug* #t)
 
 ;; debug
 (define db
