@@ -178,15 +178,15 @@
 			     (if *include-define*-in-registerized-code?*
 			       (pretty-print (returnize def) output-port)
 			       (pretty-print def output-port)))
-			   (expand-eopl-define-datatype dd))
+			   (map rm-transform (expand-eopl-define-datatype dd)))
 			 (newline output-port))
 		       eopl-defs)))))
 	     ;; global registers
 	     (fprintf output-port ";;~a~%~%" (make-string 70 #\-))
 	     (fprintf output-port ";; global registers~%")
-	     (fprintf output-port "(define pc 'undefined)~%")
+	     (fprintf output-port "(define pc \"undefined\")~%")
 	     (for-each
-	       (lambda (r) (fprintf output-port "(define ~a 'undefined)~%" r))
+	       (lambda (r) (fprintf output-port "(define ~a \"undefined\")~%" r))
 	       (register-table 'get-registers))
 	     (newline output-port)
 	     ;; temporary registers
@@ -194,7 +194,7 @@
 	       (begin
 		 (fprintf output-port ";; temporary registers~%")
 		 (for-each
-		   (lambda (t) (fprintf output-port "(define ~a 'undefined)~%" t))
+		   (lambda (t) (fprintf output-port "(define ~a \"undefined\")~%" t))
 		   (register-table 'get-temp-vars))
 		 (newline output-port)))
 	     ;; registerized function definitions
@@ -255,7 +255,16 @@
 	 ;; should catch lambda-cont, lambda-whatever, etc. here
 	 (else
 	  (record-case code
-	    (quote (datum) code)
+	    (quote (datum)
+	      (if *include-define*-in-registerized-code?*
+		`(quote* ,datum)
+		code))
+;;	      (cond
+;;		((symbol? datum) `(quoted-symbol* ,datum))
+;;		((pair? datum) `(quoted-list* ,datum))
+;;		(else `(quote* ,datum))))
+;;	    (quote (datum) (format "~a" datum))
+;;	    (quote (datum) code)
 	    (quasiquote (datum)
 	      (if *generate-low-level-registerized-code?*
 		(transform (expand-quasiquote datum init-handler init-cont))
@@ -291,7 +300,7 @@
 			  (exps (map cadr bindings))
 			  (texps (map transform exps))
 			  (assigns (map (lambda (v e) `(set! ,v ,e)) vars texps))
-			  (local-decls (map (lambda (v) `(,v 'undefined)) vars))
+			  (local-decls (map (lambda (v) `(,v "undefined")) vars))
 			  (new-bodies (consolidate
 					(append (sort-assignments assigns)
 						(map transform bodies)))))
@@ -307,7 +316,7 @@
 		       (exps (map cadr bindings))
 		       (texps (map transform exps))
 		       (assigns (map (lambda (v e) `(set! ,v ,e)) vars texps))
-		       (local-decls (map (lambda (v) `(,v 'undefined)) vars))
+		       (local-decls (map (lambda (v) `(,v "undefined")) vars))
 		       (new-bodies (consolidate (append assigns (map transform bodies)))))
 		  `(let ,local-decls ,@new-bodies))
 		(let* ((vars (map car bindings))
@@ -388,7 +397,7 @@
 		   ,@(transform-record-case-clauses clauses))
 		(transform `(record-case ,exp ,@clauses))))
 	    (halt* (value)
-	      `(begin (set! final_reg ,value) (set! pc #f)))
+	      `(begin (set! final_reg ,(transform value)) (set! pc #f)))
 	    (else (cond
 		    ((memq (car code) syntactic-keywords)
 		     (error-in-source code "I don't know how to process the above code."))

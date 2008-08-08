@@ -39,3 +39,8 @@
     [(_ value) value]
     [(_ type value) value]))
 
+;; marks all expressions that are quoted in registerized code
+
+(define-syntax quote*
+  (syntax-rules ()
+    [(_ value) (quote value)]))
