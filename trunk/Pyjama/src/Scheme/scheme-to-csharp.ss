@@ -17,7 +17,7 @@
     (apply-state object (object object))
     (read-string void (object))
     (read-file void (object))
-    (read-next-sexp object (object)) 
+    (read-next-sexp void (object)) 
     ))
 
 (define *system-ignore-functions*
@@ -241,7 +241,7 @@
       ((null? exp) "EmptyList")
       ((pair? exp)
        (cond
-	 ((eq? (car exp) 'quote) (format "\"~a\"" (cadr exp)))
+	 ((eq? (car exp) 'quote*) (format "\"~a\"" (caddr exp)))
 	 ;; FIXME!
 	 ((eq? (car exp) 'quasiquote) (format "\"~a\"" (cadr exp)))
 	 ((eq? (car exp) 'if) ;; if expression
