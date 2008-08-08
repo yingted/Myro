@@ -491,7 +491,7 @@
   (lambda (tokens)
     (read-sexp tokens init-handler
       (lambda-cont2 (sexp tokens-left)
-	(cons sexp tokens-left)))))
+	(halt* (cons sexp tokens-left))))))
 
 ;; returns the entire file contents as a single string
 (define read-content
