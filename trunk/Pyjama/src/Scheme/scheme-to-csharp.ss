@@ -1,23 +1,34 @@
 ;; temporary - to access various utilities (define*? etc.)
 (load "rm-transformer.ss")
 
+(define *function-definitions* '())
+(define *variable-definitions* '())
+(define *applications* '())
+
 (define *system-function-signatures*
   ;; use csharp function names in this format:
   ;; ((function-name return-type (param-types...))...)
   '(
     (error void (string string "object[]"))
-    (string_to_integer object (object))
-    (string_to_decimal object (object))
-    (string_to_rational object (object))
+    (scan-string void (object))
+    (scan-file void (object))
+    (scan-string void (object))
+    (scan-file void (object))
+    (apply-state object (object object))
+    (read-string void (object))
+    (read-file void (object))
+    (read-next-sexp object (object)) 
     ))
 
 (define *system-ignore-functions*
   ;; use scheme name of functions to not move to csharp
-  '(*function-signatures* *ignore-functions* run trampoline make-cont
-	   make-sub string-to-number))
+  '(*function-signatures* *ignore-functions* run trampoline))
 
 (define convert-file
   (lambda (filename . opt)
+    (set! *function-definitions* '())
+    (set! *variable-definitions* '())
+    (set! *applications* '())
     (load filename) ;; to get *function-signatures*
     (call-with-input-file filename
       (lambda (port)
@@ -95,6 +106,7 @@
 
 (define format-application
   (lambda (name args return-cast)
+    (printf "get-definition-parameter-types: ~a(~a) => ~a ~%" name args return-cast)
     (let* ((ret-args (get-definition-parameter-types name args 'app))
 	   (types (cadr ret-args))
 	   (return-type (car ret-args))
@@ -108,23 +120,28 @@
 					types args-list)
 				   ", "))))
       (if (equal? return-cast "") ;; no return override
-	  (format "~a(~a) " 
-		  ;;return-type 
-		  (proper-name name) sargs)
-	  (format "return(~a ~a) " return-cast sargs)))))
+	  (format "~a(~a) " (proper-name name) sargs)
+	  (format "~a(~a ~a) " (proper-name name) return-cast sargs)))))
 		  
-	   
+(define ends-with
+  (lambda (sym c)
+    (eq? (car (reverse (string->list (symbol->string sym)))) c)))
+
+
 (define get-definition-parameter-types
   (lambda (name params kind)
     (db "get-definition-parameter-types: ~a(~a) ~%" name params)
-    (cond
-     ((symbol? params) 
-      (if (eq? kind 'def)
-	  (lookup-param-types name '("object" ("params object[]")))
-	  (lookup-param-types name '("object" ("object[]")))))
-     ((null? params) (lookup-param-types name '("void" ())))
-     (else (let ((times (length params)))
-	     (lookup-param-types name (list "object" (repeat "object" times))))))))
+    (let ((return-type (if (ends-with name #\?)
+			   "bool"
+			   "object")))
+      (cond
+       ((symbol? params) 
+	(if (eq? kind 'def)
+	    (lookup-param-types name (list return-type '("params object[]")))
+	    (lookup-param-types name (list return-type '("object[]")))))
+       ((null? params) (lookup-param-types name '("void" ())))
+       (else (let ((times (length params)))
+	       (lookup-param-types name (list return-type (repeat "object" times)))))))))
 
 (define lookup-param-types
   (lambda (name defaults)
@@ -156,6 +173,7 @@
 			(append *function-signatures*
 				*system-function-signatures*))))
 	  (printf " adding static variable ~a...~%" name)
+	  (set! *variable-definitions* (cons name *variable-definitions*))
 	  (cond
 	   ((equal? pname "pc")
 	    (format "static Function pc = null;\n"))
@@ -166,7 +184,8 @@
        ((or (define*? def) (define? def))
 	(let ((params (cadr (caddr def)))
 	      (bodies (cddr (caddr def))))
-	  (db " adding function ~a...~%" name)
+	  (printf " adding function ~a...~%" name)
+	  (set! *function-definitions* (cons name *function-definitions*))
 	  (format "~a ~a\n" 
 		  (format-definition name params)
 		  (convert-block bodies))))
@@ -235,7 +254,7 @@
       ((char? exp)
        (cond
 	((char=? exp #\return) "'\\r'")
-	((char=? exp #\newline) "'\\n'")
+	((char=? exp #\newline) "NEWLINE")
 	((char=? exp #\space) "' '")
 	((char=? exp #\tab) "'\\t'")
 	((char=? exp #\nul) "NULL")
@@ -253,15 +272,17 @@
 
 (define convert-application
   (lambda (proc args)
-    (db "convert-application: ~a(~a)~%" proc args)
+    (printf "convert-application: ~a(~a)~%" proc args)
+    (if (not (member proc *applications*))
+	(set! *applications* (cons proc *applications*)))
     (let ((cargs (map convert-exp args)))
       (case proc
 	((and) (format "(~a)" (glue (join-list cargs " && "))))
 	((or) (format "(~a)" (glue (join-list cargs " || "))))
-	((return)
+	((return*)
 	 (if (= (length args) 2) ;; extra cast place
-	     (format-application proc (cdr args) (car args))
-	     (format-application proc args " "))) ;; space will make it a return
+	     (format-application 'return (cdr args) (car args))
+	     (format-application 'return args " "))) ;; space will make it a return
 	(else (format-application proc args ""))))))
 
 (define proper-name
@@ -281,7 +302,7 @@
      ((eq? name '-) 'Subtract)
      ((eq? name '*) 'Multiply)
      ((eq? name '/) 'Divide)
-     ((eq? name 'string) 'str)
+     ((eq? name 'string) 'make_string)
      ((eq? name 'operator) 'rator)
      ((eq? name '1st) 'First)
      ((eq? name 'bool) 'logical)

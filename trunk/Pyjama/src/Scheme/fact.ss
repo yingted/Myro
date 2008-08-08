@@ -41,10 +41,10 @@
 
 ;; For testing with C# conversion:
 
-(define fact-wrap
-  (lambda (n)
-    (fact 5)
-    (return* (int) (trampoline))))
+;; (define fact-wrap
+;;   (lambda (n)
+;;     (fact 5)
+;;     (trampoline)))
 
 ;; This won't work:
 ;; (define factorial-1
@@ -53,11 +53,11 @@
 ;;         ((< n 3) 1)
 ;;         (else (* (factorial-1 (- n 1)))))))
 
-(define factorial-2
-   (lambda (n)
-      (cond
-        ((< n 3) (return* (int) 1))
-        (else (return* (int) (* n (factorial-2 (- n 1))))))))
+;; (define factorial-2
+;;   (lambda (n)
+;;     (cond
+;;      ((< n 3) 1)
+;;      (else (* n (factorial-2 (- n 1)))))))
 
 (define Main
   (lambda (args)

@@ -335,8 +335,8 @@
 ;;          | ,@ <sexp>
 
 ;; token stream represented as a list
-(define first car)
-(define rest-of cdr)
+(define first (lambda (x) (car x)))
+(define rest-of (lambda (x) (cdr x)))
 
 ;; for testing purposes
 (define read-string
@@ -354,6 +354,9 @@
 	      (handler (format "tokens left over: ~a" tokens-left)))))))))
 
 ;; ignored in transformer to csharp
+
+(define *ignore-functions* '(string->integer string->decimal string->rational read-content))
+(define *function-signatures* '())
 
 (define string->integer
   (lambda (str)

@@ -24,7 +24,8 @@ pjscheme.exe: pjscheme-rm.ss pjscheme-cps.ss scheme-to-csharp.ss
 	echo "(exit)" >> make-pjscheme.ss
 	petite make-pjscheme.ss
 	indent -di0 -i3 pjscheme.cs
-	$(MCS) pjscheme.cs Util.cs -main:pjscheme_rm -r:Microsoft.VisualBasic.dll
+	$(MCS) pjscheme.cs Util.cs -main:pjscheme_rm \
+		-r:Microsoft.VisualBasic.dll
 	mono pjscheme.exe
 
 Reader.exe: Reader.cs Scanner.cs
@@ -46,8 +47,15 @@ fact.cs: fact.ss Util.cs make-fact.ss rm-transformer.ss
 	indent -di0 -i3 fact.cs
 	$(MCS) fact.cs Util.cs -main:fact_rm -r:Microsoft.VisualBasic.dll
 
-util.exe: Util.cs 
+util.exe: Util.cs
 	$(MCS) Util.cs -r:Microsoft.VisualBasic.dll -out:util.exe
+
+dummy:
+
+run-util: util.exe dummy
+	mono util.exe
+
+util: run-util
 
 run-fact.exe:
 	mono fact.exe

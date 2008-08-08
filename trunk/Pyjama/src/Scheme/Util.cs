@@ -9,14 +9,34 @@ public class Scheme {
 
   public static char TILDE = '~';
   public static char NULL = '\0';
+  public static char NEWLINE = '\n';
+  public static char SINGLEQUOTE = '\'';
   public static char DOUBLEQUOTE = '"';
-  public static char QUOTE = '\'';
+  public static char BACKQUOTE = '`';
   public static char BACKSPACE = '\b';
+  public static char BACKSLASH = '\\';
   public static char SLASH = '/';
   static char[] SPLITSLASH = {SLASH};
 
   public static string chars_to_scan = "";
   
+
+  public static object list_to_vector(object lyst) {
+	return null;
+  }
+
+  public static object string_ref(object s, object i) {
+	return null;
+  }
+
+  public static object make_string(object obj) {
+	return obj.ToString();
+  }
+
+  public static bool char_numeric_q(object c) {
+	return (('0' <= ((char)c)) && (((char)c) <= '9'));
+  }
+
   public static char First(object n) {
 	return chars_to_scan[(int)n];
   }
@@ -27,6 +47,12 @@ public class Scheme {
   
   public delegate void Function();
   public delegate bool Predicate(object obj);
+
+  public static void printf(object fmt, params object[] objs) {
+	// replace ~a ~s ... with {0} {1} ...
+	// replace ~% with \n
+	Console.Write((string)fmt, objs);
+  }
 
   public static void display(object obj) {
 	Console.Write(obj);
@@ -136,10 +162,17 @@ public class Scheme {
   }
 
   public static bool Compare(object obj1, object obj2) {
-	try {
-	  return (ObjectType.ObjTst(obj1, obj2, false) == 0);
-	} catch {
-	  return false;
+	if (obj1 is Symbol) {
+	  if (obj2 is Symbol) {
+		return (((Symbol)obj1) == ((Symbol)obj2));
+	  } else 
+		return false;
+	} else {
+	  try {
+		return (ObjectType.ObjTst(obj1, obj2, false) == 0);
+	  } catch {
+		return false;
+	  }
 	}
   }
 
@@ -606,19 +639,9 @@ public class Scheme {
   
   // () is represented as EmptyList
   
-  public static string prettyPrint(object obj) {
+  public static string pretty_print(object obj) {
 	string retval = "";
-	if (obj is List<object>) {
-	  foreach (object item in (List<object>) obj) {
-		if (retval != "")
-		  retval += " ";
-		if (item is List<object>)
-		  retval += prettyPrint((List<object>) item);
-		else
-		  retval += item.ToString();
-	  }
-	  return "[" + retval + "]";
-	} else if (obj is String) {
+	if (obj is String) {
 	  return String.Format("\"{0}\"", obj);
 	} else if (obj is Symbol && ((Symbol)obj) == EmptyList) {
 	  return "()";
@@ -627,7 +650,7 @@ public class Scheme {
 	  while (!Compare(current, EmptyList)) {
 		if (retval != "")
 		  retval += " ";
-		retval += prettyPrint(car(current));
+		retval += pretty_print(car(current));
 		current = cdr(current);
 	  }
 	  return "(" + retval + ")";
@@ -1002,28 +1025,89 @@ public class Scheme {
   }
 
   public static void Main(string [] args) {
-	display("Testing Add(1,1): ");
-	display(Add(1, 1));
-	newline();
-	display("Literal test: ");
-	object t = lit_exp(2);
-	display(list_q(t));
-	newline();
-	display(lit_q(t));
-	newline();
-	display(null_q(t));
-	newline();
-	display("Compare tests: ");
-	display(Compare("hello", "hello"));	newline();
-	display(Compare("hello", "hel"));	newline();
-	display(Compare("hello", "helloo"));	newline();
-	display(Compare(4.1, 4));	newline();
-	display(Compare("hello", true));	newline();
-	display("Member test: ");
-	t = cons("hello", t);
-	//prettyPrint(member("hello", t));
-	prettyPrint(list());
-	display("\n");
-  }
+	// ----------------------------------
+	// Math:
+	printf ("  Add(1,1), Result: {0}, Should be: {1}\n", 
+		Add(1, 1), 1 + 1);
+	printf ("  Multiply(10,2), Result: {0}, Should be: {1}\n", 
+		Multiply(10, 2), 10 * 2);
+	printf ("  Divide(5,2), Result: {0}, Should be: {1}\n", 
+		Divide(5, 2), 5/2.0);
+	printf ("  Subtract(22,7), Result: {0}, Should be: {1}\n", 
+		Subtract(22, 7), 22 - 7);
+	// -----------------------------------
+	// Compare tests:
+	printf("hello == hello: {0}\n", Compare("hello", "hello"));
+	printf("hello == hel: {0}\n", Compare("hello", "hel"));
+	printf("hello == helloo: {0}\n", Compare("hello", "helloo"));
+	printf("4.1 == 4: {0}\n", Compare(4.1, 4));
+	printf("hello == true: {0}\n", Compare("hello", true));
+	
+	printf("() == (): {0}\n", Compare(list(), list()));
 
+	object t = list(lit_exp(2));
+	printf("t = list(2): {0}\n", t);
+	printf("list? t: {0}\n", list_q(t));
+	printf("literal? t: {0}\n", lit_q(t));
+	printf("literal? car(t): {0}\n", lit_q(car(t)));
+	printf("null? t: {0}\n", null_q(t));
+
+	t = cons("b", cons("a", t));
+
+	printf("null? cdr(t): {0}\n", null_q(cdr(t)));
+	printf("null? cddr(t): {0}\n", null_q(cddr(t)));
+	printf("null? cdddr(t): {0}\n", null_q(cdddr(t)));
+	printf("Member test: \n");
+	t = cons("hello", t);
+	printf("t = {0}\n", pretty_print(t));
+	printf("member(hello, t) : {0}\n", pretty_print(member("hello", t)));
+	printf("member(a, t) : {0}\n", pretty_print(member("a", t)));
+	printf("member(c, t) : {0}\n", pretty_print(member("c", t)));
+	printf("(): {0}\n", pretty_print(list()));
+	printf("list(t): {0}\n", pretty_print(list(t)));
+	printf("length(list(t)): {0}\n", length(list(t)));
+	printf("length(cdr(list(t))): {0}\n", length(cdr(list(t))));
+	printf("length(car(list(t))): {0}\n", length(car(list(t))));
+	printf("cons(\"X\", list(t))): {0}\n", pretty_print(cons("X", list(t))));
+	printf("{0}\n", pretty_print("x"));
+	printf("t: {0}\n", pretty_print(t));
+
+// apply
+// call-with-input-file
+// char
+// char-alphabetic?
+// char-numeric?
+// char-whitespace?
+// char=?
+// cons
+// eof-object?
+// eq?
+// error
+// first
+// format
+// lambda
+// let
+// list
+// list->string
+// list->vector
+// list-ref
+// make-cont
+// memq
+// not
+// or
+// port
+// pretty-print
+// quote
+// read-char
+// replace
+// rest-of
+// reverse
+// string->number
+// string->symbol
+// string-append
+// string-ref
+// string=?
+
+  }
+  
 }
