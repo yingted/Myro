@@ -6,6 +6,28 @@
 (load "environments-cps.ss")
 (load "parser-cps.ss")
 
+;; temporary
+(define testall
+  (lambda ()
+    (read-datum "(load \"examples.ss\")" REP-handler
+      (lambda-cont2 (datum tokens-left)
+	(parse datum REP-handler
+	  (lambda-cont (exp)
+	    (m exp toplevel-env REP-handler
+	      (lambda-cont (v)
+		(safe-print v)
+		(read-datum "(test-all)" REP-handler
+		  (lambda-cont2 (datum tokens-left)
+		    (parse datum REP-handler
+		      (lambda-cont (exp)
+			(m exp toplevel-env REP-handler
+			  (lambda-cont (v)
+			    (read-datum "(exit)" REP-handler
+			      (lambda-cont2 (datum tokens-left)
+				(parse datum REP-handler
+				  (lambda-cont (exp)
+				    (m exp toplevel-env REP-handler REP-k)))))))))))))))))))
+
 (define start
   (lambda ()
     (read-eval-print)))

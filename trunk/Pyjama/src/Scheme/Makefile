@@ -57,6 +57,30 @@ all: environments-cps.ss parser-cps.ss unifier-cps.ss interpreter-cps.ss reader-
 	petite make-all.ss
 	$(RM) make-all.ss
 
+testds: all-ds.ss
+	echo "(load \"all-ds.ss\")" > testall.ss
+	echo "(testall)" >> testall.ss
+	echo "(exit)" >> testall.ss
+	petite testall.ss
+	$(RM) testall.ss
+
+testrm: all-rm.ss all-rm-low.ss all-rm-high.ss
+	echo "(load \"all-rm.ss\")" > testall.ss
+	echo "(run testall)" >> testall.ss
+	echo "(exit)" >> testall.ss
+	petite testall.ss
+	sleep 1
+	echo "(load \"all-rm-low.ss\")" > testall.ss
+	echo "(run testall)" >> testall.ss
+	echo "(exit)" >> testall.ss
+	petite testall.ss
+	sleep 1
+	echo "(load \"all-rm-high.ss\")" > testall.ss
+	echo "(run testall)" >> testall.ss
+	echo "(exit)" >> testall.ss
+	petite testall.ss
+	$(RM) testall.ss
+
 fact.cs: fact.ss Util.cs make-fact.ss rm-transformer.ss
 	petite make-fact.ss
 	indent -di0 -i3 fact.cs
@@ -80,5 +104,5 @@ fact.exe: fact.cs run-fact.exe
 clean:
 	$(RM) *.exe *~ pjscheme-ds.ss pjscheme-rm.ss compile.ss make-fact.ss \
 		fact.cs make-pjscheme.ss pjscheme.exe pjscheme.cs \
-		pjscheme-run.ss pjscheme.ss fact-rm.ss fact-ds.ss all*.ss
+		pjscheme-run.ss pjscheme.ss fact-rm.ss fact-ds.ss all*.ss testall.ss
 

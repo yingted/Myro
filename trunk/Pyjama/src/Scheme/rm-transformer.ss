@@ -184,9 +184,9 @@
 	     ;; global registers
 	     (fprintf output-port ";;~a~%~%" (make-string 70 #\-))
 	     (fprintf output-port ";; global registers~%")
-	     (fprintf output-port "(define pc \"undefined\")~%")
+	     (fprintf output-port "(define pc 'undefined)~%")
 	     (for-each
-	       (lambda (r) (fprintf output-port "(define ~a \"undefined\")~%" r))
+	       (lambda (r) (fprintf output-port "(define ~a 'undefined)~%" r))
 	       (register-table 'get-registers))
 	     (newline output-port)
 	     ;; temporary registers
@@ -194,7 +194,7 @@
 	       (begin
 		 (fprintf output-port ";; temporary registers~%")
 		 (for-each
-		   (lambda (t) (fprintf output-port "(define ~a \"undefined\")~%" t))
+		   (lambda (t) (fprintf output-port "(define ~a 'undefined)~%" t))
 		   (register-table 'get-temp-vars))
 		 (newline output-port)))
 	     ;; registerized function definitions
@@ -215,7 +215,7 @@
 	  (lambda (input-port)
 	    (transform-definitions input-port)))
 	(let ((line-length (pretty-line-length)))
-	  (pretty-line-length 160)
+	  (pretty-line-length 400)
 	  (if (null? opts)
 	      (begin
 		(newline)
@@ -295,7 +295,7 @@
 			  (exps (map cadr bindings))
 			  (texps (map transform exps))
 			  (assigns (map (lambda (v e) `(set! ,v ,e)) vars texps))
-			  (local-decls (map (lambda (v) `(,v "undefined")) vars))
+			  (local-decls (map (lambda (v) `(,v 'undefined)) vars))
 			  (new-bodies (consolidate
 					(append (sort-assignments assigns)
 						(map transform bodies)))))
@@ -311,7 +311,7 @@
 		       (exps (map cadr bindings))
 		       (texps (map transform exps))
 		       (assigns (map (lambda (v e) `(set! ,v ,e)) vars texps))
-		       (local-decls (map (lambda (v) `(,v "undefined")) vars))
+		       (local-decls (map (lambda (v) `(,v 'undefined)) vars))
 		       (new-bodies (consolidate (append assigns (map transform bodies)))))
 		  `(let ,local-decls ,@new-bodies))
 		(let* ((vars (map car bindings))
@@ -658,8 +658,8 @@
 	  (cases (type exp . clauses)
 	    `(cases ,type ,exp ,@(map returnize-last clauses)))
 	  (halt* (value) `(return* ,value))
-	  (error (value) `(return* ,code))
-	  ((printf pretty-print) args code)
+;;	  (error (value) `(return* ,code))
+	  ((error printf pretty-print) args code)
 	  (else (cond
 		  ((memq (car code) syntactic-keywords)
 		   (error-in-source code "I don't know how to process the above code."))
