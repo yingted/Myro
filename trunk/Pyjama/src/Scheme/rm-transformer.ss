@@ -257,7 +257,7 @@
 	  (record-case code
 	    (quote (datum)
 	      (if *include-define*-in-registerized-code?*
-		`(quote* ,datum)
+		`(quote* ,(format "~a" datum))
 		code))
 ;;	      (cond
 ;;		((symbol? datum) `(quoted-symbol* ,datum))
