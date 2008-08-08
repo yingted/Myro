@@ -257,13 +257,8 @@
 	  (record-case code
 	    (quote (datum)
 	      (if *include-define*-in-registerized-code?*
-		`(quote* ,datum ,(format "~a" datum))
+		(expand-quote datum)
 		code))
-;;	      (cond
-;;		((symbol? datum) `(quoted-symbol* ,datum))
-;;		((pair? datum) `(quoted-list* ,datum))
-;;		(else `(quote* ,datum))))
-;;	    (quote (datum) (format "~a" datum))
 ;;	    (quote (datum) code)
 	    (quasiquote (datum)
 	      (if *generate-low-level-registerized-code?*
@@ -335,7 +330,10 @@
 	    (set! (var rhs-exp)
 	      `(set! ,var ,(transform rhs-exp)))
 	    (begin exps
-	      `(begin ,@(consolidate (map transform exps))))
+	      (let ((new-exps (consolidate (map transform exps))))
+		(if (null? (cdr new-exps))
+		  (car new-exps)
+		  `(begin ,@new-exps))))
 	    ((define define*) (name body)
 	      `(,(car code) ,name ,(transform body)))
 	    (define-syntax args code)
@@ -592,6 +590,20 @@
 
 ;;----------------------------------------------------------
 
+(define expand-quote
+  (lambda (datum)
+    (cond
+      ((null? datum) ''())
+      ((number? datum) datum)
+      ((boolean? datum) datum)
+      ((list? datum)
+       `(list ,@(map expand-quote datum)))
+      ((pair? datum)
+      `(cons ,(expand-quote (car datum))
+	     ,(expand-quote (cdr datum))))
+      ((symbol? datum) `(quote ,datum))
+      (else (format "~a" datum)))))
+
 (define returnize
   (lambda (code)
     (cond
@@ -646,7 +658,8 @@
 	  (cases (type exp . clauses)
 	    `(cases ,type ,exp ,@(map returnize-last clauses)))
 	  (halt* (value) `(return* ,value))
-	  ((error printf pretty-print) args code)
+	  (error (value) `(return* ,code))
+	  ((printf pretty-print) args code)
 	  (else (cond
 		  ((memq (car code) syntactic-keywords)
 		   (error-in-source code "I don't know how to process the above code."))

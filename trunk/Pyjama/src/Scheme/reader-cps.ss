@@ -353,11 +353,6 @@
 	      (k sexp tokens-left)
 	      (handler (format "tokens left over: ~a" tokens-left)))))))))
 
-;; ignored in transformer to csharp
-
-(define *ignore-functions* '(string->integer string->decimal string->rational read-content))
-(define *function-signatures* '())
-
 (define string->integer
   (lambda (str)
     (string->number str)))

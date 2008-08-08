@@ -397,12 +397,39 @@
 	 (k (cadr (car datum)))
 	 (expand-quasiquote (cdr datum) handler
 	   (lambda-cont (v) (k `(append ,(cadr (car datum)) ,v))))))
+      ((quasiquote-list? datum)
+       (expand-quasiquote-list datum handler
+	 (lambda-cont (v)
+	   (k `(list ,@v)))))
       (else
 	(expand-quasiquote (car datum) handler
 	  (lambda-cont (v1)
 	    (expand-quasiquote (cdr datum) handler
 	      (lambda-cont (v2)
 		(k `(cons ,v1 ,v2))))))))))
+
+(define* expand-quasiquote-list
+  (lambda (datum handler k)
+    (if (null? datum)
+      (k '())
+      (expand-quasiquote (car datum) handler
+	(lambda-cont (v1)
+	  (expand-quasiquote-list (cdr datum) handler
+	    (lambda-cont (v2)
+	       (k (cons v1 v2)))))))))
+
+(define quasiquote-list?
+  (lambda (datum)
+    (or (null? datum)
+	(and (pair? datum)
+	     ;; doesn't handle nested quasiquotes yet
+	     (not (quasiquote? datum))
+	     (not (unquote? datum))
+	     (not (unquote-splicing? datum))
+	     ;; doesn't handle nested quasiquotes yet
+	     (not (quasiquote? (car datum)))
+	     (not (unquote-splicing? (car datum)))
+	     (quasiquote-list? (cdr datum))))))
 
 (define head
   (lambda (formals)
