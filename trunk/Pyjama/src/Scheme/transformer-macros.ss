@@ -43,4 +43,4 @@
 
 (define-syntax quote*
   (syntax-rules ()
-    [(_ value) (quote value)]))
+    [(_ original string) (quote original)]))
