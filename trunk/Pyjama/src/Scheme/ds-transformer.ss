@@ -247,7 +247,7 @@
 
 (define expand-eopl-define-datatype
   (lambda (def)
-    (map (lambda (name) `(define ,name (lambda args (return (cons ',name args)))))
+    (map (lambda (name) `(define ,name (lambda args (cons ',name args))))
 	 (map car (cdddr def)))))
 
 (define function-definition?

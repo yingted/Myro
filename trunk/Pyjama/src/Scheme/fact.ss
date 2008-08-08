@@ -44,7 +44,7 @@
 (define fact-wrap
   (lambda (n)
     (fact 5)
-    (return (int) (trampoline))))
+    (return* (int) (trampoline))))
 
 ;; This won't work:
 ;; (define factorial-1
@@ -56,8 +56,8 @@
 (define factorial-2
    (lambda (n)
       (cond
-        ((< n 3) (return (int) 1))
-        (else (return (int) (* n (factorial-2 (- n 1))))))))
+        ((< n 3) (return* (int) 1))
+        (else (return* (int) (* n (factorial-2 (- n 1))))))))
 
 (define Main
   (lambda (args)

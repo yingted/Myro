@@ -19,7 +19,7 @@
   (lambda-handler (e)
     (REP-k `(uncaught exception: ,e))))
 
-(define read-eval-print
+(define* read-eval-print
   (lambda ()
     (printf "==> ")
     (let* ((input (read))

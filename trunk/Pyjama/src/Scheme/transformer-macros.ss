@@ -34,7 +34,7 @@
 
 ;; for languages that need a return statement
 
-(define-syntax return
+(define-syntax return*
   (syntax-rules ()
     [(_ value) value]
     [(_ type value) value]))

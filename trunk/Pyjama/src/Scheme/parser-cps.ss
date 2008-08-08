@@ -500,5 +500,5 @@
 	  (parse datum handler
 	    (lambda-cont (exp)
 	      (parse-sexps tokens-left handler
-		(lambda (v)
+		(lambda-cont (v)
 		  (k (cons exp v)))))))))))

@@ -174,7 +174,10 @@
 		       (lambda (dd)
 			 (fprintf output-port ";; ~a datatype~%" (cadr dd))
 			 (for-each
-			   (lambda (def) (pretty-print def output-port))
+			   (lambda (def)
+			     (if *include-define*-in-registerized-code?*
+			       (pretty-print (returnize def) output-port)
+			       (pretty-print def output-port)))
 			   (expand-eopl-define-datatype dd))
 			 (newline output-port))
 		       eopl-defs)))))
@@ -195,7 +198,9 @@
 		   (register-table 'get-temp-vars))
 		 (newline output-port)))
 	     ;; registerized function definitions
-	     (for-each (print-exp output-port) defs)
+	     (if *include-define*-in-registerized-code?*
+	       (for-each (print-exp output-port) (map returnize defs))
+	       (for-each (print-exp output-port) defs))
 	     ;; trampoline
 	     (fprintf output-port ";; the trampoline~%")
 	     (pretty-print
@@ -252,7 +257,9 @@
 	  (record-case code
 	    (quote (datum) code)
 	    (quasiquote (datum)
-	      (list 'quasiquote (transform-quasiquote datum)))
+	      (if *generate-low-level-registerized-code?*
+		(transform (expand-quasiquote datum init-handler init-cont))
+		(list 'quasiquote (transform-quasiquote datum))))
 	    (if (test . conseqs)
 	      `(if ,@(map transform (cdr code))))
 	    (cond clauses
@@ -386,7 +393,7 @@
 		    ((memq (car code) syntactic-keywords)
 		     (error-in-source code "I don't know how to process the above code."))
 		    ((register-table 'registerize-application? code)
-		     (register-table 'registerize code))
+		     (transform (register-table 'registerize code)))
 		    (else (map transform code)))))))))
      (transform-quasiquote
        (lambda (datum)
@@ -574,3 +581,71 @@
       ((symbol? params) (param->reg-name params))
       (else (cons (param->reg-name (car params)) (get-register-names (cdr params)))))))
 
+;;----------------------------------------------------------
+
+(define returnize
+  (lambda (code)
+    (cond
+      ((null? code) `(return* ,code))
+      ((literal? code) `(return* ,code))
+      ((symbol? code) `(return* ,code))
+      (else
+        (record-case code
+	  (quote (datum) `(return* ,code))
+	  (quasiquote (datum) `(return* ,code))
+	  (if (test . conseqs)
+	    `(if ,test ,@(map returnize conseqs)))
+	  (cond clauses
+	    `(cond ,@(map returnize-last clauses)))
+	  (lambda (formals . bodies)
+	    `(lambda ,formals ,@(returnize-last bodies)))
+	  (let (bindings . bodies)
+	    (if (symbol? bindings)
+	      ;; named let
+	      (let* ((name (cadr code))
+		     (bindings (caddr code))
+		     (bodies (cdddr code)))
+		`(let ,name ,bindings ,@(returnize-last bodies)))
+	      ;; ordinary let
+	      `(let ,bindings ,@(returnize-last bodies))))
+	  (let* (bindings . bodies)
+	    `(let* ,bindings ,@(returnize-last bodies)))
+	  (letrec (decls . bodies)
+	    (let* ((vars (map car decls))
+		   (procs (map cadr decls))
+		   (new-procs (map returnize procs))
+		   (new-decls (map list vars new-procs)))
+	      `(letrec ,new-decls ,@(returnize-last bodies))))
+	  (set! (var rhs-exp)
+	    (if (lambda? rhs-exp)
+	      `(set! ,var ,(returnize rhs-exp))
+	      code))
+	  (begin exps (returnize-last code))
+	  ((define define*) (name body)
+	   (if (lambda? body)
+	     `(,(car code) ,name ,(returnize body))
+	     `(,(car code) ,name ,body)))
+	  (define-syntax args code)
+	  (and exps `(return* ,code))
+	  (or exps `(return* ,code))
+	  (case (exp . clauses)
+	    `(case ,exp ,@(map returnize-last clauses)))
+	  (record-case (exp . clauses)
+	    `(record-case ,exp ,@(map returnize-last clauses)))
+	  ;; EOPL
+	  (define-datatype args code)
+	  (cases (type exp . clauses)
+	    `(cases ,type ,exp ,@(map returnize-last clauses)))
+	  (halt* (value) `(return* ,value))
+	  ((error printf pretty-print) args code)
+	  (else (cond
+		  ((memq (car code) syntactic-keywords)
+		   (error-in-source code "I don't know how to process the above code."))
+		  (else `(return* ,code)))))))))
+
+(define returnize-last
+  (lambda (exps)
+    (if (null? (cdr exps))
+      (list (returnize (car exps)))
+      (cons (car exps) (returnize-last (cdr exps))))))
+ 
