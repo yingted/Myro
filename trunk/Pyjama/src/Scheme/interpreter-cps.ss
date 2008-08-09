@@ -201,7 +201,7 @@
   (lambda ()
     (make-initial-environment
       (list 'nil 'exit 'apply 'sqrt 'print 'display 'newline 'load 'null? 'cons 'car 'cdr
-	    'list '+ '- '* '/ '< '> '= 'equal? 'eq? 'range 'set-car! 'set-cdr!
+	    'list '+ '- '* '/ '< '> '= 'equal? 'eq? 'memq 'range 'set-car! 'set-cdr!
 	    'import 'get 'call-with-current-continuation 'call/cc
 	    'reverse 'append 'list->vector 'dir 'env 'current-time)
       (list '()
@@ -234,6 +234,7 @@
 	    (lambda-proc (args env2 handler k2) (k2 (apply = args)))
 	    (lambda-proc (args env2 handler k2) (k2 (apply equal? args)))
 	    (lambda-proc (args env2 handler k2) (k2 (apply eq? args)))
+	    (lambda-proc (args env2 handler k2) (k2 (apply memq args)))
 	    (lambda-proc (args env2 handler k2) (k2 (apply range args)))
 	    (lambda-proc (args env2 handler k2) (k2 (apply set-car! args)))
 	    (lambda-proc (args env2 handler k2) (k2 (apply set-cdr! args)))

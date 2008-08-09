@@ -205,41 +205,80 @@
 	(nest bindings)))))
 	   
 ;; avoids variable capture
+(define case-transformer
+  (lambda (datum)
+    (letrec
+      ((case-clause->simple-cond-clause
+	 (lambda (var)
+	   (lambda (clause)
+	     (cond
+	       ((eq? (car clause) 'else) clause)
+	       ((symbol? (car clause)) `((eq? ,var ',(car clause)) ,@(cdr clause)))
+	       (else `((memq ,var ',(car clause)) ,@(cdr clause)))))))
+       (case-clause->let-binding
+	 (lambda (clause)
+	   (if (eq? (car clause) 'else)
+	     `(else-code (lambda () ,@(cdr clause)))
+	     (let ((name (if (symbol? (car clause)) (car clause) (caar clause))))
+	       `(,name (lambda () ,@(cdr clause)))))))
+       (case-clause->cond-clause
+	 (lambda (var)
+	   (lambda (clause)
+	     (if (eq? (car clause) 'else)
+	       '(else (else-code))
+	       (let ((name (if (symbol? (car clause)) (car clause) (caar clause))))
+		 (if (symbol? (car clause))
+		   `((eq? ,var ',(car clause)) (,name))
+		   `((memq ,var ',(car clause)) (,name)))))))))
+      (let ((exp (cadr datum))
+	    (clauses (cddr datum)))
+	;; if exp is a variable, no need to introduce r binding
+	(if (symbol? exp)
+	  `(cond ,@(map (case-clause->simple-cond-clause exp) clauses))
+	  `(let ((r ,exp) ,@(map case-clause->let-binding clauses))
+	     (cond ,@(map (case-clause->cond-clause 'r) clauses))))))))
+
+;; avoids variable capture
 (define record-case-transformer
   (lambda (datum)
     (letrec
-      ((rc-clause->cond-clause
+      ((record-case-clause->let-binding
 	 (lambda (clause)
-	   (let ((tag (if (symbol? (car clause)) (car clause) (caar clause))))
-	     (cond
-	       ((eq? (car clause) 'else) `(else (else-code)))
-	       ((symbol? (car clause)) `((eq? (car r) ',tag) (apply ,tag (cdr r))))
-	       (else `((memq (car r) ',(car clause)) (apply ,tag (cdr r))))))))
-       (rc-clause->let-binding
-	 (lambda (clause)
-	   (let ((tag (if (symbol? (car clause)) (car clause) (caar clause))))
-	     (if (eq? tag 'else)
-	       `(else-code (lambda () ,@(cdr clause)))
-	       `(,tag (lambda ,(cadr clause) ,@(cddr clause))))))))
+	   (if (eq? (car clause) 'else)
+	     `(else-code (lambda () ,@(cdr clause)))
+	     (let ((name (if (symbol? (car clause)) (car clause) (caar clause))))
+	       `(,name (lambda ,(cadr clause) ,@(cddr clause)))))))
+       (record-case-clause->cond-clause
+	 (lambda (var)
+	   (lambda (clause)
+	     (if (eq? (car clause) 'else)
+	       `(else (else-code))
+	       (let ((name (if (symbol? (car clause)) (car clause) (caar clause))))
+		 (if (symbol? (car clause))
+		   `((eq? (car ,var) ',(car clause)) (apply ,name (cdr ,var)))
+		   `((memq (car ,var) ',(car clause)) (apply ,name (cdr ,var))))))))))
       (let ((exp (cadr datum))
 	    (clauses (cddr datum)))
-	;; could optimize this by first checking if exp is a variable.
-	;; if so, no need to introduce r binding
-	`(let ((r ,exp) ,@(map rc-clause->let-binding clauses))
-	   (cond ,@(map rc-clause->cond-clause clauses)))))))
+	;; if exp is a variable, no need to introduce r binding
+	(if (symbol? exp)
+	  `(let ,(map record-case-clause->let-binding clauses)
+	     (cond ,@(map (record-case-clause->cond-clause exp) clauses)))
+	  `(let ((r ,exp) ,@(map record-case-clause->let-binding clauses))
+	     (cond ,@(map (record-case-clause->cond-clause 'r) clauses))))))))
 
 ;; need case macro too
 
 (define make-macro-env
   (lambda ()
     (make-initial-environment
-      (list 'and 'or 'cond 'let 'letrec 'let* 'record-case)
+      (list 'and 'or 'cond 'let 'letrec 'let* 'case 'record-case)
       (list and-transformer
 	    or-transformer
 	    cond-transformer
 	    let-transformer
 	    letrec-transformer
 	    let*-transformer
+	    case-transformer
 	    record-case-transformer))))
 
 ;; macros as define-syntax patterns:
@@ -490,7 +529,7 @@
   (lambda (x)
     (and (symbol? x)
 	 (memq x '(quote quasiquote lambda if set! define begin
-		    cond and or let let* letrec record-case ;; do delay case
+		    cond and or let let* letrec case record-case
 		    try catch finally raise
 		    )))))
 
