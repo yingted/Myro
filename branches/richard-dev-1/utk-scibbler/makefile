@@ -5,7 +5,7 @@ EXECUTABLES = test_motor test_camera video_stream test_blob \
 			  lightFollow
 
 all: libscribbler.a libvideostream.a test_motor test_camera test_blob \
-	 video_stream calibrate
+	 video_stream
 
 clean:
 	rm -f core $(EXECUTABLES) libscribbler.a libvideostream.a *.o
