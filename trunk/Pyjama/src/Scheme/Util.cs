@@ -55,7 +55,11 @@ public class Scheme {
   }
 
   public static void display(object obj) {
-	Console.Write(obj);
+	try {
+	  Console.Write(obj);
+	} catch {
+	  Console.Write("<?>");
+	}
   }
 
   public static void display(object obj, object port) {
@@ -104,21 +108,12 @@ public class Scheme {
 	return (car(token) == myclass);
   }
 
-  
-  public static object make_cont2(params object[] args) {
-	return list2("continuation2", args);
-  }
-  
   public static object make_sub(params object[] args) {
-	return list2("substitution", args);
+	return list("substitution", args);
   }
   
-  public static object make_cont(params object[] args) {
-	return list2("continuation", args);
-  }
-
   public static object make_handler(params object[] args) {
-	return list2("handler", args);
+	return list("handler", args);
   }
   
 
@@ -247,7 +242,12 @@ public class Scheme {
   }
 
   public static object Multiply(object obj1, object obj2) {
-	return (ObjectType.MulObj(obj1, obj2));
+	try {
+	  return (ObjectType.MulObj(obj1, obj2));
+	} catch {
+	  throw new Exception(String.Format("multiply: '{0}' * '{1}'\n",
+			  obj1, obj2));
+	}
   }
 
   public static object Divide(object obj1, object obj2) {
@@ -270,10 +270,16 @@ public class Scheme {
   }
 
   public static object list_ref(object obj, object pos) {
+	//printf("calling list-ref({0}, {1})\n", obj, pos);
 	if (pair_q(obj)) {
 	  Cons result = ((Cons)obj);
 	  for (int i = 0; i < ((int)pos); i++) {
-		result = (Cons) cdr(result);
+		try {
+		  result = (Cons) cdr(result);
+		} catch {
+		  throw new Exception(string.Format("error in list_ref: improper access (list_ref {0} {1})",
+				  obj, pos));
+		}
 	  }
 	  return (object)car(result);
 	} else
@@ -335,30 +341,74 @@ public class Scheme {
 	}
   }
 
-  public static object list2(object obj, params object[] args) {
-	// first is an object, second is an array. all to be in list
-	Object result = EmptyList;
-	int count = ((Array)args).Length;
-	for (int i = 0; i < count; i++) {
-	  result = new Cons(args[count - i - 1], result);
+  public static object array_to_string(object[] args) {
+	string retval = "";
+	if (args != null) {
+	  int count = ((Array)args).Length;
+	  for (int i = 0; i < count; i++) {
+		  if (args[i] is object[]) {
+			retval += array_to_string((object[])args[i]);
+		  } else {
+			if (retval != "")
+			  retval += " ";
+			retval += args[i];
+		  }
+	  }
 	}
-	return new Cons(obj, result);
-  }
-
-  public static object list(params object[] args) {
-	Object result = EmptyList;
-	int count = ((Array)args).Length;
-	for (int i = 0; i < count; i++) {
-	  result = new Cons(args[count - i - 1], result);
-	}
-	return result;
+	return "[" + retval + "]";
   }
   
-  public static object cons(object obj1, object obj2) {
-	if (obj2 is object[])
-	  return new Cons(obj1, list(obj2));
+
+  // cons/list needs to work with object[]
+
+  public static object list(params object[] args) {
+	//printf("calling list({0})\n", array_to_string(args));
+	Object result = EmptyList;
+	if (args != null) {
+	  int count = ((Array)args).Length;
+	  for (int i = 0; i < count; i++) {
+		Object item = args[count - i - 1];
+		if (item == null) 
+		  result = EmptyList;
+		else if (item is object[])
+		  result = append( list((object[]) item), result);
+		else
+		  result = new Cons(item, result);
+	  }
+	}
+	//printf("returning list: {0}\n", pretty_print(result));	
+	return result;
+  }
+
+  public static object rdc(object lyst) {
+	if (null_q(cdr(lyst)))
+	  return lyst;
 	else
+	  return rdc(cdr(lyst));
+  }
+  
+  public static void set_cdr_b(object lyst, object item) {
+	Cons cell = (Cons) lyst;
+	cell.cdr = item;
+  }
+
+  public static object append(object obj1, object obj2) {
+	if (obj1 is object[]) {
+	  Object lyst = list(obj1);
+	  Cons cell = (Cons) rdc(lyst);
+	  set_cdr_b(cell, obj2);
+	  return lyst;
+	} else if (obj1 is Cons) {
+	  Cons cell = (Cons) rdc(obj1);
+	  set_cdr_b(cell, obj2);
+	  return obj1;
+	} else {
 	  return new Cons(obj1, obj2);
+	}
+  }
+
+  public static object cons(object obj1, object obj2) {
+	return (object) new Cons(obj1, obj2);
   }
 
   public static object cdr(object obj) {
@@ -410,7 +460,10 @@ public class Scheme {
 	
 	public Cons(object a, object b) {
 	  this.car = a;
-	  this.cdr = b;
+	  if (b is object[] || b == null) 
+		this.cdr = list(b);
+	  else
+		this.cdr = b;
 	}
 	
 	public override string ToString() {
@@ -431,16 +484,18 @@ public class Scheme {
 		  ((Cons)this.cdr).cdr == EmptyList) {
 		return String.Format(",@{0}", ((Cons)this.cdr).car);
 	  } else {
-		string s = String.Format("({0}", this.car);
+		string s = String.Format("({0}", 
+			pretty_print(this.car));
 		object sexp = this.cdr;
 		while (sexp is Cons) {
-		  s += String.Format(" {0}", ((Cons)sexp).car);
+		  s += String.Format(" {0}", 
+			  pretty_print(((Cons)sexp).car));
 		  sexp = ((Cons)sexp).cdr;
 		}
 		if (sexp == EmptyList) {
 		  s += ")";
 		} else {
-		  s += String.Format(" . {0})", sexp);
+		  s += String.Format(" . {0})", pretty_print(sexp));
 		}
 		return s;
 	  }
@@ -673,8 +728,7 @@ public class Scheme {
 	return retval;
   }
 
-  public static object rest_of(object list) {
-	return cdr(list);
+  public static object rest_of(object list) {	return cdr(list);
   }
 
   public static object first(object list) {
@@ -713,17 +767,17 @@ public class Scheme {
   }
 
   public static bool quasiquote_q(object obj) {
-	return (test_tag(obj, "quasiquote", "=", 2));
+	return (test_tag(obj, "quasiquote-exp", "=", 2));
   }
   public static bool raise_q(object obj) {
-	return (test_tag(obj, "raise", "=", 2));
+	return (test_tag(obj, "raise-exp", "=", 2));
   }
   public static object string_append(object obj1, object obj2) {
 	return ((string)obj1) + ((string)obj2);
   }
 
   public static bool try_q(object obj) {
-	return test_tag(obj, "try", ">=", 2);
+	return test_tag(obj, "try-exp", ">=", 2);
   }
 
   public static object try_body(object obj) {
@@ -740,18 +794,18 @@ public class Scheme {
   }
 
   public static bool catch_q(object obj) {
-	return test_tag(obj, "catch", ">=", 3);
+	return test_tag(obj, "catch-exp", ">=", 3);
   }
 
   public static bool finally_q(object obj) {
-	return test_tag(obj, "finally", ">=", 2);
+	return test_tag(obj, "finally-exp", ">=", 2);
   }
 
   public static bool unquote_q(object obj) {
-	return test_tag(obj, "unquote", "=", 2);
+	return test_tag(obj, "unquote-exp", "=", 2);
   }
   public static bool unquote_splicing_q(object obj) {
-	return test_tag(obj, "unquote-splicing", "=", 2);
+	return test_tag(obj, "unquote-splicing-exp", "=", 2);
   }
 
   public static bool test_tag(object obj, object key, 
@@ -809,7 +863,7 @@ public class Scheme {
   }
 
   public static bool quote_q(object obj) {
-	return test_tag(obj, "quote", "=", 2);
+	return test_tag(obj, "quote-exp", "=", 2);
   }
 
   public static bool anything_q(object obj) {
@@ -899,11 +953,11 @@ public class Scheme {
   }
 
   public static bool if_else_q(object obj) {
-	return test_tag(obj, "if", "=", 4);
+	return test_tag(obj, "if-exp", "=", 4);
   }
   
   public static bool if_then_q(object obj) {
-	return test_tag(obj, "if", "=", 3);
+	return test_tag(obj, "if-exp", "=", 3);
   }
 
   public static object assign_exp(object obj) {
@@ -993,11 +1047,11 @@ public class Scheme {
   }
 
   public static bool assignment_q(object obj) {
-	return test_tag(obj, "set!", "=", 3);
+	return test_tag(obj, "set!-exp", "=", 3);
   }
 
   public static bool define_q(object obj) {
-	return test_tag(obj, "define", ">=", 3);
+	return test_tag(obj, "define-exp", ">=", 3);
   }
 
   public static bool mit_style_q(object datum) {
@@ -1009,20 +1063,25 @@ public class Scheme {
   }
 
   public static bool define_syntax_q(object obj) {
-	return test_tag(obj, "define-syntax", ">=", 3);
+	return test_tag(obj, "define-syntax-exp", ">=", 3);
   }
 
   public static bool begin_q(object obj) {
-	return test_tag(obj, "begin", ">=", 2);
+	return test_tag(obj, "begin-exp", ">=", 2);
   }
 
   public static bool lambda_q(object obj) {
-	return test_tag(obj, "lambda", ">=", 3);
+	return test_tag(obj, "lambda-exp", ">=", 3);
   }
 
   public static bool lit_q(object obj) {
-	return test_tag(obj, "lit", "=", 2);
+	return test_tag(obj, "lit-exp", "=", 2);
   }
+
+  //   public static object make_cont (params object[]args)
+  //{
+  //return ((object) cons("continuation",  args));
+  //}
 
   public static void Main(string [] args) {
 	// ----------------------------------
@@ -1052,11 +1111,20 @@ public class Scheme {
 	printf("literal? car(t): {0}\n", lit_q(car(t)));
 	printf("null? t: {0}\n", null_q(t));
 
+	//cons("a", EmptyList).ToString();
+	printf("cons('a', ()): {0}\n", cons("a", EmptyList));
+	
 	t = cons("b", cons("a", t));
+	t = cons("c", cons("a", t));
+	t = cons("d", cons("a", t));
+	printf("t = : {0}\n", t);
 
-	printf("null? cdr(t): {0}\n", null_q(cdr(t)));
+	printf("null? cdr(t): {0} {1}\n", 
+		null_q(cdr(t)), 
+		cdr(t));
 	printf("null? cddr(t): {0}\n", null_q(cddr(t)));
-	printf("null? cdddr(t): {0}\n", null_q(cdddr(t)));
+
+	//	printf("null? cdddr(t): {0}\n", null_q(cdddr(t)));
 	printf("Member test: \n");
 	t = cons("hello", t);
 	printf("t = {0}\n", pretty_print(t));
@@ -1069,8 +1137,15 @@ public class Scheme {
 	printf("length(cdr(list(t))): {0}\n", length(cdr(list(t))));
 	printf("length(car(list(t))): {0}\n", length(car(list(t))));
 	printf("cons(\"X\", list(t))): {0}\n", pretty_print(cons("X", list(t))));
-	printf("{0}\n", pretty_print("x"));
-	printf("t: {0}\n", pretty_print(t));
+	printf("x is: {0}\n", pretty_print("x"));
+	printf("t is: {0}\n", pretty_print(t));
+	printf("list(): {0}\n", list());
+	printf("cons('a', list()): {0}\n", cons("a", list()));
+	printf("cons('a', 'b'): {0}\n", cons("a", "b"));
+
+	printf("cons('a', null): {0}\n", cons("a", null));
+	
+	//printf("make_cont('test'): {0}\n", make_cont("test"));
 
 // apply
 // call-with-input-file

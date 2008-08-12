@@ -9,15 +9,15 @@
   ;; use csharp function names in this format:
   ;; ((function-name return-type (param-types...))...)
   '(
-    (error void (string string "object[]"))
-    (scan-string void (object))
-    (scan-file void (object))
-    (scan-string void (object))
-    (scan-file void (object))
-    (apply-state object (object object))
-    (read-string void (object))
-    (read-file void (object))
-    (read-next-sexp void (object)) 
+    (error "void" ("string" "string" "object[]"))
+    (scan-string "void" ("object"))
+    (scan-file "void" ("object"))
+    (scan-string "void" ("object"))
+    (scan-file "void" ("object"))
+    (apply-state "object" ("object" "object"))
+    (read-string "void" ("object"))
+    (read-file "void" ("object"))
+    (read-next-sexp "void" ("object")) 
     ))
 
 (define *system-ignore-functions*
@@ -84,13 +84,9 @@
 	'()
 	(cons item (repeat item (- times 1))))))
 
-;;     (glue (join-list (map (lambda (type param)
-;; 			    (format "~a ~a" type (proper-name param))))
-;; 		     types params)
-;; 	  ", ")))
-
 (define format-definition
   (lambda (name params)
+    (printf "format-definition: ~a ~a ~%" name params)
     (let* ((ret-params (get-definition-parameter-types name params 'def))
 	   (types (cadr ret-params))
 	   (return-type (car ret-params))
@@ -101,13 +97,15 @@
 					   (format "~a ~a" type (proper-name param)))
 					 types param-list)
 				    ", "))))
+      (printf "return-type: ~a ~%" return-type)
       (format "public static ~a ~a(~a) " 
 	      return-type (proper-name name) sparms))))
 
 (define format-application
-  (lambda (name args return-cast)
-    (printf "get-definition-parameter-types: ~a(~a) => ~a ~%" name args return-cast)
+  (lambda (name args return-cast proc-name)
+    (db "get-definition-parameter-types: ~a(~a) => ~a ~%" name args return-cast)
     (let* ((ret-args (get-definition-parameter-types name args 'app))
+	   (proc-return-type (car (get-definition-parameter-types proc-name args 'def)))
 	   (types (cadr ret-args))
 	   (return-type (car ret-args))
 	   (args-list (if (symbol? args)
@@ -115,33 +113,67 @@
 			   args))
 	   (sargs (glue (join-list (map (lambda (type arg)
 					  (if (equal? return-cast "") 
-					      (format "(~a)~a" type (convert-exp arg))
-					      (format "~a" (convert-exp arg))))
+					      (format "(~a)~a" type (convert-exp arg proc-name))
+					      (format "~a" (convert-exp arg proc-name))))
 					types args-list)
 				   ", "))))
-      (if (equal? return-cast "") ;; no return override
-	  (format "~a(~a) " (proper-name name) sargs)
-	  (format "~a(~a ~a) " (proper-name name) return-cast sargs)))))
+      (printf "RETURN: ~a -> ~a ~%" proc-name proc-return-type)
+      (if (eq? name 'return*)
+	  (if (equal? return-cast "") ;; no return override, look it up
+	      ;; need to lookup, if void no return just exp
+	      (if (equal? proc-return-type "void")
+		  ;; no return, just the function:
+		  (convert-exp (car args) proc-name)
+		  (format "return((~a) ~a) " 
+			  proc-return-type 
+			  (convert-exp (car args) proc-name)))
+	      (format "return((~a) ~a) " 
+		      return-cast sargs))
+	  (format "~a(~a) " (proper-name name) sargs)))))
+
+(define db-format
+  (lambda stuff
+    (printf (car stuff) (cadr stuff) (caddr stuff))
+    (format (car stuff) (cadr stuff) (caddr stuff))))
 		  
 (define ends-with
   (lambda (sym c)
     (eq? (car (reverse (string->list (symbol->string sym)))) c)))
 
 
+(define get-return-type
+  (lambda (name params)
+    (db "get-return-type: ~a(~a) ~%" name)
+    ;; pick a good default
+    (let ((return-type (if (ends-with name #\?)
+			   "bool"
+			   (if (null? params)
+			       "void"
+			       "object"))))
+      (let ((types (lookup-signature name 
+		      (append *function-signatures*
+			      *system-function-signatures*))))
+	(if (null? (car types))
+	    return-type
+	    (car types))))))
+
 (define get-definition-parameter-types
   (lambda (name params kind)
     (db "get-definition-parameter-types: ~a(~a) ~%" name params)
-    (let ((return-type (if (ends-with name #\?)
-			   "bool"
-			   "object")))
-      (cond
-       ((symbol? params) 
-	(if (eq? kind 'def)
-	    (lookup-param-types name (list return-type '("params object[]")))
-	    (lookup-param-types name (list return-type '("object[]")))))
-       ((null? params) (lookup-param-types name '("void" ())))
-       (else (let ((times (length params)))
-	       (lookup-param-types name (list return-type (repeat "object" times)))))))))
+    (if (pair? name)
+	(list '() '())
+	(let ((return-type (if (ends-with name #\?)
+			       "bool"
+			       "object")))
+	  (cond
+	   ((symbol? params) 
+	    (if (eq? kind 'def)
+		(lookup-param-types name (list return-type '("params object[]")))
+		(lookup-param-types name (list return-type '("object[]")))))
+	   ((null? params) (lookup-param-types name '("void" ())))
+	   (else (let ((times (length params)))
+		   (lookup-param-types name 
+				       (list return-type (repeat "object" times))))))))))
 
 (define lookup-param-types
   (lambda (name defaults)
@@ -188,12 +220,12 @@
 	  (set! *function-definitions* (cons name *function-definitions*))
 	  (format "~a ~a\n" 
 		  (format-definition name params)
-		  (convert-block bodies))))
+		  (convert-block bodies name))))
        (else
 	(error 'convert-define "unrecognized form: ~a" def))))))
 
 (define convert-statement
-  (lambda (statement)
+  (lambda (statement proc-name)
     (db "convert-statement: '~s'~%" statement)
     (if (not (pair? statement))
 	(format "~a; " statement)
@@ -202,54 +234,61 @@
 	       (let ((true-part (car conseqs)))
 		 (if (null? (cdr conseqs))
 		     (format "if (((bool)~a)) ~a"
-			     (convert-exp test-part)
-			     (convert-statement true-part))
+			     (convert-exp test-part proc-name)
+			     (convert-statement true-part proc-name))
 		     (let ((false-part (cadr conseqs)))
 		       (format "if (((bool)~a)) ~a else ~a"
-			       (convert-exp test-part)
-			       (convert-statement true-part)
-			       (convert-statement false-part))))))
+			       (convert-exp test-part proc-name)
+			       (convert-statement true-part proc-name)
+			       (convert-statement false-part proc-name))))))
 	   (set! (sym exp)
 		 (if (eq? sym 'pc)
 		     (if (eq? exp #f)
 			 "pc = null;\n"
 			 (format "pc = (Function) ~a;\n" (proper-name exp)))
-		     (format "~a = ~a;\n" (proper-name sym) (convert-exp exp))))
+		     (format "~a = ~a;\n" (proper-name sym) (convert-exp exp proc-name))))
 	   (let (bindings . bodies)
 	     (let* ((vars (map car bindings))
 		    (temps (map (lambda (v) (format "object ~a = null;\n"
 						    (proper-name v))) vars)))
 	       (format "{\n ~a ~a }\n"
 		       (apply string-append temps)
-		       (apply string-append (map convert-statement bodies)))))
+		       (apply string-append 
+			      (map 
+			       (lambda (exp) (convert-statement exp proc-name))
+			       bodies)))))
 	   (begin statements
 		  (if (null? (cdr statements))
-		      (convert-statement (car statements))
-		      (convert-block statements)))
+		      (convert-statement (car statements) proc-name)
+		      (convert-block statements proc-name)))
 	   (else ;; apply (proc args...)
-	    (format "~a; " (convert-application (car statement) (cdr statement))))))))
+	    (format "~a; " (convert-application (car statement) 
+						(cdr statement) proc-name)))))))
   
 (define convert-block
-  (lambda (statements)
+  (lambda (statements proc-name)
     (db "convert-block: '~s'~%" statements)
-    (format "{\n ~a\n }\n" (apply string-append (map convert-statement statements)))))
+    (format "{\n ~a\n }\n" (apply string-append 
+				  (map (lambda (s)
+					 (convert-statement s proc-name))
+				       statements)))))
 
 (define convert-exp
-  (lambda (exp)
+  (lambda (exp proc-name)
     (db "convert-exp: '~s'~%" exp)
     (cond
       ((null? exp) "EmptyList")
       ((pair? exp)
        (cond
-	 ((eq? (car exp) 'quote*) (format "\"~a\"" (caddr exp)))
+	 ((eq? (car exp) 'quote) (format "\"~a\"" (cadr exp)))
 	 ;; FIXME!
 	 ((eq? (car exp) 'quasiquote) (format "\"~a\"" (cadr exp)))
 	 ((eq? (car exp) 'if) ;; if expression
 	  (format "((~a) ? (~a) : (~a))"
-		  (convert-exp (cadr exp)) 
-		  (convert-exp (caddr exp)) 
-		  (convert-exp (cadddr exp))))
-	 (else (convert-application (car exp) (cdr exp)))))
+		  (convert-exp (cadr exp) proc-name) 
+		  (convert-exp (caddr exp) proc-name) 
+		  (convert-exp (cadddr exp) proc-name)))
+	 (else (convert-application (car exp) (cdr exp) proc-name))))
       ((boolean? exp) (if exp "true" "false"))
       ((char? exp)
        (cond
@@ -271,27 +310,25 @@
       (else (format "~a" exp)))))
 
 (define convert-application
-  (lambda (proc args)
-    (printf "convert-application: ~a(~a)~%" proc args)
-    (if (not (member proc *applications*))
-	(set! *applications* (cons proc *applications*)))
-    (let ((cargs (map convert-exp args)))
-      (case proc
+  (lambda (name args proc-name)
+    (db "convert-application: ~a(~a) in ~a~%" name args proc-name)
+    (if (not (member name *applications*))
+	(set! *applications* (cons name *applications*)))
+    (let ((cargs (map (lambda (e) (convert-exp e name)) args)))
+      (case name
 	((and) (format "(~a)" (glue (join-list cargs " && "))))
 	((or) (format "(~a)" (glue (join-list cargs " || "))))
 	((return*)
-	 (if (= (length args) 2) ;; extra cast place
-	     (format-application 'return (cdr args) (car args))
-	     (format-application 'return args " "))) ;; space will make it a return
-	(else (format-application proc args ""))))))
+	 (if (= (length args) 2) ;; explicit cast in return
+	     (format-application name (cdr args) (car args) proc-name)
+	     (format-application name args "" proc-name))) ;; lookup cast
+	(else (format-application name args "" proc-name))))))
 
 (define proper-name
   (lambda (name)
     (cond
      ((string? name) name)
-     ;;((eq? name 'finally-exps) 'cdr)
      ((eq? name 'class) 'class_name)
-     ((eq? name 'goto) 'goto_name)
      ((eq? name 'set!) 'Assign)
      ((eq? name 'eq?) 'Compare)
      ((eq? name 'equal?) 'Compare)
@@ -305,7 +342,6 @@
      ((eq? name 'string) 'make_string)
      ((eq? name 'operator) 'rator)
      ((eq? name '1st) 'First)
-     ((eq? name 'bool) 'logical)
      ((eq? name 'char) 'chr)
      (else (begin (map (lambda (old_new)
 			 (set! name (replace name (car old_new) (cadr old_new))))
@@ -371,7 +407,7 @@
      ((null? (cdr lyst)) lyst)
      (else (cons (car lyst) (cons delim (join-list (cdr lyst) delim)))))))
 
-(define *debug* #f)
+(define *debug* #t)
 
 ;; debug
 (define db
