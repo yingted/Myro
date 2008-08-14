@@ -1,0 +1,5 @@
+
+Version 2.6.2  Aug 13 2008  kjohara@cc.gatech.edu
+ - turn off line sensor when not being used, supposedly saves power
+
+ 
