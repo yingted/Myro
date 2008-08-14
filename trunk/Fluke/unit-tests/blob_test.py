@@ -1,7 +1,7 @@
 from myro import *
 
 
-initialize("/dev/tty.scribbler5850")
+init()
 
 print "Select your blob box"
 show(takePicture())

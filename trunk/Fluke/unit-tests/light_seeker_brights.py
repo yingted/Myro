@@ -1,7 +1,6 @@
 from myro import *
 
-# First connect to the robot...
-init("/dev/tty.scribbler")
+init()
 
 darkenCamera()
     

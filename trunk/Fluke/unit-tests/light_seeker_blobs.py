@@ -1,14 +1,11 @@
 from myro import *
 
-#robot = Scribbler("/dev/tty.scribbler5844")
+init()
 
 GO=True
 TOO_LEFT = 90.0
 TOO_RIGHT = 154.0
 GAIN = 0.4
-
-#robot.darkenCamera()
-#robot.conf_rle(y_low=100, y_high = 255, u_low=0, u_high = 255, v_low=0, v_high =255)
 
 darkenCamera()
 configureBlob(y_low=100, y_high = 255, u_low=0, u_high = 255, v_low=0, v_high = 255)

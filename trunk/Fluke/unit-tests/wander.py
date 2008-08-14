@@ -2,7 +2,7 @@ from myro import *
 import random
 from time import *
 
-#initialize()
+init()
 
 speed=0.7
 

@@ -1,6 +1,6 @@
 from myro import *
 
-robot = Scribbler("/dev/tty.scribbler")
+init()
 
 darkenCamera()
 configureBlob(y_low=100, y_high = 255)

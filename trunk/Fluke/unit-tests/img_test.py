@@ -1,6 +1,6 @@
 from myro import *
 
-initialize()
+init()
 
 
 avg = 0.0

@@ -1,6 +1,6 @@
 from myro import *
 
-#init('/dev/tty.scribbler')
+init()
 
 GO=True
 TOO_LEFT = 40.0

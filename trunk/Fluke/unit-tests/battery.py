@@ -1,5 +1,5 @@
 from myro import *
 
-initialize("/dev/tty.scribbler")
+init()
 print "battery:", getBattery()
 

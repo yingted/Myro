@@ -1,5 +1,5 @@
 from myro import *
-init("/dev/tty.scribbler")
+init()
 
 for i in range(60):
     left, center, right = robot.get("bright")    

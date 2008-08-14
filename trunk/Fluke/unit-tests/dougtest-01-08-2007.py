@@ -1,7 +1,7 @@
 from myro import *
 
 
-init('/dev/tty.scribbler')
+init()
 
 print getLight("all")
 print getBright("all")
