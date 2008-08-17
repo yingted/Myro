@@ -8,7 +8,7 @@ using Microsoft.VisualBasic.CompilerServices;
 public class Scheme {
 
   public static char TILDE = '~';
-  public static char NULL = '\0';
+  public static char NULL = ';';
   public static char NEWLINE = '\n';
   public static char SINGLEQUOTE = '\'';
   public static char DOUBLEQUOTE = '"';
@@ -17,9 +17,6 @@ public class Scheme {
   public static char BACKSLASH = '\\';
   public static char SLASH = '/';
   static char[] SPLITSLASH = {SLASH};
-
-  public static string chars_to_scan = "";
-  
 
   public static object list_to_vector(object lyst) {
 	return null;
@@ -30,21 +27,16 @@ public class Scheme {
   }
 
   public static object make_string(object obj) {
+	if (obj == null || obj == (object) NULL)
+	  return (object) "";
 	return obj.ToString();
   }
 
   public static bool char_numeric_q(object c) {
+	if (c == null) return false;
 	return (('0' <= ((char)c)) && (((char)c) <= '9'));
   }
 
-  public static char First(object n) {
-	return chars_to_scan[(int)n];
-  }
-
-  public static int remaining(object n) {
-	return (1 + ((int)n));
-  }
-  
   public delegate void Function();
   public delegate bool Predicate(object obj);
 
@@ -83,10 +75,6 @@ public class Scheme {
 	return false;
   }
 
-  public static bool char_special_subsequent_q(object o) {
-	return false;
-  }
-
   public static bool char_is__q(object c1, object c2) {
 	return ((c1 is char) && (c2 is char) && ((char)c1) == ((char)c2));
 	
@@ -104,16 +92,8 @@ public class Scheme {
     return (symbol_q(x) && ("?" == ((string)x).Substring(0, 1)));
   }
 
-  public static bool token_type_q(object token, object myclass) {
-	return (car(token) == myclass);
-  }
-
   public static object make_sub(params object[] args) {
 	return list("substitution", args);
-  }
-  
-  public static object make_handler(params object[] args) {
-	return list("handler", args);
   }
   
 
@@ -177,10 +157,6 @@ public class Scheme {
 
   public static bool GreaterThan(object obj1, object obj2) {
 	return (ObjectType.ObjTst(obj1, obj2, false) > 0);
-  }
-
-  public static bool true_q(object obj) {
-	return ((obj is bool) && ((bool)obj));
   }
 
   public static bool false_q(object obj) {
@@ -269,6 +245,10 @@ public class Scheme {
 	throw new Exception("member takes an object and a list");
   }
 
+  public static object array_ref(object array, object pos) {
+	return ((object [])array)[(int) pos];
+  }
+
   public static object list_ref(object obj, object pos) {
 	//printf("calling list-ref({0}, {1})\n", obj, pos);
 	if (pair_q(obj)) {
@@ -283,7 +263,8 @@ public class Scheme {
 	  }
 	  return (object)car(result);
 	} else
-	  throw new Exception("error in list_ref: object is not a list");
+	  throw new Exception(string.Format("list_ref: object is not a list: list-ref({0},{1})",
+			  obj, pos));
   }
 
   public static Symbol EmptyList = new Symbol("()");
@@ -415,14 +396,16 @@ public class Scheme {
 	if (obj is Cons) 
 	  return ((Cons)obj).cdr;
 	else
-	  throw new Exception("error in cdr: object is not a list");
+	  throw new Exception(string.Format("cdr: object is not a list: cdr({0})",
+			  obj));
   }
 
   public static object car(object obj) {
 	if (obj is Cons) 
 	  return ((Cons)obj).car;
 	else
-	  throw new Exception("error in car: object is not a list");
+	  throw new Exception(string.Format("car: object is not a list: cdr({0})",
+			  obj));
   }
 
   public static object   caar(object x) {	return car(car(x));   }
@@ -728,12 +711,6 @@ public class Scheme {
 	return retval;
   }
 
-  public static object rest_of(object list) {	return cdr(list);
-  }
-
-  public static object first(object list) {
-	return car(list);
-  }
 
 //   public static bool memq(object x, object list) {
 // 	if (null_q(x)) return false;
@@ -773,7 +750,7 @@ public class Scheme {
 	return (test_tag(obj, "raise-exp", "=", 2));
   }
   public static object string_append(object obj1, object obj2) {
-	return ((string)obj1) + ((string)obj2);
+	return (obj1.ToString() + obj2.ToString());
   }
 
   public static bool try_q(object obj) {
@@ -1144,45 +1121,10 @@ public class Scheme {
 	printf("cons('a', 'b'): {0}\n", cons("a", "b"));
 
 	printf("cons('a', null): {0}\n", cons("a", null));
-	
-	//printf("make_cont('test'): {0}\n", make_cont("test"));
 
-// apply
-// call-with-input-file
-// char
-// char-alphabetic?
-// char-numeric?
-// char-whitespace?
-// char=?
-// cons
-// eof-object?
-// eq?
-// error
-// first
-// format
-// lambda
-// let
-// list
-// list->string
-// list->vector
-// list-ref
-// make-cont
-// memq
-// not
-// or
-// port
-// pretty-print
-// quote
-// read-char
-// replace
-// rest-of
-// reverse
-// string->number
-// string->symbol
-// string-append
-// string-ref
-// string=?
-
+	printf("string-append('test', NULL): \"{0}\"\n", 	 
+		string_append ((object) "test",
+			(object) make_string ((object) NULL)));
   }
   
 }

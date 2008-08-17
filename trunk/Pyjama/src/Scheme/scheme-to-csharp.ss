@@ -1,6 +1,14 @@
 ;; temporary - to access various utilities (define*? etc.)
 (load "rm-transformer.ss")
 
+(define *ignore-functions* '(
+			     read-content 
+			     string->integer 
+			     string->decimal 
+			     string->rational
+			     ))
+(define *function-signatures* '())
+
 (define *function-definitions* '())
 (define *variable-definitions* '())
 (define *applications* '())
@@ -18,11 +26,39 @@
     (read-string "void" ("object"))
     (read-file "void" ("object"))
     (read-next-sexp "void" ("object")) 
+    (pc "Function" ("null"))
+    (Main "void" ("string []"))
     ))
 
 (define *system-ignore-functions*
   ;; use scheme name of functions to not move to csharp
   '(*function-signatures* *ignore-functions* run trampoline))
+
+(define proper-name
+  (lambda (name)
+    (cond
+     ((string? name) name)
+     ((eq? name 'class) 'class_name)
+     ((eq? name 'set!) 'Assign)
+     ((eq? name 'eq?) 'Compare)
+     ((eq? name 'bool) 'boolean)
+     ((eq? name 'equal?) 'Compare)
+     ((eq? name '<) 'LessThan)
+     ((eq? name '>) 'GreaterThan)
+     ((eq? name '+) 'Add)
+     ((eq? name '=) 'Compare)
+     ((eq? name '-) 'Subtract)
+     ((eq? name '*) 'Multiply)
+     ((eq? name '/) 'Divide)
+     ((eq? name 'string) 'make_string)
+     ((eq? name 'operator) 'rator)
+     ((eq? name '1st) 'First)
+     ((eq? name 'char) 'chr)
+     (else (begin (map (lambda (old_new)
+			 (set! name (replace name (car old_new) (cadr old_new))))
+		       '((#\> "to_")(#\* "_star")(#\= "_is_")
+			 (#\- #\_)(#\? "_q")(#\! "_b")(#\/ #\_)))
+		  name)))))
 
 (define convert-file
   (lambda (filename . opt)
@@ -86,7 +122,7 @@
 
 (define format-definition
   (lambda (name params)
-    (printf "format-definition: ~a ~a ~%" name params)
+    (db "format-definition: ~a ~a ~%" name params)
     (let* ((ret-params (get-definition-parameter-types name params 'def))
 	   (types (cadr ret-params))
 	   (return-type (car ret-params))
@@ -97,7 +133,7 @@
 					   (format "~a ~a" type (proper-name param)))
 					 types param-list)
 				    ", "))))
-      (printf "return-type: ~a ~%" return-type)
+      (db "return-type: ~a ~%" return-type)
       (format "public static ~a ~a(~a) " 
 	      return-type (proper-name name) sparms))))
 
@@ -117,7 +153,6 @@
 					      (format "~a" (convert-exp arg proc-name))))
 					types args-list)
 				   ", "))))
-      (printf "RETURN: ~a -> ~a ~%" proc-name proc-return-type)
       (if (eq? name 'return*)
 	  (if (equal? return-cast "") ;; no return override, look it up
 	      ;; need to lookup, if void no return just exp
@@ -131,11 +166,6 @@
 		      return-cast sargs))
 	  (format "~a(~a) " (proper-name name) sargs)))))
 
-(define db-format
-  (lambda stuff
-    (printf (car stuff) (cadr stuff) (caddr stuff))
-    (format (car stuff) (cadr stuff) (caddr stuff))))
-		  
 (define ends-with
   (lambda (sym c)
     (eq? (car (reverse (string->list (symbol->string sym)))) c)))
@@ -198,6 +228,12 @@
 	;; def = (define name (lambda args body ...))
 	(printf "Ignoring function ~a~%" name)
 	"")
+;;        ((eq? (caddr def) 'lambda-cont)
+;; 	...)
+;;        ((eq? (caddr def) 'lambda-cont2)
+;; 	...)
+;;        ((eq? (caddr def) 'lambda-handler)
+;; 	...)
        ((not (lambda? (caddr def)))
 	;; def = (define name 'undefined)
 	(let* ((pname (proper-name name))
@@ -206,13 +242,13 @@
 				*system-function-signatures*))))
 	  (printf " adding static variable ~a...~%" name)
 	  (set! *variable-definitions* (cons name *variable-definitions*))
-	  (cond
-	   ((equal? pname "pc")
-	    (format "static Function pc = null;\n"))
-	   ((null? (car types))
-	    (format "static object ~a = null;\n" pname))
-	   (else
-	    (format "static ~a ~a = null;\n" (car types) pname)))))
+	  (let ((ret-type (if (null? (car types))
+			      "object"
+			      (car types)))
+		(assign-exp (if (null? (cadr types))
+				(convert-exp (caddr def) name)
+				(caadr types))))
+	    (format "static ~a ~a = ~a;\n" ret-type pname assign-exp))))
        ((or (define*? def) (define? def))
 	(let ((params (cadr (caddr def)))
 	      (bodies (cddr (caddr def))))
@@ -305,7 +341,7 @@
 	((char=? exp #\') "SINGLEQUOTE")
 	((char=? exp #\~) "TILDE")
 	(else (format "'~a'" exp))))
-      ((string? exp) (format "\"~a\"" exp))
+      ((string? exp) (format "\"~a\"" (replace exp #\newline "\\n")))
       ((symbol? exp) (format "~a" (proper-name exp)))
       (else (format "~a" exp)))))
 
@@ -316,6 +352,10 @@
 	(set! *applications* (cons name *applications*)))
     (let ((cargs (map (lambda (e) (convert-exp e name)) args)))
       (case name
+	((error) (format "throw new Exception(string.Format(\"{0} {1} {2}\", ~a, ~a, ~a))"
+			 (car cargs)
+			 (cadr cargs)
+			 (caddr cargs)))
 	((and) (format "(~a)" (glue (join-list cargs " && "))))
 	((or) (format "(~a)" (glue (join-list cargs " || "))))
 	((return*)
@@ -323,31 +363,6 @@
 	     (format-application name (cdr args) (car args) proc-name)
 	     (format-application name args "" proc-name))) ;; lookup cast
 	(else (format-application name args "" proc-name))))))
-
-(define proper-name
-  (lambda (name)
-    (cond
-     ((string? name) name)
-     ((eq? name 'class) 'class_name)
-     ((eq? name 'set!) 'Assign)
-     ((eq? name 'eq?) 'Compare)
-     ((eq? name 'equal?) 'Compare)
-     ((eq? name '<) 'LessThan)
-     ((eq? name '>) 'GreaterThan)
-     ((eq? name '+) 'Add)
-     ((eq? name '=) 'Compare)
-     ((eq? name '-) 'Subtract)
-     ((eq? name '*) 'Multiply)
-     ((eq? name '/) 'Divide)
-     ((eq? name 'string) 'make_string)
-     ((eq? name 'operator) 'rator)
-     ((eq? name '1st) 'First)
-     ((eq? name 'char) 'chr)
-     (else (begin (map (lambda (old_new)
-			 (set! name (replace name (car old_new) (cadr old_new))))
-		       '((#\> "to_")(#\* "_star")(#\= "_is_")
-			 (#\- #\_)(#\? "_q")(#\! "_b")(#\/ #\_)))
-		  name)))))
 
 (define glue
   (lambda (things)
@@ -407,7 +422,7 @@
      ((null? (cdr lyst)) lyst)
      (else (cons (car lyst) (cons delim (join-list (cdr lyst) delim)))))))
 
-(define *debug* #t)
+(define *debug* #f)
 
 ;; debug
 (define db

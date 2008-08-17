@@ -42,6 +42,17 @@ make-fact.ss: scheme-to-csharp.ss
 	echo "(convert-file \"fact-rm.ss\" \"fact.cs\")" >> make-fact.ss
 	echo "(exit)" >> make-fact.ss
 
+make-reader.ss: scheme-to-csharp.ss 
+	echo "(load \"rm-transformer.ss\")" > make-reader.ss
+	echo "(delete-file \"reader-ds.ss\")" >> make-reader.ss
+	echo "(ds-transform-file \"reader-cps.ss\" \"reader-ds.ss\")" >> make-reader.ss
+	echo "(delete-file \"reader-rm.ss\")" >> make-reader.ss
+	echo "(rm-transform-file \"reader-ds.ss\" \"reader-rm.ss\")" >> make-reader.ss
+	echo "(delete-file \"reader.cs\")" >> make-reader.ss
+	echo "(load \"scheme-to-csharp.ss\")" >> make-reader.ss
+	echo "(convert-file \"reader-rm.ss\" \"reader.cs\")" >> make-reader.ss
+	echo "(exit)" >> make-reader.ss
+
 all: environments-cps.ss parser-cps.ss unifier-cps.ss interpreter-cps.ss reader-cps.ss \
 		ds-transformer.ss rm-transformer.ss
 	cat environments-cps.ss unifier-cps.ss reader-cps.ss parser-cps.ss interpreter-cps.ss > all.ss
@@ -85,6 +96,11 @@ fact.cs: fact.ss Util.cs make-fact.ss rm-transformer.ss
 	petite make-fact.ss
 	indent -di0 -i3 fact.cs
 	$(MCS) fact.cs Util.cs -main:fact_rm -r:Microsoft.VisualBasic.dll
+
+reader.exe: reader-cps.ss Util.cs make-reader.ss rm-transformer.ss
+	petite make-reader.ss
+	indent -di0 -i3 reader.cs
+	$(MCS) reader.cs Util.cs -main:reader_rm -r:Microsoft.VisualBasic.dll
 
 util.exe: Util.cs
 	$(MCS) Util.cs -r:Microsoft.VisualBasic.dll -out:util.exe
