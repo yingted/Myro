@@ -11,7 +11,7 @@ public class Scheme {
   public delegate bool Predicate(object obj);
 
   public static char TILDE = '~';
-  public static char NULL = '@';
+  public static char NULL = '\0';
   public static char NEWLINE = '\n';
   public static char SINGLEQUOTE = '\'';
   public static char DOUBLEQUOTE = '"';
@@ -38,7 +38,7 @@ public class Scheme {
 
   public static object make_string(object obj) {
 	if (obj == null || obj == (object) NULL)
-	  return (object) "";
+	  return (object) "\0";
 	return obj.ToString();
   }
 
