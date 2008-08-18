@@ -505,8 +505,10 @@
 ;; for testing in c#
 (define Main
   (lambda (args)
-    (scan-string (array-ref args 0))
-    (display (trampoline))
-    (newline)
-    (printf "done!")))
+    (let ((str (array-ref args 0)))
+      (printf "scanning string: \\\"{0}\\\"\n" str)
+      (scan-string str)
+      (display (trampoline))
+      (newline)
+      (printf "done!\n"))))
 

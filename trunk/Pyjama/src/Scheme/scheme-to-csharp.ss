@@ -316,8 +316,10 @@
       ((null? exp) "EmptyList")
       ((pair? exp)
        (cond
-	 ((eq? (car exp) 'quote) (format "\"~a\"" (cadr exp)))
-	 ;; FIXME!
+	 ((eq? (car exp) 'quote) 
+	  (if (eq? (cadr exp) '())
+	      "EmptyList"
+	      (format "\"~a\"" (cadr exp))))
 	 ((eq? (car exp) 'quasiquote) (format "\"~a\"" (cadr exp)))
 	 ((eq? (car exp) 'if) ;; if expression
 	  (format "((~a) ? (~a) : (~a))"

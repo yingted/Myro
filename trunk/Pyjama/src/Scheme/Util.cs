@@ -7,8 +7,11 @@ using Microsoft.VisualBasic.CompilerServices;
 
 public class Scheme {
 
+  public delegate void Function();
+  public delegate bool Predicate(object obj);
+
   public static char TILDE = '~';
-  public static char NULL = ';';
+  public static char NULL = '@';
   public static char NEWLINE = '\n';
   public static char SINGLEQUOTE = '\'';
   public static char DOUBLEQUOTE = '"';
@@ -19,11 +22,18 @@ public class Scheme {
   static char[] SPLITSLASH = {SLASH};
 
   public static object list_to_vector(object lyst) {
-	return null;
+	int len = (int) length(lyst);
+	object current = lyst;
+	object[] retval = new object[len];
+	for (int i = 0; i < len; i++) {
+	  retval[i] = current;
+	  current = cdr(current);
+	}
+	return retval;
   }
 
   public static object string_ref(object s, object i) {
-	return null;
+	return ((string)s)[(int)i];
   }
 
   public static object make_string(object obj) {
@@ -36,9 +46,6 @@ public class Scheme {
 	if (c == null) return false;
 	return (('0' <= ((char)c)) && (((char)c) <= '9'));
   }
-
-  public delegate void Function();
-  public delegate bool Predicate(object obj);
 
   public static void printf(object fmt, params object[] objs) {
 	// replace ~a ~s ... with {0} {1} ...
@@ -68,10 +75,18 @@ public class Scheme {
   }
 
   public static bool char_alphabetic_q(object o) {
+	if (o is char) {
+	  char c = (char) o;
+	  return ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'));
+	} 
 	return false;
   }
 
   public static bool char_whitespace_q(object o) {
+	if (o is char) {
+	  char c = (char) o;
+	  return (c == ' ' || c == '\t' || c == '\n' || c == '\r');
+	}
 	return false;
   }
 
