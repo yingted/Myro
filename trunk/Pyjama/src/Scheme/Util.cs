@@ -25,6 +25,31 @@ public class Scheme {
 	return 0.0;
   }
 
+  public static QPredicate tagged_list(object test_string, object pred, object value) {
+	return new QPredicate(test_string, pred, value);
+  }
+
+  public class QPredicate {
+	object test_string;
+	object pred; 
+	object value;
+
+	public QPredicate(object test_string, object pred, object value) {
+	  this.test_string = test_string;
+	  this.pred = pred; 
+	  this.value = value;
+	}
+
+	public bool Call(object test) {
+	  if ((car(test) == test_string) &&
+		  (length(test) == test_string)) {
+		return true;
+	  }
+	  return false;
+	}
+	
+  }
+
   public static object list_to_vector(object lyst) {
 	int len = (int) length(lyst);
 	object current = lyst;
