@@ -9,6 +9,7 @@ public class Scheme {
 
   public delegate void Function();
   public delegate bool Predicate(object obj);
+  public delegate bool Predicate2(object obj1, object obj2);
 
   public static char TILDE = '~';
   public static char NULL = '\0';
@@ -25,29 +26,20 @@ public class Scheme {
 	return 0.0;
   }
 
-  public static QPredicate tagged_list(object test_string, object pred, object value) {
-	return new QPredicate(test_string, pred, value);
+  public static object apply(object proc, object args) {
+	return null;
   }
 
-  public class QPredicate {
-	object test_string;
-	object pred; 
-	object value;
+  public static object map(object proc, object args) {
+	return null;
+  }
 
-	public QPredicate(object test_string, object pred, object value) {
-	  this.test_string = test_string;
-	  this.pred = pred; 
-	  this.value = value;
-	}
+  public static object map(object proc, object args1, object args2) {
+	return null;
+  }
 
-	public bool Call(object test) {
-	  if ((car(test) == test_string) &&
-		  (length(test) == test_string)) {
-		return true;
-	  }
-	  return false;
-	}
-	
+  public static Func<object,bool> tagged_list(object test_string, object pred, object value) {
+	return (object lyst) => (((bool)Compare(car(lyst), test_string)) && ((bool)((Predicate2)pred)(length(lyst), value)));
   }
 
   public static object list_to_vector(object lyst) {
@@ -175,6 +167,22 @@ public class Scheme {
 	// FIXME: replace ~codes with {codes}
 	//String.Format(msg, rest);
 	return String.Format(((string)msg), rest);
+  }
+
+  // >=
+  public static bool to__is_(object obj1, object obj2) {
+	if (obj1 is Symbol) {
+	  // 	  if (obj2 is Symbol) {
+	  // 		return (((Symbol)obj1) >= ((Symbol)obj2));
+	  // 	  } else 
+	  return false;
+	} else {
+	  try {
+		return (ObjectType.ObjTst(obj1, obj2, false) >= 0);
+	  } catch {
+		return false;
+	  }
+	}
   }
 
   public static bool Compare(object obj1, object obj2) {

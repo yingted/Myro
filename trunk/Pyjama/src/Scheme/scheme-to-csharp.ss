@@ -38,6 +38,26 @@
     (make-toplevel-env "object" ())
     (make-macro-env "object" ())
     (make-empty-environment "object" ())
+
+    (tagged-list "Func<object,bool>" ("object" "Predicate2" "object"))
+;;    (apply "object" ("Predicate2" "object"))
+;;    (map "object" ())
+
+    (quote? "Func<object,bool>" ())
+    (quasiquote? "Func<object,bool>" ())
+    (unquote? "Func<object,bool>" ())
+    (unquote-splicing? "Func<object,bool>" ())
+    (if-then? "Func<object,bool>" ())
+    (if-else? "Func<object,bool>" ())
+    (assignment? "Func<object,bool>" ())
+    (define? "Func<object,bool>" ())
+    (define-syntax? "Func<object,bool>" ())
+    (begin? "Func<object,bool>" ())
+    (lambda? "Func<object,bool>" ())
+    (raise? "Func<object,bool>" ())
+    (try? "Func<object,bool>" ())
+    (catch? "Func<object,bool>" ())
+    (finally? "Func<object,bool>" ())
     ))
 
 (define *system-ignore-functions*
@@ -163,18 +183,28 @@
 					      (format "~a" (convert-exp arg proc-name))))
 					types args-list)
 				   ", "))))
-      (if (eq? name 'return*)
-	  (if (equal? return-cast "") ;; no return override, look it up
-	      ;; need to lookup, if void no return just exp
-	      (if (equal? proc-return-type "void")
-		  ;; no return, just the function:
-		  (convert-exp (car args) proc-name)
-		  (format "return((~a) ~a) " 
-			  proc-return-type 
-			  (convert-exp (car args) proc-name)))
-	      (format "return((~a) ~a) " 
-		      return-cast sargs))
-	  (format "~a(~a) " (proper-name name) sargs)))))
+      (cond
+       ((eq? name 'return*)
+	(if (equal? return-cast "") ;; no return override, look it up
+	    ;; need to lookup, if void no return just exp
+	    (if (equal? proc-return-type "void")
+		;; no return, just the function:
+		(convert-exp (car args) proc-name)
+		(format "return((~a) ~a) " 
+			proc-return-type 
+			(convert-exp (car args) proc-name)))
+	    (format "return((~a) ~a) " 
+		    return-cast sargs)))
+       ((or (eq? name 'apply) (eq? name 'map))
+	(let ((sargs (glue (join-list (map (lambda (type arg)
+					     (if (equal? return-cast "") 
+						 (format "(~a)~a" type (convert-exp arg proc-name))
+						 (format "~a" (convert-exp arg proc-name))))
+					   (cdr types) (cdr args-list))
+				      ", "))))
+	  (format "~a(\"~a\", ~a) " (proper-name name) (car args) sargs)))
+       (else
+	(format "~a(~a) " (proper-name name) sargs))))))
 
 (define ends-with
   (lambda (sym c)
@@ -255,7 +285,7 @@
 		(printf " adding static variable ~a...~%" name)
 		(set! *variable-definitions* (cons name *variable-definitions*))
 		(let ((ret-type (if (null? (car types))
-				    "object"
+				    "object" ;; FIXME: ends with ?
 				    (car types)))
 		      (assign-exp (if (null? (cadr types))
 				      (convert-exp (caddr def) name)
