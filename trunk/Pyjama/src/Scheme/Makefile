@@ -4,11 +4,14 @@ pjscheme-rm.ss: environments-cps.ss parser-cps.ss unifier-cps.ss \
 		interpreter-cps.ss reader-cps.ss ds-transformer.ss \
 		rm-transformer.ss pjscheme-data.ss
 	$(RM) pjscheme-cps.ss
-	cat *cps.ss > pjscheme.ss
-	cat pjscheme-data.ss >> pjscheme.ss
+	cat *cps.ss > pjscheme-cps.ss
+	cat pjscheme-data.ss >> pjscheme-cps.ss
 	echo "(load \"rm-transformer.ss\")" > compile.ss
 	echo "(compile-level-output)" >> compile.ss
-	echo "(compile \"pjscheme\")" >> compile.ss
+	echo "(delete-file \"pjscheme-ds.cs\")" >> compile.ss
+	echo "(delete-file \"pjscheme-rm.cs\")" >> compile.ss
+	echo "(ds-transform-file \"pjscheme-cps.ss\" \"pjscheme-ds.ss\")" >> compile.ss
+	echo "(rm-transform-file \"pjscheme-ds.ss\" \"pjscheme-rm.ss\")" >> compile.ss
 	echo "(exit)" >> compile.ss
 	petite compile.ss
 
@@ -17,7 +20,7 @@ run: pjscheme-rm.ss
 	echo "(begin (display (run start)) (newline))" >> pjscheme-run.ss
 	petite pjscheme-run.ss
 
-pjscheme.exe: pjscheme-rm.ss pjscheme-cps.ss scheme-to-csharp.ss
+pjscheme.exe: pjscheme-rm.ss scheme-to-csharp.ss
 	echo "(load \"scheme-to-csharp.ss\")" > make-pjscheme.ss
 	echo "(delete-file \"pjscheme.cs\")" >> make-pjscheme.ss
 	echo "(convert-file \"pjscheme-rm.ss\" \"pjscheme.cs\")" >> make-pjscheme.ss

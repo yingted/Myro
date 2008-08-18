@@ -247,11 +247,15 @@
 	    (lambda-proc (args env2 handler k2) (k2 (apply list->vector args)))
 	    (lambda-proc (args env2 handler k2) (k2 (get-variables env2)))
 	    (lambda-proc (args env2 handler k2) (k2 env2))
-	    (lambda-proc (args env2 handler k2) (k2 (let ((now (current-time)))
-						 (+ (time-second now)
-						    (inexact (/ (time-nanosecond now)
-								1000000000))))))
+	    (lambda-proc (args env2 handler k2) (k2 (get-current-time)))
 	    ))))
+
+(define get-current-time
+  (lambda ()
+    (let ((now (current-time)))
+      (+ (time-second now)
+	 (inexact (/ (time-nanosecond now)
+		     1000000000))))))
 
 (define* get-primitive
   (lambda (args env handler k)

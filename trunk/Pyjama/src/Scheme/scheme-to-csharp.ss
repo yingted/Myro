@@ -6,6 +6,13 @@
 			     string->integer 
 			     string->decimal 
 			     string->rational
+			     case-transformer
+			     cond-transformer
+			     record-case-transformer
+			     tagged-list
+			     testall
+			     group
+			     get-current-time
 			     ))
 (define *function-signatures* '())
 
@@ -28,6 +35,9 @@
     (read-next-sexp "void" ("object")) 
     (pc "Function" ("null"))
     (Main "void" ("string []"))
+    (make-toplevel-env "object" ())
+    (make-macro-env "object" ())
+    (make-empty-environment "object" ())
     ))
 
 (define *system-ignore-functions*
@@ -240,15 +250,20 @@
 	       (types (lookup-signature name 
 			(append *function-signatures*
 				*system-function-signatures*))))
-	  (printf " adding static variable ~a...~%" name)
-	  (set! *variable-definitions* (cons name *variable-definitions*))
-	  (let ((ret-type (if (null? (car types))
-			      "object"
-			      (car types)))
-		(assign-exp (if (null? (cadr types))
-				(convert-exp (caddr def) name)
-				(caadr types))))
-	    (format "static ~a ~a = ~a;\n" ret-type pname assign-exp))))
+	  (if (eq? (memq name *variable-definitions*) #f)
+	      (begin
+		(printf " adding static variable ~a...~%" name)
+		(set! *variable-definitions* (cons name *variable-definitions*))
+		(let ((ret-type (if (null? (car types))
+				    "object"
+				    (car types)))
+		      (assign-exp (if (null? (cadr types))
+				      (convert-exp (caddr def) name)
+				      (caadr types))))
+		  (format "static ~a ~a = ~a;\n" ret-type pname assign-exp)))
+	      (begin
+		(printf "skipping duplicate variable definition: ~a~%" name)
+		""))))
        ((or (define*? def) (define? def))
 	(let ((params (cadr (caddr def)))
 	      (bodies (cddr (caddr def))))

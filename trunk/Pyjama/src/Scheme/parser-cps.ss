@@ -534,12 +534,18 @@
 		    )))))
 
 (define try? (tagged-list 'try >= 2))
-(define try-body cadr)
+(define try-body 
+  (lambda (x)
+    (cadr x)))
 (define catch? (tagged-list 'catch >= 3))
-(define catch-var cadr)
-(define catch-exps cddr)
+(define catch-var 
+  (lambda (x)
+    (cadr x)))
+(define catch-exps 
+  (lambda (x) (cddr x)))
 (define finally? (tagged-list 'finally >= 2))
-(define finally-exps cdr)
+(define finally-exps 
+  (lambda (x) (cdr x)))
 
 ;;------------------------------------------------------------------------
 ;; file parser
