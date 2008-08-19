@@ -503,12 +503,18 @@
 	      (cons char (loop (read-char port))))))))))
 
 ;; for testing in c#
-(define Main
-  (lambda (args)
-    (let ((str (array-ref args 0)))
-      (printf "scanning string: \\\"{0}\\\"\n" str)
-      (scan-string str)
-      (display (trampoline))
-      (newline)
-      (printf "done!\n"))))
+;; (define Main
+;;   (lambda (args)
+;;     (let ((str (array-ref args 0)))
+;;       (printf "scanning string: \\\"{0}\\\"\n" str)
+;;       (scan-string str)
+;;       (display (trampoline))
+;;       (newline)
+;;       (printf "done!\n"))))
 
+(define Main 
+  (lambda (args)
+    (start)
+    (trampoline)
+    (newline)
+    (printf "done!\n")))
