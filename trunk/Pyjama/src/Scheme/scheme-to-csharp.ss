@@ -20,6 +20,7 @@
 			     make-frame
 			     make-initial-environment
 			     print-parsed-sexps
+			     true?
 			     ))
 (define *function-signatures* '())
 

@@ -7,6 +7,8 @@ using Microsoft.VisualBasic.CompilerServices;
 
 public class Scheme {
 
+  public static bool DEBUG = false;
+
   public delegate void Function();
   public delegate bool Predicate(object obj);
   public delegate bool Predicate2(object obj1, object obj2);
@@ -21,6 +23,25 @@ public class Scheme {
   public static char BACKSLASH = '\\';
   public static char SLASH = '/';
   static char[] SPLITSLASH = {SLASH};
+
+  public static void trace(object fmt, params object[] objs) {
+	if (DEBUG) {
+	  printf(fmt, objs);
+	}
+  }
+
+  public static bool true_q (object v) {
+	if (v is bool) {
+	  return ((bool) v);
+	} else {
+	  if (v is int) 
+		return (((int)v) != 0);
+	  else if (v is double) 
+		return (((double)v) != 0.0);
+	  else
+		return true;
+	}
+  }
 
   public static object get_current_time() {
 	return 0.0;
@@ -121,13 +142,13 @@ public class Scheme {
   }
 
   public static object map(object proc, object args1, object args2) {
-	printf("called: map2\n");
+	trace("called: map2\n");
 	object retval = EmptyList;
 	object current1 = args1;
 	object current2 = args2;
 	if (Compare(proc, "make-binding")) {
 	  while (!Compare(current1, EmptyList)) {
-		printf("  make-binding: ({0} {1})\n", car(current1), car(current2));
+		trace("  make-binding: ({0} {1})\n", car(current1), car(current2));
 		retval = cons(make_binding(car(current1), car(current2)), retval);
 		current1 = cdr(current1);
 		current2 = cdr(current2);
@@ -142,12 +163,12 @@ public class Scheme {
   }
 
   public static Func<object,bool> tagged_list(object test_string, object pred, object value) {
-	printf("called: tagged_list\n");
+	trace("called: tagged_list\n");
 	return (object lyst) => (((bool)Compare(car(lyst), test_string)) && ((bool)((Predicate2)pred)(length(lyst), value)));
   }
 
   public static object list_to_vector(object lyst) {
-	printf("called: list_to_vector\n");
+	trace("called: list_to_vector\n");
 	int len = (int) length(lyst);
 	object current = lyst;
 	object[] retval = new object[len];
@@ -159,17 +180,17 @@ public class Scheme {
   }
 
   public static object string_ref(object s, object i) {
-	printf("called: string_ref(\"{0}\", {1})\n", s, i);
+	trace("called: string_ref(\"{0}\", {1})\n", s, i);
 	return ((string)s)[(int)i];
   }
 
   public static object make_string(object obj) {
-	printf("called: make_string\n");
+	trace("called: make_string\n");
 	if (obj == null || obj == (object) NULL) {
-	  printf("make_string returned: \"\\0\"\n");
+	  trace("make_string returned: \"\\0\"\n");
 	  return (object) "\0";
 	}
-	printf("make_string returned: \"{0}\"\n", obj.ToString());
+	trace("make_string returned: \"{0}\"\n", obj.ToString());
 	return obj.ToString();
   }
 
@@ -277,7 +298,7 @@ public class Scheme {
 	// FIXME: replace ~codes with {codes}
 	//String.Format(msg, rest);
 	string retval = "";
-	printf("called format({0}, {1})\n", msg, rest);
+	trace("called format({0}, {1})\n", msg, rest);
 	string new_msg = "";
 	string smsg = msg.ToString();
 	object[] orest = (object[]) rest;
@@ -288,7 +309,17 @@ public class Scheme {
 		  new_msg += string.Format("{{0}}", count);
 		  count += 1;
 		  i++;
-		}
+		} else if (smsg[i+1] == 'a') {
+		  new_msg += string.Format("{{0}}", count);
+		  count += 1;
+		  i++;
+		} else if (smsg[i+1] == '%') {
+		  new_msg += "\n";
+		  count += 1;
+		  i++;
+		} else
+		  throw new Exception(string.Format("format needs to handle: \"{0}\"", 
+				  smsg));
 	  } else {
 		new_msg += smsg[i];
 	  }
@@ -303,7 +334,7 @@ public class Scheme {
 	  retval = String.Format(new_msg, orest[0], orest[1], orest[2]);
 	else
 	  throw new Exception("too many args to format");
-	printf("format returned: \"{0}\"\n", retval);
+	trace("format returned: \"{0}\"\n", retval);
 	return retval;
   }
 
@@ -324,15 +355,22 @@ public class Scheme {
   }
 
   public static bool Compare(object obj1, object obj2) {
+	trace("calling compare({0}, {1})\n", obj1, obj2);
 	if (obj1 is Symbol) {
+	  trace("obj1 is symbol\n");
 	  if (obj2 is Symbol) {
+		trace("obj2 is symbol\n");
 		return (((Symbol)obj1) == ((Symbol)obj2));
 	  } else 
+		trace("false1\n");
 		return false;
 	} else {
 	  try {
-		return (ObjectType.ObjTst(obj1, obj2, false) == 0);
+		bool retval = (ObjectType.ObjTst(obj1, obj2, false) == 0);
+		trace("compare returning: {0}\n", retval);
+		return retval;
 	  } catch {
+		trace("false2\n");
 		return false;
 	  }
 	}
@@ -465,10 +503,10 @@ public class Scheme {
   }
 
   public static object length(object obj) {
-	printf("called: length\n");
+	trace("called: length\n");
 	if (list_q(obj)) {
 	  if (null_q(obj)) {
-		printf("length returned: {0}\n", 0);
+		trace("length returned: {0}\n", 0);
 		return 0;
 	  } else {
 		int len = 0;
@@ -477,7 +515,7 @@ public class Scheme {
 		  len++;
 		  current = cdr(current);
 		}
-		printf("length returned: {0}\n", len);
+		trace("length returned: {0}\n", len);
 		return len;
 	  }
 	} else
