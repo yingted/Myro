@@ -78,58 +78,76 @@ public class Scheme {
 				"case_transformer",
 				(object)
 				"record_case_transformer")));
-	
   }
 
   public static object range (params object[]args) {
-	return null;
+	throw new Exception("not implemented: range");
   }
 
   public static object list_tail(object tail, object pos) {
-	return null;
+	throw new Exception("not implemented: list_tail");
   }
 
   public static object list_head(object tail, object pos) {
-	return null;
-  }
-
-  public static object for_each(object proc, object items) {
-	return null;
+	throw new Exception("not implemented: list_head");
   }
 
   public static object group() {
-	return null;
+	throw new Exception("not implemented: group");
   }
 
   public static object read() {
-	return null;
+	return Console.ReadLine();
   }
 
   public static object file_exists_q(object filename) {
-	return null;
+	throw new Exception("not implemented: file_exists_q");
   }
 
   public static object substring(object str, object start, object stop) {
 	return str.ToString().Substring(((int)start), ((int)stop) - ((int)start));
   }
 
+  public static object for_each(object proc, object items) {
+	throw new Exception(string.Format("unknown for_each proc: {0}", proc));
+  }
+
   public static object apply(object proc, object args) {
-	return null;
+	throw new Exception(string.Format("unknown apply proc: {0}", proc));
   }
 
   public static object map(object proc, object args) {
-	return null;
+	throw new Exception(string.Format("unknown map proc: {0}", proc));
   }
 
   public static object map(object proc, object args1, object args2) {
-	return null;
+	printf("called: map2\n");
+	object retval = EmptyList;
+	object current1 = args1;
+	object current2 = args2;
+	if (Compare(proc, "make-binding")) {
+	  while (!Compare(current1, EmptyList)) {
+		printf("  make-binding: ({0} {1})\n", car(current1), car(current2));
+		retval = cons(make_binding(car(current1), car(current2)), retval);
+		current1 = cdr(current1);
+		current2 = cdr(current2);
+	  }
+	} else
+	  throw new Exception(string.Format("unknown map2 proc: {0}", proc));
+	return retval;
+  }
+
+  public static object make_binding(object args1, object args2) {
+	return cons(args1, args2);
   }
 
   public static Func<object,bool> tagged_list(object test_string, object pred, object value) {
+	printf("called: tagged_list\n");
 	return (object lyst) => (((bool)Compare(car(lyst), test_string)) && ((bool)((Predicate2)pred)(length(lyst), value)));
   }
 
   public static object list_to_vector(object lyst) {
+	printf("called: list_to_vector\n");
 	int len = (int) length(lyst);
 	object current = lyst;
 	object[] retval = new object[len];
@@ -141,12 +159,17 @@ public class Scheme {
   }
 
   public static object string_ref(object s, object i) {
+	printf("called: string_ref(\"{0}\", {1})\n", s, i);
 	return ((string)s)[(int)i];
   }
 
   public static object make_string(object obj) {
-	if (obj == null || obj == (object) NULL)
+	printf("called: make_string\n");
+	if (obj == null || obj == (object) NULL) {
+	  printf("make_string returned: \"\\0\"\n");
 	  return (object) "\0";
+	}
+	printf("make_string returned: \"{0}\"\n", obj.ToString());
 	return obj.ToString();
   }
 
@@ -253,7 +276,35 @@ public class Scheme {
   public static string format(object msg, params object[] rest) {
 	// FIXME: replace ~codes with {codes}
 	//String.Format(msg, rest);
-	return String.Format(((string)msg), rest);
+	string retval = "";
+	printf("called format({0}, {1})\n", msg, rest);
+	string new_msg = "";
+	string smsg = msg.ToString();
+	object[] orest = (object[]) rest;
+	int count = 0;
+	for (int i = 0; i < smsg.Length; i++) {
+	  if (smsg[i] == '~') {
+		if (smsg[i+1] == 's') {
+		  new_msg += string.Format("{{0}}", count);
+		  count += 1;
+		  i++;
+		}
+	  } else {
+		new_msg += smsg[i];
+	  }
+	}
+	if (count == 0) 
+	  retval = String.Format(new_msg);
+	else if (count == 1) 
+	  retval = String.Format(new_msg, orest[0]);
+	else if (count == 2) 
+	  retval = String.Format(new_msg, orest[0], orest[1]);
+	else if (count == 3) 
+	  retval = String.Format(new_msg, orest[0], orest[1], orest[2]);
+	else
+	  throw new Exception("too many args to format");
+	printf("format returned: \"{0}\"\n", retval);
+	return retval;
   }
 
   // >=
@@ -414,16 +465,19 @@ public class Scheme {
   }
 
   public static object length(object obj) {
+	printf("called: length\n");
 	if (list_q(obj)) {
-	  if (null_q(obj)) 
+	  if (null_q(obj)) {
+		printf("length returned: {0}\n", 0);
 		return 0;
-	  else {
+	  } else {
 		int len = 0;
 		object current = (Cons)obj;
 		while (!Compare(current, EmptyList)) {
 		  len++;
 		  current = cdr(current);
 		}
+		printf("length returned: {0}\n", len);
 		return len;
 	  }
 	} else
@@ -611,17 +665,17 @@ public class Scheme {
 		return String.Format(",@{0}", ((Cons)this.cdr).car);
 	  } else {
 		string s = String.Format("({0}", 
-			pretty_print(this.car));
+			get_pretty_print(this.car));
 		object sexp = this.cdr;
 		while (sexp is Cons) {
 		  s += String.Format(" {0}", 
-			  pretty_print(((Cons)sexp).car));
+			  get_pretty_print(((Cons)sexp).car));
 		  sexp = ((Cons)sexp).cdr;
 		}
 		if (sexp == EmptyList) {
 		  s += ")";
 		} else {
-		  s += String.Format(" . {0})", pretty_print(sexp));
+		  s += String.Format(" . {0})", get_pretty_print(sexp));
 		}
 		return s;
 	  }
@@ -819,8 +873,13 @@ public class Scheme {
   
   
   // () is represented as EmptyList
+
+  public static void pretty_print(object obj) {
+	printf(get_pretty_print(obj));
+	newline();
+  }
   
-  public static string pretty_print(object obj) {
+  public static string get_pretty_print(object obj) {
 	string retval = "";
 	if (obj is String) {
 	  return String.Format("\"{0}\"", obj);
@@ -831,7 +890,7 @@ public class Scheme {
 	  while (!Compare(current, EmptyList)) {
 		if (retval != "")
 		  retval += " ";
-		retval += pretty_print(car(current));
+		retval += get_pretty_print(car(current));
 		current = cdr(current);
 	  }
 	  return "(" + retval + ")";
@@ -927,18 +986,18 @@ public class Scheme {
 	//	printf("null? cdddr(t): {0}\n", null_q(cdddr(t)));
 	printf("Member test: \n");
 	t = cons("hello", t);
-	printf("t = {0}\n", pretty_print(t));
-	printf("member(hello, t) : {0}\n", pretty_print(member("hello", t)));
-	printf("member(a, t) : {0}\n", pretty_print(member("a", t)));
-	printf("member(c, t) : {0}\n", pretty_print(member("c", t)));
-	printf("(): {0}\n", pretty_print(list()));
-	printf("list(t): {0}\n", pretty_print(list(t)));
+	printf("t = {0}\n", get_pretty_print(t));
+	printf("member(hello, t) : {0}\n", get_pretty_print(member("hello", t)));
+	printf("member(a, t) : {0}\n", get_pretty_print(member("a", t)));
+	printf("member(c, t) : {0}\n", get_pretty_print(member("c", t)));
+	printf("(): {0}\n", get_pretty_print(list()));
+	printf("list(t): {0}\n", get_pretty_print(list(t)));
 	printf("length(list(t)): {0}\n", length(list(t)));
 	printf("length(cdr(list(t))): {0}\n", length(cdr(list(t))));
 	printf("length(car(list(t))): {0}\n", length(car(list(t))));
-	printf("cons(\"X\", list(t))): {0}\n", pretty_print(cons("X", list(t))));
-	printf("x is: {0}\n", pretty_print("x"));
-	printf("t is: {0}\n", pretty_print(t));
+	printf("cons(\"X\", list(t))): {0}\n", get_pretty_print(cons("X", list(t))));
+	printf("x is: {0}\n", get_pretty_print("x"));
+	printf("t is: {0}\n", get_pretty_print(t));
 	printf("list(): {0}\n", list());
 	printf("cons('a', list()): {0}\n", cons("a", list()));
 	printf("cons('a', 'b'): {0}\n", cons("a", "b"));
