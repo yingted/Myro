@@ -9,10 +9,17 @@
 			     case-transformer
 			     cond-transformer
 			     record-case-transformer
+			     let*-transformer
 			     tagged-list
 			     testall
 			     group
 			     get-current-time
+			     split-variable
+			     range
+			     make-macro-env
+			     make-frame
+			     make-initial-environment
+			     print-parsed-sexps
 			     ))
 (define *function-signatures* '())
 
@@ -38,10 +45,11 @@
     (make-toplevel-env "object" ())
     (make-macro-env "object" ())
     (make-empty-environment "object" ())
+    (safe-print "void" ())
+    (parse-string "void" ())
+    (get-parsed-sexps "void" ())
 
     (tagged-list "Func<object,bool>" ("object" "Predicate2" "object"))
-;;    (apply "object" ("Predicate2" "object"))
-;;    (map "object" ())
 
     (quote? "Func<object,bool>" ())
     (quasiquote? "Func<object,bool>" ())
@@ -58,6 +66,7 @@
     (try? "Func<object,bool>" ())
     (catch? "Func<object,bool>" ())
     (finally? "Func<object,bool>" ())
+
     ))
 
 (define *system-ignore-functions*
@@ -194,8 +203,9 @@
 			proc-return-type 
 			(convert-exp (car args) proc-name)))
 	    (format "return((~a) ~a) " 
-		    return-cast sargs)))
-       ((or (eq? name 'apply) (eq? name 'map))
+		    return-cast 
+		    sargs)))
+       ((or (eq? name 'apply) (eq? name 'map) (eq? name 'for-each))
 	(let ((sargs (glue (join-list (map (lambda (type arg)
 					     (if (equal? return-cast "") 
 						 (format "(~a)~a" type (convert-exp arg proc-name))
@@ -268,12 +278,6 @@
 	;; def = (define name (lambda args body ...))
 	(printf "Ignoring function ~a~%" name)
 	"")
-;;        ((eq? (caddr def) 'lambda-cont)
-;; 	...)
-;;        ((eq? (caddr def) 'lambda-cont2)
-;; 	...)
-;;        ((eq? (caddr def) 'lambda-handler)
-;; 	...)
        ((not (lambda? (caddr def)))
 	;; def = (define name 'undefined)
 	(let* ((pname (proper-name name))
@@ -285,7 +289,9 @@
 		(printf " adding static variable ~a...~%" name)
 		(set! *variable-definitions* (cons name *variable-definitions*))
 		(let ((ret-type (if (null? (car types))
-				    "object" ;; FIXME: ends with ?
+				    (if (ends-with name #\?)
+					"bool"
+					"object")
 				    (car types)))
 		      (assign-exp (if (null? (cadr types))
 				      (convert-exp (caddr def) name)
@@ -397,14 +403,15 @@
     (db "convert-application: ~a(~a) in ~a~%" name args proc-name)
     (if (not (member name *applications*))
 	(set! *applications* (cons name *applications*)))
-    (let ((cargs (map (lambda (e) (convert-exp e name)) args)))
+    (let ((bool-cargs (map (lambda (e) (format "((bool)~a)" (convert-exp e proc-name))) args))
+	  (cargs (map (lambda (e) (convert-exp e proc-name)) args)))
       (case name
 	((error) (format "throw new Exception(string.Format(\"{0} {1} {2}\", ~a, ~a, ~a))"
 			 (car cargs)
 			 (cadr cargs)
 			 (caddr cargs)))
-	((and) (format "(~a)" (glue (join-list cargs " && "))))
-	((or) (format "(~a)" (glue (join-list cargs " || "))))
+	((and) (format "(~a)" (glue (join-list bool-cargs " && "))))
+	((or) (format "(~a)" (glue (join-list bool-cargs " || "))))
 	((return*)
 	 (if (= (length args) 2) ;; explicit cast in return
 	     (format-application name (cdr args) (car args) proc-name)

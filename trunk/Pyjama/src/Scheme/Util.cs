@@ -26,6 +26,93 @@ public class Scheme {
 	return 0.0;
   }
 
+  public static object symbol_to_string (object x) {
+	return null;
+  }
+
+  public static void split_variable() { //object variable, object delim) {
+//     (let ((strings 'undefined))
+//       (set! strings
+//         (group (string->list (symbol->string variable_reg)) #\.))
+//       (if (or (member "" strings) (= (length strings) 1))
+//           (begin (set! value_reg #f) (set! pc apply-cont))
+//           (begin
+//             (set! value_reg (map string->symbol strings))
+//             (set! pc apply-cont))))))
+  }
+
+  public static object make_initial_environment (object vars, object vals)
+  {
+	return ((object)
+		list ((object) make_frame ((object) vars, (object) vals)));
+  }
+  
+  public static object make_frame (object variables, object values)
+  {
+	return ((object)
+		map ("make-binding", (object) variables, (object) values));
+  }
+  
+  public static object make_macro_env () {
+	return ((object)
+		make_initial_environment ((object)
+			list ((object) "and", (object) "or",
+				(object) "cond", (object) "let",
+				(object) "letrec",
+				(object) "let*",
+				(object) "case",
+				(object) "record-case"),
+			(object) list ((object)
+				"and_transformer",
+				(object)
+				"or_transformer",
+				(object)
+				"cond_transformer",
+				(object)
+				"let_transformer",
+				(object)
+				"letrec_transformer",
+				(object)
+				"let_star_transformer",
+				(object)
+				"case_transformer",
+				(object)
+				"record_case_transformer")));
+	
+  }
+
+  public static object range (params object[]args) {
+	return null;
+  }
+
+  public static object list_tail(object tail, object pos) {
+	return null;
+  }
+
+  public static object list_head(object tail, object pos) {
+	return null;
+  }
+
+  public static object for_each(object proc, object items) {
+	return null;
+  }
+
+  public static object group() {
+	return null;
+  }
+
+  public static object read() {
+	return null;
+  }
+
+  public static object file_exists_q(object filename) {
+	return null;
+  }
+
+  public static object substring(object str, object start, object stop) {
+	return str.ToString().Substring(((int)start), ((int)stop) - ((int)start));
+  }
+
   public static object apply(object proc, object args) {
 	return null;
   }
