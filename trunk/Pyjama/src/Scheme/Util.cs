@@ -7,7 +7,7 @@ using Microsoft.VisualBasic.CompilerServices;
 
 public class Scheme {
 
-  public static bool DEBUG = false;
+  public static bool DEBUG = true;
 
   public delegate void Function();
   public delegate bool Predicate(object obj);
@@ -164,7 +164,12 @@ public class Scheme {
 
   public static Func<object,bool> tagged_list(object test_string, object pred, object value) {
 	trace("called: tagged_list\n");
-	return (object lyst) => (((bool)Compare(car(lyst), test_string)) && ((bool)((Predicate2)pred)(length(lyst), value)));
+	return (object lyst) => {
+	  if (list_q(lyst))
+		return (((bool)Compare(car(lyst), test_string)) && ((bool)((Predicate2)pred)(length(lyst), value)));
+	  else
+		return false;
+	};
   }
 
   public static object list_to_vector(object lyst) {
@@ -303,7 +308,7 @@ public class Scheme {
 	string smsg = msg.ToString();
 	object[] orest = (object[]) rest;
 	int count = 0;
-	for (int i = 0; i < smsg.Length; i++) {
+	for (int i = 0; i < smsg.Length - 1; i++) {
 	  if (smsg[i] == '~') {
 		if (smsg[i+1] == 's') {
 		  new_msg += string.Format("{{0}}", count);
