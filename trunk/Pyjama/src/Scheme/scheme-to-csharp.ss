@@ -14,7 +14,6 @@
 			     testall
 			     group
 			     get-current-time
-			     split-variable
 			     range
 			     make-macro-env
 			     make-frame

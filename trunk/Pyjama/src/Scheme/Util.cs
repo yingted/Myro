@@ -48,18 +48,25 @@ public class Scheme {
   }
 
   public static object symbol_to_string (object x) {
-	return null;
+	return x.ToString();
   }
 
-  public static void split_variable() { //object variable, object delim) {
-//     (let ((strings 'undefined))
-//       (set! strings
-//         (group (string->list (symbol->string variable_reg)) #\.))
-//       (if (or (member "" strings) (= (length strings) 1))
-//           (begin (set! value_reg #f) (set! pc apply-cont))
-//           (begin
-//             (set! value_reg (map string->symbol strings))
-//             (set! pc apply-cont))))))
+  public static object group(object chars, object delimiter) {
+	// given list of chars and a delim char, return a list of strings
+	object retval = EmptyList;
+	object buffer = EmptyList;
+	object current1 = chars;
+	while (!Compare(current1, EmptyList)) {
+	  if (Compare(car(current1), delimiter)) {
+		retval = cons(list_to_string(buffer), retval);
+	  } else {
+		buffer = cons(car(current1), buffer);
+	  }
+	  current1 = cdr(current1);
+	}
+	if (!Compare(buffer, EmptyList))
+	  retval = cons(buffer, retval);
+	return retval;
   }
 
   public static object make_initial_environment (object vars, object vals)
@@ -113,10 +120,6 @@ public class Scheme {
 	throw new Exception("not implemented: list_head");
   }
 
-  public static object group() {
-	throw new Exception("not implemented: group");
-  }
-
   public static object read() {
 	return Console.ReadLine();
   }
@@ -138,7 +141,17 @@ public class Scheme {
   }
 
   public static object map(object proc, object args) {
-	throw new Exception(string.Format("unknown map proc: {0}", proc));
+	trace("called: map1\n");
+	object retval = EmptyList;
+	object current1 = args;
+	while (!Compare(current1, EmptyList)) {
+	  if (Compare(proc, "string->symbol")) {
+		retval = cons(string_to_symbol(car(current1)), retval);
+	  } else
+		throw new Exception(string.Format("unknown map1 proc: {0}", proc));
+	  current1 = cdr(current1);
+	}
+	return retval;
   }
 
   public static object map(object proc, object args1, object args2) {
@@ -146,15 +159,14 @@ public class Scheme {
 	object retval = EmptyList;
 	object current1 = args1;
 	object current2 = args2;
-	if (Compare(proc, "make-binding")) {
-	  while (!Compare(current1, EmptyList)) {
-		trace("  make-binding: ({0} {1})\n", car(current1), car(current2));
+	while (!Compare(current1, EmptyList)) {
+	  if (Compare(proc, "make-binding")) {
 		retval = cons(make_binding(car(current1), car(current2)), retval);
-		current1 = cdr(current1);
-		current2 = cdr(current2);
-	  }
-	} else
-	  throw new Exception(string.Format("unknown map2 proc: {0}", proc));
+	  } else
+		throw new Exception(string.Format("unknown map2 proc: {0}", proc));
+	  current1 = cdr(current1);
+	  current2 = cdr(current2);
+	}
 	return retval;
   }
 
@@ -274,6 +286,18 @@ public class Scheme {
 	return ((o1 is string) && (o2 is string) && ((string)o1) == ((string)o2));
   }
   
+  public static object string_to_list(object str) {
+	trace("called: string_to_list\n");
+	object retval = EmptyList;
+	if (str != null) {
+	  string sstr = str.ToString();
+	  for (int i = 0; i < sstr.Length; i++) {
+		retval = cons(sstr[i], retval);
+	  }
+	}
+	return retval;
+  }
+
   public static object string_to_symbol(object s) {
 	return new Symbol((string)s);
   }
@@ -300,15 +324,13 @@ public class Scheme {
   }
 
   public static string format(object msg, params object[] rest) {
-	// FIXME: replace ~codes with {codes}
-	//String.Format(msg, rest);
 	string retval = "";
 	trace("called format({0}, {1})\n", msg, rest);
 	string new_msg = "";
 	string smsg = msg.ToString();
 	object[] orest = (object[]) rest;
 	int count = 0;
-	for (int i = 0; i < smsg.Length - 1; i++) {
+	for (int i = 0; i < smsg.Length; i++) {
 	  if (smsg[i] == '~') {
 		if (smsg[i+1] == 's') {
 		  new_msg += string.Format("{{0}}", count);
@@ -463,8 +485,9 @@ public class Scheme {
   // List functions -----------------------------------------------
 
   public static object member(object obj1, object obj2) {
-	if (pair_q(obj2)) {
-	  object current = (Cons)obj2;
+	trace("calling member({0}, {1})\n", obj1, obj2);
+	if (list_q(obj2)) {
+	  object current = obj2;
 	  while (!Compare(current, EmptyList)) {
 		if (Compare(obj1, car(current)))
 		  return current;
