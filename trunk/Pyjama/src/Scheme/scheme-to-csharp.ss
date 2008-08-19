@@ -86,6 +86,7 @@
      ((eq? name '>) 'GreaterThan)
      ((eq? name '+) 'Add)
      ((eq? name '=) 'Compare)
+     ((eq? name '>=) 'GreaterOrEqual)
      ((eq? name '-) 'Subtract)
      ((eq? name '*) 'Multiply)
      ((eq? name '/) 'Divide)

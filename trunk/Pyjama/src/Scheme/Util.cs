@@ -257,7 +257,7 @@ public class Scheme {
   }
 
   // >=
-  public static bool to__is_(object obj1, object obj2) {
+  public static bool GreaterOrEqual(object obj1, object obj2) {
 	if (obj1 is Symbol) {
 	  // 	  if (obj2 is Symbol) {
 	  // 		return (((Symbol)obj1) >= ((Symbol)obj2));
