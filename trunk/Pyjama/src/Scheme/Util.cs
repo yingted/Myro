@@ -5,13 +5,115 @@ using System.IO; // File
 using System.Collections.Generic; // List
 using Microsoft.VisualBasic.CompilerServices;
 
-public class Scheme {
+public abstract class Scheme {
 
   public static bool DEBUG = false;
 
   public delegate void Function();
   public delegate bool Predicate(object obj);
   public delegate bool Predicate2(object obj1, object obj2);
+
+  public delegate object Procedure0();
+  public delegate void Procedure0Void();
+  public delegate bool Procedure0Bool();
+
+  public delegate object Procedure1(object args);
+  public delegate void Procedure1Void(object args);
+  public delegate bool Procedure1Bool(object args);
+
+  public delegate object Procedure2(object args1, object args2);
+  public delegate void Procedure2Void(object args1, object args2);
+  public delegate bool Procedure2Bool(object args1, object args2);
+
+  public class Proc {
+	object proc = null;
+	int args = -1;
+	int returntype = 1;
+
+	public Proc(object proctype, int args, int returntype) {
+	  this.proc = proctype;
+	  this.args = args;
+	  this.returntype = returntype;
+	}
+	public object Call(object actual) {
+	  trace("calling Call1: {0}\n", actual);
+	  object retval = null;
+	  if (returntype == 0) { // void return
+		if (args == -1) 
+		  ((Procedure1Void)proc)(actual);
+		else if (args == 0) 
+		  ((Procedure0Void)proc)();
+		else if (args == 1) 
+		  ((Procedure1Void)proc)(car(actual));
+		else if (args == 2) 
+		  ((Procedure2Void)proc)(car(actual), cadr(actual));
+	  } else if (returntype == 1) { // return object
+		if (args == -1) 
+		  retval = ((Procedure1)proc)(actual);
+		else if (args == 0) 
+		  retval = ((Procedure0)proc)();
+		else if (args == 1) 
+		  retval = ((Procedure1)proc)(car(actual));
+		else if (args == 2) 
+		  retval = ((Procedure2)proc)(car(actual), cadr(actual));
+	  } else if (returntype == 2) { // return bool
+		if (args == -1) 
+		  retval = ((Procedure1Bool)proc)(actual);
+		else if (args == 0) 
+		  retval = ((Procedure0Bool)proc)();
+		else if (args == 1) 
+		  retval = ((Procedure1Bool)proc)(car(actual));
+		else if (args == 2) 
+		  retval = ((Procedure2Bool)proc)(car(actual), cadr(actual));
+	  }
+	  return retval;
+	}
+
+	public object Call(object args1, object args2) {
+	  trace("calling Call2: {0} {1}\n", args1, args2);
+	  object retval = null;
+	  if (returntype == 0) { // return void
+		((Procedure2Void)proc)(args1, args2);
+	  } else if (returntype == 1) { // return object
+		retval = ((Procedure2)proc)(args1, args2);
+	  } else if (returntype == 3) { // return object
+		retval = ((Procedure2)proc)(car(args1), car(args2));
+	  } else if (returntype == 2) { // return bool
+		retval = ((Procedure2Bool)proc)(args1, args2);
+	  }
+	  return retval;
+	}
+  }
+
+  // ProcedureN - N is arg count coming in
+  // -1, 1, 2 - number of pieces to call app with (-1 is all)
+  // 0, 1, 2 - return type 0 = void, 1 = object, 2 = bool
+  public static Proc Add_proc = new Proc((Procedure1)Add, -1, 1);
+  public static Proc Compare_proc = new Proc((Procedure1Bool) Compare, -1, 2);
+  public static Proc Divide_proc = new Proc((Procedure1) Divide, -1, 1);
+  public static Proc GreaterThan_proc = new Proc((Procedure1Bool) GreaterThan, -1, 2);
+  public static Proc LessThan_proc = new Proc((Procedure1Bool) LessThan, -1, 2);
+  public static Proc Multiply_proc = new Proc((Procedure1) Multiply, -1, 1);
+  public static Proc Subtract_proc = new Proc((Procedure1) Subtract, -1, 1);
+  public static Proc binding_variable_proc = new Proc((Procedure1) binding_variable, 1, 1);
+  public static Proc cadr_proc = new Proc((Procedure1) cadr, 1, 1);
+  public static Proc car_proc = new Proc((Procedure1) car, 1, 1);
+  public static Proc cdr_proc = new Proc((Procedure1) cdr, 1, 1);
+  public static Proc cons_proc = new Proc((Procedure2) cons, 2, 1);
+  public static Proc get_variables_from_frame_proc = new Proc((Procedure1) get_variables_from_frame, 1, 1);
+  public static Proc list_to_vector_proc = new Proc((Procedure1) list_to_vector, 1, 1);
+  public static Proc memq_proc = new Proc((Procedure1Bool) memq, 2, 2);
+  public static Proc range_proc = new Proc((Procedure1) range, -1, 1);
+  public static Proc reverse_proc = new Proc((Procedure1) reverse, 1, 1);
+  public static Proc safe_print_proc = new Proc((Procedure1Void) safe_print, -1, 0);
+  public static Proc set_car_b_proc = new Proc((Procedure2Void) set_car_b, 2, 0);
+  public static Proc set_cdr_b_proc = new Proc((Procedure2Void) set_cdr_b, 2, 0);
+  public static Proc sqrt_proc = new Proc((Procedure1) sqrt, -1, 1);
+  public static Proc string_to_symbol_proc = new Proc((Procedure1) string_to_symbol, 1, 1);
+  public static Proc null_q_proc = new Proc((Procedure1Bool) null_q, 1, 2);
+  public static Proc display_proc = new Proc((Procedure1Void) display, 1, 0);
+  public static Proc append_proc = new Proc((Procedure1) append, -1, 1);
+  public static Proc make_binding_proc = new Proc((Procedure2)make_binding, 2, 1);
 
   public static char TILDE = '~';
   public static char NULL = '\0';
@@ -22,7 +124,11 @@ public class Scheme {
   public static char BACKSPACE = '\b';
   public static char BACKSLASH = '\\';
   public static char SLASH = '/';
-  static char[] SPLITSLASH = {SLASH};
+  public static char[] SPLITSLASH = {SLASH};
+
+  public static object get_variables_from_frame(object frame) {return null;}
+  public static object binding_variable(object binding) {return null;}
+  public static void safe_print(object item) {}
 
   public static void trace(object fmt, params object[] objs) {
 	if (DEBUG) {
@@ -78,7 +184,7 @@ public class Scheme {
   public static object make_frame (object variables, object values)
   {
 	return ((object)
-		map ("make-binding", (object) variables, (object) values));
+		map (make_binding_proc, (object) variables, (object) values));
   }
   
   public static object make_macro_env () {
@@ -108,7 +214,7 @@ public class Scheme {
 				"record_case_transformer")));
   }
 
-  public static object range (params object[]args) {
+  public static object range(object args) {
 	throw new Exception("not implemented: range");
   }
 
@@ -132,16 +238,22 @@ public class Scheme {
 	return str.ToString().Substring(((int)start), ((int)stop) - ((int)start));
   }
 
-  public static object for_each(object proc, object items) {
-	throw new Exception(string.Format("unknown for_each proc: {0}", proc));
+  public static void for_each(object proc, object items) {
+	object current1 = items;
+	// FIXME: compare on empty list assumes proper list
+	// fix to work with improper lists
+	while (!Compare(current1, EmptyList)) {
+	  apply(proc, car(current1));
+	  current1 = cdr(current1);
+	}
   }
 
   public static object apply(object proc, object args) {
-	if (Compare(proc, "+")) {
-	  return Add(car(args), cadr(args));
-	} else {
-	  throw new Exception(string.Format("unknown apply proc: {0}", proc));
-	}
+	return ((Proc)proc).Call(args);
+  }
+
+  public static object apply(object proc, object args1, object args2) {
+	return ((Proc)proc).Call(args1, args2);
   }
 
   public static object map(object proc, object args) {
@@ -149,10 +261,7 @@ public class Scheme {
 	object retval = EmptyList;
 	object current1 = args;
 	while (!Compare(current1, EmptyList)) {
-	  if (Compare(proc, "string->symbol")) {
-		retval = cons(string_to_symbol(car(current1)), retval);
-	  } else
-		throw new Exception(string.Format("unknown map1 proc: {0}", proc));
+	  retval = cons( apply(proc, car(current1)), retval);
 	  current1 = cdr(current1);
 	}
 	return retval;
@@ -164,10 +273,7 @@ public class Scheme {
 	object current1 = args1;
 	object current2 = args2;
 	while (!Compare(current1, EmptyList)) {
-	  if (Compare(proc, "make-binding")) {
-		retval = cons(make_binding(car(current1), car(current2)), retval);
-	  } else
-		throw new Exception(string.Format("unknown map2 proc: {0}", proc));
+	  retval = cons( apply(proc, car(current1), car(current2)), retval);
 	  current1 = cdr(current1);
 	  current2 = cdr(current2);
 	}
@@ -356,7 +462,10 @@ public class Scheme {
 	return retval;
   }
 
-  // >=
+  public static bool GreaterOrEqual(object args) {
+	return GreaterOrEqual(car(args), cadr(args));
+  }
+
   public static bool GreaterOrEqual(object obj1, object obj2) {
 	if (obj1 is Symbol) {
 	  // 	  if (obj2 is Symbol) {
@@ -370,6 +479,17 @@ public class Scheme {
 		return false;
 	  }
 	}
+  }
+
+  public static bool Compare(object obj) {
+	object item = car(obj);
+	object current = cdr(obj);
+	while (!Compare(current, EmptyList)) {
+	  if (! Compare(item, car(current)))
+		return false;
+	  current = cdr(current);
+	}
+	return true;
   }
 
   public static bool Compare(object obj1, object obj2) {
@@ -394,8 +514,16 @@ public class Scheme {
 	}
   }
 
+  public static bool LessThan(object obj) {
+	return LessThan(car(obj), cadr(obj));
+  }
+
   public static bool LessThan(object obj1, object obj2) {
 	return (ObjectType.ObjTst(obj1, obj2, false) < 0);
+  }
+
+  public static bool GreaterThan(object args) {
+	return GreaterThan(car(args), cadr(args));
   }
 
   public static bool GreaterThan(object obj1, object obj2) {
@@ -425,6 +553,50 @@ public class Scheme {
 	throw new Exception(String.Format("unknown compare operator: '{0}'", op));
   }
 
+  public static object Add(object obj) {
+	// For adding 0 or more numbers in list
+	object retval = 0;
+	object current = obj;
+	while (!Compare(current, EmptyList)) {
+	  retval = Add(retval, car(current));
+	  current = cdr(current);
+	}
+	return retval;
+  }
+
+  public static object Multiply(object obj) {
+	// For multiplying 0 or more numbers in list
+	object retval = 1;
+	object current = obj;
+	while (!Compare(current, EmptyList)) {
+	  retval = Multiply(retval, car(current));
+	  current = cdr(current);
+	}
+	return retval;
+  }
+
+  public static object Subtract(object obj) {
+	// For subtracting 1 or more numbers in list
+	object retval = car(obj);
+	object current = cdr(obj);
+	while (!Compare(current, EmptyList)) {
+	  retval = Subtract(retval, car(current));
+	  current = cdr(current);
+	}
+	return retval;
+  }
+	
+  public static object Divide(object obj) {
+	// For dividing 1 or more numbers in list
+	object retval = car(obj);
+	object current = cdr(obj);
+	while (!Compare(current, EmptyList)) {
+	  retval = Divide(retval, car(current));
+	  current = cdr(current);
+	}
+	return retval;
+  }
+	
   public static object Add(object obj1, object obj2) {
 	try {
 	  return (ObjectType.AddObj(obj1, obj2));
@@ -614,20 +786,33 @@ public class Scheme {
 	else
 	  return rdc(cdr(lyst));
   }
+
+  public static void set_cdr_b(object obj) {
+	set_cdr_b(car(obj), cadr(obj));
+  }
   
-  public static object set_cdr_b(object lyst, object item) {
+  public static void set_cdr_b(object lyst, object item) {
 	Cons cell = (Cons) lyst;
 	cell.cdr = item;
-	return null;
   }
 
-  public static object set_car_b(object lyst, object item) {
+  public static void set_car_b(object obj) {
+	set_car_b(car(obj), cadr(obj));
+  }
+  public static void set_car_b(object lyst, object item) {
 	Cons cell = (Cons) lyst;
 	cell.car = item;
-	return null;
   }
 
-  public static object append(object obj1, object obj2) {
+  public static object append(params object[] obj) {
+	return Append(obj[0], obj[1]);
+  }
+
+  public static object append(object obj) {
+	return Append(car(obj), cadr(obj));
+  }
+
+  public static object Append(object obj1, object obj2) {
 	if (obj1 is object[]) {
 	  Object lyst = list(obj1);
 	  Cons cell = (Cons) rdc(lyst);
@@ -642,6 +827,21 @@ public class Scheme {
 	}
   }
 
+  public static object sqrt(object obj) {
+	if (pair_q(obj)) {
+	  obj = car(obj);
+	  if (obj is int)
+		return Math.Sqrt((int)obj);
+	  else
+		throw new Exception(String.Format("can't take sqrt of this type of number: {0}", obj));
+	}
+	throw new Exception("need to apply procedure to list");
+  }
+
+  public static object cons(object obj) {
+	return cons(car(obj), cadr(obj));
+  }
+
   public static object cons(object obj1, object obj2) {
 	return (object) new Cons(obj1, obj2);
   }
@@ -650,7 +850,7 @@ public class Scheme {
 	if (obj is Cons) 
 	  return ((Cons)obj).cdr;
 	else
-	  throw new Exception(string.Format("cdr: object is not a list: cdr({0})",
+	  throw new Exception(string.Format("cdr: object is not a list: {0}",
 			  obj));
   }
 
@@ -658,7 +858,7 @@ public class Scheme {
 	if (obj is Cons) 
 	  return ((Cons)obj).car;
 	else
-	  throw new Exception(string.Format("car: object is not a list: cdr({0})",
+	  throw new Exception(string.Format("car: object is not a list: {0}",
 			  obj));
   }
 
@@ -938,17 +1138,22 @@ public class Scheme {
   
   public static string get_pretty_print(object obj) {
 	string retval = "";
-	if (obj is String) {
+	if (obj == null) {
+	  return "#void";
+	} else if (obj is String) {
 	  return String.Format("\"{0}\"", obj);
 	} else if (obj is Symbol && ((Symbol)obj) == EmptyList) {
 	  return "()";
 	} else if (obj is Cons) {
 	  object current = (Cons)obj;
-	  while (!Compare(current, EmptyList)) {
+	  while (pair_q(current)) {
 		if (retval != "")
 		  retval += " ";
 		retval += get_pretty_print(car(current));
 		current = cdr(current);
+		if (!pair_q(current) && !Compare(current, EmptyList)) {
+		  retval += " . " + get_pretty_print(current);
+		}
 	  }
 	  return "(" + retval + ")";
 	} else {
@@ -968,6 +1173,10 @@ public class Scheme {
 	  retval += item.ToString();
 	}
 	return retval;
+  }
+
+  public static bool memq(object obj) {
+	return memq(car(obj), cadr(obj));
   }
 
   public static bool memq(object item1, object list) {

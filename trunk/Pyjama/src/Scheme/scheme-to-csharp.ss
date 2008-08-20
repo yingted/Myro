@@ -9,6 +9,7 @@
 			     case-transformer
 			     cond-transformer
 			     record-case-transformer
+			     letrec-transformer
 			     let*-transformer
 			     tagged-list
 			     testall
@@ -48,6 +49,10 @@
     (safe-print "void" ())
     (parse-string "void" ())
     (get-parsed-sexps "void" ())
+    (set-car! "void" ())
+    (set-cdr! "void" ())
+    (set-binding-value! "void" ())
+    (set-first-frame! "void" ())
 
     (tagged-list "Func<object,bool>" ("object" "Predicate2" "object"))
 
@@ -174,7 +179,7 @@
 					 types param-list)
 				    ", "))))
       (db "return-type: ~a ~%" return-type)
-      (format "public static ~a ~a(~a) " 
+      (format "new public static ~a ~a(~a) " 
 	      return-type (proper-name name) sparms))))
 
 (define format-application
@@ -206,14 +211,22 @@
 	    (format "return((~a) ~a) " 
 		    return-cast 
 		    sargs)))
-       ((or (eq? name 'apply) (eq? name 'map) (eq? name 'for-each))
+       ((or (eq? name 'apply) (eq? name 'map)) ;; get return values
 	(let ((sargs (glue (join-list (map (lambda (type arg)
 					     (if (equal? return-cast "") 
 						 (format "(~a)~a" type (convert-exp arg proc-name))
 						 (format "~a" (convert-exp arg proc-name))))
 					   (cdr types) (cdr args-list))
 				      ", "))))
-	  (format "~a(\"~a\", ~a) " (proper-name name) (car args) sargs)))
+	  (format "~a(~a_proc, ~a) " (proper-name name) (proper-name (car args)) sargs)))
+       ((eq? name 'for-each)
+	(let ((sargs (glue (join-list (map (lambda (type arg)
+					     (if (equal? return-cast "") 
+						 (format "(~a)~a" type (convert-exp arg proc-name))
+						 (format "~a" (convert-exp arg proc-name))))
+					   (cdr types) (cdr args-list))
+				      ", "))))
+	  (format "for_each(~a_proc, ~a) " (proper-name (car args)) sargs)))
        (else
 	(format "~a(~a) " (proper-name name) sargs))))))
 
@@ -407,7 +420,7 @@
     (let ((bool-cargs (map (lambda (e) (format "((bool)~a)" (convert-exp e proc-name))) args))
 	  (cargs (map (lambda (e) (convert-exp e proc-name)) args)))
       (case name
-	((error) (format "throw new Exception(string.Format(\"{0} {1} {2}\", ~a, ~a, ~a))"
+	((error) (format "throw new Exception(format(~a + \": \" + ~a, ~a))"
 			 (car cargs)
 			 (cadr cargs)
 			 (caddr cargs)))
