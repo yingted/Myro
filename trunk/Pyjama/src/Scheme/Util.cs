@@ -7,7 +7,7 @@ using Microsoft.VisualBasic.CompilerServices;
 
 public class Scheme {
 
-  public static bool DEBUG = true;
+  public static bool DEBUG = false;
 
   public delegate void Function();
   public delegate bool Predicate(object obj);
@@ -137,7 +137,11 @@ public class Scheme {
   }
 
   public static object apply(object proc, object args) {
-	throw new Exception(string.Format("unknown apply proc: {0}", proc));
+	if (Compare(proc, "+")) {
+	  return Add(car(args), cadr(args));
+	} else {
+	  throw new Exception(string.Format("unknown apply proc: {0}", proc));
+	}
   }
 
   public static object map(object proc, object args) {
@@ -238,25 +242,6 @@ public class Scheme {
 	return (('0' <= ((char)c)) && (((char)c) <= '9'));
   }
 
-  public static void printf(object fmt, params object[] objs) {
-	// replace ~a ~s ... with {0} {1} ...
-	// replace ~% with \n
-	Console.Write((string)fmt, objs);
-  }
-
-  public static void display(object obj) {
-	try {
-	  Console.Write(obj);
-	} catch {
-	  Console.Write("<?>");
-	}
-  }
-
-  public static void display(object obj, object port) {
-	// FIXME: add output port type
-	Console.Write(obj);
-  }
-
   public static bool symbol_q(object x) {
 	return (x is Symbol);
   }
@@ -323,15 +308,31 @@ public class Scheme {
 	Console.WriteLine("");
   }
 
+  public static void display(object obj) {
+	try {
+	  Console.Write(obj);
+	} catch {
+	  Console.Write("<?>");
+	}
+  }
+
+  public static void display(object obj, object port) {
+	// FIXME: add output port type
+	Console.Write(obj);
+  }
+
+  public static void printf(object fmt, params object[] objs) {
+	Console.Write(format(fmt, objs));
+  }
+
   public static string format(object msg, params object[] rest) {
 	string retval = "";
-	trace("called format({0}, {1})\n", msg, rest);
 	string new_msg = "";
 	string smsg = msg.ToString();
 	object[] orest = (object[]) rest;
 	int count = 0;
 	for (int i = 0; i < smsg.Length; i++) {
-	  if (smsg[i] == '~') {
+	  if (smsg[i] == TILDE) {
 		if (smsg[i+1] == 's') {
 		  new_msg += string.Format("{{0}}", count);
 		  count += 1;
@@ -351,17 +352,7 @@ public class Scheme {
 		new_msg += smsg[i];
 	  }
 	}
-	if (count == 0) 
-	  retval = String.Format(new_msg);
-	else if (count == 1) 
-	  retval = String.Format(new_msg, orest[0]);
-	else if (count == 2) 
-	  retval = String.Format(new_msg, orest[0], orest[1]);
-	else if (count == 3) 
-	  retval = String.Format(new_msg, orest[0], orest[1], orest[2]);
-	else
-	  throw new Exception("too many args to format");
-	trace("format returned: \"{0}\"\n", retval);
+	retval = String.Format(new_msg, orest);
 	return retval;
   }
 
@@ -979,13 +970,6 @@ public class Scheme {
 	return retval;
   }
 
-
-//   public static bool memq(object x, object list) {
-// 	if (null_q(x)) return false;
-// 	else if (Compare(x, list)) return true;
-// 	else return (memq(x, cdr(list)));
-//   }
-
   public static bool memq(object item1, object list) {
 	if (list is Cons) {
 	  object current = list;
@@ -993,7 +977,9 @@ public class Scheme {
 		if (Compare(item1, car(current))) {
 		  return true;
 		}
+		current = cdr(current);
 	  }
+	  return false;
 	}
 	return false;
   }
@@ -1050,7 +1036,7 @@ public class Scheme {
 	printf("null? cddr(t): {0}\n", null_q(cddr(t)));
 
 	//	printf("null? cdddr(t): {0}\n", null_q(cdddr(t)));
-	printf("Member test: \n");
+ 	printf("Member test: \n");
 	t = cons("hello", t);
 	printf("t = {0}\n", get_pretty_print(t));
 	printf("member(hello, t) : {0}\n", get_pretty_print(member("hello", t)));
