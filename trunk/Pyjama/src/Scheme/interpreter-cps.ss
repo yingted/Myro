@@ -206,11 +206,11 @@
 	    'reverse 'append 'list->vector 'dir 'env 'current-time)
       (list '()
 	    (lambda-proc (args env2 handler k2)
-	      (set! macro-env (make-macro-env))
-	      (set! toplevel-env (make-toplevel-env))
-	      ;; temporary
-	      (set! load-stack '())
-	      (halt* '(exiting the interpreter)))
+ 	      (set! macro-env (make-macro-env))
+ 	      (set! toplevel-env (make-toplevel-env))
+ 	      ;; temporary
+ 	      (set! load-stack '())
+ 	      (halt* '(exiting the interpreter)))
 	    (lambda-proc (args env2 handler k2)
 	      (let ((proc (car args))
 		    (proc-args (cadr args)))
@@ -291,7 +291,11 @@
 
 (define get-variables
   (lambda (env)
-    (map (lambda (frame) (map binding-variable frame)) env)))
+    (map get-variables-from-frame env)))
+
+(define get-variables-from-frame
+  (lambda (frame) 
+    (map binding-variable frame)))
 
 (define load-stack '())
 
