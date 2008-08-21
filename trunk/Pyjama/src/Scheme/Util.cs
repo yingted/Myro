@@ -177,40 +177,46 @@ public abstract class Scheme {
 
   public static object make_initial_environment (object vars, object vals)
   {
-	return ((object)
-		list ((object) make_frame ((object) vars, (object) vals)));
+	return list(make_frame(vars, vals));
   }
   
   public static object make_frame (object variables, object values)
   {
-	return ((object)
-		map (make_binding_proc, (object) variables, (object) values));
+	object retval = map(make_binding_proc, variables, values);
+
+	retval = cons(apply( make_binding_proc, list("plus"), list(new Proc((Procedure1)plus_one, 1, 1))), retval);
+	printf("{0}\n", retval);
+	return retval;
   }
   
+  //  public static Proc Add_proc = new Proc((Procedure1)Add, -1, 1);
+
+
+  public static object plus_one(object n) {
+	return ((int) n) + 1;
+  }
+
   public static object make_macro_env () {
 	return ((object)
 		make_initial_environment ((object)
-			list ((object) "and", (object) "or",
-				(object) "cond", (object) "let",
-				(object) "letrec",
-				(object) "let*",
-				(object) "case",
-				(object) "record-case"),
-			(object) list ((object)
+			list (
+				"and", 
+				"or",
+				"cond", 
+				"let",
+				"letrec",
+				"let*",
+				"case",
+				"record-case"
+				  ),
+			list (
 				"and_transformer",
-				(object)
 				"or_transformer",
-				(object)
 				"cond_transformer",
-				(object)
 				"let_transformer",
-				(object)
 				"letrec_transformer",
-				(object)
 				"let_star_transformer",
-				(object)
 				"case_transformer",
-				(object)
 				"record_case_transformer")));
   }
 
@@ -495,21 +501,22 @@ public abstract class Scheme {
   public static bool Compare(object obj1, object obj2) {
 	trace("calling compare({0}, {1})\n", obj1, obj2);
 	if (obj1 is Symbol) {
-	  trace("obj1 is symbol\n");
 	  if (obj2 is Symbol) {
-		trace("obj2 is symbol\n");
-		return (((Symbol)obj1) == ((Symbol)obj2));
+		return (obj1.ToString() == obj2.ToString());
 	  } else 
-		trace("false1\n");
-		return false;
+		return Compare(obj1.ToString(), obj2);
 	} else {
-	  try {
-		bool retval = (ObjectType.ObjTst(obj1, obj2, false) == 0);
-		trace("compare returning: {0}\n", retval);
-		return retval;
-	  } catch {
-		trace("false2\n");
-		return false;
+	  if (obj2 is Symbol) {
+		return Compare(obj1, obj2.ToString());
+	  } else {
+		try {
+		  bool retval = (ObjectType.ObjTst(obj1, obj2, false) == 0);
+		  trace("  compare returning: {0}\n", retval);
+		  return retval;
+		} catch {
+		  trace("  false2\n");
+		  return false;
+		}
 	  }
 	}
   }
