@@ -141,12 +141,18 @@
 		cs-trampoline)))))
 
 (define cs-trampoline
-  "    public static object trampoline() {
-        while (pc != null) {
-            pc();
-        }
-        return (final_reg);
-    }
+  "      public static object trampoline () {
+	while (get_pc() != null) {
+	  try {
+		pc ();
+	  } catch (Exception e ) {
+		value_reg = list (format(\"system exception: {0}\", e));
+		k_reg = REP_k;
+		pc = (Function) apply_cont;
+	  }
+	}
+	return (final_reg);
+  }
 ")
 
 (define lookup-signature

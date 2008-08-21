@@ -182,15 +182,19 @@ public abstract class Scheme {
   
   public static object make_frame (object variables, object values)
   {
-	object retval = map(make_binding_proc, variables, values);
-
-	retval = cons(apply( make_binding_proc, list("plus"), list(new Proc((Procedure1)plus_one, 1, 1))), retval);
-	printf("{0}\n", retval);
-	return retval;
+	return extend_frame("plus", (Procedure1)plus_one,
+		map(make_binding_proc, variables, values));
   }
   
   //  public static Proc Add_proc = new Proc((Procedure1)Add, -1, 1);
 
+  
+  public static object extend_frame(object var, object val, object env) {
+	
+	return cons(apply( make_binding_proc, 
+			list(var, list("procedure", "external", new Proc(val, 1, 1)))),
+		env);
+  }
 
   public static object plus_one(object n) {
 	return ((int) n) + 1;
@@ -1276,5 +1280,5 @@ public abstract class Scheme {
 		string_append ((object) "test",
 			(object) make_string ((object) NULL)));
   }
-  
+
 }
