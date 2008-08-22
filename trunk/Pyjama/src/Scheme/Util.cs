@@ -337,7 +337,8 @@ public abstract class Scheme {
   public static bool number_q(object datum) {
 	return ((datum is int) ||
 		(datum is double) ||
-		(datum is Rational));
+		(datum is Rational) ||
+		(datum is BigInteger));
   }
 
   public static bool boolean_q(object datum) {

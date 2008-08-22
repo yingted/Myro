@@ -2650,45 +2650,141 @@ public class BigInteger
         // index contains the MSB.
         //***********************************************************************
 
-        public byte[] getBytes()
-        {
-                int numBits = bitCount();
-
-                int numBytes = numBits >> 3;
-                if((numBits & 0x7) != 0)
-                        numBytes++;
-
-                byte[] result = new byte[numBytes];
-
-                //Console.WriteLine(result.Length);
-
-                int pos = 0;
-                uint tempVal, val = data[dataLength - 1];
-
-                if((tempVal = (val >> 24 & 0xFF)) != 0)
-                        result[pos++] = (byte)tempVal;
-                if((tempVal = (val >> 16 & 0xFF)) != 0)
-                        result[pos++] = (byte)tempVal;
-                if((tempVal = (val >> 8 & 0xFF)) != 0)
-                        result[pos++] = (byte)tempVal;
-                if((tempVal = (val & 0xFF)) != 0)
-                        result[pos++] = (byte)tempVal;
-
-                for(int i = dataLength - 2; i >= 0; i--, pos += 4)
-                {
-                        val = data[i];
-                        result[pos+3] = (byte)(val & 0xFF);
-                        val >>= 8;
-                        result[pos+2] = (byte)(val & 0xFF);
-                        val >>= 8;
-                        result[pos+1] = (byte)(val & 0xFF);
-                        val >>= 8;
-                        result[pos] = (byte)(val & 0xFF);
-                }
-
-                return result;
-        }
-
+  public byte[] getBytes()
+  {
+	int numBits = bitCount();
+	byte[] result = null;
+	
+	if(numBits == 0)
+	{
+	  result = new byte[1];
+	  result[0] = 0;
+	}
+	else
+	{
+	  int numBytes = numBits >> 3;
+	  if((numBits & 0x7) != 0)
+		numBytes++;
+	  
+	  result = new byte[numBytes];
+	  
+	  //Console.WriteLine(result.Length);
+	  
+	  int numBytesInWord = numBytes & 0x3;
+	  if(numBytesInWord == 0)
+		numBytesInWord = 4;
+	  
+	  int pos = 0;
+	  for(int i = dataLength - 1; i >= 0; i--)
+	  {
+		uint val = data[i];
+		for(int j = numBytesInWord - 1; j >= 0; j--)
+		{
+		  result[pos+j] = (byte)(val & 0xFF);
+		  val >>= 8;
+		}
+		
+		pos += numBytesInWord;
+		numBytesInWord = 4;
+	  }
+	}
+	return result;
+  }
+  
+  public byte[] getBytesOriginal()
+  {
+	int numBits = bitCount();
+	
+	int numBytes = numBits >> 3;
+	if((numBits & 0x7) != 0)
+	  numBytes++;
+	
+	byte[] result = new byte[numBytes];
+	
+	//Console.WriteLine(result.Length);
+	
+	int pos = 0;
+	uint tempVal, val = data[dataLength - 1];
+	
+	// Orig:
+	//                 if((tempVal = (val >> 24 & 0xFF)) != 0)
+	//                         result[pos++] = (byte)tempVal;
+	//                 if((tempVal = (val >> 16 & 0xFF)) != 0)
+	//                         result[pos++] = (byte)tempVal;
+	//                 if((tempVal = (val >> 8 & 0xFF)) != 0)
+	//                         result[pos++] = (byte)tempVal;
+	//                 if((tempVal = (val & 0xFF)) != 0)
+	//                         result[pos++] = (byte)tempVal;
+	
+	// Fix1:
+	// 				if( ( tempVal = ( val >> 24 & 0xFF ) ) != 0 )
+	// 				  result[ pos++ ] = ( byte )tempVal;
+	// 				if( ( tempVal = ( val >> 16 & 0xFF ) ) != 0 )
+	// 				  result[ pos++ ] = ( byte )tempVal;
+	// 				else if( pos > 0 )
+	// 				  pos++;
+	// 				if( ( tempVal = ( val >> 8 & 0xFF ) ) != 0 )
+	// 				  result[ pos++ ] = ( byte )tempVal;
+	// 				else if( pos > 0 )
+	// 				  pos++;
+	// 				if( ( tempVal = ( val & 0xFF ) ) != 0 )
+	// 				  result[ pos++ ] = ( byte )tempVal;
+	
+	// Fix2:
+	//We ignore leading zeros, but once we see the first, we keep going
+	if ((tempVal = (val >> 24 & 0xFF)) != 0 || (pos != 0)) {
+	  result[pos++] = (byte) tempVal;
+	}
+	if ((tempVal = (val >> 16 & 0xFF)) != 0 || (pos != 0) ) {
+	  result[pos++] = (byte) tempVal;
+	}
+	if ((tempVal = (val >> 8 & 0xFF)) != 0 || (pos != 0) ) {
+	  result[pos++] = (byte) tempVal;
+	}
+	if ((tempVal = (val & 0xFF)) != 0 || (pos != 0) ) {
+	  result[pos++] = (byte) tempVal;
+	}
+	
+	
+	// Fix3:
+	bool flag = false;
+	
+	// 				if ((tempVal = (val >> 24 & 0xFF)) != 0)
+	// 				{
+	// 				  result[pos++] = (byte)tempVal;
+	// 				  flag = true;
+	// 				}
+	// 				if ((tempVal = (val >> 16 & 0xFF)) != 0 || flag)
+	// 				{
+	// 				  result[pos++] = (byte)tempVal;
+	// 				  flag = true;
+	// 				}
+	// 				if ((tempVal = (val >> 8 & 0xFF)) != 0 || flag)
+	// 				{
+	// 				  result[pos++] = (byte)tempVal;
+	// 				  flag = true;
+	// 				}
+	// 				if ((tempVal = (val & 0xFF)) != 0 || flag)
+	// 				{
+	// 				  result[pos++] = (byte)tempVal;
+	// 				  flag = true;
+	// 				}
+	
+	for(int i = dataLength - 2; i >= 0; i--, pos += 4)
+	{
+	  val = data[i];
+	  result[pos+3] = (byte)(val & 0xFF);
+	  val >>= 8;
+	  result[pos+2] = (byte)(val & 0xFF);
+	  val >>= 8;
+	  result[pos+1] = (byte)(val & 0xFF);
+	  val >>= 8;
+	  result[pos] = (byte)(val & 0xFF);
+	}
+	
+	return result;
+  }
+  
 
         //***********************************************************************
         // Sets the value of the specified bit to 1
@@ -3341,4 +3437,71 @@ public class BigInteger
 
         }
 
+  //power function
+  public BigInteger Pow( int exp )
+  {
+	return power( this, exp );
+  }
+  
+  private static BigInteger power( BigInteger number, int exponent )
+  {
+	if ( exponent == 0 )
+	  throw new ArgumentException( "Dude, number " + number.ToString() + " f***ed up" );
+	if ( exponent == 1 )
+	  return number;
+	if ( exponent % 2 == 0 )
+	  return square( power( number, exponent / 2 ) );
+	else
+	  return number * square( power( number, ( exponent - 1 ) / 2 ) );
+  }
+  
+  private static BigInteger square( BigInteger num )
+  {
+	return num * num;
+  }
+  
+  //root function
+  public BigInteger root( int order )
+  {
+	
+	uint numBits = (uint)this.bitCount();
+	
+	if ( ( numBits & 0x1 ) != 0 ) // odd number of bits
+	  numBits = ( numBits >> 1 ) + 1;
+	else
+	  numBits = ( numBits >> 1 );
+	
+	uint bytePos = numBits >> 5;
+	byte bitPos = (byte)( numBits & 0x1F );
+	
+	uint mask;
+	
+	BigInteger result = new BigInteger();
+	if ( bitPos == 0 )
+	  mask = 0x80000000;
+	else
+	{
+	  mask = (uint)1 << bitPos;
+	  bytePos++;
+	}
+	result.dataLength = (int)bytePos;
+	
+	for ( int i = (int)bytePos - 1; i >= 0; i-- )
+	{
+	  while ( mask != 0 )
+	  {
+		// guess
+		result.data[i] ^= mask;
+		
+		// undo the guess if its square is larger than this
+		if ( ( result.Pow( order ) ) > this )
+		  result.data[i] ^= mask;
+		
+		mask >>= 1;
+	  }
+	  mask = 0x80000000;
+	}
+	return result;
+  }
+  
 }
