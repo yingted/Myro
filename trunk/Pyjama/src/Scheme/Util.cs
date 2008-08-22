@@ -175,6 +175,19 @@ public abstract class Scheme {
 	return retval;
   }
 
+  /*
+  public static object trampoline () {
+	return null;
+  }
+
+  public static void parse_string (object make_string) {}
+
+  public static object parse_it (object make_string) {
+	parse_string((string) make_string);
+	return trampoline();
+  }
+  */
+
   public static object make_initial_environment (object vars, object vals)
   {
 	return list(extend_frame("plus-one", new Proc((Procedure1)plus_one, 1, 1),
@@ -401,7 +414,11 @@ public abstract class Scheme {
   }
 
   public static object string_to_integer(object str) {
-	return int.Parse((string)str);
+	try {
+	  return int.Parse((string)str);
+	} catch (OverflowException e) {
+	  return new BigInteger((string)str, 10);
+	}
   }
 
   public static object string_to_decimal(object str) {
@@ -641,11 +658,25 @@ public abstract class Scheme {
   }
 
   public static object Multiply(object obj1, object obj2) {
+	// FIXME: need hierarchy of numbers, handle rational/complex/etc
 	try {
 	  return (ObjectType.MulObj(obj1, obj2));
 	} catch {
-	  throw new Exception(String.Format("multiply: '{0}' * '{1}'\n",
-			  obj1, obj2));
+	  BigInteger b1 = null;
+	  BigInteger b2 = null;
+	  if (obj1 is int)
+		b1 = new BigInteger((int) obj1);
+	  else if (obj1 is BigInteger)
+		b1 = (BigInteger)obj1;
+	  else
+		throw new Exception("can't convert int");
+	  if (obj2 is int)
+		b2 = new BigInteger((int) obj2);
+	  else if (obj2 is BigInteger)
+		b2 = (BigInteger)obj2;
+	  else
+		throw new Exception("can't convert int");
+	  return b1 * b2;
 	}
   }
 

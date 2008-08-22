@@ -143,7 +143,7 @@
 		cs-trampoline)))))
 
 (define cs-trampoline
-  "      public static object trampoline () {
+  "      new public static object trampoline () {
 	while (pc != null) {
             if (DEBUG) {
 	        pc ();
@@ -151,7 +151,7 @@
 	        try {
 		    pc ();
 	        } catch (Exception e ) {
-		    value_reg = list (format(\"system exception: {0}\", e));
+		    value_reg = list (format(\"{0}\", e));
 		    k_reg = REP_k;
 		    pc = (Function) apply_cont;
 	        }

@@ -27,7 +27,7 @@ pjscheme.exe: pjscheme-rm.ss scheme-to-csharp.ss
 	echo "(exit)" >> make-pjscheme.ss
 	petite make-pjscheme.ss
 	indent -di0 -i3 pjscheme.cs
-	$(MCS) pjscheme.cs Util.cs -main:pjscheme_rm \
+	$(MCS) pjscheme.cs Util.cs BigInteger.cs -main:pjscheme_rm \
 		-r:Microsoft.VisualBasic.dll
 	mono pjscheme.exe
 
@@ -95,18 +95,18 @@ testrm: all-rm.ss all-rm-low.ss all-rm-high.ss
 	petite testall.ss
 	$(RM) testall.ss
 
-fact.cs: fact.ss Util.cs make-fact.ss rm-transformer.ss
+fact.cs: fact.ss Util.cs BigInteger.cs make-fact.ss rm-transformer.ss
 	petite make-fact.ss
 	indent -di0 -i3 fact.cs
-	$(MCS) fact.cs Util.cs -main:fact_rm -r:Microsoft.VisualBasic.dll
+	$(MCS) fact.cs Util.cs BigInteger.cs -main:fact_rm -r:Microsoft.VisualBasic.dll
 
-reader.exe: reader-cps.ss Util.cs make-reader.ss rm-transformer.ss
+reader.exe: reader-cps.ss Util.cs BigInteger.cs make-reader.ss rm-transformer.ss
 	petite make-reader.ss
 	indent -di0 -i3 reader.cs
-	$(MCS) reader.cs Util.cs -main:reader_rm -r:Microsoft.VisualBasic.dll
+	$(MCS) reader.cs Util.cs BigInteger.cs -main:reader_rm -r:Microsoft.VisualBasic.dll
 
-util.exe: Util.cs
-	$(MCS) Util.cs -r:Microsoft.VisualBasic.dll -out:util.exe
+util.exe: Util.cs BigInteger.cs
+	$(MCS) Util.cs BigInteger.cs -r:Microsoft.VisualBasic.dll -out:util.exe
 
 dummy:
 
