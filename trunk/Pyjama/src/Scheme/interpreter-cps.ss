@@ -207,7 +207,7 @@
       (list 'nil 'exit 'apply 'sqrt 'print 'display 'newline 'load 'null? 'cons 'car 'cdr
 	    'list '+ '- '* '/ '< '> '= 'equal? 'eq? 'memq 'range 'set-car! 'set-cdr!
 	    'import 'get 'call-with-current-continuation 'call/cc
-	    'reverse 'append 'list->vector 'dir 'env 'current-time 'map)
+	    'reverse 'append 'list->vector 'dir 'env 'current-time ) ;;'map)
       (list '()
 	    (lambda-proc (args env2 handler k2)
  	      (set! macro-env (make-macro-env))
