@@ -146,17 +146,13 @@
 (define cs-trampoline
   "      new public static object trampoline () {
 	while (pc != null) {
-            if (DEBUG) {
+            try {
 	        pc ();
-            } else {
-	        try {
-		    pc ();
-	        } catch (Exception e ) {
-		    value_reg = list (format(\"{0}\", e));
-		    k_reg = REP_k;
-		    pc = (Function) apply_cont;
-	        }
-            }        
+	    } catch (Exception e ) {
+		value_reg = list (format(\"{0}\", e));
+		k_reg = REP_k;
+		pc = (Function) apply_cont;
+	    }
 	}
 	return (final_reg);
   }

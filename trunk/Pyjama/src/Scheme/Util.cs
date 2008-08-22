@@ -5,9 +5,16 @@ using System.IO; // File
 using System.Collections.Generic; // List
 using Microsoft.VisualBasic.CompilerServices;
 
+public class Config {
+  public bool DEBUG = false;
+
+  public Config() {
+  }
+}
+
 public abstract class Scheme {
 
-  public static bool DEBUG = false;
+  public static Config config = new Config();
 
   public delegate void Function();
   public delegate bool Predicate(object obj);
@@ -131,7 +138,7 @@ public abstract class Scheme {
   public static void safe_print(object item) {}
 
   public static void trace(object fmt, params object[] objs) {
-	if (DEBUG) {
+	if (config.DEBUG) {
 	  printf(fmt, objs);
 	}
   }
@@ -178,9 +185,10 @@ public abstract class Scheme {
   public static object make_initial_environment (object vars, object vals)
   {
 	return list(
-		extend_frame("plus-one", new Proc((Procedure1)plus_one, 1, 1),
-			extend_frame("typeof", new Proc((Procedure1)get_type, 1, 1),
-				make_frame(vars, vals))));
+		extend_frame("debug", new Proc((Procedure1)debug, -1, 1),
+			extend_frame("plus-one", new Proc((Procedure1)plus_one, 1, 1),
+				extend_frame("typeof", new Proc((Procedure1)get_type, 1, 1),
+					make_frame(vars, vals)))));
   }
   
   public static object make_frame (object variables, object values)
@@ -193,6 +201,14 @@ public abstract class Scheme {
 	return cons(apply( make_binding_proc, 
 			list(var, list("procedure", "<extension>", val))),
 		env);
+  }
+
+  public static object debug(object args) {
+	if (((int) length(args)) == 0)
+	  return config.DEBUG;
+	else 
+	  config.DEBUG = true_q(car(args));
+	return config.DEBUG;
   }
 
   public static object plus_one(object n) {
@@ -243,8 +259,8 @@ public abstract class Scheme {
 	return Console.ReadLine();
   }
 
-  public static object file_exists_q(object filename) {
-	throw new Exception("not implemented: file_exists_q");
+  public static object file_exists_q(object path_filename) {
+	return File.Exists(path_filename.ToString());
   }
 
   public static object substring(object str, object start, object stop) {
@@ -410,7 +426,7 @@ public abstract class Scheme {
   public static object string_to_integer(object str) {
 	try {
 	  return int.Parse((string)str);
-	} catch (OverflowException e) {
+	} catch (OverflowException) {
 	  return new BigInteger((string)str, 10);
 	}
   }
