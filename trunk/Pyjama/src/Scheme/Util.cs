@@ -175,23 +175,12 @@ public abstract class Scheme {
 	return retval;
   }
 
-  /*
-  public static object trampoline () {
-	return null;
-  }
-
-  public static void parse_string (object make_string) {}
-
-  public static object parse_it (object make_string) {
-	parse_string((string) make_string);
-	return trampoline();
-  }
-  */
-
   public static object make_initial_environment (object vars, object vals)
   {
-	return list(extend_frame("plus-one", new Proc((Procedure1)plus_one, 1, 1),
-			make_frame(vars, vals)));
+	return list(
+		extend_frame("plus-one", new Proc((Procedure1)plus_one, 1, 1),
+			extend_frame("typeof", new Proc((Procedure1)get_type, 1, 1),
+				make_frame(vars, vals))));
   }
   
   public static object make_frame (object variables, object values)
@@ -208,6 +197,10 @@ public abstract class Scheme {
 
   public static object plus_one(object n) {
 	return ((int) n) + 1;
+  }
+
+  public static object get_type(object obj) {
+	return obj.GetType();
   }
 
   public static object make_macro_env () {
@@ -1008,6 +1001,8 @@ public abstract class Scheme {
 	}
 	
 	public Rational(int numerator, int denominator) {
+	  if (denominator == 0)
+		throw new Exception("cannot represent rationals with a zero denominator");
 	  int gcd = GCD(numerator, denominator);
 	  this.numerator = numerator/gcd;
 	  this.denominator = denominator/gcd;
