@@ -32,11 +32,24 @@
     (fib "void" ("int"))
     (fact "void" ("int"))
     (fact-wrap "int" ("int"))
-    (factorial "int" ("int"))
+    (factorial "object" ("object")) ;; allows bigint
     (Main "void" ("string []"))
     ))
 
 (define *ignore-functions* '())
+
+;; temporary, because trampoline needs this to handle
+;; system exceptions:
+
+(define REP-k
+  (lambda-cont (v)
+    (safe-print v)))
+
+;; temporary, this belongs someplace global (util.ss?):
+
+(define* apply-extension
+  (lambda (type name args k)
+    (k (apply* (caddr name) (car args)))))
 
 ;; For testing with C# conversion:
 
@@ -53,7 +66,7 @@
 
 (define Main
   (lambda (args)
-    (display (factorial 10))
+    (display (factorial 50))
     (newline)
     (display (fact-wrap 5))
     (newline)

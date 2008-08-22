@@ -33,6 +33,7 @@
   ;; ((function-name return-type (param-types...))...)
   '(
     (apply-extension "void" ())
+    (apply-cont "void" ())
     (error "void" ("string" "string" "object[]"))
     (scan-string "void" ("object"))
     (scan-file "void" ("object"))
