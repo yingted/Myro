@@ -32,6 +32,7 @@
   ;; use csharp function names in this format:
   ;; ((function-name return-type (param-types...))...)
   '(
+    (apply-extension "void" ())
     (error "void" ("string" "string" "object[]"))
     (scan-string "void" ("object"))
     (scan-file "void" ("object"))
@@ -82,6 +83,7 @@
   (lambda (name)
     (cond
      ((string? name) name)
+     ((eq? name 'apply*) 'apply)
      ((eq? name 'class) 'class_name)
      ((eq? name 'set!) 'Assign)
      ((eq? name 'eq?) 'Compare)
@@ -142,14 +144,18 @@
 
 (define cs-trampoline
   "      public static object trampoline () {
-	while (get_pc() != null) {
-	  try {
-		pc ();
-	  } catch (Exception e ) {
-		value_reg = list (format(\"system exception: {0}\", e));
-		k_reg = REP_k;
-		pc = (Function) apply_cont;
-	  }
+	while (pc != null) {
+            if (DEBUG) {
+	        pc ();
+            } else {
+	        try {
+		    pc ();
+	        } catch (Exception e ) {
+		    value_reg = list (format(\"system exception: {0}\", e));
+		    k_reg = REP_k;
+		    pc = (Function) apply_cont;
+	        }
+            }        
 	}
 	return (final_reg);
   }
@@ -217,22 +223,16 @@
 	    (format "return((~a) ~a) " 
 		    return-cast 
 		    sargs)))
-       ((or (eq? name 'apply) (eq? name 'map)) ;; get return values
+       ((or (eq? name 'apply) (eq? name 'map) (eq? name 'for-each) (eq? name 'apply*))
 	(let ((sargs (glue (join-list (map (lambda (type arg)
 					     (if (equal? return-cast "") 
 						 (format "(~a)~a" type (convert-exp arg proc-name))
 						 (format "~a" (convert-exp arg proc-name))))
 					   (cdr types) (cdr args-list))
 				      ", "))))
-	  (format "~a(~a_proc, ~a) " (proper-name name) (proper-name (car args)) sargs)))
-       ((eq? name 'for-each)
-	(let ((sargs (glue (join-list (map (lambda (type arg)
-					     (if (equal? return-cast "") 
-						 (format "(~a)~a" type (convert-exp arg proc-name))
-						 (format "~a" (convert-exp arg proc-name))))
-					   (cdr types) (cdr args-list))
-				      ", "))))
-	  (format "for_each(~a_proc, ~a) " (proper-name (car args)) sargs)))
+	  (if (eq? name 'apply*)
+	      (format "~a(~a, ~a) " (proper-name name) (convert-exp (car args) proc-name) sargs)
+	      (format "~a(~a_proc, ~a) " (proper-name name) (proper-name (car args)) sargs))))
        (else
 	(format "~a(~a) " (proper-name name) sargs))))))
 

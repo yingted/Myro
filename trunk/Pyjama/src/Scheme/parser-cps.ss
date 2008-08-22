@@ -81,10 +81,9 @@
 
 (define syntactic-sugar?
   (lambda (datum)
-    (and (list? datum)
-	 (not (null? datum))
+    (and (pair? datum)
 	 (symbol? (car datum))
-	 (search-env macro-env (car datum)))))
+	 (true? (search-env macro-env (car datum))))))
 
 (define* expand-once
   (lambda (datum handler k)
@@ -469,6 +468,13 @@
 	     (not (quasiquote? (car datum)))
 	     (not (unquote-splicing? (car datum)))
 	     (quasiquote-list? (cdr datum))))))
+
+(define rac
+  (lambda (lyst)
+    (cond
+     ((null? lyst) '()) ;; error
+     ((null? (cdr lyst)) (car lyst))
+     (else (rac (cdr lyst))))))
 
 (define head
   (lambda (formals)

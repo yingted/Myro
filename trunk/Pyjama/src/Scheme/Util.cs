@@ -36,7 +36,7 @@ public abstract class Scheme {
 	  this.returntype = returntype;
 	}
 	public object Call(object actual) {
-	  trace("calling Call1: {0}\n", actual);
+	  trace("calling Call1: {0} {1} {2} {3}\n", actual, proc, args, returntype);
 	  object retval = null;
 	  if (returntype == 0) { // void return
 		if (args == -1) 
@@ -177,22 +177,19 @@ public abstract class Scheme {
 
   public static object make_initial_environment (object vars, object vals)
   {
-	return list(make_frame(vars, vals));
+	return list(extend_frame("plus-one", new Proc((Procedure1)plus_one, 1, 1),
+			make_frame(vars, vals)));
   }
   
   public static object make_frame (object variables, object values)
   {
-	return extend_frame("plus", (Procedure1)plus_one,
-		map(make_binding_proc, variables, values));
+	return map(make_binding_proc, variables, values);
   }
-  
-  //  public static Proc Add_proc = new Proc((Procedure1)Add, -1, 1);
-
   
   public static object extend_frame(object var, object val, object env) {
 	
 	return cons(apply( make_binding_proc, 
-			list(var, list("procedure", "external", new Proc(val, 1, 1)))),
+			list(var, list("procedure", "<extension>", val))),
 		env);
   }
 
@@ -202,26 +199,26 @@ public abstract class Scheme {
 
   public static object make_macro_env () {
 	return ((object)
-		make_initial_environment ((object)
-			list (
-				"and", 
-				"or",
-				"cond", 
-				"let",
-				"letrec",
-				"let*",
-				"case",
-				"record-case"
-				  ),
-			list (
-				"and_transformer",
-				"or_transformer",
-				"cond_transformer",
-				"let_transformer",
-				"letrec_transformer",
-				"let_star_transformer",
-				"case_transformer",
-				"record_case_transformer")));
+		list(make_frame(
+				list (
+					"and", 
+					"or",
+					"cond", 
+					"let",
+					"letrec",
+					"let*",
+					"case",
+					"record-case"
+					  ),
+				list (
+					"and_transformer",
+					"or_transformer",
+					"cond_transformer",
+					"let_transformer",
+					"letrec_transformer",
+					"let_star_transformer",
+					"case_transformer",
+					"record_case_transformer"))));
   }
 
   public static object range(object args) {
@@ -725,7 +722,7 @@ public abstract class Scheme {
   }
 
   public static bool list_q(object o1) {
-	return (pair_q(o1) || null_q(o1));
+	return (null_q(o1) || pair_q(o1));
   }
 
   public static object list_to_string(object lyst) {

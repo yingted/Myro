@@ -118,6 +118,8 @@
 			  (lambda ,(cons obj-name arg-names)
 			    (record-case (cdr ,obj-name)
 			      ,@(reverse clauses)
+			      (<extension> () (apply-extension (quote ,apply-name) 
+						  ,obj-name (list ,@arg-names) ,(rac arg-names)))
 			      (else (error (quote ,apply-name) ,error-string ,obj-name))))))
 		     (make-function-code
 		       `(define ,make-name
