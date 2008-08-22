@@ -1,6 +1,11 @@
 ;; temporary - to access various utilities (define*? etc.)
 (load "rm-transformer.ss")
 
+(define *code* 
+"  public static Proc get_variables_from_frame_proc = new Proc((Procedure1) get_variables_from_frame, -1, 1);
+   public static Proc binding_variable_proc = new Proc((Procedure1) binding_variable, -1, 1);
+")
+
 (define *ignore-functions* '(
 			     read-content 
 			     string->integer 
@@ -138,10 +143,11 @@
     (let ((defs (filter (lambda (x) (or (define? x) (define*? x))) forms)))
       (let ((name (proper-name (string->symbol (car (split filename #\.)))))
 	    (header "using System;\nusing Microsoft.VisualBasic.CompilerServices;\n\n"))
-	(format "~a public class ~a: Scheme {\n~a\n~a}\n"
+	(format "~a public class ~a: Scheme {\n~a\n~a ~a}\n"
 		header name 
 		(apply string-append (map convert-define defs))
-		cs-trampoline)))))
+		cs-trampoline
+		*code*)))))
 
 (define cs-trampoline
   "      new public static object trampoline () {
@@ -156,6 +162,7 @@
 	}
 	return (final_reg);
   }
+
 ")
 
 (define lookup-signature

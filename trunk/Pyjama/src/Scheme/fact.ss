@@ -51,6 +51,10 @@
   (lambda (type name args k)
     (k (apply* (caddr name) (car args)))))
 
+;; temporary, method to add code to c#
+
+(define *code* "")
+
 ;; For testing with C# conversion:
 
 (define fact-wrap

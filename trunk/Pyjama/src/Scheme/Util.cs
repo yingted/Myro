@@ -102,12 +102,12 @@ public abstract class Scheme {
   public static Proc LessThan_proc = new Proc((Procedure1Bool) LessThan, -1, 2);
   public static Proc Multiply_proc = new Proc((Procedure1) Multiply, -1, 1);
   public static Proc Subtract_proc = new Proc((Procedure1) Subtract, -1, 1);
-  public static Proc binding_variable_proc = new Proc((Procedure1) binding_variable, 1, 1);
   public static Proc cadr_proc = new Proc((Procedure1) cadr, 1, 1);
   public static Proc car_proc = new Proc((Procedure1) car, 1, 1);
   public static Proc cdr_proc = new Proc((Procedure1) cdr, 1, 1);
   public static Proc cons_proc = new Proc((Procedure2) cons, 2, 1);
-  public static Proc get_variables_from_frame_proc = new Proc((Procedure1) get_variables_from_frame, 1, 1);
+  //public static Proc get_variables_from_frame_proc = new Proc((Procedure1) get_variables_from_frame, 1, 1);
+  //public static Proc binding_variable_proc = new Proc((Procedure1) binding_variable, 1, 1);
   public static Proc list_to_vector_proc = new Proc((Procedure1) list_to_vector, 1, 1);
   public static Proc memq_proc = new Proc((Procedure1Bool) memq, 2, 2);
   public static Proc range_proc = new Proc((Procedure1) range, -1, 1);
@@ -133,9 +133,12 @@ public abstract class Scheme {
   public static char SLASH = '/';
   public static char[] SPLITSLASH = {SLASH};
 
-  public static object get_variables_from_frame(object frame) {return null;}
-  public static object binding_variable(object binding) {return null;}
-  public static void safe_print(object item) {}
+  //public static object get_variables_from_frame(object frame) {return null;}
+  //public static object binding_variable(object binding) {return null;}
+
+  public static void safe_print(object item) {
+	pretty_print(item);
+  }
 
   public static void trace(object fmt, params object[] objs) {
 	if (config.DEBUG) {
@@ -336,7 +339,7 @@ public abstract class Scheme {
   }
 
   public static object string_ref(object s, object i) {
-	trace("called: string_ref(\"{0}\", {1})\n", s, i);
+	trace("called: string_ref(s, {0})\n", i);
 	return ((string)s)[(int)i];
   }
 
@@ -527,7 +530,7 @@ public abstract class Scheme {
   }
 
   public static bool Compare(object obj1, object obj2) {
-	trace("calling compare({0}, {1})\n", obj1, obj2);
+	//trace("calling compare({0}, {1})\n", obj1, obj2);
 	if (obj1 is Symbol) {
 	  if (obj2 is Symbol) {
 		return (obj1.ToString() == obj2.ToString());
@@ -539,10 +542,10 @@ public abstract class Scheme {
 	  } else {
 		try {
 		  bool retval = (ObjectType.ObjTst(obj1, obj2, false) == 0);
-		  trace("  compare returning: {0}\n", retval);
+		  //trace("  compare returning: {0}\n", retval);
 		  return retval;
 		} catch {
-		  trace("  false2\n");
+		  //trace("  false2\n");
 		  return false;
 		}
 	  }
@@ -1191,6 +1194,8 @@ public abstract class Scheme {
 	string retval = "";
 	if (obj == null) {
 	  return "#void";
+	} else if (obj is bool) {
+	  return ((bool)obj) ? "#t" : "#f";
 	} else if (obj is String) {
 	  return String.Format("\"{0}\"", obj);
 	} else if (obj is Symbol && ((Symbol)obj) == EmptyList) {
