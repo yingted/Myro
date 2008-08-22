@@ -39,3 +39,6 @@
     [(_ value) value]
     [(_ type value) value]))
 
+(define-syntax apply*
+  (syntax-rules ()
+    [(_ proc args ...) (apply proc args ...)]))

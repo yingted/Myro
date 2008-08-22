@@ -207,7 +207,7 @@
       (list 'nil 'exit 'apply 'sqrt 'print 'display 'newline 'load 'null? 'cons 'car 'cdr
 	    'list '+ '- '* '/ '< '> '= 'equal? 'eq? 'memq 'range 'set-car! 'set-cdr!
 	    'import 'get 'call-with-current-continuation 'call/cc
-	    'reverse 'append 'list->vector 'dir 'env 'current-time)
+	    'reverse 'append 'list->vector 'dir 'env 'current-time 'map)
       (list '()
 	    (lambda-proc (args env2 handler k2)
  	      (set! macro-env (make-macro-env))
@@ -252,6 +252,10 @@
 	    (lambda-proc (args env2 handler k2) (k2 (get-variables env2)))
 	    (lambda-proc (args env2 handler k2) (k2 env2))
 	    (lambda-proc (args env2 handler k2) (k2 (get-current-time)))
+	    (lambda-proc (args env2 handler k2) 
+	      (let ((proc (car args))
+		    (proc-args (cadr args)))
+		(apply-map proc proc-args env2 handler k2)))
 	    ))))
 
 (define get-current-time
@@ -260,6 +264,14 @@
       (+ (time-second now)
 	 (inexact (/ (time-nanosecond now)
 		     1000000000))))))
+
+(define* apply-map
+  (lambda (proc args env handler k)
+    (if (null? args)
+	(k '())
+	(apply-map proc (cdr args) env handler 
+	    (lambda-cont (v)
+	       (k (cons (proc (car args)) v)))))))
 
 (define* get-primitive
   (lambda (args env handler k)
