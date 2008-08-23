@@ -53,7 +53,9 @@
     (make-toplevel-env "object" ())
     (make-macro-env "object" ())
     (make-empty-environment "object" ())
-    (safe-print "void" ())
+    (sys-display "void" ())
+    (sys-pretty-print "void" ())
+    (sys-newline "void" ())
     (parse-string "void" ())
     (get-parsed-sexps "void" ())
     (set-car! "void" ())
@@ -83,12 +85,13 @@
 
 (define *system-ignore-functions*
   ;; use scheme name of functions to not move to csharp
-  '(*function-signatures* *ignore-functions* run trampoline))
+  '(*function-signatures* *ignore-functions* run trampoline *need-newline*))
 
 (define proper-name
   (lambda (name)
     (cond
      ((string? name) name)
+     ((eq? name '*need-newline*) "config.NEED_NEWLINE")
      ((eq? name 'apply*) 'apply)
      ((eq? name 'class) 'class_name)
      ((eq? name 'set!) 'Assign)

@@ -15,7 +15,7 @@
 	  (lambda-cont (exp)
 	    (m exp toplevel-env REP-handler
 	      (lambda-cont (v)
-		(safe-print v)
+		(sys-pretty-print v)
 		(read-datum "(test-all)" REP-handler
 		  (lambda-cont2 (datum tokens-left)
 		    (parse datum REP-handler
@@ -32,10 +32,31 @@
   (lambda ()
     (read-eval-print)))
 
+(define *need-newline* #f)
+
 (define REP-k
   (lambda-cont (v)
-    (safe-print v)
+    (if (not (eq? v '<void>))
+	(sys-pretty-print v))
+    (if *need-newline* (newline))
     (read-eval-print)))
+
+(define sys-pretty-print
+  (lambda (arg)
+    (set! *need-newline* #f)
+    (pretty-print arg)))
+
+(define sys-newline
+  (lambda ()
+    (set! *need-newline* #f)
+    (newline)))
+
+(define sys-display
+  (lambda (arg)
+    (let* ((s (format "~s" arg))
+	   (len (string-length s)))
+      (set! *need-newline* (true? (not (equal? (substring s (- len 1) len) "\n"))))
+      (display s))))
 
 (define REP-handler
   (lambda-handler (e)
@@ -65,13 +86,6 @@
 	 (not (null? x))
 	 (eq? (car x) 'procedure))))
 
-;; we'll need to fully implement safe-print
-(define safe-print
-  (lambda (x)
-    (if (data-structure-procedure? x)
-      (printf "#[procedure]~%")
-      (pretty-print x))))
-
 (define* m
   (lambda (exp env handler k)
     (cases expression exp
@@ -89,19 +103,19 @@
 	    (lookup-binding var env handler
 	      (lambda-cont (binding)
 		(set-binding-value! binding rhs-value)
-		(k 'ok))))))
+		(k '<void>))))))
       (define-exp (var rhs-exp)
 	(m rhs-exp env handler
 	  (lambda-cont (rhs-value)
 	    (lookup-binding-in-first-frame var env handler
 	      (lambda-cont (binding)
 		(set-binding-value! binding rhs-value)
-		(k 'ok))))))
+		(k '<void>))))))
       (define-syntax-exp (keyword clauses)
 	(lookup-binding-in-first-frame keyword macro-env handler
 	  (lambda-cont (binding)
 	    (set-binding-value! binding clauses)
-	    (k 'ok))))
+	    (k '<void>))))
       (begin-exp (exps) (eval-sequence exps env handler k))
       (lambda-exp (formals body)
 	(k (closure formals body env)))
@@ -222,9 +236,9 @@
 		    (proc-args (cadr args)))
 		(proc proc-args env2 handler k2)))
 	    (lambda-proc (args env2 handler k2) (k2 (apply sqrt args)))
-	    (lambda-proc (args env2 handler k2) (for-each safe-print args) (k2 'ok))
-	    (lambda-proc (args env2 handler k2) (apply display args) (k2 'ok))
-	    (lambda-proc (args env2 handler k2) (newline) (k2 'ok))
+	    (lambda-proc (args env2 handler k2) (for-each sys-pretty-print args) (k2 '<void>))
+	    (lambda-proc (args env2 handler k2) (apply sys-display args) (k2 '<void>))
+	    (lambda-proc (args env2 handler k2) (sys-newline) (k2 '<void>))
 	    (lambda-proc (args env2 handler k2) (load-file (car args) toplevel-env handler k2))
 	    (lambda-proc (args env2 handler k2) (k2 (apply null? args)))
 	    (lambda-proc (args env2 handler k2) (k2 (apply cons args)))
@@ -311,7 +325,7 @@
 
 (define get-variables
   (lambda (env)
-    (map get-variables-from-frame env)))
+    (get-variables-from-frame (car env))))
 
 (define get-variables-from-frame
   (lambda (frame) 
@@ -324,7 +338,7 @@
     (cond
       ((member filename load-stack)
        (printf "skipping recursive load of ~a~%" filename)
-       (k 'ok))
+       (k '<void>))
       ((not (string? filename))
        (handler (format "filename is not a string: ~a" filename)))
       ((not (file-exists? filename))
@@ -341,7 +355,7 @@
 (define* load-loop
   (lambda (tokens env handler k)
     (if (token-type? (first tokens) 'end-marker)
-      (k 'ok)
+      (k '<void>)
       (read-sexp tokens handler
 	(lambda-cont2 (datum tokens-left)
 	  (parse datum handler
