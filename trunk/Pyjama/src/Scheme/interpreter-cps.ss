@@ -220,12 +220,11 @@
 (define make-toplevel-env
   (lambda ()
     (make-initial-environment
-      (list 'nil 'exit 'apply 'sqrt 'print 'display 'newline 'load 'null? 'cons 'car 'cdr
+      (list 'exit 'apply 'sqrt 'print 'display 'newline 'load 'null? 'cons 'car 'cdr
 	    'list '+ '- '* '/ '< '> '= 'equal? 'eq? 'memq 'range 'set-car! 'set-cdr!
 	    'import 'get 'call-with-current-continuation 'call/cc
-	    'reverse 'append 'list->vector 'dir 'env 'current-time ) ;;'map)
-      (list '()
-	    (lambda-proc (args env2 handler k2)
+	    'reverse 'append 'list->vector 'dir 'current-time ) ;;'map)
+      (list (lambda-proc (args env2 handler k2)
  	      (set! macro-env (make-macro-env))
  	      (set! toplevel-env (make-toplevel-env))
  	      ;; temporary
@@ -266,7 +265,6 @@
 	    (lambda-proc (args env2 handler k2) (k2 (apply append args)))
 	    (lambda-proc (args env2 handler k2) (k2 (apply list->vector args)))
 	    (lambda-proc (args env2 handler k2) (k2 (get-variables env2)))
-	    (lambda-proc (args env2 handler k2) (k2 env2))
 	    (lambda-proc (args env2 handler k2) (k2 (get-current-time)))
 ;; attempting to add map:
 ;; 	    (lambda-proc (args env2 handler k2) 
@@ -325,11 +323,11 @@
 
 (define get-variables
   (lambda (env)
-    (get-variables-from-frame (car env))))
+    (map get-variables-from-frame env)))
 
 (define get-variables-from-frame
   (lambda (frame) 
-    (map binding-variable frame)))
+    (sort (map binding-variable frame))))
 
 (define load-stack '())
 

@@ -7,7 +7,7 @@ using System.Collections.Generic; // List
 using Microsoft.VisualBasic.CompilerServices;
 
 public class Config {
-  public bool DEBUG = false;
+  public int DEBUG = 0;
   public bool NEED_NEWLINE = false;
 
   public Config() {
@@ -84,7 +84,7 @@ public abstract class Scheme {
 	  this.returntype = returntype;
 	}
 	public object Call(object actual) {
-	  trace("calling Call1: {0} {1} {2} {3}\n", actual, proc, args, returntype);
+	  trace(1, "calling Call1: {0} {1} {2} {3}\n", actual, proc, args, returntype);
 	  object retval = null;
 	  if (returntype == 0) { // void return
 		if (args == -1) 
@@ -118,7 +118,7 @@ public abstract class Scheme {
 	}
 
 	public object Call(object args1, object args2) {
-	  trace("calling Call2: {0} {1}\n", args1, args2);
+	  trace(1, "calling Call2: {0} {1}\n", args1, args2);
 	  object retval = null;
 	  if (returntype == 0) { // return void
 		((Procedure2Void)proc)(args1, args2);
@@ -137,7 +137,7 @@ public abstract class Scheme {
   // -1, 1, 2 - number of pieces to call app with (-1 is all)
   // 0, 1, 2 - return type 0 = void, 1 = object, 2 = bool
   public static Proc Add_proc = new Proc((Procedure1)Add, -1, 1);
-  public static Proc Compare_proc = new Proc((Procedure1Bool) Compare, -1, 2);
+  public static Proc Same_proc = new Proc((Procedure1Bool) Same, -1, 2);
   public static Proc Divide_proc = new Proc((Procedure1) Divide, -1, 1);
   public static Proc GreaterThan_proc = new Proc((Procedure1Bool) GreaterThan, -1, 2);
   public static Proc LessThan_proc = new Proc((Procedure1Bool) LessThan, -1, 2);
@@ -151,6 +151,7 @@ public abstract class Scheme {
   public static Proc memq_proc = new Proc((Procedure1Bool) memq, 2, 2);
   public static Proc range_proc = new Proc((Procedure1) range, -1, 1);
   public static Proc reverse_proc = new Proc((Procedure1) reverse, 1, 1);
+  public static Proc sort_proc = new Proc((Procedure1) sort, 1, 1);
   public static Proc set_car_b_proc = new Proc((Procedure2Void) set_car_b, 2, 0);
   public static Proc set_cdr_b_proc = new Proc((Procedure2Void) set_cdr_b, 2, 0);
   public static Proc sqrt_proc = new Proc((Procedure1) sqrt, -1, 1);
@@ -172,8 +173,8 @@ public abstract class Scheme {
   public static char SLASH = '/';
   public static char[] SPLITSLASH = {SLASH};
 
-  public static void trace(object fmt, params object[] objs) {
-	if (config.DEBUG) {
+  public static void trace(int level, object fmt, params object[] objs) {
+	if (level <= config.DEBUG) {
 	  printf(fmt, objs);
 	}
   }
@@ -202,30 +203,37 @@ public abstract class Scheme {
   }
 
   public static object group(object chars, object delimiter) {
+	trace(2, "calling group({0}, {1})", chars, delimiter);
 	// given list of chars and a delim char, return a list of strings
 	object retval = EmptyList;
 	object buffer = EmptyList;
 	object current1 = chars;
-	while (!Compare(current1, EmptyList)) {
-	  if (Compare(car(current1), delimiter)) {
+	while (!Same(current1, EmptyList)) {
+	  if (Same(car(current1), delimiter)) {
 		retval = cons(list_to_string(buffer), retval);
 	  } else {
 		buffer = cons(car(current1), buffer);
 	  }
 	  current1 = cdr(current1);
 	}
-	if (!Compare(buffer, EmptyList))
-	  retval = cons(buffer, retval);
-	return retval;
+	if (!Same(buffer, EmptyList))
+	  retval = cons(list_to_string(buffer), retval);
+	return reverse(retval);
   }
 
   public static object make_initial_environment (object vars, object vals)
   {
 	return list(
 		extend_frame("debug", new Proc((Procedure1)debug, -1, 1),
-			extend_frame("plus-one", new Proc((Procedure1)plus_one, 1, 1),
-				extend_frame("typeof", new Proc((Procedure1)get_type, 1, 1),
-					make_frame(vars, vals)))));
+		extend_frame("typeof", new Proc((Procedure1)get_type, 1, 1),
+		extend_frame("float", new Proc((Procedure1)ToDouble, 1, 1),
+		extend_frame("int", new Proc((Procedure1)ToInt, 1, 1),
+		extend_frame("sort", new Proc((Procedure1)sort, 1, 1),
+		extend_frame("string->symbol", new Proc((Procedure1) string_to_symbol, 1, 1),
+		extend_frame("group", new Proc((Procedure2) group, 2, 1),
+		extend_frame("member", new Proc((Procedure2)member, 2, 1),
+		extend_frame("map", new Proc((Procedure2)map, 2, 1),
+			make_frame(vars, vals)))))))))));
   }
   
   public static object make_frame (object variables, object values)
@@ -244,18 +252,36 @@ public abstract class Scheme {
 	if (((int) length(args)) == 0)
 	  return config.DEBUG;
 	else 
-	  config.DEBUG = true_q(car(args));
+	  config.DEBUG = (int)car(args);
 	return config.DEBUG;
-  }
-
-  public static object plus_one(object n) {
-	return ((int) n) + 1;
   }
 
   public static object get_type(object obj) {
 	return obj.GetType();
   }
 
+  public static object ToDouble(object obj) {
+	try {
+	  return Convert.ToDouble(obj);
+	} catch {
+	  if (obj is Rational) {
+		return (double)((Rational)obj);
+	  } else
+		throw new Exception(string.Format("can't convert object of type '{0}' to float", obj.GetType()));
+	}
+  }
+
+  public static object ToInt(object obj) {
+	try {
+	  return Convert.ToInt32(obj);
+	} catch {
+	  if (obj is Rational) {
+		return (int)((Rational)obj);
+	  } else	  
+		throw new Exception(string.Format("can't convert object of type '{0}' to int", obj.GetType()));
+	}
+  }
+  
   public static object make_macro_env () {
 	return ((object)
 		list(make_frame(
@@ -312,7 +338,7 @@ public abstract class Scheme {
 	object current1 = items;
 	// FIXME: compare on empty list assumes proper list
 	// fix to work with improper lists
-	while (!Compare(current1, EmptyList)) {
+	while (!Same(current1, EmptyList)) {
 	  apply(proc, car(current1));
 	  current1 = cdr(current1);
 	}
@@ -327,10 +353,10 @@ public abstract class Scheme {
   }
 
   public static object map(object proc, object args) {
-	trace("called: map1\n");
+	trace(1, "called: map1\n");
 	object retval = EmptyList;
 	object current1 = args;
-	while (!Compare(current1, EmptyList)) {
+	while (!Same(current1, EmptyList)) {
 	  retval = cons( apply(proc, car(current1)), retval);
 	  current1 = cdr(current1);
 	}
@@ -338,11 +364,11 @@ public abstract class Scheme {
   }
 
   public static object map(object proc, object args1, object args2) {
-	trace("called: map2\n");
+	trace(1, "called: map2\n");
 	object retval = EmptyList;
 	object current1 = args1;
 	object current2 = args2;
-	while (!Compare(current1, EmptyList)) {
+	while (!Same(current1, EmptyList)) {
 	  retval = cons( apply(proc, car(current1), car(current2)), retval);
 	  current1 = cdr(current1);
 	  current2 = cdr(current2);
@@ -355,10 +381,10 @@ public abstract class Scheme {
   }
 
   public static Func<object,bool> tagged_list(object test_string, object pred, object value) {
-	trace("called: tagged_list\n");
+	trace(2, "called: tagged_list\n");
 	return (object lyst) => {
 	  if (list_q(lyst))
-		return (((bool)Compare(car(lyst), test_string)) && ((bool)((Predicate2)pred)(length(lyst), value)));
+		return (((bool)Same(car(lyst), test_string)) && ((bool)((Predicate2)pred)(length(lyst), value)));
 	  else
 		return false;
 	};
@@ -367,29 +393,29 @@ public abstract class Scheme {
   public static Func<object,bool> procedure_q = tagged_list("procedure", (Predicate2)GreaterOrEqual, 1);
 
   public static object list_to_vector(object lyst) {
-	trace("called: list_to_vector\n");
+	trace(2, "called: list_to_vector\n");
 	int len = (int) length(lyst);
 	object current = lyst;
 	object[] retval = new object[len];
 	for (int i = 0; i < len; i++) {
-	  retval[i] = current;
+	  retval[i] = car(current);
 	  current = cdr(current);
 	}
 	return retval;
   }
 
   public static object string_ref(object s, object i) {
-	trace("called: string_ref(s, {0})\n", i);
-	return ((string)s)[(int)i];
+	trace(2, "called: string_ref(s, {0})\n", i);
+	return s.ToString()[(int)i];
   }
 
   public static object make_string(object obj) {
-	trace("called: make_string\n");
+	trace(2, "called: make_string\n");
 	if (obj == null || obj == (object) NULL) {
-	  trace("make_string returned: \"\\0\"\n");
+	  trace(2, "make_string returned: \"\\0\"\n");
 	  return (object) "\0";
 	}
-	trace("make_string returned: \"{0}\"\n", obj.ToString());
+	trace(2, "make_string returned: \"{0}\"\n", obj.ToString());
 	return obj.ToString();
   }
 
@@ -447,11 +473,12 @@ public abstract class Scheme {
   }
 
   public static bool string_is__q(object o1, object o2) {
+	trace(4, "calling string=?({0}, {1})", o1, o2);
 	return ((o1 is string) && (o2 is string) && ((string)o1) == ((string)o2));
   }
   
   public static object string_to_list(object str) {
-	trace("called: string_to_list\n");
+	trace(2, "called: string_to_list\n");
 	object retval = EmptyList;
 	if (str != null) {
 	  string sstr = str.ToString();
@@ -463,29 +490,29 @@ public abstract class Scheme {
   }
 
   public static object string_to_symbol(object s) {
-	return new Symbol((string)s);
+	return new Symbol(s.ToString());
   }
 
   public static object string_to_integer(object str) {
 	try {
-	  return int.Parse((string)str);
+	  return int.Parse(str.ToString());
 	} catch (OverflowException) {
-	  return BigIntegerParse((string)str);
+	  return BigIntegerParse(str.ToString());
 	}
   }
 
   public static object string_to_decimal(object str) {
-	return double.Parse((string)str);
+	return double.Parse(str.ToString());
   }
 
   public static object string_to_rational(object str) {
-	string[] part = ((string)str).Split(SPLITSLASH);
+	string[] part = (str.ToString()).Split(SPLITSLASH);
 	return new Rational(int.Parse(part[0]), int.Parse(part[1]));
   }
 
   public static void error(object code, object msg, params object[] rest) {
 	config.NEED_NEWLINE = false;
-	Console.WriteLine("Error in {0}: {1}", ((string)code), format(msg, rest));
+	Console.WriteLine("Error in {0}: {1}", (code.ToString()), format(msg, rest));
   }
 
   public static void newline() {
@@ -512,11 +539,13 @@ public abstract class Scheme {
   }
 
   public static string repr(object obj) {
-	string retval = "";
+	trace(3, "calling repr...\n");
 	if (obj == null) {
 	  return "#<void>";
 	} else if (obj is bool) {
 	  return ((bool)obj) ? "#t" : "#f";
+	} else if (obj is Array) {
+	  return (string)array_to_string((object[]) obj);
 	} else if (obj is double) {
 	  string s = obj.ToString();
 	  if (s.Contains("."))
@@ -535,17 +564,18 @@ public abstract class Scheme {
 		return "#<procedure>";
 	  } else {
 		object current = (Cons)obj;
+		string retval = "";
 		while (pair_q(current)) {
 		  if (retval != "")
 			retval += " ";
 		  retval += repr(car(current));
 		  current = cdr(current);
-		  if (!pair_q(current) && !Compare(current, EmptyList)) {
+		  if (!pair_q(current) && !Same(current, EmptyList)) {
 			retval += " . " + repr(current);
 		  }
 		}
+		return "(" + retval + ")";
 	  }
-	  return "(" + retval + ")";
 	} else {
 	  return obj.ToString();
 	}
@@ -601,34 +631,50 @@ public abstract class Scheme {
 	}
   }
 
-  public static bool Compare(object obj) {
+  public static bool Same(object obj) {
 	object item = car(obj);
 	object current = cdr(obj);
-	while (!Compare(current, EmptyList)) {
-	  if (! Compare(item, car(current)))
+	while (!Same(current, EmptyList)) {
+	  if (! Same(item, car(current)))
 		return false;
 	  current = cdr(current);
 	}
 	return true;
   }
 
-  public static bool Compare(object obj1, object obj2) {
-	//trace("calling compare({0}, {1})\n", obj1, obj2);
+  public static int cmp(object obj1, object obj2) {
+	trace(4, "calling cmp({0}, {1})\n", obj1, obj2);
+	if (obj1 is Symbol) {
+	  if (obj2 is Symbol) {
+		return cmp(obj1.ToString(), obj2.ToString());
+	  } else 
+		return cmp(obj1.ToString(), obj2);
+	} else {
+	  if (obj2 is Symbol) {
+		return cmp(obj1, obj2.ToString());
+	  } else {
+		return ObjectType.ObjTst(obj1, obj2, false);
+	  }
+	}
+  }
+
+  public static bool Same(object obj1, object obj2) {
+	trace(4, "calling compare({0}, {1})\n", obj1, obj2);
 	if (obj1 is Symbol) {
 	  if (obj2 is Symbol) {
 		return (obj1.ToString() == obj2.ToString());
 	  } else 
-		return Compare(obj1.ToString(), obj2);
+		return Same(obj1.ToString(), obj2);
 	} else {
 	  if (obj2 is Symbol) {
-		return Compare(obj1, obj2.ToString());
+		return Same(obj1, obj2.ToString());
 	  } else {
 		try {
 		  bool retval = (ObjectType.ObjTst(obj1, obj2, false) == 0);
-		  //trace("  compare returning: {0}\n", retval);
+		  trace(4, "  compare returning: {0}\n", retval);
 		  return retval;
 		} catch {
-		  //trace("  false2\n");
+		  trace(4, "  false2\n");
 		  return false;
 		}
 	  }
@@ -659,7 +705,7 @@ public abstract class Scheme {
 	return (! ((bool)obj));
   }
 
-  public static bool Compare(object obj1, object op, object obj2) {
+  public static bool Same(object obj1, object op, object obj2) {
 	if (((string)op) == "=") {
 	  return (ObjectType.ObjTst(obj1, obj2, false) == 0);
 	} else if (((string)op) == "<") {
@@ -678,7 +724,7 @@ public abstract class Scheme {
 	// For adding 0 or more numbers in list
 	object retval = 0;
 	object current = obj;
-	while (!Compare(current, EmptyList)) {
+	while (!Same(current, EmptyList)) {
 	  retval = Add(retval, car(current));
 	  current = cdr(current);
 	}
@@ -689,7 +735,7 @@ public abstract class Scheme {
 	// For multiplying 0 or more numbers in list
 	object retval = 1;
 	object current = obj;
-	while (!Compare(current, EmptyList)) {
+	while (!Same(current, EmptyList)) {
 	  retval = Multiply(retval, car(current));
 	  current = cdr(current);
 	}
@@ -700,7 +746,7 @@ public abstract class Scheme {
 	// For subtracting 1 or more numbers in list
 	object retval = car(obj);
 	object current = cdr(obj);
-	while (!Compare(current, EmptyList)) {
+	while (!Same(current, EmptyList)) {
 	  retval = Subtract(retval, car(current));
 	  current = cdr(current);
 	}
@@ -711,7 +757,7 @@ public abstract class Scheme {
 	// For dividing 1 or more numbers in list
 	object retval = car(obj);
 	object current = cdr(obj);
-	while (!Compare(current, EmptyList)) {
+	while (!Same(current, EmptyList)) {
 	  retval = Divide(retval, car(current));
 	  current = cdr(current);
 	}
@@ -846,41 +892,45 @@ public abstract class Scheme {
   }
 
   public static object Divide(object obj1, object obj2) {
-	try {
-	  return (ObjectType.DivObj(obj1, obj2));
-	} catch {
-	  if (obj1 is Rational) {
-		if (obj2 is Rational) {
-		  return (((Rational)obj1) / ((Rational)obj2));
-		} else if (obj2 is int) {
-		  return (((Rational)obj1) / ((int)obj2));
-		} else if (obj2 is double) {
-		  return (((double)((Rational)obj1)) / ((double)obj2));
-		}
-	  } else if (obj2 is Rational) {
+	if ((obj1 is int) && (obj2 is int)) {
+	  return new Rational((int)obj1, (int)obj2);
+	} else {
+	  try {
+		return (ObjectType.DivObj(obj1, obj2));
+	  } catch {
 		if (obj1 is Rational) {
-		  return (((Rational)obj1) / ((Rational)obj2));
-		} else if (obj1 is int) {
-		  return (((Rational)obj2) / ((int)obj1));
-		} else if (obj1 is double) {
-		  return (((double)((Rational)obj2)) / ((double)obj1));
+		  if (obj2 is Rational) {
+			return (((Rational)obj1) / ((Rational)obj2));
+		  } else if (obj2 is int) {
+			return (((Rational)obj1) / ((int)obj2));
+		  } else if (obj2 is double) {
+			return (((double)((Rational)obj1)) / ((double)obj2));
+		  }
+		} else if (obj2 is Rational) {
+		  if (obj1 is Rational) {
+			return (((Rational)obj1) / ((Rational)obj2));
+		  } else if (obj1 is int) {
+			return (((Rational)obj2) / ((int)obj1));
+		  } else if (obj1 is double) {
+			return (((double)((Rational)obj2)) / ((double)obj1));
+		  }
+		} else {
+		  BigInteger b1 = null;
+		  BigInteger b2 = null;
+		  if (obj1 is int) {
+			b1 = makeBigInteger((int) obj1);
+		  } else if (obj1 is BigInteger) {
+			b1 = (BigInteger)obj1;
+		  } else
+			throw new Exception(string.Format("can't convert {0} to bigint", obj1.GetType()));
+		  if (obj2 is int) {
+			b2 = makeBigInteger((int) obj2);
+		  } else if (obj2 is BigInteger) {
+			b2 = (BigInteger)obj2;
+		  } else
+			throw new Exception(string.Format("can't convert {0} to bigint", obj2.GetType()));
+		  return b1 / b2;
 		}
-	  } else {
-		BigInteger b1 = null;
-		BigInteger b2 = null;
-		if (obj1 is int) {
-		  b1 = makeBigInteger((int) obj1);
-		} else if (obj1 is BigInteger) {
-		  b1 = (BigInteger)obj1;
-		} else
-		  throw new Exception(string.Format("can't convert {0} to bigint", obj1.GetType()));
-		if (obj2 is int) {
-		  b2 = makeBigInteger((int) obj2);
-		} else if (obj2 is BigInteger) {
-		  b2 = (BigInteger)obj2;
-		} else
-		  throw new Exception(string.Format("can't convert {0} to bigint", obj2.GetType()));
-		return b1 / b2;
 	  }
 	}
 	throw new Exception(String.Format("unable to divide {0} and {1}", 
@@ -890,11 +940,11 @@ public abstract class Scheme {
   // List functions -----------------------------------------------
 
   public static object member(object obj1, object obj2) {
-	trace("calling member({0}, {1})\n", obj1, obj2);
+	trace(2, "calling member({0}, {1})\n", obj1, obj2);
 	if (list_q(obj2)) {
 	  object current = obj2;
-	  while (!Compare(current, EmptyList)) {
-		if (Compare(obj1, car(current)))
+	  while (!Same(current, EmptyList)) {
+		if (Same(obj1, car(current)))
 		  return current;
 		current = cdr(current);
 	  }
@@ -936,19 +986,19 @@ public abstract class Scheme {
   }
 
   public static object length(object obj) {
-	trace("called: length\n");
+	trace(3, "called: length\n");
 	if (list_q(obj)) {
 	  if (null_q(obj)) {
-		trace("length returned: {0}\n", 0);
+		trace(3, "length returned: {0}\n", 0);
 		return 0;
 	  } else {
 		int len = 0;
 		object current = (Cons)obj;
-		while (!Compare(current, EmptyList)) {
+		while (!Same(current, EmptyList)) {
 		  len++;
 		  current = cdr(current);
 		}
-		trace("length returned: {0}\n", len);
+		trace(3, "length returned: {0}\n", len);
 		return len;
 	  }
 	} else
@@ -961,14 +1011,45 @@ public abstract class Scheme {
 
   public static object list_to_string(object lyst) {
 	String retval = "";
-	object current = (Cons)lyst;
-	while (current != EmptyList) {
-	  retval += car(current).ToString();
-	  current = cdr((Cons)current);
+	if (lyst is Cons) {
+	  object current = lyst;
+	  while (!Same(current, EmptyList)) {
+		retval += car(current).ToString();
+		current = cdr(current);
+	  }
 	}
 	return retval;
   }
 
+  static object pivot (object l) {
+	if (null_q(l))
+	  return "done";
+	else if (null_q(cdr(l)))
+	  return "done";
+	else if (cmp(car(l), cadr(l)) <= 0)
+	  return pivot(cdr(l));
+	else
+	  return car(l);
+  }
+
+  // usage: (partition 4 '(6 4 2 1 7) () ()) -> returns partitions
+  static object partition (object piv,  object l, object p1, object p2) {
+	if (null_q(l))
+	  return list(p1, p2);
+	else if (cmp(car(l), piv) < 0)
+	  return partition(piv, cdr(l), cons(car(l), p1), p2);
+	else
+	  return partition(piv, cdr(l), p1, cons(car(l), p2));
+  }
+
+  public static object sort(object l) {
+	object piv = pivot(l);
+	if (Same(piv, "done")) return l;
+	object parts = partition(piv, l, EmptyList, EmptyList);
+	return append(sort(car(parts)),
+		          sort(cadr(parts)));
+  }
+  
   public static object reverse(object lyst) {
 	if (lyst is Cons) {
 	  object result = EmptyList;
@@ -1163,16 +1244,38 @@ public abstract class Scheme {
 		  ((Cons)this.cdr).cdr == EmptyList) {
 		return String.Format(",@{0}", ((Cons)this.cdr).car);
 	  } else {
-		string s = String.Format("({0}", repr(this.car));
+		return "(...)";
+	  }
+	}
+
+	public string UnSafeToString() {
+	  if (this.car == new Symbol("quote") &&
+		  (this.cdr is Cons) &&
+		  ((Cons)this.cdr).cdr == EmptyList) {
+		return String.Format("'{0}", ((Cons)this.cdr).car);
+	  } else if (this.car == new Symbol("quasiquote") &&
+		  (this.cdr is Cons) &&
+		  ((Cons)this.cdr).cdr == EmptyList) {
+		return String.Format("`{0}", ((Cons)this.cdr).car);
+	  } else if (this.car == new Symbol("unquote") &&
+		  (this.cdr is Cons) &&
+		  ((Cons)this.cdr).cdr == EmptyList) {
+		return String.Format(",{0}", ((Cons)this.cdr).car);
+	  } else if (this.car == new Symbol("unquote-splicing") &&
+		  (this.cdr is Cons) &&
+		  ((Cons)this.cdr).cdr == EmptyList) {
+		return String.Format(",@{0}", ((Cons)this.cdr).car);
+	  } else {
+		string s = String.Format("({0}", this.car);
 		object sexp = this.cdr;
 		while (sexp is Cons) {
-		  s += String.Format(" {0}", repr(((Cons)sexp).car));
+		  s += String.Format(" {0}", ((Cons)sexp).car);
 		  sexp = ((Cons)sexp).cdr;
 		}
 		if (sexp == EmptyList) {
 		  s += ")";
 		} else {
-		  s += String.Format(" . {0})", repr(sexp));
+		  s += String.Format(" . {0})", sexp);
 		}
 		return s;
 	  }
@@ -1256,6 +1359,10 @@ public abstract class Scheme {
 	  return (((double) f.numerator) / ((double) f.denominator));
 	}
 
+	public static implicit operator int(Rational f) {
+	  return f.numerator / f.denominator;
+  }
+
 	public static implicit operator float(Rational f) {
 	  return (((float) f.numerator) / ((float) f.denominator));
 	}
@@ -1268,6 +1375,13 @@ public abstract class Scheme {
 	}
 
 	public static Rational operator +(Rational f1, int i) {
+	  int lcm = LCM(f1.denominator, 1);
+	  return new Rational((f1.numerator * lcm/f1.denominator +
+			  i * lcm/1),
+		  lcm);
+	}
+
+	public static Rational operator +(int i, Rational f1) {
 	  int lcm = LCM(f1.denominator, 1);
 	  return new Rational((f1.numerator * lcm/f1.denominator +
 			  i * lcm/1),
@@ -1381,7 +1495,7 @@ public abstract class Scheme {
   }  
 
   public static bool isTokenType(List<object> token, string tokenType) {
-	return (((string) token[0]) == tokenType);
+	return Same(token[0], tokenType);
   }
   
   public static string arrayToString(object[] array) {
@@ -1401,8 +1515,8 @@ public abstract class Scheme {
   public static bool memq(object item1, object list) {
 	if (list is Cons) {
 	  object current = list;
-	  while (! Compare(current, EmptyList)) {
-		if (Compare(item1, car(current))) {
+	  while (! Same(current, EmptyList)) {
+		if (Same(item1, car(current))) {
 		  return true;
 		}
 		current = cdr(current);
@@ -1417,7 +1531,7 @@ public abstract class Scheme {
   }
 
   public static object read_content(object filename) {
-	return File.OpenText((string)filename).ReadToEnd();
+	return File.OpenText(filename.ToString()).ReadToEnd();
   }
 
   public static object string_append(object obj1, object obj2) {
@@ -1436,14 +1550,14 @@ public abstract class Scheme {
 	printf ("  Subtract(22,7), Result: {0}, Should be: {1}\n", 
 		Subtract(22, 7), 22 - 7);
 	// -----------------------------------
-	// Compare tests:
-	printf("hello == hello: {0}\n", Compare("hello", "hello"));
-	printf("hello == hel: {0}\n", Compare("hello", "hel"));
-	printf("hello == helloo: {0}\n", Compare("hello", "helloo"));
-	printf("4.1 == 4: {0}\n", Compare(4.1, 4));
-	printf("hello == true: {0}\n", Compare("hello", true));
+	// Same tests:
+	printf("hello == hello: {0}\n", Same("hello", "hello"));
+	printf("hello == hel: {0}\n", Same("hello", "hel"));
+	printf("hello == helloo: {0}\n", Same("hello", "helloo"));
+	printf("4.1 == 4: {0}\n", Same(4.1, 4));
+	printf("hello == true: {0}\n", Same("hello", true));
 	
-	printf("() == (): {0}\n", Compare(list(), list()));
+	printf("() == (): {0}\n", Same(list(), list()));
 
 	object t = list(2);
 	printf("t = list(2): {0}\n", t);

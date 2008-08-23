@@ -2,13 +2,9 @@
 Bugs
 ====
 
-1. need to implement or fix: memq, range, import
+1. need to implement or fix: memq, range, module.name, map
 2. eq? and equal? and = should be different
-3. representation for vector
-4. dir is not safe
-5. make pretty-print safe
-6. remove nil, env
-7. write map
+3. make pretty-print safer and useful
 
 
 scheme-to-csharp
