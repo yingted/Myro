@@ -175,6 +175,8 @@ public abstract class Scheme {
 
   public static void trace(int level, object fmt, params object[] objs) {
 	if (level <= config.DEBUG) {
+	  for (int i = 1; i < level; i++)
+		printf("    ");
 	  printf(fmt, objs);
 	}
   }
@@ -345,15 +347,26 @@ public abstract class Scheme {
   }
 
   public static object apply(object proc, object args) {
-	return ((Proc)proc).Call(args);
+	trace(1, "called: apply({0}, {1})\n", proc, args);
+	if (proc is Proc)
+	  return ((Proc)proc).Call(args);
+	else {
+	  if (procedure_q(proc) && Same(cadr(proc), "<extension>"))
+		return ((Proc)caddr(proc)).Call(args);
+	  else
+		throw new Exception(string.Format("invalid procedure: {0}", proc));
+	}
   }
 
   public static object apply(object proc, object args1, object args2) {
-	return ((Proc)proc).Call(args1, args2);
+	if (proc is Proc)
+	  return ((Proc)proc).Call(args1, args2);
+	else
+	  throw new Exception(string.Format("invalid procedure: {0}", proc));
   }
 
   public static object map(object proc, object args) {
-	trace(1, "called: map1\n");
+	trace(1, "called: map1({0}, {1})\n", proc, args);
 	object retval = EmptyList;
 	object current1 = args;
 	while (!Same(current1, EmptyList)) {
@@ -405,7 +418,7 @@ public abstract class Scheme {
   }
 
   public static object string_ref(object s, object i) {
-	trace(2, "called: string_ref(s, {0})\n", i);
+	trace(9, "called: string_ref(s, {0})\n", i);
 	return s.ToString()[(int)i];
   }
 
@@ -671,10 +684,10 @@ public abstract class Scheme {
 	  } else {
 		try {
 		  bool retval = (ObjectType.ObjTst(obj1, obj2, false) == 0);
-		  trace(4, "  compare returning: {0}\n", retval);
+		  trace(4, "compare returning: {0}\n", retval);
 		  return retval;
 		} catch {
-		  trace(4, "  false2\n");
+		  trace(4, "false2\n");
 		  return false;
 		}
 	  }
@@ -1244,7 +1257,7 @@ public abstract class Scheme {
 		  ((Cons)this.cdr).cdr == EmptyList) {
 		return String.Format(",@{0}", ((Cons)this.cdr).car);
 	  } else {
-		return "(...)";
+		return String.Format("({0} ...)", this.car);
 	  }
 	}
 
