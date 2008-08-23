@@ -43,7 +43,9 @@
 
 (define* apply-extension
   (lambda (type name args k)
-    (k (apply* (caddr name) (car args)))))
+    (if (eq? type 'apply-proc)
+	(k (apply* (caddr name) (car args)))
+	(error 'apply-extension "unknown type: ~a" type))))
 
 (define* read-eval-print
   (lambda ()

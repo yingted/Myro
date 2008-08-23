@@ -27,12 +27,12 @@ pjscheme.exe: pjscheme-rm.ss scheme-to-csharp.ss
 	echo "(exit)" >> make-pjscheme.ss
 	petite make-pjscheme.ss
 	indent -di0 -i3 pjscheme.cs
-	$(MCS) pjscheme.cs Util.cs BigInteger.cs -main:pjscheme_rm \
-		-r:Microsoft.VisualBasic.dll
-	mono pjscheme.exe
+	$(MCS) pjscheme.cs Util.cs  -main:pjscheme_rm \
+		-lib:DLLs -r:Microsoft.VisualBasic.dll -r:Microsoft.Scripting.dll
+	MONO_PATH=DLLs mono pjscheme.exe
 
 Test.exe: Test.cs
-	$(MCS) Test.cs -r:Microsoft.VisualBasic.dll
+	$(MCS) Test.cs -lib:DLLs -r:Microsoft.VisualBasic.dll -r:Microsoft.Scripting.dll
 
 make-fact.ss: scheme-to-csharp.ss 
 	echo "(load \"rm-transformer.ss\")" > make-fact.ss
@@ -81,23 +81,23 @@ testrm: all-rm.ss all-rm-low.ss all-rm-high.ss
 	petite testall.ss
 	$(RM) testall.ss
 
-fact.cs: fact.ss Util.cs BigInteger.cs make-fact.ss rm-transformer.ss
+fact.cs: fact.ss Util.cs make-fact.ss rm-transformer.ss
 	petite make-fact.ss
 	indent -di0 -i3 fact.cs
-	$(MCS) fact.cs Util.cs BigInteger.cs -main:fact_rm -r:Microsoft.VisualBasic.dll
+	$(MCS) fact.cs Util.cs -main:fact_rm -lib:DLLs -r:Microsoft.VisualBasic.dll -r:Microsoft.Scripting.dll
 
-util.exe: Util.cs BigInteger.cs
-	$(MCS) Util.cs BigInteger.cs -r:Microsoft.VisualBasic.dll -out:util.exe
+Util.exe: Util.cs 
+	$(MCS) Util.cs -r:Microsoft.VisualBasic.dll -lib:DLLs -r:Microsoft.Scripting.dll -out:Util.exe
 
 dummy:
 
-run-util: util.exe dummy
-	mono util.exe
+run-util: Util.exe dummy
+	MONO_PATH=DLLs mono Util.exe
 
-util: run-util
+Util: run-util
 
 run-fact.exe:
-	mono fact.exe
+	MONO_PATH=DLLs mono fact.exe
 
 fact.exe: fact.cs run-fact.exe
 

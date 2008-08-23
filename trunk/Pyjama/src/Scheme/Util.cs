@@ -2,6 +2,7 @@
 
 using System;
 using System.IO; // File
+using Microsoft.Scripting.Math;
 using System.Collections.Generic; // List
 using Microsoft.VisualBasic.CompilerServices;
 
@@ -32,6 +33,45 @@ public abstract class Scheme {
   public delegate void Procedure2Void(object args1, object args2);
   public delegate bool Procedure2Bool(object args1, object args2);
 
+  public static BigInteger makeBigInteger(int value) {
+	int sign = +1;
+	if (value < 0) {
+	  sign = -1;
+	  value *= -1;
+	}
+	return new BigInteger(sign, (uint)value);
+  }
+
+  public static BigInteger BigIntegerParse(string value) {
+	int radix = 10;
+	BigInteger multiplier = makeBigInteger(1);
+	BigInteger result = makeBigInteger(0);
+	value = (value.ToUpper()).Trim();
+	int limit = 0;
+	if(value[0] == '-')
+	  limit = 1;
+	for(int i = value.Length - 1; i >= limit ; i--) {
+	  int posVal = (int)value[i];
+	  if(posVal >= '0' && posVal <= '9')
+		posVal -= '0';
+	  else if(posVal >= 'A' && posVal <= 'Z')
+		posVal = (posVal - 'A') + 10;
+	  else
+		posVal = 9999999;       // error flag
+	  
+	  if(posVal >= radix)
+		throw(new ArithmeticException("Invalid string in constructor."));
+	  else {
+		if(value[0] == '-')
+		  posVal = -posVal;
+		result = result + (multiplier * posVal);
+		if((i - 1) >= limit)
+		  multiplier = multiplier * radix;
+	  }
+	}
+	return result;
+  }
+  
   public class Proc {
 	object proc = null;
 	int args = -1;
@@ -106,8 +146,6 @@ public abstract class Scheme {
   public static Proc car_proc = new Proc((Procedure1) car, 1, 1);
   public static Proc cdr_proc = new Proc((Procedure1) cdr, 1, 1);
   public static Proc cons_proc = new Proc((Procedure2) cons, 2, 1);
-  //public static Proc get_variables_from_frame_proc = new Proc((Procedure1) get_variables_from_frame, 1, 1);
-  //public static Proc binding_variable_proc = new Proc((Procedure1) binding_variable, 1, 1);
   public static Proc list_to_vector_proc = new Proc((Procedure1) list_to_vector, 1, 1);
   public static Proc memq_proc = new Proc((Procedure1Bool) memq, 2, 2);
   public static Proc range_proc = new Proc((Procedure1) range, -1, 1);
@@ -133,9 +171,6 @@ public abstract class Scheme {
   public static char SLASH = '/';
   public static char[] SPLITSLASH = {SLASH};
 
-  //public static object get_variables_from_frame(object frame) {return null;}
-  //public static object binding_variable(object binding) {return null;}
-
   public static void safe_print(object item) {
 	pretty_print(item);
   }
@@ -160,7 +195,9 @@ public abstract class Scheme {
   }
 
   public static object get_current_time() {
-	return 0.0;
+	DateTime baseTime = new DateTime(1970, 1, 1, 8, 0, 0);
+	DateTime nowInUTC = DateTime.UtcNow;
+	return ((nowInUTC - baseTime).Ticks / 10000000.0);
   }
 
   public static object symbol_to_string (object x) {
@@ -430,7 +467,7 @@ public abstract class Scheme {
 	try {
 	  return int.Parse((string)str);
 	} catch (OverflowException) {
-	  return new BigInteger((string)str, 10);
+	  return BigIntegerParse((string)str);
 	}
   }
 
@@ -639,27 +676,38 @@ public abstract class Scheme {
 	try {
 	  return (ObjectType.AddObj(obj1, obj2));
 	} catch {
-	  try {
-		if (obj1 is Rational) {
-		  if (obj2 is Rational) {
-			return (((Rational)obj1) + ((Rational)obj2));
-		  } else if (obj2 is int) {
-			return (((Rational)obj1) + ((int)obj2));
-		  } else if (obj2 is double) {
-			return (((double)((Rational)obj1)) + ((double)obj2));
-		  }
-		} else if (obj2 is Rational) {
-		  if (obj1 is Rational) {
-			return (((Rational)obj1) + ((Rational)obj2));
-		  } else if (obj1 is int) {
-			return (((Rational)obj2) + ((int)obj1));
-		  } else if (obj1 is double) {
-			return (((double)((Rational)obj2)) + ((double)obj1));
-		  }
+	  if (obj1 is Rational) {
+		if (obj2 is Rational) {
+		  return (((Rational)obj1) + ((Rational)obj2));
+		} else if (obj2 is int) {
+		  return (((Rational)obj1) + ((int)obj2));
+		} else if (obj2 is double) {
+		  return (((double)((Rational)obj1)) + ((double)obj2));
 		}
-	  } catch {
-		throw new Exception(String.Format("unable to add {0} and {1}", 
-				obj1.GetType().ToString(), obj2.GetType().ToString()));
+	  } else if (obj2 is Rational) {
+		if (obj1 is Rational) {
+		  return (((Rational)obj1) + ((Rational)obj2));
+		} else if (obj1 is int) {
+		  return (((Rational)obj2) + ((int)obj1));
+		} else if (obj1 is double) {
+		  return (((double)((Rational)obj2)) + ((double)obj1));
+		}
+	  } else {
+		BigInteger b1 = null;
+		BigInteger b2 = null;
+		if (obj1 is int) {
+		  b1 = makeBigInteger((int) obj1);
+		} else if (obj1 is BigInteger) {
+		  b1 = (BigInteger)obj1;
+		} else
+		  throw new Exception(string.Format("can't convert {0} to bigint", obj1.GetType()));
+		if (obj2 is int) {
+		  b2 = makeBigInteger((int) obj2);
+		} else if (obj2 is BigInteger) {
+		  b2 = (BigInteger)obj2;
+		} else
+		  throw new Exception(string.Format("can't convert {0} to bigint", obj2.GetType()));
+		return b1 + b2;
 	  }
 	}
 	throw new Exception(String.Format("unable to add {0} and {1}", 
@@ -667,34 +715,70 @@ public abstract class Scheme {
   }
 
   public static object Subtract(object obj1, object obj2) {
-	return (ObjectType.SubObj(obj1, obj2));
+	try {
+	  return (ObjectType.SubObj(obj1, obj2));
+	} catch {
+ 	  BigInteger b1 = null;
+ 	  BigInteger b2 = null;
+ 	  if (obj1 is int) {
+ 		b1 = makeBigInteger((int) obj1);
+	  } else if (obj1 is BigInteger) {
+		b1 = (BigInteger)obj1;
+	  } else
+		throw new Exception(string.Format("can't convert {0} to bigint", obj1.GetType()));
+	  if (obj2 is int) {
+		b2 = makeBigInteger((int) obj2);
+	  } else if (obj2 is BigInteger) {
+		b2 = (BigInteger)obj2;
+	  } else
+		throw new Exception(string.Format("can't convert {0} to bigint", obj2.GetType()));
+	  return b1 - b2;
+	}
   }
 
   public static object Multiply(object obj1, object obj2) {
 	// FIXME: need hierarchy of numbers, handle rational/complex/etc
 	try {
-	  return (ObjectType.MulObj(obj1, obj2));
+	  return ObjectType.MulObj(obj1, obj2);
 	} catch {
-	  BigInteger b1 = null;
-	  BigInteger b2 = null;
-	  if (obj1 is int)
-		b1 = new BigInteger((int) obj1);
-	  else if (obj1 is BigInteger)
+ 	  BigInteger b1 = null;
+ 	  BigInteger b2 = null;
+ 	  if (obj1 is int) {
+ 		b1 = makeBigInteger((int) obj1);
+	  } else if (obj1 is BigInteger) {
 		b1 = (BigInteger)obj1;
-	  else
-		throw new Exception("can't convert int");
-	  if (obj2 is int)
-		b2 = new BigInteger((int) obj2);
-	  else if (obj2 is BigInteger)
+	  } else
+		throw new Exception(string.Format("can't convert {0} to bigint", obj1.GetType()));
+	  if (obj2 is int) {
+		b2 = makeBigInteger((int) obj2);
+	  } else if (obj2 is BigInteger) {
 		b2 = (BigInteger)obj2;
-	  else
-		throw new Exception("can't convert int");
+	  } else
+		throw new Exception(string.Format("can't convert {0} to bigint", obj2.GetType()));
 	  return b1 * b2;
 	}
   }
 
   public static object Divide(object obj1, object obj2) {
-	return (ObjectType.DivObj(obj1, obj2));
+	try {
+	  return (ObjectType.DivObj(obj1, obj2));
+	} catch {
+ 	  BigInteger b1 = null;
+ 	  BigInteger b2 = null;
+ 	  if (obj1 is int) {
+ 		b1 = makeBigInteger((int) obj1);
+	  } else if (obj1 is BigInteger) {
+		b1 = (BigInteger)obj1;
+	  } else
+		throw new Exception(string.Format("can't convert {0} to bigint", obj1.GetType()));
+	  if (obj2 is int) {
+		b2 = makeBigInteger((int) obj2);
+	  } else if (obj2 is BigInteger) {
+		b2 = (BigInteger)obj2;
+	  } else
+		throw new Exception(string.Format("can't convert {0} to bigint", obj2.GetType()));
+	  return b1 / b2;
+	}
   }
 
   // List functions -----------------------------------------------
@@ -1042,8 +1126,8 @@ public abstract class Scheme {
 	  // Least Common Multiple
 	  n1 = Math.Abs(n1);
 	  n2 = Math.Abs(n2);
-	  if (n1 > n2) return ((n2 / GCD(n1, n2)) * n1);
-	  else         return ((n1 / GCD(n1, n2)) * n2);
+	  if (n1 > n2) return checked((n2 / GCD(n1, n2)) * n1);
+	  else         return checked((n1 / GCD(n1, n2)) * n2);
 	}
 
 	public override bool Equals(object other) {
@@ -1058,10 +1142,10 @@ public abstract class Scheme {
 	}
 	
 	public override string ToString() {
-	  if (denominator != 1)
-		return string.Format("{0}/{1}", numerator, denominator);
-	  else
-		return numerator.ToString();
+	  //if (denominator != 1)
+	  return string.Format("{0}/{1}", numerator, denominator);
+	  //else
+	  //return numerator.ToString();
 	}
 
 	public static implicit operator double(Rational f) {
@@ -1196,6 +1280,12 @@ public abstract class Scheme {
 	  return "#void";
 	} else if (obj is bool) {
 	  return ((bool)obj) ? "#t" : "#f";
+	} else if (obj is double) {
+	  string s = obj.ToString();
+	  if (s.Contains("."))
+		return s;
+	  else
+		return String.Format("{0}.", s);
 	} else if (obj is String) {
 	  return String.Format("\"{0}\"", obj);
 	} else if (obj is Symbol && ((Symbol)obj) == EmptyList) {
@@ -1324,6 +1414,30 @@ public abstract class Scheme {
 	printf("string-append('test', NULL): \"{0}\"\n", 	 
 		string_append ((object) "test",
 			(object) make_string ((object) NULL)));
+
+	int val = 15;
+	printf("BigInteger, long, int:\n");
+	printf("  {0}: {1} == {2} == WRONG! {3}\n", val,
+		bigfact(makeBigInteger(val)), longfact(val), intfact(val));
+	printf("Multiply:\n");
+	printf("15: {0} \n", Multiply(Multiply( Multiply( intfact(12), 13), 14), 15));
+
+	printf("1827391823712983712983712938: {0}\n", BigIntegerParse("1827391823712983712983712938"));
+  }
+
+  public static long longfact(long n) {
+	if (n == 1) return n;
+	return n * longfact(n - 1);
+  }
+
+  public static int intfact(int n) {
+	if (n == 1) return n;
+	return n * intfact(n - 1);
+  }
+
+  public static BigInteger bigfact(BigInteger n) {
+	if (n == 1) return n;
+	return n * bigfact(n - 1);
   }
 
 }

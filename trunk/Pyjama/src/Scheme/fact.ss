@@ -65,11 +65,15 @@
 (define factorial
   (lambda (n)
     (cond
-     ((< n 3) 1)
+     ((= n 1) 1)
      (else (* n (factorial (- n 1)))))))
 
 (define Main
   (lambda (args)
+    (display "Should be: 1307674368000")
+    (newline)
+    (display (factorial 15))
+    (newline)
     (display (factorial 50))
     (newline)
     (display (fact-wrap 5))
