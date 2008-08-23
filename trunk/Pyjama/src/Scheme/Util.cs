@@ -234,8 +234,7 @@ public abstract class Scheme {
 		extend_frame("string->symbol", new Proc((Procedure1) string_to_symbol, 1, 1),
 		extend_frame("group", new Proc((Procedure2) group, 2, 1),
 		extend_frame("member", new Proc((Procedure2)member, 2, 1),
-		extend_frame("map", new Proc((Procedure2)map, 2, 1),
-			make_frame(vars, vals)))))))))));
+			make_frame(vars, vals))))))))));
   }
   
   public static object make_frame (object variables, object values)
