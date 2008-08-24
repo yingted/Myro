@@ -296,6 +296,10 @@
 			  (texps (map transform exps))
 			  (assigns (map (lambda (v e) `(set! ,v ,e)) vars texps))
 			  (local-decls (map (lambda (v) `(,v 'undefined)) vars))
+			  ;; remove any (set! x 'undefined) assignments introduced by letrec
+			  (assigns (filter
+				     (lambda (x) (not (equal? (caddr x) ''undefined)))
+				     assigns))
 			  (new-bodies (consolidate
 					(append (sort-assignments assigns)
 						(map transform bodies)))))

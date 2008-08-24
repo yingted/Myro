@@ -170,6 +170,7 @@
     (test-define)
     (test-call/cc)
     (test-loop)
+    (test-macros)
     ))
 
 (define verify
@@ -302,3 +303,27 @@
                 (raise 'blastoff!))
             (loop (- n 1)))
        (catch e e))))
+
+(define (test-macros)
+  (verify #t
+    (let ((bool 5))
+      (or (= bool 4) (= bool 5))))
+  (verify 6
+    (let ((bool 5))
+      (or (= bool 4) 6)))
+  (verify #f
+    (let ((bool 5))
+      (and (= bool 5) (> bool 0) (= bool 4))))
+  (verify 5
+    (let ((r 5))
+      (case 'banana
+	(apple 'no)
+	((cherry banana) 1 2 r)
+	(else 'no))))
+  (verify '((6) orange 5)
+    (let ((r 5))
+      (record-case (cons 'banana (cons 'orange (cons (* 2 3) '())))
+	(apple (a b c) (list c b a r))
+	((cherry banana) (a . b) (list b a r))
+	((orange) () 'no)
+	(else 2 3 4)))))

@@ -230,6 +230,7 @@
  	      ;; temporary
  	      (set! load-stack '())
  	      (halt* '(exiting the interpreter)))
+	    ;; apply
 	    (lambda-proc (args env2 handler k2)
 	      (let ((proc (car args))
 		    (proc-args (cadr args)))

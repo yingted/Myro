@@ -265,8 +265,6 @@
 	  `(let ((r ,exp) ,@(map record-case-clause->let-binding clauses))
 	     (cond ,@(map (record-case-clause->cond-clause 'r) clauses))))))))
 
-;; need case macro too
-
 (define make-macro-env
   (lambda ()
     (make-initial-environment
@@ -540,18 +538,12 @@
 		    )))))
 
 (define try? (tagged-list 'try >= 2))
-(define try-body 
-  (lambda (x)
-    (cadr x)))
+(define try-body (lambda (x) (cadr x)))
 (define catch? (tagged-list 'catch >= 3))
-(define catch-var 
-  (lambda (x)
-    (cadr x)))
-(define catch-exps 
-  (lambda (x) (cddr x)))
+(define catch-var (lambda (x) (cadr x)))
+(define catch-exps (lambda (x) (cddr x)))
 (define finally? (tagged-list 'finally >= 2))
-(define finally-exps 
-  (lambda (x) (cdr x)))
+(define finally-exps (lambda (x) (cdr x)))
 
 ;;------------------------------------------------------------------------
 ;; file parser
