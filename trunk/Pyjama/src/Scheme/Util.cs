@@ -228,14 +228,15 @@ public abstract class Scheme {
 	object current1 = chars;
 	while (!Equal(current1, EmptyList)) {
 	  if (Equal(car(current1), delimiter)) {
-		retval = cons(list_to_string(buffer), retval);
+		retval = cons(list_to_string(reverse(buffer)), retval);
+		buffer = EmptyList;
 	  } else {
 		buffer = cons(car(current1), buffer);
 	  }
 	  current1 = cdr(current1);
 	}
 	if (!Equal(buffer, EmptyList))
-	  retval = cons(list_to_string(buffer), retval);
+	  retval = cons(list_to_string(reverse(buffer)), retval);
 	return reverse(retval);
   }
 
@@ -249,10 +250,11 @@ public abstract class Scheme {
 		extend_frame("sort", new Proc((Procedure1)sort, 1, 1),
 		extend_frame("string->symbol", new Proc((Procedure1) string_to_symbol, 1, 1),
 		extend_frame("symbol->string", new Proc((Procedure1) symbol_to_string, 1, 1),
+		extend_frame("string->list", new Proc((Procedure1) string_to_list, 1, 1),
 		extend_frame("group", new Proc((Procedure2) group, 2, 1),
 		extend_frame("member", new Proc((Procedure2)member, 2, 1),
 		extend_frame("format", new Proc((Procedure1)format_list, -1, 1),
-			make_frame(vars, vals))))))))))));
+			make_frame(vars, vals)))))))))))));
   }
   
   public static object make_binding(object args1, object args2) {
@@ -421,7 +423,7 @@ public abstract class Scheme {
 	  retval = cons( apply(proc, car(current1)), retval);
 	  current1 = cdr(current1);
 	}
-	return retval;
+	return reverse(retval);
   }
 
   public static object map(object proc, object args1, object args2) {
@@ -434,7 +436,7 @@ public abstract class Scheme {
 	  current1 = cdr(current1);
 	  current2 = cdr(current2);
 	}
-	return retval;
+	return reverse(retval);
   }
 
   public static Func<object,bool> tagged_list(object test_string, object pred, object value) {
@@ -537,7 +539,7 @@ public abstract class Scheme {
   }
   
   public static object string_to_list(object str) {
-	trace(2, "called: string_to_list\n");
+	trace(2, "called: string_to_list: {0}\n", str);
 	object retval = EmptyList;
 	if (str != null) {
 	  string sstr = str.ToString();
@@ -545,7 +547,7 @@ public abstract class Scheme {
 		retval = cons(sstr[i], retval);
 	  }
 	}
-	return retval;
+	return reverse(retval);
   }
 
   public static object string_to_symbol(object s) {

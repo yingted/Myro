@@ -2,18 +2,13 @@
 Bugs
 ====
 
-1. need to implement or fix: memq
-2. eq? and equal? and = should be different
-   then name.x lookups will work
-3. make pretty-print safer and useful
-
-4. Handle system exception so that you could continue?
-   need to grab current continuation
-   Also need to be able to try/catch system exception
+1. eq? and equal? and = should be different
+2. make pretty-print safer and useful
+3. Handle system exception to be able to try/catch them
+4. exceptions/continuations allow fix and continue?
 
 
 scheme-to-csharp
 ================
 
 1. add DLR flag and code
-2. handle varargs: (lambda args ...)
