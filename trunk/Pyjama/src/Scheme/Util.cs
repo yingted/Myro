@@ -248,10 +248,11 @@ public abstract class Scheme {
 		extend_frame("int", new Proc((Procedure1)ToInt, 1, 1),
 		extend_frame("sort", new Proc((Procedure1)sort, 1, 1),
 		extend_frame("string->symbol", new Proc((Procedure1) string_to_symbol, 1, 1),
+		extend_frame("symbol->string", new Proc((Procedure1) symbol_to_string, 1, 1),
 		extend_frame("group", new Proc((Procedure2) group, 2, 1),
 		extend_frame("member", new Proc((Procedure2)member, 2, 1),
 		extend_frame("format", new Proc((Procedure1)format_list, -1, 1),
-			make_frame(vars, vals)))))))))));
+			make_frame(vars, vals))))))))))));
   }
   
   public static object make_binding(object args1, object args2) {
