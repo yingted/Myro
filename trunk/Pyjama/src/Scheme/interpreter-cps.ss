@@ -15,7 +15,7 @@
 	  (lambda-cont (exp)
 	    (m exp toplevel-env REP-handler
 	      (lambda-cont (v)
-		(sys-pretty-print v)
+		(pretty-print-prim v)
 		(read-datum "(test-all)" REP-handler
 		  (lambda-cont2 (datum tokens-left)
 		    (parse datum REP-handler
@@ -37,21 +37,21 @@
 (define REP-k
   (lambda-cont (v)
     (if (not (eq? v '<void>))
-	(sys-pretty-print v))
+	(pretty-print-prim v))
     (if *need-newline* (newline))
     (read-eval-print)))
 
-(define sys-pretty-print
+(define pretty-print-prim
   (lambda (arg)
     (set! *need-newline* #f)
     (pretty-print arg)))
 
-(define sys-newline
+(define newline-prim
   (lambda ()
     (set! *need-newline* #f)
     (newline)))
 
-(define sys-display
+(define display-prim
   (lambda (arg)
     (let* ((s (format "~s" arg))
 	   (len (string-length s)))
@@ -235,9 +235,9 @@
 		    (proc-args (cadr args)))
 		(proc proc-args env2 handler k2)))
 	    (lambda-proc (args env2 handler k2) (k2 (apply sqrt args)))
-	    (lambda-proc (args env2 handler k2) (for-each sys-pretty-print args) (k2 '<void>))
-	    (lambda-proc (args env2 handler k2) (apply sys-display args) (k2 '<void>))
-	    (lambda-proc (args env2 handler k2) (sys-newline) (k2 '<void>))
+	    (lambda-proc (args env2 handler k2) (for-each pretty-print-prim args) (k2 '<void>))
+	    (lambda-proc (args env2 handler k2) (apply display-prim args) (k2 '<void>))
+	    (lambda-proc (args env2 handler k2) (newline-prim) (k2 '<void>))
 	    (lambda-proc (args env2 handler k2) (load-file (car args) toplevel-env handler k2))
 	    (lambda-proc (args env2 handler k2) (k2 (apply null? args)))
 	    (lambda-proc (args env2 handler k2) (k2 (apply cons args)))
@@ -270,16 +270,16 @@
 	    (lambda-proc (args env2 handler k2)
 	      (let ((proc (car args))
 		    (proc-args (cadr args)))
-		(sys-map proc proc-args env2 handler k2)))
+		(map-prim proc proc-args env2 handler k2)))
 	    ))))
 
-(define* sys-map
+(define* map-prim
   (lambda (proc args env handler k)
     (if (null? args)
 	(k '())
 	(proc (car args) env handler 
 	   (lambda-cont (v1)
-	      (sys-map proc (cdr args) env handler 
+	      (map-prim proc (cdr args) env handler 
 		 (lambda-cont (v2)
 		     (k (cons v1 v2)))))))))
 		     

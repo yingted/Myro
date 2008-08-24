@@ -2,9 +2,14 @@
 Bugs
 ====
 
-1. need to implement or fix: memq, range, module.name, map
+1. need to implement or fix: memq
 2. eq? and equal? and = should be different
+   then name.x lookups will work
 3. make pretty-print safer and useful
+
+4. Handle system exception so that you could continue?
+   need to grab current continuation
+   Also need to be able to try/catch system exception
 
 
 scheme-to-csharp

@@ -53,9 +53,9 @@
     (make-toplevel-env "object" ())
     (make-macro-env "object" ())
     (make-empty-environment "object" ())
-    (sys-display "void" ())
-    (sys-pretty-print "void" ())
-    (sys-newline "void" ())
+    (display-prim "void" ())
+    (pretty-print-prim "void" ())
+    (newline-prim "void" ())
     (parse-string "void" ())
     (get-parsed-sexps "void" ())
     (set-car! "void" ())
@@ -95,9 +95,9 @@
      ((eq? name 'apply*) 'apply)
      ((eq? name 'class) 'class_name)
      ((eq? name 'set!) 'Assign)
-     ((eq? name 'eq?) 'Same) ;; FIXME: eq?, =, and equal? are not the same
-     ((eq? name '=) 'Same)
-     ((eq? name 'equal?) 'Same)
+     ((eq? name 'eq?) 'Eq) 
+     ((eq? name '=) 'EqualSign)
+     ((eq? name 'equal?) 'Equal)
      ((eq? name 'bool) 'boolean)
      ((eq? name '<) 'LessThan)
      ((eq? name '>) 'GreaterThan)
@@ -397,7 +397,7 @@
 	 ((eq? (car exp) 'quote) 
 	  (if (eq? (cadr exp) '())
 	      "EmptyList"
-	      (format "\"~a\"" (cadr exp))))
+	      (format "makeSymbol(\"~a\")" (cadr exp))))
 	 ((eq? (car exp) 'quasiquote) (format "\"~a\"" (cadr exp)))
 	 ((eq? (car exp) 'if) ;; if expression
 	  (format "((~a) ? (~a) : (~a))"
