@@ -398,7 +398,7 @@
 	 ((eq? (car exp) 'quote) 
 	  (if (eq? (cadr exp) '())
 	      "EmptyList"
-	      (format "makeSymbol(\"~a\")" (cadr exp))))
+	      (format "symbol(\"~a\")" (cadr exp))))
 	 ((eq? (car exp) 'quasiquote) (format "\"~a\"" (cadr exp)))
 	 ((eq? (car exp) 'if) ;; if expression
 	  (format "((~a) ? (~a) : (~a))"

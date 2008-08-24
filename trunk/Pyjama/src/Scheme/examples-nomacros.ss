@@ -256,39 +256,39 @@
       (div 10 2))
     (verify "division by zero"
       (try (div 10 0) (catch e e)))
-    (verify "division by zero"
-      (try (let ((x (try (div 10 0)))) x) (catch e e)))
-    (verify 5
-      (let ((x (try (div 10 2) (catch e -1)))) x))
-    (verify -1
-      (let ((x (try (div 10 0) (catch e -1)))) x))
-    (verify 5
-      (let ((x (try (div 10 2) (catch e -1) (finally (print 'closing-files) 42))))  x))
-    (verify -1
-      (let ((x (try (div 10 0) (catch e -1) (finally (print 'closing-files) 42))))  x))
-    (verify 5
-      (let ((x (try (div 10 2) (finally (print 'closing-files) 42))))  x))
-    (verify 'foo
-      (try (let ((x (try (div 10 0) (catch e -1 (raise 'foo)) (finally (print 'closing-files) 42))))  x) (catch e e)))
-    (verify 'ack
-      (try (let ((x (try (div 10 0)
-                (catch e -1 (raise 'foo))
-                (finally (print 'closing-files) (raise 'ack) 42))))
-       x) (catch e e)))
-    (verify 99
-      (try (let ((x (try (div 10 0)
-                     (catch e -1 (raise 'foo))
-                     (finally (print 'closing-files) (raise 'ack) 42))))
-            x)
-       (catch e (if (equal? e 'ack) 99 (raise 'doug)))
-       (finally (print 'closing-outer-files))))
-    (verify 'doug
-      (try (try (let ((x (try (div 10 0)
-                     (catch e -1 (raise 'foo))
-                     (finally (print 'closing-files) (raise 'ack) 42))))
-            x)
-       (catch e (if (equal? e 'foo) 99 (raise 'doug)))
-       (finally (print 'closing-outer-files))) (catch e e)))
+;;    (verify "division by zero"
+;;      (try (let ((x (try (div 10 0)))) x) (catch e e)))
+;;    (verify 5
+;;      (let ((x (try (div 10 2) (catch e -1)))) x))
+;;     (verify -1
+;;       (let ((x (try (div 10 0) (catch e -1)))) x))
+;;     (verify 5
+;;       (let ((x (try (div 10 2) (catch e -1) (finally (print 'closing-files) 42))))  x))
+;;     (verify -1
+;;       (let ((x (try (div 10 0) (catch e -1) (finally (print 'closing-files) 42))))  x))
+;;     (verify 5
+;;       (let ((x (try (div 10 2) (finally (print 'closing-files) 42))))  x))
+;;     (verify 'foo
+;;       (try (let ((x (try (div 10 0) (catch e -1 (raise 'foo)) (finally (print 'closing-files) 42))))  x) (catch e e)))
+;;     (verify 'ack
+;;       (try (let ((x (try (div 10 0)
+;;                 (catch e -1 (raise 'foo))
+;;                 (finally (print 'closing-files) (raise 'ack) 42))))
+;;        x) (catch e e)))
+;;     (verify 99
+;;       (try (let ((x (try (div 10 0)
+;;                      (catch e -1 (raise 'foo))
+;;                      (finally (print 'closing-files) (raise 'ack) 42))))
+;;             x)
+;;        (catch e (if (equal? e 'ack) 99 (raise 'doug)))
+;;        (finally (print 'closing-outer-files))))
+;;     (verify 'doug
+;;       (try (try (let ((x (try (div 10 0)
+;;                      (catch e -1 (raise 'foo))
+;;                      (finally (print 'closing-files) (raise 'ack) 42))))
+;;             x)
+;;       (catch e (if (equal? e 'foo) 99 (raise 'doug)))
+;;       (finally (print 'closing-outer-files))) (catch e e)))
     ))
 
 ;; (define test-loop

@@ -223,7 +223,7 @@
       (list 'exit 'apply 'sqrt 'print 'display 'newline 'load 'null? 'cons 'car 'cdr
 	    'list '+ '- '* '/ '< '> '= 'equal? 'eq? 'memq 'range 'set-car! 'set-cdr!
 	    'import 'get 'call-with-current-continuation 'call/cc
-	    'reverse 'append 'list->vector 'dir 'current-time 'map)
+	    'reverse 'append 'list->vector 'dir 'current-time 'map 'env)
       (list (lambda-proc (args env2 handler k2)
  	      (set! macro-env (make-macro-env))
  	      (set! toplevel-env (make-toplevel-env))
@@ -272,6 +272,8 @@
 	      (let ((proc (car args))
 		    (proc-args (cadr args)))
 		(map-prim proc proc-args env2 handler k2)))
+	    ;; env:
+	    (lambda-proc (args env2 handler k2) (k2 env2))
 	    ))))
 
 (define* map-prim

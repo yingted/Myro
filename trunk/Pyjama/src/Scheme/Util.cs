@@ -3,20 +3,143 @@
 using System;
 using System.IO; // File
 using Microsoft.Scripting.Math;
+using System.Collections; // Hashtable
 using System.Collections.Generic; // List
 using Microsoft.VisualBasic.CompilerServices;
 
 public class Config {
   public int DEBUG = 0;
   public bool NEED_NEWLINE = false;
+  Hashtable symbol_table = new Hashtable(); //Default one
+  int symbol_count = 1;
 
   public Config() {
+  }
+
+  public Symbol symbol(string ssymbol) {
+	if (!symbol_table.ContainsKey(ssymbol)) {
+	  symbol_table.Add(ssymbol, new Symbol(ssymbol, symbol_count));
+	  symbol_count++;
+	}
+	return (Symbol) symbol_table[ssymbol];
+  }
+  
+}
+
+public class Symbol {
+  string id;
+  int val;
+  
+  public Symbol(string id, int val) {
+	this.id = id;
+	this.val = val;
+  }
+  
+  public override bool Equals(object other) {
+	return ((other is Symbol) && (this.val == ((Symbol)other).val));
+  }
+  
+  public override int GetHashCode() {
+	return id.GetHashCode();
+  }
+  
+  public override string ToString() {
+	return this.id;
+  }
+}
+
+public class Rational {
+  int numerator;
+  int denominator;
+  
+  public Rational(int num) {
+	this.numerator = num;
+	this.denominator = 1;
+  }
+  
+  public Rational(int numerator, int denominator) {
+	if (denominator == 0)
+	  throw new Exception("cannot represent rationals with a zero denominator");
+	int gcd = GCD(numerator, denominator);
+	this.numerator = numerator/gcd;
+	this.denominator = denominator/gcd;
+  }
+  
+  public static int GCD(int n1, int n2) {
+	// Greatest Common Denominator
+	n1 = Math.Abs(n1);
+	n2 = Math.Abs(n2);
+	if (n1 == 0) return n2;
+	if (n2 == 0) return n1;
+	if (n1 > n2) return GCD(n2, n1 % n2);
+	else         return GCD(n1, n2 % n1);
+  }
+  
+  public static int LCM(int n1, int n2) {
+	// Least Common Multiple
+	n1 = Math.Abs(n1);
+	n2 = Math.Abs(n2);
+	if (n1 > n2) return checked((n2 / GCD(n1, n2)) * n1);
+	else         return checked((n1 / GCD(n1, n2)) * n2);
+  }
+  
+  public override bool Equals(object other) {
+	return (other is Rational &&
+		(this.numerator == ((Rational)other).numerator &&
+			this.denominator == ((Rational)other).denominator));
+  }
+  
+  public override int GetHashCode() {
+	double d = ((double) numerator) / denominator;
+	return d.GetHashCode();
+  }
+  
+  public override string ToString() {
+	//if (denominator != 1)
+	return string.Format("{0}/{1}", numerator, denominator);
+	//else
+	//return numerator.ToString();
+  }
+  
+  public static implicit operator double(Rational f) {
+	return (((double) f.numerator) / ((double) f.denominator));
+  }
+  
+  public static implicit operator int(Rational f) {
+	return f.numerator / f.denominator;
+  }
+  
+  public static implicit operator float(Rational f) {
+	return (((float) f.numerator) / ((float) f.denominator));
+  }
+  
+  public static Rational operator +(Rational f1, Rational f2) {
+	int lcm = LCM(f1.denominator, f2.denominator);
+	return new Rational((f1.numerator * lcm/f1.denominator +
+			f2.numerator * lcm/f2.denominator),
+		lcm);
+  }
+  
+  public static Rational operator +(Rational f1, int i) {
+	int lcm = LCM(f1.denominator, 1);
+	return new Rational((f1.numerator * lcm/f1.denominator +
+			i * lcm/1),
+		lcm);
+  }
+  
+  public static Rational operator +(int i, Rational f1) {
+	int lcm = LCM(f1.denominator, 1);
+	return new Rational((f1.numerator * lcm/f1.denominator +
+			i * lcm/1),
+		lcm);
   }
 }
 
 public abstract class Scheme {
 
   public static Config config = new Config();
+
+  public static Symbol EmptyList = (Symbol) symbol("()");
 
   public delegate void Function();
   public delegate bool Predicate(object obj);
@@ -34,8 +157,8 @@ public abstract class Scheme {
   public delegate void Procedure2Void(object args1, object args2);
   public delegate bool Procedure2Bool(object args1, object args2);
 
-  public static Symbol makeSymbol(string symbol) {
-	return new Symbol(symbol);
+  public static object symbol(object symbol) {
+	return config.symbol(symbol.ToString());
   }
 
   public static BigInteger makeBigInteger(int value) {
@@ -88,7 +211,7 @@ public abstract class Scheme {
 	  this.returntype = returntype;
 	}
 	public object Call(object actual) {
-	  trace(1, "calling Call1: {0} {1} {2} {3}\n", actual, proc, args, returntype);
+	  //trace(1, "calling Call1: {0} {1} {2} {3}\n", actual, proc, args, returntype);
 	  object retval = null;
 	  if (returntype == 0) { // void return
 		if (args == -1) 
@@ -131,7 +254,7 @@ public abstract class Scheme {
 	}
 
 	public object Call(object args1, object args2) {
-	  trace(1, "calling Call2: {0} {1}\n", args1, args2);
+	  //trace(1, "calling Call2: {0} {1}\n", args1, args2);
 	  object retval = null;
 	  if (returntype == 0) { // return void
 		((Procedure2Void)proc)(args1, args2);
@@ -221,7 +344,7 @@ public abstract class Scheme {
   }
 
   public static object group(object chars, object delimiter) {
-	trace(2, "calling group({0}, {1})", chars, delimiter);
+	//trace(2, "calling group({0}, {1})", chars, delimiter);
 	// given list of chars and a delim char, return a list of strings
 	object retval = EmptyList;
 	object buffer = EmptyList;
@@ -243,20 +366,21 @@ public abstract class Scheme {
   public static object make_initial_environment (object vars, object vals)
   {
 	return list(
-		extend_frame("debug", new Proc((Procedure1)debug, -1, 1),
-		extend_frame("typeof", new Proc((Procedure1)get_type, 1, 1),
-		extend_frame("float", new Proc((Procedure1)ToDouble, 1, 1),
-		extend_frame("int", new Proc((Procedure1)ToInt, 1, 1),
-		extend_frame("sort", new Proc((Procedure1)sort, 1, 1),
-		extend_frame("string->symbol", new Proc((Procedure1) string_to_symbol, 1, 1),
-		extend_frame("symbol->string", new Proc((Procedure1) symbol_to_string, 1, 1),
-		extend_frame("string->list", new Proc((Procedure1) string_to_list, 1, 1),
-		extend_frame("group", new Proc((Procedure2) group, 2, 1),
-		extend_frame("member", new Proc((Procedure2)member, 2, 1),
-		extend_frame("format", new Proc((Procedure1)format_list, -1, 1),
-		extend_frame("list-head", new Proc((Procedure2)list_head, 2, 1),
-		extend_frame("list-tail", new Proc((Procedure2)list_tail, 2, 1),
-			make_frame(vars, vals)))))))))))))));
+		extend_frame(symbol("debug"), new Proc((Procedure1)debug, -1, 1),
+		extend_frame(symbol("typeof"), new Proc((Procedure1)get_type, 1, 1),
+		extend_frame(symbol("float"), new Proc((Procedure1)ToDouble, 1, 1),
+		extend_frame(symbol("int"), new Proc((Procedure1)ToInt, 1, 1),
+		extend_frame(symbol("sort"), new Proc((Procedure1)sort, 1, 1),
+		extend_frame(symbol("string->symbol"), new Proc((Procedure1) string_to_symbol, 1, 1),
+		extend_frame(symbol("symbol->string"), new Proc((Procedure1) symbol_to_string, 1, 1),
+		extend_frame(symbol("string->list"), new Proc((Procedure1) string_to_list, 1, 1),
+		extend_frame(symbol("group"), new Proc((Procedure2) group, 2, 1),
+		extend_frame(symbol("member"), new Proc((Procedure2)member, 2, 1),
+		extend_frame(symbol("format"), new Proc((Procedure1)format_list, -1, 1),
+		extend_frame(symbol("list-head"), new Proc((Procedure2)list_head, 2, 1),
+		extend_frame(symbol("list-tail"), new Proc((Procedure2)list_tail, 2, 1),
+		extend_frame(symbol("symbol"), new Proc((Procedure1)symbol, 1, 1),
+			make_frame(vars, vals))))))))))))))));
   }
   
   public static object make_binding(object args1, object args2) {
@@ -270,13 +394,13 @@ public abstract class Scheme {
   
   public static object make_binding_proc_extension(object var, object val) {
 	return apply( make_binding_proc, 
-		list(var, list("procedure", "<extension>", val)));
+		list(var, list(symbol("procedure"), symbol("<extension>"), val)));
   }
 
   public static object extend_frame(object var, object val, object env) {
 	
 	return cons(apply( make_binding_proc, 
-			list(var, list("procedure", "<extension>", val))),
+			list(var, list(symbol("procedure"), symbol("<extension>"), val))),
 		env);
   }
 
@@ -318,24 +442,24 @@ public abstract class Scheme {
 	return ((object)
 		list(make_frame(
 				list (
-					"and", 
-					"or",
-					"cond", 
-					"let",
-					"letrec",
-					"let*",
-					"case",
-					"record-case"
+					symbol("and"), 
+					symbol("or"),
+					symbol("cond"), 
+					symbol("let"),
+					symbol("letrec"),
+					symbol("let*"),
+					symbol("case"),
+					symbol("record-case")
 					  ),
 				list (
-					"and_transformer",
-					"or_transformer",
-					"cond_transformer",
-					"let_transformer",
-					"letrec_transformer",
-					"let_star_transformer",
-					"case_transformer",
-					"record_case_transformer"))));
+					symbol("and_transformer"),
+					symbol("or_transformer"),
+					symbol("cond_transformer"),
+					symbol("let_transformer"),
+					symbol("letrec_transformer"),
+					symbol("let_star_transformer"),
+					symbol("case_transformer"),
+					symbol("record_case_transformer")))));
   }
 
   public static object range(object args) {
@@ -362,7 +486,7 @@ public abstract class Scheme {
   }
 
   public static object list_tail(object lyst, object pos) {
-	trace(5, "calling list_tail({0}, {1})\n", lyst, pos);
+	//trace(5, "calling list_tail({0}, {1})\n", lyst, pos);
 	if (list_q(lyst)) {
 	  object current = lyst;
 	  int current_pos = 0;
@@ -376,7 +500,7 @@ public abstract class Scheme {
   }
 
   public static object list_head(object lyst, object pos) {
-	trace(5, "calling list_head({0}, {1})\n", lyst, pos);
+	//trace(5, "calling list_head({0}, {1})\n", lyst, pos);
 	if (list_q(lyst)) {
 	  object retval = EmptyList;
 	  object current = lyst;
@@ -418,11 +542,11 @@ public abstract class Scheme {
   }
 
   public static object apply(object proc, object args) {
-	trace(1, "called: apply({0}, {1})\n", proc, args);
+	//trace(1, "called: apply({0}, {1})\n", proc, args);
 	if (proc is Proc)
 	  return ((Proc)proc).Call(args);
 	else {
-	  if (procedure_q(proc) && Equal(cadr(proc), "<extension>"))
+	  if (procedure_q(proc) && Equal(cadr(proc), symbol("<extension>")))
 		return ((Proc)caddr(proc)).Call(args);
 	  else
 		throw new Exception(string.Format("invalid procedure: {0}", proc));
@@ -433,14 +557,14 @@ public abstract class Scheme {
 	if (proc is Proc)
 	  return ((Proc)proc).Call(args1, args2);
 	else
-	  if (procedure_q(proc) && Equal(cadr(proc), "<extension>"))
+	  if (procedure_q(proc) && Equal(cadr(proc), symbol("<extension>")))
 		return ((Proc)caddr(proc)).Call(args1, args2);
 	  else
 		throw new Exception(string.Format("invalid procedure: {0}", proc));
   }
 
   public static object map(object proc, object args) {
-	trace(1, "called: map1({0}, {1})\n", proc, args);
+	//trace(1, "called: map1({0}, {1})\n", proc, args);
 	object retval = EmptyList;
 	object current1 = args;
 	while (!Equal(current1, EmptyList)) {
@@ -451,7 +575,7 @@ public abstract class Scheme {
   }
 
   public static object map(object proc, object args1, object args2) {
-	trace(1, "called: map2\n");
+	//trace(1, "called: map2\n");
 	object retval = EmptyList;
 	object current1 = args1;
 	object current2 = args2;
@@ -464,7 +588,7 @@ public abstract class Scheme {
   }
 
   public static Func<object,bool> tagged_list(object test_string, object pred, object value) {
-	trace(2, "called: tagged_list\n");
+	//trace(2, "called: tagged_list\n");
 	return (object lyst) => {
 	  if (list_q(lyst))
 		return (((bool)Equal(car(lyst), test_string)) && ((bool)((Predicate2)pred)(length(lyst), value)));
@@ -473,12 +597,12 @@ public abstract class Scheme {
 	};
   }
 
-  public static Func<object,bool> procedure_q = tagged_list("procedure", (Predicate2)GreaterOrEqual, 1);
+  public static Func<object,bool> procedure_q = tagged_list(symbol("procedure"), (Predicate2)GreaterOrEqual, 1);
 
-  public static Func<object,bool> module_q = tagged_list("module", (Predicate2)GreaterOrEqual, 1);
+  public static Func<object,bool> module_q = tagged_list(symbol("module"), (Predicate2)GreaterOrEqual, 1);
 
   public static object list_to_vector(object lyst) {
-	trace(2, "called: list_to_vector\n");
+	//trace(2, "called: list_to_vector\n");
 	int len = (int) length(lyst);
 	object current = lyst;
 	object[] retval = new object[len];
@@ -490,17 +614,17 @@ public abstract class Scheme {
   }
 
   public static object string_ref(object s, object i) {
-	trace(9, "called: string_ref(s, {0})\n", i);
+	//trace(9, "called: string_ref(s, {0})\n", i);
 	return s.ToString()[(int)i];
   }
 
   public static object make_string(object obj) {
-	trace(2, "called: make_string\n");
+	//trace(2, "called: make_string\n");
 	if (obj == null || obj == (object) NULL) {
-	  trace(2, "make_string returned: \"\\0\"\n");
+	  //trace(2, "make_string returned: \"\\0\"\n");
 	  return (object) "\0";
 	}
-	trace(2, "make_string returned: \"{0}\"\n", obj.ToString());
+	//trace(2, "make_string returned: \"{0}\"\n", obj.ToString());
 	return obj.ToString();
   }
 
@@ -558,12 +682,12 @@ public abstract class Scheme {
   }
 
   public static bool string_is__q(object o1, object o2) {
-	trace(4, "calling string=?({0}, {1})", o1, o2);
+	//trace(4, "calling string=?({0}, {1})", o1, o2);
 	return ((o1 is string) && (o2 is string) && ((string)o1) == ((string)o2));
   }
   
   public static object string_to_list(object str) {
-	trace(2, "called: string_to_list: {0}\n", str);
+	//trace(2, "called: string_to_list: {0}\n", str);
 	object retval = EmptyList;
 	if (str != null) {
 	  string sstr = str.ToString();
@@ -575,7 +699,7 @@ public abstract class Scheme {
   }
 
   public static object string_to_symbol(object s) {
-	return new Symbol(s.ToString());
+	return symbol(s.ToString());
   }
 
   public static object string_to_integer(object str) {
@@ -624,7 +748,7 @@ public abstract class Scheme {
   }
 
   public static string repr(object obj) {
-	trace(3, "calling repr...\n");
+	//trace(3, "calling repr\n");
 	if (obj == null) {
 	  return "#<void>";
 	} else if (obj is bool) {
@@ -640,10 +764,7 @@ public abstract class Scheme {
 	} else if (obj is String) {
 	  return String.Format("\"{0}\"", obj);
 	} else if (obj is Symbol) {
-	  if (((Symbol)obj) == EmptyList)
-		return "()";
-	  else
-		return obj.ToString();
+	  return obj.ToString();
 	} else if (obj is Cons) {
 	  if (procedure_q(obj)) {
 		return "#<procedure>";
@@ -658,7 +779,7 @@ public abstract class Scheme {
 		  retval += car(current); //repr(car(current));
 		  current = cdr(current);
 		  if (!pair_q(current) && !Equal(current, EmptyList)) {
-			retval += " . " + "..."; //repr(current);
+			retval += " . " + repr(current); // ...
 		  }
 		}
 		return "(" + retval + ")";
@@ -669,7 +790,7 @@ public abstract class Scheme {
   }
 
   public static string format_list(object args) {
-	trace(5, "calling format_list: {0} length={1}\n", args, length(args));
+	//trace(5, "calling format_list: {0} length={1}\n", args, length(args));
 	if (pair_q(args)) {
 	  int len = (int)length(args);
 	  if (len == 1)
@@ -766,7 +887,7 @@ public abstract class Scheme {
   }
 
   public static int cmp(object obj1, object obj2) {
-	trace(8, "calling cmp({0}, {1})\n", obj1, obj2);
+	//trace(8, "calling cmp({0}, {1})\n", obj1, obj2);
 	if (obj1 is Symbol) {
 	  if (obj2 is Symbol) {
 		return cmp(obj1.ToString(), obj2.ToString());
@@ -781,10 +902,26 @@ public abstract class Scheme {
 	}
   }
 
+  public static bool Eq(object obj1, object obj2) {
+	if ((obj1 is Symbol) || (obj2 is Symbol)) {
+	  if ((obj1 is Symbol) && (obj2 is Symbol))
+		return ((Symbol)obj1).Equals(obj2);
+	  else return false;
+	} else {
+	  try {
+		bool retval = (obj1 == obj2);//(ObjectType.ObjTst(obj1, obj2, false) == 0);
+		return retval;
+	  } catch {
+		return false;
+	  }
+	}
+  }
+
   public static bool Equal(object obj1, object obj2) {
-	trace(8, "calling equal({0}, {1})\n", obj1, obj2);
-	if ((obj1 is Symbol) && (obj2 is Symbol)) { // HACK! Compare pointers!
-	  return (obj1.ToString() == obj2.ToString());
+	if ((obj1 is Symbol) || (obj2 is Symbol)) { 
+	  if ((obj1 is Symbol) && (obj2 is Symbol))
+		return ((Symbol)obj1).Equals(obj2);
+	  else return false;
 	} else if (list_q(obj1) && list_q(obj2)) {
 	  if (null_q(obj1) && null_q(obj2))
 		return true;
@@ -799,17 +936,14 @@ public abstract class Scheme {
 	} else {
 	  try {
 		bool retval = (ObjectType.ObjTst(obj1, obj2, false) == 0);
-		trace(8, "equal returning: {0}\n", retval);
 		return retval;
 	  } catch {
-		trace(8, "false2\n");
 		return false;
 	  }
 	}
   }
 
   public static bool EqualSign(object obj1, object obj2) {
-	trace(8, "calling =({0}, {1})\n", obj1, obj2);
 	if (obj1 is Symbol) {
 	  if (obj2 is Symbol) {
 		return (obj1.ToString() == obj2.ToString());
@@ -821,33 +955,8 @@ public abstract class Scheme {
 	  } else {
 		try {
 		  bool retval = (ObjectType.ObjTst(obj1, obj2, false) == 0);
-		  trace(8, "= returning: {0}\n", retval);
 		  return retval;
 		} catch {
-		  trace(8, "= returning false2\n");
-		  return false;
-		}
-	  }
-	}
-  }
-
-  public static bool Eq(object obj1, object obj2) {
-	trace(8, "calling eq({0}, {1})\n", obj1, obj2);
-	if (obj1 is Symbol) {
-	  if (obj2 is Symbol) {
-		return (obj1.ToString() == obj2.ToString());
-	  } else 
-		return Eq(obj1.ToString(), obj2);
-	} else {
-	  if (obj2 is Symbol) {
-		return Eq(obj1, obj2.ToString());
-	  } else {
-		try {
-		  bool retval = (ObjectType.ObjTst(obj1, obj2, false) == 0);
-		  trace(8, "eq returning: {0}\n", retval);
-		  return retval;
-		} catch {
-		  trace(8, "eq returning false\n");
 		  return false;
 		}
 	  }
@@ -1113,7 +1222,7 @@ public abstract class Scheme {
   // List functions -----------------------------------------------
 
   public static object member(object obj1, object obj2) {
-	trace(2, "calling member({0}, {1})\n", obj1, obj2);
+	//trace(2, "calling member({0}, {1})\n", obj1, obj2);
 	if (list_q(obj2)) {
 	  object current = obj2;
 	  while (!Equal(current, EmptyList)) {
@@ -1148,8 +1257,6 @@ public abstract class Scheme {
 			  obj, pos));
   }
 
-  public static Symbol EmptyList = new Symbol("()");
-
   public static bool null_q(object o1) {
 	return ((o1 is Symbol) && (((Symbol)o1) == EmptyList));
   }
@@ -1159,10 +1266,10 @@ public abstract class Scheme {
   }
 
   public static object length(object obj) {
-	trace(3, "called: length\n");
+	//trace(3, "called: length\n");
 	if (list_q(obj)) {
 	  if (null_q(obj)) {
-		trace(3, "length returned: {0}\n", 0);
+		//trace(3, "length returned: {0}\n", 0);
 		return 0;
 	  } else {
 		int len = 0;
@@ -1171,7 +1278,7 @@ public abstract class Scheme {
 		  len++;
 		  current = cdr(current);
 		}
-		trace(3, "length returned: {0}\n", len);
+		//trace(3, "length returned: {0}\n", len);
 		return len;
 	  }
 	} else
@@ -1196,9 +1303,9 @@ public abstract class Scheme {
 
   static object pivot (object l) {
 	if (null_q(l))
-	  return "done";
+	  return symbol("done");
 	else if (null_q(cdr(l)))
-	  return "done";
+	  return symbol("done");
 	else if (cmp(car(l), cadr(l)) <= 0)
 	  return pivot(cdr(l));
 	else
@@ -1217,7 +1324,7 @@ public abstract class Scheme {
 
   public static object sort(object l) {
 	object piv = pivot(l);
-	if (Equal(piv, "done")) return l;
+	if (Equal(piv, symbol("done"))) return l;
 	object parts = partition(piv, l, EmptyList, EmptyList);
 	return append(sort(car(parts)),
 		          sort(cadr(parts)));
@@ -1387,279 +1494,6 @@ public abstract class Scheme {
   public static object cdddar(object x) {	return cdr(cdr(cdr(car(x))));   }
   public static object cddddr(object x) {	return cdr(cdr(cdr(cdr(x))));   }
 
-  public class Cons {
-	public object car;
-	public object cdr;
-	
-	public Cons(object a, object b) {
-	  this.car = a;
-	  if (b is object[] || b == null) 
-		this.cdr = list(b);
-	  else
-		this.cdr = b;
-	}
-	
-	public override string ToString() {
-	  if (this.car == new Symbol("quote") &&
-		  (this.cdr is Cons) &&
-		  ((Cons)this.cdr).cdr == EmptyList) {
-		return String.Format("'{0}", ((Cons)this.cdr).car);
-	  } else if (this.car == new Symbol("quasiquote") &&
-		  (this.cdr is Cons) &&
-		  ((Cons)this.cdr).cdr == EmptyList) {
-		return String.Format("`{0}", ((Cons)this.cdr).car);
-	  } else if (this.car == new Symbol("unquote") &&
-		  (this.cdr is Cons) &&
-		  ((Cons)this.cdr).cdr == EmptyList) {
-		return String.Format(",{0}", ((Cons)this.cdr).car);
-	  } else if (this.car == new Symbol("unquote-splicing") &&
-		  (this.cdr is Cons) &&
-		  ((Cons)this.cdr).cdr == EmptyList) {
-		return String.Format(",@{0}", ((Cons)this.cdr).car);
-	  } else {
-		return String.Format("({0} ...)", this.car);
-	  }
-	}
-
-	public string UnSafeToString() {
-	  if (this.car == new Symbol("quote") &&
-		  (this.cdr is Cons) &&
-		  ((Cons)this.cdr).cdr == EmptyList) {
-		return String.Format("'{0}", ((Cons)this.cdr).car);
-	  } else if (this.car == new Symbol("quasiquote") &&
-		  (this.cdr is Cons) &&
-		  ((Cons)this.cdr).cdr == EmptyList) {
-		return String.Format("`{0}", ((Cons)this.cdr).car);
-	  } else if (this.car == new Symbol("unquote") &&
-		  (this.cdr is Cons) &&
-		  ((Cons)this.cdr).cdr == EmptyList) {
-		return String.Format(",{0}", ((Cons)this.cdr).car);
-	  } else if (this.car == new Symbol("unquote-splicing") &&
-		  (this.cdr is Cons) &&
-		  ((Cons)this.cdr).cdr == EmptyList) {
-		return String.Format(",@{0}", ((Cons)this.cdr).car);
-	  } else {
-		string s = String.Format("({0}", this.car);
-		object sexp = this.cdr;
-		while (sexp is Cons) {
-		  s += String.Format(" {0}", ((Cons)sexp).car);
-		  sexp = ((Cons)sexp).cdr;
-		}
-		if (sexp == EmptyList) {
-		  s += ")";
-		} else {
-		  s += String.Format(" . {0})", sexp);
-		}
-		return s;
-	  }
-	}
-  }
-  
-  public class Symbol {
-	string id;
-	
-	public Symbol(string id) {
-	  this.id = id;
-	}
-	
-	public override bool Equals(object other) {
-	  return (other is Symbol && this.id == ((Symbol)other).id);
-	}
-	
-	public override int GetHashCode() {
-	  return id.GetHashCode();
-	}
-	
-	public override string ToString() {
-	  return this.id;
-	}
-  }
-  
-  public class Rational {
-	int numerator;
-	int denominator;
-	
-	public Rational(int num) {
-	  this.numerator = num;
-	  this.denominator = 1;
-	}
-	
-	public Rational(int numerator, int denominator) {
-	  if (denominator == 0)
-		throw new Exception("cannot represent rationals with a zero denominator");
-	  int gcd = GCD(numerator, denominator);
-	  this.numerator = numerator/gcd;
-	  this.denominator = denominator/gcd;
-	}
-	
-	public static int GCD(int n1, int n2) {
-	  // Greatest Common Denominator
-	  n1 = Math.Abs(n1);
-	  n2 = Math.Abs(n2);
-	  if (n1 == 0) return n2;
-	  if (n2 == 0) return n1;
-	  if (n1 > n2) return GCD(n2, n1 % n2);
-	  else         return GCD(n1, n2 % n1);
-	}
-	
-	public static int LCM(int n1, int n2) {
-	  // Least Common Multiple
-	  n1 = Math.Abs(n1);
-	  n2 = Math.Abs(n2);
-	  if (n1 > n2) return checked((n2 / GCD(n1, n2)) * n1);
-	  else         return checked((n1 / GCD(n1, n2)) * n2);
-	}
-
-	public override bool Equals(object other) {
-	  return (other is Rational &&
-		  (this.numerator == ((Rational)other).numerator &&
-			  this.denominator == ((Rational)other).denominator));
-	}
-	
-	public override int GetHashCode() {
-	  double d = ((double) numerator) / denominator;
-	  return d.GetHashCode();
-	}
-	
-	public override string ToString() {
-	  //if (denominator != 1)
-	  return string.Format("{0}/{1}", numerator, denominator);
-	  //else
-	  //return numerator.ToString();
-	}
-
-	public static implicit operator double(Rational f) {
-	  return (((double) f.numerator) / ((double) f.denominator));
-	}
-
-	public static implicit operator int(Rational f) {
-	  return f.numerator / f.denominator;
-  }
-
-	public static implicit operator float(Rational f) {
-	  return (((float) f.numerator) / ((float) f.denominator));
-	}
-
-	public static Rational operator +(Rational f1, Rational f2) {
-	  int lcm = LCM(f1.denominator, f2.denominator);
-	  return new Rational((f1.numerator * lcm/f1.denominator +
-			                  f2.numerator * lcm/f2.denominator),
-		                     lcm);
-	}
-
-	public static Rational operator +(Rational f1, int i) {
-	  int lcm = LCM(f1.denominator, 1);
-	  return new Rational((f1.numerator * lcm/f1.denominator +
-			  i * lcm/1),
-		  lcm);
-	}
-
-	public static Rational operator +(int i, Rational f1) {
-	  int lcm = LCM(f1.denominator, 1);
-	  return new Rational((f1.numerator * lcm/f1.denominator +
-			  i * lcm/1),
-		  lcm);
-	}
-  }
-  
-  public class Vector {
-
-	List<object> elements;
-
-	public Vector(object cell) {
-	  elements = new List<object>();
-	  while (cell is Cons) {
-		elements.Add(((Cons)cell).car);
-		cell = ((Cons)cell).cdr;
-	  }
-	}
-
-	public override string ToString() {
-	  string retval = "";
-	  foreach (object s in elements) {
-		if (retval != "") 
-		  retval += " ";
-		retval += s.ToString();
-	  }
-	  return String.Format("#({0})", retval);
-	}
-	
-  }
-
-  public class SchemeBoolean {
-	bool val;
-	
-	public SchemeBoolean(bool val) {
-	  this.val = val;
-	}
-	
-	public override bool Equals(object other) {
-	  return (other is SchemeBoolean && this.val == ((SchemeBoolean)other).val);
-	}
-	
-	public override int GetHashCode() {
-	  return val.GetHashCode();
-	}
-	
-	public override string ToString() {
-	  if (this.val) {
-		return "#t";
-	  } else {
-		return "#f";
-	  }
-	}
-  }
-  
-  public class SchemeCharacter {
-	char ch;
-	
-	public SchemeCharacter(char ch) {
-	  this.ch = ch;
-	}
-	
-	public override bool Equals(object other) {
-	  return (other is SchemeCharacter && this.ch == ((SchemeCharacter)other).ch);
-	}
-	
-	public override int GetHashCode() {
-	  return ch.GetHashCode();
-	}
-	
-	public override string ToString() {
-	  if (this.ch == '\0') return "#\\nul";
-	  else if (this.ch == ' ') return "#\\space";
-	  else if (this.ch == '\t') return "#\\tab";
-	  else if (this.ch == '\n') return "#\\newline";
-	  else if (this.ch == '\b') return "#\\backspace";
-	  else if (this.ch == '\r') return "#\\return";
-	  else if (this.ch == '\f') return "#\\page";
-	  else return String.Format("#\\{0}", this.ch);    // not quite right
-	}
-  }
-  
-  public class SchemeString {
-	string val;
-	
-	public SchemeString(string val) {
-	  this.val = val;
-	}
-	
-	public override bool Equals(object other) {
-	  return (other is SchemeString && this.val == ((SchemeString)other).val);
-	}
-	
-	public override int GetHashCode() {
-	  return val.GetHashCode();
-	}
-	
-	public override string ToString() {
-	  return '"' + this.val + '"';
-	}
-  }
-  
-  
-  // () is represented as EmptyList
-
   public static void pretty_print(object obj) {
 	// FIXME: need to make this safe
 	// Just get representation for now
@@ -1710,6 +1544,99 @@ public abstract class Scheme {
   public static object string_append(object obj1, object obj2) {
 	return (obj1.ToString() + obj2.ToString());
   }
+
+
+public class Cons {
+  public object car;
+  public object cdr;
+  
+  public Cons(object a, object b) {
+	this.car = a;
+	if (b is object[] || b == null) 
+	  this.cdr = list(b);
+	else
+	  this.cdr = b;
+  }
+  
+  public string SafeToString() {
+	if (this.car == symbol("quote") &&
+		(this.cdr is Cons) &&
+		((Cons)this.cdr).cdr == EmptyList) {
+	  return String.Format("'{0}", ((Cons)this.cdr).car);
+	} else if (this.car == symbol("quasiquote") &&
+		(this.cdr is Cons) &&
+		((Cons)this.cdr).cdr == EmptyList) {
+	  return String.Format("`{0}", ((Cons)this.cdr).car);
+	} else if (this.car == symbol("unquote") &&
+		(this.cdr is Cons) &&
+		((Cons)this.cdr).cdr == EmptyList) {
+	  return String.Format(",{0}", ((Cons)this.cdr).car);
+	} else if (this.car == symbol("unquote-splicing") &&
+		(this.cdr is Cons) &&
+		((Cons)this.cdr).cdr == EmptyList) {
+	  return String.Format(",@{0}", ((Cons)this.cdr).car);
+	} else {
+	  return String.Format("({0} ...)", this.car); //...
+	}
+  }
+  
+  public override string ToString() { // Unsafe
+	if (this.car == symbol("quote") &&
+		(this.cdr is Cons) &&
+		((Cons)this.cdr).cdr == EmptyList) {
+	  return String.Format("'{0}", ((Cons)this.cdr).car);
+	} else if (this.car == symbol("quasiquote") &&
+		(this.cdr is Cons) &&
+		((Cons)this.cdr).cdr == EmptyList) {
+	  return String.Format("`{0}", ((Cons)this.cdr).car);
+	} else if (this.car == symbol("unquote") &&
+		(this.cdr is Cons) &&
+		((Cons)this.cdr).cdr == EmptyList) {
+	  return String.Format(",{0}", ((Cons)this.cdr).car);
+	} else if (this.car == symbol("unquote-splicing") &&
+		(this.cdr is Cons) &&
+		((Cons)this.cdr).cdr == EmptyList) {
+	  return String.Format(",@{0}", ((Cons)this.cdr).car);
+	} else {
+	  string s = String.Format("({0}", this.car);
+	  object sexp = this.cdr;
+	  while (sexp is Cons) {
+		s += String.Format(" {0}", ((Cons)sexp).car);
+		sexp = ((Cons)sexp).cdr;
+	  }
+	  if (sexp == EmptyList) {
+		s += ")";
+	  } else {
+		s += String.Format(" . {0})", sexp);
+	  }
+	  return s;
+	}
+  }
+}
+
+public class Vector {
+  
+  List<object> elements;
+  
+	public Vector(object cell) {
+	  elements = new List<object>();
+	  while (cell is Cons) {
+		elements.Add(((Cons)cell).car);
+		cell = ((Cons)cell).cdr;
+	  }
+	}
+  
+  public override string ToString() {
+	string retval = "";
+	foreach (object s in elements) {
+	  if (retval != "") 
+		retval += " ";
+	  retval += s.ToString();
+	}
+	return String.Format("#({0})", retval);
+  }
+  
+}
 
   public static void Main(string [] args) {
 	// ----------------------------------
