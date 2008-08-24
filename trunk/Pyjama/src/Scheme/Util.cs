@@ -783,23 +783,27 @@ public abstract class Scheme {
 
   public static bool Equal(object obj1, object obj2) {
 	trace(8, "calling equal({0}, {1})\n", obj1, obj2);
-	if (obj1 is Symbol) {
-	  if (obj2 is Symbol) {
-		return (obj1.ToString() == obj2.ToString());
-	  } else 
-		return Equal(obj1.ToString(), obj2);
+	if ((obj1 is Symbol) && (obj2 is Symbol)) { // HACK! Compare pointers!
+	  return (obj1.ToString() == obj2.ToString());
+	} else if (list_q(obj1) && list_q(obj2)) {
+	  if (null_q(obj1) && null_q(obj2))
+		return true;
+	  else if (null_q(obj1))
+		return false;
+	  else if (null_q(obj2))
+		return false;
+	  else if (Equal(car(obj1),  car(obj2)))
+		return Equal(cdr(obj1), cdr(obj2));
+	  else
+		return false;
 	} else {
-	  if (obj2 is Symbol) {
-		return Equal(obj1, obj2.ToString());
-	  } else {
-		try {
-		  bool retval = (ObjectType.ObjTst(obj1, obj2, false) == 0);
-		  trace(8, "equal returning: {0}\n", retval);
-		  return retval;
-		} catch {
-		  trace(8, "false2\n");
-		  return false;
-		}
+	  try {
+		bool retval = (ObjectType.ObjTst(obj1, obj2, false) == 0);
+		trace(8, "equal returning: {0}\n", retval);
+		return retval;
+	  } catch {
+		trace(8, "false2\n");
+		return false;
 	  }
 	}
   }
