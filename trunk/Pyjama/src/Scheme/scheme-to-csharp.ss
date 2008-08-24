@@ -85,7 +85,8 @@
 
 (define *system-ignore-functions*
   ;; use scheme name of functions to not move to csharp
-  '(*function-signatures* *ignore-functions* run trampoline *need-newline*))
+  '(*function-signatures* *ignore-functions* run trampoline *need-newline*
+    *code*))
 
 (define proper-name
   (lambda (name)

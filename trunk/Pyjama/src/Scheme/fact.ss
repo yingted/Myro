@@ -43,7 +43,7 @@
 
 (define REP-k
   (lambda-cont (v)
-    (safe-print v)))
+    (pretty-print v)))
 
 ;; temporary, this belongs someplace global (util.ss?):
 

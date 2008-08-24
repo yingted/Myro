@@ -3,9 +3,10 @@ Bugs
 ====
 
 1. eq? and equal? and = should be different
-2. make pretty-print safer and useful
-3. Handle system exception to be able to try/catch them
-4. exceptions/continuations allow fix and continue?
+2. (equal? '(1 2 3) '(1 2 3)) => #f
+3. make pretty-print safer and useful
+4. Handle system exception to be able to try/catch them
+5. exceptions/continuations allow fix and continue?
 
 
 scheme-to-csharp

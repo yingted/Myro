@@ -254,7 +254,9 @@ public abstract class Scheme {
 		extend_frame("group", new Proc((Procedure2) group, 2, 1),
 		extend_frame("member", new Proc((Procedure2)member, 2, 1),
 		extend_frame("format", new Proc((Procedure1)format_list, -1, 1),
-			make_frame(vars, vals)))))))))))));
+		extend_frame("list-head", new Proc((Procedure2)list_head, 2, 1),
+		extend_frame("list-tail", new Proc((Procedure2)list_tail, 2, 1),
+			make_frame(vars, vals)))))))))))))));
   }
   
   public static object make_binding(object args1, object args2) {
@@ -359,12 +361,34 @@ public abstract class Scheme {
 	throw new Exception("improper args to range");
   }
 
-  public static object list_tail(object tail, object pos) {
-	throw new Exception("not implemented: list_tail");
+  public static object list_tail(object lyst, object pos) {
+	trace(5, "calling list_tail({0}, {1})\n", lyst, pos);
+	if (list_q(lyst)) {
+	  object current = lyst;
+	  int current_pos = 0;
+	  while (!Equal(current_pos, pos)) {
+		current = cdr(current);
+		current_pos++;
+	  }
+	  return current;
+	}
+	throw new Exception("list-tail takes a list and a pos");
   }
 
-  public static object list_head(object tail, object pos) {
-	throw new Exception("not implemented: list_head");
+  public static object list_head(object lyst, object pos) {
+	trace(5, "calling list_head({0}, {1})\n", lyst, pos);
+	if (list_q(lyst)) {
+	  object retval = EmptyList;
+	  object current = lyst;
+	  int current_pos = 0;
+	  while (!Equal(current_pos, pos)) {
+		retval = cons(car(current), retval);
+		current = cdr(current);
+		current_pos++;
+	  }
+	  return reverse(retval);
+	}
+	throw new Exception("list-head takes a list and a pos");
   }
 
   public static object read() {
