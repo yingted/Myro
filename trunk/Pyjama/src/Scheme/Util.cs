@@ -290,11 +290,12 @@ public abstract class Scheme {
   public static Proc memq_proc = new Proc((Procedure2Bool) memq, 2, 2);
   public static Proc range_proc = new Proc((Procedure1) range, -1, 1);
   public static Proc reverse_proc = new Proc((Procedure1) reverse, 1, 1);
-  public static Proc sort_proc = new Proc((Procedure1) sort, 1, 1);
+  public static Proc sort_proc = new Proc((Procedure2) sort, 2, 1);
   public static Proc set_car_b_proc = new Proc((Procedure2Void) set_car_b, 2, 0);
   public static Proc set_cdr_b_proc = new Proc((Procedure2Void) set_cdr_b, 2, 0);
   public static Proc sqrt_proc = new Proc((Procedure1) sqrt, -1, 1);
-  public static Proc string_to_symbol_proc = new Proc((Procedure1) string_to_symbol, -1, 1);
+  public static Proc string_to_symbol_proc = new Proc((Procedure1) string_to_symbol, -1, 2);
+  public static Proc stringLessThan_q_proc = new Proc((Procedure2Bool) stringLessThan_q, 2, 1);
   public static Proc null_q_proc = new Proc((Procedure1Bool) null_q, 1, 2);
   public static Proc display_prim_proc = new Proc((Procedure1Void) display, 1, 0);
   public static Proc pretty_print_prim_proc = new Proc((Procedure1Void) pretty_print, -1, 0);
@@ -370,7 +371,7 @@ public abstract class Scheme {
 		extend_frame(symbol("typeof"), new Proc((Procedure1)get_type, 1, 1),
 		extend_frame(symbol("float"), new Proc((Procedure1)ToDouble, 1, 1),
 		extend_frame(symbol("int"), new Proc((Procedure1)ToInt, 1, 1),
-		extend_frame(symbol("sort"), new Proc((Procedure1)sort, 1, 1),
+		extend_frame(symbol("sort"), new Proc((Procedure2)sort, 2, 1),
 		extend_frame(symbol("string->symbol"), new Proc((Procedure1) string_to_symbol, 1, 1),
 		extend_frame(symbol("symbol->string"), new Proc((Procedure1) symbol_to_string, 1, 1),
 		extend_frame(symbol("string->list"), new Proc((Procedure1) string_to_list, 1, 1),
@@ -521,6 +522,11 @@ public abstract class Scheme {
 
   public static object file_exists_q(object path_filename) {
 	return File.Exists(path_filename.ToString());
+  }
+
+  public static bool stringLessThan_q(object a, object b) {
+	// third argument is ignoreCase
+	return (String.Compare(a.ToString(), b.ToString(), false) < 0);
   }
 
   public static object string_length(object str) {
@@ -769,7 +775,7 @@ public abstract class Scheme {
 	  if (procedure_q(obj)) {
 		return "#<procedure>";
 	  } else if (module_q(obj)) {
-		return "#<procedure>";
+		return String.Format("#<module {0}>", car(obj));
 	  } else {
 		object current = (Cons)obj;
 		string retval = "";
@@ -1301,33 +1307,35 @@ public abstract class Scheme {
 	return retval;
   }
 
-  static object pivot (object l) {
+  static object pivot (object p, object l) {
 	if (null_q(l))
 	  return symbol("done");
 	else if (null_q(cdr(l)))
 	  return symbol("done");
+	// FIXME: use p to compare
 	else if (cmp(car(l), cadr(l)) <= 0)
-	  return pivot(cdr(l));
+	  return pivot(p, cdr(l));
 	else
 	  return car(l);
   }
 
   // usage: (partition 4 '(6 4 2 1 7) () ()) -> returns partitions
-  static object partition (object piv,  object l, object p1, object p2) {
+  static object partition (object p, object piv,  object l, object p1, object p2) {
 	if (null_q(l))
 	  return list(p1, p2);
+	// FIXME: use p to compare
 	else if (cmp(car(l), piv) < 0)
-	  return partition(piv, cdr(l), cons(car(l), p1), p2);
+	  return partition(p, piv, cdr(l), cons(car(l), p1), p2);
 	else
-	  return partition(piv, cdr(l), p1, cons(car(l), p2));
+	  return partition(p, piv, cdr(l), p1, cons(car(l), p2));
   }
 
-  public static object sort(object l) {
-	object piv = pivot(l);
+  public static object sort(object p, object l) {
+	object piv = pivot(p, l);
 	if (Equal(piv, symbol("done"))) return l;
-	object parts = partition(piv, l, EmptyList, EmptyList);
-	return append(sort(car(parts)),
-		          sort(cadr(parts)));
+	object parts = partition(p, piv, l, EmptyList, EmptyList);
+	return append(sort(p, car(parts)),
+		sort(p, cadr(parts)));
   }
   
   public static object reverse(object lyst) {
@@ -1581,7 +1589,11 @@ public class Cons {
   }
   
   public override string ToString() { // Unsafe
-	if (this.car == symbol("quote") &&
+	if (procedure_q(this)) 
+	  return "#<procedure>";
+	else if (module_q(this)) 
+	  return String.Format("#<module {0}>", this.car);
+	else if (this.car == symbol("quote") &&
 		(this.cdr is Cons) &&
 		((Cons)this.cdr).cdr == EmptyList) {
 	  return String.Format("'{0}", ((Cons)this.cdr).car);

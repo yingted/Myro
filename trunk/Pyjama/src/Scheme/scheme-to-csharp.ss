@@ -37,6 +37,8 @@
   ;; use csharp function names in this format:
   ;; ((function-name return-type (param-types...))...)
   '(
+    (symbol<? "bool" ())
+    (string<? "bool" ())
     (apply-extension "void" ())
     (apply-cont "void" ())
     (error "void" ("string" "string" "object[]"))
@@ -64,6 +66,7 @@
     (set-first-frame! "void" ())
 
     (tagged-list "Func<object,bool>" ("object" "Predicate2" "object"))
+    (sort "object" ("Predicate2" "object"))
 
     (quote? "Func<object,bool>" ())
     (quasiquote? "Func<object,bool>" ())
@@ -100,7 +103,6 @@
      ((eq? name '=) 'EqualSign)
      ((eq? name 'equal?) 'Equal)
      ((eq? name 'bool) 'boolean)
-     ((eq? name '<) 'LessThan)
      ((eq? name '>) 'GreaterThan)
      ((eq? name '+) 'Add)
      ((eq? name '>=) 'GreaterOrEqual)
@@ -113,7 +115,7 @@
      ((eq? name 'char) 'chr)
      (else (begin (map (lambda (old_new)
 			 (set! name (replace name (car old_new) (cadr old_new))))
-		       '((#\> "to_")(#\* "_star")(#\= "_is_")
+		       '((#\> "to_")(#\< "LessThan")(#\* "_star")(#\= "_is_")
 			 (#\- #\_)(#\? "_q")(#\! "_b")(#\/ #\_)))
 		  name)))))
 

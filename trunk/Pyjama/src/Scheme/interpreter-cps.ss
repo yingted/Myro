@@ -224,7 +224,8 @@
 	    'list '+ '- '* '/ '< '> '= 'equal? 'eq? 'memq 'range 'set-car! 'set-cdr!
 	    'import 'get 'call-with-current-continuation 'call/cc
 	    'reverse 'append 'list->vector 'dir 'current-time 'map 'env)
-      (list (lambda-proc (args env2 handler k2)
+      (list (;; exit
+	     lambda-proc (args env2 handler k2)
  	      (set! macro-env (make-macro-env))
  	      (set! toplevel-env (make-toplevel-env))
  	      ;; temporary
@@ -235,44 +236,76 @@
 	      (let ((proc (car args))
 		    (proc-args (cadr args)))
 		(proc proc-args env2 handler k2)))
+	    ;; sqrt
 	    (lambda-proc (args env2 handler k2) (k2 (apply sqrt args)))
+	    ;; print
 	    (lambda-proc (args env2 handler k2) (for-each pretty-print-prim args) (k2 '<void>))
+	    ;; display
 	    (lambda-proc (args env2 handler k2) (apply display-prim args) (k2 '<void>))
+	    ;; newline
 	    (lambda-proc (args env2 handler k2) (newline-prim) (k2 '<void>))
+	    ;; load
 	    (lambda-proc (args env2 handler k2) (load-file (car args) toplevel-env handler k2))
+	    ;; null?
 	    (lambda-proc (args env2 handler k2) (k2 (apply null? args)))
+	    ;; cons
 	    (lambda-proc (args env2 handler k2) (k2 (apply cons args)))
+	    ;; car
 	    (lambda-proc (args env2 handler k2) (k2 (apply car args)))
+	    ;; cdr
 	    (lambda-proc (args env2 handler k2) (k2 (apply cdr args)))
+	    ;; list
 	    (lambda-proc (args env2 handler k2) (k2 args))
+	    ;; +
 	    (lambda-proc (args env2 handler k2) (k2 (apply + args)))
+	    ;; - 
 	    (lambda-proc (args env2 handler k2) (k2 (apply - args)))
+	    ;; *
 	    (lambda-proc (args env2 handler k2) (k2 (apply * args)))
+	    ;; /
 	    (lambda-proc (args env2 handler k2) (k2 (apply / args)))
+	    ;; <
 	    (lambda-proc (args env2 handler k2) (k2 (apply < args)))
+	    ;; >
 	    (lambda-proc (args env2 handler k2) (k2 (apply > args)))
+	    ;; =
 	    (lambda-proc (args env2 handler k2) (k2 (apply = args)))
+	    ;; equal?
 	    (lambda-proc (args env2 handler k2) (k2 (apply equal? args)))
+	    ;; eq?
 	    (lambda-proc (args env2 handler k2) (k2 (apply eq? args)))
+	    ;; memq
 	    (lambda-proc (args env2 handler k2) (k2 (apply memq args)))
+	    ;; range
 	    (lambda-proc (args env2 handler k2) (k2 (apply range args)))
+	    ;; set-car!
 	    (lambda-proc (args env2 handler k2) (k2 (apply set-car! args)))
+	    ;; set-cdr
 	    (lambda-proc (args env2 handler k2) (k2 (apply set-cdr! args)))
+	    ;; import
 	    (lambda-proc (args env2 handler k2) (import-primitive args env2 handler k2))
+	    ;; get
 	    (lambda-proc (args env2 handler k2) (get-primitive args env2 handler k2))
+	    ;; call/cc
 	    (lambda-proc (args env2 handler k2) (call/cc-primitive (car args) env2 handler k2))
+	    ;; call/cc
 	    (lambda-proc (args env2 handler k2) (call/cc-primitive (car args) env2 handler k2))
+	    ;; reverse
 	    (lambda-proc (args env2 handler k2) (k2 (apply reverse args)))
+	    ;; append
 	    (lambda-proc (args env2 handler k2) (k2 (apply append args)))
+	    ;; list->vector
 	    (lambda-proc (args env2 handler k2) (k2 (apply list->vector args)))
-	    (lambda-proc (args env2 handler k2) (k2 (get-variables env2)))
+	    ;; dir
+	    (lambda-proc (args env2 handler k2) (k2 (dir args env2)))
+	    ;; current-time
 	    (lambda-proc (args env2 handler k2) (k2 (get-current-time)))
-	    ;; map:
+	    ;; map
 	    (lambda-proc (args env2 handler k2)
 	      (let ((proc (car args))
 		    (proc-args (cadr args)))
 		(map-prim proc proc-args env2 handler k2)))
-	    ;; env:
+	    ;; env
 	    (lambda-proc (args env2 handler k2) (k2 env2))
 	    ))))
 
@@ -331,13 +364,21 @@
     (let ((fake-k (lambda-proc (args env2 handler k2) (k (car args)))))
       (proc (list fake-k) env handler k))))
 
-(define get-variables
-  (lambda (env)
-    (map get-variables-from-frame env)))
+(define dir
+  (lambda (args env)
+     (if (null? args)
+ 	(map get-variables-from-frame env)
+	(car (map get-variables-from-frame (car args))))))
 
 (define get-variables-from-frame
   (lambda (frame) 
-    (sort (map binding-variable frame))))
+    (sort symbol<? (map binding-variable frame))))
+
+(define symbol<?
+  (lambda (a b)
+    (let ((a_string (symbol->string a))
+	  (b_string (symbol->string b)))
+      (string<? a_string b_string))))
 
 (define load-stack '())
 
