@@ -2,6 +2,7 @@
 
 using System;
 using System.IO; // File
+using System.Reflection; // Assembly
 using Microsoft.Scripting.Math;
 using System.Collections; // Hashtable
 using System.Collections.Generic; // List
@@ -414,9 +415,58 @@ public abstract class Scheme {
   }
 
   public static object get_type(object obj) {
+	// implements "typeof"
 	return obj.GetType();
   }
 
+  public static object using_prim(object args, object env) {
+	// implements "using"
+	if (list_q(args)) {
+	  int len = (int) length(args);
+	  if (len == 1) { // (using "file.dll")
+		String filename = (String) car(args);
+		Assembly assembly = Assembly.LoadFrom(filename);
+		// add assembly to assemblies
+		// then add each type to environment
+		foreach (Type type in assembly.GetTypes()) {
+		  string className = type.FullName;
+		  Console.WriteLine("Type: {0}", className);
+
+		  int pos = type.FullName.IndexOf("+");
+		  if (pos != -1) {
+			string name = type.FullName.Substring(pos + 1, 
+				type.FullName.Length - pos - 1);
+			Console.WriteLine("    Name: {0}.{1}", className, name);
+		  }
+		  Console.WriteLine("  Methods:");
+		  foreach (MethodInfo mi in type.GetMethods()) { 
+			if (!mi.IsVirtual) {
+			  Console.WriteLine("    Name: {0}.{1}", className, mi.Name);
+			}
+		  }
+		  Console.WriteLine("  Fields:");
+		  foreach (FieldInfo fi in type.GetFields()) {
+			Console.WriteLine("    Name: {0}.{1}", className, fi.Name);
+		  }
+		}
+
+		/*
+		  Symbol def = Symbol.Create(name);
+		  Pair body = new Pair(Pair.Cons(Symbol.Create("new-prim"),
+		  Pair.Cons(type.FullName,
+		  Pair.Cons(Symbol.Create("_using"),
+		  new Pair(Symbol.Create("args"))))));
+		  Expression expr = Expression.Parse(Pair.Cons(Symbol.Create("lambda"), 
+		  Pair.Cons(Symbol.Create("args"), body)));
+		  globalEnv.Bind(def, (object) expr.Eval(globalEnv,
+		  localEnv));
+		*/
+	  } else if (len == 1) { // (using "file.dll" 'module)
+	  }
+	}
+	return null;
+  }
+  
   public static object ToDouble(object obj) {
 	try {
 	  return Convert.ToDouble(obj);

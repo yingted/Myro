@@ -223,7 +223,8 @@
       (list 'exit 'apply 'sqrt 'print 'display 'newline 'load 'null? 'cons 'car 'cdr
 	    'list '+ '- '* '/ '< '> '= 'equal? 'eq? 'memq 'range 'set-car! 'set-cdr!
 	    'import 'get 'call-with-current-continuation 'call/cc
-	    'reverse 'append 'list->vector 'dir 'current-time 'map 'env)
+	    'reverse 'append 'list->vector 'dir 'current-time 'map 'env
+	    'using)
       (list (;; exit
 	     lambda-proc (args env2 handler k2)
  	      (set! macro-env (make-macro-env))
@@ -307,7 +308,15 @@
 		(map-prim proc proc-args env2 handler k2)))
 	    ;; env
 	    (lambda-proc (args env2 handler k2) (k2 env2))
+	    ;; using
+	    (lambda-proc (args env2 handler k2) (k2 (using-wrapper args env2)))
 	    ))))
+
+(define using-wrapper
+  (lambda (args env)
+    ;; this is not defined here, but is needed in other languages
+    ;; (such as C#) for importing shared libraries
+    (using-prim args env)))
 
 (define* map-prim
   (lambda (proc args env handler k)
