@@ -280,11 +280,17 @@
   (lambda (proc args env handler k)
     (if (null? args)
 	(k '())
-	(proc (car args) env handler 
-	   (lambda-cont (v1)
-	      (map-prim proc (cdr args) env handler 
-		 (lambda-cont (v2)
-		     (k (cons v1 v2)))))))))
+	(if (not (list? (car args)))
+	    (proc (list (car args)) env handler 
+	      (lambda-cont (v1)
+   	        (map-prim proc (cdr args) env handler 
+		  (lambda-cont (v2)
+		     (k (cons v1 v2))))))
+	    (proc (car args) env handler 
+	      (lambda-cont (v1)
+   	        (map-prim proc (cdr args) env handler 
+		  (lambda-cont (v2)
+		     (k (cons v1 v2))))))))))
 		     
 (define get-current-time
   (lambda ()

@@ -211,7 +211,7 @@ public abstract class Scheme {
 	  this.returntype = returntype;
 	}
 	public object Call(object actual) {
-	  //trace(1, "calling Call1: {0} {1} {2} {3}\n", actual, proc, args, returntype);
+	  trace(1, "calling Call1: {0} {1} {2} {3}\n", actual, proc, args, returntype);
 	  object retval = null;
 	  if (returntype == 0) { // void return
 		if (args == -1) 
@@ -254,7 +254,7 @@ public abstract class Scheme {
 	}
 
 	public object Call(object args1, object args2) {
-	  //trace(1, "calling Call2: {0} {1}\n", args1, args2);
+	  trace(1, "calling Call2: {0} {1}\n", args1, args2);
 	  object retval = null;
 	  if (returntype == 0) { // return void
 		((Procedure2Void)proc)(args1, args2);
@@ -344,7 +344,7 @@ public abstract class Scheme {
   }
 
   public static object group(object chars, object delimiter) {
-	//trace(2, "calling group({0}, {1})", chars, delimiter);
+	trace(2, "calling group({0}, {1})", chars, delimiter);
 	// given list of chars and a delim char, return a list of strings
 	object retval = EmptyList;
 	object buffer = EmptyList;
@@ -486,7 +486,7 @@ public abstract class Scheme {
   }
 
   public static object list_tail(object lyst, object pos) {
-	//trace(5, "calling list_tail({0}, {1})\n", lyst, pos);
+	trace(5, "calling list_tail({0}, {1})\n", lyst, pos);
 	if (list_q(lyst)) {
 	  object current = lyst;
 	  int current_pos = 0;
@@ -500,7 +500,7 @@ public abstract class Scheme {
   }
 
   public static object list_head(object lyst, object pos) {
-	//trace(5, "calling list_head({0}, {1})\n", lyst, pos);
+	trace(5, "calling list_head({0}, {1})\n", lyst, pos);
 	if (list_q(lyst)) {
 	  object retval = EmptyList;
 	  object current = lyst;
@@ -542,7 +542,7 @@ public abstract class Scheme {
   }
 
   public static object apply(object proc, object args) {
-	//trace(1, "called: apply({0}, {1})\n", proc, args);
+	trace(1, "called: apply({0}, {1})\n", proc, args);
 	if (proc is Proc)
 	  return ((Proc)proc).Call(args);
 	else {
@@ -564,7 +564,7 @@ public abstract class Scheme {
   }
 
   public static object map(object proc, object args) {
-	//trace(1, "called: map1({0}, {1})\n", proc, args);
+	trace(1, "called: map1({0}, {1})\n", proc, args);
 	object retval = EmptyList;
 	object current1 = args;
 	while (!Equal(current1, EmptyList)) {
@@ -575,7 +575,7 @@ public abstract class Scheme {
   }
 
   public static object map(object proc, object args1, object args2) {
-	//trace(1, "called: map2\n");
+	trace(1, "called: map2\n");
 	object retval = EmptyList;
 	object current1 = args1;
 	object current2 = args2;
@@ -588,7 +588,7 @@ public abstract class Scheme {
   }
 
   public static Func<object,bool> tagged_list(object test_string, object pred, object value) {
-	//trace(2, "called: tagged_list\n");
+	trace(2, "called: tagged_list\n");
 	return (object lyst) => {
 	  if (list_q(lyst))
 		return (((bool)Equal(car(lyst), test_string)) && ((bool)((Predicate2)pred)(length(lyst), value)));
@@ -602,7 +602,7 @@ public abstract class Scheme {
   public static Func<object,bool> module_q = tagged_list(symbol("module"), (Predicate2)GreaterOrEqual, 1);
 
   public static object list_to_vector(object lyst) {
-	//trace(2, "called: list_to_vector\n");
+	trace(2, "called: list_to_vector\n");
 	int len = (int) length(lyst);
 	object current = lyst;
 	object[] retval = new object[len];
@@ -614,17 +614,17 @@ public abstract class Scheme {
   }
 
   public static object string_ref(object s, object i) {
-	//trace(9, "called: string_ref(s, {0})\n", i);
+	trace(9, "called: string_ref(s, {0})\n", i);
 	return s.ToString()[(int)i];
   }
 
   public static object make_string(object obj) {
-	//trace(2, "called: make_string\n");
+	trace(2, "called: make_string\n");
 	if (obj == null || obj == (object) NULL) {
-	  //trace(2, "make_string returned: \"\\0\"\n");
+	  trace(2, "make_string returned: \"\\0\"\n");
 	  return (object) "\0";
 	}
-	//trace(2, "make_string returned: \"{0}\"\n", obj.ToString());
+	trace(2, "make_string returned: \"{0}\"\n", obj.ToString());
 	return obj.ToString();
   }
 
@@ -682,12 +682,12 @@ public abstract class Scheme {
   }
 
   public static bool string_is__q(object o1, object o2) {
-	//trace(4, "calling string=?({0}, {1})", o1, o2);
+	trace(4, "calling string=?({0}, {1})", o1, o2);
 	return ((o1 is string) && (o2 is string) && ((string)o1) == ((string)o2));
   }
   
   public static object string_to_list(object str) {
-	//trace(2, "called: string_to_list: {0}\n", str);
+	trace(2, "called: string_to_list: {0}\n", str);
 	object retval = EmptyList;
 	if (str != null) {
 	  string sstr = str.ToString();
@@ -748,7 +748,7 @@ public abstract class Scheme {
   }
 
   public static string repr(object obj) {
-	//trace(3, "calling repr\n");
+	trace(3, "calling repr\n");
 	if (obj == null) {
 	  return "#<void>";
 	} else if (obj is bool) {
@@ -790,7 +790,7 @@ public abstract class Scheme {
   }
 
   public static string format_list(object args) {
-	//trace(5, "calling format_list: {0} length={1}\n", args, length(args));
+	trace(5, "calling format_list: {0} length={1}\n", args, length(args));
 	if (pair_q(args)) {
 	  int len = (int)length(args);
 	  if (len == 1)
@@ -887,7 +887,7 @@ public abstract class Scheme {
   }
 
   public static int cmp(object obj1, object obj2) {
-	//trace(8, "calling cmp({0}, {1})\n", obj1, obj2);
+	trace(8, "calling cmp({0}, {1})\n", obj1, obj2);
 	if (obj1 is Symbol) {
 	  if (obj2 is Symbol) {
 		return cmp(obj1.ToString(), obj2.ToString());
@@ -1222,7 +1222,7 @@ public abstract class Scheme {
   // List functions -----------------------------------------------
 
   public static object member(object obj1, object obj2) {
-	//trace(2, "calling member({0}, {1})\n", obj1, obj2);
+	trace(2, "calling member({0}, {1})\n", obj1, obj2);
 	if (list_q(obj2)) {
 	  object current = obj2;
 	  while (!Equal(current, EmptyList)) {
@@ -1266,10 +1266,10 @@ public abstract class Scheme {
   }
 
   public static object length(object obj) {
-	//trace(3, "called: length\n");
+	trace(3, "called: length\n");
 	if (list_q(obj)) {
 	  if (null_q(obj)) {
-		//trace(3, "length returned: {0}\n", 0);
+		trace(3, "length returned: {0}\n", 0);
 		return 0;
 	  } else {
 		int len = 0;
@@ -1278,7 +1278,7 @@ public abstract class Scheme {
 		  len++;
 		  current = cdr(current);
 		}
-		//trace(3, "length returned: {0}\n", len);
+		trace(3, "length returned: {0}\n", len);
 		return len;
 	  }
 	} else
