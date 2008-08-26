@@ -13,3 +13,19 @@ scheme-to-csharp
 ================
 
 1. add DLR flag and code
+
+
+External Libraries
+==================
+
+==> (using "External.dll")
+[adds External to environment]
+==> (External "x") ;; static int
+5
+==> (External "func") ;; called static method, no args
+42
+==> (External "func2" "this is a test") ;; called static method, with args
+"THIS IS A TEST"
+==> (External "dummy" 7 "yo") ;; called constructor
+External [this is a type]
+

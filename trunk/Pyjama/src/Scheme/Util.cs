@@ -12,6 +12,7 @@ public class Config {
   public int DEBUG = 0;
   public bool NEED_NEWLINE = false;
   Hashtable symbol_table = new Hashtable(); //Default one
+  public List<Assembly> assemblies = new List<Assembly>();
   int symbol_count = 1;
 
   public Config() {
@@ -24,7 +25,10 @@ public class Config {
 	}
 	return (Symbol) symbol_table[ssymbol];
   }
-  
+
+  public void AddAssembly(Assembly assembly) {
+	assemblies.Add(assembly);
+  }
 }
 
 public class Symbol {
@@ -419,48 +423,137 @@ public abstract class Scheme {
 	return obj.GetType();
   }
 
+  public static string[] get_parts(String filename, String delimiter) {
+	int pos = filename.IndexOf(delimiter);
+	string[] parts = null;
+	if (pos != -1) {
+	  parts = new string[2];
+	  parts[0] = filename.Substring(0, pos);
+	  parts[1] = filename.Substring(pos + 1, filename.Length - pos - 1);
+	} else {
+	  parts = new string[1];
+	  parts[0] = filename;
+	}
+	return parts;
+  }
+
+  static public Type[] get_arg_types(object objs) {
+	int i = 0;
+	Type[] retval = new Type[(int)length(objs)];
+	object current = objs;
+	while (!Equal(current, EmptyList)) {
+	  object obj = car(current);
+	  if (Equal(obj, "null"))
+		retval[i] = Type.GetType("System.Object");
+	  else
+		retval[i] = obj.GetType();
+	  i++;
+	  current = cdr(current);
+	}
+	return retval;
+  }
+
+  public static Type get_type(String tname) {
+	printf("get_type '{0}'\n", tname);
+	foreach (Assembly assembly in config.assemblies) {
+	  Type type = assembly.GetType(tname);
+	  if (type != null) {
+		printf("  found type '{0}'\n", type);
+		return type;
+	  }
+	}
+	printf("  not found\n");
+	return null;
+  }
+
+  // given a name, return a function that given an array, returns object
+  public static Procedure1 make_external_proc(object tname) {
+	printf("making external proc '{0}'\n", tname);
+	return args => call_external_proc(tname, args);
+  }
+
+  public static object call_external_proc(object name, object args) {
+	// Type Members
+	// Type Constructor
+	// Fields
+	// Properties
+	// Methods
+	Type type = get_type(name.ToString());
+	if (type != null) {
+	  String method_name = car(args).ToString();
+	  Type[] types = get_arg_types(cdr(args));
+	  object[] arguments = (object[]) list_to_vector(cdr(args));
+	  MethodInfo method = type.GetMethod(method_name, types);
+	  printf("type is {0}, types are {1}\n", type, array_to_string(types));
+	  if (method != null) {
+		printf("method name is '{0}' args are {1}\n", name, args);
+		object retval = method.Invoke(method_name, arguments);
+		return retval;
+	  } else {
+		FieldInfo field = type.GetField(method_name);
+		if (field != null) {
+		  printf("field: {0}\n", field.GetValue(null));
+		  return field.GetValue(null);
+		} else {
+		  // list the constructors:
+		  ConstructorInfo[] p = type.GetConstructors();
+		  Console.WriteLine(p.Length);
+		  for (int i=0;i<p.Length;i++) {
+            Console.WriteLine(p[i].Name);
+			ParameterInfo[] pars = p[i].GetParameters();
+			foreach (ParameterInfo par in pars) 
+			{
+			  Console.WriteLine(par.ParameterType);
+			}
+		  }
+		  // load the matching one:
+		  ConstructorInfo constructor = type.GetConstructor(types);
+		  if (constructor != null) {
+			printf("Found a constructor!\n");
+			object retval = constructor.Invoke(arguments);
+			printf("instance property name: {0}\n", retval.GetType().GetField("name").GetValue(retval));
+			return retval;
+		  } else {
+			throw new Exception(String.Format("what is this '{0}'?", name));
+		  }
+		} 
+	  }
+	}
+	throw new Exception(String.Format("no such external type '{0}'", name));
+  }
+
   public static object using_prim(object args, object env) {
 	// implements "using"
 	if (list_q(args)) {
 	  int len = (int) length(args);
 	  if (len == 1) { // (using "file.dll")
 		String filename = (String) car(args);
-		Assembly assembly = Assembly.LoadFrom(filename);
+		Assembly assembly = null;
+		try {
+		  assembly = Assembly.LoadFrom(filename);
+		} catch (System.IO.FileNotFoundException) {
+#pragma warning disable 612
+		  assembly = Assembly.LoadWithPartialName(filename);
+#pragma warning restore 612
+		}
 		// add assembly to assemblies
-		// then add each type to environment
-		foreach (Type type in assembly.GetTypes()) {
-		  string className = type.FullName;
-		  Console.WriteLine("Type: {0}", className);
-
-		  int pos = type.FullName.IndexOf("+");
-		  if (pos != -1) {
-			string name = type.FullName.Substring(pos + 1, 
-				type.FullName.Length - pos - 1);
-			Console.WriteLine("    Name: {0}.{1}", className, name);
-		  }
-		  Console.WriteLine("  Methods:");
-		  foreach (MethodInfo mi in type.GetMethods()) { 
-			if (!mi.IsVirtual) {
-			  Console.WriteLine("    Name: {0}.{1}", className, mi.Name);
+		//string[] parts = get_parts(filename, ".");
+		if (assembly != null) {
+		  config.AddAssembly(assembly);
+		  // then add each type to environment
+		  foreach (Type type in assembly.GetTypes()) {
+			if (type.IsPublic) {
+			  string className = type.FullName;
+			  Console.WriteLine("Type: {0}", className);
+			  //classname_parts = get_parts(className, "+");
+			  set_car_b( env, extend_frame(symbol(className), 
+					  new Proc((Procedure1)make_external_proc(className), -1, 1),
+					  car(env)));
 			}
 		  }
-		  Console.WriteLine("  Fields:");
-		  foreach (FieldInfo fi in type.GetFields()) {
-			Console.WriteLine("    Name: {0}.{1}", className, fi.Name);
-		  }
+		} else {
+		  throw new Exception(String.Format("external library '{0}' could not be loaded", filename));
 		}
-
-		/*
-		  Symbol def = Symbol.Create(name);
-		  Pair body = new Pair(Pair.Cons(Symbol.Create("new-prim"),
-		  Pair.Cons(type.FullName,
-		  Pair.Cons(Symbol.Create("_using"),
-		  new Pair(Symbol.Create("args"))))));
-		  Expression expr = Expression.Parse(Pair.Cons(Symbol.Create("lambda"), 
-		  Pair.Cons(Symbol.Create("args"), body)));
-		  globalEnv.Bind(def, (object) expr.Eval(globalEnv,
-		  localEnv));
-		*/
 	  } else if (len == 1) { // (using "file.dll" 'module)
 	  }
 	}
