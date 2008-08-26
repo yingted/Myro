@@ -162,8 +162,12 @@
             try {
 	        pc ();
 	    } catch (Exception e ) {
-                string [] parts = get_parts(e.ToString(), NEWLINE_STRING);
-		value_reg = list (format(\"{0}\", parts[0]));
+                if (config.DEBUG > 0) {
+                    value_reg = e.ToString();
+                } else {
+                    string [] parts = get_parts(e.ToString(), NEWLINE_STRING);
+		    value_reg = list (format(\"{0}\", parts[0]));
+                }
 		k_reg = REP_k;
 		pc = (Function) apply_cont;
 	    }
