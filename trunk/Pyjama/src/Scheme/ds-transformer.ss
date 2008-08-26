@@ -19,9 +19,10 @@
       (make-datatype 'continuation2 'cont2 '((k k2) value1 value2))
       (make-datatype 'handler 'handler '((handler REP-handler) exception))
       (make-datatype 'procedure 'proc '(proc args env2 handler k2))
+      (make-datatype 'macro-transformer 'macro '((macro mit-define-transformer) datum k))
       )))
 
-(define record-field-order '(env env2 handler k k2))
+(define record-field-order '(formals runt body env env2 handler k k2))
 
 ;;-------------------------------------------------------------------------------
 
@@ -118,8 +119,6 @@
 			  (lambda ,(cons obj-name arg-names)
 			    (record-case (cdr ,obj-name)
 			      ,@(reverse clauses)
-			      (<extension> () (apply-extension (quote ,apply-name) 
-						  ,obj-name (list ,@arg-names) ,(rac arg-names)))
 			      (else (error (quote ,apply-name) ,error-string ,obj-name))))))
 		     (make-function-code
 		       `(define ,make-name
@@ -496,9 +495,9 @@
 				(all-free clause params)))
 			    clauses)))
 	  (lambda (formals . bodies) (all-free bodies (union formals params)))
-	  (let (bindings . bodies) (free (let-transformer code) params))
-	  (let* (bindings . bodies) (free (let*-transformer code) params))
-	  (letrec (decls . bodies) (free (letrec-transformer code) params))
+	  (let (bindings . bodies) (free (let-transformer code (lambda (v) v)) params))
+	  (let* (bindings . bodies) (free (let*-transformer code (lambda (v) v)) params))
+	  (letrec (decls . bodies) (free (letrec-transformer code (lambda (v) v)) params))
 	  (set! (var rhs-exp) (free rhs-exp params))
 	  (begin exps (all-free exps params))
 	  ((define define*) (name . bodies)
@@ -791,9 +790,9 @@
 		   ((mem? old-var formals) #f)
 		   ((and (mem? new-var formals) (memq old-var (all-free bodies '()))) #t)
 		   (else (ormap unsafe? bodies))))
-	       (let (bindings . bodies) (unsafe? (let-transformer exp)))
-	       (let* (bindings . bodies) (unsafe? (let*-transformer exp)))
-	       (letrec (decls . bodies) (unsafe? (letrec-transformer exp)))
+	       (let (bindings . bodies) (unsafe? (let-transformer exp (lambda (v) v))))
+	       (let* (bindings . bodies) (unsafe? (let*-transformer exp (lambda (v) v))))
+	       (letrec (decls . bodies) (unsafe? (letrec-transformer exp (lambda (v) v))))
 	       (set! (var rhs-exp) (unsafe? rhs-exp))
 	       (begin exps (ormap unsafe? exps))
 	       (and exps (ormap unsafe? exps))
@@ -806,9 +805,9 @@
 				 (ormap unsafe? clause)))
 			      clauses)))
 	       (record-case (rexp . clauses)
-		 (unsafe? (record-case-transformer exp)))
+		 (unsafe? (record-case-transformer exp (lambda (v) v))))
 	       (cases (type rexp . clauses)
-		 (unsafe? (record-case-transformer `(record-case ,rexp ,@clauses))))
+		 (unsafe? (record-case-transformer `(record-case ,rexp ,@clauses) (lambda (v) v))))
 	       (else (if (memq (car exp) syntactic-keywords)
 		       (error 'unsafe? "don't know how to process ~a" exp)
 		       (ormap unsafe? exp))))))))

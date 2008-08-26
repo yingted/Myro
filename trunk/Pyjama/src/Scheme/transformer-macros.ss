@@ -20,6 +20,12 @@
   (syntax-rules ()
     [(_ formals body ...) (lambda formals body ...)]))
 
+;; macro transformer functions
+
+(define-syntax lambda-macro
+  (syntax-rules ()
+    [(_ formals body ...) (lambda formals body ...)]))
+
 ;; definitions to registerize
 
 (define-syntax define*

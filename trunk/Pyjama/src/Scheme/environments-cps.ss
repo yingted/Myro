@@ -48,40 +48,46 @@
 
 ;; environments
 
+;; <environment> = (environment . (<frame> ...))
+
+(define environment?
+  (lambda (x)
+    (and (pair? x) (eq? (car x) 'environment))))
+
 (define make-empty-environment
   (lambda ()
-    '(())))
+    (cons 'environment '(()))))
 
 (define make-initial-environment
   (lambda (vars vals)
-    (list (make-frame vars vals))))
+    (cons 'environment (list (make-frame vars vals)))))
 
 (define first-frame
   (lambda (env)
-    (car env)))
-
-(define rest-of-frames
-  (lambda (env)
-    (cdr env)))
+    (cadr env)))
 
 (define set-first-frame!
   (lambda (env new-frame)
-    (set-car! env new-frame)))
+    (set-car! (cdr env) new-frame)))
 
 (define extend
   (lambda (env variables values)
-    (cons (make-frame variables values) env)))
+    (cons 'environment (cons (make-frame variables values) (cdr env)))))
 
 ;; variable lookup
 
 (define search-env
   (lambda (env variable)
-    (if (null? env)
+    (search-frames (cdr env) variable)))
+
+(define search-frames
+  (lambda (frames variable)
+    (if (null? frames)
       #f
-      (let ((binding (search-frame (first-frame env) variable)))
+      (let ((binding (search-frame (car frames) variable)))
         (if binding
           binding
-          (search-env (rest-of-frames env) variable))))))
+          (search-frames (cdr frames) variable))))))
 
 (define* lookup-value
   (lambda (variable env handler k)
@@ -123,7 +129,7 @@
 		  (new-path (if (string=? path "")
 			      (format "~a" var)
 			      (format "~a.~a" path var))))
-	      (if (not (module? result))
+	      (if (not (environment? result))
 		  (handler (format "~a is not a module" new-path))
 		  (lookup-variable-components
 		    (cdr components) new-path result handler k)))))))))

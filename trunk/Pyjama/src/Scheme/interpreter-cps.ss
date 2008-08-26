@@ -15,7 +15,6 @@
 	  (lambda-cont (exp)
 	    (m exp toplevel-env REP-handler
 	      (lambda-cont (v)
-		(pretty-print-prim v)
 		(read-datum "(test-all)" REP-handler
 		  (lambda-cont2 (datum tokens-left)
 		    (parse datum REP-handler
@@ -62,12 +61,6 @@
   (lambda-handler (e)
     (REP-k `(uncaught exception: ,e))))
 
-(define* apply-extension
-  (lambda (type name args k)
-    (if (eq? type 'apply-proc)
-	(k (apply* (caddr name) (car args)))
-	(error 'apply-extension "unknown type: ~a" type))))
-
 (define* read-eval-print
   (lambda ()
     (printf "==> ")
@@ -78,13 +71,6 @@
 	  (parse datum REP-handler
 	    (lambda-cont (exp)
 	      (m exp toplevel-env REP-handler REP-k))))))))
-
-;; used by the data structure version of the code
-(define data-structure-procedure?
-  (lambda (x)
-    (and (list? x)
-	 (not (null? x))
-	 (eq? (car x) 'procedure))))
 
 (define* m
   (lambda (exp env handler k)
@@ -114,7 +100,7 @@
       (define-syntax-exp (keyword clauses)
 	(lookup-binding-in-first-frame keyword macro-env handler
 	  (lambda-cont (binding)
-	    (set-binding-value! binding clauses)
+	    (set-binding-value! binding (make-pattern-macro clauses))
 	    (k '<void>))))
       (begin-exp (exps) (eval-sequence exps env handler k))
       (lambda-exp (formals body)
@@ -225,92 +211,93 @@
 	    'import 'get 'call-with-current-continuation 'call/cc
 	    'reverse 'append 'list->vector 'dir 'current-time 'map 'env
 	    'using)
-      (list (;; exit
-	     lambda-proc (args env2 handler k2)
- 	      (set! macro-env (make-macro-env))
- 	      (set! toplevel-env (make-toplevel-env))
- 	      ;; temporary
- 	      (set! load-stack '())
- 	      (halt* '(exiting the interpreter)))
-	    ;; apply
-	    (lambda-proc (args env2 handler k2)
-	      (let ((proc (car args))
-		    (proc-args (cadr args)))
-		(proc proc-args env2 handler k2)))
-	    ;; sqrt
-	    (lambda-proc (args env2 handler k2) (k2 (apply sqrt args)))
-	    ;; print
-	    (lambda-proc (args env2 handler k2) (for-each pretty-print-prim args) (k2 '<void>))
-	    ;; display
-	    (lambda-proc (args env2 handler k2) (apply display-prim args) (k2 '<void>))
-	    ;; newline
-	    (lambda-proc (args env2 handler k2) (newline-prim) (k2 '<void>))
-	    ;; load
-	    (lambda-proc (args env2 handler k2) (load-file (car args) toplevel-env handler k2))
-	    ;; null?
-	    (lambda-proc (args env2 handler k2) (k2 (apply null? args)))
-	    ;; cons
-	    (lambda-proc (args env2 handler k2) (k2 (apply cons args)))
-	    ;; car
-	    (lambda-proc (args env2 handler k2) (k2 (apply car args)))
-	    ;; cdr
-	    (lambda-proc (args env2 handler k2) (k2 (apply cdr args)))
-	    ;; list
-	    (lambda-proc (args env2 handler k2) (k2 args))
-	    ;; +
-	    (lambda-proc (args env2 handler k2) (k2 (apply + args)))
-	    ;; - 
-	    (lambda-proc (args env2 handler k2) (k2 (apply - args)))
-	    ;; *
-	    (lambda-proc (args env2 handler k2) (k2 (apply * args)))
-	    ;; /
-	    (lambda-proc (args env2 handler k2) (k2 (apply / args)))
-	    ;; <
-	    (lambda-proc (args env2 handler k2) (k2 (apply < args)))
-	    ;; >
-	    (lambda-proc (args env2 handler k2) (k2 (apply > args)))
-	    ;; =
-	    (lambda-proc (args env2 handler k2) (k2 (apply = args)))
-	    ;; equal?
-	    (lambda-proc (args env2 handler k2) (k2 (apply equal? args)))
-	    ;; eq?
-	    (lambda-proc (args env2 handler k2) (k2 (apply eq? args)))
-	    ;; memq
-	    (lambda-proc (args env2 handler k2) (k2 (apply memq args)))
-	    ;; range
-	    (lambda-proc (args env2 handler k2) (k2 (apply range args)))
-	    ;; set-car!
-	    (lambda-proc (args env2 handler k2) (k2 (apply set-car! args)))
-	    ;; set-cdr
-	    (lambda-proc (args env2 handler k2) (k2 (apply set-cdr! args)))
-	    ;; import
-	    (lambda-proc (args env2 handler k2) (import-primitive args env2 handler k2))
-	    ;; get
-	    (lambda-proc (args env2 handler k2) (get-primitive args env2 handler k2))
-	    ;; call/cc
-	    (lambda-proc (args env2 handler k2) (call/cc-primitive (car args) env2 handler k2))
-	    ;; call/cc
-	    (lambda-proc (args env2 handler k2) (call/cc-primitive (car args) env2 handler k2))
-	    ;; reverse
-	    (lambda-proc (args env2 handler k2) (k2 (apply reverse args)))
-	    ;; append
-	    (lambda-proc (args env2 handler k2) (k2 (apply append args)))
-	    ;; list->vector
-	    (lambda-proc (args env2 handler k2) (k2 (apply list->vector args)))
-	    ;; dir
-	    (lambda-proc (args env2 handler k2) (k2 (dir args env2)))
-	    ;; current-time
-	    (lambda-proc (args env2 handler k2) (k2 (get-current-time)))
-	    ;; map
-	    (lambda-proc (args env2 handler k2)
-	      (let ((proc (car args))
-		    (proc-args (cadr args)))
-		(map-prim proc proc-args env2 handler k2)))
-	    ;; env
-	    (lambda-proc (args env2 handler k2) (k2 env2))
-	    ;; using
-	    (lambda-proc (args env2 handler k2) (k2 (using-wrapper args env2)))
-	    ))))
+      (list
+	;; exit
+        (lambda-proc (args env2 handler k2)
+	  (set! macro-env (make-macro-env))
+	  (set! toplevel-env (make-toplevel-env))
+	  ;; temporary
+	  (set! load-stack '())
+	  (halt* '(exiting the interpreter)))
+	;; apply
+	(lambda-proc (args env2 handler k2)
+	  (let ((proc (car args))
+		(proc-args (cadr args)))
+	    (proc proc-args env2 handler k2)))
+	;; sqrt
+	(lambda-proc (args env2 handler k2) (k2 (apply sqrt args)))
+	;; print
+	(lambda-proc (args env2 handler k2) (for-each pretty-print-prim args) (k2 '<void>))
+	;; display
+	(lambda-proc (args env2 handler k2) (apply display-prim args) (k2 '<void>))
+	;; newline
+	(lambda-proc (args env2 handler k2) (newline-prim) (k2 '<void>))
+	;; load
+	(lambda-proc (args env2 handler k2) (load-file (car args) toplevel-env handler k2))
+	;; null?
+	(lambda-proc (args env2 handler k2) (k2 (apply null? args)))
+	;; cons
+	(lambda-proc (args env2 handler k2) (k2 (apply cons args)))
+	;; car
+	(lambda-proc (args env2 handler k2) (k2 (apply car args)))
+	;; cdr
+	(lambda-proc (args env2 handler k2) (k2 (apply cdr args)))
+	;; list
+	(lambda-proc (args env2 handler k2) (k2 args))
+	;; +
+	(lambda-proc (args env2 handler k2) (k2 (apply + args)))
+	;; - 
+	(lambda-proc (args env2 handler k2) (k2 (apply - args)))
+	;; *
+	(lambda-proc (args env2 handler k2) (k2 (apply * args)))
+	;; /
+	(lambda-proc (args env2 handler k2) (k2 (apply / args)))
+	;; <
+	(lambda-proc (args env2 handler k2) (k2 (apply < args)))
+	;; >
+	(lambda-proc (args env2 handler k2) (k2 (apply > args)))
+	;; =
+	(lambda-proc (args env2 handler k2) (k2 (apply = args)))
+	;; equal?
+	(lambda-proc (args env2 handler k2) (k2 (apply equal? args)))
+	;; eq?
+	(lambda-proc (args env2 handler k2) (k2 (apply eq? args)))
+	;; memq
+	(lambda-proc (args env2 handler k2) (k2 (apply memq args)))
+	;; range
+	(lambda-proc (args env2 handler k2) (k2 (apply range args)))
+	;; set-car!
+	(lambda-proc (args env2 handler k2) (k2 (apply set-car! args)))
+	;; set-cdr
+	(lambda-proc (args env2 handler k2) (k2 (apply set-cdr! args)))
+	;; import
+	(lambda-proc (args env2 handler k2) (import-primitive args env2 handler k2))
+	;; get
+	(lambda-proc (args env2 handler k2) (get-primitive args env2 handler k2))
+	;; call/cc
+	(lambda-proc (args env2 handler k2) (call/cc-primitive (car args) env2 handler k2))
+	;; call/cc
+	(lambda-proc (args env2 handler k2) (call/cc-primitive (car args) env2 handler k2))
+	;; reverse
+	(lambda-proc (args env2 handler k2) (k2 (apply reverse args)))
+	;; append
+	(lambda-proc (args env2 handler k2) (k2 (apply append args)))
+	;; list->vector
+	(lambda-proc (args env2 handler k2) (k2 (apply list->vector args)))
+	;; dir
+	(lambda-proc (args env2 handler k2) (k2 (dir args env2)))
+	;; current-time
+	(lambda-proc (args env2 handler k2) (k2 (get-current-time)))
+	;; map
+	(lambda-proc (args env2 handler k2)
+	  (let ((proc (car args))
+		(proc-args (cadr args)))
+	    (map-prim proc proc-args env2 handler k2)))
+	;; env
+	(lambda-proc (args env2 handler k2) (k2 env2))
+	;; using
+	(lambda-proc (args env2 handler k2) (k2 (using-wrapper args env2)))
+	))))
 
 (define using-wrapper
   (lambda (args env)
@@ -321,18 +308,18 @@
 (define* map-prim
   (lambda (proc args env handler k)
     (if (null? args)
-	(k '())
-	(if (not (list? (car args)))
-	    (proc (list (car args)) env handler 
-	      (lambda-cont (v1)
-   	        (map-prim proc (cdr args) env handler 
-		  (lambda-cont (v2)
-		     (k (cons v1 v2))))))
-	    (proc (car args) env handler 
-	      (lambda-cont (v1)
-   	        (map-prim proc (cdr args) env handler 
-		  (lambda-cont (v2)
-		     (k (cons v1 v2))))))))))
+      (k '())
+      (if (not (list? (car args)))
+	(proc (list (car args)) env handler
+	  (lambda-cont (v1)
+	    (map-prim proc (cdr args) env handler
+	      (lambda-cont (v2)
+		(k (cons v1 v2))))))
+	(proc (car args) env handler 
+	  (lambda-cont (v1)
+	    (map-prim proc (cdr args) env handler 
+	      (lambda-cont (v2)
+		(k (cons v1 v2))))))))))
 		     
 (define get-current-time
   (lambda ()
@@ -348,13 +335,12 @@
 	(lambda-cont (v)
 	  (cond
 	    ((null? (cdr args)) (k v))
-	    ((not (module? v)) (handler (format "~a is not a module" sym)))
+	    ((not (environment? v)) (handler (format "~a is not a module" sym)))
 	    (else (get-primitive (cdr args) v handler k))))))))
 
-;; need a more reliable test for a module/environment
-(define module?
-  (lambda (x)
-    (and (list? x) (not (null? x)) (list? (car x)))))
+;; bug fix needed:
+;; (import "my-fact.ss" 'm)
+;; (m.m.m.m.m.fib 10) =>  89
 
 (define* import-primitive
   (lambda (args env handler k)
@@ -435,6 +421,11 @@
 	((null? (cddr args)) (range (car args) (cadr args) 1 '()))
 	(else (range (car args) (cadr args) (caddr args) '()))))))
 	
+(define make-external-proc
+  (lambda (external-function-object)
+    (lambda-proc (args env2 handler k2)
+      (k2 (apply* external-function-object args)))))
+
 (define toplevel-env (make-toplevel-env))
 (define macro-env (make-macro-env))
 

@@ -268,7 +268,7 @@
 	      `(if ,@(map transform (cdr code))))
 	    (cond clauses
 	      (if *generate-low-level-registerized-code?*
-		(transform (cond-transformer code))
+		(transform (cond-transformer code (lambda (v) v)))
 		`(cond ,@(map (lambda (clause)
 				(if (eq? (car clause) 'else)
 				  `(else ,@(consolidate (map transform (cdr clause))))
@@ -280,7 +280,7 @@
 	      (if (symbol? bindings)
 		 ;; named let
 		 (if *generate-low-level-registerized-code?*
-		   (transform (let-transformer code))
+		   (transform (let-transformer code (lambda (v) v)))
 		   (let* ((name (cadr code))
 			  (bindings (caddr code))
 			  (bodies (cdddr code))
@@ -325,7 +325,7 @@
 		  `(let* ,new-bindings ,@new-bodies))))
 	    (letrec (decls . bodies)
 	      (if *generate-low-level-registerized-code?*
-		(transform (letrec-transformer code))
+		(transform (letrec-transformer code (lambda (v) v)))
 		(let* ((vars (map car decls))
 		       (procs (map cadr decls))
 		       (new-procs (map list vars (map transform procs)))
