@@ -26,6 +26,7 @@
 			     make-initial-environment
 			     print-parsed-sexps
 			     true?
+			     type?
 			     ))
 (define *function-signatures* '())
 
@@ -161,7 +162,8 @@
             try {
 	        pc ();
 	    } catch (Exception e ) {
-		value_reg = list (format(\"{0}\", e));
+                string [] parts = get_parts(e.ToString(), NEWLINE_STRING);
+		value_reg = list (format(\"{0}\", parts[0]));
 		k_reg = REP_k;
 		pc = (Function) apply_cont;
 	    }

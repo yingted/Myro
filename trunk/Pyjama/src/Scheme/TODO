@@ -20,12 +20,44 @@ External Libraries
 
 ==> (using "External.dll")
 [adds External to environment]
-==> (External "x") ;; static int
+==> (External '(x) '()) ;; static field
 5
-==> (External "func") ;; called static method, no args
+==> (External '(func) '()) ;; static func, no args
+CALLED FUNC!
 42
-==> (External "func2" "this is a test") ;; called static method, with args
-"THIS IS A TEST"
-==> (External "dummy" 7 "yo") ;; called constructor
-External [this is a type]
+==> (External '(func2) '("kjhk dkjfhdsfkj")) ;; static func, with args
+CALLED FUNC2!
+"KJHK DKJFHDSFKJ"
+==> (define c (External '(Constructor) '(100 "betty"))) ;; nested constructor, with args
+==> c
+External
+==> (property c 'size) ;; access properties of newly cosntructed object
+100
+==> (property c 'name)
+"betty"
+==> (define e (External '() '(20 "duh"))) ;; top layer ctor
+==> (property e 'size)
+20
 
+Can we make external calls, and properties both use the same notation (and the same as module
+lookups)? That would be:
+
+==> (using "External.dll")
+==> (External.x) ;; static field
+5
+==> (External.func) ;; static func, no args
+CALLED FUNC!
+42
+==> (External.func2 "kjhk dkjfhdsfkj") ;; static func, with args
+CALLED FUNC2!
+"KJHK DKJFHDSFKJ"
+==> (define c (External.Constructor 100 "betty")) ;; nested constructor, with args
+==> c
+External
+==> (c.size) ;; access properties of newly cosntructed object
+100
+==> (c.name)
+"betty"
+==> (define e (External 20 "duh")) ;; top layer ctor
+==> (e.size)
+20

@@ -299,8 +299,8 @@ public abstract class Scheme {
   public static Proc set_car_b_proc = new Proc((Procedure2Void) set_car_b, 2, 0);
   public static Proc set_cdr_b_proc = new Proc((Procedure2Void) set_cdr_b, 2, 0);
   public static Proc sqrt_proc = new Proc((Procedure1) sqrt, -1, 1);
-  public static Proc string_to_symbol_proc = new Proc((Procedure1) string_to_symbol, -1, 2);
-  public static Proc stringLessThan_q_proc = new Proc((Procedure2Bool) stringLessThan_q, 2, 1);
+  public static Proc string_to_symbol_proc = new Proc((Procedure1) string_to_symbol, 1, 1);
+  public static Proc stringLessThan_q_proc = new Proc((Procedure2Bool) stringLessThan_q, 2, 2);
   public static Proc null_q_proc = new Proc((Procedure1Bool) null_q, 1, 2);
   public static Proc display_prim_proc = new Proc((Procedure1Void) display, 1, 0);
   public static Proc pretty_print_prim_proc = new Proc((Procedure1Void) pretty_print, -1, 0);
@@ -317,6 +317,7 @@ public abstract class Scheme {
   public static char BACKSLASH = '\\';
   public static char SLASH = '/';
   public static char[] SPLITSLASH = {SLASH};
+  public static string NEWLINE_STRING = "\n";
 
   public static void trace(int level, object fmt, params object[] objs) {
 	if (level <= config.DEBUG) {
@@ -372,11 +373,13 @@ public abstract class Scheme {
   public static object make_initial_environment (object vars, object vals)
   {
 	return list(
+		extend_frame(symbol("property"), new Proc((Procedure1)property, -1, 1),
 		extend_frame(symbol("debug"), new Proc((Procedure1)debug, -1, 1),
 		extend_frame(symbol("typeof"), new Proc((Procedure1)get_type, 1, 1),
 		extend_frame(symbol("float"), new Proc((Procedure1)ToDouble, 1, 1),
 		extend_frame(symbol("int"), new Proc((Procedure1)ToInt, 1, 1),
 		extend_frame(symbol("sort"), new Proc((Procedure2)sort, 2, 1),
+		extend_frame(symbol("string<?"), new Proc((Procedure2Bool) stringLessThan_q, 2, 2),
 		extend_frame(symbol("string->symbol"), new Proc((Procedure1) string_to_symbol, 1, 1),
 		extend_frame(symbol("symbol->string"), new Proc((Procedure1) symbol_to_string, 1, 1),
 		extend_frame(symbol("string->list"), new Proc((Procedure1) string_to_list, 1, 1),
@@ -386,7 +389,7 @@ public abstract class Scheme {
 		extend_frame(symbol("list-head"), new Proc((Procedure2)list_head, 2, 1),
 		extend_frame(symbol("list-tail"), new Proc((Procedure2)list_tail, 2, 1),
 		extend_frame(symbol("symbol"), new Proc((Procedure1)symbol, 1, 1),
-			make_frame(vars, vals))))))))))))))));
+			make_frame(vars, vals))))))))))))))))));
   }
   
   public static object make_binding(object args1, object args2) {
@@ -453,73 +456,111 @@ public abstract class Scheme {
 	return retval;
   }
 
-  public static Type get_type(String tname) {
-	printf("get_type '{0}'\n", tname);
+  public static Type get_the_type(String tname) {
 	foreach (Assembly assembly in config.assemblies) {
 	  Type type = assembly.GetType(tname);
 	  if (type != null) {
-		printf("  found type '{0}'\n", type);
 		return type;
 	  }
 	}
-	printf("  not found\n");
 	return null;
   }
 
-  // given a name, return a function that given an array, returns object
-  public static Procedure1 make_external_proc(object tname) {
-	printf("making external proc '{0}'\n", tname);
-	return args => call_external_proc(tname, args);
-  }
+  public static object property (object args) {
+	object the_obj = car(args);
+	object property_list = cdr(args);
+	return call_external_proc(the_obj, the_obj.GetType(), property_list, list());
 
-  public static object call_external_proc(object name, object args) {
-	// Type Members
-	// Type Constructor
-	// Fields
-	// Properties
-	// Methods
-	Type type = get_type(name.ToString());
-	if (type != null) {
-	  String method_name = car(args).ToString();
-	  Type[] types = get_arg_types(cdr(args));
-	  object[] arguments = (object[]) list_to_vector(cdr(args));
-	  MethodInfo method = type.GetMethod(method_name, types);
-	  printf("type is {0}, types are {1}\n", type, array_to_string(types));
-	  if (method != null) {
-		printf("method name is '{0}' args are {1}\n", name, args);
-		object retval = method.Invoke(method_name, arguments);
-		return retval;
-	  } else {
-		FieldInfo field = type.GetField(method_name);
-		if (field != null) {
-		  printf("field: {0}\n", field.GetValue(null));
-		  return field.GetValue(null);
-		} else {
-		  // list the constructors:
-		  ConstructorInfo[] p = type.GetConstructors();
-		  Console.WriteLine(p.Length);
-		  for (int i=0;i<p.Length;i++) {
-            Console.WriteLine(p[i].Name);
-			ParameterInfo[] pars = p[i].GetParameters();
-			foreach (ParameterInfo par in pars) 
-			{
-			  Console.WriteLine(par.ParameterType);
-			}
-		  }
-		  // load the matching one:
-		  ConstructorInfo constructor = type.GetConstructor(types);
-		  if (constructor != null) {
-			printf("Found a constructor!\n");
-			object retval = constructor.Invoke(arguments);
-			printf("instance property name: {0}\n", retval.GetType().GetField("name").GetValue(retval));
-			return retval;
-		  } else {
-			throw new Exception(String.Format("what is this '{0}'?", name));
-		  }
-		} 
+	/*
+	object result = get_external_thing(the_obj, the_obj.GetType(), property_list, get_arg_types(list()));
+
+	if (!null_q(result)) {
+	  if (Eq(car(result), symbol("field"))) {
+		string field_name = (string) cadr(result);
+		FieldInfo field = (FieldInfo) caddr(result);
+		try {
+		  return field.GetValue(null); // null for static
+		} catch {
+		  return field.GetValue(the_obj); // the_obj for instance
+		}
 	  }
 	}
-	throw new Exception(String.Format("no such external type '{0}'", name));
+	return null;
+	*/
+  }
+
+  public static object get_external_thing(object obj, Type type, object lyst, Type[] types) {
+	ConstructorInfo constructor = type.GetConstructor(types);
+	if (constructor != null) {
+	  return list(symbol("constructor"), "ctor", constructor);
+	}
+	object current = lyst;
+	while (!Equal(current, EmptyList)) {
+	  string name = car(current).ToString();
+	  MethodInfo method = type.GetMethod(name, types);
+	  if (method != null) {
+		return list(symbol("method"), name, method);
+	  }
+	  FieldInfo field = type.GetField(name);
+	  if (field != null) {
+		return list(symbol("field"), name, field);
+	  }
+	  PropertyInfo property = type.GetProperty(name);
+	  if (property != null) {
+		return list(symbol("property"), name, property);
+	  }
+	}
+	// Type Members
+	return list();
+  }
+
+  // given a name, return a function that given an array, returns object
+  public static Procedure2 make_external_proc(object tname) {
+	return (path, args) => call_external_proc(null, get_the_type(tname.ToString()), path, args);
+  }
+
+  public static object call_external_proc(object obj, Type type, object path, object args) {
+	//string name = obj.ToString();
+	//Type type = null;
+	//type = get_the_type(name.ToString());
+	if (type != null) {
+	  Type[] types = get_arg_types(args);
+	  object[] arguments = (object[]) list_to_vector(args);
+	  object result = get_external_thing(obj, type, path, types);
+	  if (!null_q(result)) {
+		if (Eq(car(result), symbol("method"))) {
+		  string method_name = (string) cadr(result);
+		  MethodInfo method = (MethodInfo) caddr(result);
+		  object retval = method.Invoke(method_name, arguments);
+		  return retval;
+		} else if (Eq(car(result), symbol("field"))) {
+		  //string field_name = (string) cadr(result);
+		  FieldInfo field = (FieldInfo) caddr(result);
+		  try {
+			return field.GetValue(null); // null for static
+		  } catch {
+			return field.GetValue(obj); // use obj for instance
+		  }
+		} else if (Eq(car(result), symbol("constructor"))) {
+		  //string ctor_name = (string) cadr(result);
+		  ConstructorInfo constructor = (ConstructorInfo) caddr(result);
+		  object retval = constructor.Invoke(arguments);
+		  return retval;
+		} else if (Eq(car(result), symbol("property"))) {
+		  string property_name = (string) cadr(result);
+		  PropertyInfo property = (PropertyInfo) caddr(result);
+		  // ParameterInfo[] indexes = property.GetIndexParameters();
+		  // to use interface, OR
+		  // PropertyType.IsArray; to just get object then access
+		  return property.GetValue(property_name, null); // non-indexed
+		  //property.GetValue(property_name, index); // indexed
+		} else {
+		  throw new Exception(String.Format("don't know how to handle '{0}'?", result));
+		}
+	  }
+	  return result;
+	}
+	throw new Exception(String.Format("no such external type '{0}'", type));
   }
 
   public static object using_prim(object args, object env) {
@@ -544,10 +585,9 @@ public abstract class Scheme {
 		  foreach (Type type in assembly.GetTypes()) {
 			if (type.IsPublic) {
 			  string className = type.FullName;
-			  Console.WriteLine("Type: {0}", className);
 			  //classname_parts = get_parts(className, "+");
 			  set_car_b( env, extend_frame(symbol(className), 
-					  new Proc((Procedure1)make_external_proc(className), -1, 1),
+					  new Proc((Procedure2)make_external_proc(className), 2, 1),
 					  car(env)));
 			}
 		  }
@@ -744,6 +784,14 @@ public abstract class Scheme {
 	  else
 		return false;
 	};
+  }
+
+  public static bool type_q(object obj) {
+	return (obj is Type);
+  }
+
+  public static bool object_q(object obj) {
+	return (! list_q(obj));
   }
 
   public static Func<object,bool> procedure_q = tagged_list(symbol("procedure"), (Predicate2)GreaterOrEqual, 1);
