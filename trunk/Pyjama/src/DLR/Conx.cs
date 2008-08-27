@@ -307,11 +307,11 @@ public class Layer
     public Layer(string name, int size)
     {
         
-            if (size <= 0)
-            {
-                Exception e = new Exception("Layer was initialized with size zero.");
-                throw e;
-            }
+        if (size <= 0)
+        {
+            Exception e = new Exception("Layer was initialized with size zero.");
+            throw e;
+        }
         
 
         //this.log = 0;
@@ -543,7 +543,7 @@ public class Layer
         double avgvalue;
         if (this.size > 0)
         {
-            avgvalue = ttlvalue/this.size;
+            avgvalue = ttlvalue / this.size;
         }
         else
         {
@@ -589,10 +589,10 @@ public class Layer
         }
         if ((this.verbosity > 4) && (this.type != "Input"))
         {
-            this.print(this.weight, "Weight  \t");
-            this.print(this.dweight, "Dweight   \t");
+            this.print(this.weight, "Weight\t");
+            this.print(this.dweight, "Dweight\t");
             this.print(this.delta, "Delta \t");
-            this.print(this.netinput, "Net Input \t");
+            this.print(this.netinput, "NetInput\t");
             this.print(this.wed, "Wed \t");
         }
     }
@@ -875,7 +875,7 @@ public class Connection
 
     public void display()
     {
-        if((this.toLayer.verbosity>2))
+        if(this.toLayer.verbosity>2)
         {
             Console.WriteLine("=============================");
             Console.WriteLine("Connection from '{0}' to '{1}': (Active: {2}, Frozen: {3})",
@@ -897,7 +897,7 @@ public class Connection
             }
         }
 
-        if((this.toLayer.verbosity>4))
+        if(this.toLayer.verbosity>4)
         {
             Console.Write("wed:");
             for(int i=0; i < this.fromLayer.size; i++)
@@ -1000,7 +1000,7 @@ public class Network
     public List<Connection> cacheConnections = new List<Connection>();
     public List<Layer> cacheLayers = new List<Layer>();
     public bool useCrossValidationToStop = false;
-	public Activation act = new ActASIG(.1);
+    public Activation act = new ActASIG(.1);
 
 
 
@@ -1672,7 +1672,7 @@ public class Network
                 Dictionary<string,double[]> pcorrect)
     {
         Console.WriteLine("Epoch #{0,-6} | TSS Error: {1:F4} | Correct: {2:F4} | RMS Error: {3:F4}",
-                  epoch, tssErr, totalCorrect*1.0/totalCount, rmsErr);
+                  epoch, tssErr, totalCorrect*1.0 /totalCount, rmsErr);
 
         foreach(string layerName in pcorrect.Keys)
         {
@@ -1694,7 +1694,7 @@ public class Network
     public void reportFinal(int epoch, double tssErr, int totalCorrect, int totalCount, double rmsErr)
     {
         Console.WriteLine("Final #{0,-6} | TSS Error: {1:F2} | Correct: {2:F4} | RMS Error: {3:F4}",
-                  epoch, tssErr, totalCorrect*1.0/totalCount, rmsErr);
+                  epoch, tssErr, totalCorrect*1.0 /totalCount, rmsErr);
     }
 
     public void reportFinal(int epoch, double tssErr, int totalCorrect, int totalCount, double rmsErr,
@@ -1722,7 +1722,7 @@ public class Network
 
     public bool doWhile(int totalCount, int totalCorrect)
     {
-        if ((totalCount != 0) && ((totalCorrect*1.0/totalCount < this.stopPercent)||
+        if ((totalCount != 0) && ((totalCorrect*1.0 /totalCount < this.stopPercent)||
                       (this.useCrossValidationToStop)))
         {
             return true;
@@ -1756,6 +1756,7 @@ public class Network
             totalCorrect = (int) list[1];
             totalCount = (int) list[2];
             totalPCorrect = (Dictionary<string,double[]>) list[3];
+            Console.WriteLine("Correct: {0}, Count: {1}, Length of Dictionary: {2}", totalCorrect, totalCount, totalPCorrect.Count);
             if (totalCount!= 0)
             {
                 rmsErr = Math.Sqrt(tssErr/totalCount);
@@ -1817,7 +1818,7 @@ public class Network
         }
         if(totalCount > 0)
         {
-            this.reportFinal(this.epoch, tssErr, totalCorrect, totalCount, rmsErr, totalPCorrect);
+            this.reportFinal(this.epoch-1, tssErr, totalCorrect, totalCount, rmsErr, totalPCorrect);
             if ((this.autoCrossValidation)||(this.crossValidationCorpus.Count>0))
             {
                 List<object> retval = this.sweepCrossValidation();
@@ -1932,7 +1933,7 @@ public class Network
         }
         if(totalCount > 0)
         {
-            this.reportFinal(this.epoch, tssErr, totalCorrect, totalCount, rmsErr, totalPCorrect);
+            this.reportFinal(this.epoch-1, tssErr, totalCorrect, totalCount, rmsErr, totalPCorrect);
             if ((this.autoCrossValidation)||(this.crossValidationCorpus.Count>0))
             {
                 List<object> retval = this.sweepCrossValidation();
@@ -2059,7 +2060,7 @@ public class Network
         }
         if(totalCount > 0)
         {
-            this.reportFinal(this.epoch, tssErr, totalCorrect, totalCount, rmsErr, totalPCorrect);
+            this.reportFinal(this.epoch-1, tssErr, totalCorrect, totalCount, rmsErr, totalPCorrect);
             if ((this.autoCrossValidation)||(this.crossValidationCorpus.Count>0))
             {
                 List<object> retval = this.sweepCrossValidation();
@@ -2146,6 +2147,7 @@ public class Network
         int cnt = 0;
         foreach(int i in this.loadOrder)
         {
+            //Console.WriteLine("   Processing pattern {0}", i);
             if ((this.verbosity >= 1)||(this.interactive))
             {
                 Console.WriteLine("\n-----------------------------------------------------------Pattern #{0}", this.loadOrder[i]+1);
@@ -2165,6 +2167,7 @@ public class Network
             int correct = (int) list[1];
             int total = (int) list[2];
             Dictionary<string,double[]> pcorrect = (Dictionary<string,double[]>) list[3];
+            //Console.WriteLine("      Error: {1}, Correct: {1}, Total: {2}", error, correct, total);
             this.sweeping = false;
             //save Results
             tssError += error;
@@ -2315,20 +2318,20 @@ public class Network
             }
             outLayer.copyTargets(inLayer.activation);
         }
-        Dictionary<string,double[]> retval2 = this.prebackprop(args);
-        if(retval2.Count>0)
+        Dictionary<string,double[]> retval3 = this.prebackprop(args);
+        if(retval3.Count>0)
         {
-            args=retval2;
+            args=retval3;
         }
         List<object> list = backprop(args);
         if(this.verbosity > 2)
         {
             this.display();
         }
-        Dictionary<string,double[]> retval2 = this.postbackprop(args);
-        if(retval2.Count>0)
+        Dictionary<string,double[]> retval4 = this.postbackprop(args);
+        if(retval4.Count>0)
         {
-            args=retval2;
+            args=retval4;
         }
         if(this.learning && !this.batch)
         {
@@ -2353,7 +2356,7 @@ public class Network
         return args;
     }
     
-    public virtual Dictionary<string,double[]> postpropagate(Dictionary<string,double[]> args)
+    public virtual Dictionary<string,double[]> postbackprop(Dictionary<string,double[]> args)
     {
         return args;
     }
@@ -2803,6 +2806,10 @@ public class Network
             if(verbosity>0)
             {
                 Console.WriteLine("Weights changed.");
+                foreach(Connection con in this.connections)
+                {
+                    con.display();
+                } 
             }
         }
         List<double> list = new List<double>();
@@ -3165,8 +3172,7 @@ public class Network
                 Dictionary<string,double[]> set
                     = this.getDataCrossValidation(i);
                 this.sweeping = true;
-                List<object> lyst = this.step(set
-                                 );
+                List<object> lyst = this.step(set);
                 this.sweeping = false;
                 tssError += (double) lyst[0];
                 totalCorrect += (int) lyst[1];
@@ -3180,8 +3186,7 @@ public class Network
                     in this.crossValidationCorpus)
             {
                 this.sweeping = true;
-                List<object> lyst = this.step(set
-                                 );
+                List<object> lyst = this.step(set);
                 this.sweeping = false;
                 if (this.crossValidationReportLayers.Count > 0)
                 {
@@ -3496,7 +3501,7 @@ public class Network
 
     public void setSigmoidOffset(double value)
     {
-        this.signmoid_prime_offset = value;
+        this.sigmoid_prime_offset = value;
         this.act.sigmoid_prime_offset = value;
     }
     
@@ -3516,49 +3521,117 @@ public class Network
     static void Main()
     {
 
+        
 
-        // Network learning 8-digit binary numbers for speed comparison with Python
 
-        /*
-        double[][] inputs = new double[256][];
-        double[][] targets = new double[256][];
-        int r;
+        
+        double[][] inputs = new double[10][];
+        double[][] targets = new double[10][];
         int temp;
-        int count;
-        for(int i=0;i<256;i++)
-        {   temp = i;
-            count = 0;
-            double[] array = new double[8];
-            array.Initialize();
-            for(int j=0;j<8;j++)
+        for(int i=0;i<10;i++)
+        {   
+            double[] array = new double[25000];
+            temp = Network.random.Next(0,2);
+            int a = 0;
+            int b = 0;
+            int c = 0;
+            int d = 0;
+            int e = 0;
+                       
+            for(int j=0;j<25000;j++)
             {
-            r = temp%2;
-            array[j]=r;
-            temp = temp/2;
-            count+=r;
+                temp = Network.random.Next(0,2);
+                a = (a+temp)%2;
+                b = (b+temp)%3;
+                c = (c+temp)%5;
+                d = (d+temp)%7;
+                e = (e+temp)% 11;
+                array[j] = temp;
             }
-            double[] tar = new double[]{count%2};
+            
+            double[] tar = new double[]{a, b/2.0, c/4.0, d/6.0, e/10.0};
             inputs[i]=Functions.copyDoubleArray(array);
             targets[i]=Functions.copyDoubleArray(tar);
         }
          Network net = new Network();
-         net.addLayers(8,8,1);
+         net.addLayers(25000,1000,5);
+         net.setVerbosity(0);
          net.setInputs(inputs);
          net.setTargets(targets);
-         net.setReportRate(25);
+         net.setReportRate(1);
          net.setResetEpoch(100000);
-         net.setHyperbolicError(true);
+         net.setTolerance(.4);
+         Console.WriteLine("Generated patterns");
          DateTime start = DateTime.Now;
-         net.train(0,1000);
+         net.train(0,10);
          TimeSpan timeTaken = DateTime.Now - start;
+         Console.WriteLine("Minutes: " + timeTaken.Minutes);
+         Console.WriteLine("Seconds: " + timeTaken.Seconds);
          Console.WriteLine("Milliseconds: " + timeTaken.Milliseconds);
+         
+        
+        
+        
+        /*
+        Random rand = new Random();
+        SRN net = new SRN();
+        net.addSRNLayers(3,3,3);
+        net.tolerance = .3;
+        double[][] inputs = new double[99][];
+        double temp = 0;
+        for(int i = 0; i< 99; i++)
+        {
+            if(i%3 == 0)
+            {
+                inputs[i] = new double[]{.9,.1,.1};
+            }
+            else
+            {
+                if (temp==2)
+                {
+                    inputs[i] = new double[]{.1,.9,.1};
+                    temp = 0;
+                }
+                else
+                {
+                    if (temp == 3)
+                    {
+                        inputs[i] = new double[]{.1,.1,.9};
+                        temp = 0;
+                    }
+                    else
+                    {
+                        temp = rand.Next(2,4);
+                        if (temp==2)
+                        {
+                            inputs[i] = new double[]{.1,.1,.9};
+                        }
+                        else
+                        {
+                            inputs[i] = new double[]{.1,.9,.1};
+                        }
+                    }
+                }
+            }
+        }
+        double[][] targets = new double[99][];
+        for(int i=0; i<98;i++)
+        {
+            targets[i] = inputs[i+1];
+        }
+        targets[98] = new double[]{.9,.1,.1};
+                        
+        net.setInputs(inputs);
+        net.setTargets(targets);
+        net.setSequenceType("ordered-continuous");
+        net.setReportRate(10);
+        net.train();
+
+
         */
 
 
-
-
-
-
+/*
 
         //very simple Network for debugging
 
@@ -3580,7 +3653,7 @@ public class Network
         net.setTargets(targets);
         net.setTolerance(.4);
         net.setVerbosity(0);
-        net.setReportRate(25);
+        net.setReportRate(1);
         net.saveInputsToFile("intest.conx");
         net.loadInputsFromFile("intest.conx");
         net.saveTargetsToFile("tartest.conx");
@@ -3593,10 +3666,12 @@ public class Network
         net.connections[0].weight[1][0]=0;
         net.connections[1].weight[0][0]=0;
         net.setOrderedInputs(true);
+        net.setVerbosity(0);
         net.train(0,1000);
 
 
         Console.WriteLine("Done.");
+*/
     }
 }
 
@@ -3609,74 +3684,74 @@ public class Network
 
 public class SRN: Network
 {
-	bool initContext = false;
-	bool learningDuringSequencing = true;
-	bool contextCopying = true;
-	Dictionary<string, Layer> contextLayers = new Dictionary<string, Layer>();
-	List<string[]> prediction;
-	string sequenceType="";
+    bool initContext = false;
+    bool learnDuringSequencing = true;
+    bool contextCopying = true;
+    Dictionary<string, Layer> contextLayers = new Dictionary<string, Layer>();
+    List<string[]> prediction;
+    string sequenceType="";
 
-	public SRN(): base()
-	{
-		this.name = "Simple Recurrent Network";
-		Console.WriteLine("Remember to set sequence type.");
-	}
-	
-	public setSequenceType(string value)
-	{
-		if (value == "ordered-continuous")
-		{
-			this.orderedInputs = true;
-			this.initContext = false;
-			this.sequenceType = value;
-		}
-		if (value == "random-segmented")
-		{
-			this.orderedInputs = false;
-			this.initContext = true;
-			this.sequenceType = value;
-		}
-		if (value == "random-continuous")
-		{
-			this.orderedInputs = false;
-			this.initContext = false;
-			this.sequenceType = value;
-		}
-		if (value == "ordered-segmented")
-		{
-			this.orderedInputs = true;
-			this.initContext = true;
-			this.sequenceType = value;
-		}
-		if (this.sequenceType.Count<1)try
-		{
-			Console.WriteLine("Please set valid sequence type.");
-			Console.WriteLine("Options: \"ordered-continuous\", \"random-segmented\", \"random-continuous\", \"ordered-segmented\");
-			throw new Exception("Sequence type not set.");
-		}
-	}
-	
-	
-	public void predict(string inName, string outName)
-	{
-		string[] array = new string[]{inName, outName};
-		this.prediction.Add(array);
-	}
-	
-	
-	public void setInitContext(bool value)
-	{
-		this.initContext = value;
-	}
-	
-			
-	public setLearningDuringSequence(bool value)
-	{
-		this.learningDuringSequence = value;
-	}
-	
-	
-	public override void addThreeLayers(int inc, int hidc, int outc)
+    public SRN(): base()
+    {
+        this.name = "Simple Recurrent Network";
+        Console.WriteLine("Remember to set sequence type.");
+    }
+    
+    public void setSequenceType(string value)
+    {
+        if (value == "ordered-continuous")
+        {
+            this.orderedInputs = true;
+            this.initContext = false;
+            this.sequenceType = value;
+        }
+        if (value == "random-segmented")
+        {
+            this.orderedInputs = false;
+            this.initContext = true;
+            this.sequenceType = value;
+        }
+        if (value == "random-continuous")
+        {
+            this.orderedInputs = false;
+            this.initContext = false;
+            this.sequenceType = value;
+        }
+        if (value == "ordered-segmented")
+        {
+            this.orderedInputs = true;
+            this.initContext = true;
+            this.sequenceType = value;
+        }
+        if (this.sequenceType.Length<1)
+        {
+            Console.WriteLine("Please set valid sequence type.");
+            Console.WriteLine("Options: \"ordered-continuous\", \"random-segmented\", \"random-continuous\", \"ordered-segmented\".");
+            throw new Exception("Sequence type not set.");
+        }
+    }
+    
+    
+    public void predict(string inName, string outName)
+    {
+        string[] array = new string[]{inName, outName};
+        this.prediction.Add(array);
+    }
+    
+    
+    public void setInitContext(bool value)
+    {
+        this.initContext = value;
+    }
+    
+            
+    public void setLearningDuringSequence(bool value)
+    {
+        this.learnDuringSequencing = value;
+    }
+    
+    
+    public override void addThreeLayers(int inc, int hidc, int outc)
     {
         this.addLayer("Input", inc);
         this.addContextLayer("Context", hidc, "Hidden");
@@ -3686,233 +3761,276 @@ public class SRN: Network
         this.connect("Context", "Hidden");
         this.connect("Hidden", "Output");
     }
-	
+    
 
-	public addSRNLayers(int inc, int hidc, int outc)
-	{
-		this.addThreeLayers(inc, hidc, outc)
-	}
-	
-	
-	public addContextLayer(string name, int size, string hiddenLayerName)
-	{
-		Layer layer = Layer(name, size);
-		this.addContext(layer, hiddenLayerName);
-	}
-	
+    public void addSRNLayers(int inc, int hidc, int outc)
+    {
+        this.addThreeLayers(inc, hidc, outc);
+    }
+    
+    
+    public void addContextLayer(string name, int size, string hiddenLayerName)
+    {
+        Layer layer = new Layer(name, size);
+        this.addContext(layer, hiddenLayerName);
+    }
+    
 
-	public addContextLayer(string name, int size, string hiddenLayerName, int verbosity)
-	{
-		Layer layer = Layer(name, size);
-		layer.verbosity = verbosity;
-		this.addContext(layer, hiddenLayerName);
-	}
-
-
-	public addContext(Layer layer, string hiddenLayerName)
-	{
-		SRN.add(layer);
-		if (this.contextLayers.ContainsKey(hiddenLayerName))
-		{
-			throw new Exception("There is already a context Layer associated with this layer.");
-		}
-		else
-		{
-			this.contextLayers.Add(hiddenLayerName, layer);
-			layer.kind = "Context";
-		}
-	}
+    public void addContextLayer(string name, int size, string hiddenLayerName, int verbosity)
+    {
+        Layer layer = new Layer(name, size);
+        layer.verbosity = verbosity;
+        this.addContext(layer, hiddenLayerName);
+    }
 
 
-	public copyHiddenToContext()
-	{
-		foreach(string key in this.contextLayers.Keys)
-		{
-			if(this.verbosity>2)
-			{
-				Console.WriteLine("Hidden Layer: {0}", this.getLayer(key).activation);
-				Console.WriteLine("Context Layer before copy: {0}", this.contextLayers[key].activation);
-			}
-			this.contextLayers[key].copyActivations(this.getLayer(item[0]).activation);
-			if(this.verbosity>2)
-			{
-				Console.WriteLine("Context Layer after copy: {0}", this.contextLayers[key].activation);
-			}
-		}
-	}
-	
-		
-
-	public void setContext(double value)
-	{
-		foreach( Layer context in this.contextLayers.Values)
-		{
-			context.resetFlags();
-			context.setActivations(value);
-		}
-	}
-	
-	
-	public override Dictionary<string, double[]> prepropagate(Dictionary<string, double[]> args)
-	{
-		if(!this.contextCopying)
-		{
-			foreach(Layer layer in this.layers)
-			{
-				if (layer.kind == "Context")
-				{
-					layer.activationSet = true;
-				}
-			}
-		}
-		return args;
-	}
-	
-	
-	public override Disctionary<string, double[]> postbackprop(Dictionary<string,double[]>)
-	{
-		if(this.contextCopying)
-		{
-			this.copyHiddenToContext
-		}
-		return args;
-	}
+    public void addContext(Layer layer, string hiddenLayerName)
+    {
+        this.add(layer);
+        if (this.contextLayers.ContainsKey(hiddenLayerName))
+        {
+            throw new Exception("There is already a context Layer associated with this layer.");
+        }
+        else
+        {
+            this.contextLayers.Add(hiddenLayerName, layer);
+            layer.kind = "Context";
+        }
+    }
 
 
-	public List<object> networkStep(Dictionary<string,double> args)
-	{
-		return base.step(args);
-	}
-	
-	
-	public override List<object> step(Dictionary<string,double> args)
-	{
-		if(this.sequenceType.Couont<1)
-		{
-			throw new Exception("sequenceType not set! Use SRN.setSequenceType()");
-		}
-		if (this.initContext)
-		{
-			this.setContext();
-		}
-		else
-		{
-			foreach(Layer context in this.contextLayers.Values)
-			{
-				context.activationSet = true;
-			}
-		}
-		List<string> inputBankNames = new List<string>();
-		List<string> outputBankNames = new List<string>();
-		int inputBankSize =0;
-		List<int> inputArgSizes = new List<int>();
-		int inputArgSize = 0;
-		foreach(Layer layer in this.layers)
-		{
-			if (layer.kind == "Input")
-			{
-				inputBankNames.Add(layer.name);
-				inputBankSize+=layer.size;
-				if (args.ContainsKey(layer.name))
-				{
-					inputArgSize+= args[layer.name].Length;
-				}
-			}
-			if (layer.kind == "Output")
-			{
-				outputBankNames.Add(layer.name);
-			}
-		}
-		int sequenceLength = inputArgSize/inputTotalSize;
-		bool learning = this.learning;
-			
+    public void copyHiddenToContext()
+    {
+        foreach(string key in this.contextLayers.Keys)
+        {
+            if(this.verbosity>2)
+            {
+                Console.WriteLine("Hidden Layer: {0}", this.getLayer(key).activation);
+                Console.WriteLine("Context Layer before copy: {0}", this.contextLayers[key].activation);
+            }
+            this.contextLayers[key].copyActivations(this.getLayer(key).activation);
+            if(this.verbosity>2)
+            {
+                Console.WriteLine("Context Layer after copy: {0}", this.contextLayers[key].activation);
+            }
+        }
+    }
+    
+        
 
-    /*
-    def step(self, **args):
+    public void setContext(double value)
+    {
+        foreach( Layer context in this.contextLayers.Values)
+        {
+            context.resetFlags();
+            context.setActivations(value);
+        }
+    }
+    
+    
+    public override Dictionary<string, double[]> prepropagate(Dictionary<string, double[]> args)
+    {
+        if(!this.contextCopying)
+        {
+            foreach(Layer layer in this.layers)
+            {
+                if (layer.kind == "Context")
+                {
+                    layer.activationSet = true;
+                }
+            }
+        }
+        return args;
+    }
+    
+    
+    public override Dictionary<string, double[]> postbackprop(Dictionary<string,double[]> args)
+    {
+        if(this.contextCopying)
+        {
+            this.copyHiddenToContext();
+        }
+        return args;
+    }
 
-        # replace all patterns
-        for key in args:
-            args[key] = self.replacePatterns( args[key], key )
-        # Get all of the input/output layer names:
-        inputBankNames = [layer.name for layer in self.layers if layer.kind == 'Input']
-        outputBankNames = [layer.name for layer in self.layers if layer.kind == 'Output']
-        inputBankSizes = [layer.size for layer in self.layers if layer.kind == 'Input']
-        inputBankTotalSize = sum(inputBankSizes)
-        inputArgSizes = [len(args[name]) for name in inputBankNames if name in args]
-        inputArgTotalSize = sum(inputArgSizes)
-        sequenceLength = inputArgTotalSize / inputBankTotalSize
-        learning = self.learning
-        totalRetvals = (0.0, 0, 0) # error, correct, total
-        totalPCorrect = {}
-        for step in range(sequenceLength):
-            if self.verbosity >= 1 or self.interactive:
-                print "-----------------------------------Step #", step + 1
-            dict = {}
-            dict.update(args) # in case context, or others
-            # now, overwrite input and output, if necessary
-            for name in inputBankNames:
-                if name in args:
-                    patternLength = self[name].size
-                    offset = step * patternLength
-                    if (offset + patternLength) >= len(args[name]):
-                        # if this seq is too big, use last part:
-                        dict[name] = args[name][-patternLength:]
-                    else:
-                        # else, go to the right spot in seq:
-                        dict[name] = args[name][offset:offset+patternLength]
-            for name in outputBankNames:
-                if name in args:
-                    patternLength = self[name].size
-                    offset = step * patternLength
-                    if (offset + patternLength) >= len(args[name]):
-                        # if this seq is too big, use last part:
-                        dict[name] = args[name][-patternLength:]
-                    else:
-                        # else, go to the right spot in seq:
-                        dict[name] = args[name][offset:offset+patternLength]
-            # get info for predicition -------------------------
-            for p in self.prediction:
-                (inName, outName) = p
-                inLayer = self.getLayer(inName)
-                if not inLayer.type == 'Input':
-                    raise LayerError, ('Prediction input layer not type \'Input\'.', inLayer.type)
-                outLayer = self.getLayer(outName)
-                if not outLayer.type == 'Output':
-                    raise LayerError, ('Prediction output layer not type \'Output\'.', outLayer.type)
-                if step == sequenceLength - 1: # last one in sequence; what do we do?
-                    start = 0 # wrap to next input vector
-                    if not self._sweeping: # not in sweep, in step, no target
-                        raise LayerError, "Attempting to predict last item in sequence, but using step(). Use sweep() instead."
-                    else: # in a sweep, so get the next pattern if one:
-                        if self.currentSweepCount == None: # last item in epoch, predict back to first pattern
-                            # Train it to predict first pattern, first sequence item
-                            pattern = self.getData(self.loadOrder[0])
-                            for key in pattern:
-                                pattern[key] = self.replacePatterns( pattern[key], key )
-                            if inName in inputBankNames:
-                                if inName in pattern:
-                                    dict[outName] = pattern[inName][start:start+patternLength]
-                            #dict[outName] = pattern["input"][start:start+patternLength]
-                        else:
-                            pattern = self.getData(self.loadOrder[self.currentSweepCount+1]) 
-                            for key in pattern:
-                                pattern[key] = self.replacePatterns( pattern[key], key )
-                            if inName in inputBankNames:
-                                if inName in pattern:
-                                    dict[outName] = pattern[inName][start:start+patternLength]
-                            #dict[outName] = pattern["input"][start:start+patternLength]
-                else: # in middle of sequence
-                    start = (step + 1) * inLayer.size
-                    dict[outName] = args[inName][start:start+patternLength]
-            # end predicition code -----------------------------
-            if step < sequenceLength - 1: # not the last one
-                if not self.learnDuringSequence:
-                    self.learning = 0
-            retvals = self.networkStep(**dict)
-            self.learning = learning # in case we turned it off
-            totalRetvals = map(lambda x,y: x+y, totalRetvals[:3], retvals[:3])
-            sumMerge(totalPCorrect, retvals[3])
-            totalRetvals.append( totalPCorrect)
-        return totalRetvals
 
-			*/
+    public List<object> networkStep(Dictionary<string,double[]> args)
+    {
+        return base.step(args);
+    }
+    
+    
+    public override List<object> step(Dictionary<string,double[]> args)
+    {
+        foreach(string name in args.Keys)
+        {
+            Console.WriteLine(name);
+        }
+        if(this.sequenceType.Length<1)
+        {
+            throw new Exception("sequenceType not set! Use SRN.setSequenceType()");
+        }
+        if (this.initContext)
+        {
+            this.setContext(.5);
+        }
+        else
+        {
+            foreach(Layer context in this.contextLayers.Values)
+            {
+                context.activationSet = true;
+            }
+        }
+        List<string> inputBankNames = new List<string>();
+        List<string> outputBankNames = new List<string>();
+        int inputBankSize =0;
+        int inputArgSize = 0;
+        foreach(Layer layer in this.layers)
+        {
+            if (layer.kind == "Input")
+            {
+                Console.WriteLine("Found input layer: {0}", layer.name);
+                inputBankNames.Add(layer.name);
+                inputBankSize+=layer.size;
+                if (args.ContainsKey(layer.name))
+                {
+                    inputArgSize+= args[layer.name].Length;
+                }
+            }
+            if (layer.kind == "Output")
+            {
+                Console.WriteLine("Found output layer: {0}", layer.name);
+                outputBankNames.Add(layer.name);
+            }
+        }
+        int sequenceLength = inputArgSize/inputBankSize;
+        bool learning = this.learning;
+        List<object> retval = new List<object>();
+        double error = 0.0;
+        int correct = 0;
+        int count = 0;
+        Dictionary<string,double[]> totalPCorrect = new Dictionary<string, double[]>();
+        for(int step=0; step<sequenceLength; step++)
+        {
+            if ((this.verbosity >=1)||this.interactive)
+            {
+                Console.WriteLine("\n-----------------------------------------------------------Step #{0}", step+1);
+            }
+            Dictionary<string,double[]> dict = new Dictionary<string,double[]>();
+            foreach(string key in args.Keys)
+            {
+                dict.Add(key, Functions.copyDoubleArray(args[key]));
+            }
+            foreach(string name in inputBankNames)
+            {
+                if(args.ContainsKey(name))
+                {
+                    Console.WriteLine("Input bank name: {0}", name);
+                    int patternLength = this.layersByName[name].size;
+                    int offset = step* patternLength;
+                    double[] arr = new double[patternLength];
+                    if ((offset+patternLength) >= args[name].Length)
+                    {
+                        Array.Copy(args[name],args[name].Length-patternLength,arr,0,patternLength);
+                    }
+                    else
+                    {
+                        Array.Copy(args[name],offset, arr, 0, patternLength);
+                    }
+                    dict[name]=arr;
+                }
+            }
+            foreach(string name in outputBankNames)
+            {
+                if(args.ContainsKey(name))
+                {
+                    Console.WriteLine("Output Bank Name: {0}", name);
+                    int patternLength = this.layersByName[name].size;
+                    int offset = step* patternLength;
+                    double[] arr = new double[patternLength];
+                    if ((offset+patternLength) >= args[name].Length)
+                    {
+                        Array.Copy(args[name],args[name].Length-patternLength,arr,0,patternLength);
+                    }
+                    else
+                    {
+                        Array.Copy(args[name],offset, arr, 0, patternLength);
+                    }
+                    dict[name]=arr;
+                }
+            }
+            foreach(string[] tuple in this.prediction)
+            {
+                string inName = tuple[0];
+                string outName = tuple[1];
+                Layer inLayer = this.getLayer(inName);
+                if(inLayer.type!="Input")
+                {
+                    throw new Exception("Prediction input not type \"Input\".");
+                }
+                Layer outLayer = this.getLayer(outName);
+                if(outLayer.type!="Output")
+                {
+                    throw new Exception("Prediction output not type \"Output\".");
+                }
+                int patternLength = inLayer.size;
+                // Correct??? Issues with patternLength!
+                if(step==sequenceLength-1)
+                {
+                    int start = 0;
+                    if(!this.sweeping)
+                    {
+                        throw new Exception("Attemping to predict last item in sequence, but using step(). Use sweep() instead.");
+                    }
+                    if(this.currentSweepCount==0)
+                    {
+                        Dictionary<string,double[]> pattern = this.getData(this.loadOrder[0]);
+                        if((inputBankNames.Contains(inName))&&pattern.ContainsKey(inName))
+                        {
+                            double[] arr = new double[patternLength];
+                            Array.Copy(pattern[inName],start,arr,0,patternLength);
+                            dict[outName]=arr;
+                        }
+                    }
+                    else
+                    {
+                        Dictionary<string,double[]> pattern = this.getData(this.loadOrder[currentSweepCount+1]);
+                        if((inputBankNames.Contains(inName))&&pattern.ContainsKey(inName))
+                        {
+                            double[] arr = new double[patternLength];
+                            Array.Copy(pattern[inName],start,arr,0,patternLength);
+                            dict[outName]=arr;
+                        }
+                    }
+                }
+                else
+                {
+                    int start = (step+1)*inLayer.size;
+                    double[] arr = new double[patternLength];
+                    Array.Copy(args[inName],start,arr,0,patternLength);
+                    dict[outName]=arr;
+                }
+            }
+            if (step<sequenceLength-1)
+            {
+                if(!this.learnDuringSequencing)
+                {
+                    this.learning = false;
+                }
+            }
+            List<object> ret = this.networkStep(dict);
+            this.learning = learning;
+            error += (double)ret[0];
+            correct += (int) ret[1];
+            count += (int) ret[2];
+            totalPCorrect = Functions.sumMerge(totalPCorrect, (Dictionary<string,double[]>) ret[3]);
+        }
+        retval.Add(error);
+        retval.Add(correct);
+        retval.Add(count);
+        retval.Add(totalPCorrect);
+        return retval;
+        
+    }
+}                    
+            
