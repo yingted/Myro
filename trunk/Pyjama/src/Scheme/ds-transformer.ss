@@ -20,6 +20,7 @@
       (make-datatype 'handler 'handler '((handler REP-handler) exception))
       (make-datatype 'procedure 'proc '(proc args env2 handler k2))
       (make-datatype 'macro-transformer 'macro '((macro mit-define-transformer) datum k))
+      (make-datatype 'anonymous-function 'anon-func '(func args))
       )))
 
 (define record-field-order '(formals runt body env env2 handler k k2))

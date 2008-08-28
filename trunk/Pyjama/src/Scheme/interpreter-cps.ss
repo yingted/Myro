@@ -362,7 +362,7 @@
 (define dir
   (lambda (args env)
      (if (null? args)
- 	(map get-variables-from-frame env)
+ 	(map get-variables-from-frame (frames env))
 	(car (map get-variables-from-frame (car args))))))
 
 (define get-variables-from-frame

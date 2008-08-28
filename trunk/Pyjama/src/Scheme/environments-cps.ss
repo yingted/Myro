@@ -66,6 +66,10 @@
   (lambda (env)
     (cadr env)))
 
+(define frames
+  (lambda (env)
+    (cdr env)))
+
 (define set-first-frame!
   (lambda (env new-frame)
     (set-car! (cdr env) new-frame)))
