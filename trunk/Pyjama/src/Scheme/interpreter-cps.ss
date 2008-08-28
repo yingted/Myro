@@ -203,8 +203,14 @@
 	   (k result)
 	   (eval-sequence (cdr exps) env handler k))))))
 
+(define make-initial-env-extended
+  (lambda (env)
+    ;; this is here as a hook for extending environments in C# etc.
+    env))
+
 (define make-toplevel-env
   (lambda ()
+    ;;(make-initial-env-extended
     (make-initial-environment
       (list 'exit 'apply 'sqrt 'print 'display 'newline 'load 'null? 'cons 'car 'cdr
 	    'list '+ '- '* '/ '< '> '= 'equal? 'eq? 'memq 'range 'set-car! 'set-cdr!
@@ -295,15 +301,9 @@
 	    (map-prim proc proc-args env2 handler k2)))
 	;; env
 	(lambda-proc (args env2 handler k2) (k2 env2))
-	;; using
-	(lambda-proc (args env2 handler k2) (k2 (using-wrapper args env2)))
+	;; using (not defined in scheme-scheme)
+	(lambda-proc (args env2 handler k2) (k2 (using-prim args env2)))
 	))))
-
-(define using-wrapper
-  (lambda (args env)
-    ;; this is not defined here, but is needed in other languages
-    ;; (such as C#) for importing shared libraries
-    (using-prim args env)))
 
 (define* map-prim
   (lambda (proc args env handler k)

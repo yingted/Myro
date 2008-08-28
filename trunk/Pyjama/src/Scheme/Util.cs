@@ -9,7 +9,7 @@ using System.Collections.Generic; // List
 using Microsoft.VisualBasic.CompilerServices;
 
 public class Config {
-  public int DEBUG = 0;
+  public int DEBUG = 9;
   public bool NEED_NEWLINE = false;
   Hashtable symbol_table = new Hashtable(); //Default one
   public List<Assembly> assemblies = new List<Assembly>();
@@ -370,49 +370,54 @@ public abstract class Scheme {
 	return reverse(retval);
   }
 
-  public static object make_initial_environment (object vars, object vals)
-  {
-	return list(
-		extend_frame(symbol("property"), new Proc((Procedure1)property, -1, 1),
-		extend_frame(symbol("debug"), new Proc((Procedure1)debug, -1, 1),
-		extend_frame(symbol("typeof"), new Proc((Procedure1)get_type, 1, 1),
-		extend_frame(symbol("float"), new Proc((Procedure1)ToDouble, 1, 1),
-		extend_frame(symbol("int"), new Proc((Procedure1)ToInt, 1, 1),
-		extend_frame(symbol("sort"), new Proc((Procedure2)sort, 2, 1),
-		extend_frame(symbol("string<?"), new Proc((Procedure2Bool) stringLessThan_q, 2, 2),
-		extend_frame(symbol("string->symbol"), new Proc((Procedure1) string_to_symbol, 1, 1),
-		extend_frame(symbol("symbol->string"), new Proc((Procedure1) symbol_to_string, 1, 1),
-		extend_frame(symbol("string->list"), new Proc((Procedure1) string_to_list, 1, 1),
-		extend_frame(symbol("group"), new Proc((Procedure2) group, 2, 1),
-		extend_frame(symbol("member"), new Proc((Procedure2)member, 2, 1),
-		extend_frame(symbol("format"), new Proc((Procedure1)format_list, -1, 1),
-		extend_frame(symbol("list-head"), new Proc((Procedure2)list_head, 2, 1),
-		extend_frame(symbol("list-tail"), new Proc((Procedure2)list_tail, 2, 1),
-		extend_frame(symbol("symbol"), new Proc((Procedure1)symbol, 1, 1),
-			make_frame(vars, vals))))))))))))))))));
-  }
-  
   public static object make_binding(object args1, object args2) {
-	return cons(args1, args2);
+	// dummy
+	return null;
   }
 
-  public static object make_frame (object variables, object values)
-  {
-	return map(make_binding_proc, variables, values);
+//   public static object make_frame (object variables, object values)
+//   {
+// 	return map(make_binding_proc, variables, values);
+//   }
+  
+//   public static object make_binding_proc_extension(object var, object val) {
+// 	return apply( make_binding_proc, 
+// 		list(var, list(symbol("procedure"), symbol("<extension>"), val)));
+//   }
+
+//   public static object extend_frame(object var, object val, object env) {
+	
+// 	return cons(apply( make_binding_proc, 
+// 			list(var, list(symbol("procedure"), symbol("<extension>"), val))),
+// 		env);
+//   }
+
+  public static object extend(object env, object vars, object vals) {
+	// dummy
+	return null;
+  }
+
+  public static object make_initial_env_extended (object env) {
+	printf("make-initial-env-extended: {0}\n", env);
+// 	extend(env, symbol("property"), new Proc((Procedure1)property, -1, 1));
+// 	extend(env, symbol("debug"), new Proc((Procedure1)debug, -1, 1));
+// 	extend(env, symbol("typeof"), new Proc((Procedure1)get_type, 1, 1));
+// 	extend(env, symbol("float"), new Proc((Procedure1)ToDouble, 1, 1));
+// 	extend(env, symbol("int"), new Proc((Procedure1)ToInt, 1, 1));
+// 	extend(env, symbol("sort"), new Proc((Procedure2)sort, 2, 1));
+// 	extend(env, symbol("string<?"), new Proc((Procedure2Bool) stringLessThan_q, 2, 2));
+// 	extend(env, symbol("string->symbol"), new Proc((Procedure1) string_to_symbol, 1, 1));
+// 	extend(env, symbol("symbol->string"), new Proc((Procedure1) symbol_to_string, 1, 1));
+// 	extend(env, symbol("string->list"), new Proc((Procedure1) string_to_list, 1, 1));
+// 	extend(env, symbol("group"), new Proc((Procedure2) group, 2, 1));
+// 	extend(env, symbol("member"), new Proc((Procedure2)member, 2, 1));
+// 	extend(env, symbol("format"), new Proc((Procedure1)format_list, -1, 1));
+// 	extend(env, symbol("list-head"), new Proc((Procedure2)list_head, 2, 1));
+// 	extend(env, symbol("list-tail"), new Proc((Procedure2)list_tail, 2, 1));
+// 	extend(env, symbol("symbol"), new Proc((Procedure1)symbol, 1, 1));
+	return env;
   }
   
-  public static object make_binding_proc_extension(object var, object val) {
-	return apply( make_binding_proc, 
-		list(var, list(symbol("procedure"), symbol("<extension>"), val)));
-  }
-
-  public static object extend_frame(object var, object val, object env) {
-	
-	return cons(apply( make_binding_proc, 
-			list(var, list(symbol("procedure"), symbol("<extension>"), val))),
-		env);
-  }
-
   public static object debug(object args) {
 	if (((int) length(args)) == 0)
 	  return config.DEBUG;
@@ -586,9 +591,12 @@ public abstract class Scheme {
 			if (type.IsPublic) {
 			  string className = type.FullName;
 			  //classname_parts = get_parts(className, "+");
-			  set_car_b( env, extend_frame(symbol(className), 
-					  new Proc((Procedure2)make_external_proc(className), 2, 1),
-					  car(env)));
+			  env = extend(env, 
+				  symbol(className), 
+				  new Proc((Procedure2)make_external_proc(className), 2, 1));
+// 			  set_car_b( env, extend_frame(symbol(className), 
+// 					  new Proc((Procedure2)make_external_proc(className), 2, 1),
+// 					  car(env)));
 			}
 		  }
 		} else {
@@ -622,29 +630,29 @@ public abstract class Scheme {
 	}
   }
   
-  public static object make_macro_env () {
-	return ((object)
-		list(make_frame(
-				list (
-					symbol("and"), 
-					symbol("or"),
-					symbol("cond"), 
-					symbol("let"),
-					symbol("letrec"),
-					symbol("let*"),
-					symbol("case"),
-					symbol("record-case")
-					  ),
-				list (
-					symbol("and_transformer"),
-					symbol("or_transformer"),
-					symbol("cond_transformer"),
-					symbol("let_transformer"),
-					symbol("letrec_transformer"),
-					symbol("let_star_transformer"),
-					symbol("case_transformer"),
-					symbol("record_case_transformer")))));
-  }
+//   public static object make_macro_env () {
+// 	return ((object)
+// 		list(make_frame(
+// 				list (
+// 					symbol("and"), 
+// 					symbol("or"),
+// 					symbol("cond"), 
+// 					symbol("let"),
+// 					symbol("letrec"),
+// 					symbol("let*"),
+// 					symbol("case"),
+// 					symbol("record-case")
+// 					  ),
+// 				list (
+// 					symbol("and_transformer"),
+// 					symbol("or_transformer"),
+// 					symbol("cond_transformer"),
+// 					symbol("let_transformer"),
+// 					symbol("letrec_transformer"),
+// 					symbol("let_star_transformer"),
+// 					symbol("case_transformer"),
+// 					symbol("record_case_transformer")))));
+//   }
 
   public static object range(object args) {
 	// range(start stop incr)

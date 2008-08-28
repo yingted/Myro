@@ -158,7 +158,7 @@
 	      (cond
 		((eq? test-exp 'else)
 		 (cond
-		   ((null? then-exps) (error 'cond-transformer "bad concrete syntax: (else)"))
+		   ((null? then-exps) (error 'cond-transformer "bad concrete syntax: (~a)" 'else))
 		   ((null? (cdr then-exps)) (k (car then-exps)))
 		   (else (k `(begin ,@then-exps)))))
 		((null? then-exps)

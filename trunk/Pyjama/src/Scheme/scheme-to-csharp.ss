@@ -11,22 +11,15 @@
 			     string->integer 
 			     string->decimal 
 			     string->rational
-			     case-transformer
-			     cond-transformer
-			     record-case-transformer
-			     letrec-transformer
-			     let*-transformer
 			     tagged-list
 			     testall
 			     group
 			     get-current-time
 			     range
-			     make-macro-env
-			     make-frame
-			     make-initial-environment
 			     print-parsed-sexps
 			     true?
 			     type?
+			     make-initial-env-extended
 			     ))
 (define *function-signatures* '())
 
