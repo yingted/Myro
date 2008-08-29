@@ -814,18 +814,21 @@ public abstract class Scheme {
   }
 
   public static object map(object proc, object args) {
-	trace(1, "called: map1({0}, {1})\n", proc, args);
+	trace(1, "called:{0}1({1})\n", proc, args);
 	object retval = EmptyList;
 	object current1 = args;
 	while (!Equal(current1, EmptyList)) {
-	  retval = cons( apply(proc, car(current1)), retval);
+	  if (list_q(car(current1)))
+		retval = cons( apply(proc, list(car(current1))), retval);
+	  else
+		retval = cons( apply(proc, car(current1)), retval);
 	  current1 = cdr(current1);
 	}
 	return reverse(retval);
   }
 
   public static object map(object proc, object args1, object args2) {
-	trace(1, "called: map2\n");
+	trace(1, "called:{0}2({1} {2})\n", proc, args1, args2);
 	object retval = EmptyList;
 	object current1 = args1;
 	object current2 = args2;
@@ -1237,12 +1240,8 @@ public abstract class Scheme {
 	return (ObjectType.ObjTst(obj1, obj2, false) > 0);
   }
 
-  public static bool false_q(object obj) {
-	return ((obj is bool) && !((bool)obj));
-  }
-
   public static object not(object obj) {
-	return (! ((bool)obj));
+	return (! true_q(obj));
   }
 
   public static bool Equal(object obj1, object op, object obj2) {

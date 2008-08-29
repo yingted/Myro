@@ -239,7 +239,9 @@
 	;; newline
 	(lambda-proc (args env2 handler k2) (newline-prim) (k2 '<void>))
 	;; load
-	(lambda-proc (args env2 handler k2) (load-file (car args) toplevel-env handler k2))
+	(lambda-proc (args env2 handler k2) 
+	   (set! load-stack '())
+	   (load-file (car args) toplevel-env handler k2))
 	;; null?
 	(lambda-proc (args env2 handler k2) (k2 (apply null? args)))
 	;; cons
