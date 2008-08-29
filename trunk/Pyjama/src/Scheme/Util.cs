@@ -138,6 +138,54 @@ public class Rational {
 			i * lcm/1),
 		lcm);
   }
+
+  public static Rational operator -(Rational f1, Rational f2) {
+	int lcm = LCM(f1.denominator, f2.denominator);
+	return new Rational((f1.numerator * lcm/f1.denominator -
+			f2.numerator * lcm/f2.denominator),
+		lcm);
+  }
+  
+  public static Rational operator -(Rational f1, int i) {
+	int lcm = LCM(f1.denominator, 1);
+	return new Rational((f1.numerator * lcm/f1.denominator -
+			i * lcm/1),
+		lcm);
+  }
+  
+  public static Rational operator -(int i, Rational f1) {
+	int lcm = LCM(f1.denominator, 1);
+	return new Rational((f1.numerator * lcm/f1.denominator -
+			i * lcm/1),
+		lcm);
+  }
+
+  public static Rational operator *(Rational f1, Rational f2) {
+	return new Rational((f1.numerator * f2.numerator),
+		(f1.denominator * f2.denominator));
+  }
+  
+  public static Rational operator *(Rational f1, int i) {
+	return new Rational((f1.numerator * i), f1.denominator);
+  }
+  
+  public static Rational operator *(int i, Rational f1) {
+	return new Rational((f1.numerator * i), f1.denominator);
+  }
+
+  public static Rational operator /(Rational f1, Rational f2) {
+	return new Rational((f1.numerator * f2.denominator),
+		                (f1.denominator * f2.numerator));
+  }
+  
+  public static Rational operator /(Rational f1, int i) {
+	return new Rational(f1.numerator, f1.denominator * i);
+  }
+  
+  public static Rational operator /(int i, Rational f1) {
+	return new Rational(f1.denominator * i, f1.numerator);
+  }
+
 }
 
 public abstract class Scheme {
@@ -447,7 +495,6 @@ public abstract class Scheme {
  	set_env_b(env, symbol("list-head"), new Proc("list-head", (Procedure2)list_head, 2, 1));
  	set_env_b(env, symbol("list-tail"), new Proc("list-tail", (Procedure2)list_tail, 2, 1));
  	set_env_b(env, symbol("symbol"), new Proc("symbol", (Procedure1)symbol, 1, 1));
-	// FIXME: something wrong with cadr vs caar requiring 1 and -1
 	set_env_b(env, symbol("caar"), new Proc("caar", (Procedure1)caar, 1, 1));
 	set_env_b(env, symbol("cadr"), new Proc("cadr", (Procedure1)cadr, 1, 1));
 	set_env_b(env, symbol("cdar"), new Proc("cdar", (Procedure1)cdar, 1, 1));
@@ -1023,7 +1070,7 @@ public abstract class Scheme {
 	  if (s.Contains("."))
 		return s;
 	  else
-		return String.Format("{0}.", s);
+		return String.Format("{0}.0", s);
 	} else if (obj is String) {
 	  return String.Format("\"{0}\"", obj);
 	} else if (obj is Symbol) {
@@ -1308,26 +1355,26 @@ public abstract class Scheme {
   }
 	
   public static object Add(object obj1, object obj2) {
-	try {
-	  return (ObjectType.AddObj(obj1, obj2));
-	} catch {
+	if (obj1 is Rational) {
+	  if (obj2 is Rational) {
+		return (((Rational)obj1) + ((Rational)obj2));
+	  } else if (obj2 is int) {
+		return (((Rational)obj1) + ((int)obj2));
+	  } else if (obj2 is double) {
+		return (((double)((Rational)obj1)) + ((double)obj2));
+	  }
+	} else if (obj2 is Rational) {
 	  if (obj1 is Rational) {
-		if (obj2 is Rational) {
-		  return (((Rational)obj1) + ((Rational)obj2));
-		} else if (obj2 is int) {
-		  return (((Rational)obj1) + ((int)obj2));
-		} else if (obj2 is double) {
-		  return (((double)((Rational)obj1)) + ((double)obj2));
-		}
-	  } else if (obj2 is Rational) {
-		if (obj1 is Rational) {
-		  return (((Rational)obj1) + ((Rational)obj2));
-		} else if (obj1 is int) {
-		  return (((Rational)obj2) + ((int)obj1));
-		} else if (obj1 is double) {
-		  return (((double)((Rational)obj2)) + ((double)obj1));
-		}
-	  } else {
+		return (((Rational)obj1) + ((Rational)obj2));
+	  } else if (obj1 is int) {
+		return (((Rational)obj2) + ((int)obj1));
+	  } else if (obj1 is double) {
+		return (((double)((Rational)obj2)) + ((double)obj1));
+	  }
+	} else {
+	  try {
+		return (ObjectType.AddObj(obj1, obj2));
+	  } catch {
 		BigInteger b1 = null;
 		BigInteger b2 = null;
 		if (obj1 is int) {
@@ -1350,26 +1397,26 @@ public abstract class Scheme {
   }
 
   public static object Subtract(object obj1, object obj2) {
-	try {
-	  return (ObjectType.SubObj(obj1, obj2));
-	} catch {
+	if (obj1 is Rational) {
+	  if (obj2 is Rational) {
+		return (((Rational)obj1) - ((Rational)obj2));
+	  } else if (obj2 is int) {
+		return (((Rational)obj1) - ((int)obj2));
+	  } else if (obj2 is double) {
+		return (((double)((Rational)obj1)) - ((double)obj2));
+	  }
+	} else if (obj2 is Rational) {
 	  if (obj1 is Rational) {
-		if (obj2 is Rational) {
-		  return (((Rational)obj1) - ((Rational)obj2));
-		} else if (obj2 is int) {
-		  return (((Rational)obj1) - ((int)obj2));
-		} else if (obj2 is double) {
-		  return (((double)((Rational)obj1)) - ((double)obj2));
-		}
-	  } else if (obj2 is Rational) {
-		if (obj1 is Rational) {
-		  return (((Rational)obj1) - ((Rational)obj2));
-		} else if (obj1 is int) {
-		  return (((Rational)obj2) - ((int)obj1));
-		} else if (obj1 is double) {
-		  return (((double)((Rational)obj2)) - ((double)obj1));
-		}
-	  } else {
+		return (((Rational)obj1) - ((Rational)obj2));
+	  } else if (obj1 is int) {
+		return (((Rational)obj2) - ((int)obj1));
+	  } else if (obj1 is double) {
+		return (((double)((Rational)obj2)) - ((double)obj1));
+	  }
+	} else {
+	  try {
+		return (ObjectType.SubObj(obj1, obj2));
+	  } catch {
 		BigInteger b1 = null;
 		BigInteger b2 = null;
 		if (obj1 is int) {
@@ -1393,26 +1440,26 @@ public abstract class Scheme {
 
   public static object Multiply(object obj1, object obj2) {
 	// FIXME: need hierarchy of numbers, handle rational/complex/etc
-	try {
-	  return ObjectType.MulObj(obj1, obj2);
-	} catch {
+	if (obj1 is Rational) {
+	  if (obj2 is Rational) {
+		return (((Rational)obj1) * ((Rational)obj2));
+	  } else if (obj2 is int) {
+		return (((Rational)obj1) * ((int)obj2));
+	  } else if (obj2 is double) {
+		return (((double)((Rational)obj1)) * ((double)obj2));
+	  }
+	} else if (obj2 is Rational) {
 	  if (obj1 is Rational) {
-		if (obj2 is Rational) {
-		  return (((Rational)obj1) * ((Rational)obj2));
-		} else if (obj2 is int) {
-		  return (((Rational)obj1) * ((int)obj2));
-		} else if (obj2 is double) {
-		  return (((double)((Rational)obj1)) * ((double)obj2));
-		}
-	  } else if (obj2 is Rational) {
-		if (obj1 is Rational) {
-		  return (((Rational)obj1) * ((Rational)obj2));
-		} else if (obj1 is int) {
-		  return (((Rational)obj2) * ((int)obj1));
-		} else if (obj1 is double) {
-		  return (((double)((Rational)obj2)) * ((double)obj1));
-		}
-	  } else {
+		return (((Rational)obj1) * ((Rational)obj2));
+	  } else if (obj1 is int) {
+		return (((Rational)obj2) * ((int)obj1));
+	  } else if (obj1 is double) {
+		return (((double)((Rational)obj2)) * ((double)obj1));
+	  }
+	} else {
+	  try {
+		return ObjectType.MulObj(obj1, obj2);
+	  } catch {
 		BigInteger b1 = null;
 		BigInteger b2 = null;
 		if (obj1 is int) {
@@ -1438,26 +1485,26 @@ public abstract class Scheme {
 	if ((obj1 is int) && (obj2 is int)) {
 	  return new Rational((int)obj1, (int)obj2);
 	} else {
-	  try {
-		return (ObjectType.DivObj(obj1, obj2));
-	  } catch {
+	  if (obj1 is Rational) {
+		if (obj2 is Rational) {
+		  return (((Rational)obj1) / ((Rational)obj2));
+		} else if (obj2 is int) {
+		  return (((Rational)obj1) / ((int)obj2));
+		} else if (obj2 is double) {
+		  return (((double)((Rational)obj1)) / ((double)obj2));
+		}
+	  } else if (obj2 is Rational) {
 		if (obj1 is Rational) {
-		  if (obj2 is Rational) {
-			return (((Rational)obj1) / ((Rational)obj2));
-		  } else if (obj2 is int) {
-			return (((Rational)obj1) / ((int)obj2));
-		  } else if (obj2 is double) {
-			return (((double)((Rational)obj1)) / ((double)obj2));
-		  }
-		} else if (obj2 is Rational) {
-		  if (obj1 is Rational) {
-			return (((Rational)obj1) / ((Rational)obj2));
-		  } else if (obj1 is int) {
-			return (((Rational)obj2) / ((int)obj1));
-		  } else if (obj1 is double) {
-			return (((double)((Rational)obj2)) / ((double)obj1));
-		  }
-		} else {
+		  return (((Rational)obj1) / ((Rational)obj2));
+		} else if (obj1 is int) {
+		  return (((int)obj1) / ((Rational)obj2));
+		} else if (obj1 is double) {
+		  return (((double)obj1) / ((Rational)obj2));
+		}
+	  } else {
+		try {
+		  return (ObjectType.DivObj(obj1, obj2));
+		} catch {
 		  BigInteger b1 = null;
 		  BigInteger b2 = null;
 		  if (obj1 is int) {
