@@ -175,6 +175,8 @@
 
 (define verify
   (lambda (answer exp)
+    (print "Testing ")
+    (print exp)
     (if (equal? exp answer)
       (print 'passed)
       (begin
@@ -184,6 +186,7 @@
 
 (define test-mu-lambda
   (lambda ()
+    (print "testing mu lambda")
     (verify '(1 2 3 4 5)
       ((lambda x x) 1 2 3 4 5))
     (verify '(1 (2 3 4 5))
@@ -201,6 +204,7 @@
 
 (define test-define
   (lambda ()
+    (print "testing define")
     (define f1 (lambda (a b c) (list a b c)))
     (define (f2) (list 42))
     (define (f3 . x) (list x))
@@ -211,6 +215,7 @@
 
 (define test-call/cc
   (lambda ()
+    (print "testing call/cc")
     (verify 40
       (* 10 (call/cc (lambda (k) 4))))
     (verify 40
@@ -222,6 +227,7 @@
 
 (define test-try
   (lambda ()
+    (print "testing try")
     (verify 3
       (try 3))
     (verify 3
@@ -297,6 +303,7 @@
 
 (define test-loop
   (lambda ()
+    (print "testing loop")
     (try (let loop ((n 5))
             (print n)
             (if (= n 0)
@@ -305,6 +312,7 @@
        (catch e e))))
 
 (define (test-macros)
+  (print "testing macros")
   (verify #t
     (let ((bool 5))
       (or (= bool 4) (= bool 5))))

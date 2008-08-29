@@ -435,6 +435,8 @@ public abstract class Scheme {
  	set_env_b(env, symbol("float"), new Proc("float", (Procedure1)ToDouble, 1, 1));
  	set_env_b(env, symbol("int"), new Proc("int", (Procedure1)ToInt, 1, 1));
  	set_env_b(env, symbol("sort"), new Proc("sort", (Procedure2)sort, 2, 1));
+ 	set_env_b(env, symbol("list?"), new Proc("list?", (Procedure1Bool)list_q, 1, 2));
+ 	set_env_b(env, symbol("proper?"), new Proc("proper?", (Procedure1Bool)proper_q, 1, 2));
  	set_env_b(env, symbol("string<?"), new Proc("string<?", (Procedure2Bool) stringLessThan_q, 2, 2));
  	set_env_b(env, symbol("string->symbol"), new Proc("string->symbol", (Procedure1) string_to_symbol, 1, 1));
  	set_env_b(env, symbol("symbol->string"), new Proc("symbol->string", (Procedure1) symbol_to_string, 1, 1));
@@ -1026,7 +1028,7 @@ public abstract class Scheme {
 	  return String.Format("\"{0}\"", obj);
 	} else if (obj is Symbol) {
 	  return obj.ToString();
-	} else if (obj is Cons) {
+	} else if (list_q(obj)) {
 	  if (procedure_q(obj)) {
 		return "#<procedure>";
 	  } else if (module_q(obj)) {
@@ -1045,6 +1047,8 @@ public abstract class Scheme {
 		}
 		return "(" + retval + ")";
 	  }
+	} else if (obj is Cons) { // improper list!
+	  return format("[improper list: {0}]", obj);
 	} else {
 	  return obj.ToString();
 	}
@@ -1542,8 +1546,27 @@ public abstract class Scheme {
 	  throw new Exception("attempt to take length of a non-list");
   }
 
+  public static bool proper_q(object obj) {
+	trace(3, "called: proper_q\n");
+	if (null_q(obj)) {
+	  return true;
+	} else if (pair_q(obj)) {
+	  object current = obj;
+	  while (true) {
+		if (null_q(cdr(current))) {
+		  return true;
+		}
+		if (! pair_q(cdr(current))) {
+		  return false;
+		}
+		current = cdr(current);
+	  }
+	}
+	return false;
+  }
+
   public static bool list_q(object o1) {
-	return (null_q(o1) || pair_q(o1));
+	return (proper_q(o1) && (null_q(o1) || pair_q(o1)));
   }
 
   public static object list_to_string(object lyst) {
