@@ -296,31 +296,54 @@
 	(lambda-proc (args env2 handler k2) (k2 (get-current-time)))
 	;; map
 	(lambda-proc (args env2 handler k2)
-	  (let ((proc (car args))
-		(proc-args (cadr args)))
-	    (map-prim proc proc-args env2 handler k2)))
+	  (mapN (car args) (cdr args) env2 handler k2))
 	;; env
 	(lambda-proc (args env2 handler k2) (k2 env2))
 	;; using (not defined in scheme-scheme)
 	(lambda-proc (args env2 handler k2) (k2 (using-prim args env2)))
 	)))))
 
+;; supports procedures of any numbers of arguments
 (define* map-prim
   (lambda (proc args env handler k)
-    (if (null? args)
+    (let ((len (length args)))
+      (cond
+	((= len 1) (map1 proc (car args) env handler k))
+	((= len 2) (map2 proc (car args) (cadr args) env handler k))
+	(else (mapN proc args env handler k))))))
+
+;; for improved efficiency
+(define* map1
+  (lambda (proc list1 env handler k)
+    (if (null? list1)
       (k '())
-      (if (not (list? (car args)))
-	(proc (list (car args)) env handler
-	  (lambda-cont (v1)
-	    (map-prim proc (cdr args) env handler
-	      (lambda-cont (v2)
-		(k (cons v1 v2))))))
-	(proc (car args) env handler 
-	  (lambda-cont (v1)
-	    (map-prim proc (cdr args) env handler 
-	      (lambda-cont (v2)
-		(k (cons v1 v2))))))))))
-		     
+      (proc (list (car list1)) env handler
+	(lambda-cont (v1)
+	  (map1 proc (cdr list1) env handler
+	    (lambda-cont (v2)
+	      (k (cons v1 v2)))))))))
+
+;; for improved efficiency
+(define* map2
+  (lambda (proc list1 list2 env handler k)
+    (if (null? list1)
+      (k '())
+      (proc (list (car list1) (car list2)) env handler
+	(lambda-cont (v1)
+	  (map2 proc (cdr list1) (cdr list2) env handler
+	    (lambda-cont (v2)
+	      (k (cons v1 v2)))))))))
+
+(define* mapN
+  (lambda (proc lists env handler k)
+    (if (null? (car lists))
+      (k '())
+      (proc (map car lists) env handler
+	(lambda-cont (v1)
+	  (mapN proc (map cdr lists) env handler
+	    (lambda-cont (v2)
+	      (k (cons v1 v2)))))))))
+
 (define get-current-time
   (lambda ()
     (let ((now (current-time)))

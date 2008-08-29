@@ -193,16 +193,6 @@
 	     (bodies (cddr datum)))
 	(k `((lambda ,vars ,@bodies) ,@exps))))))
 
-;;(define letrec-transformer
-;;  (lambda-macro (datum k)
-;;    (let* ((decls (cadr datum))
-;;	   (vars (map car decls))
-;;	   (procs (map cadr decls))
-;;	   (bodies (cddr datum))
-;;	   (bindings (map (lambda (var) `(,var 'undefined)) vars))
-;;	   (assigns (map (lambda (var proc) `(set! ,var ,proc)) vars procs)))
-;;      (k `(let ,bindings ,@assigns ,@bodies)))))
-
 (define letrec-transformer
   (lambda-macro (datum k)
     (let* ((decls (cadr datum))
@@ -238,39 +228,6 @@
 	    (k `(let (,(car bindings)) ,v)))))))
 
 ;; avoids variable capture
-;;(define case-transformer
-;;  (lambda-macro (datum k)
-;;    (let ((exp (cadr datum))
-;;	  (clauses (cddr datum))
-;;	  (case-clause->simple-cond-clause
-;;	    (lambda (var)
-;;	      (lambda (clause)
-;;		(cond
-;;		  ((eq? (car clause) 'else) clause)
-;;		  ((symbol? (car clause)) `((eq? ,var ',(car clause)) ,@(cdr clause)))
-;;		  (else `((memq ,var ',(car clause)) ,@(cdr clause)))))))
-;;	  (case-clause->let-binding
-;;	    (lambda (clause)
-;;	      (if (eq? (car clause) 'else)
-;;		`(else-code (lambda () ,@(cdr clause)))
-;;		(let ((name (if (symbol? (car clause)) (car clause) (caar clause))))
-;;		  `(,name (lambda () ,@(cdr clause)))))))
-;;	  (case-clause->cond-clause
-;;	    (lambda (var)
-;;	      (lambda (clause)
-;;		(if (eq? (car clause) 'else)
-;;		  '(else (else-code))
-;;		  (let ((name (if (symbol? (car clause)) (car clause) (caar clause))))
-;;		    (if (symbol? (car clause))
-;;		      `((eq? ,var ',(car clause)) (,name))
-;;		      `((memq ,var ',(car clause)) (,name)))))))))
-;;      ;; if exp is a variable, no need to introduce r binding
-;;      (if (symbol? exp)
-;;	(k `(cond ,@(map (case-clause->simple-cond-clause exp) clauses)))
-;;	(k `(let ((r ,exp) ,@(map case-clause->let-binding clauses))
-;;	      (cond ,@(map (case-clause->cond-clause 'r) clauses))))))))
-
-;; avoids variable capture
 (define case-transformer
   (lambda-macro (datum k)
     (let ((exp (cadr datum))
@@ -280,118 +237,76 @@
 	(case-clauses->simple-cond-clauses exp clauses
 	  (lambda-cont (new-clauses)
 	    (k `(cond ,@new-clauses))))
-	(case-clauses->let-bindings clauses
-	  (lambda-cont (bindings)
-	    (case-clauses->cond-clauses 'r clauses
-	      (lambda-cont (new-clauses)
-		(k `(let ((r ,exp) ,@bindings) (cond ,@new-clauses)))))))))))
+	(case-clauses->cond-clauses 'r clauses
+	  (lambda-cont2 (bindings new-clauses)
+	    (k `(let ((r ,exp) ,@bindings) (cond ,@new-clauses)))))))))
 
 (define* case-clauses->simple-cond-clauses
   (lambda (var clauses k)
     (if (null? clauses)
       (k '())
       (case-clauses->simple-cond-clauses var (cdr clauses)
-	(lambda-cont (v)
+	(lambda-cont (new-clauses)
 	  (let ((clause (car clauses)))
 	    (cond
-	      ((eq? (car clause) 'else) (k (cons clause v)))
-	      ((symbol? (car clause)) (k (cons `((eq? ,var ',(car clause)) ,@(cdr clause)) v)))
-	      (else (k (cons `((memq ,var ',(car clause)) ,@(cdr clause)) v))))))))))
-
-(define* case-clauses->let-bindings
-  (lambda (clauses k)
-    (if (null? clauses)
-      (k '())
-      (case-clauses->let-bindings (cdr clauses)
-	(lambda-cont (v)
-	  (let ((clause (car clauses)))
-	    (if (eq? (car clause) 'else)
-	      (k (cons `(else-code (lambda () ,@(cdr clause))) v))
-	      (let ((name (if (symbol? (car clause)) (car clause) (caar clause))))
-		(k (cons `(,name (lambda () ,@(cdr clause))) v))))))))))
+	      ((eq? (car clause) 'else)
+	       (k (cons clause new-clauses)))
+	      ((symbol? (car clause))
+	       (k (cons `((eq? ,var ',(car clause)) ,@(cdr clause)) new-clauses)))
+	      (else (k (cons `((memq ,var ',(car clause)) ,@(cdr clause))
+			     new-clauses))))))))))
 
 (define* case-clauses->cond-clauses
-  (lambda (var clauses k)
+  (lambda (var clauses k2)
     (if (null? clauses)
-      (k '())
+      (k2 '() '())
       (case-clauses->cond-clauses var (cdr clauses)
-	(lambda-cont (v)
+	(lambda-cont2 (bindings new-clauses)
 	  (let ((clause (car clauses)))
 	    (if (eq? (car clause) 'else)
-	      (k (cons '(else (else-code)) v))
-	      (let ((name (if (symbol? (car clause)) (car clause) (caar clause))))
-		(if (symbol? (car clause))
-		  (k (cons `((eq? ,var ',(car clause)) (,name)) v))
-		  (k (cons `((memq ,var ',(car clause)) (,name)) v)))))))))))
-
-;; avoids variable capture
-;;(define record-case-transformer
-;;  (lambda-macro (datum k)
-;;    (let ((exp (cadr datum))
-;;	  (clauses (cddr datum))
-;;	  (record-case-clause->let-binding
-;;	    (lambda (clause)
-;;	      (if (eq? (car clause) 'else)
-;;		`(else-code (lambda () ,@(cdr clause)))
-;;		(let ((name (if (symbol? (car clause)) (car clause) (caar clause))))
-;;		  `(,name (lambda ,(cadr clause) ,@(cddr clause)))))))
-;;	  (record-case-clause->cond-clause
-;;	    (lambda (var)
-;;	      (lambda (clause)
-;;		(if (eq? (car clause) 'else)
-;;		  `(else (else-code))
-;;		  (let ((name (if (symbol? (car clause)) (car clause) (caar clause))))
-;;		    (if (symbol? (car clause))
-;;		      `((eq? (car ,var) ',(car clause)) (apply ,name (cdr ,var)))
-;;		      `((memq (car ,var) ',(car clause)) (apply ,name (cdr ,var))))))))))
-;;      ;; if exp is a variable, no need to introduce r binding
-;;      (if (symbol? exp)
-;;	(k `(let ,(map record-case-clause->let-binding clauses)
-;;	      (cond ,@(map (record-case-clause->cond-clause exp) clauses))))
-;;	(k `(let ((r ,exp) ,@(map record-case-clause->let-binding clauses))
-;;	      (cond ,@(map (record-case-clause->cond-clause 'r) clauses))))))))
+	      (k2 (cons `(else-code (lambda () ,@(cdr clause))) bindings)
+		  (cons '(else (else-code)) new-clauses))
+	      (if (symbol? (car clause))
+		(let ((name (car clause)))
+		  (k2 (cons `(,name (lambda () ,@(cdr clause))) bindings)
+		      (cons `((eq? ,var ',(car clause)) (,name)) new-clauses)))
+		(let ((name (caar clause)))
+		  (k2 (cons `(,name (lambda () ,@(cdr clause))) bindings)
+		      (cons `((memq ,var ',(car clause)) (,name)) new-clauses)))))))))))
 
 ;; avoids variable capture
 (define record-case-transformer
   (lambda-macro (datum k)
     (let ((exp (cadr datum))
 	  (clauses (cddr datum)))
-      (record-case-clauses->let-bindings clauses
-	(lambda-cont (bindings)
-	  ;; if exp is a variable, no need to introduce r binding
-	  (if (symbol? exp)
-	    (record-case-clauses->cond-clauses exp clauses
-	      (lambda-cont (new-clauses)
-		(k `(let ,bindings (cond ,@new-clauses)))))
-	    (record-case-clauses->cond-clauses 'r clauses
-	      (lambda-cont (new-clauses)
-		(k `(let ((r ,exp) ,@bindings) (cond ,@new-clauses)))))))))))
-
-(define* record-case-clauses->let-bindings
-  (lambda (clauses k)
-    (if (null? clauses)
-      (k '())
-      (record-case-clauses->let-bindings (cdr clauses)
-	(lambda-cont (v)
-	  (let ((clause (car clauses)))
-	    (if (eq? (car clause) 'else)
-	      (k (cons `(else-code (lambda () ,@(cdr clause))) v))
-	      (let ((name (if (symbol? (car clause)) (car clause) (caar clause))))
-		(k (cons `(,name (lambda ,(cadr clause) ,@(cddr clause))) v))))))))))
+      ;; if exp is a variable, no need to introduce r binding
+      (if (symbol? exp)
+	(record-case-clauses->cond-clauses exp clauses
+	  (lambda-cont2 (bindings new-clauses)
+	    (k `(let ,bindings (cond ,@new-clauses)))))
+	(record-case-clauses->cond-clauses 'r clauses
+	  (lambda-cont2 (bindings new-clauses)
+	    (k `(let ((r ,exp) ,@bindings) (cond ,@new-clauses)))))))))
 
 (define* record-case-clauses->cond-clauses
-  (lambda (var clauses k)
+  (lambda (var clauses k2)
     (if (null? clauses)
-      (k '())
+      (k2 '() '())
       (record-case-clauses->cond-clauses var (cdr clauses)
-	(lambda-cont (v)
+	(lambda-cont2 (bindings new-clauses)
 	  (let ((clause (car clauses)))
 	    (if (eq? (car clause) 'else)
-	      (k (cons `(else (else-code)) v))
-	      (let ((name (if (symbol? (car clause)) (car clause) (caar clause))))
-		(if (symbol? (car clause))
-		  (k (cons `((eq? (car ,var) ',(car clause)) (apply ,name (cdr ,var))) v))
-		  (k (cons `((memq (car ,var) ',(car clause)) (apply ,name (cdr ,var))) v)))))))))))
+	      (k2 (cons `(else-code (lambda () ,@(cdr clause))) bindings)
+		  (cons `(else (else-code)) new-clauses))
+	      (if (symbol? (car clause))
+		(let ((name (car clause)))
+		  (k2 (cons `(,name (lambda ,(cadr clause) ,@(cddr clause))) bindings)
+		      (cons `((eq? (car ,var) ',(car clause)) (apply ,name (cdr ,var)))
+			    new-clauses)))
+		(let ((name (caar clause)))
+		  (k2 (cons `(,name (lambda ,(cadr clause) ,@(cddr clause))) bindings)
+		      (cons `((memq (car ,var) ',(car clause)) (apply ,name (cdr ,var)))
+			    new-clauses)))))))))))
 
 (define make-macro-env
   (lambda ()
