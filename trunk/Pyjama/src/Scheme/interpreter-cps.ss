@@ -296,7 +296,7 @@
 	(lambda-proc (args env2 handler k2) (k2 (get-current-time)))
 	;; map
 	(lambda-proc (args env2 handler k2)
-	  (mapN (car args) (cdr args) env2 handler k2))
+	  (map-prim (car args) (cdr args) env2 handler k2))
 	;; env
 	(lambda-proc (args env2 handler k2) (k2 env2))
 	;; using (not defined in scheme-scheme)
