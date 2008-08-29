@@ -4,7 +4,7 @@ pjscheme-rm.ss: environments-cps.ss parser-cps.ss unifier-cps.ss \
 		interpreter-cps.ss reader-cps.ss ds-transformer.ss \
 		rm-transformer.ss pjscheme-data.ss
 	$(RM) pjscheme-cps.ss
-	cat *cps.ss > pjscheme-cps.ss
+	cat reader-cps.ss environments-cps.ss parser-cps.ss interpreter-cps.ss unifier-cps.ss > pjscheme-cps.ss
 	cat pjscheme-data.ss >> pjscheme-cps.ss
 	echo "(load \"rm-transformer.ss\")" > compile.ss
 	echo "(compile-level-output)" >> compile.ss
@@ -27,9 +27,9 @@ pjscheme.exe: pjscheme-rm.ss scheme-to-csharp.ss
 	echo "(exit)" >> make-pjscheme.ss
 	petite make-pjscheme.ss
 	indent -di0 -i3 pjscheme.cs
-	$(MCS) pjscheme.cs Util.cs  -main:pjscheme_rm \
+	$(MCS) -debug pjscheme.cs Util.cs  -main:pjscheme_rm \
 		-lib:DLLs -r:Microsoft.VisualBasic.dll -r:Microsoft.Scripting.dll
-	MONO_PATH=DLLs mono pjscheme.exe
+	MONO_PATH=DLLs mono --debug pjscheme.exe
 
 Test.exe: Test.cs
 	$(MCS) Test.cs -lib:DLLs -r:Microsoft.VisualBasic.dll -r:Microsoft.Scripting.dll

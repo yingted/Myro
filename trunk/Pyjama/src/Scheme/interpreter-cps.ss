@@ -210,8 +210,8 @@
 
 (define make-toplevel-env
   (lambda ()
-    ;;(make-initial-env-extended
-    (make-initial-environment
+    (make-initial-env-extended
+     (make-initial-environment
       (list 'exit 'apply 'sqrt 'print 'display 'newline 'load 'null? 'cons 'car 'cdr
 	    'list '+ '- '* '/ '< '> '= 'equal? 'eq? 'memq 'range 'set-car! 'set-cdr!
 	    'import 'get 'call-with-current-continuation 'call/cc
@@ -303,7 +303,7 @@
 	(lambda-proc (args env2 handler k2) (k2 env2))
 	;; using (not defined in scheme-scheme)
 	(lambda-proc (args env2 handler k2) (k2 (using-prim args env2)))
-	))))
+	)))))
 
 (define* map-prim
   (lambda (proc args env handler k)

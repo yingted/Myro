@@ -9,7 +9,7 @@ using System.Collections.Generic; // List
 using Microsoft.VisualBasic.CompilerServices;
 
 public class Config {
-  public int DEBUG = 9;
+  public int DEBUG = 0;
   public bool NEED_NEWLINE = false;
   Hashtable symbol_table = new Hashtable(); //Default one
   public List<Assembly> assemblies = new List<Assembly>();
@@ -209,14 +209,16 @@ public abstract class Scheme {
 	object proc = null;
 	int args = -1;
 	int returntype = 1;
+	public string repr = null;
 
-	public Proc(object proctype, int args, int returntype) {
+	public Proc(string repr, object proctype, int args, int returntype) {
+	  this.repr = repr;
 	  this.proc = proctype;
 	  this.args = args;
 	  this.returntype = returntype;
 	}
 	public object Call(object actual) {
-	  trace(1, "calling Call1: {0} {1} {2} {3}\n", actual, proc, args, returntype);
+	  trace(1, "calling {0}({1})...\n", repr, actual);
 	  object retval = null;
 	  if (returntype == 0) { // void return
 		if (args == -1) 
@@ -259,7 +261,7 @@ public abstract class Scheme {
 	}
 
 	public object Call(object args1, object args2) {
-	  trace(1, "calling Call2: {0} {1}\n", args1, args2);
+	  trace(1, "calling {0}({1} {2})...\n", repr, args1, args2);
 	  object retval = null;
 	  if (returntype == 0) { // return void
 		((Procedure2Void)proc)(args1, args2);
@@ -272,40 +274,45 @@ public abstract class Scheme {
 	  }
 	  return retval;
 	}
+
+	public override string ToString() {
+	  return String.Format("#<procedure {0}>", repr);
+	}
+
   }
 
   // ProcedureN - N is arg count coming in
   // -1, 1, 2 - number of pieces to call app with (-1 is all)
   // 0, 1, 2 - return type 0 = void, 1 = object, 2 = bool
-  public static Proc Add_proc = new Proc((Procedure1)Add, -1, 1);
+  public static Proc Add_proc = new Proc("+", (Procedure1)Add, -1, 1);
   // FIXME: make these three different:
-  public static Proc Equal_proc = new Proc((Procedure1Bool) Equal, -1, 2);
-  public static Proc Eq_proc = new Proc((Procedure1Bool) Equal, -1, 2);
-  public static Proc EqualSign_proc = new Proc((Procedure1Bool) Equal, -1, 2);
-  public static Proc Divide_proc = new Proc((Procedure1) Divide, -1, 1);
-  public static Proc GreaterThan_proc = new Proc((Procedure1Bool) GreaterThan, -1, 2);
-  public static Proc LessThan_proc = new Proc((Procedure1Bool) LessThan, -1, 2);
-  public static Proc Multiply_proc = new Proc((Procedure1) Multiply, -1, 1);
-  public static Proc Subtract_proc = new Proc((Procedure1) Subtract, -1, 1);
-  public static Proc cadr_proc = new Proc((Procedure1) cadr, 1, 1);
-  public static Proc car_proc = new Proc((Procedure1) car, 1, 1);
-  public static Proc cdr_proc = new Proc((Procedure1) cdr, 1, 1);
-  public static Proc cons_proc = new Proc((Procedure2) cons, 2, 1);
-  public static Proc list_to_vector_proc = new Proc((Procedure1) list_to_vector, 1, 1);
-  public static Proc memq_proc = new Proc((Procedure2Bool) memq, 2, 2);
-  public static Proc range_proc = new Proc((Procedure1) range, -1, 1);
-  public static Proc reverse_proc = new Proc((Procedure1) reverse, 1, 1);
-  public static Proc sort_proc = new Proc((Procedure2) sort, 2, 1);
-  public static Proc set_car_b_proc = new Proc((Procedure2Void) set_car_b, 2, 0);
-  public static Proc set_cdr_b_proc = new Proc((Procedure2Void) set_cdr_b, 2, 0);
-  public static Proc sqrt_proc = new Proc((Procedure1) sqrt, -1, 1);
-  public static Proc string_to_symbol_proc = new Proc((Procedure1) string_to_symbol, 1, 1);
-  public static Proc stringLessThan_q_proc = new Proc((Procedure2Bool) stringLessThan_q, 2, 2);
-  public static Proc null_q_proc = new Proc((Procedure1Bool) null_q, 1, 2);
-  public static Proc display_prim_proc = new Proc((Procedure1Void) display, 1, 0);
-  public static Proc pretty_print_prim_proc = new Proc((Procedure1Void) pretty_print, -1, 0);
-  public static Proc append_proc = new Proc((Procedure1) append, -1, 1);
-  public static Proc make_binding_proc = new Proc((Procedure2)make_binding, 2, 1);
+  public static Proc Equal_proc = new Proc("equal?", (Procedure1Bool) Equal, -1, 2);
+  public static Proc Eq_proc = new Proc("eq?", (Procedure1Bool) Equal, -1, 2);
+  public static Proc EqualSign_proc = new Proc("=", (Procedure1Bool) Equal, -1, 2);
+  public static Proc Divide_proc = new Proc("/", (Procedure1) Divide, -1, 1);
+  public static Proc GreaterThan_proc = new Proc(">", (Procedure1Bool) GreaterThan, -1, 2);
+  public static Proc LessThan_proc = new Proc("<", (Procedure1Bool) LessThan, -1, 2);
+  public static Proc Multiply_proc = new Proc("*", (Procedure1) Multiply, -1, 1);
+  public static Proc Subtract_proc = new Proc("-", (Procedure1) Subtract, -1, 1);
+  public static Proc cadr_proc = new Proc("cadr", (Procedure1) cadr, -1, 1);
+  public static Proc car_proc = new Proc("car", (Procedure1) car, -1, 1);
+  public static Proc cdr_proc = new Proc("cdr", (Procedure1) cdr, -1, 1);
+  public static Proc cons_proc = new Proc("cons", (Procedure2) cons, 2, 1);
+  public static Proc list_to_vector_proc = new Proc("list->vector", (Procedure1) list_to_vector, 1, 1);
+  public static Proc memq_proc = new Proc("memq", (Procedure2Bool) memq, 2, 2);
+  public static Proc range_proc = new Proc("range", (Procedure1) range, -1, 1);
+  public static Proc reverse_proc = new Proc("reverse", (Procedure1) reverse, 1, 1);
+  public static Proc sort_proc = new Proc("sort", (Procedure2) sort, 2, 1);
+  public static Proc set_car_b_proc = new Proc("set-car!", (Procedure2Void) set_car_b, 2, 0);
+  public static Proc set_cdr_b_proc = new Proc("set-cdr!", (Procedure2Void) set_cdr_b, 2, 0);
+  public static Proc sqrt_proc = new Proc("sqrt", (Procedure1) sqrt, -1, 1);
+  public static Proc string_to_symbol_proc = new Proc("string->symbol", (Procedure1) string_to_symbol, 1, 1);
+  public static Proc stringLessThan_q_proc = new Proc("string<?", (Procedure2Bool) stringLessThan_q, 2, 2);
+  public static Proc null_q_proc = new Proc("null?", (Procedure1Bool) null_q, 1, 2);
+  public static Proc display_prim_proc = new Proc("display", (Procedure1Void) display, 1, 0);
+  public static Proc pretty_print_prim_proc = new Proc("pretty-print", (Procedure1Void) pretty_print, -1, 0);
+  public static Proc append_proc = new Proc("append", (Procedure1) append, -1, 1);
+  public static Proc make_binding_proc = new Proc("make-binding",(Procedure2)make_binding, 2, 1);
 
   public static char TILDE = '~';
   public static char NULL = '\0';
@@ -370,10 +377,14 @@ public abstract class Scheme {
 	return reverse(retval);
   }
 
-  public static object make_binding(object args1, object args2) {
-	// dummy
-	return null;
+  public static object make_proc(params object[] args) {
+	return cons(symbol("procedure"), vector_to_list(args));
   }
+
+  public static object make_binding (object variable, object value) {
+	return ((object) cons ((object) variable, (object) value));
+  }
+  
 
 //   public static object make_frame (object variables, object values)
 //   {
@@ -392,29 +403,77 @@ public abstract class Scheme {
 // 		env);
 //   }
 
-  public static object extend(object env, object vars, object vals) {
-	// dummy
-	return null;
+  public static object first_frame (object env) {
+	return ((object) cadr ((object) env));
   }
 
+  public static void set_first_frame_b (object env, object new_frame) {
+	set_car_b ((object) cdr ((object) env), (object) new_frame);
+  }
+
+  // given a name, return a function that given an array, returns object
+  public static Procedure2 make_instance_proc(object tname) {
+	return (path, args) => call_external_proc(null, get_the_type(tname.ToString()), path, args);
+  }
+
+  public static void set_env_b(object env, object var, object val) {
+	object frame = first_frame(env);
+	set_first_frame_b(env, cons(make_binding(var, make_external_proc(val)), frame));
+  }
+
+  public static object make_external_proc (object external_function_object) {
+	// FIXME: this is not overridden as it is used 
+	return ((object)
+		make_proc ((object) symbol ("<proc-40>"),
+			(object) external_function_object));
+  }
+  
   public static object make_initial_env_extended (object env) {
-	printf("make-initial-env-extended: {0}\n", env);
-// 	extend(env, symbol("property"), new Proc((Procedure1)property, -1, 1));
-// 	extend(env, symbol("debug"), new Proc((Procedure1)debug, -1, 1));
-// 	extend(env, symbol("typeof"), new Proc((Procedure1)get_type, 1, 1));
-// 	extend(env, symbol("float"), new Proc((Procedure1)ToDouble, 1, 1));
-// 	extend(env, symbol("int"), new Proc((Procedure1)ToInt, 1, 1));
-// 	extend(env, symbol("sort"), new Proc((Procedure2)sort, 2, 1));
-// 	extend(env, symbol("string<?"), new Proc((Procedure2Bool) stringLessThan_q, 2, 2));
-// 	extend(env, symbol("string->symbol"), new Proc((Procedure1) string_to_symbol, 1, 1));
-// 	extend(env, symbol("symbol->string"), new Proc((Procedure1) symbol_to_string, 1, 1));
-// 	extend(env, symbol("string->list"), new Proc((Procedure1) string_to_list, 1, 1));
-// 	extend(env, symbol("group"), new Proc((Procedure2) group, 2, 1));
-// 	extend(env, symbol("member"), new Proc((Procedure2)member, 2, 1));
-// 	extend(env, symbol("format"), new Proc((Procedure1)format_list, -1, 1));
-// 	extend(env, symbol("list-head"), new Proc((Procedure2)list_head, 2, 1));
-// 	extend(env, symbol("list-tail"), new Proc((Procedure2)list_tail, 2, 1));
-// 	extend(env, symbol("symbol"), new Proc((Procedure1)symbol, 1, 1));
+  	set_env_b(env, symbol("property"), new Proc("property", (Procedure1)property, -1, 1));
+ 	set_env_b(env, symbol("debug"), new Proc("debug", (Procedure1)debug, -1, 1));
+ 	set_env_b(env, symbol("typeof"), new Proc("typeof", (Procedure1)get_type, 1, 1));
+ 	set_env_b(env, symbol("float"), new Proc("float", (Procedure1)ToDouble, 1, 1));
+ 	set_env_b(env, symbol("int"), new Proc("int", (Procedure1)ToInt, 1, 1));
+ 	set_env_b(env, symbol("sort"), new Proc("sort", (Procedure2)sort, 2, 1));
+ 	set_env_b(env, symbol("string<?"), new Proc("string<?", (Procedure2Bool) stringLessThan_q, 2, 2));
+ 	set_env_b(env, symbol("string->symbol"), new Proc("string->symbol", (Procedure1) string_to_symbol, 1, 1));
+ 	set_env_b(env, symbol("symbol->string"), new Proc("symbol->string", (Procedure1) symbol_to_string, 1, 1));
+ 	set_env_b(env, symbol("string->list"), new Proc("string->list", (Procedure1) string_to_list, 1, 1));
+ 	set_env_b(env, symbol("group"), new Proc("group", (Procedure2) group, 2, 1));
+ 	set_env_b(env, symbol("member"), new Proc("member", (Procedure2)member, 2, 1));
+ 	set_env_b(env, symbol("format"), new Proc("format", (Procedure1)format_list, -1, 1));
+ 	set_env_b(env, symbol("list-head"), new Proc("list-head", (Procedure2)list_head, 2, 1));
+ 	set_env_b(env, symbol("list-tail"), new Proc("list-tail", (Procedure2)list_tail, 2, 1));
+ 	set_env_b(env, symbol("symbol"), new Proc("symbol", (Procedure1)symbol, 1, 1));
+	// FIXME: something wrong with cadr vs caar requiring 1 and -1
+	set_env_b(env, symbol("caar"), new Proc("caar", (Procedure1)caar, -1, 1));
+	set_env_b(env, symbol("cadr"), new Proc("cadr", (Procedure1)cadr, 1, 1));
+	set_env_b(env, symbol("cdar"), new Proc("cdar", (Procedure1)cdar, -1, 1));
+	set_env_b(env, symbol("cddr"), new Proc("cddr", (Procedure1)cddr, 1, 1));
+	set_env_b(env, symbol("caaar"), new Proc("caaar", (Procedure1)caaar, -1, 1));
+	set_env_b(env, symbol("caadr"), new Proc("caadr", (Procedure1)caadr, 1, 1));
+	set_env_b(env, symbol("cadar"), new Proc("cadar", (Procedure1)cadar, -1, 1));
+	set_env_b(env, symbol("caddr"), new Proc("caddr", (Procedure1)caddr, 1, 1));
+	set_env_b(env, symbol("cdaar"), new Proc("cdaar", (Procedure1)cdaar, -1, 1));
+	set_env_b(env, symbol("cdadr"), new Proc("cdadr", (Procedure1)cdadr, 1, 1));
+	set_env_b(env, symbol("cddar"), new Proc("cddar", (Procedure1)cddar, -1, 1));
+	set_env_b(env, symbol("cdddr"), new Proc("cdddr", (Procedure1)cdddr, 1, 1));
+	set_env_b(env, symbol("caaaar"), new Proc("caaaar", (Procedure1)caaaar, -1, 1));
+	set_env_b(env, symbol("caaadr"), new Proc("caaadr", (Procedure1)caaadr, 1, 1));
+	set_env_b(env, symbol("caadar"), new Proc("caadar", (Procedure1)caadar, -1, 1));
+	set_env_b(env, symbol("caaddr"), new Proc("caaddr", (Procedure1)caaddr, 1, 1));
+	set_env_b(env, symbol("cadaar"), new Proc("cadaar", (Procedure1)cadaar, -1, 1));
+	set_env_b(env, symbol("cadadr"), new Proc("cadadr", (Procedure1)cadadr, 1, 1));
+	set_env_b(env, symbol("caddar"), new Proc("caddar", (Procedure1)caddar, -1, 1));
+	set_env_b(env, symbol("cadddr"), new Proc("cadddr", (Procedure1)cadddr, 1, 1));
+	set_env_b(env, symbol("cdaaar"), new Proc("cdaaar", (Procedure1)cdaaar, -1, 1));
+	set_env_b(env, symbol("cdaadr"), new Proc("cdaadr", (Procedure1)cdaadr, 1, 1));
+	set_env_b(env, symbol("cdadar"), new Proc("cdadar", (Procedure1)cdadar, -1, 1));
+	set_env_b(env, symbol("cdaddr"), new Proc("cdaddr", (Procedure1)cdaddr, 1, 1));
+	set_env_b(env, symbol("cddaar"), new Proc("cddaar", (Procedure1)cddaar, -1, 1));
+	set_env_b(env, symbol("cddadr"), new Proc("cddadr", (Procedure1)cddadr, 1, 1));
+	set_env_b(env, symbol("cdddar"), new Proc("cdddar", (Procedure1)cdddar, -1, 1));
+	set_env_b(env, symbol("cddddr"), new Proc("cddddr", (Procedure1)cddddr, 1, 1));
 	return env;
   }
   
@@ -519,11 +578,6 @@ public abstract class Scheme {
 	return list();
   }
 
-  // given a name, return a function that given an array, returns object
-  public static Procedure2 make_external_proc(object tname) {
-	return (path, args) => call_external_proc(null, get_the_type(tname.ToString()), path, args);
-  }
-
   public static object call_external_proc(object obj, Type type, object path, object args) {
 	//string name = obj.ToString();
 	//Type type = null;
@@ -591,9 +645,8 @@ public abstract class Scheme {
 			if (type.IsPublic) {
 			  string className = type.FullName;
 			  //classname_parts = get_parts(className, "+");
-			  env = extend(env, 
-				  symbol(className), 
-				  new Proc((Procedure2)make_external_proc(className), 2, 1));
+			  set_env_b(env, symbol(className), new Proc("make-external", 
+					  (Procedure2)make_instance_proc(className), 2, 1));
 // 			  set_car_b( env, extend_frame(symbol(className), 
 // 					  new Proc((Procedure2)make_external_proc(className), 2, 1),
 // 					  car(env)));
