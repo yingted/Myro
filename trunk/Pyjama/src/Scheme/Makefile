@@ -101,8 +101,11 @@ run-fact.exe:
 
 fact.exe: fact.cs run-fact.exe
 
+DLR.exe: DLR.cs
+	gmcs DLR.cs -lib:DLLs -r:Microsoft.Scripting.dll -r:Microsoft.Scripting.Core.dll
+
 clean:
 	$(RM) *.exe *~ pjscheme-ds.ss pjscheme-rm.ss compile.ss make-fact.ss \
-		fact.cs make-pjscheme.ss pjscheme.exe pjscheme.cs \
+		fact.cs make-pjscheme.ss pjscheme.exe pjscheme.cs DLR.exe \
 		pjscheme-run.ss pjscheme.ss fact-rm.ss fact-ds.ss all*.ss testall.ss
 
