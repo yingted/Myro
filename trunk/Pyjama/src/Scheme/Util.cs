@@ -463,7 +463,7 @@ public abstract class Scheme {
   public static Procedure2 make_instance_proc(object tname) {
 	return (path, args) => call_external_proc(null, get_the_type(tname.ToString()), path, args);
   }
-
+  
   public static void set_env_b(object env, object var, object val) {
 	object frame = first_frame(env);
 	set_first_frame_b(env, cons(make_binding(var, make_external_proc(val)), frame));
@@ -1075,7 +1075,7 @@ public abstract class Scheme {
 	  return String.Format("\"{0}\"", obj);
 	} else if (obj is Symbol) {
 	  return obj.ToString();
-	} else if (list_q(obj)) {
+	} else if (list_q(obj) || pair_q(obj)) {
 	  if (procedure_q(obj)) {
 		return "#<procedure>";
 	  } else if (module_q(obj)) {
@@ -1086,7 +1086,7 @@ public abstract class Scheme {
 		while (pair_q(current)) {
 		  if (retval != "")
 			retval += " ";
-		  retval += car(current); //repr(car(current));
+		  retval += repr(car(current));
 		  current = cdr(current);
 		  if (!pair_q(current) && !Equal(current, EmptyList)) {
 			retval += " . " + repr(current); // ...
@@ -1094,8 +1094,6 @@ public abstract class Scheme {
 		}
 		return "(" + retval + ")";
 	  }
-	} else if (obj is Cons) { // improper list!
-	  return format("[improper list: {0}]", obj);
 	} else {
 	  return obj.ToString();
 	}

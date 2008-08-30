@@ -2,8 +2,10 @@
 (load "rm-transformer.ss")
 
 (define *code* 
-"  public static Proc get_variables_from_frame_proc = new Proc(\"get-variables-from-frame\", (Procedure1) get_variables_from_frame, -1, 1);
-   public static Proc binding_variable_proc = new Proc(\"binding-variable\", (Procedure1) binding_variable, -1, 1);
+"  public static Proc get_variables_from_frame_proc = 
+         new Proc(\"get-variables-from-frame\", (Procedure1) get_variables_from_frame, 1, 1);
+   public static Proc binding_variable_proc = 
+         new Proc(\"binding-variable\", (Procedure1) binding_variable, 1, 1);
 ")
 
 (define *ignore-functions* '(
