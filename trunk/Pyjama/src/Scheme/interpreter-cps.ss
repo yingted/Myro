@@ -388,7 +388,7 @@
   (lambda (args env)
      (if (null? args)
  	(map get-variables-from-frame (frames env))
-	(car (map get-variables-from-frame (car args))))))
+	(map get-variables-from-frame (frames args)))))
 
 (define get-variables-from-frame
   (lambda (frame) 

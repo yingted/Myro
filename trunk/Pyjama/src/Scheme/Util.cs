@@ -433,24 +433,6 @@ public abstract class Scheme {
 	return ((object) cons ((object) variable, (object) value));
   }
   
-
-//   public static object make_frame (object variables, object values)
-//   {
-// 	return map(make_binding_proc, variables, values);
-//   }
-  
-//   public static object make_binding_proc_extension(object var, object val) {
-// 	return apply( make_binding_proc, 
-// 		list(var, list(symbol("procedure"), symbol("<extension>"), val)));
-//   }
-
-//   public static object extend_frame(object var, object val, object env) {
-	
-// 	return cons(apply( make_binding_proc, 
-// 			list(var, list(symbol("procedure"), symbol("<extension>"), val))),
-// 		env);
-//   }
-
   public static object first_frame (object env) {
 	return ((object) cadr ((object) env));
   }
@@ -470,7 +452,7 @@ public abstract class Scheme {
   }
 
   public static object make_external_proc (object external_function_object) {
-	// FIXME: this is not overridden as it is used 
+	// FIXME: this is not overridden (but should be) as it is used in Util.cs
 	return ((object)
 		make_proc ((object) symbol ("<proc-40>"),
 			(object) external_function_object));
@@ -485,6 +467,7 @@ public abstract class Scheme {
  	set_env_b(env, symbol("sort"), new Proc("sort", (Procedure2)sort, 2, 1));
  	set_env_b(env, symbol("list?"), new Proc("list?", (Procedure1Bool)list_q, 1, 2));
  	set_env_b(env, symbol("proper?"), new Proc("proper?", (Procedure1Bool)proper_q, 1, 2));
+ 	//set_env_b(env, symbol("procedure?"), new Proc("procedure?", (Procedure1Bool)procedure_q, 1, 2));
  	set_env_b(env, symbol("string<?"), new Proc("string<?", (Procedure2Bool) stringLessThan_q, 2, 2));
  	set_env_b(env, symbol("string->symbol"), new Proc("string->symbol", (Procedure1) string_to_symbol, 1, 1));
  	set_env_b(env, symbol("symbol->string"), new Proc("symbol->string", (Procedure1) symbol_to_string, 1, 1));
@@ -583,23 +566,6 @@ public abstract class Scheme {
 	object the_obj = car(args);
 	object property_list = cdr(args);
 	return call_external_proc(the_obj, the_obj.GetType(), property_list, list());
-
-	/*
-	object result = get_external_thing(the_obj, the_obj.GetType(), property_list, get_arg_types(list()));
-
-	if (!null_q(result)) {
-	  if (Eq(car(result), symbol("field"))) {
-		string field_name = (string) cadr(result);
-		FieldInfo field = (FieldInfo) caddr(result);
-		try {
-		  return field.GetValue(null); // null for static
-		} catch {
-		  return field.GetValue(the_obj); // the_obj for instance
-		}
-	  }
-	}
-	return null;
-	*/
   }
 
   public static object get_external_thing(object obj, Type type, object lyst, Type[] types) {
@@ -909,8 +875,6 @@ public abstract class Scheme {
 
   public static Func<object,bool> procedure_q = tagged_list(symbol("procedure"), (Predicate2)GreaterOrEqual, 1);
 
-  public static Func<object,bool> module_q = tagged_list(symbol("module"), (Predicate2)GreaterOrEqual, 1);
-
   public static object list_to_vector(object lyst) {
 	trace(2, "called: list_to_vector\n");
 	int len = (int) length(lyst);
@@ -1078,8 +1042,8 @@ public abstract class Scheme {
 	} else if (list_q(obj) || pair_q(obj)) {
 	  if (procedure_q(obj)) {
 		return "#<procedure>";
-	  } else if (module_q(obj)) {
-		return String.Format("#<module {0}>", car(obj));
+	  } else if (Eq(car(obj), symbol("envionment"))) {
+		return String.Format("#<environment>"); //, car(obj));
 	  } else {
 		object current = (Cons)obj;
 		string retval = "";
@@ -1907,6 +1871,8 @@ public class Cons {
 	}
   }
   
+  public static Func<object,bool> module_q = tagged_list(symbol("module"), (Predicate2)GreaterOrEqual, 1);
+
   public override string ToString() { // Unsafe
 	if (procedure_q(this)) 
 	  return "#<procedure>";
