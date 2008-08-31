@@ -27,7 +27,7 @@ pjscheme.exe: pjscheme-rm.ss scheme-to-csharp.ss
 	echo "(exit)" >> make-pjscheme.ss
 	petite make-pjscheme.ss
 	indent -di0 -i3 pjscheme.cs
-	$(MCS) -debug pjscheme.cs Util.cs  -main:pjscheme_rm \
+	$(MCS) -debug pjscheme.cs Util.cs getline.cs -main:pjscheme_rm \
 		-lib:DLLs -r:Microsoft.VisualBasic.dll -r:Microsoft.Scripting.dll
 	MONO_PATH=DLLs mono --debug pjscheme.exe
 

@@ -61,10 +61,14 @@
   (lambda-handler (e)
     (REP-k `(uncaught exception: ,e))))
 
+(define read-line
+  (lambda (prompt)
+    (printf prompt)
+    (read)))
+
 (define* read-eval-print
   (lambda ()
-    (printf "==> ")
-    (let* ((input (read))
+    (let* ((input (read-line "==> "))
 	   (input-string (format "~s" input)))
       (read-datum input-string REP-handler
 	(lambda-cont2 (datum tokens-left)

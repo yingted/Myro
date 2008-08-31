@@ -184,6 +184,19 @@ public class SchemeLanguageContext : LanguageContext  {
   }
 }
 
+namespace n1 {
+  public class MyType1 {
+	public string Name { get; set; }
+	public MyType1() {
+	  Name = "MyType1";
+	}
+
+	public override string ToString() {
+	  return Name;
+	}
+  }
+}
+
 public class SchemeHost {
 
   public static void Main(string[] args) {
@@ -192,6 +205,8 @@ public class SchemeHost {
 	
 	// Preload System assembly
 	runtime.LoadAssembly(typeof(string).Assembly);
+	// To make it soe that the language can create these objects:
+	//runtime.LoadAssembly( Assembly.GetAssembly( typeof( n1.MyType1)));
 	
 	// Create a scope at global level
 	ScriptScope globalEnv = runtime.CreateScope();
@@ -203,14 +218,10 @@ public class SchemeHost {
 	//ScriptScope CreateScope(IAttributesCollection globals);
 
 	schemeEngine.SetVariable(globalEnv, "x", 42);
+	schemeEngine.SetVariable(globalEnv, "y", new n1.MyType1());
 	Console.WriteLine(String.Format("x = {0}", schemeEngine.GetVariable(globalEnv, "x")));
-	Console.WriteLine(String.Format("env = {0}", SchemeContext.GetContext()));
-	//foreach (String name in schemeEngine.GetEnviornmentVariables(globalEnv)) {
-	//Console.WriteLine(String.Format("{0} = {0}", name, schemeEngine.GetVariable(globalEnv, name)));
-	//}
-		
-	//ScriptSource source = schemeEngine.CreateScriptSourceFromString("x = 1;");
-	//source.Execute(globals);
+	Console.WriteLine(String.Format("y = {0}", schemeEngine.GetVariable(globalEnv, "y")));
+
 	
   }
 

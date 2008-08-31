@@ -10,6 +10,7 @@
 
 (define *ignore-functions* '(
 			     read-content 
+			     read-line
 			     string->integer 
 			     string->decimal 
 			     string->rational
