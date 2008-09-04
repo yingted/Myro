@@ -1142,7 +1142,6 @@ public abstract class Scheme {
 	}
   }
 
-  // FIXME: Eq, and EqualSign
   public static bool Equal(object obj) {
 	object item = car(obj);
 	object current = cdr(obj);
@@ -1234,22 +1233,26 @@ public abstract class Scheme {
   }
 
   public static bool EqualSign(object obj1, object obj2) {
-	if (obj1 is Symbol) {
-	  if (obj2 is Symbol) {
-		return (obj1.ToString() == obj2.ToString());
-	  } else 
-		return EqualSign(obj1.ToString(), obj2);
+	// FIXME: why does this work and the other not?
+	return obj1.ToString() == obj2.ToString();
+
+	if ((obj1 is Symbol) && (obj2 is Symbol)) {
+	  return (((Symbol)obj1).Equals(obj2));
+	} else if ((obj1 is int) && (obj2 is int)) {
+	  return obj1 == obj2;
+	} else if ((obj1 is double) && (obj2 is double)) {
+	  return obj1 == obj2;
+//	} else if (obj1.GetType().ToString() == obj1.GetType().ToString()) {
+//    return obj1 == obj2;
 	} else {
-	  if (obj2 is Symbol) {
-		return EqualSign(obj1, obj2.ToString());
-	  } else {
-		try {
-		  bool retval = (ObjectType.ObjTst(obj1, obj2, false) == 0);
-		  return retval;
-		} catch {
-		  return false;
-		}
-	  }
+	  return obj1.ToString() == obj2.ToString();
+// 	  try {
+// 		bool retval = (ObjectType.ObjTst(obj1, obj2, false) == 0);
+// 		//bool retval = (obj1 == obj2);
+// 		return retval;
+// 	  } catch {
+// 		return false;
+// 	  }
 	}
   }
 
@@ -1509,7 +1512,9 @@ public abstract class Scheme {
 
   public static object member(object obj1, object obj2) {
 	trace(2, "calling member({0}, {1})\n", obj1, obj2);
-	if (pair_q(obj2)) {
+	if (null_q(obj2)) {
+	  return false;
+	} else if (pair_q(obj2)) {
 	  object current = obj2;
 	  while (pair_q(current)) {
 		if (Equal(obj1, car(current)))
