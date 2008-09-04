@@ -219,7 +219,7 @@
       (list 'exit 'apply 'sqrt 'print 'display 'newline 'load 'null? 'cons 'car 'cdr
 	    'list '+ '- '* '/ '< '> '= 'equal? 'eq? 'memq 'range 'set-car! 'set-cdr!
 	    'import 'get 'call-with-current-continuation 'call/cc
-	    'reverse 'append 'list->vector 'dir 'current-time 'map 'env
+	    'reverse 'append 'list->vector 'dir 'current-time 'map 'for-each 'env
 	    'using)
       (list
 	;; exit
@@ -303,6 +303,9 @@
 	;; map
 	(lambda-proc (args env2 handler k2)
 	  (map-prim (car args) (cdr args) env2 handler k2))
+	;; for-each
+	(lambda-proc (args env2 handler k2)
+	  (for-each-prim (car args) (cdr args) env2 handler k2))
 	;; env
 	(lambda-proc (args env2 handler k2) (k2 env2))
 	;; using (not defined in scheme-scheme)
@@ -349,6 +352,14 @@
 	  (mapN proc (map cdr lists) env handler
 	    (lambda-cont (v2)
 	      (k (cons v1 v2)))))))))
+
+(define* for-each-prim
+  (lambda (proc lists env handler k)
+    (if (null? (car lists))
+      (k '<void>)
+      (proc (map car lists) env handler
+	(lambda-cont (v1)
+	  (for-each-prim proc (map cdr lists) env handler k))))))
 
 (define get-current-time
   (lambda ()

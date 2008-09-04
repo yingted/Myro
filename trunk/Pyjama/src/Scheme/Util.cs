@@ -414,7 +414,7 @@ public abstract class Scheme {
 	object retval = EmptyList;
 	object buffer = EmptyList;
 	object current1 = chars;
-	while (!Equal(current1, EmptyList)) {
+	while (!Eq(current1, EmptyList)) {
 	  if (Equal(car(current1), delimiter)) {
 		retval = cons(list_to_string(reverse(buffer)), retval);
 		buffer = EmptyList;
@@ -423,7 +423,7 @@ public abstract class Scheme {
 	  }
 	  current1 = cdr(current1);
 	}
-	if (!Equal(buffer, EmptyList))
+	if (!Eq(buffer, EmptyList))
 	  retval = cons(list_to_string(reverse(buffer)), retval);
 	return reverse(retval);
   }
@@ -457,7 +457,7 @@ public abstract class Scheme {
   public static object make_external_proc (object external_function_object) {
 	// FIXME: this is not overridden (but should be) as it is used in Util.cs
 	return ((object)
-		make_proc ((object) symbol ("<proc-40>"),
+		make_proc ((object) symbol ("<proc-41>"),
 			(object) external_function_object));
   }
   
@@ -469,8 +469,8 @@ public abstract class Scheme {
  	set_env_b(env, symbol("int"), new Proc("int", (Procedure1)ToInt, 1, 1));
  	set_env_b(env, symbol("sort"), new Proc("sort", (Procedure2)sort, 2, 1));
  	set_env_b(env, symbol("list?"), new Proc("list?", (Procedure1Bool)list_q, 1, 2));
- 	set_env_b(env, symbol("proper?"), new Proc("proper?", (Procedure1Bool)proper_q, 1, 2));
- 	//set_env_b(env, symbol("procedure?"), new Proc("procedure?", (Procedure1Bool)procedure_q, 1, 2));
+ 	set_env_b(env, symbol("length"), new Proc("length", (Procedure1)length, 1, 1));
+ 	set_env_b(env, symbol("procedure?"), new Proc("procedure?", (Procedure1Bool)procedure_q_proc, 1, 2));
  	set_env_b(env, symbol("string<?"), new Proc("string<?", (Procedure2Bool) stringLessThan_q, 2, 2));
  	set_env_b(env, symbol("string->symbol"), new Proc("string->symbol", (Procedure1) string_to_symbol, 1, 1));
  	set_env_b(env, symbol("symbol->string"), new Proc("symbol->string", (Procedure1) symbol_to_string, 1, 1));
@@ -543,7 +543,7 @@ public abstract class Scheme {
 	int i = 0;
 	Type[] retval = new Type[(int)length(objs)];
 	object current = objs;
-	while (!Equal(current, EmptyList)) {
+	while (!Eq(current, EmptyList)) {
 	  object obj = car(current);
 	  if (Equal(obj, "null"))
 		retval[i] = Type.GetType("System.Object");
@@ -577,7 +577,7 @@ public abstract class Scheme {
 	  return list(symbol("constructor"), "ctor", constructor);
 	}
 	object current = lyst;
-	while (!Equal(current, EmptyList)) {
+	while (!Eq(current, EmptyList)) {
 	  string name = car(current).ToString();
 	  MethodInfo method = type.GetMethod(name, types);
 	  if (method != null) {
@@ -806,7 +806,7 @@ public abstract class Scheme {
 	object current1 = items;
 	// FIXME: compare on empty list assumes proper list
 	// fix to work with improper lists
-	while (!Equal(current1, EmptyList)) {
+	while (!Eq(current1, EmptyList)) {
 	  apply(proc, car(current1));
 	  current1 = cdr(current1);
 	}
@@ -817,7 +817,7 @@ public abstract class Scheme {
 	if (proc is Proc)
 	  return ((Proc)proc).Call(args);
 	else {
-	  if (procedure_q(proc) && Equal(cadr(proc), symbol("<extension>")))
+	  if (procedure_q(proc) && Eq(cadr(proc), symbol("<extension>")))
 		return ((Proc)caddr(proc)).Call(args);
 	  else
 		throw new Exception(string.Format("invalid procedure: {0}", proc));
@@ -828,7 +828,7 @@ public abstract class Scheme {
 	if (proc is Proc)
 	  return ((Proc)proc).Call(args1, args2);
 	else
-	  if (procedure_q(proc) && Equal(cadr(proc), symbol("<extension>")))
+	  if (procedure_q(proc) && Eq(cadr(proc), symbol("<extension>")))
 		return ((Proc)caddr(proc)).Call(args1, args2);
 	  else
 		throw new Exception(string.Format("invalid procedure: {0}", proc));
@@ -838,7 +838,7 @@ public abstract class Scheme {
 	trace(1, "called:{0}1({1})\n", proc, args);
 	object retval = EmptyList;
 	object current1 = args;
-	while (!Equal(current1, EmptyList)) {
+	while (!Eq(current1, EmptyList)) {
 	  if (list_q(car(current1)))
 		retval = cons( apply(proc, list(car(current1))), retval);
 	  else
@@ -853,7 +853,7 @@ public abstract class Scheme {
 	object retval = EmptyList;
 	object current1 = args1;
 	object current2 = args2;
-	while (!Equal(current1, EmptyList)) {
+	while (!Eq(current1, EmptyList)) {
 	  retval = cons( apply(proc, car(current1), car(current2)), retval);
 	  current1 = cdr(current1);
 	  current2 = cdr(current2);
@@ -864,22 +864,23 @@ public abstract class Scheme {
   public static Func<object,bool> tagged_list(object test_string, object pred, object value) {
 	trace(2, "called: tagged_list\n");
 	return (object lyst) => {
-	  if (list_q(lyst))
-		return (((bool)Equal(car(lyst), test_string)) && ((bool)((Predicate2)pred)(length(lyst), value)));
-	  else
+	  if (pair_q(lyst)) {
+		bool retval = (((bool)Eq(car(lyst), string_to_symbol(test_string))) && 
+			           ((bool)((Predicate2)pred)(length_safe(lyst), value)));
+		//printf("is this a {0}? ({1} ...) compare {2} => {3}\n", test_string, car(lyst), value, retval);
+		return retval;
+	  } else {
+		//printf("is this a {0}? not a list! => false\n", test_string);
 		return false;
+	  }
 	};
   }
 
-  public static bool type_q(object obj) {
-	return (obj is Type);
-  }
-
-  public static bool object_q(object obj) {
-	return (! list_q(obj));
-  }
-
   public static Func<object,bool> procedure_q = tagged_list(symbol("procedure"), (Predicate2)GreaterOrEqual, 1);
+
+  public static bool procedure_q_proc(object obj) {
+	return (bool) procedure_q(obj);
+  }
 
   public static object list_to_vector(object lyst) {
 	trace(2, "called: list_to_vector\n");
@@ -1028,6 +1029,11 @@ public abstract class Scheme {
   }
 
   public static string repr(object obj) {
+	return repr(obj, 0);
+  }
+
+  public static string repr(object obj, int depth) {
+	if (depth > 1) return "...";
 	trace(3, "calling repr\n");
 	if (obj == null) {
 	  return "#<void>";
@@ -1045,21 +1051,21 @@ public abstract class Scheme {
 	  return String.Format("\"{0}\"", obj);
 	} else if (obj is Symbol) {
 	  return obj.ToString();
-	} else if (list_q(obj) || pair_q(obj)) {
+	} else if (pair_q(obj)) {
 	  if (procedure_q(obj)) {
 		return "#<procedure>";
 	  } else if (Eq(car(obj), symbol("envionment"))) {
 		return String.Format("#<environment>"); //, car(obj));
 	  } else {
-		object current = (Cons)obj;
 		string retval = "";
+		object current = (Cons)obj;
 		while (pair_q(current)) {
 		  if (retval != "")
 			retval += " ";
-		  retval += repr(car(current));
+		  retval += repr(car(current), depth + 1);
 		  current = cdr(current);
-		  if (!pair_q(current) && !Equal(current, EmptyList)) {
-			retval += " . " + repr(current); // ...
+		  if (!pair_q(current) && !Eq(current, EmptyList)) {
+			retval += " . " + repr(current, depth + 1); // ...
 		  }
 		}
 		return "(" + retval + ")";
@@ -1136,7 +1142,7 @@ public abstract class Scheme {
   public static bool Equal(object obj) {
 	object item = car(obj);
 	object current = cdr(obj);
-	while (!Equal(current, EmptyList)) {
+	while (!Eq(current, EmptyList)) {
 	  if (! Equal(item, car(current)))
 		return false;
 	  current = cdr(current);
@@ -1147,7 +1153,7 @@ public abstract class Scheme {
   public static bool EqualSign(object obj) {
 	object item = car(obj);
 	object current = cdr(obj);
-	while (!EqualSign(current, EmptyList)) {
+	while (!Eq(current, EmptyList)) {
 	  if (! EqualSign(item, car(current)))
 		return false;
 	  current = cdr(current);
@@ -1282,7 +1288,7 @@ public abstract class Scheme {
 	// For adding 0 or more numbers in list
 	object retval = 0;
 	object current = obj;
-	while (!Equal(current, EmptyList)) {
+	while (!Eq(current, EmptyList)) {
 	  retval = Add(retval, car(current));
 	  current = cdr(current);
 	}
@@ -1293,7 +1299,7 @@ public abstract class Scheme {
 	// For multiplying 0 or more numbers in list
 	object retval = 1;
 	object current = obj;
-	while (!Equal(current, EmptyList)) {
+	while (!Eq(current, EmptyList)) {
 	  retval = Multiply(retval, car(current));
 	  current = cdr(current);
 	}
@@ -1304,7 +1310,7 @@ public abstract class Scheme {
 	// For subtracting 1 or more numbers in list
 	object retval = car(obj);
 	object current = cdr(obj);
-	while (!Equal(current, EmptyList)) {
+	while (!Eq(current, EmptyList)) {
 	  retval = Subtract(retval, car(current));
 	  current = cdr(current);
 	}
@@ -1315,7 +1321,7 @@ public abstract class Scheme {
 	// For dividing 1 or more numbers in list
 	object retval = car(obj);
 	object current = cdr(obj);
-	while (!Equal(current, EmptyList)) {
+	while (!Eq(current, EmptyList)) {
 	  retval = Divide(retval, car(current));
 	  current = cdr(current);
 	}
@@ -1501,7 +1507,7 @@ public abstract class Scheme {
 	trace(2, "calling member({0}, {1})\n", obj1, obj2);
 	if (list_q(obj2)) {
 	  object current = obj2;
-	  while (!Equal(current, EmptyList)) {
+	  while (!Eq(current, EmptyList)) {
 		if (Equal(obj1, car(current)))
 		  return current;
 		current = cdr(current);
@@ -1550,7 +1556,7 @@ public abstract class Scheme {
 	  } else {
 		int len = 0;
 		object current = (Cons)obj;
-		while (!Equal(current, EmptyList)) {
+		while (!Eq(current, EmptyList)) {
 		  len++;
 		  current = cdr(current);
 		}
@@ -1561,34 +1567,44 @@ public abstract class Scheme {
 	  throw new Exception("attempt to take length of a non-list");
   }
 
-  public static bool proper_q(object obj) {
-	trace(3, "called: proper_q\n");
+  public static object length_safe(object obj) {
+	trace(3, "called: length_safe\n");
+	if (null_q(obj)) {
+	  trace(3, "length_safe returned: {0}\n", 0);
+	  return 0;
+	} else if (pair_q(obj)) {
+	  int len = 0;
+	  object current = (Cons)obj;
+	  while (pair_q(current)) {
+		len++;
+		current = cdr(current);
+	  }
+	  trace(3, "length_safe returned: {0}\n", len);
+	  return len;
+	}
+	return -1;
+  }
+
+  public static bool list_q(object obj) {
+	trace(3, "called: list?({0})\n", repr(obj));
 	if (null_q(obj)) {
 	  return true;
 	} else if (pair_q(obj)) {
 	  object current = obj;
-	  while (true) {
-		if (null_q(cdr(current))) {
-		  return true;
-		}
-		if (! pair_q(cdr(current))) {
-		  return false;
-		}
+	  while (pair_q(current)) {
 		current = cdr(current);
 	  }
+	  return Eq(current, EmptyList);
 	}
+	//printf("false\n");
 	return false;
-  }
-
-  public static bool list_q(object o1) {
-	return (proper_q(o1) && (null_q(o1) || pair_q(o1)));
   }
 
   public static object list_to_string(object lyst) {
 	String retval = "";
 	if (lyst is Cons) {
 	  object current = lyst;
-	  while (!Equal(current, EmptyList)) {
+	  while (!Eq(current, EmptyList)) {
 		retval += car(current).ToString();
 		current = cdr(current);
 	  }
@@ -1621,7 +1637,7 @@ public abstract class Scheme {
 
   public static object sort(object p, object l) {
 	object piv = pivot(p, l);
-	if (Equal(piv, symbol("done"))) return l;
+	if (Eq(piv, symbol("done"))) return l;
 	object parts = partition(p, piv, l, EmptyList, EmptyList);
 	return append(sort(p, car(parts)),
 		sort(p, cadr(parts)));
@@ -1631,7 +1647,7 @@ public abstract class Scheme {
 	if (lyst is Cons) {
 	  object result = EmptyList;
 	  object current = ((Cons)lyst);
-	  while (current != EmptyList) {
+	  while (!Eq(current, EmptyList)) {
 		result = new Cons(car(current), result);
 		current = cdr(current);
 	  }
@@ -1691,14 +1707,18 @@ public abstract class Scheme {
 	set_cdr_b(car(obj), cadr(obj));
   }
   
+  public static void update_length_forwards(object lyst) {
+  }
+
   public static void set_cdr_b(object lyst, object item) {
 	Cons cell = (Cons) lyst;
 	cell.cdr = item;
   }
-
+  
   public static void set_car_b(object obj) {
 	set_car_b(car(obj), cadr(obj));
   }
+
   public static void set_car_b(object lyst, object item) {
 	Cons cell = (Cons) lyst;
 	cell.car = item;
@@ -1819,7 +1839,7 @@ public abstract class Scheme {
   public static bool memq(object item1, object list) {
 	if (list is Cons) {
 	  object current = list;
-	  while (! Equal(current, EmptyList)) {
+	  while (! Eq(current, EmptyList)) {
 		if (Equal(item1, car(current))) {
 		  return true;
 		}

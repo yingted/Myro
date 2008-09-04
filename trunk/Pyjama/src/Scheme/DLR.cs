@@ -222,6 +222,9 @@ public class SchemeHost {
 	Console.WriteLine(String.Format("x = {0}", schemeEngine.GetVariable(globalEnv, "x")));
 	Console.WriteLine(String.Format("y = {0}", schemeEngine.GetVariable(globalEnv, "y")));
 
+	//LanguageContext.DomainManager.Globals.TryGetName("System");
+	globalEnv.TryGetName("System");
+
 	
   }
 
