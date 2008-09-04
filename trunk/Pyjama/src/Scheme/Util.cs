@@ -56,8 +56,8 @@ public class Symbol {
 }
 
 public class Rational {
-  int numerator;
-  int denominator;
+  public int numerator;
+  public int denominator;
   
   public Rational(int num) {
 	this.numerator = num;
@@ -750,7 +750,7 @@ public abstract class Scheme {
 
   public static object list_tail(object lyst, object pos) {
 	trace(5, "calling list_tail({0}, {1})\n", lyst, pos);
-	if (list_q(lyst)) {
+	if (pair_q(lyst)) {
 	  object current = lyst;
 	  int current_pos = 0;
 	  while (!Equal(current_pos, pos)) {
@@ -764,7 +764,7 @@ public abstract class Scheme {
 
   public static object list_head(object lyst, object pos) {
 	trace(5, "calling list_head({0}, {1})\n", lyst, pos);
-	if (list_q(lyst)) {
+	if (pair_q(lyst)) {
 	  object retval = EmptyList;
 	  object current = lyst;
 	  int current_pos = 0;
@@ -997,7 +997,11 @@ public abstract class Scheme {
 
   public static object string_to_rational(object str) {
 	string[] part = (str.ToString()).Split(SPLITSLASH);
-	return new Rational(int.Parse(part[0]), int.Parse(part[1]));
+	Rational retval = new Rational(int.Parse(part[0]), int.Parse(part[1]));
+	if (retval.denominator == 1)
+	  return retval.numerator;
+	else
+	  return retval;
   }
 
   public static void error(object code, object msg, params object[] rest) {
@@ -1033,7 +1037,7 @@ public abstract class Scheme {
   }
 
   public static string repr(object obj, int depth) {
-	if (depth > 1) return "...";
+	if (depth > 3) return "...";
 	trace(3, "calling repr\n");
 	if (obj == null) {
 	  return "#<void>";
@@ -1208,7 +1212,7 @@ public abstract class Scheme {
 	  if ((obj1 is Symbol) && (obj2 is Symbol))
 		return ((Symbol)obj1).Equals(obj2);
 	  else return false;
-	} else if (list_q(obj1) && list_q(obj2)) {
+	} else if (pair_q(obj1) && pair_q(obj2)) {
 	  if (null_q(obj1) && null_q(obj2))
 		return true;
 	  else if (null_q(obj1))
@@ -1505,9 +1509,9 @@ public abstract class Scheme {
 
   public static object member(object obj1, object obj2) {
 	trace(2, "calling member({0}, {1})\n", obj1, obj2);
-	if (list_q(obj2)) {
+	if (pair_q(obj2)) {
 	  object current = obj2;
-	  while (!Eq(current, EmptyList)) {
+	  while (pair_q(current)) {
 		if (Equal(obj1, car(current)))
 		  return current;
 		current = cdr(current);
@@ -1770,7 +1774,7 @@ public abstract class Scheme {
 	if (obj is Cons) 
 	  return ((Cons)obj).cdr;
 	else
-	  throw new Exception(string.Format("cdr: object is not a list: {0}",
+	  throw new Exception(string.Format("cdr: object is not a pair: {0}",
 			  obj));
   }
 
@@ -1778,7 +1782,7 @@ public abstract class Scheme {
 	if (obj is Cons) 
 	  return ((Cons)obj).car;
 	else
-	  throw new Exception(string.Format("car: object is not a list: {0}",
+	  throw new Exception(string.Format("car: object is not a pair: {0}",
 			  obj));
   }
 

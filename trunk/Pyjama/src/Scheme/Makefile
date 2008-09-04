@@ -81,13 +81,13 @@ testrm: all-rm.ss all-rm-low.ss all-rm-high.ss
 	petite testall.ss
 	$(RM) testall.ss
 
-fact.cs: fact.ss Util.cs make-fact.ss rm-transformer.ss
+fact.cs: fact.ss Util.cs getline.cs make-fact.ss rm-transformer.ss
 	petite make-fact.ss
 	indent -di0 -i3 fact.cs
-	$(MCS) fact.cs Util.cs -main:fact_rm -lib:DLLs -r:Microsoft.VisualBasic.dll -r:Microsoft.Scripting.dll
+	$(MCS) fact.cs Util.cs getline.cs -main:fact_rm -lib:DLLs -r:Microsoft.VisualBasic.dll -r:Microsoft.Scripting.dll
 
-Util.exe: Util.cs 
-	$(MCS) Util.cs -r:Microsoft.VisualBasic.dll -lib:DLLs -r:Microsoft.Scripting.dll -out:Util.exe
+Util.exe: Util.cs getline.cs
+	$(MCS) Util.cs getline.cs -r:Microsoft.VisualBasic.dll -lib:DLLs -r:Microsoft.Scripting.dll -out:Util.exe
 
 dummy:
 
