@@ -216,7 +216,7 @@
   (lambda ()
     (make-initial-env-extended
      (make-initial-environment
-      (list 'exit 'eval 'apply 'sqrt 'print 'display 'newline 'load 'null? 'cons 'car 'cdr
+      (list 'exit 'eval 'parse 'apply 'sqrt 'print 'display 'newline 'load 'null? 'cons 'car 'cdr
 	    'list '+ '- '* '/ '< '> '= 'equal? 'eq? 'memq 'range 'set-car! 'set-cdr!
 	    'import 'get 'call-with-current-continuation 'call/cc
 	    'reverse 'append 'list->vector 'dir 'current-time 'map 'for-each 'env
@@ -234,6 +234,9 @@
 	  (parse (car args) REP-handler
 	    (lambda-cont (exp)
 	      (m exp toplevel-env REP-handler k2))))
+	;; parse
+	(lambda-proc (args env2 handler k2)
+	  (parse (car args) REP-handler k2))
 	;; apply
 	(lambda-proc (args env2 handler k2)
 	  (let ((proc (car args))
