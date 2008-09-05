@@ -313,7 +313,7 @@
        ((memq name (append *ignore-functions* *system-ignore-functions*))
 	;; primitive function or system function
 	;; def = (define name (lambda args body ...))
-	(printf "Ignoring function ~a~%" name)
+	;;(printf "Ignoring function ~a~%" name)
 	"")
        ((not (lambda? (caddr def)))
 	;; def = (define name 'undefined)
@@ -323,7 +323,7 @@
 				*system-function-signatures*))))
 	  (if (eq? (memq name *variable-definitions*) #f)
 	      (begin
-		(printf " adding static variable ~a...~%" name)
+		;;(printf " adding static variable ~a...~%" name)
 		(set! *variable-definitions* (cons name *variable-definitions*))
 		(let ((ret-type (if (null? (car types))
 				    (if (ends-with name #\?)
@@ -340,7 +340,7 @@
        ((or (define*? def) (define? def))
 	(let ((params (cadr (caddr def)))
 	      (bodies (cddr (caddr def))))
-	  (printf " adding function ~a...~%" name)
+	  ;;(printf " adding function ~a...~%" name)
 	  (set! *function-definitions* (cons name *function-definitions*))
 	  (format "~a ~a\n" 
 		  (format-definition name params)
