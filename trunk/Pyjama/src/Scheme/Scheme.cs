@@ -455,7 +455,7 @@ public abstract class Scheme {
   }
 
   public static object make_external_proc (object external_function_object) {
-	// FIXME: this is not overridden (but should be) as it is used in Util.cs
+	// FIXME: this is not overridden (but should be) as it is used in Scheme.cs
 	return ((object)
 		make_proc ((object) symbol ("<proc-41>"),
 			(object) external_function_object));

@@ -27,7 +27,7 @@ pjscheme.exe: pjscheme-rm.ss scheme-to-csharp.ss
 	echo "(exit)" >> make-pjscheme.ss
 	petite make-pjscheme.ss
 	indent -di0 -i3 pjscheme.cs
-	$(MCS) -debug pjscheme.cs Util.cs getline.cs -main:pjscheme_rm \
+	$(MCS) -debug pjscheme.cs Scheme.cs getline.cs -main:pjscheme_rm \
 		-lib:DLLs -r:Microsoft.VisualBasic.dll -r:Microsoft.Scripting.dll
 	MONO_PATH=DLLs mono --debug pjscheme.exe
 
@@ -81,20 +81,10 @@ testrm: all-rm.ss all-rm-low.ss all-rm-high.ss
 	petite testall.ss
 	$(RM) testall.ss
 
-fact.cs: fact.ss Util.cs getline.cs make-fact.ss rm-transformer.ss
+fact.cs: fact.ss Scheme.cs getline.cs make-fact.ss rm-transformer.ss
 	petite make-fact.ss
 	indent -di0 -i3 fact.cs
-	$(MCS) fact.cs Util.cs getline.cs -main:fact_rm -lib:DLLs -r:Microsoft.VisualBasic.dll -r:Microsoft.Scripting.dll
-
-Util.exe: Util.cs getline.cs
-	$(MCS) Util.cs getline.cs -r:Microsoft.VisualBasic.dll -lib:DLLs -r:Microsoft.Scripting.dll -out:Util.exe
-
-dummy:
-
-run-util: Util.exe dummy
-	MONO_PATH=DLLs mono Util.exe
-
-Util: run-util
+	$(MCS) fact.cs Scheme.cs getline.cs -main:fact_rm -lib:DLLs -r:Microsoft.VisualBasic.dll -r:Microsoft.Scripting.dll
 
 run-fact.exe:
 	MONO_PATH=DLLs mono fact.exe
