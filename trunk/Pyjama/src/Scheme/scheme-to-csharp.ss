@@ -164,13 +164,12 @@
 	        pc ();
 	    } catch (Exception e ) {
                 if (config.DEBUG > 0) {
-                    value_reg = e.ToString();
+                    exception_reg = e.ToString();
                 } else {
                     string [] parts = get_parts(e.ToString(), NEWLINE_STRING);
-		    value_reg = list (format(\"{0}\", parts[0]));
+		    exception_reg = format(\"{0}\", parts[0]);
                 }
-		k_reg = REP_k;
-		pc = (Function) apply_cont;
+		pc = (Function) apply_handler;
 	    }
 	}
 	return (final_reg);
