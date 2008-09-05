@@ -321,27 +321,6 @@
 	    case-transformer
 	    record-case-transformer))))
 
-;; macros as define-syntax patterns:
-;;            '([(and) #t]
-;;	      [(and ?exp) ?exp]
-;;	      [(and ?exp . ?exp*) (if ?exp (and . ?exp*) #f)])
-;;	    '([(or) #f]
-;;	      [(or ?exp) ?exp]
-	      ;; incorrect:
-	      ;;[(or ?exp . ?exp*) (if ?exp #t (or . ?exp*))]
-;;	      [(or ?exp . ?exp*)
-;;	       (let ((first ?exp) (rest (lambda () (or . ?exp*))))
-;;		 (if first first (rest)))])
-	    ;; not quite correct:
-;;	    '([(cond) #t]
-;;	      [(cond (else . ?results)) (begin . ?results)]
-;;	      [(cond (?test . ?results)) (if ?test (begin . ?results) #f)]
-;;	      [(cond (?test . ?results) . ?rest)
-;;	       (if ?test (begin . ?results) (cond . ?rest))])
-;;	    '([(let* () . ?bodies) (begin . ?bodies)]
-;;	      [(let* ((?var ?exp) . ?rest) . ?bodies)
-;;	       (let ((?var ?exp)) (let* ?rest . ?bodies))])
-
 (define macro-env (make-macro-env))
 
 ;;--------------------------------------------------------------------------

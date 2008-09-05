@@ -216,7 +216,7 @@
   (lambda ()
     (make-initial-env-extended
      (make-initial-environment
-      (list 'exit 'apply 'sqrt 'print 'display 'newline 'load 'null? 'cons 'car 'cdr
+      (list 'exit 'eval 'apply 'sqrt 'print 'display 'newline 'load 'null? 'cons 'car 'cdr
 	    'list '+ '- '* '/ '< '> '= 'equal? 'eq? 'memq 'range 'set-car! 'set-cdr!
 	    'import 'get 'call-with-current-continuation 'call/cc
 	    'reverse 'append 'list->vector 'dir 'current-time 'map 'for-each 'env
@@ -229,6 +229,11 @@
 	  ;; temporary
 	  (set! load-stack '())
 	  (halt* '(exiting the interpreter)))
+	;; eval
+	(lambda-proc (args env2 handler k2)
+	  (parse (car args) REP-handler
+	    (lambda-cont (exp)
+	      (m exp toplevel-env REP-handler k2))))
 	;; apply
 	(lambda-proc (args env2 handler k2)
 	  (let ((proc (car args))
@@ -263,7 +268,10 @@
 	;; *
 	(lambda-proc (args env2 handler k2) (k2 (apply * args)))
 	;; /
-	(lambda-proc (args env2 handler k2) (k2 (apply / args)))
+	(lambda-proc (args env2 handler k2)
+	  (if (= (cadr args) 0)
+	    (handler "division by zero")
+	    (k2 (apply / args))))
 	;; <
 	(lambda-proc (args env2 handler k2) (k2 (apply < args)))
 	;; >
@@ -312,7 +320,7 @@
 	(lambda-proc (args env2 handler k2) (k2 (using-prim args env2)))
 	)))))
 
-;; supports procedures of any numbers of arguments
+;; supports procedures of any number of arguments
 (define* map-prim
   (lambda (proc args env handler k)
     (let ((len (length args)))
