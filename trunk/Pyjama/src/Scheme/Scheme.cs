@@ -744,7 +744,12 @@ public class Scheme {
 
   public static object list_tail(object lyst, object pos) {
 	trace(5, "calling list_tail({0}, {1})\n", lyst, pos);
-	if (pair_q(lyst)) {
+	if (null_q(lyst)) {
+	  if (Equal(pos, 0))
+		return EmptyList;
+	  else
+		throw new Exception("list-tail position beyond list");
+	} else if (pair_q(lyst)) {
 	  object current = lyst;
 	  int current_pos = 0;
 	  while (!Equal(current_pos, pos)) {
@@ -758,7 +763,12 @@ public class Scheme {
 
   public static object list_head(object lyst, object pos) {
 	trace(5, "calling list_head({0}, {1})\n", lyst, pos);
-	if (pair_q(lyst)) {
+	if (null_q(lyst)) {
+	  if (Equal(pos, 0))
+		return EmptyList;
+	  else
+		throw new Exception("list-head position beyond list");
+	} else if (pair_q(lyst)) {
 	  object retval = EmptyList;
 	  object current = lyst;
 	  int current_pos = 0;
@@ -1227,26 +1237,16 @@ public class Scheme {
   }
 
   public static bool EqualSign(object obj1, object obj2) {
-	// FIXME: why does this work and the other not?
-	return obj1.ToString() == obj2.ToString();
-
-	if ((obj1 is Symbol) && (obj2 is Symbol)) {
-	  return (((Symbol)obj1).Equals(obj2));
+ 	if ((obj1 is Symbol) && (obj2 is Symbol)) {
+ 	  return (((Symbol)obj1).Equals(obj2));
 	} else if ((obj1 is int) && (obj2 is int)) {
-	  return obj1 == obj2;
+	  return ((int)obj1) == ((int)obj2);
 	} else if ((obj1 is double) && (obj2 is double)) {
+	  return ((double)obj1) == ((double)obj2);
+	} else  { //if (obj1.GetType().ToString() == obj1.GetType().ToString()) {
 	  return obj1 == obj2;
-//	} else if (obj1.GetType().ToString() == obj1.GetType().ToString()) {
-//    return obj1 == obj2;
-	} else {
-	  return obj1.ToString() == obj2.ToString();
-// 	  try {
-// 		bool retval = (ObjectType.ObjTst(obj1, obj2, false) == 0);
-// 		//bool retval = (obj1 == obj2);
-// 		return retval;
-// 	  } catch {
-// 		return false;
-// 	  }
+	  //	} else {
+	  //	  return obj1.ToString() == obj2.ToString();
 	}
   }
 
@@ -1415,6 +1415,8 @@ public class Scheme {
 
   public static object Multiply(object obj1, object obj2) {
 	// FIXME: need hierarchy of numbers, handle rational/complex/etc
+	if (obj1 is int && ((int)obj1) == 1) return obj2;
+	if (obj2 is int && ((int)obj2) == 1) return obj1;
 	if (obj1 is Rational) {
 	  if (obj2 is Rational) {
 		return (((Rational)obj1) * ((Rational)obj2));
@@ -1930,7 +1932,7 @@ public class Cons {
 		s += String.Format(" {0}", ((Cons)sexp).car);
 		sexp = ((Cons)sexp).cdr;
 	  }
-	  if (sexp == EmptyList) {
+	  if (Eq(sexp, EmptyList)) {
 		s += ")";
 	  } else {
 		s += String.Format(" . {0})", sexp);
