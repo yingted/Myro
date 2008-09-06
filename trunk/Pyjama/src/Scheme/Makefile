@@ -85,18 +85,21 @@ testrm: all-rm.ss all-rm-low.ss all-rm-high.ss
 fact.cs: fact.ss Scheme.cs getline.cs make-fact.ss rm-transformer.ss
 	petite make-fact.ss
 	indent -di0 -i3 fact.cs
-	$(MCS) fact.cs Scheme.cs getline.cs -main:fact_rm -lib:DLLs -r:Microsoft.VisualBasic.dll -r:Microsoft.Scripting.dll
 
-run-fact.exe:
+fact: fact.exe
 	MONO_PATH=DLLs mono fact.exe
 
-fact.exe: fact.cs run-fact.exe
+fact.exe: fact.cs
+	$(MCS) fact.cs Scheme.cs getline.cs -main:PJScheme -lib:DLLs -r:Microsoft.VisualBasic.dll -r:Microsoft.Scripting.dll
 
 DLR.exe: DLR.cs
 	gmcs DLR.cs -lib:DLLs -r:Microsoft.Scripting.dll -r:Microsoft.Scripting.Core.dll
 
+External.dll: External.cs
+	$(MCS) External.cs -target:library
+
 clean:
 	$(RM) *.exe *~ pjscheme-ds.ss pjscheme-rm.ss compile.ss make-fact.ss \
-		fact.cs make-pjscheme.ss pjscheme.exe pjscheme.cs DLR.exe \
+		fact.cs make-pjscheme.ss pjscheme.exe pjscheme.cs pjscheme-cps.ss \
 		pjscheme-run.ss pjscheme.ss fact-rm.ss fact-ds.ss all*.ss testall.ss
 

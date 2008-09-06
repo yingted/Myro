@@ -51,6 +51,13 @@
   (lambda (type name args k)
     (k (apply* (caddr name) (car args)))))
 
+(define make-external-proc
+  (lambda (external-function-object)
+    (lambda-proc (args env2 handler k2)
+      (k2 (apply* external-function-object args)))))
+
+(define exception_reg 'undefined)
+
 ;; temporary, method to add code to c#
 
 (define *code* "")

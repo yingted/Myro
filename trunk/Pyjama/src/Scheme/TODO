@@ -4,10 +4,8 @@ Bugs
 
 1. eq? and equal? and = should be different
 2. make pretty-print safer and useful
-3. Handle system exception to be able to try/catch them
-4. exceptions/continuations allow fix and continue?
-5. handle (map proc list1 list2 ...)
-
+3. exceptions/continuations allow fix and continue?
+4. (External '(func2) '(1234)) ;; static func, with args (wrong type = loop)
 
 scheme-to-csharp
 ================

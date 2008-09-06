@@ -251,8 +251,8 @@
 					   (cdr types) (cdr args-list))
 				      ", "))))
 	  (if (eq? name 'apply*)
-	      (format "~a.~a(~a, ~a) " *class* (proper-name name) (convert-exp (car args) proc-name) sargs)
-	      (format "~a.~a(~a_proc, ~a) " *class* (proper-name name) (proper-name (car args)) sargs))))
+	      (format "~a(~a, ~a) " (proper-name name) (convert-exp (car args) proc-name) sargs)
+	      (format "~a(~a_proc, ~a) " (proper-name name) (proper-name (car args)) sargs))))
        (else
 	(format "~a.~a(~a) " *class* (proper-name name) sargs))))))
 

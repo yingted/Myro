@@ -600,7 +600,7 @@ public class Scheme {
 	  object result = get_external_thing(obj, type, path, types);
 	  if (!null_q(result)) {
 		if (Eq(car(result), symbol("method"))) {
-		  string method_name = (string) cadr(result);
+		  string method_name = cadr(result).ToString();
 		  MethodInfo method = (MethodInfo) caddr(result);
 		  object retval = method.Invoke(method_name, arguments);
 		  return retval;
@@ -618,7 +618,7 @@ public class Scheme {
 		  object retval = constructor.Invoke(arguments);
 		  return retval;
 		} else if (Eq(car(result), symbol("property"))) {
-		  string property_name = (string) cadr(result);
+		  string property_name = cadr(result).ToString();
 		  PropertyInfo property = (PropertyInfo) caddr(result);
 		  // ParameterInfo[] indexes = property.GetIndexParameters();
 		  // to use interface, OR
@@ -638,8 +638,8 @@ public class Scheme {
 	// implements "using"
 	if (list_q(args)) {
 	  int len = (int) length(args);
-	  if (len == 1) { // (using "file.dll")
-		String filename = (String) car(args);
+	  if (len > 0) { // (using "file.dll")
+		String filename = car(args).ToString();
 		Assembly assembly = null;
 		try {
 		  assembly = Assembly.LoadFrom(filename);
@@ -655,20 +655,25 @@ public class Scheme {
 		  // then add each type to environment
 		  foreach (Type type in assembly.GetTypes()) {
 			if (type.IsPublic) {
-			  string className = type.FullName;
+			  string moduleName = null;
+			  if (len == 2)  // (using "file.dll" 'module)
+				moduleName = cadr(args).ToString();
+			  else
+				moduleName = type.FullName;
+			  String className = type.FullName;
 			  //classname_parts = get_parts(className, "+");
-			  set_env_b(env, symbol(className), new Proc("make-external", 
+			  set_env_b(env, symbol(moduleName), new Proc("make-external", 
 					  (Procedure2)make_instance_proc(className), 2, 1));
-// 			  set_car_b( env, extend_frame(symbol(className), 
-// 					  new Proc((Procedure2)make_external_proc(className), 2, 1),
-// 					  car(env)));
 			}
 		  }
 		} else {
 		  throw new Exception(String.Format("external library '{0}' could not be loaded", filename));
 		}
-	  } else if (len == 1) { // (using "file.dll" 'module)
+	  } else {
+		throw new Exception("using takes a DLL name, and optionally a moduleName");
 	  }
+	} else {
+	  throw new Exception("using takes a DLL name, and optionally a moduleName");
 	}
 	return null;
   }
@@ -719,27 +724,34 @@ public class Scheme {
 // 					symbol("record_case_transformer")))));
 //   }
 
-  public static object range(object args) {
-	// range(start stop incr)
+  public static object range(object args) { // range(start stop incr)
 	if (list_q(args)) {
 	  int len = (int) length(args);
-	  object retval = list();
-	  if (len == 1) {
-		for (int i = ((int)car(args)) - 1; i >= 0; i--) 
-		  retval = cons(i, retval);
-	  } else if (len == 2) {
-		// start stop
-		for (int i = ((int)cadr(args)) - 1; i >= ((int)car(args)); i--) 
-		  retval = cons(i, retval);
-	  } else if (len == 3) {
-		// start stop incr
-		for (int i = ((int)car(args)); i < ((int)cadr(args)); i = i + ((int)caddr(args)))
-		  retval = cons(i, retval);
-		retval = reverse(retval);
+	  if (len == 1) { // (range 100)
+		return make_range(0, ((int)car(args)), 1); 
+	  } else if (len == 2) { // (range start stop)
+		return make_range(((int)car(args)), ((int)cadr(args)), 1); 
+	  } else if (len == 3) { // (range start stop incr)
+		return make_range(((int)car(args)), ((int)cadr(args)), 
+			((int)caddr(args))); 
 	  }
-	  return retval;
 	}
 	throw new Exception("improper args to range");
+  }
+
+  public static object make_range(int start, int stop, int incr) {
+	object retval = EmptyList;
+	object tail = EmptyList;
+	for (int i = start; i < stop; i += incr) {
+	  if (Eq(tail, EmptyList)) {
+		retval = list(i); // start of list
+		tail = retval;
+	  } else { // a pair
+		set_cdr_b(tail, cons(i, EmptyList));
+		tail = cdr(tail);
+	  }
+	}
+	return retval;
   }
 
   public static object list_tail(object lyst, object pos) {
@@ -771,13 +783,20 @@ public class Scheme {
 	} else if (pair_q(lyst)) {
 	  object retval = EmptyList;
 	  object current = lyst;
+	  object tail = EmptyList;
 	  int current_pos = 0;
 	  while (!Equal(current_pos, pos)) {
-		retval = cons(car(current), retval);
+		if (Eq(retval, EmptyList)) {
+		  retval = cons(car(current), EmptyList);
+		  tail = retval;
+		} else {
+		  set_cdr_b(tail, cons(car(current), EmptyList));
+		  tail = cdr(tail);
+		}
 		current = cdr(current);
 		current_pos++;
 	  }
-	  return reverse(retval);
+	  return retval;
 	}
 	throw new Exception("list-head takes a list and a pos");
   }
@@ -838,31 +857,52 @@ public class Scheme {
 		throw new Exception(string.Format("invalid procedure: {0}", proc));
   }
 
+  public static void apply_handler () {
+	// will be replaced
+  }
+
   public static object map(object proc, object args) {
 	trace(1, "called:{0}1({1})\n", proc, args);
 	object retval = EmptyList;
+	object tail = retval;
 	object current1 = args;
 	while (!Eq(current1, EmptyList)) {
-	  if (list_q(car(current1)))
-		retval = cons( apply(proc, list(car(current1))), retval);
+	  object result;
+	  if (pair_q(car(current1)))
+		result = apply(proc, list(car(current1)));
 	  else
-		retval = cons( apply(proc, car(current1)), retval);
+		result = apply(proc, car(current1));
+	  if (Eq(tail, EmptyList)) {
+		retval = list(result); // start of list
+		tail = retval;
+	  } else { // pair
+		set_cdr_b(tail, cons(result, EmptyList));
+		tail = cdr(tail);
+	  }
 	  current1 = cdr(current1);
 	}
-	return reverse(retval);
+	return retval;
   }
 
   public static object map(object proc, object args1, object args2) {
 	trace(1, "called:{0}2({1} {2})\n", proc, args1, args2);
 	object retval = EmptyList;
+	object tail = EmptyList;
 	object current1 = args1;
 	object current2 = args2;
 	while (!Eq(current1, EmptyList)) {
-	  retval = cons( apply(proc, car(current1), car(current2)), retval);
+	  object result = apply(proc, car(current1), car(current2));
+	  if (Eq(retval, EmptyList)) {
+		retval = cons( result, EmptyList);
+		tail = retval;
+	  } else {
+		set_cdr_b( tail, cons(result, EmptyList));
+		tail = cdr(tail);
+	  }
 	  current1 = cdr(current1);
 	  current2 = cdr(current2);
 	}
-	return reverse(retval);
+	return retval;
   }
 
   public static Func<object,bool> tagged_list(object test_string, object pred, object value) {
@@ -974,13 +1014,20 @@ public class Scheme {
   public static object string_to_list(object str) {
 	trace(2, "called: string_to_list: {0}\n", str);
 	object retval = EmptyList;
+	object tail = EmptyList;
 	if (str != null) {
 	  string sstr = str.ToString();
 	  for (int i = 0; i < sstr.Length; i++) {
-		retval = cons(sstr[i], retval);
+		if (Eq(retval, EmptyList)) {
+		  retval = cons(sstr[i], EmptyList);
+		  tail = retval;
+		} else {
+		  set_cdr_b(tail, cons(sstr[i], EmptyList));
+		  tail = cdr(tail);
+		}
 	  }
 	}
-	return reverse(retval);
+	return retval;
   }
 
   public static object string_to_symbol(object s) {
@@ -1044,7 +1091,7 @@ public class Scheme {
 	if (depth > 3) return "...";
 	trace(3, "calling repr\n");
 	if (obj == null) {
-	  return "#<void>";
+	  return "<void>";
 	} else if (obj is bool) {
 	  return ((bool)obj) ? "#t" : "#f";
 	} else if (obj is Array) {
@@ -1271,16 +1318,18 @@ public class Scheme {
   }
 
   public static bool Equal(object obj1, object op, object obj2) {
-	if (((string)op) == "=") {
-	  return (ObjectType.ObjTst(obj1, obj2, false) == 0);
-	} else if (((string)op) == "<") {
-	  return (ObjectType.ObjTst(obj1, obj2, false) < 0);
-	} else if (((string)op) == ">") {
-	  return (ObjectType.ObjTst(obj1, obj2, false) > 0);
-	} else if (((string)op) == "<=") {
-	  return (ObjectType.ObjTst(obj1, obj2, false) <= 0);
-	} else if (((string)op) == ">=") {
-	  return (ObjectType.ObjTst(obj1, obj2, false) >= 0);
+	if (op is string) {
+	  if (((string)op) == "=") {
+		return (ObjectType.ObjTst(obj1, obj2, false) == 0);
+	  } else if (((string)op) == "<") {
+		return (ObjectType.ObjTst(obj1, obj2, false) < 0);
+	  } else if (((string)op) == ">") {
+		return (ObjectType.ObjTst(obj1, obj2, false) > 0);
+	  } else if (((string)op) == "<=") {
+		return (ObjectType.ObjTst(obj1, obj2, false) <= 0);
+	  } else if (((string)op) == ">=") {
+		return (ObjectType.ObjTst(obj1, obj2, false) >= 0);
+	  }
 	} 
 	throw new Exception(String.Format("unknown compare operator: '{0}'", op));
   }
@@ -1554,24 +1603,26 @@ public class Scheme {
 
   public static object length(object obj) {
 	trace(3, "called: length\n");
-	if (list_q(obj)) {
-	  if (null_q(obj)) {
-		trace(3, "length returned: {0}\n", 0);
-		return 0;
-	  } else {
-		int len = 0;
-		object current = (Cons)obj;
-		while (!Eq(current, EmptyList)) {
-		  len++;
-		  current = cdr(current);
-		}
+	if (null_q(obj)) {
+	  trace(3, "length returned: {0}\n", 0);
+	  return 0;
+	} else if (pair_q(obj)) {
+	  int len = 0;
+	  object current = (Cons)obj;
+	  while (pair_q(current)) {
+		len++;
+		current = cdr(current);
+	  }
+	  if (Eq(current, EmptyList)) {
 		trace(3, "length returned: {0}\n", len);
 		return len;
+	  } else {
+		throw new Exception("attempt to take length of an improper list");
 	  }
 	} else
 	  throw new Exception("attempt to take length of a non-list");
   }
-
+  
   public static object length_safe(object obj) {
 	trace(3, "called: length_safe\n");
 	if (null_q(obj)) {
@@ -1712,9 +1763,6 @@ public class Scheme {
 	set_cdr_b(car(obj), cadr(obj));
   }
   
-  public static void update_length_forwards(object lyst) {
-  }
-
   public static void set_cdr_b(object lyst, object item) {
 	Cons cell = (Cons) lyst;
 	cell.cdr = item;
