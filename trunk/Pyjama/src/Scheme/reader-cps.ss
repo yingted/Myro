@@ -515,6 +515,4 @@
 (define Main 
   (lambda (args)
     (start)
-    (trampoline)
-    (newline)
-    (printf "done!\n")))
+    (trampoline)))

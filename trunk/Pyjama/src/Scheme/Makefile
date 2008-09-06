@@ -2,10 +2,9 @@ MCS=gmcs
 
 pjscheme-rm.ss: environments-cps.ss parser-cps.ss unifier-cps.ss \
 		interpreter-cps.ss reader-cps.ss ds-transformer.ss \
-		rm-transformer.ss pjscheme-data.ss
+		rm-transformer.ss 
 	$(RM) pjscheme-cps.ss
 	cat reader-cps.ss environments-cps.ss parser-cps.ss interpreter-cps.ss unifier-cps.ss > pjscheme-cps.ss
-	cat pjscheme-data.ss >> pjscheme-cps.ss
 	echo "(load \"rm-transformer.ss\")" > compile.ss
 	echo "(compile-level-output)" >> compile.ss
 	echo "(delete-file \"pjscheme-ds.cs\")" >> compile.ss
@@ -20,15 +19,17 @@ run: pjscheme-rm.ss
 	echo "(begin (display (run start)) (newline))" >> pjscheme-run.ss
 	petite pjscheme-run.ss
 
-pjscheme.exe: pjscheme-rm.ss scheme-to-csharp.ss
+pjscheme.exe: pjscheme-rm.ss scheme-to-csharp.ss Scheme.cs
 	echo "(load \"scheme-to-csharp.ss\")" > make-pjscheme.ss
 	echo "(delete-file \"pjscheme.cs\")" >> make-pjscheme.ss
 	echo "(convert-file \"pjscheme-rm.ss\" \"pjscheme.cs\")" >> make-pjscheme.ss
 	echo "(exit)" >> make-pjscheme.ss
 	petite make-pjscheme.ss
 	indent -di0 -i3 pjscheme.cs
-	$(MCS) -debug pjscheme.cs Scheme.cs getline.cs -main:pjscheme_rm \
+	$(MCS) -debug pjscheme.cs Scheme.cs getline.cs -main:PJScheme \
 		-lib:DLLs -r:Microsoft.VisualBasic.dll -r:Microsoft.Scripting.dll
+
+pjscheme: pjscheme.exe
 	MONO_PATH=DLLs mono --debug pjscheme.exe
 
 Test.exe: Test.cs

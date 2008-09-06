@@ -8,6 +8,8 @@
          new Proc(\"binding-variable\", (Procedure1) binding_variable, 1, 1);
 ")
 
+(define *class* 'PJScheme) ;; 'undefined to use filename
+
 (define *ignore-functions* '(
 			     read-content 
 			     read-line
@@ -151,8 +153,10 @@
     (let ((defs (filter (lambda (x) (or (define? x) (define*? x))) forms)))
       (let ((name (proper-name (string->symbol (car (split filename #\.)))))
 	    (header "using System;\nusing Microsoft.VisualBasic.CompilerServices;\n\n"))
+	(if (equal? *class* 'undefined)
+	    (set! *class* name))
 	(format "~a public class ~a: Scheme {\n~a\n~a ~a}\n"
-		header name 
+		header *class*
 		(apply string-append (map convert-define defs))
 		cs-trampoline
 		*code*)))))
@@ -247,10 +251,10 @@
 					   (cdr types) (cdr args-list))
 				      ", "))))
 	  (if (eq? name 'apply*)
-	      (format "~a(~a, ~a) " (proper-name name) (convert-exp (car args) proc-name) sargs)
-	      (format "~a(~a_proc, ~a) " (proper-name name) (proper-name (car args)) sargs))))
+	      (format "~a.~a(~a, ~a) " *class* (proper-name name) (convert-exp (car args) proc-name) sargs)
+	      (format "~a.~a(~a_proc, ~a) " *class* (proper-name name) (proper-name (car args)) sargs))))
        (else
-	(format "~a(~a) " (proper-name name) sargs))))))
+	(format "~a.~a(~a) " *class* (proper-name name) sargs))))))
 
 (define ends-with
   (lambda (sym c)

@@ -143,8 +143,8 @@
 ;; ==> "(for sym in '(a b c d) do (print sym) (newline))"
 ;; ==> "(for n in (range 10 20 2) do (print n))"
 
-;; ==> "(for n at (i j) in matrix2D do (print (list n 'coords: i j)))"
-;; ==> "(for n at (i j k) in matrix3D do (print (list n 'coords: i j k)))"
+;; ==> "(for n at (i j) in matrix2d do (print (list n 'coords: i j)))"
+;; ==> "(for n at (i j k) in matrix3d do (print (list n 'coords: i j k)))"
 
 ;; ==> "(! 5)"
 ;; ==> "(nth 10 facts)"
@@ -160,8 +160,8 @@
     (print (for 5 times do (print 'hello)))
     (print (for sym in '(a b c d) do (print sym) (newline)))
     (print (for n in (range 10 20 2) do (print n)))
-    (print (for n at (i j) in matrix2D do (print (list n 'coords: i j))))
-    (print (for n at (i j k) in matrix3D do (print (list n 'coords: i j k))))
+    (print (for n at (i j) in matrix2d do (print (list n 'coords: i j))))
+    (print (for n at (i j k) in matrix3d do (print (list n 'coords: i j k))))
     (print (! 5))
     (print (nth 10 facts))
     (print (nth 20 fibs))

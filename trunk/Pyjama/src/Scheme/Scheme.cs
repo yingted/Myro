@@ -190,7 +190,7 @@ public class Rational {
 
 }
 
-public abstract class Scheme {
+public class Scheme {
 
   static LineEditor lineEditor = new LineEditor(null);
   public static Config config = new Config();
@@ -451,16 +451,10 @@ public abstract class Scheme {
   
   public static void set_env_b(object env, object var, object val) {
 	object frame = first_frame(env);
-	set_first_frame_b(env, cons(make_binding(var, make_external_proc(val)), frame));
+	// make_external_proc is defined in generated code
+	set_first_frame_b(env, cons(make_binding(var, PJScheme.make_external_proc(val)), frame));
   }
 
-  public static object make_external_proc (object external_function_object) {
-	// FIXME: this is not overridden (but should be) as it is used in Scheme.cs
-	return ((object)
-		make_proc ((object) symbol ("<proc-41>"),
-			(object) external_function_object));
-  }
-  
   public static object make_initial_env_extended (object env) {
   	set_env_b(env, symbol("property"), new Proc("property", (Procedure1)property, -1, 1));
  	set_env_b(env, symbol("debug"), new Proc("debug", (Procedure1)debug, -1, 1));
