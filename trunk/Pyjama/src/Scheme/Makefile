@@ -7,8 +7,8 @@ pjscheme-rm.ss: environments-cps.ss parser-cps.ss unifier-cps.ss \
 	cat reader-cps.ss environments-cps.ss parser-cps.ss interpreter-cps.ss unifier-cps.ss > pjscheme-cps.ss
 	echo "(load \"rm-transformer.ss\")" > compile.ss
 	echo "(compile-level-output)" >> compile.ss
-	echo "(delete-file \"pjscheme-ds.cs\")" >> compile.ss
-	echo "(delete-file \"pjscheme-rm.cs\")" >> compile.ss
+	echo "(delete-file \"pjscheme-ds.ss\")" >> compile.ss
+	echo "(delete-file \"pjscheme-rm.ss\")" >> compile.ss
 	echo "(ds-transform-file \"pjscheme-cps.ss\" \"pjscheme-ds.ss\")" >> compile.ss
 	echo "(rm-transform-file \"pjscheme-ds.ss\" \"pjscheme-rm.ss\")" >> compile.ss
 	echo "(exit)" >> compile.ss

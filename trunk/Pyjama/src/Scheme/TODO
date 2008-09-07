@@ -59,3 +59,30 @@ External
 ==> (define e (External 20 "duh")) ;; top layer ctor
 ==> (e.size)
 20
+
+Writing Nice External Libraries
+===============================
+
+* GetCustomMember – runs before normal .NET lookups
+* GetBoundMember – runs after normal .NET lookups
+* SetMember – runs before normal .NET member assignment
+* SetMemberAfter – runs after normal .NET member assignment
+* DeleteMember – runs before normal .NET operator access (there’s no .NET version – so its the only one)
+
+class TextExt {
+  Dictionary<string, object> dict = new Dictionary<string, object>();
+  [SpecialName]
+  public object GetBoundMember(string name)
+  {
+    if (dict.ContainsKey(name))
+	  return dict[name];
+    else
+	  return OperationFailed.Value;
+  }
+  
+  [SpecialName]
+  public void SetMemberAfter(string methodName, object o)
+  {
+    dict.Add(methodName, o);
+  }
+}

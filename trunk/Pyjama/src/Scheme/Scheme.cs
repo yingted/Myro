@@ -364,6 +364,7 @@ public class Scheme {
   public static Proc pretty_print_prim_proc = new Proc("pretty-print", (Procedure1Void) pretty_print, -1, 0);
   public static Proc append_proc = new Proc("append", (Procedure1) append, -1, 1);
   public static Proc make_binding_proc = new Proc("make-binding",(Procedure2)make_binding, 2, 1);
+  public static Proc printf_prim_proc = new Proc("printf",(Procedure1)printf_prim, -1, 1);
 
   public static char TILDE = '~';
   public static char NULL = '\0';
@@ -1079,6 +1080,26 @@ public class Scheme {
 	Console.Write(s);
   }
 
+  public static object printf_prim(object args) {
+	int len = ((int) length(args)) - 1;
+	// FIXME: surely there is a better way?:
+	if (len == 0)
+	  Console.Write(car(args));
+	else if (len == 1)
+	  Console.Write(format(car(args), cadr(args)));
+	else if (len == 2)
+	  Console.Write(format(car(args), cadr(args), caddr(args)));
+	else if (len == 3)
+	  Console.Write(format(car(args), cadr(args), caddr(args), cadddr(args)));
+	else if (len == 4)
+	  Console.Write(format(car(args), cadr(args), caddr(args), cadddr(args), 
+			  cadddr(cdr(args))));
+	else if (len == 5)
+	  Console.Write(format(car(args), cadr(args), caddr(args), cadddr(args), 
+			  cadddr(cdr(args)), cadddr(cdr(cdr(args)))));
+	return null;
+  }
+  
   public static void printf(object fmt, params object[] objs) {
 	Console.Write(format(fmt, objs));
   }
@@ -1091,7 +1112,7 @@ public class Scheme {
 	if (depth > 3) return "...";
 	trace(3, "calling repr\n");
 	if (obj == null) {
-	  return "<void>";
+	  return ""; // FIXME: should give void when forced
 	} else if (obj is bool) {
 	  return ((bool)obj) ? "#t" : "#f";
 	} else if (obj is Array) {

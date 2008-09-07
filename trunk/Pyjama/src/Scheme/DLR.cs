@@ -199,6 +199,14 @@ namespace n1 {
 
 public class SchemeHost {
 
+// 	public static object Import(CodeContext context, string name) {
+// 	  object value;
+// 	  if (context.LanguageContext.DomainManager.Globals.TryGetName(SymbolTable.StringToId(name), out value)) {
+// 		return value;
+// 	  }
+// 	  return null;
+// 	}
+
   public static void Main(string[] args) {
 	// Create runtime
 	ScriptRuntime runtime = ScriptRuntime.Create();
@@ -214,18 +222,32 @@ public class SchemeHost {
 	// Load Scheme Engine
 	ScriptEngine schemeEngine = runtime.GetEngine(typeof(SchemeLanguageContext));
 	
-	//ScriptScope CreateScope();
-	//ScriptScope CreateScope(IAttributesCollection globals);
+	//schemeEngine.Runtime.Host.PlatformAdaptationLayer.LoadAssembly("System");
+	//schemeEngine.Runtime.Host.PlatformAdaptationLayer.LoadAssemblyFromPath("External.dll");
+	//env.Host.PlatformAdaptationLayer.LoadAssembly("System");
 
-	schemeEngine.SetVariable(globalEnv, "x", 42);
-	schemeEngine.SetVariable(globalEnv, "y", new n1.MyType1());
-	Console.WriteLine(String.Format("x = {0}", schemeEngine.GetVariable(globalEnv, "x")));
-	Console.WriteLine(String.Format("y = {0}", schemeEngine.GetVariable(globalEnv, "y")));
+// 	object value;
+// 	ScriptScope scope = schemeEngine.Runtime.CreateScope();
+// 	scope.SetVariable("x", 1000);
+// 	bool loaded = scope.TryGetVariable("System", out value);
+// 	if (loaded)
+// 	  Console.WriteLine(value);
+// 	else
+// 	  Console.WriteLine("error");
 
-	//LanguageContext.DomainManager.Globals.TryGetName("System");
-	globalEnv.TryGetName("System");
 
-	
+	ScriptRuntime env = ScriptRuntime.Create();
+	Console.WriteLine(env.Globals);
+	env.Globals.SetVariable("x", 42);
+	env.Globals.SetVariable("y", "test");
+	Console.WriteLine(String.Format("x = {0}", env.Globals.GetVariable("x")));
+	Console.WriteLine(String.Format("y = {0}", env.Globals.GetVariable("y")));
+
+	Assembly assembly = Assembly.LoadWithPartialName("System");
+	env.Globals.SetVariable("System", assembly);
+	Console.WriteLine(String.Format("System = {0}", env.Globals.GetVariable("System")));
+
+
   }
 
 }

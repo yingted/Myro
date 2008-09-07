@@ -220,7 +220,7 @@
 	    'list '+ '- '* '/ '< '> '= 'equal? 'eq? 'memq 'range 'set-car! 'set-cdr!
 	    'import 'get 'call-with-current-continuation 'call/cc
 	    'reverse 'append 'list->vector 'dir 'current-time 'map 'for-each 'env
-	    'using)
+	    'using 'not 'printf)
       (list
 	;; exit
         (lambda-proc (args env2 handler k2)
@@ -321,6 +321,10 @@
 	(lambda-proc (args env2 handler k2) (k2 env2))
 	;; using (not defined in scheme-scheme)
 	(lambda-proc (args env2 handler k2) (k2 (using-prim args env2)))
+	;; not
+	(lambda-proc (args env2 handler k2) (k2 (not (car args))))
+	;; printf
+	(lambda-proc (args env2 handler k2) (k2 (printf-prim args)))
 	)))))
 
 ;; supports procedures of any number of arguments

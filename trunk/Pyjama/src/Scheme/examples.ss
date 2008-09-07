@@ -24,6 +24,11 @@
 	  (cons (f (car values)) (filter-map f pred? (cdr values)))
 	  (filter-map f pred? (cdr values))))))
 
+(define-syntax time 
+  [(time ?exp) (let ((start (current-time)))
+		 ?exp
+		 (- (current-time) start))])
+
 ;;---------------------------------------------------------------------
 ;; for loops
 
