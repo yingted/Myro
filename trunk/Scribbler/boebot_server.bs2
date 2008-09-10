@@ -1,9 +1,6 @@
 ' {$STAMP BS2}
 ' {$PBASIC 2.5}
-' Scribbler robot server code
-' IPRE (http://www.roboteducation.org/)
-' For use with Myro and MSRS
-
+' Azam Thatte, Georgia Institute of Technology, 04/03/2008
 '--------------------------------------------------------------------
 '''''''''''''''''''''''''''''''''''''''
 ' Default Robot Name
@@ -11,46 +8,15 @@
 ' Default Data - application uses
 '   Gets set on reprogram
 '''''''''''''''''''''''''''''''''''''''
-nameData DATA          "Scribby         " ' 16 chars for 2 packets
+nameData DATA          "Spiritual_Slave         "
 '                       1234567890123456
 ipreData DATA          127,127,127,127,0,0,0,0
 '
-'First four values of ipreData are the fudge data stored to EEPROM
-'It defaults to 127 (1.0) or no fudging.
+passData DATA          "Spiritual_Slave         "
 
-passData DATA          "Scribby         " ' 16 chars for password
-
-echoData DATA          0  'MSRS = 1, Myro = 0
-sendData DATA          0  'MSRS = 1, Myro = 0
-quietData DATA         0  'Don't play beeps?
-
-''''''''''''''''''''''''''''''''''''''''''''''''''''
-' IPRE Scribbler API
-'
-' Version information is at bottom of file.
-'
-' Overview:
-'   Messages to robot are a constant 9 bytes long.  Messages from robot are
-'   variable length depending on the message type.  See below for details.
-'
-'   On startup, the robot repeatedly sends its name preceded by "IPRE" every
-'   'TIMEOUT' milliseconds.  This allows the PC to find it and connect.  After
-'   the scribbler receives a command, this name broadcasting stops.
-'
-'   All "SET" messages have a return type of "GET_ALL".
-'
-' Messages TO robot:
-'   The first byte is the message type
-'   The next bytes are the command data (if any)
-'   The rest of the message is filled with null characters until a total of 9 bytes.
-'
-' Messages FROM robot:
-'   The first bytes are the message data
-'   The last byte is the message type
-'     If the message is a GET type message, just the requested data is sent
-'     If the message is a SET type message, the binary state of the robot is sent
-'
-''''''''''''''''''''''''''''''''''''''''''''''''''''
+echoData DATA          0
+sendData DATA          0
+quietData DATA         0
 
 SOFT_RESET         CON 33  ' Format: 33 0 0 0 0 0 0 0 0, Notes: Performs a software reset of robot.  (turns name broadcast back on)
 GET_ALL            CON 65  ' Response: leftIR rightIR LeftLightHighyte LeftLightLowByte CenterLightHighByte CenterLightLowByte RightLightHighByte RightLightLowByte LineLeft LineRight Stall 65
@@ -75,39 +41,6 @@ GET_DATA           CON 81  ' Response: data from flash memory 81
 GET_PASS1          CON 50  ' Respone: 16 bytes from flash memory
 GET_PASS2          CON 51  ' Respone: 16 bytes from flash memory
 
-' Reserved for Camera Dongle:
-' R 82
-' S 83
-' T 84
-' U 85
-' V 86
-' X 88
-' Y 89
-' Z 90
-' [ 91
-'   92
-
-' 116
-' 117
-' 118
-' 120
-' 121
-' 122
-' 123
-' 124
-' 125
-' 126
-' 127
-' 128
-' 129
-' 130
-' 131
-
-' Unused:
-
-' ^ 94
-' _ 95
-' 131 -> 255
 
 SET_SINGLE_DATA    CON 96  ' Sets a single byte of data in flash memory'
 SET_DATA           CON 97  ' Sets 8 bytes of data in flash memory
@@ -148,7 +81,7 @@ LightRightPin    PIN 0
 LightCenterPin   PIN 1
 LightLeftPin     PIN 2
 LineEnablePin    PIN 3
-LineRightPin     PIN 4
+LineRightPin     PIN 5
 LineLeftPin      PIN 5
 ObsRxPin         PIN 6
 StallPin         PIN 7
@@ -158,7 +91,8 @@ LedLeftPin       PIN 10
 SpeakerPin       PIN 11
 MotorRightPin    PIN 12
 MotorLeftPin     PIN 13
-ObsTxRightPin    PIN 14
+'MotorGrip        PIN 14
+ObsTxRightPin    PIN 15
 ObsTxLeftPin     PIN 15
 SerialPin        CON 16
 
@@ -169,7 +103,14 @@ inCmd    VAR Byte(PACKET_LENGTH)
 quiet    VAR Bit
 sendName VAR Bit
 echoMode VAR Bit
-
+azam_counter VAR Word
+rev_counter VAR Word
+right_pulse VAR Word
+left_pulse VAR Word
+grip_counter VAR Word
+rot0 VAR Word
+rot1 VAR Word
+rot2 VAR Word
 '''''''''''''''''''''''''''''
 ' Temp Variables
 '''''''''''''''''''''''''''''
@@ -179,6 +120,10 @@ var3    VAR Word
 temp    VAR Byte
 temp2   VAR Byte
 
+
+rot0 = 750
+rot1 = 650
+rot2 = 850
 '''''''''''''''''''''''''''''''''''
 ' Software reset start location
 '''''''''''''''''''''''''''''''''''
@@ -204,10 +149,6 @@ LOW ObsTxLeftPin
 ' Variable Initialization
 ''''''''''''''''''''''''''''''
 inCmd(PACKET_LENGTH-1) = 0
-'quiet = 0
-'sendName = 1
-'echoMode = 1
-
 READ echoData, inCmd(0)
 echoMode = inCmd(0) & %00000001
 READ sendData, inCmd(0)
@@ -215,36 +156,7 @@ sendName = inCmd(0) & %00000001
 READ quietData, inCmd(0)
 quiet = inCmd(0) & %00000001
 
-''''''''''''''''''''''''''''''
-' Turn on chirp
-''''''''''''''''''''''''''''''
-IF (quiet = 0) THEN
-  PAUSE 50
-  HIGH LedLeftPin
-  FREQOUT SpeakerPin, 80, 784
-  HIGH LedCenterPin
-  FREQOUT SpeakerPin, 80, 880
-  HIGH LedRightPin
-  FREQOUT SpeakerPin, 80, 698
-  LOW LedRightPin
-  FREQOUT SpeakerPin, 80, 349
-  LOW LedCenterPin
-  FREQOUT SpeakerPin, 80, 523
-  LOW LedLeftPin
-ELSE
-  PAUSE 50
-  HIGH LedLeftPin
-  HIGH LedCenterPin
-  HIGH LedRightPin
-  LOW LedRightPin
-  LOW LedCenterPin
-  LOW LedLeftPin
-ENDIF
-'''''''''''''''''''''''
-' Main loop
-'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
-'This is what gets called when the robot has no commumications with PC
 INIT:
   ' Used to flash the middle LED with short timeout:
   IF (LedCenterPin = 1) THEN LedCenterPin = 0 ELSE LedCenterPin = 1
@@ -259,10 +171,11 @@ INIT:
 
 BEGIN:
   SERIN SerialPin, BAUD, TIMEOUT, INIT, [STR inCmd\PACKET_LENGTH]
-  LOOKDOWN inCmd(0), = [GET_STATE, GET_LINE_RIGHT, GET_LINE_LEFT, GET_LIGHT_LEFT, GET_LIGHT_CENTER, GET_LIGHT_RIGHT,  GET_IR_LEFT, GET_IR_RIGHT, GET_STALL, GET_NAME1, GET_NAME2, GET_PASS1, GET_PASS2,  SET_MOTORS_OFF, SET_MOTORS, SET_SPEAKER, SET_SPEAKER_2, SET_LED_LEFT_ON, SET_LED_LEFT_OFF, SET_LED_CENTER_ON, SET_LED_CENTER_OFF, SET_LED_RIGHT_ON, SET_LED_RIGHT_OFF, SET_NAME1, SET_NAME2, SET_PASS1, SET_PASS2, SET_LED_ALL_ON, SET_LED_ALL_OFF, GET_LIGHT_ALL, GET_IR_ALL, GET_LINE_ALL, GET_ALL, SET_LOUD, SET_QUIET, GET_ALL_BINARY, SOFT_RESET,    SET_LED_ALL, GET_INFO, GET_DATA, SET_DATA, SET_SINGLE_DATA, SET_ECHO_MODE], temp
-  BRANCH temp,         [GetState,  GetLineRight,   GetLineLeft,   GetLightLeft,   GetLightCenter,   GetLightRight,    GetObsLeft,  GetObsRight,  GetStall,  GetName1,  GetName2, GetPass1, GetPass2,  MotorsOff,      Motors,     SetSpeaker,  SetSpeaker2,   OnLeftLED,       OffLeftLED,       OnCenterLED,       OffCenterLED,       OnRightLED,       OffRightLED,       SetName1,  SetName2, SetPass1, SetPass2,  OnAllLED,       OffAllLED,       GetLightAll,   GetIRAll,   GetLineAll,   GetAll,  SetLoud,  SetQuiet,  GetAllBinary,   SoftwareReset, SetLedAll,   GetInfo,  GetData,  SetData, SetSingleData, SetEchoMode]
+  ' SERIN serial,baudrate,[DEC pulse_width]  ' for MATLAB
+
+  LOOKDOWN inCmd(0), = [GET_STATE, GET_LINE_RIGHT, GET_LINE_LEFT, GET_IR_LEFT, GET_IR_RIGHT, GET_STALL, GET_NAME1, GET_NAME2, GET_PASS1, GET_PASS2,  SET_MOTORS_OFF, SET_MOTORS, SET_SPEAKER, SET_SPEAKER_2, SET_LED_LEFT_ON, SET_LED_LEFT_OFF, SET_LED_CENTER_ON, SET_LED_CENTER_OFF, SET_LED_RIGHT_ON, SET_LED_RIGHT_OFF, SET_NAME1, SET_NAME2, SET_PASS1, SET_PASS2, SET_LED_ALL_ON, SET_LED_ALL_OFF, GET_IR_ALL, GET_LINE_ALL, GET_ALL, SET_LOUD, SET_QUIET, GET_ALL_BINARY, SOFT_RESET,    SET_LED_ALL, GET_INFO, GET_DATA, SET_DATA, SET_SINGLE_DATA, SET_ECHO_MODE], temp
+  BRANCH temp,         [GetState,  GetLineRight,   GetLineLeft,  GetObsLeft,  GetObsRight,  GetStall,  GetName1,  GetName2, GetPass1, GetPass2,  MotorsOff,      Motors,     SetSpeaker,  SetSpeaker2,   OnLeftLED,       OffLeftLED,       OnCenterLED,       OffCenterLED,       OnRightLED,       OffRightLED,       SetName1,  SetName2, SetPass1, SetPass2,  OnAllLED,       OffAllLED,     GetIRAll,   GetLineAll,   GetAll,  SetLoud,  SetQuiet,  GetAllBinary,   SoftwareReset, SetLedAll,   GetInfo,  GetData,  SetData, SetSingleData, SetEchoMode]
 TOP:
-  ' echo command to tell we are done
   IF (echoMode = 1)     THEN SEROUT SerialPin, BAUD, [inCmd(0)]
   IF (LedCenterPin = 1) THEN LedCenterPin = 0 ELSE LedCenterPin = 1
   sendName = 0
@@ -299,37 +212,6 @@ GetLineAll:
      SEROUT SerialPin, BAUD, [LineLeftPin, LineRightPin]
      GOTO TOP
 
-GetLightLeft:
-     HIGH LightLeftPin
-     PAUSE 3
-     RCTIME LightLeftPin, 1, var3
-     SEROUT SerialPin, BAUD, [var3.HIGHBYTE, var3.LOWBYTE]
-     GOTO TOP
-
-GetLightCenter:
-     HIGH LightCenterPin
-     PAUSE 3
-     RCTIME LightCenterPin, 1, var3
-     SEROUT SerialPin, BAUD, [var3.HIGHBYTE, var3.LOWBYTE]
-     GOTO TOP
-
-GetLightRight:
-     HIGH LightRightPin
-     PAUSE 3
-     RCTIME LightRightPin, 1, var3
-     SEROUT SerialPin, BAUD, [var3.HIGHBYTE, var3.LOWBYTE]
-     GOTO TOP
-
-GetLightAll:
-     HIGH LightLeftPin
-     HIGH LightCenterPin
-     HIGH LightRightPin
-     PAUSE 3
-     RCTIME LightLeftPin, 1, var3
-     RCTIME LightCenterPin, 1, var2
-     RCTIME LightRightPin, 1, var1
-     SEROUT SerialPin, BAUD, [var3.HIGHBYTE, var3.LOWBYTE, var2.HIGHBYTE, var2.LOWBYTE, var1.HIGHBYTE, var1.LOWBYTE]
-     GOTO TOP
 
 GetObsRight:
      FREQOUT ObsTxRightPin, 1, 40500
@@ -468,11 +350,10 @@ SetPass2:
      GOTO GetAll
 
 MotorsOff:
-     PULSOUT MotorRightPin, 2000
-     PULSOUT MotorLeftPin, 2000
+     PULSOUT MotorRightPin, rot0
+     PULSOUT MotorLeftPin, rot0
      GOTO GetAll
 
-     'FREQOUT Pin, Duration, Freq1, Freq2
 SetSpeaker:
      var1 = inCmd(1)
      var1 = (var1 << 8) | inCmd(2)
@@ -503,69 +384,205 @@ SetSpeaker2:
      GOTO GetAll
 
 Motors:
-      var1 = inCmd(1) ' right motor
-      var2 = inCmd(2) ' left motor
+      var1 = inCmd(1)
+      var2 = inCmd(2)
 
-'Fudge motor values based upon direction & speed:
-'
+READ ipreData+0, temp
+ IF (var1 > 170) AND (var2 > 170) THEN
+   rev_counter = 32
+ left_pulse = rot1
+ right_pulse = rot2
 
-READ ipreData+0, temp  ' Fudge 0
-'Fudge the left motor when going forward. (51-100%)
-IF (temp > 127) AND (var2 > 150) THEN
-  var2 = var2 - (temp - 127)
+ FOR azam_counter = 1 TO rev_counter
+PULSOUT 12, right_pulse
+PULSOUT 13, left_pulse
+PAUSE 20
+NEXT
+
+ ENDIF
+
+
+ IF (var1 > 170) AND (var2 < 150) THEN
+
+  rev_counter = 32
+ left_pulse = rot0
+ right_pulse = rot1
+
+ FOR azam_counter = 1 TO rev_counter
+PULSOUT 12, right_pulse
+PULSOUT 13, left_pulse
+PAUSE 20
+NEXT
+
+ ENDIF
+
+
+ IF (var1 > 100) AND (var1 < 150) AND (var2 < 150) THEN
+
+ FOR rev_counter = 1 TO 100
+
+  IF(rev_counter>50) THEN
+
+PULSOUT 12, rot1
+PULSOUT 13, rot0
+PAUSE 20
+
 ENDIF
 
-'Fudge the right motor when going foward! (51-100%)
-IF (temp < 127) AND (var1 > 150) THEN
-   var1 = var1 - (127 - temp )
-ENDIF
+PULSOUT 14, 1000
+PAUSE 20
+NEXT
 
-READ ipreData+1, temp  ' Fudge 1
-'Fudge the left motor when going forward (0-50%)
-IF (temp > 127) AND (150 >= var2) AND ( var2 > 100) THEN
-  var2 = var2 - (temp - 127)
-ENDIF
-'Fudge the right motor when going forward (0-50%)
-IF (temp < 127) AND (150 >= var1) AND (var1 > 100) THEN
-   var1 = var1 - (127 - temp )
-ENDIF
+FOR rev_counter = 1 TO 100
+PULSOUT 14, 500
+PAUSE 20
+NEXT
+
+ ENDIF
+
+ IF (var1 < 150) AND (var2 > 170) THEN
+
+ rev_counter = 32
+ left_pulse = rot2
+ right_pulse = rot0
+
+ FOR azam_counter = 1 TO rev_counter
+PULSOUT 12, right_pulse
+PULSOUT 13, left_pulse
+PAUSE 20
+NEXT
+
+
+ ENDIF
+
+
+READ ipreData+1, temp
+
+ IF (100<var1) AND (var1<150) AND (100 < var2) AND (var2<150) THEN
+
+ rev_counter = 10
+ left_pulse = rot1
+ right_pulse = rot2
+
+ FOR azam_counter = 1 TO rev_counter
+PULSOUT 12, right_pulse
+PULSOUT 13, left_pulse
+PAUSE 20
+NEXT
+
+
+  ENDIF
+
+
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+
+'  Play Music
 
 READ ipreData+2, temp  ' Fudge 2
-'Backwards travel is just like forwards travel, but reversed!
-'fudge the right motor when going backwards (0-50%)
-IF ( temp > 127) AND (100 > var1) AND (var1 >= 50) THEN
-  var1 = var1 + ( temp - 127)
-ENDIF
 
-'fudge the left motor when going backwards.  (0-50% )
-IF (temp < 127) AND (100 > var2) AND ( var2 >= 50) THEN
-  var2 = var2 + (127 - temp)
-ENDIF
+   IF (50<var1) AND (var1<100) AND (50 < var2) AND (var2<100) THEN
 
-READ ipreData+3, temp  ' Fudge 3
-'fudge the right motor when going backwards (51-100%)
-IF ( temp > 127) AND (var1 < 50) THEN
-  var1 = var1 + (temp - 127)
-ENDIF
-'fudge the left motor when going backwards (51-100%)
-IF (temp < 127) AND (50 > var2) THEN
-  var2 = var2 + ( 127 - temp )
-ENDIF
 
-      var1 = (var1 + 100) * 10
-      var2 =  (var2 + 100) * 10
+   FOR rev_counter = 1 TO 2
 
-      PULSOUT MotorRightPin, var1
-      PULSOUT MotorLeftPin,  var2
-      GOTO GetAll
+FREQOUT 4, 500, 1400*3         'E
+PAUSE 40
+FREQOUT 4, 500, 1400*3         'E
+PAUSE 40
+FREQOUT 4, 500, 1500*3         'F
+PAUSE 40
+FREQOUT 4, 500, 1650*3         'G
+PAUSE 40
+FREQOUT 4, 500, 1650*3         'G
+PAUSE 40
+FREQOUT 4, 500, 1500*3         'F
+PAUSE 40
+FREQOUT 4, 500, 1400*3         'E
+PAUSE 40
+FREQOUT 4, 500, 1240*3         'D
+PAUSE 40
 
-' Old and busted code to just make the motors do what they
-' were told!
-'     var1 = (inCmd(1) + 100) * 10
-'     var2 = (inCmd(2) + 100) * 10
-'     PULSOUT MotorRightPin, var1
-'     PULSOUT MotorLeftPin, var2
-'     GOTO GetAll
+
+FREQOUT 4, 500, 1100*3         'C
+PAUSE 40
+FREQOUT 4, 500, 1100*3         'C
+PAUSE 40
+FREQOUT 4, 500, 1240*3         'D
+PAUSE 40
+FREQOUT 4, 500, 1400*3         'E
+PAUSE 40
+FREQOUT 4, 900, 1400*3         'E
+PAUSE 40
+FREQOUT 4, 250, 1240*3         'D
+PAUSE 8
+FREQOUT 4, 800, 1240*3         'D
+PAUSE 120
+
+ NEXT
+
+
+ FOR azam_counter = 1 TO 15
+FOR rev_counter = 1 TO 10
+PULSOUT 14, 500
+PAUSE 20
+NEXT
+FOR rev_counter = 1 TO 20
+PULSOUT 14, 1000
+PAUSE 20
+NEXT
+NEXT
+
+FOR rev_counter = 1 TO 100
+PULSOUT 14, 500
+PAUSE 20
+NEXT
+
+
+  ENDIF
+
+
+
+IF (var1 > 50)AND (var1 < 100) AND (var2 < 50) THEN
+
+
+     FOR rev_counter = 1 TO 100
+
+PULSOUT 14, 1000
+PAUSE 20
+NEXT
+
+ ENDIF
+
+
+ IF (var1 < 50) AND (var2 > 50) AND (var2 < 100) THEN
+
+
+     FOR rev_counter = 1 TO 10
+
+PULSOUT 14, 500
+PAUSE 20
+NEXT
+
+ ENDIF
+
+
+READ ipreData+3, temp
+
+ IF (var1 < 25) AND (var2 < 25) THEN
+
+  rev_counter = 32
+ left_pulse = rot2
+ right_pulse = rot1
+
+ FOR azam_counter = 1 TO rev_counter
+PULSOUT 12, right_pulse
+PULSOUT 13, left_pulse
+PAUSE 20
+NEXT
+
+  ENDIF
+  GOTO GetAll
+
 
 OnLeftLED:
      LedLeftPin = 1

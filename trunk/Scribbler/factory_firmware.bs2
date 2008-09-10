@@ -1,14 +1,9 @@
-' Scribbler robot demonstration code
-' Copyright 2005, Element Products, Inc.
-'
 '  {$STAMP BS2}
 '  {$PBASIC 2.5}
-
-
+' Scribbler robot demonstration code
+' Copyright 2005, Element Products, Inc.
 
 #DEFINE Verbose = 0
-
-
 
 ' I/O Declarations
 
