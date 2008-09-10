@@ -1,6 +1,7 @@
 ' {$STAMP BS2}
 ' {$PBASIC 2.5}
 ' Azam Thatte, Georgia Institute of Technology, 04/03/2008
+' Doug Blank, Byrn Mawr College, 2008
 '--------------------------------------------------------------------
 '''''''''''''''''''''''''''''''''''''''
 ' Default Robot Name
@@ -8,11 +9,11 @@
 ' Default Data - application uses
 '   Gets set on reprogram
 '''''''''''''''''''''''''''''''''''''''
-nameData DATA          "Spiritual_Slave         "
+nameData DATA          "Boebot          "
 '                       1234567890123456
 ipreData DATA          127,127,127,127,0,0,0,0
 '
-passData DATA          "Spiritual_Slave         "
+passData DATA          "Boebot          "
 
 echoData DATA          0
 sendData DATA          0
@@ -103,7 +104,7 @@ inCmd    VAR Byte(PACKET_LENGTH)
 quiet    VAR Bit
 sendName VAR Bit
 echoMode VAR Bit
-azam_counter VAR Word
+i_counter VAR Word
 rev_counter VAR Word
 right_pulse VAR Word
 left_pulse VAR Word
@@ -182,7 +183,7 @@ TOP:
 GOTO BEGIN
 
 
-'''''''''''''''''''''''
+'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 ' Subroutines
 '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
@@ -393,7 +394,7 @@ READ ipreData+0, temp
  left_pulse = rot1
  right_pulse = rot2
 
- FOR azam_counter = 1 TO rev_counter
+ FOR i_counter = 1 TO rev_counter
 PULSOUT 12, right_pulse
 PULSOUT 13, left_pulse
 PAUSE 20
@@ -408,7 +409,7 @@ NEXT
  left_pulse = rot0
  right_pulse = rot1
 
- FOR azam_counter = 1 TO rev_counter
+ FOR i_counter = 1 TO rev_counter
 PULSOUT 12, right_pulse
 PULSOUT 13, left_pulse
 PAUSE 20
@@ -446,7 +447,7 @@ NEXT
  left_pulse = rot2
  right_pulse = rot0
 
- FOR azam_counter = 1 TO rev_counter
+ FOR i_counter = 1 TO rev_counter
 PULSOUT 12, right_pulse
 PULSOUT 13, left_pulse
 PAUSE 20
@@ -464,7 +465,7 @@ READ ipreData+1, temp
  left_pulse = rot1
  right_pulse = rot2
 
- FOR azam_counter = 1 TO rev_counter
+ FOR i_counter = 1 TO rev_counter
 PULSOUT 12, right_pulse
 PULSOUT 13, left_pulse
 PAUSE 20
@@ -521,7 +522,7 @@ PAUSE 120
  NEXT
 
 
- FOR azam_counter = 1 TO 15
+ FOR i_counter = 1 TO 15
 FOR rev_counter = 1 TO 10
 PULSOUT 14, 500
 PAUSE 20
@@ -574,7 +575,7 @@ READ ipreData+3, temp
  left_pulse = rot2
  right_pulse = rot1
 
- FOR azam_counter = 1 TO rev_counter
+ FOR i_counter = 1 TO rev_counter
 PULSOUT 12, right_pulse
 PULSOUT 13, left_pulse
 PAUSE 20
@@ -651,5 +652,5 @@ SetEchoMode:
   GOTO GetAll
 
 GetInfo:
-  SEROUT SerialPin, BAUD, ["Robot-Version:2.6.1,Robot:Scribbler,Mode:Serial", LF]
+  SEROUT SerialPin, BAUD, ["Robot-Version:2.6.2,Robot:Boebot,Mode:Serial", LF]
   GOTO TOP
