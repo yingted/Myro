@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="BuildZip" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Import Project="$(MSBuildExtensionsPath)\MSBuildCommunityTasks\MSBuild.Community.Tasks.Targets"/>
+
+<PropertyGroup>
+  <Version>$(BUILD_NUMBER)</Version>
+  <BuildDir>..\bin\</BuildDir>
+</PropertyGroup>
+<!-- Define a group of Test Assemblies -->
+  <ItemGroup>
+      <TestAssembly Include="..\bin\Release\IronEditor.Engine.Tests.dll" />
+  </ItemGroup>
+
+<!-- <ItemGroup>
+    <DefaultExclude Include="**\.svn\**" />
+    <DefaultExclude Include="**\bin\**" />
+    <DefaultExclude Include="**\obj\**" />
+    <DefaultExclude Include="**\Release\**" />
+    <DefaultExclude Include="**\Debug\**" />
+    <DefaultExclude Include="**\Test\**" />
+    <DefaultExclude Include="**\TestResults\**" />
+    <DefaultExclude Include="**\*.user" />
+    <DefaultExclude Include="**\*.suo" />
+    <DefaultExclude Include="**\*.zip" />
+    <DefaultExclude Include="**\*.txt" />
+    <DefaultExclude Include="**\*.resharper.*" />
+  </ItemGroup>-->
+
+  <Target Name="RemoveBuildDir">
+    <RemoveDir Directories="$(BuildDir)\Release" Condition="Exists('$(BuildDir)\Release')" />
+  </Target>
+    
+  <Target Name="UpdateAssemblyInfo">
+    <Message Text="Build Directory is $(BuildDir)" />
+    <Message Text="MSBuildProjectDirectory is $(MSBuildProjectDirectory)" />
+    <AssemblyInfo CodeLanguage="CS"  
+                    OutputFile="$(MSBuildProjectDirectory)\IronEditor.Engine\Properties\AssemblyInfo.cs" 
+                    AssemblyTitle="IronEditor.Engine" 
+                    AssemblyDescription="IronEditor Engine"
+                    AssemblyConfiguration=""
+                    AssemblyCompany="Ben Hall - Blog.BenHall.me.uk"
+                    AssemblyProduct="IronEditor"
+                    AssemblyCopyright="Copyright (c) Ben Hall, 2008"
+                    AssemblyTrademark=""
+                    ComVisible="false"
+                    CLSCompliant="true"
+                    Guid="d038566a-1937-478a-b5c5-b79c4afb253a"
+                    AssemblyVersion="$(Version)"
+                    AssemblyFileVersion="1.0.0.0" />
+
+    <AssemblyInfo CodeLanguage="CS"  
+                    OutputFile="$(MSBuildProjectDirectory)\IronEditor.UI.WinForms\Properties\AssemblyInfo.cs" 
+                    AssemblyTitle="IronEditor.UI.WinForms" 
+                    AssemblyDescription="IronEditor WinForms UI"
+                    AssemblyConfiguration=""
+                    AssemblyCompany="Ben Hall - Blog.BenHall.me.uk"
+                    AssemblyProduct="IronEditor"
+                    AssemblyCopyright="Copyright (c) Ben Hall, 2008"
+                    AssemblyTrademark=""
+                    ComVisible="false"
+                    CLSCompliant="true"
+                    Guid="d038566a-1937-478a-b5c5-b79c4afb253b"
+                    AssemblyVersion="$(Version)"
+                    AssemblyFileVersion="1.0.0.0" />
+  </Target>
+
+  <Target Name="Build" DependsOnTargets="UpdateAssemblyInfo">
+    <MSBuild Projects="IronEditor.sln" Properties="Configuration=Release" />
+  </Target>
+
+  <Target Name="Test" DependsOnTargets="Build">
+      <Message Text="Tests to run"></Message>
+      <NUnit Assemblies="@(TestAssembly)" 
+             ContinueOnError="false" 
+             ToolPath="E:\CCNet\Tools\NUnit\" 
+             DisableShadowCopy="true" 
+             OutputXmlFile="$(Logs)\nunit-results.xml" />
+  </Target>
+  
+  <Target Name="BuildZip"  DependsOnTargets="Test">
+    <ItemGroup>
+        <ZipFiles Include="$(BuildDir)\Release\**\*.*" Exclude="*.zip" />
+    </ItemGroup>
+    <MakeDir Directories="$(BuildDir)\Builds" Condition="!Exists('$(BuildDir)\Builds')" />
+    <Zip Files="@(ZipFiles)"
+         WorkingDirectory="$(BuildDir)\Builds\" 
+         ZipFileName="$(BuildDir)\Builds\IronEditor-$(Version).zip"
+         ZipLevel="9" /> 
+  </Target>
+
+</Project>

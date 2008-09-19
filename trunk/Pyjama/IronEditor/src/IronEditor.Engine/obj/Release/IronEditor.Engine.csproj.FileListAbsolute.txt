@@ -1,0 +1,10 @@
+C:\Users\dblank\Desktop\IronEditor\bin\Release\IronEditor.Engine.dll
+C:\Users\dblank\Desktop\IronEditor\bin\Release\IronEditor.Engine.pdb
+C:\Users\dblank\Desktop\IronEditor\src\IronEditor.Engine\obj\Release\ResolveAssemblyReference.cache
+C:\Users\dblank\Desktop\IronEditor\src\IronEditor.Engine\obj\Release\IronEditor.Engine.dll
+C:\Users\dblank\Desktop\IronEditor\src\IronEditor.Engine\obj\Release\IronEditor.Engine.pdb
+C:\Users\dblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\bin\Release\IronEditor.Engine.dll
+C:\Users\dblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\bin\Release\IronEditor.Engine.pdb
+C:\Users\dblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\src\IronEditor.Engine\obj\Release\ResolveAssemblyReference.cache
+C:\Users\dblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\src\IronEditor.Engine\obj\Release\IronEditor.Engine.dll
+C:\Users\dblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\src\IronEditor.Engine\obj\Release\IronEditor.Engine.pdb

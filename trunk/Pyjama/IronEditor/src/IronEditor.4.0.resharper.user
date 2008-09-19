@@ -1,0 +1,146 @@
+<Configuration>
+  <UnitTestRunner>
+    <CustomStartDirectory>
+    </CustomStartDirectory>
+    <UseShadowCopy>True</UseShadowCopy>
+    <UseCustomFolder>False</UseCustomFolder>
+    <EnableUnitTesting>True</EnableUnitTesting>
+    <Providers />
+  </UnitTestRunner>
+  <RecentFiles>
+    <RecentFiles>
+      <File id="DEC8BF39-2EED-48A3-8220-A06A7331D579/f:LanguageSettingsSerialisationTests.cs" caret="16" scrollPosition="0|0" />
+      <File id="DEC8BF39-2EED-48A3-8220-A06A7331D579/f:LanguageSettingsTests.cs" caret="128" scrollPosition="0|0" />
+      <File id="C098812F-B27C-48A5-8CB6-9D5028F1CFF1/f:BaseForm.cs" caret="0" scrollPosition="0|0" />
+      <File id="C098812F-B27C-48A5-8CB6-9D5028F1CFF1/d:Controls/f:ControlTitle.cs" caret="0" scrollPosition="0|0" />
+      <File id="C098812F-B27C-48A5-8CB6-9D5028F1CFF1/f:ShortcutKeyDispatcher.cs" caret="0" scrollPosition="0|0" />
+      <File id="59E815AB-F475-4AA8-969B-699120FEEEE8/f:DirectoryTreePopulator.cs" caret="16" scrollPosition="0|0" />
+      <File id="59E815AB-F475-4AA8-969B-699120FEEEE8/f:EngineCache.cs" caret="51" scrollPosition="0|0" />
+      <File id="59E815AB-F475-4AA8-969B-699120FEEEE8/f:LanguageSettingsLoader.cs" caret="437" scrollPosition="0|0" />
+      <File id="C098812F-B27C-48A5-8CB6-9D5028F1CFF1/d:Config/f:IronRuby.xml" caret="0" scrollPosition="0|0" />
+      <File id="59E815AB-F475-4AA8-969B-699120FEEEE8/f:DLREngineFactory.cs" caret="1117" scrollPosition="0|21" />
+      <File id="59E815AB-F475-4AA8-969B-699120FEEEE8/f:DLREngine.cs" caret="1548" scrollPosition="0|0" />
+      <File id="C098812F-B27C-48A5-8CB6-9D5028F1CFF1/d:Controls/f:CodeEditorIDETextBox.cs" caret="934" scrollPosition="0|0" />
+      <File id="C098812F-B27C-48A5-8CB6-9D5028F1CFF1/d:Controls/f:IDEInput.cs" caret="270" scrollPosition="0|0" />
+      <File id="C098812F-B27C-48A5-8CB6-9D5028F1CFF1/f:MainFormController.cs" caret="5146" scrollPosition="0|127" />
+      <File id="C098812F-B27C-48A5-8CB6-9D5028F1CFF1/f:IMainForm.cs" caret="511" scrollPosition="0|2" />
+      <File id="59E815AB-F475-4AA8-969B-699120FEEEE8/f:EngineInformation.cs" caret="377" scrollPosition="0|0" />
+      <File id="C098812F-B27C-48A5-8CB6-9D5028F1CFF1/f:UserSettings.cs" caret="375" scrollPosition="0|1" />
+      <File id="C098812F-B27C-48A5-8CB6-9D5028F1CFF1/d:Controls/f:IDETab.cs" caret="342" scrollPosition="0|0" />
+      <File id="59E815AB-F475-4AA8-969B-699120FEEEE8/f:ActiveCodeFile.cs" caret="114" scrollPosition="0|0" />
+      <File id="C098812F-B27C-48A5-8CB6-9D5028F1CFF1/d:Controls/f:FileManager.cs" caret="1037" scrollPosition="0|26" />
+      <File id="C098812F-B27C-48A5-8CB6-9D5028F1CFF1/f:MainForm.Designer.cs" caret="7523" scrollPosition="0|108" />
+      <File id="C098812F-B27C-48A5-8CB6-9D5028F1CFF1/f:Program.cs" caret="423" scrollPosition="0|2" />
+      <File id="C098812F-B27C-48A5-8CB6-9D5028F1CFF1/f:MainForm.cs" caret="7203" scrollPosition="0|207" />
+      <File id="DEC8BF39-2EED-48A3-8220-A06A7331D579/f:ApplicationOptionsTests.cs" caret="299" scrollPosition="0|0" />
+      <File id="C098812F-B27C-48A5-8CB6-9D5028F1CFF1/f:ApplicationOptions.cs" caret="1175" scrollPosition="0|11" />
+      <File id="C098812F-B27C-48A5-8CB6-9D5028F1CFF1/d:Dialogs/d:OptionFrames/f:FontControl.Designer.cs" caret="193" scrollPosition="0|0" />
+      <File id="C098812F-B27C-48A5-8CB6-9D5028F1CFF1/d:Dialogs/d:OptionFrames/f:FontControl.cs" caret="1567" scrollPosition="0|32" />
+      <File id="C098812F-B27C-48A5-8CB6-9D5028F1CFF1/d:Dialogs/f:OptionsDialog.cs" caret="885" scrollPosition="0|8" />
+      <File id="C098812F-B27C-48A5-8CB6-9D5028F1CFF1/f:BaseDialog.Designer.cs" caret="731" scrollPosition="0|15" />
+      <File id="C098812F-B27C-48A5-8CB6-9D5028F1CFF1/f:BaseDialog.cs" caret="62" scrollPosition="0|0" />
+    </RecentFiles>
+    <RecentEdits>
+      <File id="DEC8BF39-2EED-48A3-8220-A06A7331D579/f:ApplicationOptionsTests.cs" caret="0" scrollPosition="0|0" />
+      <File id="C098812F-B27C-48A5-8CB6-9D5028F1CFF1/f:ApplicationOptions.cs" caret="711" scrollPosition="0|0" />
+      <File id="C098812F-B27C-48A5-8CB6-9D5028F1CFF1/f:UserSettings.cs" caret="263" scrollPosition="0|1" />
+      <File id="C098812F-B27C-48A5-8CB6-9D5028F1CFF1/f:UserSettings.cs" caret="375" scrollPosition="0|1" />
+      <File id="C098812F-B27C-48A5-8CB6-9D5028F1CFF1/f:MainForm.cs" caret="7555" scrollPosition="0|224" />
+      <File id="DEC8BF39-2EED-48A3-8220-A06A7331D579/f:ApplicationOptionsTests.cs" caret="1076" scrollPosition="0|2" />
+      <File id="DEC8BF39-2EED-48A3-8220-A06A7331D579/f:ApplicationOptionsTests.cs" caret="1076" scrollPosition="0|8" />
+      <File id="C098812F-B27C-48A5-8CB6-9D5028F1CFF1/f:MainForm.cs" caret="870" scrollPosition="0|8" />
+      <File id="C098812F-B27C-48A5-8CB6-9D5028F1CFF1/f:MainForm.cs" caret="7341" scrollPosition="0|216" />
+      <File id="C098812F-B27C-48A5-8CB6-9D5028F1CFF1/f:MainForm.cs" caret="6927" scrollPosition="0|213" />
+      <File id="C098812F-B27C-48A5-8CB6-9D5028F1CFF1/f:MainForm.cs" caret="7203" scrollPosition="0|213" />
+      <File id="C098812F-B27C-48A5-8CB6-9D5028F1CFF1/d:Dialogs/f:OptionsDialog.cs" caret="435" scrollPosition="0|11" />
+      <File id="C098812F-B27C-48A5-8CB6-9D5028F1CFF1/d:Dialogs/f:OptionsDialog.cs" caret="330" scrollPosition="0|11" />
+      <File id="C098812F-B27C-48A5-8CB6-9D5028F1CFF1/d:Dialogs/f:OptionsDialog.cs" caret="238" scrollPosition="0|8" />
+      <File id="C098812F-B27C-48A5-8CB6-9D5028F1CFF1/d:Dialogs/d:OptionFrames/f:FontControl.cs" caret="1406" scrollPosition="0|24" />
+      <File id="DEC8BF39-2EED-48A3-8220-A06A7331D579/f:ApplicationOptionsTests.cs" caret="757" scrollPosition="0|0" />
+      <File id="C098812F-B27C-48A5-8CB6-9D5028F1CFF1/f:ApplicationOptions.cs" caret="1715" scrollPosition="0|15" />
+      <File id="C098812F-B27C-48A5-8CB6-9D5028F1CFF1/f:ApplicationOptions.cs" caret="1453" scrollPosition="0|15" />
+      <File id="C098812F-B27C-48A5-8CB6-9D5028F1CFF1/f:ApplicationOptions.cs" caret="1900" scrollPosition="0|15" />
+      <File id="C098812F-B27C-48A5-8CB6-9D5028F1CFF1/d:Dialogs/d:OptionFrames/f:FontControl.cs" caret="1454" scrollPosition="0|23" />
+      <File id="C098812F-B27C-48A5-8CB6-9D5028F1CFF1/d:Dialogs/f:OptionsDialog.cs" caret="890" scrollPosition="0|14" />
+      <File id="C098812F-B27C-48A5-8CB6-9D5028F1CFF1/d:Dialogs/d:OptionFrames/f:FontControl.cs" caret="614" scrollPosition="0|6" />
+      <File id="C098812F-B27C-48A5-8CB6-9D5028F1CFF1/d:Dialogs/d:OptionFrames/f:FontControl.cs" caret="561" scrollPosition="0|12" />
+      <File id="C098812F-B27C-48A5-8CB6-9D5028F1CFF1/d:Dialogs/f:OptionsDialog.cs" caret="638" scrollPosition="0|14" />
+      <File id="C098812F-B27C-48A5-8CB6-9D5028F1CFF1/f:ApplicationOptions.cs" caret="1175" scrollPosition="0|14" />
+      <File id="C098812F-B27C-48A5-8CB6-9D5028F1CFF1/d:Dialogs/d:OptionFrames/f:FontControl.cs" caret="395" scrollPosition="0|9" />
+      <File id="C098812F-B27C-48A5-8CB6-9D5028F1CFF1/d:Dialogs/d:OptionFrames/f:FontControl.cs" caret="1333" scrollPosition="0|21" />
+      <File id="C098812F-B27C-48A5-8CB6-9D5028F1CFF1/d:Dialogs/d:OptionFrames/f:FontControl.cs" caret="1458" scrollPosition="0|29" />
+      <File id="C098812F-B27C-48A5-8CB6-9D5028F1CFF1/d:Dialogs/d:OptionFrames/f:FontControl.cs" caret="1810" scrollPosition="0|35" />
+      <File id="C098812F-B27C-48A5-8CB6-9D5028F1CFF1/f:BaseDialog.cs" caret="187" scrollPosition="0|0" />
+    </RecentEdits>
+  </RecentFiles>
+  <SettingsComponent>
+    <string />
+    <integer />
+    <boolean>
+      <setting name="livetemplates.csharp.usevar">True</setting>
+      <setting name="SolutionAnalysisEnabled">False</setting>
+      <setting name="UseSolutionBuilder">False</setting>
+    </boolean>
+  </SettingsComponent>
+  <NAntValidationSettings>
+    <NAntPath value="" />
+  </NAntValidationSettings>
+  <CompletionStatisticsManager>
+    <ItemStatistics item="Default">
+      <Item value="Unsaved" priority="0" />
+      <Item value="Text" priority="1" />
+      <Item value="IDETextBox" priority="0" />
+      <Item value="TextChanged" priority="1" />
+      <Item value="Input" priority="0" />
+      <Item value="endsWith" priority="0" />
+      <Item value="FileName" priority="0" />
+      <Item value="UpdateFileName" priority="0" />
+      <Item value="IO" priority="1" />
+      <Item value="IsolatedStorage" priority="2" />
+      <Item value="ApplicationOptions" priority="3" />
+      <Item value="SaveUserSettings" priority="0" />
+      <Item value="UIFont" priority="3" />
+      <Item value="UserSettings" priority="3" />
+      <Item value="settings" priority="3" />
+      <Item value="IsTrue" priority="0" />
+      <Item value="Exists" priority="0" />
+      <Item value="GetFileNames" priority="0" />
+      <Item value="Length" priority="0" />
+      <Item value="Font" priority="1" />
+      <Item value="GenericSansSerif" priority="0" />
+      <Item value="serializer" priority="0" />
+      <Item value="XmlSerializer" priority="0" />
+      <Item value="Serialize" priority="0" />
+      <Item value="isoStream" priority="2" />
+      <Item value="FontName" priority="1" />
+      <Item value="FontSize" priority="1" />
+      <Item value="GetName" priority="0" />
+      <Item value="Name" priority="0" />
+      <Item value="GetUserStoreForApplication" priority="2" />
+      <Item value="GetUserStoreForAssembly" priority="0" />
+      <Item value="GetStore" priority="1" />
+      <Item value="IsolatedStorageScope" priority="1" />
+      <Item value="Assembly" priority="0" />
+      <Item value="GetUserStoreForDomain" priority="2" />
+      <Item value="Domain" priority="0" />
+      <Item value="AreEqual" priority="0" />
+      <Item value="Deserialize" priority="0" />
+      <Item value="Read" priority="1" />
+      <Item value="ApplyUserSettings" priority="0" />
+      <Item value="LoadUserSettings" priority="2" />
+      <Item value="fontFamily" priority="0" />
+      <Item value="fontControl" priority="1" />
+      <Item value="SetFont" priority="0" />
+      <Item value="SetSize" priority="0" />
+      <Item value="SelectedItem" priority="0" />
+      <Item value="SelectedText" priority="0" />
+      <Item value="ToString" priority="2" />
+      <Item value="Close" priority="2" />
+      <Item value="Select" priority="1" />
+      <Item value="Items" priority="2" />
+      <Item value="fontSize" priority="0" />
+      <Item value="Count" priority="0" />
+      <Item value="SelectedIndex" priority="0" />
+    </ItemStatistics>
+  </CompletionStatisticsManager>
+</Configuration>
