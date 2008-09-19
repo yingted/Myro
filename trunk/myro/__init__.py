@@ -847,7 +847,7 @@ def turn(direction, amount = .8, seconds=None):
         raise AttributeError, "need to initialize robot"
 def turnLeft(speed=1, seconds=None):
     if myro.globvars.robot:
-        return myro.globvars.robot.turnLeft(speed=1, seconds)
+        return myro.globvars.robot.turnLeft(speed, seconds)
     else:
         raise AttributeError, "need to initialize robot"
 def turnRight(speed=1, seconds=None):
