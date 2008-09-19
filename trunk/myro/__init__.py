@@ -1297,7 +1297,18 @@ def repaint(picture = None, name="default"):
     myro.globvars.images[name].img = photoimage
     # refresh the canvas:
     myro.globvars.images[name].refresh(myro.globvars.windows[name])
-        
+
+def getWindow(name="default"):
+    return myro.globvars.windows[name]
+
+def draw(obj, win=None):
+    if win == None:
+        win = myro.globvars.windows["default"]
+    obj.draw(win)
+
+def undraw(obj):
+    obj.undraw()
+
 def getWidth(picture):
     return picture.width
 

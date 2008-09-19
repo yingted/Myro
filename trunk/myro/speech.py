@@ -129,6 +129,9 @@ def playSpeech(filename):
         myro.globvars.tts.playSpeech(filename)
     else:
         print "Text-to-speech is not loaded"
+def playSound(filename):
+    myro.globvars.tts.playSpeech(filename)
+
 def saveSpeech(message, filename):
     if myro.globvars.tts != None:
         myro.globvars.tts.saveSpeech(message, filename)
