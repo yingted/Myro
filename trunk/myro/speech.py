@@ -170,9 +170,9 @@ On the way, a "animal" stopped her to ask her for the "noun2".
 But, the "animal" did not want the "noun2", instead, the "animal" "verb3_past" on "name".
 Then "name" "verb4_past" the "animal"'s "part_of_body" and ran to "verb5_present" her grandmother."""
     if askQuestion("Which story?", ["The Race", "Red Riding Hood"]) == "The Race":
-        story = makeStory("The Race", raceStory)
+        story = makeStory(raceStory)
     else:
-        story = makeStory("Red Riding Hood", redStory)
+        story = makeStory(redStory)
     speak(story, async=1)
     return story
 

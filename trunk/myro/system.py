@@ -1,5 +1,5 @@
 import zipfile, tarfile, urllib
-import os, string, sys, time
+import os, string, sys, time, tempfile
 try:
     import serial
 except:
@@ -36,7 +36,7 @@ def url_retrieve(url, tmp_dir = None):
         elif "TEMP" in os.environ:
             tmp_dir = os.environ["TEMP"]
         else:
-            tmp_dir = "."
+            tmp_dir = tempfile.gettempdir()
     # get url into tmp_file
     path, file = url.rsplit("/", 1)
     tmp_file = tmp_dir + os.sep + file

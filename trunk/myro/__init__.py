@@ -6,7 +6,7 @@ Distributed under a Shared Source License
 """
 
 __REVISION__ = "$Revision$"
-__VERSION__  = "2.8.2"
+__VERSION__  = "2.8.9"
 __AUTHOR__   = "Doug Blank <dblank@cs.brynmawr.edu>"
 
 import sys, atexit, time, random, pickle, threading, os, types, copy
@@ -169,6 +169,12 @@ def pickOne(*args):
     else:
         return args[random.randrange(len(args))]
 
+def pickOneInRange(start, stop):
+    """
+    Randomly pick one of a list, or one between [0, arg).
+    """
+    return random.randrange(start, stop)
+
 def heads(): return flipCoin() == "heads"
 def tails(): return flipCoin() == "tails"
 
@@ -184,7 +190,7 @@ def randomNumber():
     """
     return random.random()
 
-def gamepad(*phrases):
+def gamepad(*phrases, **kwargs):
     """
     Run the gamepad controller.
     """
@@ -201,73 +207,100 @@ def gamepad(*phrases):
                    "Ouch! I'm a sensitive robot.", 
                    "I'm hungry. Do you have any batteries?", 
                    "Good bye, for now."]
+    elif type(phrases[0]) == type(gamepad):
+        print "Gamepad is now running..."
+        while True:
+            retval = getGamepad()
+            button = retval["button"]
+            for i in range(len(phrases)):
+                if button[i]:
+                    retval = phrases[i]()
+                    if retval == 'exit':
+                        break
+        return
     print "        Pad   Action"
     print "     ------   -------"
     print " Left/Right   turnLeft() and turnRight()"
     print "    Up/Down   forward() and backward()"
     print ""
-    print "     Button   Action"
-    print "     ------   -------"
-    print "          1   takePicture()"
-    print "          2   beep(.25, 523)"  
-    print "          3   beep(.25, 587)"  
-    print "          4   beep(.25, 659)"  
-    print "          5   speak('%s')" % phrases[0]
-    print "          6   speak('%s')" % phrases[1]
-    print "          7   speak('%s')" % phrases[2]
-    print "          8   speak('%s') and stop()" % phrases[3]
-    print ""
-    print "Gamepad is now running... Press button 8 to stop."
+    if len(button) > 0:
+        print "     Button   Action"
+        print "     ------   -------"
+        if len(button) > 0:
+            print "          1   stop()"
+        if len(button) > 1:
+            print "          2   takePicture()"
+        if len(button) > 2:
+            print "          3   beep(.25, 523)"  
+        if len(button) > 3:
+            print "          4   beep(.25, 587)"  
+        if len(button) > 4:
+            print "          5   beep(.25, 659)"  
+        if len(button) > 5:
+            print "          6   speak('%s')" % phrases[0]
+        if len(button) > 6:
+            print "          7   speak('%s')" % phrases[1]
+        if len(button) > 7:
+            print "          8   speak('%s')" % phrases[2]
+        print ""
+    print "Gamepad is now running... Press button 1 to stop."
     lastMove = [0, 0]
     done = True
+    retval = getGamepadNow()
+    button = retval["button"]
+    length = len(button)
+    tryToMove = True
     while True:
         retval = getGamepadNow()
         button = retval["button"]
         axis = retval["axis"]
-        if button[0]:
-            speak("Taking a picture. Say cheese!", async=1)
+        freqs = [None, None]
+        if length > 0 and button[0]:
+            stop()
+            break
+        if length > 1 and button[1]:
+            speak("Say cheese!", async=1)
             pic = takePicture()
             show(pic)
-        freqs = [None, None]
-        if button[1]:
+        if length > 2 and button[2]:
             freqs[0] = 523
-        if button[2]:
+        if length > 3 and button[3]:
             if freqs[0] == None:
                 freqs[0] = 587
             else:
                 freqs[1] = 587
-        if button[3]:
+        if length > 4 and button[4]:
             if freqs[0] == None:
                 freqs[0] = 659
             else:
                 freqs[1] = 659
-        if button[4]:
+        ## speak
+        if length > 5 and button[5]:
             if done:
                 speak(phrases[0], async=1)
                 done = False
-        elif button[5]:
+        elif length > 6 and button[6]:
             if done:
                 speak(phrases[1], async=1)
                 done = False
-        elif button[6]:
+        elif length > 7 and button[7]:
             if done:
                 speak(phrases[2], async=1)
                 done = False
-        elif button[7]:
-            speak(phrases[3], async=1)
-            stop()
-            break
         else:
             done = True
-        if (axis[0], axis[1]) != lastMove:
-            move(-axis[1], -axis[0])
-            lastMove = axis[0], axis[1]
+        if tryToMove and (axis[0], axis[1]) != lastMove:
+            try:
+                move(-axis[1], -axis[0])
+                lastMove = axis[0], axis[1]
+            except:
+                tryToMove = False
         if freqs != [None, None]:
             try:
                 beep(.25, *freqs)
             except:
                 computer.beep(.25, *freqs)
-
+                
 def getGamepad(*what, **kwargs):
     """
     Return readings from a gamepad/joystick when there is a change. 
@@ -610,14 +643,14 @@ class Robot(object):
     def setStartSong(self, songName):
         return self.set("startsong", songName)
 
-    def forward(self, amount, interval=None):
-        self.move(amount, 0)
+    def forward(self, speed=1, interval=None):
+        self.move(speed, 0)
         if interval != None:
             time.sleep(interval)
             self.stop()
 
-    def backward(self, amount, interval=None):
-        self.move(-amount, 0)
+    def backward(self, speed=1, interval=None):
+        self.move(-speed, 0)
         if interval != None:
             time.sleep(interval)
             self.stop()
@@ -640,15 +673,15 @@ class Robot(object):
             self.stop()
         return retval
 
-    def turnLeft(self, amount, interval=None):
-        retval = self.move(0, amount)
+    def turnLeft(self, speed=1, interval=None):
+        retval = self.move(0, speed)
         if interval != None:
             time.sleep(interval)
             self.stop()
         return retval
     
-    def turnRight(self, amount, interval=None):
-        retval = self.move(0, -amount)
+    def turnRight(self, speed=1, interval=None):
+        retval = self.move(0, -speed)
         if interval != None:
             time.sleep(interval)
             self.stop()
@@ -797,14 +830,14 @@ def move(translate, rotate):
         return myro.globvars.robot.move(translate, rotate)
     else:
         raise AttributeError, "need to initialize robot"
-def forward(amount, seconds=None):
+def forward(speed=1, seconds=None):
     if myro.globvars.robot:
-        return myro.globvars.robot.forward(amount, seconds)
+        return myro.globvars.robot.forward(speed, seconds)
     else:
         raise AttributeError, "need to initialize robot"
-def backward(amount, seconds=None):
+def backward(speed=1, seconds=None):
     if myro.globvars.robot:
-        return myro.globvars.robot.backward(amount, seconds)
+        return myro.globvars.robot.backward(speed, seconds)
     else:
         raise AttributeError, "need to initialize robot"
 def turn(direction, amount = .8, seconds=None):
@@ -812,14 +845,14 @@ def turn(direction, amount = .8, seconds=None):
         return myro.globvars.robot.turn(direction, amount, seconds)
     else:
         raise AttributeError, "need to initialize robot"
-def turnLeft(amount, seconds=None):
+def turnLeft(speed=1, seconds=None):
     if myro.globvars.robot:
-        return myro.globvars.robot.turnLeft(amount, seconds)
+        return myro.globvars.robot.turnLeft(speed=1, seconds)
     else:
         raise AttributeError, "need to initialize robot"
-def turnRight(amount, seconds=None):
+def turnRight(speed=1, seconds=None):
     if myro.globvars.robot:
-        return myro.globvars.robot.turnRight(amount, seconds)
+        return myro.globvars.robot.turnRight(speed, seconds)
     else:
         raise AttributeError, "need to initialize robot"
 def stop():

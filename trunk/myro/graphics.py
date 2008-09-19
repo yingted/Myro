@@ -150,7 +150,7 @@ try:
      #_tkExec(tkSnack.initializeSnack, myro.globvars.gui)
 except:
      tkSnack = None
-     print >> sys.stderr, "WARNING: sound did not load; need tkSnack?"
+#     print >> sys.stderr, "WARNING: sound did not load; need tkSnack?"
 
 
 ##########################################################################
@@ -376,8 +376,8 @@ class GraphWin(tk.Canvas):
         master.resizable(0,0)
         self.foreground = "black"
         self.items = []
-        self.mouseX = None
-        self.mouseY = None
+        self.mouseX, self.mouseY = (None, None)
+        self.lastX, self.lastY = (0, 0)
         self.bind("<Button-1>", self._onClick)
         self.bind("<ButtonRelease-1>", self._onRelease)
         self.height = height
@@ -518,6 +518,9 @@ class GraphWin(tk.Canvas):
         
     def setMouseHandler(self, func):
         self._mouseCallback = func
+
+    def setTimer(self, msec, func, *args):
+         _tkCall(self.after, msec, func, *args)
 
     def setMouseReleaseHandler(self, func):
         self._mouseCallbackRelease = func
