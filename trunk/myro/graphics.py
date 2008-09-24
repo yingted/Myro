@@ -464,6 +464,9 @@ class GraphWin(tk.Canvas):
         #self.update_idletasks()
         self.__checkOpen()
         _tkCall(self.update_idletasks)
+
+    def redraw(self):
+         _tkCall(self.update)
         
     def getMouse(self):
         """Wait for mouse click and return Point object representing
@@ -1925,6 +1928,37 @@ class Calibrate(Tkinter.Toplevel):
         trans = speed
         rot = 0.0
         return (trans, rot)
+
+def rgb2hsv(red, green, blue):
+     """Converts red, green, and blue to hue, saturation, and brightness """
+     return colorsys.rgb_to_hsv(red, green, blue)
+
+def hls2rgb(h, l, s):
+     return colorsys.hls_to_rgb(h, l, s)
+
+def hsv2rgb(h, s, v):
+     return colorsys.hsv_to_rgb(h, s, v)
+
+def rgb2hls(red, green, blue):
+     return colorsys.rgb_to_hls(red, green, blue)
+
+def rgb2yiq(red, green, blue):
+     return colorsys.rgb_to_yiq(red, green, blue)
+
+def yiq2rgb(y, i, q):
+     return colorsys.yiq_to_rgb(y, i, q)
+
+def yuv2rgb(Y, U, V):
+    R = int(Y + (1.4075 * (V - 128)))
+    G = int(Y - (0.3455 * (U - 128)) - (0.7169 * (V - 128)))
+    B = int(Y + (1.7790 * (U - 128)))
+    return [max(min(v,255),0) for v in (R, G, B)]
+
+def rgb2yuv(R, G, B):
+    Y = int(0.299 * R + 0.587 * G + 0.114 * B)
+    U = int(-0.14713 * R - 0.28886 * G + 0.436 * B + 128)
+    V = int( 0.615 * R - 0.51499* G - 0.10001 * B + 128)
+    return [max(min(v,255),0) for v in (Y, U, V)]
 
 # Kill the tk thread at exit
 if myro.globvars.runtkthread:

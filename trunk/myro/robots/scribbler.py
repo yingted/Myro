@@ -15,7 +15,7 @@ try:
 except:
     print "WARNING: pyserial not loaded: scribbler won't work!"
 from myro import Robot, ask
-from myro.graphics import _askQuestion, Picture
+from myro.graphics import _askQuestion, Picture, rgb2yuv
 import myro.globvars
 import cStringIO
 # needed for new camera dongle
@@ -1268,6 +1268,11 @@ class Scribbler(Robot):
         
     ########################################################## End Dongle Commands
 
+    def reset(self):
+        for p in [127, 127, 127, 127, 0, 0, 0, 0]:
+            self.setSingleData(p, 0)
+        self.setName("Scribby")
+
     def setData(self, position, value):
         data = self._get(Scribbler.GET_DATA, 8)
         data[position] = value
@@ -1750,22 +1755,4 @@ def quadrupleSize(line, width):
 def set_ir_power(ser, power):
     ser.write(chr(Scribbler.SET_DONGLE_IR))
     ser.write(chr(power))
-
-def yuv2rgb(Y, U, V):
-    R = int(Y + (1.4075 * (V - 128)))
-    G = int(Y - (0.3455 * (U - 128)) - (0.7169 * (V - 128)))
-    B = int(Y + (1.7790 * (U - 128)))
-    return [max(min(v,255),0) for v in (R, G, B)]
-
-def rgb2yuv(R, G, B):
-    Y = int(0.299 * R + 0.587 * G + 0.114 * B)
-    U = int(-0.14713 * R - 0.28886 * G + 0.436 * B + 128)
-    V = int( 0.615 * R - 0.51499* G - 0.10001 * B + 128)
-    return [max(min(v,255),0) for v in (Y, U, V)]
-
-#def rgb2yuv(R, G, B):
-#    Y = int(0.299 * R + 0.587 * G + 0.114 * B)
-#    U = int(-0.169 * R - 0.332 * G + 0.500 * B + 128)
-#    V = int( 0.500 * R - 0.419 * G - 0.0813 * B + 128)
-#    return [max(min(v,255),0) for v in (Y, U, V)]
 
