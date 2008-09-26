@@ -10,7 +10,7 @@ __VERSION__  = "2.8.9"
 __AUTHOR__   = "Doug Blank <dblank@cs.brynmawr.edu>"
 
 import sys, atexit, time, random, pickle, threading, os, types, copy
-import StringIO, traceback
+import StringIO, traceback, urllib
 import myro.globvars
 from myro.media import *
 from myro.speech import *
@@ -1179,6 +1179,7 @@ def makePicture(*args):
     makePicture() - makes a 0x0 image
     makePicture(width, height)
     makePicture("filename")
+    makePicture("http://image")
     makePicture(width, height, data)
     makePicture(width, height, data, "mode")
     """
@@ -1187,6 +1188,8 @@ def makePicture(*args):
     elif len(args) == 1:
         filename = args[0]
         retval = Picture()
+        if filename.startswith("http://"):
+            filename, message = urllib.urlretrieve(filename)
         retval.load(filename)
     elif len(args) == 2:
         x = args[0]
