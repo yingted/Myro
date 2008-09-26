@@ -6,11 +6,11 @@ Distributed under a Shared Source License
 """
 
 __REVISION__ = "$Revision$"
-__VERSION__  = "2.8.9"
+__VERSION__  = "2.8.10"
 __AUTHOR__   = "Doug Blank <dblank@cs.brynmawr.edu>"
 
 import sys, atexit, time, random, pickle, threading, os, types, copy
-import StringIO, traceback, urllib
+import StringIO, traceback, urllib, glob
 import myro.globvars
 from myro.media import *
 from myro.speech import *
@@ -1435,6 +1435,12 @@ def beepScale(duration, start, stop, factor=2):
     while hz <= stop:
         computer.beep(duration, hz)
         hz *= factor
+
+def getFilenames(pattern):
+    """ Get a list of filenames via a pattern, like "z??.jpg"."""
+    filenames = glob.glob(pattern)
+    filenames.sort() # get in order, back to front
+    return filenames
 
 ############################
 

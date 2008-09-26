@@ -11,7 +11,9 @@ ctime = os.path.getctime("../../html/myro/myro-%s.zip" % upgrade_against)
 
 stime = datetime.date.fromtimestamp(ctime)
 
-pipe = os.popen("""svn diff -r {%s}:HEAD --summarize | grep "myro/" | cut -c 8- """ % stime)
+print """svn diff -r {%s}:HEAD --summarize | grep " myro/" | cut -c 8- """ % stime
+
+pipe = os.popen("""svn diff -r {%s}:HEAD --summarize | grep " myro/" | cut -c 8- """ % stime)
 
 manifest = {}
 for line in pipe:
