@@ -10,12 +10,12 @@ namespace IronEditor.UI.WinForms
     {
         public IMainForm MainForm { get; set; }
         List<LanguageSettings> languages;
-        private EngineCache EngineCache;
+        //private EngineCache EngineCache;
 
         public MainFormController(IMainForm mainForm)
         {
             MainForm = mainForm;
-            EngineCache = new EngineCache();
+            //EngineCache = new EngineCache();
 
             LoadSettings();
         }
@@ -47,11 +47,12 @@ namespace IronEditor.UI.WinForms
 
         internal void Execute()
         {
-            IEngine engine = GetEngineFromCache();
+            //IEngine engine = GetEngineFromCache();
 
-            engine.ExecuteStatement(MainForm.GetCodeBlock().GetCodeToExecute());
+            //engine.ExecuteStatement(MainForm.GetCodeBlock().GetCodeToExecute());
         }
 
+        /*
         private IEngine GetEngineFromCache()
         {
             string languageExtension = MainForm.GetCurrentActiveFile().FileExtension;
@@ -59,6 +60,7 @@ namespace IronEditor.UI.WinForms
 
             return EngineCache.GetEngine(setting, MainForm.GetOutputStream());
         }
+        */
 
         public List<LanguageSettings> GetLanguages()
         {
@@ -109,7 +111,7 @@ namespace IronEditor.UI.WinForms
                 if (newProjectDialog.ProjectType == "Project")
                 {
                     Clear();
-                    EngineCache.AppendPathToEngines(newProjectDialog.ProjectPath);
+                    //EngineCache.AppendPathToEngines(newProjectDialog.ProjectPath);
                     MainForm.OpenProject(newProjectDialog.ProjectPath);
                 }
                 else
@@ -173,7 +175,7 @@ namespace IronEditor.UI.WinForms
         private string GetSaveLocation()
         {
             SaveFileDialog saveFileDialog = new SaveFileDialog();
-            saveFileDialog.Filter = GetEngineFromCache().GetSaveFilter();
+            //saveFileDialog.Filter = GetEngineFromCache().GetSaveFilter();
             if (saveFileDialog.ShowDialog() == DialogResult.OK)
                 return saveFileDialog.FileName;
 
@@ -197,7 +199,7 @@ namespace IronEditor.UI.WinForms
             {
                 Clear();
                 MainForm.OpenProject(folderBrowserDialog.SelectedPath);
-                EngineCache.AppendPathToEngines(folderBrowserDialog.SelectedPath);
+                //EngineCache.AppendPathToEngines(folderBrowserDialog.SelectedPath);
             }
         }
 
@@ -215,8 +217,8 @@ namespace IronEditor.UI.WinForms
                 string languageExtension = MainForm.GetCurrentActiveFile().FileExtension;
                 LanguageSettings setting = FindLanguageByExtension(languageExtension);
 
-                IEngine engine = EngineCache.GetEngine(setting, MainForm.GetOutputStream());
-                engine.LaunchConsole();
+                //IEngine engine = EngineCache.GetEngine(setting, MainForm.GetOutputStream());
+                //engine.LaunchConsole();
             }
         }
 
@@ -227,8 +229,9 @@ namespace IronEditor.UI.WinForms
                 string languageExtension = MainForm.GetCurrentActiveFile().FileExtension;
                 LanguageSettings setting = FindLanguageByExtension(languageExtension);
 
-                IEngine engine = EngineCache.GetEngine(setting, MainForm.GetOutputStream());
-                return engine.CanExecuteConsole;
+                //IEngine engine = EngineCache.GetEngine(setting, MainForm.GetOutputStream());
+                //return engine.CanExecuteConsole;
+                return false;
             }
 
             return false;

@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{C098812F-B27C-48A5-8CB6-9D5028F1CFF1}</ProjectGuid>
     <OutputType>WinExe</OutputType>
@@ -38,6 +38,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ApplicationInformation.cs" />
     <Compile Include="ApplicationOptions.cs" />
     <Compile Include="BaseDialog.cs">
       <SubType>Form</SubType>
@@ -51,6 +52,7 @@
     <Compile Include="BaseForm.Designer.cs">
       <DependentUpon>BaseForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="ActiveCodeFile.cs" />
     <Compile Include="CodeBlock.cs" />
     <Compile Include="Controls\FileManager.cs">
       <SubType>UserControl</SubType>
@@ -108,6 +110,7 @@
     </Compile>
     <Compile Include="IMainForm.cs" />
     <Compile Include="LanguageNotFoundException.cs" />
+    <Compile Include="LanguageSettings.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -148,24 +151,6 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
-    <Content Include="SyntaxFiles\AutoIt.syn">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SyntaxFiles\CSharp.syn">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SyntaxFiles\IronPython.syn">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SyntaxFiles\SmallTalk.syn">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SyntaxFiles\Text.syn">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SyntaxFiles\VBNET.syn">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Settings.settings</DependentUpon>
@@ -174,12 +159,6 @@
     <Compile Include="ShortcutKeyDispatcher.cs" />
     <Compile Include="TextBoxWriter.cs" />
     <Compile Include="UserSettings.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\IronEditor.Engine\IronEditor.Engine.csproj">
-      <Project>{59E815AB-F475-4AA8-969B-699120FEEEE8}</Project>
-      <Name>IronEditor.Engine</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Dialogs\AboutDialog.resx">

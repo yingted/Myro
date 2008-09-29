@@ -82,3 +82,38 @@ C:\Users\dblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\src\IronEditor.UI.WinFo
 C:\Users\dblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\src\IronEditor.UI.WinForms\obj\Debug\IronEditor.UI.WinForms.csproj.GenerateResource.Cache
 C:\Users\dblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\src\IronEditor.UI.WinForms\obj\Debug\IronEditor.UI.WinForms.exe
 C:\Users\dblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\src\IronEditor.UI.WinForms\obj\Debug\IronEditor.UI.WinForms.pdb
+C:\Documents and Settings\dsblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\bin\Debug\IronEditor.UI.WinForms.exe.config
+C:\Documents and Settings\dsblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\src\IronEditor.UI.WinForms\obj\Debug\IronEditor.UI.WinForms.exe
+C:\Documents and Settings\dsblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\src\IronEditor.UI.WinForms\obj\Debug\IronEditor.UI.WinForms.pdb
+C:\Documents and Settings\dsblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\bin\Debug\Config\CSharp.xml
+C:\Documents and Settings\dsblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\bin\Debug\Config\IronPython.xml
+C:\Documents and Settings\dsblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\bin\Debug\Config\IronRuby.xml
+C:\Documents and Settings\dsblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\bin\Debug\LanguageBinaries\IronPython\ipy.exe
+C:\Documents and Settings\dsblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\bin\Debug\LanguageBinaries\IronPython\IronPython.dll
+C:\Documents and Settings\dsblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\bin\Debug\LanguageBinaries\IronPython\IronPython.Modules.dll
+C:\Documents and Settings\dsblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\bin\Debug\LanguageBinaries\IronRuby\ir.exe
+C:\Documents and Settings\dsblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\bin\Debug\LanguageBinaries\IronRuby\IronRuby.dll
+C:\Documents and Settings\dsblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\bin\Debug\LanguageBinaries\IronRuby\IronRuby.Libraries.dll
+C:\Documents and Settings\dsblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\bin\Debug\Resources\Folder_Closed.png
+C:\Documents and Settings\dsblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\bin\Debug\Resources\Folder_Open.png
+C:\Documents and Settings\dsblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\bin\Debug\Resources\Generic_Document.png
+C:\Documents and Settings\dsblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\bin\Debug\Resources\FormRunHS.png
+C:\Documents and Settings\dsblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\bin\Debug\Resources\DeleteHS.png
+C:\Documents and Settings\dsblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\bin\Debug\Resources\NewDocumentHS.png
+C:\Documents and Settings\dsblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\bin\Debug\Resources\PropertiesHS.png
+C:\Documents and Settings\dsblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\bin\Debug\IronEditor.UI.WinForms.exe
+C:\Documents and Settings\dsblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\bin\Debug\IronEditor.UI.WinForms.pdb
+C:\Documents and Settings\dsblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\src\IronEditor.UI.WinForms\obj\Debug\ResolveAssemblyReference.cache
+C:\Documents and Settings\dsblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\src\IronEditor.UI.WinForms\obj\Debug\IronEditor.UI.WinForms.BaseForm.resources
+C:\Documents and Settings\dsblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\src\IronEditor.UI.WinForms\obj\Debug\IronEditor.UI.WinForms.Controls.FileManager.resources
+C:\Documents and Settings\dsblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\src\IronEditor.UI.WinForms\obj\Debug\IronEditor.UI.WinForms.Controls.OutputWindow.resources
+C:\Documents and Settings\dsblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\src\IronEditor.UI.WinForms\obj\Debug\IronEditor.UI.WinForms.mainForm.resources
+C:\Documents and Settings\dsblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\src\IronEditor.UI.WinForms\obj\Debug\IronEditor.UI.WinForms.Properties.Resources.resources
+C:\Documents and Settings\dsblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\src\IronEditor.UI.WinForms\obj\Debug\IronEditor.UI.WinForms.Dialogs.AboutDialog.resources
+C:\Documents and Settings\dsblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\src\IronEditor.UI.WinForms\obj\Debug\IronEditor.UI.WinForms.BaseDialog.resources
+C:\Documents and Settings\dsblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\src\IronEditor.UI.WinForms\obj\Debug\IronEditor.UI.WinForms.Controls.IDETab.resources
+C:\Documents and Settings\dsblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\src\IronEditor.UI.WinForms\obj\Debug\IronEditor.UI.WinForms.Dialogs.NewFileDialog.resources
+C:\Documents and Settings\dsblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\src\IronEditor.UI.WinForms\obj\Debug\IronEditor.UI.WinForms.Dialogs.NewProjectDialog.resources
+C:\Documents and Settings\dsblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\src\IronEditor.UI.WinForms\obj\Debug\IronEditor.UI.WinForms.Dialogs.OptionFrames.FontControl.resources
+C:\Documents and Settings\dsblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\src\IronEditor.UI.WinForms\obj\Debug\IronEditor.UI.WinForms.Dialogs.OptionsDialog.resources
+C:\Documents and Settings\dsblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\src\IronEditor.UI.WinForms\obj\Debug\IronEditor.UI.WinForms.csproj.GenerateResource.Cache

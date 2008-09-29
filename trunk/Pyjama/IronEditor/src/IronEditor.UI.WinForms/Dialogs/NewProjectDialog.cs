@@ -1,7 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Windows.Forms;
-using IronEditor.Engine;
+using System.Collections.Generic;
+// using System.Collections.Generic;
 
 namespace IronEditor.UI.WinForms.Dialogs
 {
@@ -37,11 +38,19 @@ namespace IronEditor.UI.WinForms.Dialogs
             InitializeComponent();
             _controller = controller;
 
-            foreach (LanguageSettings language in _controller.GetLanguages())
-            {
-                languagesCombo.Items.Add(language.Language);
-            }
+            List<LanguageSettings> languages = _controller.GetLanguages();
 
+            if (languages != null)
+            {
+                foreach (LanguageSettings language in languages)
+                {
+                    languagesCombo.Items.Add(language.Language);
+                }
+            }
+            else
+            {
+                languagesCombo.Items.Add("Python");
+            }
             languagesCombo.SelectedIndex = 0;
             projectType.SelectedIndex = 0;
         }

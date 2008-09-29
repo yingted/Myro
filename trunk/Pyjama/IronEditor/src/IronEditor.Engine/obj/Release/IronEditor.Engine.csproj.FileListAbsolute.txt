@@ -8,3 +8,8 @@ C:\Users\dblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\bin\Release\IronEditor.
 C:\Users\dblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\src\IronEditor.Engine\obj\Release\ResolveAssemblyReference.cache
 C:\Users\dblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\src\IronEditor.Engine\obj\Release\IronEditor.Engine.dll
 C:\Users\dblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\src\IronEditor.Engine\obj\Release\IronEditor.Engine.pdb
+C:\Documents and Settings\dsblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\bin\Release\IronEditor.Engine.dll
+C:\Documents and Settings\dsblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\bin\Release\IronEditor.Engine.pdb
+C:\Documents and Settings\dsblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\src\IronEditor.Engine\obj\Release\ResolveAssemblyReference.cache
+C:\Documents and Settings\dsblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\src\IronEditor.Engine\obj\Release\IronEditor.Engine.dll
+C:\Documents and Settings\dsblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\src\IronEditor.Engine\obj\Release\IronEditor.Engine.pdb
