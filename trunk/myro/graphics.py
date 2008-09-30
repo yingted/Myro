@@ -1207,14 +1207,25 @@ class Image(GraphicsObject):
             self.pixmap = center_point_and_pixmap[1]
         else:
             raise AttributeError, "invalid parameters to Image(); need 1 or 2"
+
+
         self.imageId = Image.idCount        # give this image a number
         Image.idCount = Image.idCount + 1 # increment global counter
-        if type(self.pixmap) == type(""): # assume a filename
-            self.img = _tkCall(tk.PhotoImage, file=self.pixmap, master=_root)
-        else:
+
+
+	#New code by JWS to work with a Picture, Filename, or Pixmap.
+	if type(self.pixmap) == type(""): # assume a filename
+            picture = Picture()
+            picture.load(self.pixmap)
+            self.pixmap = makePixmap(picture)
             self.img = self.pixmap.image
-            # _tkCall(tk.PhotoImage, pixmap.image, master=_root)
-            # 
+
+        elif type(self.pixmap) == Picture :     #Create from a picture
+            self.pixmap = makePixmap(self.pixmap)
+            self.img = self.pixmap.image
+
+        else:            #Otherwise, assume they gave us a valid pixmap!
+            self.img = self.pixmap.image
 
     def getP1(self):
          return Point(self.anchor.x - self.pixmap.getWidth()/2, 
