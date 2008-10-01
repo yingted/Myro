@@ -1193,7 +1193,7 @@ makeColor = Color
 
 class Image(GraphicsObject):
     idCount = 0
-    imageCache = {} # tk photoimages go here to avoid GC while drawn
+
     def __init__(self, *center_point_and_pixmap):
         """
         Create a Image where p = Point, pixmap is a filename or image.
@@ -1244,7 +1244,6 @@ class Image(GraphicsObject):
     def _refresh(self, canvas):
         p = self.anchor
         x,y = canvas.toScreen(p.x,p.y)
-        self.imageCache[self.imageId] = self.img
         canvas.delete("image")
         return canvas.create_image(x,y,image=self.img,tag="image")
          
@@ -1253,14 +1252,12 @@ class Image(GraphicsObject):
             self.anchor = Point(0, 0) # FIX: center point on canvas
         p = self.anchor
         x,y = canvas.toScreen(p.x,p.y)
-        self.imageCache[self.imageId] = self.img # save a reference  
         return canvas.create_image(x,y,image=self.img,tag="image")
     
     def _move(self, dx, dy):
         self.anchor.move(dx,dy)
         
     def undraw(self):
-        del self.imageCache[self.imageId]  # allow gc of tk photoimage
         GraphicsObject.undraw(self)
 
     def getAnchor(self):
