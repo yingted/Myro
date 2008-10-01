@@ -1,7 +1,6 @@
 ﻿using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
-using IronEditor.Engine;
 
 namespace IronEditor.UI.WinForms.Controls
 {

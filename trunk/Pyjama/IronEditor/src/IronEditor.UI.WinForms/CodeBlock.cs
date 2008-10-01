@@ -1,7 +1,6 @@
 ﻿using System.Windows.Forms;
-using IronEditor.UI.WinForms.Controls;
 
-namespace IronEditor.Engine
+namespace IronEditor.UI.WinForms.Controls
 {
     public class CodeBlock
     {

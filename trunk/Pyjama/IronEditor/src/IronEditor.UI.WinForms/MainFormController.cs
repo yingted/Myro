@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Windows.Forms;
-using IronEditor.Engine;
 using IronEditor.UI.WinForms.Dialogs;
 
 namespace IronEditor.UI.WinForms

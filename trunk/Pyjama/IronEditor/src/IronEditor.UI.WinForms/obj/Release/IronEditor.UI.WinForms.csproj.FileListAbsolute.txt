@@ -116,3 +116,8 @@ C:\Documents and Settings\dsblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\src\I
 C:\Documents and Settings\dsblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\bin\Release\IronEditor.UI.WinForms.exe.config
 C:\Documents and Settings\dsblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\bin\Release\IronEditor.UI.WinForms.exe
 C:\Documents and Settings\dsblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\bin\Release\IronEditor.UI.WinForms.pdb
+C:\Documents and Settings\dsblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\bin\Release\IronEditor.UI.WinForms.exe.manifest
+C:\Documents and Settings\dsblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\bin\Release\IronEditor.UI.WinForms.application
+C:\Documents and Settings\dsblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\src\IronEditor.UI.WinForms\obj\Release\IronEditor.UI.WinForms.TrustInfo.xml
+C:\Documents and Settings\dsblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\src\IronEditor.UI.WinForms\obj\Release\IronEditor.UI.WinForms.exe.manifest
+C:\Documents and Settings\dsblank\Desktop\Myro-dev\trunk\Pyjama\IronEditor\src\IronEditor.UI.WinForms\obj\Release\IronEditor.UI.WinForms.application
