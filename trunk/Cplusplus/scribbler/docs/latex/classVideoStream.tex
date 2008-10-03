@@ -1,0 +1,80 @@
+\section{VideoStream Class Reference}
+\label{classVideoStream}\index{VideoStream@{VideoStream}}
+A class for streaming video from a scribbler robot.  
+
+
+{\tt \#include $<$VideoStream.h$>$}
+
+Collaboration diagram for VideoStream:\subsection*{Public Member Functions}
+\begin{CompactItemize}
+\item 
+{\bf VideoStream} ({\bf Scribbler} $\ast$scrib, int color\_\-mode)
+\item 
+void {\bf startStream} ()
+\item 
+int {\bf addFilter} ({\bf Filter} $\ast$filter)
+\item 
+int {\bf delFilter} (int filter\_\-location)
+\item 
+void {\bf endStream} ()
+\end{CompactItemize}
+
+
+\subsection{Detailed Description}
+A class for streaming video from a scribbler robot. 
+
+The class is used to stream video from the robot and apply filters to the video stream, so that the effects can be seen in real time.
+
+\begin{Desc}
+\item[Author:]Richard Edwards \end{Desc}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\index{VideoStream@{VideoStream}!VideoStream@{VideoStream}}
+\index{VideoStream@{VideoStream}!VideoStream@{VideoStream}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}VideoStream::VideoStream ({\bf Scribbler} $\ast$ {\em scrib}, \/  int {\em color\_\-mode})}\label{classVideoStream_27a9bbff3a8f5b1c0a46bb6de342f163}
+
+
+\begin{Desc}
+\item[Parameters:]
+\begin{description}
+\item[{\em scrib}]- A pointer to a scribbler robot instance. \item[{\em color\_\-mode}]- 0 If the stream is operating in gray scale 1 if the stream is operating in RGB color space, and 2 if the robot is taking blob images. \end{description}
+\end{Desc}
+
+
+\subsection{Member Function Documentation}
+\index{VideoStream@{VideoStream}!startStream@{startStream}}
+\index{startStream@{startStream}!VideoStream@{VideoStream}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void VideoStream::startStream ()}\label{classVideoStream_706b92d2e36bdca2a4cd99f2f932fffa}
+
+
+Starts the stream in the back ground. Note, this function should not be called if the scrib instance has not successfully connected to a scribbler robot. \index{VideoStream@{VideoStream}!addFilter@{addFilter}}
+\index{addFilter@{addFilter}!VideoStream@{VideoStream}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}int VideoStream::addFilter ({\bf Filter} $\ast$ {\em filter})}\label{classVideoStream_cc358aaa5ee9a97eb89cf427498749c7}
+
+
+Used to add a filter to the video stream's filter list. Note filters can be added at anytime to the video stream, even during streaming.
+
+\begin{Desc}
+\item[Returns:]The index at which the filter was stored in the video stream filter vector. \end{Desc}
+\index{VideoStream@{VideoStream}!delFilter@{delFilter}}
+\index{delFilter@{delFilter}!VideoStream@{VideoStream}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}int VideoStream::delFilter (int {\em filter\_\-location})}\label{classVideoStream_8f17354ee847f5348a51c40ea41301c1}
+
+
+Used to delete a filter from the video stream's filter list at a specified index.
+
+\begin{Desc}
+\item[Returns:]0 for sucess, -1 for invalid index. \end{Desc}
+\index{VideoStream@{VideoStream}!endStream@{endStream}}
+\index{endStream@{endStream}!VideoStream@{VideoStream}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void VideoStream::endStream ()}\label{classVideoStream_cf268ad22ed69e13185153716d68a314}
+
+
+Not yet fully functional, does not close the GUI.
+
+However, it does close the display and capture threads. 
+
+The documentation for this class was generated from the following file:\begin{CompactItemize}
+\item 
+headers/VideoStream.h\end{CompactItemize}

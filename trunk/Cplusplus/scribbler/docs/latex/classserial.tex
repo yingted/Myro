@@ -1,0 +1,98 @@
+\section{serial Class Reference}
+\label{classserial}\index{serial@{serial}}
+Used to manipulate a \doxyref{serial}{p.}{classserial} connection in Linux for connecting, reading, and writing.  
+
+
+{\tt \#include $<$serial.h$>$}
+
+\subsection*{Public Member Functions}
+\begin{CompactItemize}
+\item 
+{\bf serial} (int baudrate, int block\_\-read)
+\item 
+int {\bf connect} (const char $\ast$device)
+\item 
+void {\bf disconnect} ()
+\item 
+int {\bf \_\-write} (unsigned char $\ast$buf, int bytes)
+\item 
+int {\bf \_\-read} (unsigned char $\ast$buf, int bytes)
+\item 
+void {\bf flush\_\-input} ()
+\item 
+void {\bf flush\_\-output} ()
+\end{CompactItemize}
+
+
+\subsection{Detailed Description}
+Used to manipulate a \doxyref{serial}{p.}{classserial} connection in Linux for connecting, reading, and writing. 
+
+Richard Edwards 
+
+\subsection{Constructor \& Destructor Documentation}
+\index{serial@{serial}!serial@{serial}}
+\index{serial@{serial}!serial@{serial}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}serial::serial (int {\em baudrate}, \/  int {\em block\_\-read})}\label{classserial_c6b401c173856ad2b9c68099aac3aa26}
+
+
+Constructs a general \doxyref{serial}{p.}{classserial} class. However, the only specifiable parameter for the \doxyref{serial}{p.}{classserial} is the baudrate. At a later date, the class will be update to support a wider range of \doxyref{serial}{p.}{classserial} connections.
+
+\begin{Desc}
+\item[Parameters:]
+\begin{description}
+\item[{\em baudrate}]- The communication speed. \item[{\em block\_\-read}]- specifies whether or not \_\-read should block \end{description}
+\end{Desc}
+
+
+\subsection{Member Function Documentation}
+\index{serial@{serial}!connect@{connect}}
+\index{connect@{connect}!serial@{serial}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}int serial::connect (const char $\ast$ {\em device})}\label{classserial_b3346f890584f7129add17009ab66ba2}
+
+
+Used to connect to a specified device, and configure the \doxyref{serial}{p.}{classserial} channel. The channel is currently only configurable as 8N1. \index{serial@{serial}!disconnect@{disconnect}}
+\index{disconnect@{disconnect}!serial@{serial}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void serial::disconnect ()}\label{classserial_8ca4a5868c507f08aaff599aafd48e79}
+
+
+Used to close the \doxyref{serial}{p.}{classserial} connction. \index{serial@{serial}!\_\-write@{\_\-write}}
+\index{\_\-write@{\_\-write}!serial@{serial}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}int serial::\_\-write (unsigned char $\ast$ {\em buf}, \/  int {\em bytes})}\label{classserial_2b1c8f560a30944d84fa4d722cc9f2b2}
+
+
+\begin{Desc}
+\item[Parameters:]
+\begin{description}
+\item[{\em buf}]- buffer that contains the data to be written. \item[{\em bytes}]- the number of bytes to write. \end{description}
+\end{Desc}
+\begin{Desc}
+\item[Returns:]The number of bytes written. \end{Desc}
+\index{serial@{serial}!\_\-read@{\_\-read}}
+\index{\_\-read@{\_\-read}!serial@{serial}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}int serial::\_\-read (unsigned char $\ast$ {\em buf}, \/  int {\em bytes})}\label{classserial_2c0a85a7713245d92d1b09a373241b44}
+
+
+Used to read data off of a \doxyref{serial}{p.}{classserial} connection, note that if the \doxyref{serial}{p.}{classserial} connection is configured to be non-blocking, you may not read the desired number of bytes.
+
+\begin{Desc}
+\item[Parameters:]
+\begin{description}
+\item[{\em buf}]- buffer for storing the read data. \item[{\em bytes}]- the number of bytes to be read.\end{description}
+\end{Desc}
+\begin{Desc}
+\item[Returns:]The number of bytes read. \end{Desc}
+\index{serial@{serial}!flush\_\-input@{flush\_\-input}}
+\index{flush\_\-input@{flush\_\-input}!serial@{serial}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void serial::flush\_\-input ()}\label{classserial_d0657f009ae2d5be8d4b4909b104d7ea}
+
+
+Flushes the \doxyref{serial}{p.}{classserial} input buffer. \index{serial@{serial}!flush\_\-output@{flush\_\-output}}
+\index{flush\_\-output@{flush\_\-output}!serial@{serial}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void serial::flush\_\-output ()}\label{classserial_c94de09c32e0f83a4e1bbb70f58aff8b}
+
+
+Flushes the \doxyref{serial}{p.}{classserial} output buffer. 
+
+The documentation for this class was generated from the following file:\begin{CompactItemize}
+\item 
+headers/serial.h\end{CompactItemize}

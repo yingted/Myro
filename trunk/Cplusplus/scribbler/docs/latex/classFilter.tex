@@ -1,0 +1,83 @@
+\section{Filter Class Reference}
+\label{classFilter}\index{Filter@{Filter}}
+The class defintes a frame work creating data filters which can manipulate images, and apply any changes in the image data back to the image.  
+
+
+{\tt \#include $<$Filter.h$>$}
+
+\subsection*{Public Member Functions}
+\begin{CompactItemize}
+\item 
+{\bf Filter} (int imageHeight, int imageWidth, int colorMode)
+\item 
+void {\bf applyFilter} (unsigned char $\ast$)
+\item 
+int {\bf getHeight} ()
+\item 
+int {\bf getWidth} ()
+\item 
+int {\bf getColorMode} ()
+\item 
+virtual void {\bf filter} (unsigned char $\ast$)
+\end{CompactItemize}
+
+
+\subsection{Detailed Description}
+The class defintes a frame work creating data filters which can manipulate images, and apply any changes in the image data back to the image. 
+
+The class is used within the \doxyref{VideoStream}{p.}{classVideoStream} package to allow for the creation of various image filters, which can be applied to a stream and the results will be visible in real time.
+
+Richard Edwards 
+
+\subsection{Constructor \& Destructor Documentation}
+\index{Filter@{Filter}!Filter@{Filter}}
+\index{Filter@{Filter}!Filter@{Filter}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}Filter::Filter (int {\em imageHeight}, \/  int {\em imageWidth}, \/  int {\em colorMode})}\label{classFilter_b690ea86711dae2f55910c74d6c0619f}
+
+
+\begin{Desc}
+\item[Parameters:]
+\begin{description}
+\item[{\em imageHeight}]- the height of images to be manipulated. \item[{\em imageWidth}]- the width of images to be manipulated. \item[{\em colorMode}]- An integer to determine the current color space. (0 - GrayScale, 1 - RGB, 2 - RGB Blob) \end{description}
+\end{Desc}
+
+
+\subsection{Member Function Documentation}
+\index{Filter@{Filter}!applyFilter@{applyFilter}}
+\index{applyFilter@{applyFilter}!Filter@{Filter}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void Filter::applyFilter (unsigned char $\ast$)}\label{classFilter_2d5bea638f4c529cc4e0a5b6edc249e6}
+
+
+A function for applying the filter to an image. Note, one should always invoke applyFilter, and not invoke filter.
+
+The reasoning behind this will be more clear, when the class is extended to allow for a filter to yield data from its application. \index{Filter@{Filter}!getHeight@{getHeight}}
+\index{getHeight@{getHeight}!Filter@{Filter}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}int Filter::getHeight ()}\label{classFilter_2957d17670a60492624c740f772df3ed}
+
+
+\begin{Desc}
+\item[Returns:]Returns the image height. \end{Desc}
+\index{Filter@{Filter}!getWidth@{getWidth}}
+\index{getWidth@{getWidth}!Filter@{Filter}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}int Filter::getWidth ()}\label{classFilter_52342985f9f8799340fead7b0c6fc600}
+
+
+\begin{Desc}
+\item[Returns:]Returns the image width. \end{Desc}
+\index{Filter@{Filter}!getColorMode@{getColorMode}}
+\index{getColorMode@{getColorMode}!Filter@{Filter}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}int Filter::getColorMode ()}\label{classFilter_ed6ac9a25e27017a27873fecc4ce2452}
+
+
+\begin{Desc}
+\item[Returns:]Retuns the color Mode. \end{Desc}
+\index{Filter@{Filter}!filter@{filter}}
+\index{filter@{filter}!Filter@{Filter}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}virtual void Filter::filter (unsigned char $\ast$)\hspace{0.3cm}{\tt  [virtual]}}\label{classFilter_596dbd23e309573fb02d98b4a0209352}
+
+
+The function used by applyFilter to actually process an image. However, when developing your own filter, if you do not overwrite this function, then the filter's default behavior is to do nothing. 
+
+The documentation for this class was generated from the following file:\begin{CompactItemize}
+\item 
+headers/Filter.h\end{CompactItemize}

@@ -1,0 +1,117 @@
+\section{Robot Class Reference}
+\label{classRobot}\index{Robot@{Robot}}
+A generic robot class that specifies general required functions for basic robot operation.  
+
+
+{\tt \#include $<$Robot.h$>$}
+
+Inheritance diagram for Robot:\subsection*{Public Member Functions}
+\begin{CompactItemize}
+\item 
+virtual int {\bf connect} ()=0
+\item 
+virtual int {\bf disconnect} ()=0
+\item 
+virtual void {\bf move} (double translate, double rotate, double z=0)=0
+\item 
+virtual void {\bf translate} (double val)=0
+\item 
+virtual void {\bf rotate} (double val)=0
+\item 
+void {\bf motors} (double leftSpeed, double rightSpeed)
+\item 
+void {\bf turnLeft} (double speed, double time=0)
+\item 
+void {\bf turnRight} (double speed, double time=0)
+\item 
+void {\bf turn} (double direction, double time=0)
+\item 
+void {\bf turn} (std::string direction, double value, double time=0)
+\item 
+void {\bf forward} (double speed, double time=0)
+\item 
+void {\bf backward} (double speed, double time=0)
+\end{CompactItemize}
+
+
+\subsection{Detailed Description}
+A generic robot class that specifies general required functions for basic robot operation. 
+
+Richard Edwards 
+
+\subsection{Member Function Documentation}
+\index{Robot@{Robot}!connect@{connect}}
+\index{connect@{connect}!Robot@{Robot}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}virtual int Robot::connect ()\hspace{0.3cm}{\tt  [pure virtual]}}\label{classRobot_0915db144494f807767b04e38b7a4a50}
+
+
+Abstract function for connecting to the robot. 
+
+Implemented in {\bf Scribbler} \doxyref{}{p.}{classScribbler_f7a289c52823b56affc8614d074bbe8d}.\index{Robot@{Robot}!disconnect@{disconnect}}
+\index{disconnect@{disconnect}!Robot@{Robot}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}virtual int Robot::disconnect ()\hspace{0.3cm}{\tt  [pure virtual]}}\label{classRobot_a7a9053e5802d714846e38d5ca60b4f9}
+
+
+Abstract function for disconnecting from the robot. 
+
+Implemented in {\bf Scribbler} \doxyref{}{p.}{classScribbler_9bdadd3185f21faefdbbb0258ee36081}.\index{Robot@{Robot}!move@{move}}
+\index{move@{move}!Robot@{Robot}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}virtual void Robot::move (double {\em translate}, \/  double {\em rotate}, \/  double {\em z} = {\tt 0})\hspace{0.3cm}{\tt  [pure virtual]}}\label{classRobot_4f0743617994e8c02b2094bc43b4b58a}
+
+
+Abstract function for moving a robot with some tranlation velocity, rotational velocity, and possibly some z-dimension velocity. 
+
+Implemented in {\bf Scribbler} \doxyref{}{p.}{classScribbler_a36206f3cf121ef6c3fd6f421c636e00}.\index{Robot@{Robot}!translate@{translate}}
+\index{translate@{translate}!Robot@{Robot}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}virtual void Robot::translate (double {\em val})\hspace{0.3cm}{\tt  [pure virtual]}}\label{classRobot_09a8a8fcf11d1fe98886a7e980079bf8}
+
+
+Abstract function for issuing a translational velocity. 
+
+Implemented in {\bf Scribbler} \doxyref{}{p.}{classScribbler_2d46e5f96071040070bab5e63c6a13af}.\index{Robot@{Robot}!rotate@{rotate}}
+\index{rotate@{rotate}!Robot@{Robot}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}virtual void Robot::rotate (double {\em val})\hspace{0.3cm}{\tt  [pure virtual]}}\label{classRobot_2eb186817fa0180c9c01a52c0f88e2b5}
+
+
+Abstract function for issuing a rotational velocity. 
+
+Implemented in {\bf Scribbler} \doxyref{}{p.}{classScribbler_d26135c1700c2942099e6035dacdb2df}.\index{Robot@{Robot}!motors@{motors}}
+\index{motors@{motors}!Robot@{Robot}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void Robot::motors (double {\em leftSpeed}, \/  double {\em rightSpeed})}\label{classRobot_b0ac58fe9792f0fc465c357b8d52a779}
+
+
+Definites a default behavior for issuing speeds to the left and right motor. However, it requires that your class has implemented the move function. \index{Robot@{Robot}!turnLeft@{turnLeft}}
+\index{turnLeft@{turnLeft}!Robot@{Robot}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void Robot::turnLeft (double {\em speed}, \/  double {\em time} = {\tt 0})}\label{classRobot_cd15dd8356482f4c18dcea5c0dd20e9c}
+
+
+A default behavior for turning the robot left for either some specified amount of time, or to be executed until another command is sent. \index{Robot@{Robot}!turnRight@{turnRight}}
+\index{turnRight@{turnRight}!Robot@{Robot}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void Robot::turnRight (double {\em speed}, \/  double {\em time} = {\tt 0})}\label{classRobot_d1b1647ef6f88cc50a28097b05ac7de9}
+
+
+A default behavior for turning the robot right for either some specified amount of time, or to be executed until another command is sent. \index{Robot@{Robot}!turn@{turn}}
+\index{turn@{turn}!Robot@{Robot}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void Robot::turn (double {\em direction}, \/  double {\em time} = {\tt 0})}\label{classRobot_88092b36c430916436abf0670df78eb7}
+
+
+A default turn function for telling the robot to turn left or right at a preset speed, for some amount of time or until another command is issued. \index{Robot@{Robot}!turn@{turn}}
+\index{turn@{turn}!Robot@{Robot}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void Robot::turn (std::string {\em direction}, \/  double {\em value}, \/  double {\em time} = {\tt 0})}\label{classRobot_aeefe2a20a29015f67a162700fc8fa20}
+
+
+A default turn function for telling the robot to turn left or right at a specified speed, for some amount of time or until another command is issued. \index{Robot@{Robot}!forward@{forward}}
+\index{forward@{forward}!Robot@{Robot}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void Robot::forward (double {\em speed}, \/  double {\em time} = {\tt 0})}\label{classRobot_c512df6178664fc4d9345ee710f2de7a}
+
+
+A default function for telling the robot to move foward at a specified speed and for some duration of time, or until another command is sent. \index{Robot@{Robot}!backward@{backward}}
+\index{backward@{backward}!Robot@{Robot}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void Robot::backward (double {\em speed}, \/  double {\em time} = {\tt 0})}\label{classRobot_b7b5dcc83c43172426ba80c521272f59}
+
+
+A default function for telling the robot to move in reverse at a specified speed and for some duration of time, or until another command is sent. 
+
+The documentation for this class was generated from the following file:\begin{CompactItemize}
+\item 
+headers/Robot.h\end{CompactItemize}

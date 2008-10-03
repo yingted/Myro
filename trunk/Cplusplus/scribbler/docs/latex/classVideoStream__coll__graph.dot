@@ -1,0 +1,13 @@
+digraph G
+{
+  bgcolor="transparent";
+  edge [fontname="FreeSans",fontsize=10,labelfontname="FreeSans",labelfontsize=10];
+  node [fontname="FreeSans",fontsize=10,shape=record];
+  Node1 [label="VideoStream",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled" fontcolor="black"];
+  Node2 -> Node1 [dir=back,color="darkorchid3",fontsize=10,style="dashed",label="myScrib"];
+  Node2 [label="Scribbler",height=0.2,width=0.4,color="black",URL="$classScribbler.html",tooltip="This class implements all of the needed methods and components for controlling a..."];
+  Node3 -> Node2 [dir=back,color="midnightblue",fontsize=10,style="solid"];
+  Node3 [label="Robot",height=0.2,width=0.4,color="black",URL="$classRobot.html",tooltip="A generic robot class that specifies general required functions for basic robot operation..."];
+  Node4 -> Node2 [dir=back,color="darkorchid3",fontsize=10,style="dashed",label="con"];
+  Node4 [label="serial",height=0.2,width=0.4,color="black",URL="$classserial.html",tooltip="Used to manipulate a serial connection in Linux for connecting, reading, and writing..."];
+}

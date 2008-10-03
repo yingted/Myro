@@ -1,0 +1,575 @@
+\section{Scribbler Class Reference}
+\label{classScribbler}\index{Scribbler@{Scribbler}}
+This class implements all of the needed methods and components for controlling a scribbler robot.  
+
+
+{\tt \#include $<$Scribbler.h$>$}
+
+Inheritance diagram for Scribbler:Collaboration diagram for Scribbler:\subsection*{Public Member Functions}
+\begin{CompactItemize}
+\item 
+int {\bf connect} ()
+\item 
+int {\bf disconnect} ()
+\item 
+void {\bf move} (double translate, double rotate, double z=0)
+\item 
+void {\bf rotate} (double amount)
+\item 
+void {\bf translate} (double amount)
+\item 
+void {\bf hardStop} ()
+\item 
+void {\bf restart} ()
+\item 
+void {\bf beep} (double duration, int freq, int freq2=0)
+\item 
+void {\bf setData} (int position, int value)
+\item 
+void {\bf setSingleData} (int position, int value)
+\item 
+void {\bf setEchoMode} (int value)
+\item 
+void {\bf setName} (std::string newName)
+\item 
+void {\bf setPassword} (std::string password)
+\item 
+int {\bf set} (std::string item, int position, int value=0)
+\item 
+int {\bf set} (std::string item, std::string position, double value=0)
+\item 
+void $\ast$ {\bf get} (std::string item, std::vector$<$ std::string $>$ position=std::vector$<$ std::string $>$())
+\item 
+void $\ast$ {\bf get} (std::string item, std::vector$<$ int $>$ position)
+\item 
+std::vector$<$ int $>$ {\bf getLastSensors} ()
+\item 
+void {\bf setLEDFront} (int value)
+\item 
+void {\bf setLEDBack} (double value)
+\item 
+void {\bf setForwardness} (std::string direction)
+\item 
+void {\bf setForwardness} (int direction)
+\item 
+void {\bf setIRPower} (int power)
+\item 
+void {\bf setWhiteBalance} (int value)
+\item 
+void {\bf reboot} ()
+\item 
+void {\bf conf\_\-rle\_\-range} (unsigned char $\ast$picture, int x1, int y1, int x2, int y2)
+\item 
+void {\bf configureBlob} (int y\_\-low=0, int y\_\-high=255, int u\_\-low=0, int u\_\-high=255, int v\_\-low=0, int v\_\-high=255, int smooth\_\-thresh=4)
+\item 
+double {\bf getBattery} ()
+\item 
+int {\bf getObstacle} (std::string value=\char`\"{}none\char`\"{})
+\item 
+int {\bf getObstacle} (int value)
+\item 
+int {\bf getBright} (std::string value=\char`\"{}\char`\"{})
+\item 
+int {\bf getLight} (std::string value=\char`\"{}none\char`\"{})
+\item 
+int {\bf getLight} (int value)
+\item 
+unsigned char $\ast$ {\bf takePicture} (std::string type=\char`\"{}color\char`\"{})
+\item 
+std::vector$<$ int $>$ {\bf getBlob} ()
+\item 
+void {\bf darkenCamera} (int level=0)
+\item 
+void {\bf autoCamera} ()
+\item 
+std::string {\bf getName} ()
+\item 
+std::string {\bf getPassword} ()
+\item 
+std::vector$<$ std::string $>$ {\bf getInfo} ()
+\item 
+std::vector$<$ int $>$ {\bf getData} (std::vector$<$ int $>$ position=std::vector$<$ int $>$())
+\end{CompactItemize}
+
+
+\subsection{Detailed Description}
+This class implements all of the needed methods and components for controlling a scribbler robot. 
+
+A port of the existing IPRE \doxyref{Scribbler}{p.}{classScribbler} Python code to C++. The original authors of the python based code are Keith O'Hara and Doug Blank.
+
+\begin{Desc}
+\item[Author:]Richard Edwards \end{Desc}
+
+
+\subsection{Member Function Documentation}
+\index{Scribbler@{Scribbler}!connect@{connect}}
+\index{connect@{connect}!Scribbler@{Scribbler}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}int Scribbler::connect ()\hspace{0.3cm}{\tt  [virtual]}}\label{classScribbler_f7a289c52823b56affc8614d074bbe8d}
+
+
+Used to connect to the robot, and on use it will ask the user to specify the desired com port.
+
+\begin{Desc}
+\item[Returns:]returns a value less than 0 to indicate failure and a positive value greater than or equal to zero to indicate success. \end{Desc}
+
+
+Implements {\bf Robot} \doxyref{}{p.}{classRobot_0915db144494f807767b04e38b7a4a50}.\index{Scribbler@{Scribbler}!disconnect@{disconnect}}
+\index{disconnect@{disconnect}!Scribbler@{Scribbler}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}int Scribbler::disconnect ()\hspace{0.3cm}{\tt  [virtual]}}\label{classScribbler_9bdadd3185f21faefdbbb0258ee36081}
+
+
+Attempts to disconnect from the robot.
+
+\begin{Desc}
+\item[Returns:]returns a value less than 0 to indicate failure, and a positive value greater than or equal to zero to indicate success. \end{Desc}
+
+
+Implements {\bf Robot} \doxyref{}{p.}{classRobot_a7a9053e5802d714846e38d5ca60b4f9}.\index{Scribbler@{Scribbler}!move@{move}}
+\index{move@{move}!Scribbler@{Scribbler}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void Scribbler::move (double {\em translate}, \/  double {\em rotate}, \/  double {\em z} = {\tt 0})\hspace{0.3cm}{\tt  [virtual]}}\label{classScribbler_a36206f3cf121ef6c3fd6f421c636e00}
+
+
+Move issues a desired velocity and desired angular velocity,
+
+\begin{Desc}
+\item[Parameters:]
+\begin{description}
+\item[{\em double}]translate - velocity [-1,1] \item[{\em double}]rotate - angular velocity [-1,1] \end{description}
+\end{Desc}
+
+
+Implements {\bf Robot} \doxyref{}{p.}{classRobot_4f0743617994e8c02b2094bc43b4b58a}.\index{Scribbler@{Scribbler}!rotate@{rotate}}
+\index{rotate@{rotate}!Scribbler@{Scribbler}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void Scribbler::rotate (double {\em amount})\hspace{0.3cm}{\tt  [virtual]}}\label{classScribbler_d26135c1700c2942099e6035dacdb2df}
+
+
+Function for giving the robot a desired velocity. \begin{Desc}
+\item[Parameters:]
+\begin{description}
+\item[{\em double}]amount - angular velocity [-1,1] \end{description}
+\end{Desc}
+
+
+Implements {\bf Robot} \doxyref{}{p.}{classRobot_2eb186817fa0180c9c01a52c0f88e2b5}.\index{Scribbler@{Scribbler}!translate@{translate}}
+\index{translate@{translate}!Scribbler@{Scribbler}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void Scribbler::translate (double {\em amount})\hspace{0.3cm}{\tt  [virtual]}}\label{classScribbler_2d46e5f96071040070bab5e63c6a13af}
+
+
+Function for giving the robot a desired velocity.
+
+\begin{Desc}
+\item[Parameters:]
+\begin{description}
+\item[{\em double}]amount - angular velocity [-1,1] \end{description}
+\end{Desc}
+
+
+Implements {\bf Robot} \doxyref{}{p.}{classRobot_09a8a8fcf11d1fe98886a7e980079bf8}.\index{Scribbler@{Scribbler}!hardStop@{hardStop}}
+\index{hardStop@{hardStop}!Scribbler@{Scribbler}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void Scribbler::hardStop ()}\label{classScribbler_65f7862b21ee67314b4119e696223ff8}
+
+
+Function for cutting off power to the robot's motors. \index{Scribbler@{Scribbler}!restart@{restart}}
+\index{restart@{restart}!Scribbler@{Scribbler}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void Scribbler::restart ()}\label{classScribbler_e3cae33a63548223f1037a16d5bfe632}
+
+
+TODO: Restart is not yet supported! \index{Scribbler@{Scribbler}!beep@{beep}}
+\index{beep@{beep}!Scribbler@{Scribbler}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void Scribbler::beep (double {\em duration}, \/  int {\em freq}, \/  int {\em freq2} = {\tt 0})}\label{classScribbler_3baeb877c446c22596121f806701b226}
+
+
+Function for sending tone's to the robot.
+
+\begin{Desc}
+\item[Parameters:]
+\begin{description}
+\item[{\em double}]duration - time specified in seconds \item[{\em int}]freq - the frequency of the tone \item[{\em int}]freq2 - an opitional second frequency, defaults to 0 \end{description}
+\end{Desc}
+\index{Scribbler@{Scribbler}!setData@{setData}}
+\index{setData@{setData}!Scribbler@{Scribbler}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void Scribbler::setData (int {\em position}, \/  int {\em value})}\label{classScribbler_7cbff5bb8d4684c17df5fa4d90fb0a4c}
+
+
+Allows used set a single byte value stored on the robot. There are 8 byte values which can be accessed and modified.
+
+\begin{Desc}
+\item[Parameters:]
+\begin{description}
+\item[{\em int}]position - index bounded on [0,7] \item[{\em int}]value - the desired value, bounded on [0,255] \end{description}
+\end{Desc}
+\index{Scribbler@{Scribbler}!setSingleData@{setSingleData}}
+\index{setSingleData@{setSingleData}!Scribbler@{Scribbler}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void Scribbler::setSingleData (int {\em position}, \/  int {\em value})}\label{classScribbler_4ae497aad9af7279bea8278f0407f80a}
+
+
+Performs the same operations as setData, however using a different robot message, which doesn't require the resubmission of all 8 bytes.
+
+\begin{Desc}
+\item[Parameters:]
+\begin{description}
+\item[{\em int}]position - index bounded on [0,7] \item[{\em int}]value - the desired value, bounded on [0,255] \end{description}
+\end{Desc}
+\index{Scribbler@{Scribbler}!setEchoMode@{setEchoMode}}
+\index{setEchoMode@{setEchoMode}!Scribbler@{Scribbler}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void Scribbler::setEchoMode (int {\em value})}\label{classScribbler_a3265b32b1a16066b68eb585cdee02fd}
+
+
+Used to turn the robot's echo mode on or off
+
+\begin{Desc}
+\item[Parameters:]
+\begin{description}
+\item[{\em int}]value - 0 for off, and 1 for on \end{description}
+\end{Desc}
+\index{Scribbler@{Scribbler}!setName@{setName}}
+\index{setName@{setName}!Scribbler@{Scribbler}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void Scribbler::setName (std::string {\em newName})}\label{classScribbler_12f822364f936c92bb26145a438900fa}
+
+
+Changes the 16 byte name stored on the robot to the specified 16 byte name.
+
+\begin{Desc}
+\item[Parameters:]
+\begin{description}
+\item[{\em string}]newName - A character string that isn't longer than 16 characters(does not count null character). \end{description}
+\end{Desc}
+\index{Scribbler@{Scribbler}!setPassword@{setPassword}}
+\index{setPassword@{setPassword}!Scribbler@{Scribbler}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void Scribbler::setPassword (std::string {\em password})}\label{classScribbler_20c057264a35576446a3c3dd4a26405d}
+
+
+Changes the 16 byte password stored on the robot to the new specified 16 byte password.
+
+\begin{Desc}
+\item[Parameters:]
+\begin{description}
+\item[{\em string}]password - A character string that isn't longer than 16 characters(does not count null character). \end{description}
+\end{Desc}
+\index{Scribbler@{Scribbler}!set@{set}}
+\index{set@{set}!Scribbler@{Scribbler}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}int Scribbler::set (std::string {\em item}, \/  int {\em position}, \/  int {\em value} = {\tt 0})}\label{classScribbler_d237f47cb04c7f1327d402dfc8780f7e}
+
+
+A general purpose set function which allows you to set an item at position on/off or set an item at position to value.
+
+Example: set(led, 1, 0) - sets the center led to the off position. set(whitebalance, 1) - turns the camera's white balance on.
+
+\begin{Desc}
+\item[Parameters:]
+\begin{description}
+\item[{\em item}]- the desired item \item[{\em position}]- the desired position or item value \item[{\em value}]- the value for the desired item at position. \end{description}
+\end{Desc}
+\index{Scribbler@{Scribbler}!set@{set}}
+\index{set@{set}!Scribbler@{Scribbler}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}int Scribbler::set (std::string {\em item}, \/  std::string {\em position}, \/  double {\em value} = {\tt 0})}\label{classScribbler_7189c88adef112361f6cff56ffb01d42}
+
+
+A general purpose set function which allows you to setting an item at position to value, or setting an item to the value position.
+
+Example: set(led, \char`\"{}front\char`\"{}, 1) - sets front led to on set(\char`\"{}name\char`\"{} \char`\"{}Scribby\char`\"{}) - sets the robot's name to Scribby
+
+\begin{Desc}
+\item[Parameters:]
+\begin{description}
+\item[{\em item}]- the desired item \item[{\em position}]- the desired position or value for item \item[{\em value}]- the value for the desired item at position. \end{description}
+\end{Desc}
+\index{Scribbler@{Scribbler}!get@{get}}
+\index{get@{get}!Scribbler@{Scribbler}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void$\ast$ Scribbler::get (std::string {\em item}, \/  std::vector$<$ std::string $>$ {\em position} = {\tt std::vector$<$~std::string~$>$()})}\label{classScribbler_989deffe762bd140bb81c4fd95c26af3}
+
+
+A general purpose get function which will query the specified item for all data, or particular data specified by the position vector.
+
+Example get(\char`\"{}name\char`\"{}) - return a pointer to the robot's name. get(\char`\"{}info\char`\"{}) - returns all information about the robot.
+
+\begin{Desc}
+\item[Parameters:]
+\begin{description}
+\item[{\em item}]- the desired item to query \item[{\em position}]- a vector for issuing more detailed queries on an item.\end{description}
+\end{Desc}
+\begin{Desc}
+\item[Returns:]The return value is a void $\ast$ pointer, it is up to the caller to know which return value they are expecting and to cast accordingly. \end{Desc}
+\index{Scribbler@{Scribbler}!get@{get}}
+\index{get@{get}!Scribbler@{Scribbler}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void$\ast$ Scribbler::get (std::string {\em item}, \/  std::vector$<$ int $>$ {\em position})}\label{classScribbler_26832d4d1f2373c97a8d747de0f0fd41}
+
+
+A general purpose get function which will query teh specified item for data specified by the position vector.
+
+Example: get(\char`\"{}light\char`\"{}, std::vector$<$int$>$(3,0)) : returns a pointer to a vector containing three readings from light sensor 0.
+
+\begin{Desc}
+\item[Returns:]The return value is a void $\ast$ pointer, it is up to the caller to know which return value they are expecting adn to cast accordingly. \end{Desc}
+\index{Scribbler@{Scribbler}!getLastSensors@{getLastSensors}}
+\index{getLastSensors@{getLastSensors}!Scribbler@{Scribbler}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}std::vector$<$int$>$ Scribbler::getLastSensors ()}\label{classScribbler_b358b1d1bc06c2a4fb94171ea14e0b74}
+
+
+Every set command will read the values for all eleven on board robot sensors, and store them internally within a sensor array. This, function returns a vector containing those previously read sensor values.
+
+\begin{Desc}
+\item[Returns:]A vector containing the robot's last sensor update. Order: Light 0, 1, 3 ir 4, 5 line 6, 7 stall 8 \end{Desc}
+\index{Scribbler@{Scribbler}!setLEDFront@{setLEDFront}}
+\index{setLEDFront@{setLEDFront}!Scribbler@{Scribbler}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void Scribbler::setLEDFront (int {\em value})}\label{classScribbler_2ffedfe63730f3d121df47f88b170adb}
+
+
+Use to toggle the front led on or off.
+
+\begin{Desc}
+\item[Parameters:]
+\begin{description}
+\item[{\em value}]- 0 for off and 1 for on. \end{description}
+\end{Desc}
+\index{Scribbler@{Scribbler}!setLEDBack@{setLEDBack}}
+\index{setLEDBack@{setLEDBack}!Scribbler@{Scribbler}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void Scribbler::setLEDBack (double {\em value})}\label{classScribbler_907d86d6c2b1cf1baf17898d25d659af}
+
+
+Used to set the back led to the specified value.
+
+\begin{Desc}
+\item[Parameters:]
+\begin{description}
+\item[{\em value}]- specifiy an intensity for the rear led. value is bounded on [0.0,1.0] \end{description}
+\end{Desc}
+\index{Scribbler@{Scribbler}!setForwardness@{setForwardness}}
+\index{setForwardness@{setForwardness}!Scribbler@{Scribbler}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void Scribbler::setForwardness (std::string {\em direction})}\label{classScribbler_7b7008069b93403fca63aedc7d02890b}
+
+
+Used to set the robot's forward direction. The fluke can either be set to forward, or the light sensors on the rear of the robot can be set as the forward direction.
+
+\begin{Desc}
+\item[Parameters:]
+\begin{description}
+\item[{\em direction}]- the robot's desired forward direction. (\char`\"{}fluke-forward\char`\"{} or \char`\"{}scribbler-forward\char`\"{}) \end{description}
+\end{Desc}
+\index{Scribbler@{Scribbler}!setForwardness@{setForwardness}}
+\index{setForwardness@{setForwardness}!Scribbler@{Scribbler}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void Scribbler::setForwardness (int {\em direction})}\label{classScribbler_348c121b4154397780a6a061bd307fb3}
+
+
+Used to set the robot's foward direction.
+
+\begin{Desc}
+\item[Parameters:]
+\begin{description}
+\item[{\em direction}]- 1 for fluke-foward and 0 for scribbler-forward \end{description}
+\end{Desc}
+\index{Scribbler@{Scribbler}!setIRPower@{setIRPower}}
+\index{setIRPower@{setIRPower}!Scribbler@{Scribbler}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void Scribbler::setIRPower (int {\em power})}\label{classScribbler_e4436d949639a5f6aad0b5db149cc650}
+
+
+Used to set the power amount for the dongle's IR sensors.
+
+\begin{Desc}
+\item[Parameters:]
+\begin{description}
+\item[{\em power}]- desired power value bounded on [0,255] \end{description}
+\end{Desc}
+\index{Scribbler@{Scribbler}!setWhiteBalance@{setWhiteBalance}}
+\index{setWhiteBalance@{setWhiteBalance}!Scribbler@{Scribbler}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void Scribbler::setWhiteBalance (int {\em value})}\label{classScribbler_fcfa9bd8d4ff6d06fdc0d927f8993bb6}
+
+
+Used to turn the camera's white balance on or off.
+
+\begin{Desc}
+\item[Parameters:]
+\begin{description}
+\item[{\em value}]- 0 white balance off, 1 white balance on \end{description}
+\end{Desc}
+\index{Scribbler@{Scribbler}!reboot@{reboot}}
+\index{reboot@{reboot}!Scribbler@{Scribbler}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void Scribbler::reboot ()}\label{classScribbler_8f07c22ee290fec765ff47d9717a3ad3}
+
+
+Not yet supported \index{Scribbler@{Scribbler}!conf\_\-rle\_\-range@{conf\_\-rle\_\-range}}
+\index{conf\_\-rle\_\-range@{conf\_\-rle\_\-range}!Scribbler@{Scribbler}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void Scribbler::conf\_\-rle\_\-range (unsigned char $\ast$ {\em picture}, \/  int {\em x1}, \/  int {\em y1}, \/  int {\em x2}, \/  int {\em y2})}\label{classScribbler_3ceaf2f42deb48190265b21c04fad5b8}
+
+
+Used to configure the blob tracking freature within the robot, by providing a picture and a specifying the top left and bottom right corner of a bounding box. The bounding box will the define the pixels of interest for configuring the desired pixel values.
+
+\begin{Desc}
+\item[Parameters:]
+\begin{description}
+\item[{\em picture}]- 256x192 RGB Image \item[{\em x1}]- top left bounding box corner x value. \item[{\em y1}]- top left bounding box corner y value. \item[{\em x2}]- bottom right bounding box corner x value. \item[{\em y2}]- bottom right bounding box corner y value. \end{description}
+\end{Desc}
+\index{Scribbler@{Scribbler}!configureBlob@{configureBlob}}
+\index{configureBlob@{configureBlob}!Scribbler@{Scribbler}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void Scribbler::configureBlob (int {\em y\_\-low} = {\tt 0}, \/  int {\em y\_\-high} = {\tt 255}, \/  int {\em u\_\-low} = {\tt 0}, \/  int {\em u\_\-high} = {\tt 255}, \/  int {\em v\_\-low} = {\tt 0}, \/  int {\em v\_\-high} = {\tt 255}, \/  int {\em smooth\_\-thresh} = {\tt 4})}\label{classScribbler_791314f4bbb605a2d91570e5d63e2f3d}
+
+
+Used to manually define the bounds for a blob configuration in YUV color space. Note, this generally will not be used unless one wishes to write a different blob configuration other than the one provided by conf\_\-rle\_\-range.
+
+\begin{Desc}
+\item[Parameters:]
+\begin{description}
+\item[{\em y\_\-low}]- Y Lower bound \item[{\em y\_\-high}]- Y Upper bound \item[{\em u\_\-low}]- U Lower bound \item[{\em u\_\-high}]- U Upper bound \item[{\em v\_\-low}]- V Lower bound \item[{\em y\_\-low}]- Y\_\-lower bound \end{description}
+\end{Desc}
+\index{Scribbler@{Scribbler}!getBattery@{getBattery}}
+\index{getBattery@{getBattery}!Scribbler@{Scribbler}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}double Scribbler::getBattery ()}\label{classScribbler_ac0b3bf76ad4d644e6b58525f58c1033}
+
+
+Read the current voltage value for the batteries.
+
+\begin{Desc}
+\item[Returns:]The percentage of battery power remaining. \end{Desc}
+\index{Scribbler@{Scribbler}!getObstacle@{getObstacle}}
+\index{getObstacle@{getObstacle}!Scribbler@{Scribbler}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}int Scribbler::getObstacle (std::string {\em value} = {\tt \char`\"{}none\char`\"{}})}\label{classScribbler_aa9310ee075c7010c56faf91f13a3231}
+
+
+Reads the value for a specified dongle IR sensor.
+
+Example: getObstacle(\char`\"{}left\char`\"{})
+
+\begin{Desc}
+\item[Parameters:]
+\begin{description}
+\item[{\em value}]- The desired IR sensor to query. \end{description}
+\end{Desc}
+\begin{Desc}
+\item[Returns:]A value ranging from 0 - 6000. The larger the value the closer to an obstacle. However, the quality of the IR sensors decays over time. So it may be possible for the upper bound to be lower than 6000. \end{Desc}
+\index{Scribbler@{Scribbler}!getObstacle@{getObstacle}}
+\index{getObstacle@{getObstacle}!Scribbler@{Scribbler}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}int Scribbler::getObstacle (int {\em value})}\label{classScribbler_3f4c589aa460087a495fb376216df001}
+
+
+Read the value for a specified dongle IR sensor.
+
+Example: getObstacle(1)
+
+\begin{Desc}
+\item[Parameters:]
+\begin{description}
+\item[{\em value}]- The desired IR sensor to query. \end{description}
+\end{Desc}
+\begin{Desc}
+\item[Returns:]A value ranging from 0 - 6000. The larger the value the closer to an obstacle. However, the quality of the IR sensors decays over time. So it may be possible for the upper bound to be lower than 6000. \end{Desc}
+\index{Scribbler@{Scribbler}!getBright@{getBright}}
+\index{getBright@{getBright}!Scribbler@{Scribbler}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}int Scribbler::getBright (std::string {\em value} = {\tt \char`\"{}\char`\"{}})}\label{classScribbler_08a165d00fd1eb0b25c4bea5942fc96e}
+
+
+The camera has three different window's which it can use for returning light intensity. getBright allows you to query a particular window for its intensity value.
+
+Example: getBright(\char`\"{}right\char`\"{})
+
+\begin{Desc}
+\item[Parameters:]
+\begin{description}
+\item[{\em value}]- The desired window to query. \end{description}
+\end{Desc}
+\begin{Desc}
+\item[Returns:]An integer represent the light intensity for the specified window. \end{Desc}
+\index{Scribbler@{Scribbler}!getLight@{getLight}}
+\index{getLight@{getLight}!Scribbler@{Scribbler}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}int Scribbler::getLight (std::string {\em value} = {\tt \char`\"{}none\char`\"{}})}\label{classScribbler_2fb6eba557a0563eea9266fa5b540e4b}
+
+
+Used to query a specified light sensor located on the rear of the robot.
+
+Example: getLight(\char`\"{}left\char`\"{})
+
+\begin{Desc}
+\item[Parameters:]
+\begin{description}
+\item[{\em value}]- The desired light sensor. \end{description}
+\end{Desc}
+\begin{Desc}
+\item[Returns:]An two byte integer representing the light reading from the specified light sensor. \end{Desc}
+\index{Scribbler@{Scribbler}!getLight@{getLight}}
+\index{getLight@{getLight}!Scribbler@{Scribbler}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}int Scribbler::getLight (int {\em value})}\label{classScribbler_ab7ad6616a55e70c18ed46dea8b845d1}
+
+
+Used to query a specified light sensor located on the rear of the robot.
+
+Example getLight(1)
+
+\begin{Desc}
+\item[Parameters:]
+\begin{description}
+\item[{\em value}]- The desired light sensor. \end{description}
+\end{Desc}
+\begin{Desc}
+\item[Returns:]A two byte integer representing the light reading from the specified light sensor. \end{Desc}
+\index{Scribbler@{Scribbler}!takePicture@{takePicture}}
+\index{takePicture@{takePicture}!Scribbler@{Scribbler}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}unsigned char$\ast$ Scribbler::takePicture (std::string {\em type} = {\tt \char`\"{}color\char`\"{}})}\label{classScribbler_e76c3a85701116b40af89d3ea5a7e4bf}
+
+
+Used to take pictures in the RGB and Gray Scale color space. Also, once the blob tracking is configured it will return an image with the areas of interest in white, and the areas of non-interest in black.
+
+\begin{Desc}
+\item[Parameters:]
+\begin{description}
+\item[{\em type}]- Valid values, \char`\"{}color\char`\"{}, \char`\"{}gray\char`\"{}, and \char`\"{}blob\char`\"{} \end{description}
+\end{Desc}
+\begin{Desc}
+\item[Returns:]unsigned char array containing the image infromation. \end{Desc}
+\index{Scribbler@{Scribbler}!getBlob@{getBlob}}
+\index{getBlob@{getBlob}!Scribbler@{Scribbler}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}std::vector$<$int$>$ Scribbler::getBlob ()}\label{classScribbler_c5554f8f75d5a595b9af9bd4590b4bc8}
+
+
+Given that the blob tracking is configured, this function returns the number of pixels that match the specified blob and the x,y location related to said blob.
+
+\begin{Desc}
+\item[Returns:]A vector with the following data order: numpixels, x\_\-location, y\_\-location \end{Desc}
+\index{Scribbler@{Scribbler}!darkenCamera@{darkenCamera}}
+\index{darkenCamera@{darkenCamera}!Scribbler@{Scribbler}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void Scribbler::darkenCamera (int {\em level} = {\tt 0})}\label{classScribbler_73e62d11898dd7a97775abecd0a600a6}
+
+
+This turns off White Balance, Gain Control, and Exposure Control \index{Scribbler@{Scribbler}!autoCamera@{autoCamera}}
+\index{autoCamera@{autoCamera}!Scribbler@{Scribbler}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}void Scribbler::autoCamera ()}\label{classScribbler_719e3f22c6aabb024edb2b23323abda5}
+
+
+This turns on White Balance, Gain Control, and Exposure Control \index{Scribbler@{Scribbler}!getName@{getName}}
+\index{getName@{getName}!Scribbler@{Scribbler}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}std::string Scribbler::getName ()}\label{classScribbler_bf20230db6546efac1ff68ea13a34302}
+
+
+\begin{Desc}
+\item[Returns:]Returns the name of the robot. \end{Desc}
+\index{Scribbler@{Scribbler}!getPassword@{getPassword}}
+\index{getPassword@{getPassword}!Scribbler@{Scribbler}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}std::string Scribbler::getPassword ()}\label{classScribbler_320536d5f7906b6b25ebc9ad701def4e}
+
+
+\begin{Desc}
+\item[Returns:]Returns the password stored on the robot. \end{Desc}
+\index{Scribbler@{Scribbler}!getInfo@{getInfo}}
+\index{getInfo@{getInfo}!Scribbler@{Scribbler}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}std::vector$<$std::string$>$ Scribbler::getInfo ()}\label{classScribbler_4c6450c00fc448c18bcf7e56d98c3580}
+
+
+This returns informat about the robot's dongle, firmware, and communication mode.
+
+\begin{Desc}
+\item[Returns:]The vector contains strings formated as item:value Example: fluke:2.7.8 \end{Desc}
+\index{Scribbler@{Scribbler}!getData@{getData}}
+\index{getData@{getData}!Scribbler@{Scribbler}}
+\subsubsection{\setlength{\rightskip}{0pt plus 5cm}std::vector$<$int$>$ Scribbler::getData (std::vector$<$ int $>$ {\em position} = {\tt std::vector$<$~int~$>$()})}\label{classScribbler_68aaa4a74037c9bd1e764c5e8f14afb0}
+
+
+\begin{Desc}
+\item[Parameters:]
+\begin{description}
+\item[{\em An}]opitional vector used to specify desired byte indexes. \end{description}
+\end{Desc}
+\begin{Desc}
+\item[Returns:]This function returns either all 8 bytes stored on the robot, or a set of the data based on the input vector.\end{Desc}
+Example: A vector containining 1, 2, 3 will return the data bytes stored at index 1, 2, and 3. 
+
+The documentation for this class was generated from the following file:\begin{CompactItemize}
+\item 
+headers/Scribbler.h\end{CompactItemize}
