@@ -205,8 +205,7 @@ def gamepad(*phrases, **kwargs):
             name = "Scribby"
         phrases = ["Hello. My name is %s." % name, 
                    "Ouch! I'm a sensitive robot.", 
-                   "I'm hungry. Do you have any batteries?", 
-                   "Good bye, for now."]
+                   "I'm hungry. Do you have any batteries?" ]
     elif type(phrases[0]) == type(gamepad):
         print "Gamepad is now running..."
         while True:
@@ -223,6 +222,11 @@ def gamepad(*phrases, **kwargs):
     print " Left/Right   turnLeft() and turnRight()"
     print "    Up/Down   forward() and backward()"
     print ""
+
+    #Added by JWS to make sure that retval and button are defined.
+    retval = getGamepadNow()
+    button = retval["button"]
+
     if len(button) > 0:
         print "     Button   Action"
         print "     ------   -------"
@@ -243,15 +247,17 @@ def gamepad(*phrases, **kwargs):
         if len(button) > 7:
             print "          8   speak('%s')" % phrases[2]
         print ""
+
+
     print "Gamepad is now running... Press button 1 to stop."
     lastMove = [0, 0]
-    done = True
+    doneSpeaking = True
     retval = getGamepadNow()
     button = retval["button"]
     length = len(button)
     tryToMove = True
     while True:
-        retval = getGamepadNow()
+        retval = getGamepad()		#changed to blocking, JWS
         button = retval["button"]
         axis = retval["axis"]
         freqs = [None, None]
@@ -274,21 +280,24 @@ def gamepad(*phrases, **kwargs):
                 freqs[0] = 659
             else:
                 freqs[1] = 659
+
         ## speak
         if length > 5 and button[5]:
-            if done:
+            if doneSpeaking:
                 speak(phrases[0], async=1)
-                done = False
+                doneSpeaking = False
         elif length > 6 and button[6]:
-            if done:
+            if doneSpeaking:
                 speak(phrases[1], async=1)
-                done = False
+                doneSpeaking = False
         elif length > 7 and button[7]:
-            if done:
+            if doneSpeaking:
                 speak(phrases[2], async=1)
-                done = False
+                doneSpeaking = False
         else:
-            done = True
+            doneSpeaking = True
+
+
         if tryToMove and (axis[0], axis[1]) != lastMove:
             try:
                 move(-axis[1], -axis[0])
