@@ -1,4 +1,11 @@
 """
+NOTICE: This file is a copy of scribbler.py.
+IT IS NOT USED BY MYRO2!
+
+This file contains experimental modifications for using the Fluke on it's
+own, without a scribbler. If you are trying to modify Myro2 (the Python
+verson of Myro) you should be working on the scribbler.py file instead!
+
 Myro code for the Fluke board.
 (c) 2007, Institute for Personal Robots in Education
 http://roboteducation.org/
