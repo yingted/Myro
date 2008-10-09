@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 using System.IO;
 using System.IO.IsolatedStorage;
 using System.Reflection;
@@ -7,6 +8,20 @@ using System.Xml.Serialization;
 
 namespace IronEditor.UI.WinForms
 {
+    [Serializable]
+    public class UserSettings
+    {
+        public string FontName { get; set; }
+        public float FontSize { get; set; }
+        public Font UIFont
+        {
+            get
+            {
+                return new Font(FontName, FontSize);
+            }
+        }
+    }
+
     public static class ApplicationOptions
     {
         public static string SettingsDirectory { get; set; }

@@ -102,22 +102,6 @@ namespace IronEditor.UI.WinForms
             Application.Exit();
         }
 
-        public void NewProject(MainFormController _controller)
-        {
-            NewProjectDialog newProjectDialog = new NewProjectDialog(_controller);
-            if(newProjectDialog.ShowDialog() == DialogResult.OK)
-            {
-                if (newProjectDialog.ProjectType == "Project")
-                {
-                    Clear();
-                    //EngineCache.AppendPathToEngines(newProjectDialog.ProjectPath);
-                    MainForm.OpenProject(newProjectDialog.ProjectPath);
-                }
-                else
-                    OpenFile(CreateDefaultActiveFile(newProjectDialog.SelectedLanguage));
-            }
-        }
-
         private ActiveCodeFile CreateDefaultActiveFile(string language)
         {
             string[] fileExt = FindExtensionByLanguage(language);
@@ -188,24 +172,9 @@ namespace IronEditor.UI.WinForms
             MainForm.SetSaveInformationForActiveFile(location);
         }
 
-        public void OpenProject()
-        {
-            FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog();
-            folderBrowserDialog.SelectedPath = Directory.GetCurrentDirectory();
-            folderBrowserDialog.ShowNewFolderButton = false;
-            folderBrowserDialog.Description = "Select the folder to load";
-            if(folderBrowserDialog.ShowDialog() == DialogResult.OK)
-            {
-                Clear();
-                MainForm.OpenProject(folderBrowserDialog.SelectedPath);
-                //EngineCache.AppendPathToEngines(folderBrowserDialog.SelectedPath);
-            }
-        }
-
         private void Clear()
         {
             MainForm.ClearOutputStream();
-            MainForm.ClearProjectList();
             MainForm.ClearOpenFiles();
         }
 

@@ -16,7 +16,6 @@ namespace IronEditor.UI.WinForms
         {
             InitializeComponent();
             KeyDown += new KeyEventHandler(mainForm_KeyDown);
-            //projectTree.OpenFileRequest += projectTree_OpenFileRequest;
             
             _controller = new MainFormController(this);
 
@@ -68,19 +67,9 @@ namespace IronEditor.UI.WinForms
             outputWindow.GetOutput().Clear();
         }
 
-        public void ClearProjectList()
-        {
-            //projectTree.Clear();
-        }
-
         public void ClearOpenFiles()
         {
             fileManager1.Clear();
-        }
-
-        public void OpenProject(string folder)
-        {
-            //projectTree.PopulateDirectoryTree(folder);
         }
 
         public ActiveCodeFile GetCurrentActiveFile()
@@ -100,7 +89,6 @@ namespace IronEditor.UI.WinForms
             //newToolStripMenuItem.Enabled = enable;
             //openToolStripMenuItem.Enabled = enable;
             //openToolStripButton.Enabled = enable;
-            //openProjectToolStripMenuItem.Enabled = enable;
             cutToolStripMenuItem.Enabled = enable;
             cutToolStripButton.Enabled = enable;
             copyToolStripMenuItem.Enabled = enable;
@@ -126,12 +114,6 @@ namespace IronEditor.UI.WinForms
             _controller.LaunchHelp();
         }
 
-
-        void projectTree_OpenFileRequest(object sender, Controls.OpenFileEventArgs e)
-        {
-            _controller.OpenFile(e.File);
-        }
-
         private void aboutToolStripMenuItem_Click(object sender, System.EventArgs e)
         {
             _controller.DisplayAboutDialog();
@@ -146,7 +128,6 @@ namespace IronEditor.UI.WinForms
         {
             Cursor current = Cursor.Current;
             Cursor.Current = Cursors.WaitCursor;
-            _controller.NewProject(_controller);
             Cursor.Current = current;
         }
 
@@ -167,14 +148,6 @@ namespace IronEditor.UI.WinForms
             _controller.OpenFile();
             Cursor.Current = current;
 
-        }
-
-        private void openProjectToolStripMenuItem_Click(object sender, System.EventArgs e)
-        {
-            Cursor current = Cursor.Current;
-            Cursor.Current = Cursors.WaitCursor;
-            _controller.OpenProject();
-            Cursor.Current = current;
         }
 
         private void undoToolStripMenuItem_Click(object sender, System.EventArgs e)
