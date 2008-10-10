@@ -57,6 +57,12 @@ namespace IronEditor.UI.WinForms
             SetButtonsStatus();
         }
 
+        public void OpenFile()
+        {
+            _controller.NewFile();
+            SetButtonsStatus();
+        }
+
         public string CurrentActiveFileLocation()
         {
             return fileManager1.GetCurrentFile().Location;
@@ -85,10 +91,10 @@ namespace IronEditor.UI.WinForms
         private void SetButtonsStatus()
         {
             bool enable = HasFileOpen;
-            //newToolStripButton.Enabled = enable;
-            //newToolStripMenuItem.Enabled = enable;
-            //openToolStripMenuItem.Enabled = enable;
-            //openToolStripButton.Enabled = enable;
+            newToolStripButton.Enabled = true;
+            newToolStripMenuItem.Enabled = true;
+            openToolStripMenuItem.Enabled = true;
+            openToolStripButton.Enabled = true;
             cutToolStripMenuItem.Enabled = enable;
             cutToolStripButton.Enabled = enable;
             copyToolStripMenuItem.Enabled = enable;
@@ -128,6 +134,7 @@ namespace IronEditor.UI.WinForms
         {
             Cursor current = Cursor.Current;
             Cursor.Current = Cursors.WaitCursor;
+            _controller.NewFile();
             Cursor.Current = current;
         }
 

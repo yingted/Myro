@@ -5,7 +5,7 @@ namespace IronEditor.UI.WinForms
     {
         public static string Version()
         {
-            return "3.0.0";
+            return "1.0.0";
         }
 
         public static string Title()

@@ -49,6 +49,9 @@ namespace IronEditor.UI.WinForms
             //IEngine engine = GetEngineFromCache();
 
             //engine.ExecuteStatement(MainForm.GetCodeBlock().GetCodeToExecute());
+
+            System.Console.WriteLine(MainForm.GetCodeBlock().GetCodeToExecute());
+
         }
 
         /*
@@ -64,6 +67,12 @@ namespace IronEditor.UI.WinForms
         public List<LanguageSettings> GetLanguages()
         {
             return languages;
+        }
+
+        public void NewFile()
+        {
+            ActiveCodeFile file = CreateDefaultActiveFile("Python");
+            MainForm.OpenFile(file);
         }
 
         public void OpenFile()
@@ -94,7 +103,10 @@ namespace IronEditor.UI.WinForms
 
         private string[] FindExtensionByLanguage(string langauge)
         {
-            return languages.Find(l => l.Language == langauge).FileExtensions.Split(';');
+            if (languages != null)
+                return languages.Find(l => l.Language == langauge).FileExtensions.Split(';');
+            else
+                return new string[0];
         }
 
         public void Exit()
@@ -115,6 +127,7 @@ namespace IronEditor.UI.WinForms
             ActiveCodeFile code = new ActiveCodeFile();
             code.Location = path;
             code.Untitled = true;
+            code.FileName = "New File";
             code.Unsaved = true;
             return code;
         }
@@ -130,9 +143,11 @@ namespace IronEditor.UI.WinForms
 
                     if (string.IsNullOrEmpty(location) || activeFile.Untitled)
                         location = GetSaveLocation();
-
-                    WriteCodeToExecuteToFile(location);
-                    MainForm.SetSaveInformationForActiveFile(location);
+                    if (location != string.Empty)
+                    {
+                        WriteCodeToExecuteToFile(location);
+                        MainForm.SetSaveInformationForActiveFile(location);
+                    }
                 }
             }
         }
@@ -161,15 +176,17 @@ namespace IronEditor.UI.WinForms
             //saveFileDialog.Filter = GetEngineFromCache().GetSaveFilter();
             if (saveFileDialog.ShowDialog() == DialogResult.OK)
                 return saveFileDialog.FileName;
-
             return string.Empty;
         }
 
         public void SaveAs()
         {
             string location = GetSaveLocation();
-            WriteCodeToExecuteToFile(location);
-            MainForm.SetSaveInformationForActiveFile(location);
+            if (location != string.Empty)
+            {
+                WriteCodeToExecuteToFile(location);
+                MainForm.SetSaveInformationForActiveFile(location);
+            }
         }
 
         private void Clear()

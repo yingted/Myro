@@ -36,6 +36,15 @@ namespace IronEditor.UI.WinForms.Controls
             }
         }
 
+        public void OpenFile()
+        {
+            IDETab tab = new IDETab();
+            if (FontToUse != null)
+                tab.Input.Font = FontToUse;
+            //tab.SetInitialText();
+            tabControl.TabPages.Add(tab);
+            tabControl.SelectedTab = tab;
+        }
 
         public void OpenFile(ActiveCodeFile file)
         {

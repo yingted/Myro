@@ -20,9 +20,6 @@ namespace IronEditor.UI.WinForms
                 case Keys.F5:
                     _controller.Execute();
                     break;
-                case Keys.F6:
-                    _controller.LaunchConsole();
-                    break;
             }
         }
     }

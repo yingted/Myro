@@ -9,7 +9,6 @@ namespace IronEditor.UI.WinForms
         public bool Unsaved;
         public bool Untitled;
 
-
         public ActiveCodeFile()
         {
         }
