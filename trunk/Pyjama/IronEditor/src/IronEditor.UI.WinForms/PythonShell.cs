@@ -49,7 +49,7 @@ using Microsoft.Scripting.Hosting;
 
             //output_stream = new TextBufferOutputStream(buffer);
 
-            runtime = ScriptRuntime.Create();
+            //runtime = ScriptRuntime.Create();
             runtime.LoadAssembly(typeof(string).Assembly);
             //runtime.LoadAssembly(typeof(Debug).Assembly);
             engine = runtime.GetEngine("py");
