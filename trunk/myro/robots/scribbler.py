@@ -648,7 +648,7 @@ class Scribbler(Robot):
         # from the mean, with approripate
         # min/max values to fit in an 8 bit register.
 	#
-	stdMod = 1.5
+	stdMod = 3.0
 
         minU = max(0, (uMean - sU*stdMod)    )
         maxU = min(255, (uMean + sU*stdMod)  )
