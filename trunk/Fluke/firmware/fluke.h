@@ -46,6 +46,7 @@
 
 #define putch(x) uart1_queue_write(x)
 #define dbg_putch(x) uart1_queue_write(x)
+
 #define getch(x) uart1GetchRTS(x)
 #define getchblock(x) uart1GetchBlockRTS(x)
 

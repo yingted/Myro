@@ -50,7 +50,7 @@ void update_low_battery_light()
     {
       if ((battery_counter % 80000) == 0)
 	{
-	  set_led(200);
+	  set_led(120);
 	}
       else if ((battery_counter % 80000) == 40000)
 	{

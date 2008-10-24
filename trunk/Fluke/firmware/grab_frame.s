@@ -150,8 +150,8 @@ col:
 	LDRB R8, [R4, #3]		
 	/* store R8 into imgbuf and increment imgbuf */
 	STRB R8, [R0], #1
-	/* debug on */
-	STR R5, [R4, #4]	
+	/* debug off */
+	STR R5, [R4, #12]	
 	/* subtract one from pixel count */
 	SUBS R3, R3, #1
 	/* debug off */	
@@ -179,6 +179,19 @@ dummy:
 	
 	BNE col
 
+	/* turn debug led on */
+	STR R5, [R4, #4]	
+
+	/* delay for a while so we can see the led*/
+	LDR R6,=50000
+leddelay:	
+	SUBS R6, R6, #1	
+	BNE leddelay
+	
+	/* debug led off */
+	STR R5, [R4, #12]	
+
+	
         /* Enable IRQ */
         MRS R5, CPSR
         BIC R5, R5, #0x80

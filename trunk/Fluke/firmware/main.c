@@ -56,7 +56,7 @@ int main (void)
   // are we ready to relay scribbler output
   // by default we wait until we get a scribbler request from
   // the user before relaying scribbler messages via bluetooth
-  int scrib = 0;
+  int relay_scrib_messages = 0;
 
   // is the current command a scribbler command
   int scribbler_cmd = 0;
@@ -194,8 +194,8 @@ int main (void)
 	      else if (ch == SET_PASS_BYTE)	   serve_send_byte();
 	      else if (ch == SET_PASSTHROUGH)	   serve_set_passthrough();
 	      else if (ch == SET_PASS_N_BYTES)	   serve_set_pass_n_bytes();
-	      else if (ch == SET_PASSTHROUGH_ON)   scrib = 1;
-	      else if (ch == SET_PASSTHROUGH_OFF)  scrib = 0;
+	      else if (ch == SET_PASSTHROUGH_ON)   relay_scrib_messages = 1;
+	      else if (ch == SET_PASSTHROUGH_OFF)  relay_scrib_messages = 0;
 	      else if (ch == GET_PASS_N_BYTES)	   serve_get_pass_n_bytes();
 	      else if (ch == GET_PASS_BYTES_UNTIL) serve_get_pass_bytes_until();
 	      else if (ch == SET_FORWARDNESS)	   serve_set_forwardness();
@@ -218,7 +218,7 @@ int main (void)
 	  if (scribbler_cmd)	    
 	    {	      
 	      // Flush if this is the first time we have  talked to the scribbler 
-	      if (scrib == 0)
+	      if (relay_scrib_messages == 0)
 		{
 		  for (i = 0; i < 100; i++)
 		    {
@@ -226,7 +226,7 @@ int main (void)
 		    }
 		}
 
-	      scrib = 1;
+	      relay_scrib_messages = 1;
 	      
 	      // we just got a GET_INFO request; pass it on to the scribbler
 	      if ((rqst_idx == 0) && (ch == GET_INFO))
@@ -273,25 +273,26 @@ int main (void)
        * if we are talking to the scribbler see if it has anything
        * for us to relay over the bluetooth link
        */
-      if (scrib)
+      if (relay_scrib_messages)
 	{
 	  ch = uart0Getch();
 	  if (ch != -1)
-	    {	  
+	    {
 	      // Process GET_INFO request we got the last character
 	      if (get_info > 500 && ch == 0x0A)
 		{
 		  get_info = 0;
-		}	      
+		}
+
 	      // Process GET_INFO we just sent our GET_INFO string
 	      if (get_info >= 500 && get_info < 50000)
 		{
 		  putch(',');
 		  get_info = 50000;
-		}	      
+		}
 	      putch(ch);	      
 	    }
-	}      
+	}
       
       
       /* 
