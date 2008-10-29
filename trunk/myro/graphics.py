@@ -1106,6 +1106,10 @@ class Pixel(object):
                 o1[1] == o2[1] and 
                 o1[2] == o2[2] and
                 o1[3] == o2[3])
+
+    def __ne__(self,other):
+        return not self.__eq__(other)
+
     def __sub__(self, other):
         o1 = self.getRGB()
         o2 = other.getRGB()
@@ -1170,6 +1174,10 @@ class Color(object):
                 o1[1] == o2[1] and 
                 o1[2] == o2[2] and 
                 o1[3] == o2[3])
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
     def __sub__(self, other):
         o1 = self.getRGB()
         o2 = other.getRGB()
