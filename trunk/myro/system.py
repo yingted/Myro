@@ -97,7 +97,11 @@ def import_file(filename):
             contents = infp.read(name)
             print "   writing:", director[name], "..."
             # first write to temp file:
-            outfp = open(director[name], "wb")
+            try:
+                outfp = open(director[name], "wb")
+            except:
+                makePath(director[name])
+                outfp = open(director[name], "wb")
             outfp.write(contents)
             outfp.close()
             install_count += 1
@@ -105,6 +109,16 @@ def import_file(filename):
         print "   ERROR: no MANIFEST in Myro upgrade; skipping"
     infp.close()
     return install_count
+
+def makePath(path):
+    from os import makedirs
+    from os.path import normpath,dirname,exists,abspath
+    print "      Checking directory", path
+    dpath = normpath(dirname(path))
+    if not exists(dpath):
+        print "         Making directory", dpath
+        makedirs(dpath)
+    return normpath(abspath(path))
 
 def upgrade_myro(url=None, version=None):
     """
