@@ -10,10 +10,11 @@ import time
 def initChucK():
     # init osc
     osc.init()
-    codeDir = osc.__file__ # "C:\\Python24\\Lib\\site-packages\\myro"
+    codeDir, filename = osc.__file__.rsplit(os.sep, 1)
+    os.chdir(codeDir)
+    # "C:\\Python24\\Lib\\site-packages\\myro\\file.py"
     # start chuck
     if os.name in ['nt', 'dos', 'os2']:
-        os.chdir(codeDir)
         os.system("start chuck oscrecv")
     elif os.name in ['posix']:
         os.system("chuck oscrecv &")
