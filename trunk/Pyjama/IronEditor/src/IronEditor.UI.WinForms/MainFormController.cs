@@ -3,19 +3,26 @@ using System.IO;
 using System.Windows.Forms;
 using IronEditor.UI.WinForms.Dialogs;
 
+using IronPython.Hosting;
+using Microsoft.Scripting;
+using Microsoft.Scripting.Hosting;
+
 namespace IronEditor.UI.WinForms
 {
     public class MainFormController
     {
         public IMainForm MainForm { get; set; }
         List<LanguageSettings> languages;
-        //private EngineCache EngineCache;
+        private ScriptEngine engine;
+        private ScriptScope scope;
 
         public MainFormController(IMainForm mainForm)
         {
             MainForm = mainForm;
-            //EngineCache = new EngineCache();
-
+            // Engine stuff:
+            engine = IronPython.Hosting.Python.CreateEngine();
+            scope = engine.Runtime.CreateScope();
+          
             LoadSettings();
         }
 
@@ -52,6 +59,26 @@ namespace IronEditor.UI.WinForms
 
             System.Console.WriteLine(MainForm.GetCodeBlock().GetCodeToExecute());
 
+            try
+            {
+                System.String code = MainForm.GetCodeBlock().GetCodeToExecute();
+                ScriptSource source = engine.CreateScriptSourceFromString(code, SourceCodeKind.InteractiveCode);
+                object result = source.Execute(scope);
+                System.Console.WriteLine(result);
+            } 
+            catch (System.Exception e)
+            {
+                System.Console.WriteLine("Exception: {0}", e.Message);
+            }
+
+//  Message="unexpected token 'print'"
+//  Source="Microsoft.Scripting"
+//  Column=1
+//  ErrorCode=16
+//  Line=1
+//  SourceCode="print \"hello\"\r\n"
+//  StackTrace:
+       
         }
 
         /*
