@@ -30,34 +30,16 @@ using Microsoft.Scripting.Hosting;
     public class PythonShell : BaseShell, PyjamaInterfaces.IShell
     {
         private readonly ScriptEngine engine;
-        private readonly ScriptRuntime runtime;
         private ScriptScope scope;
-        //private TextBufferOutputStream output_stream;
+        private ScriptRuntime runtime;
 
         public PythonShell()
             : base()
         {
-            //mgr = new SourceLanguagesManager();
-            //language = mgr.GetLanguageFromMimeType("text/x-python");
-
-            // Set up syntax highlighting
-            //buffer = new SourceBuffer(language);
-            //buffer.Highlight = true;
-            //source_view = new ShellSourceView(buffer, ">>> ");
-
-            // Change the font to fixed-width:
-
-            //output_stream = new TextBufferOutputStream(buffer);
-
-            //runtime = ScriptRuntime.Create();
             runtime.LoadAssembly(typeof(string).Assembly);
-            //runtime.LoadAssembly(typeof(Debug).Assembly);
             engine = runtime.GetEngine("py");
 
             Encoding encoding = Encoding.UTF8;
-            //engine.Runtime.IO.SetInput(stdin, encoding);
-            //engine.Runtime.IO.SetOutput(output_stream, encoding);
-            //engine.Runtime.IO.SetErrorOutput(output_stream, encoding);
             scope = engine.Runtime.CreateScope();
 
             // Probably a more direct way to do these things:

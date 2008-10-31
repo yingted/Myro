@@ -31,18 +31,21 @@
             this.output = new System.Windows.Forms.TextBox();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.consoleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.printToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.restartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.languageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
             this.pythonToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.rubyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.schemeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.restartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
+            this.printToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // output
             // 
+            this.output.AcceptsReturn = true;
+            this.output.AcceptsTab = true;
+            this.output.AllowDrop = true;
             this.output.BackColor = System.Drawing.SystemColors.WindowText;
             this.output.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.output.Cursor = System.Windows.Forms.Cursors.Default;
@@ -78,11 +81,11 @@
             this.consoleToolStripMenuItem.Size = new System.Drawing.Size(62, 20);
             this.consoleToolStripMenuItem.Text = "Console";
             // 
-            // printToolStripMenuItem
+            // restartToolStripMenuItem
             // 
-            this.printToolStripMenuItem.Name = "printToolStripMenuItem";
-            this.printToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.printToolStripMenuItem.Text = "Print...";
+            this.restartToolStripMenuItem.Name = "restartToolStripMenuItem";
+            this.restartToolStripMenuItem.Size = new System.Drawing.Size(126, 22);
+            this.restartToolStripMenuItem.Text = "Restart";
             // 
             // languageToolStripMenuItem
             // 
@@ -91,37 +94,37 @@
             this.rubyToolStripMenuItem,
             this.schemeToolStripMenuItem});
             this.languageToolStripMenuItem.Name = "languageToolStripMenuItem";
-            this.languageToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.languageToolStripMenuItem.Size = new System.Drawing.Size(126, 22);
             this.languageToolStripMenuItem.Text = "Language";
-            // 
-            // toolStripMenuItem1
-            // 
-            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(149, 6);
             // 
             // pythonToolStripMenuItem
             // 
             this.pythonToolStripMenuItem.Name = "pythonToolStripMenuItem";
-            this.pythonToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.pythonToolStripMenuItem.Size = new System.Drawing.Size(116, 22);
             this.pythonToolStripMenuItem.Text = "Python";
             // 
             // rubyToolStripMenuItem
             // 
             this.rubyToolStripMenuItem.Name = "rubyToolStripMenuItem";
-            this.rubyToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.rubyToolStripMenuItem.Size = new System.Drawing.Size(116, 22);
             this.rubyToolStripMenuItem.Text = "Ruby";
             // 
             // schemeToolStripMenuItem
             // 
             this.schemeToolStripMenuItem.Name = "schemeToolStripMenuItem";
-            this.schemeToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.schemeToolStripMenuItem.Size = new System.Drawing.Size(116, 22);
             this.schemeToolStripMenuItem.Text = "Scheme";
             // 
-            // restartToolStripMenuItem
+            // toolStripMenuItem1
             // 
-            this.restartToolStripMenuItem.Name = "restartToolStripMenuItem";
-            this.restartToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
-            this.restartToolStripMenuItem.Text = "Restart";
+            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(123, 6);
+            // 
+            // printToolStripMenuItem
+            // 
+            this.printToolStripMenuItem.Name = "printToolStripMenuItem";
+            this.printToolStripMenuItem.Size = new System.Drawing.Size(126, 22);
+            this.printToolStripMenuItem.Text = "Print...";
             // 
             // OutputWindow
             // 
@@ -138,7 +141,6 @@
 
         #endregion
 
-        private System.Windows.Forms.TextBox output;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem consoleToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem languageToolStripMenuItem;
@@ -148,6 +150,7 @@
         private System.Windows.Forms.ToolStripMenuItem rubyToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem schemeToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem restartToolStripMenuItem;
+        public System.Windows.Forms.TextBox output;
 
     }
 }

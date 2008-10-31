@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Text;
+using System.Collections.Generic;
 using System.IO;
 using System.Windows.Forms;
 using IronEditor.UI.WinForms.Dialogs;
@@ -14,16 +16,31 @@ namespace IronEditor.UI.WinForms
         public IMainForm MainForm { get; set; }
         List<LanguageSettings> languages;
         private ScriptEngine engine;
+        ScriptRuntime env;
         private ScriptScope scope;
+        ScriptRuntimeSetup setup;
+        MemoryStream ms;
+        int current_position = -1;
 
         public MainFormController(IMainForm mainForm)
         {
             MainForm = mainForm;
             // Engine stuff:
-            engine = IronPython.Hosting.Python.CreateEngine();
-            scope = engine.Runtime.CreateScope();
+            setup = new ScriptRuntimeSetup();
+            setup.LanguageSetups.Add(IronPython.Hosting.Python.CreateLanguageSetup(null));
+            //setup.LanguageSetups.Add(new LanguageSetup(assembly_qualified_name, displayName, languageNames, fileExtensions));
+            //env = ScriptRuntime.CreateFromConfiguration();
+            env = new ScriptRuntime(setup);
+            ms = new MemoryStream();
+            env.IO.SetOutput(ms, new StreamWriter(ms)); // RedirectToConsole();
+            engine = env.GetEngine("py"); // env.GetEngine("rb");
+            scope = env.CreateScope();
           
             LoadSettings();
+            // load one from command line
+            // or, open a blank one
+            NewFile();
+            MainForm.PrintConsoleMessage("Pyjama Python, Version 1.0.0\r\n>>> ");
         }
 
         private void LoadSettings()
@@ -48,28 +65,49 @@ namespace IronEditor.UI.WinForms
 
         public void LaunchHelp()
         {
-            MessageBox.Show("Coming soon! Maybe... \r\nIn the meantime, visit Blog.BenHall.me.uk", "Help", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show("See http://pyjamaproject.org", "Help", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private static string ReadFromStream(int current_position, MemoryStream ms)
+        {
+            int length = ((int)ms.Length);
+            System.Console.WriteLine(String.Format("current_position={0}, ms.Length={1}, length={2}", current_position, ms.Length, length));
+            Byte[] bytes = new Byte[length];
+            ms.Seek(0, SeekOrigin.Begin);
+            ms.Read(bytes, 0, length);
+            System.Console.WriteLine(String.Format("current_position={0}, length={1}, bytes={2}", current_position, length, 
+                Encoding.GetEncoding("utf-8").GetString(bytes)));
+            return Encoding.GetEncoding("utf-8").GetString(bytes);
         }
 
         internal void Execute()
         {
-            //IEngine engine = GetEngineFromCache();
-
-            //engine.ExecuteStatement(MainForm.GetCodeBlock().GetCodeToExecute());
-
-            System.Console.WriteLine(MainForm.GetCodeBlock().GetCodeToExecute());
-
+            System.String code = MainForm.GetCodeBlock().GetCodeToExecute();
+            ms.Flush();
             try
             {
-                System.String code = MainForm.GetCodeBlock().GetCodeToExecute();
                 ScriptSource source = engine.CreateScriptSourceFromString(code, SourceCodeKind.InteractiveCode);
                 object result = source.Execute(scope);
-                System.Console.WriteLine(result);
-            } 
-            catch (System.Exception e)
-            {
-                System.Console.WriteLine("Exception: {0}", e.Message);
+                string str = ReadFromStream(current_position, ms);
+                current_position = ((int)ms.Length) - 1;
+                MainForm.PrintConsoleMessage("Evaluate: " + code);
+                MainForm.PrintConsoleMessage(str);
+            } catch (System.Exception e1) {
+                try
+                {
+                    ScriptSource source = engine.CreateScriptSourceFromString(code, SourceCodeKind.Statements);
+                    object result = source.Execute(scope);
+                    string str = ReadFromStream(current_position, ms);
+                    current_position = ((int)ms.Length) - 1;
+                    MainForm.PrintConsoleMessage(str);
+                }
+                catch (System.Exception e)
+                {
+                    MainForm.PrintConsoleMessage(e.Message);
+                }
             }
+            MainForm.PrintConsoleMessage(">>> ");
+        }
 
 //  Message="unexpected token 'print'"
 //  Source="Microsoft.Scripting"
@@ -79,18 +117,6 @@ namespace IronEditor.UI.WinForms
 //  SourceCode="print \"hello\"\r\n"
 //  StackTrace:
        
-        }
-
-        /*
-        private IEngine GetEngineFromCache()
-        {
-            string languageExtension = MainForm.GetCurrentActiveFile().FileExtension;
-            LanguageSettings setting = FindLanguageByExtension(languageExtension);
-
-            return EngineCache.GetEngine(setting, MainForm.GetOutputStream());
-        }
-        */
-
         public List<LanguageSettings> GetLanguages()
         {
             return languages;

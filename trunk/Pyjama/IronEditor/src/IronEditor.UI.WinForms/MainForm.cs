@@ -45,7 +45,13 @@ namespace IronEditor.UI.WinForms
         {
             return fileManager1.GetCode();
         }
-        
+
+        public void PrintConsoleMessage(string message)
+        {
+            System.Console.WriteLine("Message: " + message);
+            outputWindow.output.Text += message + "\r\n";
+        }
+
         public bool HasFileOpen
         {
             get { return fileManager1.HasFileOpen; }

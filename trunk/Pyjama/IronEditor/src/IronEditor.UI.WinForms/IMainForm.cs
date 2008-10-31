@@ -7,6 +7,7 @@ namespace IronEditor.UI.WinForms
     {
         TextWriter GetOutputStream();
         CodeBlock GetCodeBlock();
+        void PrintConsoleMessage(string message);
         void OpenFile(ActiveCodeFile code);
         void ClearOutputStream();
         void ClearOpenFiles();
