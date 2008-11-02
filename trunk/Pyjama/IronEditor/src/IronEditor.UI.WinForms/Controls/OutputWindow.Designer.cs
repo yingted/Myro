@@ -46,6 +46,7 @@
             this.output.AcceptsReturn = true;
             this.output.AcceptsTab = true;
             this.output.AllowDrop = true;
+            this.output.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
             this.output.BackColor = System.Drawing.SystemColors.WindowText;
             this.output.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.output.Cursor = System.Windows.Forms.Cursors.Default;

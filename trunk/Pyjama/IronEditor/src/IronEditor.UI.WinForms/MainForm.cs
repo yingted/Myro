@@ -11,6 +11,9 @@ namespace IronEditor.UI.WinForms
     public partial class mainForm : BaseForm, IMainForm
     {
         private MainFormController _controller;
+        bool need_newline = false;
+        bool need_prompt = true;
+        string prompt = ">>> ";
 
         public mainForm()
         {
@@ -46,10 +49,29 @@ namespace IronEditor.UI.WinForms
             return fileManager1.GetCode();
         }
 
+        public void PrintPrompt()
+        {
+            if (need_newline)
+                PrintConsoleMessage("\r\n");
+            if (need_prompt)
+                PrintConsoleMessage(prompt);
+            need_newline = false;
+            need_prompt = false;
+        }
+
+        public void PrintLineConsoleMessage(string message)
+        {
+            outputWindow.output.Text += message + "\r\n";
+            need_newline = false;
+            need_prompt = true;
+        }
+            
         public void PrintConsoleMessage(string message)
         {
-            System.Console.WriteLine("Message: " + message);
-            outputWindow.output.Text += message + "\r\n";
+            outputWindow.output.Text += message;
+            // if not ending with newline
+            need_newline = !(message.EndsWith("\r") | message.EndsWith("\n"));
+            need_prompt = ! message.Equals("");
         }
 
         public bool HasFileOpen

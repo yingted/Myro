@@ -17,9 +17,24 @@ namespace IronEditor.UI.WinForms.Controls
 
             textBox = new TextBox();
             textBox.Multiline = true;
+            textBox.AcceptsReturn = true;
+            textBox.AcceptsTab = true;
             textBox.Dock = DockStyle.Fill;
+            textBox.KeyPress += new KeyPressEventHandler(textBox_KeyPress);
             textBox.TextChanged += textbox_TextChanged;
             Controls.Add(textBox);
+        }
+
+        void textBox_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == '\t')
+            {
+                int start = textBox.SelectionStart;
+                textBox.Text = textBox.Text.Insert(start, "    ");
+                textBox.SelectionStart = start + 4;
+                e.Handled = true;
+                return;
+            }
         }
 
         void textbox_TextChanged(object sender, EventArgs e)
