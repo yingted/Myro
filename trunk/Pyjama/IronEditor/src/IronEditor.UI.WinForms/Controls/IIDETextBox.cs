@@ -19,6 +19,5 @@ namespace IronEditor.UI.WinForms.Controls
         void Paste();
         void SelectAll();
         event IDETextBoxEvent.TextChangedHandler TextChanged;
-
     }
 }

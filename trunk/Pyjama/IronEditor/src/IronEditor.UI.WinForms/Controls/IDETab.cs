@@ -7,32 +7,34 @@ namespace IronEditor.UI.WinForms.Controls
     
         public IDEInput Input { get; set; }
         public ActiveCodeFile ActiveFile { get; set; }
+        public StandardIDETextBox textBox;
+        public IMainForm MainForm;
 
-        public IDETab(ActiveCodeFile file)
-            : this(file.FileExtension)
+        public IDETab(IMainForm main_form, ActiveCodeFile file)
+            : this(main_form, file.FileExtension)
         {
             UpdateFileName(file);
             ActiveFile = file;
         }
 
-        public IDETab(string fileExtension)
+        public IDETab(IMainForm main_form, string fileExtension)
         {
+            MainForm = main_form;
             Text = "NewFile";
             CreateTextBox(fileExtension);
         }
 
-        public IDETab()
+        public IDETab(IMainForm main_form)
         {
+            MainForm = main_form;
             Text = "NewFile";
             CreateTextBox(string.Empty);
         }
 
         private void CreateTextBox(string fileExtension)
         {
-            IIDETextBox textBox;
-            
             //if (MonoEnvironment.IsRunningOnMono())
-            textBox = new StandardIDETextBox();
+            textBox = new StandardIDETextBox(MainForm);
             //else
             //textBox = new CodeEditorIDETextBox(fileExtension);
 
@@ -41,15 +43,16 @@ namespace IronEditor.UI.WinForms.Controls
             Controls.Add(textBox as Control);
         }
 
-        internal void UpdateFileName(ActiveCodeFile file)
-        {
-            Text = file.FileName;
-        }
-
         void textBox_TextChanged(object sender, System.EventArgs e)
         {
             ActiveFile.Unsaved = true;
             UpdateSaveStatus();
+        }
+
+        internal void UpdateFileName(ActiveCodeFile file)
+        {
+            //System.Console.WriteLine("IDETab.UpdateFileName to " + file.FileName);
+            Text = file.FileName;
         }
 
         public void UpdateSaveStatus()

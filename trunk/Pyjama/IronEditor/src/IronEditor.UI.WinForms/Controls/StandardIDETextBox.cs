@@ -7,35 +7,57 @@ namespace IronEditor.UI.WinForms.Controls
     public partial class StandardIDETextBox : UserControl, IIDETextBox
     {
         public new event IDETextBoxEvent.TextChangedHandler TextChanged;
-
+        private IMainForm MainForm;
         private TextBox textBox;
 
-        public StandardIDETextBox()
+        public StandardIDETextBox(IMainForm main_form)
         {
+            MainForm = main_form;
             InitializeComponent();
             this.Dock = DockStyle.Fill;
-
             textBox = new TextBox();
             textBox.Multiline = true;
             textBox.AcceptsReturn = true;
             textBox.AcceptsTab = true;
             textBox.Dock = DockStyle.Fill;
             textBox.KeyPress += new KeyPressEventHandler(textBox_KeyPress);
+            textBox.KeyUp += new KeyEventHandler(textBox_KeyUp);
             textBox.TextChanged += textbox_TextChanged;
+            textBox.Font = new Font("Courier New", 10); 
             Controls.Add(textBox);
+        }
+
+        void textBox_KeyUp(object sender, KeyEventArgs e)
+        {
+            // Do things when a key goes down  
+            // FIXME: this can be wrong when selecting
+            int col = (textBox.SelectionStart - textBox.GetFirstCharIndexOfCurrentLine() + 1);
+            int line = (textBox.GetLineFromCharIndex(textBox.SelectionStart) + 1);
+            MainForm.UpdateGUI(col, line);
         }
 
         void textBox_KeyPress(object sender, KeyPressEventArgs e)
         {
-            if (e.KeyChar == '\t')
+            // Add ability to handle newlines after line ending with colon
+            if (e.KeyChar == '\t') // tab
             {
                 int start = textBox.SelectionStart;
                 textBox.Text = textBox.Text.Insert(start, "    ");
                 textBox.SelectionStart = start + 4;
                 e.Handled = true;
-                return;
             }
         }
+
+        public int CurrentColumn
+        {
+            get {return (textBox.SelectionStart - textBox.GetFirstCharIndexOfCurrentLine() + 1);}
+        }
+
+        public int CurrentLine
+        {
+            get { return (textBox.GetLineFromCharIndex(textBox.SelectionStart) + 1); }
+        }
+
 
         void textbox_TextChanged(object sender, EventArgs e)
         {

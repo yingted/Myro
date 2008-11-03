@@ -21,7 +21,7 @@ namespace IronEditor.UI.WinForms
         }
 
         public override void Write(Byte [] buffer, int offset, int count) {
-            mainform.PrintLineConsoleMessage(Encoding.UTF8.GetString(buffer, offset, count));
+            mainform.PrintConsoleMessage(Encoding.UTF8.GetString(buffer, offset, count));
         }
     }
     
@@ -54,6 +54,7 @@ namespace IronEditor.UI.WinForms
             // or, open a blank one
             NewFile();
             MainForm.PrintConsoleMessage("Pyjama Python, Version 1.0.0\r\n>>> ");
+            
         }
 
         private void LoadSettings()
@@ -78,7 +79,7 @@ namespace IronEditor.UI.WinForms
 
         public void LaunchHelp()
         {
-            MessageBox.Show("See http://pyjamaproject.org", "Help", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show("See http://PyjamaProject.org", "Help", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         internal void Execute()
@@ -86,11 +87,11 @@ namespace IronEditor.UI.WinForms
             // Get text to eval:
             System.String code = MainForm.GetCodeBlock().GetCodeToExecute();
             code = code.Trim();
+            MainForm.PrintLineConsoleMessage(code);
             try
             {
                 ScriptSource source = engine.CreateScriptSourceFromString(code, SourceCodeKind.InteractiveCode);
                 object result = source.Execute(scope);
-                MainForm.PrintLineConsoleMessage(code);
             } catch (System.Exception e1) {
                 try
                 {
@@ -122,7 +123,7 @@ namespace IronEditor.UI.WinForms
         public void NewFile()
         {
             ActiveCodeFile file = CreateDefaultActiveFile("Python");
-            MainForm.OpenFile(file);
+            MainForm.OpenFile(MainForm, file);
         }
 
         public void OpenFile()
@@ -141,7 +142,7 @@ namespace IronEditor.UI.WinForms
         public void OpenFile(ActiveCodeFile file)
         {
             if (File.Exists(file.Location))
-                MainForm.OpenFile(file);
+                MainForm.OpenFile(MainForm, file);
             else
                 throw new FileNotFoundException("File not found", file.Location);
         }
@@ -177,13 +178,14 @@ namespace IronEditor.UI.WinForms
             ActiveCodeFile code = new ActiveCodeFile();
             code.Location = path;
             code.Untitled = true;
-            code.FileName = "New File";
+            code.FileName = "Untitled";
             code.Unsaved = true;
             return code;
         }
 
         public void Save()
         {
+            //System.Console.WriteLine("controller saving...");
             ActiveCodeFile activeFile = MainForm.GetCurrentActiveFile();
             if (MainForm.HasFileOpen && activeFile != null)
             {
@@ -196,6 +198,7 @@ namespace IronEditor.UI.WinForms
                     if (location != string.Empty)
                     {
                         WriteCodeToExecuteToFile(location);
+                        //System.Console.WriteLine("saving to " + location);
                         MainForm.SetSaveInformationForActiveFile(location);
                     }
                 }

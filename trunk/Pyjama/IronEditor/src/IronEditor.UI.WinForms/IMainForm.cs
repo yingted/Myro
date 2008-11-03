@@ -10,7 +10,8 @@ namespace IronEditor.UI.WinForms
         void PrintConsoleMessage(string message);
         void PrintLineConsoleMessage(string message);
         void PrintPrompt();
-        void OpenFile(ActiveCodeFile code);
+        void OpenFile(IMainForm MainForm, ActiveCodeFile code);
+        void UpdateGUI(int col, int line);
         void ClearOutputStream();
         void ClearOpenFiles();
         bool HasFileOpen { get; }

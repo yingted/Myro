@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using System.IO;
 using System.IO.IsolatedStorage;
+using System.Threading;
 using IronEditor.UI.WinForms.Controls;
 using IronEditor.UI.WinForms.Dialogs;
 
@@ -14,6 +15,7 @@ namespace IronEditor.UI.WinForms
         bool need_newline = false;
         bool need_prompt = true;
         string prompt = ">>> ";
+        Thread execute_thread;
 
         public mainForm()
         {
@@ -26,6 +28,11 @@ namespace IronEditor.UI.WinForms
 
             SetButtonsStatus();
             ApplyUserSettings(ApplicationOptions.LoadUserSettings(ApplicationOptions.GetIsolatedStorage()));
+            //this.ActiveControl = this.outputWindow.output; // Output window gets cursor
+            this.ActiveControl = fileManager1.GetCurrentTabTextBox(); // tab text gets cursor
+            this.languageName.Text = "Python";
+            this.columnNumber.Text = "" + 1;
+            this.lineNumber.Text = "" + 1;
         }
 
         void mainForm_KeyDown(object sender, KeyEventArgs e)
@@ -36,6 +43,14 @@ namespace IronEditor.UI.WinForms
 
         private void execute_Click(object sender, System.EventArgs e)
         {
+            // FIXME:
+            // set GUI in thread run state
+            // change cursor to busy
+            // FIXME:
+            // This won't work as you have to do some business with Invoke to coordinate:
+            //    execute_thread = new Thread( new ThreadStart(_controller.Execute));
+            //    execute_thread.Start();
+            // For now, just do it directly:
             _controller.Execute();
         }
 
@@ -57,6 +72,8 @@ namespace IronEditor.UI.WinForms
                 PrintConsoleMessage(prompt);
             need_newline = false;
             need_prompt = false;
+            outputWindow.output.SelectionStart = outputWindow.output.Text.Length;
+            outputWindow.output.ScrollToCaret();
         }
 
         public void PrintLineConsoleMessage(string message)
@@ -64,6 +81,8 @@ namespace IronEditor.UI.WinForms
             outputWindow.output.Text += message + "\r\n";
             need_newline = false;
             need_prompt = true;
+            outputWindow.output.SelectionStart = outputWindow.output.Text.Length;
+            outputWindow.output.ScrollToCaret();
         }
             
         public void PrintConsoleMessage(string message)
@@ -72,6 +91,8 @@ namespace IronEditor.UI.WinForms
             // if not ending with newline
             need_newline = !(message.EndsWith("\r") | message.EndsWith("\n"));
             need_prompt = ! message.Equals("");
+            outputWindow.output.SelectionStart = outputWindow.output.Text.Length;
+            outputWindow.output.ScrollToCaret();
         }
 
         public bool HasFileOpen
@@ -79,10 +100,16 @@ namespace IronEditor.UI.WinForms
             get { return fileManager1.HasFileOpen; }
         }
 
-        public void OpenFile(ActiveCodeFile file)
+        public void OpenFile(IMainForm main_form, ActiveCodeFile file)
         {
-            fileManager1.OpenFile(file);
+            fileManager1.OpenFile(main_form, file);
             SetButtonsStatus();
+        }
+
+        public void UpdateGUI(int col, int line)
+        {
+            this.columnNumber.Text = "" + col;
+            this.lineNumber.Text = "" + line;
         }
 
         public void OpenFile()

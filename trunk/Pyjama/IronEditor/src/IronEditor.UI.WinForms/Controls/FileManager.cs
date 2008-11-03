@@ -36,9 +36,9 @@ namespace IronEditor.UI.WinForms.Controls
             }
         }
 
-        public void OpenFile()
+        public void OpenFile(IMainForm main_form)
         {
-            IDETab tab = new IDETab();
+            IDETab tab = new IDETab(main_form);
             if (FontToUse != null)
                 tab.Input.Font = FontToUse;
             //tab.SetInitialText();
@@ -46,9 +46,9 @@ namespace IronEditor.UI.WinForms.Controls
             tabControl.SelectedTab = tab;
         }
 
-        public void OpenFile(ActiveCodeFile file)
+        public void OpenFile(IMainForm main_form, ActiveCodeFile file)
         {
-            IDETab tab = new IDETab(file);
+            IDETab tab = new IDETab(main_form, file);
             if (FontToUse != null)
                 tab.Input.Font = FontToUse;
             tab.SetInitialText(File.ReadAllText(file.Location));
@@ -82,9 +82,17 @@ namespace IronEditor.UI.WinForms.Controls
 
         private IDETab GetCurrentTab()
         {
-            if (tabControl.TabCount > 0) 
+            if (tabControl.TabCount > 0)
                 return tabControl.SelectedTab as IDETab;
-            
+
+            return null;
+        }
+
+        public Control GetCurrentTabTextBox()
+        {
+            if (tabControl.TabCount > 0)
+                return ((IDETab)tabControl.SelectedTab).textBox as Control;
+
             return null;
         }
 
@@ -97,6 +105,7 @@ namespace IronEditor.UI.WinForms.Controls
         {
             ActiveCodeFile code = GetCurrentFile();
             code.Location = location;
+            code.SetFileName(location);
             code.Unsaved = false;
             code.Untitled = false;
             IDETab tab = GetCurrentTab();

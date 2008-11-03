@@ -32,6 +32,7 @@
             this.main = new System.Windows.Forms.Panel();
             this.mainContentSplit = new System.Windows.Forms.SplitContainer();
             this.fileManager1 = new IronEditor.UI.WinForms.Controls.FileManager();
+            this.outputWindow = new IronEditor.UI.WinForms.Controls.OutputWindow();
             this.toolStrip = new System.Windows.Forms.Panel();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.newToolStripButton = new System.Windows.Forms.ToolStripButton();
@@ -80,12 +81,11 @@
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel1 = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
-            this.toolStripStatusLabel7 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.languageName = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel3 = new System.Windows.Forms.ToolStripStatusLabel();
-            this.toolStripStatusLabel6 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.lineNumber = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel4 = new System.Windows.Forms.ToolStripStatusLabel();
-            this.toolStripStatusLabel5 = new System.Windows.Forms.ToolStripStatusLabel();
-            this.outputWindow = new IronEditor.UI.WinForms.Controls.OutputWindow();
+            this.columnNumber = new System.Windows.Forms.ToolStripStatusLabel();
             this.main.SuspendLayout();
             this.mainContentSplit.Panel1.SuspendLayout();
             this.mainContentSplit.Panel2.SuspendLayout();
@@ -136,6 +136,20 @@
             this.fileManager1.Size = new System.Drawing.Size(635, 269);
             this.fileManager1.TabIndex = 4;
             this.fileManager1.Load += new System.EventHandler(this.fileManager1_Load);
+            // 
+            // outputWindow
+            // 
+            this.outputWindow.BackColor = System.Drawing.SystemColors.WindowText;
+            this.outputWindow.Cursor = System.Windows.Forms.Cursors.Default;
+            this.outputWindow.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.outputWindow.ForeColor = System.Drawing.SystemColors.Window;
+            this.outputWindow.Location = new System.Drawing.Point(0, 0);
+            this.outputWindow.Margin = new System.Windows.Forms.Padding(0);
+            this.outputWindow.Name = "outputWindow";
+            this.outputWindow.Padding = new System.Windows.Forms.Padding(0, 0, 0, 20);
+            this.outputWindow.Size = new System.Drawing.Size(635, 240);
+            this.outputWindow.TabIndex = 3;
+            this.outputWindow.Load += new System.EventHandler(this.outputWindow_Load);
             // 
             // toolStrip
             // 
@@ -256,7 +270,8 @@
             this.toolStripButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton1.Name = "toolStripButton1";
             this.toolStripButton1.Size = new System.Drawing.Size(23, 22);
-            this.toolStripButton1.Text = "toolStripButton1";
+            this.toolStripButton1.Text = "Run";
+            this.toolStripButton1.Click += new System.EventHandler(this.execute_Click);
             // 
             // toolStripButton2
             // 
@@ -265,7 +280,7 @@
             this.toolStripButton2.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton2.Name = "toolStripButton2";
             this.toolStripButton2.Size = new System.Drawing.Size(23, 22);
-            this.toolStripButton2.Text = "toolStripButton2";
+            this.toolStripButton2.Text = "Pause";
             // 
             // executeToolStripButton
             // 
@@ -413,7 +428,7 @@
             // 
             this.undoToolStripMenuItem.Name = "undoToolStripMenuItem";
             this.undoToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Z)));
-            this.undoToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
+            this.undoToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
             this.undoToolStripMenuItem.Text = "&Undo";
             this.undoToolStripMenuItem.Click += new System.EventHandler(this.undoToolStripMenuItem_Click);
             // 
@@ -421,14 +436,14 @@
             // 
             this.redoToolStripMenuItem.Name = "redoToolStripMenuItem";
             this.redoToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.Y)));
-            this.redoToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
+            this.redoToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
             this.redoToolStripMenuItem.Text = "&Redo";
             this.redoToolStripMenuItem.Visible = false;
             // 
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(141, 6);
+            this.toolStripSeparator3.Size = new System.Drawing.Size(161, 6);
             // 
             // cutToolStripMenuItem
             // 
@@ -436,7 +451,7 @@
             this.cutToolStripMenuItem.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.cutToolStripMenuItem.Name = "cutToolStripMenuItem";
             this.cutToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.X)));
-            this.cutToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
+            this.cutToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
             this.cutToolStripMenuItem.Text = "Cu&t";
             this.cutToolStripMenuItem.Click += new System.EventHandler(this.cutToolStripMenuItem_Click);
             // 
@@ -446,7 +461,7 @@
             this.copyToolStripMenuItem.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.copyToolStripMenuItem.Name = "copyToolStripMenuItem";
             this.copyToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.C)));
-            this.copyToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
+            this.copyToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
             this.copyToolStripMenuItem.Text = "&Copy";
             this.copyToolStripMenuItem.Click += new System.EventHandler(this.copyToolStripMenuItem_Click);
             // 
@@ -456,19 +471,20 @@
             this.pasteToolStripMenuItem.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.pasteToolStripMenuItem.Name = "pasteToolStripMenuItem";
             this.pasteToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.V)));
-            this.pasteToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
+            this.pasteToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
             this.pasteToolStripMenuItem.Text = "&Paste";
             this.pasteToolStripMenuItem.Click += new System.EventHandler(this.pasteToolStripMenuItem_Click);
             // 
             // toolStripSeparator4
             // 
             this.toolStripSeparator4.Name = "toolStripSeparator4";
-            this.toolStripSeparator4.Size = new System.Drawing.Size(141, 6);
+            this.toolStripSeparator4.Size = new System.Drawing.Size(161, 6);
             // 
             // selectAllToolStripMenuItem
             // 
             this.selectAllToolStripMenuItem.Name = "selectAllToolStripMenuItem";
-            this.selectAllToolStripMenuItem.Size = new System.Drawing.Size(144, 22);
+            this.selectAllToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.A)));
+            this.selectAllToolStripMenuItem.Size = new System.Drawing.Size(164, 22);
             this.selectAllToolStripMenuItem.Text = "Select &All";
             this.selectAllToolStripMenuItem.Click += new System.EventHandler(this.selectAllToolStripMenuItem_Click);
             // 
@@ -540,11 +556,11 @@
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStatusLabel1,
             this.toolStripStatusLabel2,
-            this.toolStripStatusLabel7,
+            this.languageName,
             this.toolStripStatusLabel3,
-            this.toolStripStatusLabel6,
+            this.lineNumber,
             this.toolStripStatusLabel4,
-            this.toolStripStatusLabel5});
+            this.columnNumber});
             this.statusStrip1.Location = new System.Drawing.Point(0, 542);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Size = new System.Drawing.Size(635, 22);
@@ -568,13 +584,13 @@
             this.toolStripStatusLabel2.Text = "Language:";
             this.toolStripStatusLabel2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
-            // toolStripStatusLabel7
+            // languageName
             // 
-            this.toolStripStatusLabel7.Name = "toolStripStatusLabel7";
-            this.toolStripStatusLabel7.Padding = new System.Windows.Forms.Padding(70, 0, 0, 0);
-            this.toolStripStatusLabel7.Size = new System.Drawing.Size(115, 17);
-            this.toolStripStatusLabel7.Text = "Python";
-            this.toolStripStatusLabel7.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.languageName.Name = "languageName";
+            this.languageName.Padding = new System.Windows.Forms.Padding(70, 0, 0, 0);
+            this.languageName.Size = new System.Drawing.Size(115, 17);
+            this.languageName.Text = "Python";
+            this.languageName.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // toolStripStatusLabel3
             // 
@@ -583,13 +599,13 @@
             this.toolStripStatusLabel3.Size = new System.Drawing.Size(36, 17);
             this.toolStripStatusLabel3.Text = "Line: ";
             // 
-            // toolStripStatusLabel6
+            // lineNumber
             // 
-            this.toolStripStatusLabel6.Name = "toolStripStatusLabel6";
-            this.toolStripStatusLabel6.Padding = new System.Windows.Forms.Padding(20, 0, 0, 0);
-            this.toolStripStatusLabel6.Size = new System.Drawing.Size(33, 17);
-            this.toolStripStatusLabel6.Text = "0";
-            this.toolStripStatusLabel6.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.lineNumber.Name = "lineNumber";
+            this.lineNumber.Padding = new System.Windows.Forms.Padding(20, 0, 0, 0);
+            this.lineNumber.Size = new System.Drawing.Size(33, 17);
+            this.lineNumber.Text = "0";
+            this.lineNumber.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // toolStripStatusLabel4
             // 
@@ -598,27 +614,13 @@
             this.toolStripStatusLabel4.Size = new System.Drawing.Size(52, 17);
             this.toolStripStatusLabel4.Text = "Column:";
             // 
-            // toolStripStatusLabel5
+            // columnNumber
             // 
-            this.toolStripStatusLabel5.Name = "toolStripStatusLabel5";
-            this.toolStripStatusLabel5.Padding = new System.Windows.Forms.Padding(20, 0, 0, 0);
-            this.toolStripStatusLabel5.Size = new System.Drawing.Size(33, 17);
-            this.toolStripStatusLabel5.Text = "0";
-            this.toolStripStatusLabel5.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // outputWindow
-            // 
-            this.outputWindow.BackColor = System.Drawing.SystemColors.WindowText;
-            this.outputWindow.Cursor = System.Windows.Forms.Cursors.Default;
-            this.outputWindow.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.outputWindow.ForeColor = System.Drawing.SystemColors.Window;
-            this.outputWindow.Location = new System.Drawing.Point(0, 0);
-            this.outputWindow.Margin = new System.Windows.Forms.Padding(0);
-            this.outputWindow.Name = "outputWindow";
-            this.outputWindow.Padding = new System.Windows.Forms.Padding(0, 0, 0, 20);
-            this.outputWindow.Size = new System.Drawing.Size(635, 240);
-            this.outputWindow.TabIndex = 3;
-            this.outputWindow.Load += new System.EventHandler(this.outputWindow_Load);
+            this.columnNumber.Name = "columnNumber";
+            this.columnNumber.Padding = new System.Windows.Forms.Padding(20, 0, 0, 0);
+            this.columnNumber.Size = new System.Drawing.Size(33, 17);
+            this.columnNumber.Text = "0";
+            this.columnNumber.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // mainForm
             // 
@@ -703,11 +705,11 @@
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel2;
-        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel7;
+        private System.Windows.Forms.ToolStripStatusLabel languageName;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel3;
-        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel6;
+        private System.Windows.Forms.ToolStripStatusLabel lineNumber;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel4;
-        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel5;
+        private System.Windows.Forms.ToolStripStatusLabel columnNumber;
 
 
 
