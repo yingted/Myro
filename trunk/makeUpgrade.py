@@ -39,7 +39,10 @@ manifest_files.sort()
 mfp = open("myro-upgrade-%s/MANIFEST" % upgrade_name, "w")
 first = 1
 completed = []
-for newfilename in set(manifest_files):
+file_set = list(set(manifest_files))
+file_set.sort()
+file_set.reverse()
+for newfilename in file_set:
     filename, path_filename = manifest[newfilename]
     # if file exists:
     if (posixpath.exists("myro/%s" % path_filename) and 
