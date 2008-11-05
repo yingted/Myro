@@ -1411,7 +1411,7 @@ def wall(): return getObstacle(1) > 4500
 
 def loop(*functions):
     """
-    Calls each of the given functions seuentially, N times.
+    Calls each of the given functions sequentially, N times.
     Example:
 
     >>> loop(f1, f2, 10)
@@ -1433,6 +1433,32 @@ def loop(*functions):
                 print ""
     stop()
     return "ok"
+
+def doTogether(*functions):
+    """
+    Runs each of the given functions at the same time.
+    Example:
+
+    >>> doTogether(f1, f2, f3)
+    will call f1() f2() and f3() together.
+    """
+    def makeThread(function):
+        import threading
+        thread = threading.Thread()
+        thread.run = function
+        return thread
+    assert len(functions) >= 2, "doTogether: takes 2 (or more) functions"
+    thread_list = []
+    # first make the threads:
+    for function in functions:
+        thread_list.append(makeThread(function))
+    # now, start them:
+    for thread in thread_list:
+        thread.start()
+    # wait for them to finish:
+    for thread in thread_list:
+        thread.join()
+    print "ok"
 
 def beepScale(duration, start, stop, factor=2):
     """
