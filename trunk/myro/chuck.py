@@ -265,7 +265,7 @@ class Shakers(Instrument):
     #    - Little Rocks = 21
     #    - Tuned Bamboo Chimes = 22
     def preset(self, number):
-        if preset >= 0 and preset <= 22:
+        if number >= 0 and number <= 22:
             osc.sendMsg("/inst/shakers/preset", [int(number)])
 
     # set shake energy [0.0-1.0]
@@ -311,7 +311,7 @@ class Saxophone(Instrument):
     # set vibrato frequency [Hz], vibrato gain [0.0-1.0], and
     # noise component gain [0.0-1.0]
     def setVibrato(self, vibratoFreq, vibratoGain, noiseGain):
-        if vibratoGain >= 0 and vibratoGani <= 1 and noiseGain >= 0 and noiseGain <= 1:
+        if vibratoGain >= 0 and vibratoGain <= 1 and noiseGain >= 0 and noiseGain <= 1:
             osc.sendMsg("/inst/saxofony/vibrato", [vibratoFreq * 1.0,
                                                    vibratoGain * 1.0,
                                                    noiseGain * 1.0])
@@ -348,7 +348,7 @@ class MoogSynthesizer(Instrument):
 
     # filter Q value [0.0-1.0]
     def setFilterQ(self, floatValue):
-        if filterQ >= 0 and filterQ <= 1:
+        if floatValue >= 0 and floatValue <= 1:
             osc.sendMsg("/inst/moog/filterQ", [floatValue * 1.0])
 
     # set filter sweep rate [0.0-1.0]
