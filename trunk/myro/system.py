@@ -147,11 +147,11 @@ def upgrade_myro(url=None, version=None):
                 if filename.startswith("myro-upgrade-"):
                     end = filename.index(".zip")
                     patch_ver = filename[13:end].split(".")
-                    if (version != None and 
-                        map(int, patch_ver) > map(int, version)):
-                        print "   Downloading..."
-                        install_count += import_url(url + filename)
-                    if map(int, patch_ver) > map(int, myro_ver):
+                    if (version != None): # get specific version
+                        if map(int, patch_ver) == map(int, version):
+                            print "   Downloading..."
+                            install_count += import_url(url + filename)
+                    elif map(int, patch_ver) > map(int, myro_ver):
                         # download it
                         print "   Downloading..."
                         install_count += import_url(url + filename)
