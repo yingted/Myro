@@ -6,7 +6,7 @@ Distributed under a Shared Source License
 """
 
 __REVISION__ = "$Revision$"
-__VERSION__  = "2.8.14"
+__VERSION__  = "2.8.15"
 __AUTHOR__   = "Doug Blank <dblank@cs.brynmawr.edu>"
 
 import sys, atexit, time, random, pickle, threading, os, types, copy
@@ -1074,6 +1074,42 @@ def getBattery():
     else:
         raise AttributeError, "need to initialize robot"
 
+def getIRMessage():
+    if myro.globvars.robot:
+        return myro.globvars.robot.getIRMessage()
+    else:
+        raise AttributeError, "need to initialize robot"
+
+def sendIRMessage(msg, footer=True):
+    if myro.globvars.robot:
+        return myro.globvars.robot.sendIRMessage(msg, footer)
+    else:
+        raise AttributeError, "need to initialize robot"
+
+def setCommunicateLeft(on=True):
+    if myro.globvars.robot:
+        return myro.globvars.robot.setCommunicateLeft(on)
+    else:
+        raise AttributeError, "need to initialize robot"
+
+def setCommunicateRight(on=True):
+    if myro.globvars.robot:
+        return myro.globvars.robot.setCommunicateLeft(on)
+    else:
+        raise AttributeError, "need to initialize robot"
+
+def setCommunicateCenter(on=True):
+    if myro.globvars.robot:
+        return myro.globvars.robot.setCommunicateCenter(on)
+    else:
+        raise AttributeError, "need to initialize robot"
+
+def setCommunicateAll(on=True):
+    if myro.globvars.robot:
+        return myro.globvars.robot.setCommunicateAll(on)
+    else:
+        raise AttributeError, "need to initialize robot"
+
 def configureBlob(y_low=0, y_high=255,
                   u_low=0, u_high=255,
                   v_low=0, v_high=255,
@@ -1338,7 +1374,7 @@ def setPixel(picture, x, y, color):
     return picture.setColor(x, y, color)
 
 def getGray(picture, x, y):
-    return sum(picture.getPixel(x, y).getRGB())/3
+    return sum((picture.getPixel(x, y)).getRGB())/3
 
 def setGray(picture, x, y, gray):
     return getPixel(picture, x, y).setRGB([gray,gray,gray])
@@ -1386,6 +1422,9 @@ def setGreen(pixel, value):
 
 def setBlue(pixel, value):
     return pixel.setColor(Color(pixel.getRGB()[0], pixel.getRGB()[1], value))
+
+def setGray(pixel, value):
+    return pixel.setColor(Color(value, value, value))
 
 def setAlpha(pixel, value):
     return pixel.setAlpha(value)

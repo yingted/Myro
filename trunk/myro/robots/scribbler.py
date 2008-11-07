@@ -152,6 +152,11 @@ class Scribbler(Robot):
 
     GET_VERSION=142
 
+    GET_IR_MESSAGE = 150
+    SEND_IR_MESSAGE = 151
+    SET_IR_EMITTERS = 152
+
+
     PACKET_LENGTH     =  9
     
     def __init__(self, serialport = None, baudrate = 38400):
@@ -188,6 +193,7 @@ class Scribbler(Robot):
         self._lastTranslate = 0
         self._lastRotate    = 0
         self._volume = 0
+        self.emitters = 0x1 | 0x2 | 0x4
         if serialport == None:
             if 'MYROROBOT'in os.environ:
                 serialport = os.environ['MYROROBOT']
@@ -1081,7 +1087,69 @@ class Scribbler(Robot):
         finally:
             self.lock.release()
         return retval
-    
+
+    def getIRMessage(self):
+        line = ''
+        try:
+            self.lock.acquire()
+            self.ser.write(chr(Scribbler.GET_IR_MESSAGE))
+            size = ord(self.ser.read(1))
+            while (len(line) < size):
+                line += self.ser.read(size-len(line))                   
+        finally:
+            self.lock.release()
+        return line
+
+    def sendIRMessage(self, data, footer=True):
+        try:
+            self.lock.acquire()
+            if footer:
+                data = data + chr(0x01)
+            self.ser.write(chr(Scribbler.SEND_IR_MESSAGE))            
+            self.ser.write(chr(len(data)))            
+            for i in data:
+                self.ser.write(i)
+        finally:
+            self.lock.release()
+        return 
+
+    def setCommunicateLeft(self, on=True):
+        if on:
+            self.emitters = self.emitters | 0x04
+        else:
+            self.emitters = self.emitters & ~0x04
+        return self.setCommunicate()
+
+    def setCommunicateCenter(self, on=True):
+        if on:
+            self.emitters = self.emitters | 0x02
+        else:
+            self.emitters = self.emitters & ~0x02
+        return self.setCommunicate()
+
+    def setCommunicateRight(self, on=True):
+        if on:
+            self.emitters = self.emitters | 0x01
+        else:
+            self.emitters = self.emitters & ~0x01
+        return self.setCommunicate()
+
+    def setCommunicateAll(self, on=True):
+        if on:
+            self.emitters = 0x01 | 0x02 | 0x04
+        else:
+            self.emitters = 0
+        return self.setCommunicate()
+
+    def setCommunicate(self):
+        try:
+            self.lock.acquire()
+            self.ser.write(chr(Scribbler.SET_IR_EMITTERS))            
+            self.ser.write(chr(self.emitters))            
+        finally:
+            self.lock.release()
+        return 
+
     def setBrightPower(self, power):
         try:
             self.lock.acquire()

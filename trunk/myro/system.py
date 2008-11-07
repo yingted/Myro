@@ -298,24 +298,32 @@ def get_info_timeout(s):
             retDict[it.lower().strip()] = value.strip()
     return retDict
             
-def load_scribbler(s, f):
+def load_scribbler(s, f, force=False):
     
     # check to see if we need to send magicKey when upgrading
-    info = get_info_timeout(s)
+    if myro.globvars.robot and myro.globvars.robot.dongle:
+        info = myro.globvars.robot.dongle
+    else:
+        info = get_info_timeout(s)
+        if "fluke" in info:
+            info = info["fluke"]
+        else:
+            info = "0.0.0"
 
-    #print info
+    print info
+
     sendMagicKey = False
 
-    if "fluke" in info.keys():
-
-        version = map(int, info["fluke"].split("."))
-        print "Version of fluke", version
+    version = map(int, info.split("."))
+    print "Version of fluke", version
     
-        if version <= [2, 5, 0]:
-            print "Older firmware version, Not sending magic key"
-        else:
-            sendMagicKey = True
-            print "Sending magic key"
+    if version > [2, 5, 0] or force:
+        sendMagicKey = True
+
+    if sendMagicKey:
+        print "Sending magic key"
+    else:
+        print "Older firmware version, Not sending magic key"            
 
     bytes=[]
     for t in f:        
