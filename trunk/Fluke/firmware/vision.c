@@ -30,9 +30,7 @@ unsigned char V_LOW = 90;
 unsigned char V_HIGH =120;
 
 
-// RLE buffer is used when sending an RLE blob image
-#define RLE_BUFFER_SIZE 2048
-unsigned char rle[RLE_BUFFER_SIZE+4];
+unsigned char rle[RLE_BUFFER_SIZE+4] __attribute__((aligned(4)));
 
 int rle_counter = 0;
 

@@ -14,6 +14,7 @@
 #include "uart.h"
 #include "ov7649.h"
 #include "fluke.h"
+#include "infrared.h"
 
 int getchblock2b()
 {
@@ -100,10 +101,6 @@ void setup_pins()
   IODIR = (S_RST  | MCLK   | MDIN   | LED   | D2A_CS | A2D_CS | MCS | 
 	   IROUT1 | IROUT2 | IROUT3 | B_TXD | B_RTS);
   IOSET = (D2A_CS | A2D_CS | MCS | B_TXD);
-
-  PINSEL0 |= (1 << 27);  // Match 1.1 (pin 13/IROUT1)  PROG   (R)
-  PINSEL1 |= (1 << 6);   // Match 1.3 (pin 19/IROUT2)  IPRE   (L)
-  PINSEL1 |= (1 << 8);   // Match 1.3 (pin 20/IROUT3)  MIDDLE (M)
 }
 
 void setup_pll()
@@ -666,23 +663,24 @@ void grab_image_vote(int times, unsigned char* img, int delay)
 
 void emit_on(uint8_t emitters)
 {
-  TIMER1_PR =  0x22;     // Load Prescalar
   TIMER1_TCR = 0x2;      // Reset Counter  
-  TIMER1_MR1 = 0x14;     // set MR1 to 40Khz
-  TIMER1_MCR = (1 << 4); // On match (MR1) reset the counter
   
   if (emitters & 0x01) // GET_DONGLE_R_IR)
     {
+      PINSEL0 |= (1 << 27);  // Match 1.1 (pin 13/IROUT1)  PROG   (R)
       TIMER1_EMR |= 0x0C2;     // set external match - toggle 1.1
     }
   
   if (emitters & 0x02) //GET_DONGLE_L_IR)
     {
+      PINSEL1 |= (1 << 6);   // Match 1.3 (pin 19/IROUT2)  IPRE   (L)
       TIMER1_EMR |= 0x304;    // set external match - toggle 1.2
     }
   
   if (emitters & 0x04) //GET_DONGLE_C_IR)
     {
+
+      PINSEL1 |= (1 << 8);   // Match 1.3 (pin 20/IROUT3)  MIDDLE (M)
       TIMER1_EMR |= 0xC08;    // set external match - toggle 1.3
     }
   
@@ -697,16 +695,20 @@ void emit_off(uint8_t emitters)
   if (emitters & 0x01) // GET_DONGLE_R_IR)
     {
       TIMER1_EMR &= ~0x0C2;     // set external match - toggle 1.1
+      PINSEL0 &= ~(1 << 27);  // Match 1.1 (pin 13/IROUT1)  PROG   (R)
     }
   
   if (emitters & 0x02) //GET_DONGLE_L_IR)
     {
       TIMER1_EMR &= ~0x304;    // set external match - toggle 1.2
+      PINSEL1 &= ~(1 << 6);   // Match 1.3 (pin 19/IROUT2)  IPRE   (L)
     }
   
   if (emitters & 0x04) //GET_DONGLE_C_IR)
     {
       TIMER1_EMR &= ~0xC08;    // set external match - toggle 1.3
+      PINSEL1 &= ~(1 << 8);   // Match 1.3 (pin 20/IROUT3)  MIDDLE (M)
+      
     }  
 }
 
@@ -725,6 +727,12 @@ void emit_off(uint8_t emitters)
 int check_ir_bounce(uint8_t emitters)
 {
   int i, j, pulses;
+
+  ir_rx_disable();
+
+  TIMER1_PR =  0x22;     // Load Prescalar
+  TIMER1_MR1 = 0x14;     // set MR1 to 40Khz
+  TIMER1_MCR = (1 << 4); // On match (MR1) reset the counter
 
   i = 0;
   pulses = 0;	      
@@ -767,6 +775,11 @@ int check_ir_bounce(uint8_t emitters)
   
   // turn off all emitters
   emit_off(emitters);
-  
+
+  TIMER1_MCR &= ~(1 << 4); // DISABLE On match (MR1) reset the counter
+
+  // turn this back on
+  ir_rx_init();
+
   return pulses;
 }

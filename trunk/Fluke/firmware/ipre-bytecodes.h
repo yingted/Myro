@@ -114,3 +114,7 @@
 #define GET_VERSION           142
 #define SET_PASSTHROUGH_ON    143
 #define SET_PASSTHROUGH_OFF   144
+
+#define GET_IR_MESSAGE        150
+#define SEND_IR_MESSAGE       151
+#define SET_IR_EMITTERS       152

@@ -46,7 +46,7 @@ extern unsigned char V_HIGH;
 
 // RLE buffer is used when sending an RLE blob image
 #define RLE_BUFFER_SIZE 2048
-extern unsigned char rle[RLE_BUFFER_SIZE+4];
+extern unsigned char rle[RLE_BUFFER_SIZE+4] __attribute__((aligned(4)));
 
 extern int rle_counter;
 

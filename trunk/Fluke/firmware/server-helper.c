@@ -6,6 +6,7 @@
 #include "firmware_upgrade.h"
 #include "jpeg.h"
 #include "constants.h"
+#include "infrared.h"
 
 
 // the image buffer; also used in other RAM intensive operations
@@ -596,7 +597,7 @@ void serve_set_passthrough()
 	  ch = uart0Getch();
 	  if (ch != -1)
 	    {
-	      //led_on();
+	      //led_on);
 	      putch(ch);
 	    }
 	}
@@ -755,6 +756,9 @@ void serve_restore_eeprom()
 void serve_update_firmware()
 {
   int code;
+
+  interrupts_get_and_disable();
+
   // get a special code
   code = getchblock2b();
   
@@ -789,3 +793,81 @@ void serve_version()
   putstr(VERSION);
   putch(0x0A);
 }
+
+
+/*
+ * Send over bluetooth the last IR message received
+ */
+void serve_get_ir_message()
+{
+  int i = 0;
+
+  process_ir_buffer();
+  putch(msg_size);
+  for (i = 0; i <  msg_size; i++)
+    {
+      putch(msg_buffer[i]);
+    }  
+  msg_size = 0;
+}
+
+/*
+ * Set IR emitters used for transmission
+ */
+uint32_t use_emitters = IROUT1 | IROUT2 | IROUT3;
+
+void serve_set_ir_emitters()
+{
+  uint8_t e;
+  e = getchblock();
+  
+  // right
+  if (e & 0x1)
+    {
+      use_emitters |= IROUT1;
+    }
+  else
+    {
+      use_emitters &= ~IROUT1;
+    }
+  
+  //middle
+  if (e & 0x2)
+    {
+      use_emitters |= IROUT3;
+    }
+  else
+    {
+      use_emitters &= ~IROUT3;
+    }
+
+  //left
+  if (e & 0x4)
+    {
+      use_emitters |= IROUT2;
+    }
+  else
+    {
+      use_emitters &= ~IROUT2;
+    }
+}
+
+/*
+ * Send an IR message 
+ */
+void serve_send_ir_message()
+{
+  int size;
+  int i;
+  int data;
+ 
+  // get # of bytes to send
+  size = getchblock();
+ 
+  for (i = 0; i <  size; i++)
+    {
+      data = getchblock();
+      ir_send_byte(data, use_emitters);
+    } 
+}
+

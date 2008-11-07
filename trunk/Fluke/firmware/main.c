@@ -30,6 +30,7 @@
 #include "constants.h"
 #include "jpeg.h"
 #include "vic.h"
+#include "infrared.h"
 
 void FIQ_Routine (void)   __attribute__ ((interrupt("FIQ")));
 void SWI_Routine (void)   __attribute__ ((interrupt("SWI")));
@@ -102,12 +103,18 @@ int main (void)
   // Set up VIC and enable interrupts
   vic_init();
   
+  //set timer0 prescalaer to around 1 usec
+  TIMER0_PR = 0x39;
+  
   // Start timer0 for benchmarking
   TIMER0_TCR = 1;
 
   // Set up the transmit queue
   uart1_queue_init();
-  
+
+  // setup interrupts for receiving IR messages
+  ir_rx_init();
+
   // set back configurable LED off
   set_led(0);
 
@@ -212,6 +219,9 @@ int main (void)
 	      else if (ch == GET_JPEG_GRAY_SCAN)   serve_jpeg_gray_scan();
 	      else if (ch == GET_JPEG_COLOR_SCAN)  serve_jpeg_color_scan();
 	      else if (ch == GET_VERSION)          serve_version();
+	      else if (ch == GET_IR_MESSAGE)       serve_get_ir_message();
+	      else if (ch == SEND_IR_MESSAGE)      serve_send_ir_message();
+	      else if (ch == SET_IR_EMITTERS)      serve_set_ir_emitters();
 	      else scribbler_cmd = 1;
 	    }
 	  

@@ -4,6 +4,7 @@
 #include "fluke.h"
 #include "uart.h"
 #include "vision.h"
+#include "infrared.h"
 
 void update_low_battery_light();
 
@@ -107,6 +108,21 @@ void serve_back_led();
  * Set IR transmit power
  */
 void serve_ir_power();
+
+/*
+ * Send over bluetooth the last IR message received
+ */
+void serve_get_ir_message();
+
+/*
+ * Send an IR message 
+ */
+void serve_send_ir_message();
+
+/*
+ * Set IR emitters used for transmission
+ */
+void serve_set_ir_emitters();
 
 /*
  * Read a serial memory location

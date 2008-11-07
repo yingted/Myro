@@ -18,7 +18,7 @@ PORT?=/dev/tty.usbserial
 
 OBJFILES = crt.o grab_frame.o interrupts.o usleep.o uart.o main.o \
 	ov7649.o fluke.o scribbler.o firmware_upgrade.o jpeg.o \
-	uart_queue.o vic.o constants.o vision.o server-helper.o
+	uart_queue.o vic.o constants.o vision.o server-helper.o infrared.o
 
 all: main.hex
 
