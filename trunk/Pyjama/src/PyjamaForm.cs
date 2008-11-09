@@ -69,7 +69,7 @@ namespace Pyjama
             if (need_newline)
                 PrintConsoleMessage("\r\n");
             if (need_prompt)
-                PrintConsoleMessage(prompt);
+                PrintConsoleMessage(prompt, Color.White);
             need_newline = false;
             need_prompt = false;
             outputWindow.output.SelectionStart = outputWindow.output.Text.Length;
@@ -81,16 +81,31 @@ namespace Pyjama
             outputWindow.output.Text += message + "\r\n";
             need_newline = false;
             need_prompt = true;
+            // FIXME
+            //outputWindow.output.SelectionStart = outputWindow.output.Text.Length;
+            //outputWindow.output.SelectionLength = message.Length;
+            //outputWindow.output.SelectionColor = Color.Red;
+            // Make text a color:
+            // Move to end:
             outputWindow.output.SelectionStart = outputWindow.output.Text.Length;
             outputWindow.output.ScrollToCaret();
         }
-            
+
         public void PrintConsoleMessage(string message)
+        {
+            PrintConsoleMessage(message, Color.White);
+        }
+
+        public void PrintConsoleMessage(string message, Color color)
         {
             outputWindow.output.Text += message;
             // if not ending with newline
             need_newline = !(message.EndsWith("\r") | message.EndsWith("\n"));
             need_prompt = ! message.Equals("");
+            // FIXME:
+            //outputWindow.output.SelectionLength = message.Length;
+            //outputWindow.output.SelectionColor = color;
+            // Move to end:
             outputWindow.output.SelectionStart = outputWindow.output.Text.Length;
             outputWindow.output.ScrollToCaret();
         }
