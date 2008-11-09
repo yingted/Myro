@@ -30,8 +30,6 @@
         {
             this.okButton = new System.Windows.Forms.Button();
             this.title = new System.Windows.Forms.Label();
-            this.blogLink = new System.Windows.Forms.LinkLabel();
-            this.label1 = new System.Windows.Forms.Label();
             this.version = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.urlHomepage = new System.Windows.Forms.LinkLabel();
@@ -58,28 +56,6 @@
             this.title.TabIndex = 1;
             this.title.Text = "{0}";
             // 
-            // blogLink
-            // 
-            this.blogLink.AutoSize = true;
-            this.blogLink.LinkArea = new System.Windows.Forms.LinkArea(6, 24);
-            this.blogLink.Location = new System.Drawing.Point(121, 39);
-            this.blogLink.Name = "blogLink";
-            this.blogLink.Size = new System.Drawing.Size(126, 18);
-            this.blogLink.TabIndex = 2;
-            this.blogLink.TabStop = true;
-            this.blogLink.Text = "Visit Blog.BenHall.me.uk";
-            this.blogLink.UseCompatibleTextRendering = true;
-            this.blogLink.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.blogLink_LinkClicked);
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(13, 39);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(102, 13);
-            this.label1.TabIndex = 3;
-            this.label1.Text = "Created by Ben Hall";
-            // 
             // version
             // 
             this.version.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
@@ -105,10 +81,10 @@
             this.urlHomepage.LinkArea = new System.Windows.Forms.LinkArea(17, 28);
             this.urlHomepage.Location = new System.Drawing.Point(16, 57);
             this.urlHomepage.Name = "urlHomepage";
-            this.urlHomepage.Size = new System.Drawing.Size(198, 18);
+            this.urlHomepage.Size = new System.Drawing.Size(191, 18);
             this.urlHomepage.TabIndex = 6;
             this.urlHomepage.TabStop = true;
-            this.urlHomepage.Text = "Project Homepage www.Pyjama.net";
+            this.urlHomepage.Text = "Project Homepage PyjamaProject.org";
             this.urlHomepage.UseCompatibleTextRendering = true;
             this.urlHomepage.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.urlHomepage_LinkClicked);
             // 
@@ -122,8 +98,6 @@
             this.Controls.Add(this.urlHomepage);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.version);
-            this.Controls.Add(this.label1);
-            this.Controls.Add(this.blogLink);
             this.Controls.Add(this.title);
             this.Controls.Add(this.okButton);
             this.Name = "AboutDialog";
@@ -137,8 +111,6 @@
 
         private System.Windows.Forms.Button okButton;
         private System.Windows.Forms.Label title;
-        private System.Windows.Forms.LinkLabel blogLink;
-        private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label version;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.LinkLabel urlHomepage;

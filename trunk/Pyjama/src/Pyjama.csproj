@@ -113,7 +113,6 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Controls\IDocument.cs" />
-    <Compile Include="Controls\OpenFileEventArgs.cs" />
     <Compile Include="Controls\Console.cs">
       <SubType>UserControl</SubType>
     </Compile>

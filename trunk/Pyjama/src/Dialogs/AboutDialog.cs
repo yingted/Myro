@@ -13,14 +13,9 @@ namespace Pyjama.Dialogs
             title.Text = string.Format(title.Text, ApplicationInformation.Title());
         }
 
-        private void blogLink_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
-        {
-            Process.Start("http://blog.BenHall.me.uk");
-        }
-
         private void urlHomepage_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            Process.Start("http://www.Pyjama.net");
+            Process.Start("http://PyjamaProject.org/");
         }
     }
 }
