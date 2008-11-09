@@ -49,7 +49,7 @@ namespace Pyjama
             ms = new MyMemoryStream(pyjamaForm);
             env.IO.SetOutput(ms, new UTF8Encoding(false));
 
-            LoadSettings();
+            //LoadSettings();
             // load one from command line
             // or, open a blank one
             NewFile();
@@ -66,8 +66,8 @@ namespace Pyjama
             else
             {
                 languages = new List<LanguageSettings>(); //HACK: Not sure what to do about this.
-                MessageBox.Show("Config directory not found. No language information loaded.",
-                                "Config directory not found", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                //MessageBox.Show("Config directory not found. No language information loaded.",
+                //                "Config directory not found", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
