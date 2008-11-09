@@ -8,7 +8,7 @@ namespace Pyjama
     {
         public new event Document.TextChangedHandler TextChanged;
         private IMainForm MainForm;
-        private TextBox textBox;
+        private RichTextBox textBox;
 
         public delegate void TextChangedHandler(object sender, EventArgs e);
 
@@ -17,9 +17,9 @@ namespace Pyjama
             MainForm = main_form;
             InitializeComponent();
             this.Dock = DockStyle.Fill;
-            textBox = new TextBox();
+            textBox = new RichTextBox();
             textBox.Multiline = true;
-            textBox.AcceptsReturn = true;
+            //textBox.AcceptsReturn = true;
             textBox.AcceptsTab = true;
             textBox.Dock = DockStyle.Fill;
             textBox.KeyPress += new KeyPressEventHandler(textBox_KeyPress);

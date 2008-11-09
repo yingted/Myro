@@ -114,11 +114,11 @@
     </Compile>
     <Compile Include="Controls\IDocument.cs" />
     <Compile Include="Controls\OpenFileEventArgs.cs" />
-    <Compile Include="Controls\OutputWindow.cs">
+    <Compile Include="Controls\Console.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Controls\OutputWindow.Designer.cs">
-      <DependentUpon>OutputWindow.cs</DependentUpon>
+    <Compile Include="Controls\Console.Designer.cs">
+      <DependentUpon>Console.cs</DependentUpon>
     </Compile>
     <Compile Include="Controls\Document.cs">
       <SubType>UserControl</SubType>
@@ -152,7 +152,6 @@
     </Compile>
     <Compile Include="PyjamaInterfaces.cs" />
     <Compile Include="IMainForm.cs" />
-    <Compile Include="LanguageNotFoundException.cs" />
     <Compile Include="LanguageSettings.cs" />
     <Compile Include="PyjamaForm.cs">
       <SubType>Form</SubType>
@@ -171,8 +170,8 @@
       <DependentUpon>DocumentManager.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Controls\OutputWindow.resx">
-      <DependentUpon>OutputWindow.cs</DependentUpon>
+    <EmbeddedResource Include="Controls\Console.resx">
+      <DependentUpon>Console.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="PyjamaForm.resx">

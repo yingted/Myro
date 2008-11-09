@@ -6,9 +6,9 @@ namespace Pyjama
 {
     internal sealed class TextBoxWriter : TextWriter
     {
-        private TextBox _textBox;
+        private RichTextBox _textBox;
 
-        internal TextBoxWriter(TextBox textBox)
+        internal TextBoxWriter(RichTextBox textBox)
         {
             _textBox = textBox;
         }

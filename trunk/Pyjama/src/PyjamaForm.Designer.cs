@@ -32,7 +32,7 @@
             this.main = new System.Windows.Forms.Panel();
             this.mainContentSplit = new System.Windows.Forms.SplitContainer();
             this.docManager = new Pyjama.DocumentManager();
-            this.outputWindow = new Pyjama.OutputWindow();
+            this.outputWindow = new Pyjama.Console();
             this.toolStrip = new System.Windows.Forms.Panel();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.newToolStripButton = new System.Windows.Forms.ToolStripButton();
@@ -701,7 +701,7 @@
         private System.Windows.Forms.ToolStripButton toolStripButton1;
         private System.Windows.Forms.ToolStripButton toolStripButton2;
         private System.Windows.Forms.ToolStripMenuItem closeTabToolStripMenuItem;
-        private Pyjama.OutputWindow outputWindow;
+        private Pyjama.Console outputWindow;
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel2;
