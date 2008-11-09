@@ -31,7 +31,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PyjamaForm));
             this.main = new System.Windows.Forms.Panel();
             this.mainContentSplit = new System.Windows.Forms.SplitContainer();
-            this.fileManager1 = new Pyjama.DocumentManager();
+            this.docManager = new Pyjama.DocumentManager();
             this.outputWindow = new Pyjama.OutputWindow();
             this.toolStrip = new System.Windows.Forms.Panel();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
@@ -115,7 +115,7 @@
             // 
             // mainContentSplit.Panel1
             // 
-            this.mainContentSplit.Panel1.Controls.Add(this.fileManager1);
+            this.mainContentSplit.Panel1.Controls.Add(this.docManager);
             this.mainContentSplit.Panel1MinSize = 100;
             // 
             // mainContentSplit.Panel2
@@ -127,15 +127,15 @@
             this.mainContentSplit.SplitterWidth = 6;
             this.mainContentSplit.TabIndex = 7;
             // 
-            // fileManager1
+            // docManager
             // 
-            this.fileManager1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.fileManager1.FontToUse = null;
-            this.fileManager1.Location = new System.Drawing.Point(0, 0);
-            this.fileManager1.Name = "fileManager1";
-            this.fileManager1.Size = new System.Drawing.Size(635, 269);
-            this.fileManager1.TabIndex = 4;
-            this.fileManager1.Load += new System.EventHandler(this.fileManager1_Load);
+            this.docManager.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.docManager.FontToUse = null;
+            this.docManager.Location = new System.Drawing.Point(0, 0);
+            this.docManager.Name = "docManager";
+            this.docManager.Size = new System.Drawing.Size(635, 269);
+            this.docManager.TabIndex = 4;
+            this.docManager.Load += new System.EventHandler(this.fileManager1_Load);
             // 
             // outputWindow
             // 
@@ -682,7 +682,7 @@
         private System.Windows.Forms.Panel toolStrip;
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.SplitContainer mainContentSplit;
-        private Pyjama.DocumentManager fileManager1;
+        private Pyjama.DocumentManager docManager;
         private System.Windows.Forms.ToolStripButton newToolStripButton;
         private System.Windows.Forms.ToolStripButton openToolStripButton;
         private System.Windows.Forms.ToolStripButton saveToolStripButton;

@@ -24,10 +24,10 @@ namespace Pyjama
             mainform.PrintConsoleMessage(Encoding.UTF8.GetString(buffer, offset, count));
         }
     }
-    
+
     public class PyjamaFormController
     {
-        public IMainForm MainForm { get; set; }
+        public IMainForm pyjamaForm { get; set; }
         List<LanguageSettings> languages;
         private ScriptEngine engine;
         ScriptRuntime env;
@@ -37,7 +37,7 @@ namespace Pyjama
 
         public PyjamaFormController(IMainForm mainForm)
         {
-            MainForm = mainForm;
+            pyjamaForm = mainForm;
             // Engine stuff:
             setup = new ScriptRuntimeSetup();
             setup.LanguageSetups.Add(IronPython.Hosting.Python.CreateLanguageSetup(null));
@@ -46,15 +46,15 @@ namespace Pyjama
             env = new ScriptRuntime(setup);
             engine = env.GetEngine("py"); // env.GetEngine("rb");
             scope = env.CreateScope();
-            ms = new MyMemoryStream(MainForm);
+            ms = new MyMemoryStream(pyjamaForm);
             env.IO.SetOutput(ms, new UTF8Encoding(false));
-          
+
             LoadSettings();
             // load one from command line
             // or, open a blank one
             NewFile();
-            MainForm.PrintConsoleMessage("Pyjama Python, Version 1.0.0\r\n>>> ");
-            
+            pyjamaForm.PrintConsoleMessage("Pyjama Python, Version 1.0.0\r\n>>> ");
+
         }
 
         private void LoadSettings()
@@ -85,36 +85,38 @@ namespace Pyjama
         internal void Execute()
         {
             // Get text to eval:
-            System.String code = MainForm.GetCodeBlock().GetCodeToExecute();
+            System.String code = pyjamaForm.GetCodeBlock().GetCodeToExecute();
             code = code.Trim();
-            MainForm.PrintLineConsoleMessage(code);
+            pyjamaForm.PrintLineConsoleMessage(code);
             try
             {
                 ScriptSource source = engine.CreateScriptSourceFromString(code, SourceCodeKind.InteractiveCode);
                 object result = source.Execute(scope);
-            } catch (System.Exception e1) {
+            }
+            catch (System.Exception e1)
+            {
                 try
                 {
                     ScriptSource source = engine.CreateScriptSourceFromString(code, SourceCodeKind.Statements);
-                    MainForm.PrintLineConsoleMessage("Evaluating...");
+                    pyjamaForm.PrintLineConsoleMessage("Evaluating...");
                     object result = source.Execute(scope);
                 }
                 catch (System.Exception e)
                 {
-                    MainForm.PrintLineConsoleMessage("Exception: " + e.Message);
+                    pyjamaForm.PrintLineConsoleMessage("Exception: " + e.Message);
                 }
             }
-            MainForm.PrintPrompt();
+            pyjamaForm.PrintPrompt();
         }
 
-//  Message="unexpected token 'print'"
-//  Source="Microsoft.Scripting"
-//  Column=1
-//  ErrorCode=16
-//  Line=1
-//  SourceCode="print \"hello\"\r\n"
-//  StackTrace:
-       
+        //  Message="unexpected token 'print'"
+        //  Source="Microsoft.Scripting"
+        //  Column=1
+        //  ErrorCode=16
+        //  Line=1
+        //  SourceCode="print \"hello\"\r\n"
+        //  StackTrace:
+
         public List<LanguageSettings> GetLanguages()
         {
             return languages;
@@ -123,7 +125,7 @@ namespace Pyjama
         public void NewFile()
         {
             ActiveCodeFile file = CreateDefaultActiveFile("Python");
-            MainForm.OpenFile(MainForm, file);
+            pyjamaForm.OpenFile(pyjamaForm, file);
         }
 
         public void OpenFile()
@@ -131,7 +133,7 @@ namespace Pyjama
             OpenFileDialog open = new OpenFileDialog();
             open.Filter = "All Files (*.*)|*.*";
 
-            if(open.ShowDialog() == DialogResult.OK)
+            if (open.ShowDialog() == DialogResult.OK)
             {
                 ActiveCodeFile file = new ActiveCodeFile(open.FileName);
                 file.Unsaved = false;
@@ -142,7 +144,7 @@ namespace Pyjama
         public void OpenFile(ActiveCodeFile file)
         {
             if (File.Exists(file.Location))
-                MainForm.OpenFile(MainForm, file);
+                pyjamaForm.OpenFile(pyjamaForm, file);
             else
                 throw new FileNotFoundException("File not found", file.Location);
         }
@@ -186,8 +188,8 @@ namespace Pyjama
         public void Save()
         {
             //System.Console.WriteLine("controller saving...");
-            ActiveCodeFile activeFile = MainForm.GetCurrentActiveFile();
-            if (MainForm.HasFileOpen && activeFile != null)
+            ActiveCodeFile activeFile = pyjamaForm.GetCurrentActiveFile();
+            if (pyjamaForm.HasFileOpen && activeFile != null)
             {
                 if (activeFile.Unsaved)
                 {
@@ -199,7 +201,7 @@ namespace Pyjama
                     {
                         WriteCodeToExecuteToFile(location);
                         //System.Console.WriteLine("saving to " + location);
-                        MainForm.SetSaveInformationForActiveFile(location);
+                        pyjamaForm.SetSaveInformationForActiveFile(location);
                     }
                 }
             }
@@ -210,16 +212,16 @@ namespace Pyjama
             if (string.IsNullOrEmpty(file))
                 return; // Do nothing then :P
 
-            StreamWriter sw = new StreamWriter(file,false);
+            StreamWriter sw = new StreamWriter(file, false);
 
             try
             {
-                sw.Write(MainForm.GetCodeBlock().Code.Text);
+                sw.Write(pyjamaForm.GetCodeBlock().Code.Text);
                 sw.Flush();
             }
             finally
             {
-                sw.Close();                
+                sw.Close();
             }
         }
 
@@ -238,41 +240,8 @@ namespace Pyjama
             if (location != string.Empty)
             {
                 WriteCodeToExecuteToFile(location);
-                MainForm.SetSaveInformationForActiveFile(location);
+                pyjamaForm.SetSaveInformationForActiveFile(location);
             }
-        }
-
-        private void Clear()
-        {
-            MainForm.ClearOutputStream();
-            MainForm.ClearOpenFiles();
-        }
-
-        public void LaunchConsole()
-        {
-            if (MainForm.HasFileOpen)
-            {
-                string languageExtension = MainForm.GetCurrentActiveFile().FileExtension;
-                LanguageSettings setting = FindLanguageByExtension(languageExtension);
-
-                //IEngine engine = EngineCache.GetEngine(setting, MainForm.GetOutputStream());
-                //engine.LaunchConsole();
-            }
-        }
-
-        public bool CanLaunchConsole()
-        {
-            if (MainForm.HasFileOpen)
-            {
-                string languageExtension = MainForm.GetCurrentActiveFile().FileExtension;
-                LanguageSettings setting = FindLanguageByExtension(languageExtension);
-
-                //IEngine engine = EngineCache.GetEngine(setting, MainForm.GetOutputStream());
-                //return engine.CanExecuteConsole;
-                return false;
-            }
-
-            return false;
         }
     }
 }

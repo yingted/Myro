@@ -29,7 +29,7 @@ namespace Pyjama
             SetButtonsStatus();
             ApplyUserSettings(ApplicationOptions.LoadUserSettings(ApplicationOptions.GetIsolatedStorage()));
             //this.ActiveControl = this.outputWindow.output; // Output window gets cursor
-            this.ActiveControl = fileManager1.GetCurrentTabTextBox(); // tab text gets cursor
+            this.ActiveControl = docManager.GetCurrentTabTextBox(); // tab text gets cursor
             this.languageName.Text = "Python";
             this.columnNumber.Text = "" + 1;
             this.lineNumber.Text = "" + 1;
@@ -61,7 +61,7 @@ namespace Pyjama
 
         public CodeBlock GetCodeBlock()
         {
-            return fileManager1.GetCode();
+            return docManager.GetCode();
         }
 
         public void PrintPrompt()
@@ -97,12 +97,12 @@ namespace Pyjama
 
         public bool HasFileOpen
         {
-            get { return fileManager1.HasFileOpen; }
+            get { return docManager.HasFileOpen; }
         }
 
         public void OpenFile(IMainForm main_form, ActiveCodeFile file)
         {
-            fileManager1.OpenFile(main_form, file);
+            docManager.OpenFile(main_form, file);
             SetButtonsStatus();
         }
 
@@ -120,7 +120,7 @@ namespace Pyjama
 
         public string CurrentActiveFileLocation()
         {
-            return fileManager1.GetCurrentFile().Location;
+            return docManager.GetCurrentFile().Location;
         }
 
         public void ClearOutputStream()
@@ -130,17 +130,17 @@ namespace Pyjama
 
         public void ClearOpenFiles()
         {
-            fileManager1.Clear();
+            docManager.Clear();
         }
 
         public ActiveCodeFile GetCurrentActiveFile()
         {
-            return fileManager1.GetCurrentFile();
+            return docManager.GetCurrentFile();
         }
 
         public void SetSaveInformationForActiveFile(string location)
         {
-            fileManager1.SetSaveInformationForActiveFile(location);
+            docManager.SetSaveInformationForActiveFile(location);
         }
 
         private void SetButtonsStatus()
@@ -219,7 +219,7 @@ namespace Pyjama
 
         private DocumentInput GetNotNullIDEInput()
         {
-            DocumentInput input = fileManager1.GetCurrentInput();
+            DocumentInput input = docManager.GetCurrentInput();
             if (input == null)
                 return new DocumentInput(null);
             else
@@ -263,7 +263,7 @@ namespace Pyjama
                 return;
 
             outputWindow.GetOutput().Font = settings.UIFont;
-            fileManager1.FontToUse = settings.UIFont;
+            docManager.FontToUse = settings.UIFont;
         }
 
         private UserSettings CreateUserSettings(OptionsDialog dialog)
@@ -281,17 +281,6 @@ namespace Pyjama
         private void mainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
             
-        }
-
-        private void launchConsoleToolStripButton_Click(object sender, System.EventArgs e)
-        {
-            _controller.LaunchConsole();
-        }
-
-        private void launchConsoleToolStripMenuItem_Click(object sender, System.EventArgs e)
-        {
-            _controller.LaunchConsole();
-
         }
 
         private void outputWindow_Load(object sender, EventArgs e)
