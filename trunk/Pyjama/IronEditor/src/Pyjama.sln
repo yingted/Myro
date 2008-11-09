@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual C# Express 2008
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pyjama", "IronEditor.UI.WinForms\Pyjama.csproj", "{C098812F-B27C-48A5-8CB6-9D5028F1CFF1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pyjama", "src\Pyjama.csproj", "{C098812F-B27C-48A5-8CB6-9D5028F1CFF1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
