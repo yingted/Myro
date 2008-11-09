@@ -4,25 +4,25 @@ using System.Windows.Forms;
 using System.IO;
 using System.IO.IsolatedStorage;
 using System.Threading;
-using IronEditor.UI.WinForms.Controls;
-using IronEditor.UI.WinForms.Dialogs;
+using Pyjama;
+using Pyjama.Dialogs;
 
-namespace IronEditor.UI.WinForms
+namespace Pyjama
 {
-    public partial class mainForm : BaseForm, IMainForm
+    public partial class PyjamaForm : BaseForm, IMainForm
     {
-        private MainFormController _controller;
+        private PyjamaFormController _controller;
         bool need_newline = false;
         bool need_prompt = true;
         string prompt = ">>> ";
         Thread execute_thread;
 
-        public mainForm()
+        public PyjamaForm()
         {
             InitializeComponent();
             KeyDown += new KeyEventHandler(mainForm_KeyDown);
             
-            _controller = new MainFormController(this);
+            _controller = new PyjamaFormController(this);
 
             Text = string.Format(Text, ApplicationInformation.Title(), ApplicationInformation.Version());
 
@@ -217,11 +217,11 @@ namespace IronEditor.UI.WinForms
             GetNotNullIDEInput().Undo();
         }
 
-        private IDEInput GetNotNullIDEInput()
+        private DocumentInput GetNotNullIDEInput()
         {
-            IDEInput input = fileManager1.GetCurrentInput();
+            DocumentInput input = fileManager1.GetCurrentInput();
             if (input == null)
-                return new IDEInput(null);
+                return new DocumentInput(null);
             else
                 return input;
         }

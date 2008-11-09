@@ -1,4 +1,4 @@
-﻿namespace IronEditor.UI.WinForms
+﻿namespace Pyjama
 {
     public partial class BaseDialog : BaseForm
     {

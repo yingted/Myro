@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 
 
-namespace IronEditor.UI.WinForms
+namespace Pyjama
 {
     public class LanguageSettings
     {

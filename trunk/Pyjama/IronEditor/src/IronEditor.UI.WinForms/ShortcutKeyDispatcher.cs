@@ -1,11 +1,11 @@
 ﻿using System.Windows.Forms;
 
-namespace IronEditor.UI.WinForms
+namespace Pyjama
 {
     internal class ShortcutKeyDispatcher
     {
-        private MainFormController _controller;
-        public ShortcutKeyDispatcher(MainFormController controller)
+        private PyjamaFormController _controller;
+        public ShortcutKeyDispatcher(PyjamaFormController controller)
         {
             _controller = controller;
         }

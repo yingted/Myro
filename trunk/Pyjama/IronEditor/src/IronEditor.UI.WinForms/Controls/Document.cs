@@ -2,15 +2,17 @@
 using System.Drawing;
 using System.Windows.Forms;
 
-namespace IronEditor.UI.WinForms.Controls
+namespace Pyjama
 {
-    public partial class StandardIDETextBox : UserControl, IIDETextBox
+    public partial class Document : UserControl, IDocument
     {
-        public new event IDETextBoxEvent.TextChangedHandler TextChanged;
+        public new event Document.TextChangedHandler TextChanged;
         private IMainForm MainForm;
         private TextBox textBox;
 
-        public StandardIDETextBox(IMainForm main_form)
+        public delegate void TextChangedHandler(object sender, EventArgs e);
+
+        public Document(IMainForm main_form)
         {
             MainForm = main_form;
             InitializeComponent();

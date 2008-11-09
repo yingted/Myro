@@ -1,7 +1,7 @@
 ﻿using System.IO;
-using IronEditor.UI.WinForms.Controls;
+using Pyjama;
 
-namespace IronEditor.UI.WinForms
+namespace Pyjama
 {
     public interface IMainForm
     {

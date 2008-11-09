@@ -1,4 +1,4 @@
-﻿namespace IronEditor.UI.WinForms.Controls
+﻿namespace Pyjama
 {
     partial class OutputWindow
     {

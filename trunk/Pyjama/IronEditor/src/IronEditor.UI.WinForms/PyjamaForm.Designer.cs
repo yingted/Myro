@@ -1,6 +1,6 @@
-﻿namespace IronEditor.UI.WinForms
+﻿namespace Pyjama
 {
-    partial class mainForm
+    partial class PyjamaForm
     {
         /// <summary>
         /// Required designer variable.
@@ -28,11 +28,11 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(mainForm));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PyjamaForm));
             this.main = new System.Windows.Forms.Panel();
             this.mainContentSplit = new System.Windows.Forms.SplitContainer();
-            this.fileManager1 = new IronEditor.UI.WinForms.Controls.FileManager();
-            this.outputWindow = new IronEditor.UI.WinForms.Controls.OutputWindow();
+            this.fileManager1 = new Pyjama.DocumentManager();
+            this.outputWindow = new Pyjama.OutputWindow();
             this.toolStrip = new System.Windows.Forms.Panel();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.newToolStripButton = new System.Windows.Forms.ToolStripButton();
@@ -187,7 +187,7 @@
             // newToolStripButton
             // 
             this.newToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.newToolStripButton.Image = global::IronEditor.UI.WinForms.Properties.Resources.NewDocumentHS;
+            this.newToolStripButton.Image = global::Pyjama.Properties.Resources.NewDocumentHS;
             this.newToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.newToolStripButton.Name = "newToolStripButton";
             this.newToolStripButton.Size = new System.Drawing.Size(23, 22);
@@ -266,7 +266,7 @@
             // toolStripButton1
             // 
             this.toolStripButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolStripButton1.Image = global::IronEditor.UI.WinForms.Properties.Resources.FormRunHS;
+            this.toolStripButton1.Image = global::Pyjama.Properties.Resources.FormRunHS;
             this.toolStripButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton1.Name = "toolStripButton1";
             this.toolStripButton1.Size = new System.Drawing.Size(23, 22);
@@ -276,7 +276,7 @@
             // toolStripButton2
             // 
             this.toolStripButton2.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolStripButton2.Image = global::IronEditor.UI.WinForms.Properties.Resources.Start;
+            this.toolStripButton2.Image = global::Pyjama.Properties.Resources.Start;
             this.toolStripButton2.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.toolStripButton2.Name = "toolStripButton2";
             this.toolStripButton2.Size = new System.Drawing.Size(23, 22);
@@ -285,7 +285,7 @@
             // executeToolStripButton
             // 
             this.executeToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.executeToolStripButton.Image = global::IronEditor.UI.WinForms.Properties.Resources.FastRun;
+            this.executeToolStripButton.Image = global::Pyjama.Properties.Resources.FastRun;
             this.executeToolStripButton.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.executeToolStripButton.Name = "executeToolStripButton";
             this.executeToolStripButton.Size = new System.Drawing.Size(23, 22);
@@ -325,7 +325,7 @@
             // 
             // newToolStripMenuItem
             // 
-            this.newToolStripMenuItem.Image = global::IronEditor.UI.WinForms.Properties.Resources.NewDocumentHS;
+            this.newToolStripMenuItem.Image = global::Pyjama.Properties.Resources.NewDocumentHS;
             this.newToolStripMenuItem.Name = "newToolStripMenuItem";
             this.newToolStripMenuItem.Size = new System.Drawing.Size(167, 22);
             this.newToolStripMenuItem.Text = "New Script";
@@ -622,7 +622,7 @@
             this.columnNumber.Text = "0";
             this.columnNumber.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
-            // mainForm
+            // PyjamaForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -630,7 +630,7 @@
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.main);
             this.Controls.Add(this.menuStrip1);
-            this.Name = "mainForm";
+            this.Name = "PyjamaForm";
             this.Text = "{0} - {1}";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.mainForm_FormClosing);
             this.main.ResumeLayout(false);
@@ -682,7 +682,7 @@
         private System.Windows.Forms.Panel toolStrip;
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.SplitContainer mainContentSplit;
-        private IronEditor.UI.WinForms.Controls.FileManager fileManager1;
+        private Pyjama.DocumentManager fileManager1;
         private System.Windows.Forms.ToolStripButton newToolStripButton;
         private System.Windows.Forms.ToolStripButton openToolStripButton;
         private System.Windows.Forms.ToolStripButton saveToolStripButton;
@@ -701,7 +701,7 @@
         private System.Windows.Forms.ToolStripButton toolStripButton1;
         private System.Windows.Forms.ToolStripButton toolStripButton2;
         private System.Windows.Forms.ToolStripMenuItem closeTabToolStripMenuItem;
-        private IronEditor.UI.WinForms.Controls.OutputWindow outputWindow;
+        private Pyjama.OutputWindow outputWindow;
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel2;

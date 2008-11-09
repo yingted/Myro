@@ -5,10 +5,10 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("IronEditor.UI.WinForms")]
+[assembly: AssemblyTitle("Pyjama")]
 
 #if (DEBUG)
-[assembly: AssemblyDescription("IronEditor Application (Debug)")]
+[assembly: AssemblyDescription("Pyjama Application (Debug)")]
     [assembly: AssemblyConfiguration("Debug")]
 #else
     [assembly: AssemblyDescription("DLR Host Application (Release)")]

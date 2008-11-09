@@ -3,7 +3,7 @@ using System.Drawing;
 using System.Drawing.Text;
 using System.Windows.Forms;
 
-namespace IronEditor.UI.WinForms.Dialogs.OptionFrames
+namespace Pyjama.Dialogs.OptionFrames
 {
     public partial class FontControl : UserControl
     {

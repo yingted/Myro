@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Security.Policy;
 using System.Xml.Serialization;
 
-namespace IronEditor.UI.WinForms
+namespace Pyjama
 {
     [Serializable]
     public class UserSettings

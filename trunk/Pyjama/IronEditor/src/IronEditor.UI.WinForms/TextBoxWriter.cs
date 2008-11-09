@@ -2,7 +2,7 @@
 using System.Text;
 using System.Windows.Forms;
 
-namespace IronEditor.UI.WinForms
+namespace Pyjama
 {
     internal sealed class TextBoxWriter : TextWriter
     {

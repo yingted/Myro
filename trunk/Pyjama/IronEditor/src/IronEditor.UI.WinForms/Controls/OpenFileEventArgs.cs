@@ -1,6 +1,6 @@
 using System;
 
-namespace IronEditor.UI.WinForms.Controls
+namespace Pyjama
 {
     public class OpenFileEventArgs : EventArgs
     {

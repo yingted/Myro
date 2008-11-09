@@ -3,23 +3,26 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{C098812F-B27C-48A5-8CB6-9D5028F1CFF1}</ProjectGuid>
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>IronEditor.UI.WinForms</RootNamespace>
-    <AssemblyName>IronEditor.UI.WinForms</AssemblyName>
+    <RootNamespace>Pyjama</RootNamespace>
+    <AssemblyName>Pyjama</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <ManifestCertificateThumbprint>9CA55AD0BB19B42B705E48E3C0C8D6F1E1A2916F</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>52A2F9A90133C00E4045DC583F60B7D2FB1A0F20</ManifestCertificateThumbprint>
     <ManifestKeyFile>IronEditor.UI.WinForms_TemporaryKey.pfx</ManifestKeyFile>
     <GenerateManifests>true</GenerateManifests>
     <TargetZone>LocalIntranet</TargetZone>
-    <SignManifests>false</SignManifests>
+    <SignManifests>true</SignManifests>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishWizardCompleted>true</PublishWizardCompleted>
-    <PublishUrl>publish\</PublishUrl>
+    <SignAssembly>false</SignAssembly>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
+    <PublishUrl>C:\Users\dblank\Desktop\publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
     <UpdateEnabled>false</UpdateEnabled>
@@ -30,7 +33,7 @@
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
     <OpenBrowserOnPublish>false</OpenBrowserOnPublish>
-    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationRevision>6</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
@@ -99,17 +102,17 @@
     </Compile>
     <Compile Include="ActiveCodeFile.cs" />
     <Compile Include="CodeBlock.cs" />
-    <Compile Include="Controls\FileManager.cs">
+    <Compile Include="Controls\DocumentManager.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Controls\FileManager.Designer.cs">
-      <DependentUpon>FileManager.cs</DependentUpon>
+    <Compile Include="Controls\DocumentManager.Designer.cs">
+      <DependentUpon>DocumentManager.cs</DependentUpon>
     </Compile>
-    <Compile Include="Controls\IDEInput.cs" />
-    <Compile Include="Controls\IDETab.cs">
+    <Compile Include="Controls\DocumentInput.cs" />
+    <Compile Include="Controls\DocumentPage.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Controls\IIDETextBox.cs" />
+    <Compile Include="Controls\IDocument.cs" />
     <Compile Include="Controls\OpenFileEventArgs.cs" />
     <Compile Include="Controls\OutputWindow.cs">
       <SubType>UserControl</SubType>
@@ -117,11 +120,11 @@
     <Compile Include="Controls\OutputWindow.Designer.cs">
       <DependentUpon>OutputWindow.cs</DependentUpon>
     </Compile>
-    <Compile Include="Controls\StandardIDETextBox.cs">
+    <Compile Include="Controls\Document.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Controls\StandardIDETextBox.Designer.cs">
-      <DependentUpon>StandardIDETextBox.cs</DependentUpon>
+    <Compile Include="Controls\Document.Designer.cs">
+      <DependentUpon>Document.cs</DependentUpon>
     </Compile>
     <Compile Include="Dialogs\AboutDialog.cs">
       <SubType>Form</SubType>
@@ -148,33 +151,32 @@
       <DependentUpon>OptionsDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="PyjamaInterfaces.cs" />
-    <Compile Include="PythonShell.cs" />
     <Compile Include="IMainForm.cs" />
     <Compile Include="LanguageNotFoundException.cs" />
     <Compile Include="LanguageSettings.cs" />
-    <Compile Include="MainForm.cs">
+    <Compile Include="PyjamaForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MainForm.Designer.cs">
-      <DependentUpon>MainForm.cs</DependentUpon>
+    <Compile Include="PyjamaForm.Designer.cs">
+      <DependentUpon>PyjamaForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="MainFormController.cs" />
+    <Compile Include="PyjamaFormController.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="BaseForm.resx">
       <DependentUpon>BaseForm.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Controls\FileManager.resx">
-      <DependentUpon>FileManager.cs</DependentUpon>
+    <EmbeddedResource Include="Controls\DocumentManager.resx">
+      <DependentUpon>DocumentManager.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Controls\OutputWindow.resx">
       <DependentUpon>OutputWindow.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="MainForm.resx">
-      <DependentUpon>MainForm.cs</DependentUpon>
+    <EmbeddedResource Include="PyjamaForm.resx">
+      <DependentUpon>PyjamaForm.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -197,7 +199,6 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Compile Include="Shell.cs" />
     <Compile Include="ShortcutKeyDispatcher.cs" />
     <Compile Include="TextBoxWriter.cs" />
   </ItemGroup>
@@ -226,8 +227,8 @@
       <DependentUpon>BaseDialog.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Controls\IDETab.resx">
-      <DependentUpon>IDETab.cs</DependentUpon>
+    <EmbeddedResource Include="Controls\DocumentPage.resx">
+      <DependentUpon>DocumentPage.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\NewFileDialog.resx">

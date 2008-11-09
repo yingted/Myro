@@ -1,4 +1,4 @@
-﻿namespace IronEditor.UI.WinForms.Dialogs
+﻿namespace Pyjama.Dialogs
 {
     partial class OptionsDialog
     {

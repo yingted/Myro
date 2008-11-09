@@ -1,6 +1,6 @@
 ﻿using System.Windows.Forms;
 
-namespace IronEditor.UI.WinForms
+namespace Pyjama
 {
     public partial class BaseForm : Form
     {

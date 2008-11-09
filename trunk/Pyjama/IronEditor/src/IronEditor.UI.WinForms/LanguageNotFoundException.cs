@@ -1,6 +1,6 @@
 using System;
 
-namespace IronEditor.UI.WinForms
+namespace Pyjama
 {
     internal class LanguageNotFoundException : Exception
     {

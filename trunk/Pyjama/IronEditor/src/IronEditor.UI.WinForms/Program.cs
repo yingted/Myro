@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 
-namespace IronEditor.UI.WinForms
+namespace Pyjama
 {
     static class Program
     {
@@ -14,7 +14,7 @@ namespace IronEditor.UI.WinForms
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             ApplicationOptions.LoadOptions();
-            Application.Run(new mainForm());
+            Application.Run(new PyjamaForm());
         }
     }
 }

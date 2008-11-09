@@ -1,6 +1,6 @@
 ﻿using System.Windows.Forms;
 
-namespace IronEditor.UI.WinForms.Controls
+namespace Pyjama
 {
     public partial class OutputWindow : UserControl
     {

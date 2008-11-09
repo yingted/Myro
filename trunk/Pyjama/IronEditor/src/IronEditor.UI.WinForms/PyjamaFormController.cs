@@ -3,13 +3,13 @@ using System.Text;
 using System.Collections.Generic;
 using System.IO;
 using System.Windows.Forms;
-using IronEditor.UI.WinForms.Dialogs;
+using Pyjama.Dialogs;
 
 using IronPython.Hosting;
 using Microsoft.Scripting;
 using Microsoft.Scripting.Hosting;
 
-namespace IronEditor.UI.WinForms
+namespace Pyjama
 {
     public class MyMemoryStream : MemoryStream
     {
@@ -25,7 +25,7 @@ namespace IronEditor.UI.WinForms
         }
     }
     
-    public class MainFormController
+    public class PyjamaFormController
     {
         public IMainForm MainForm { get; set; }
         List<LanguageSettings> languages;
@@ -35,7 +35,7 @@ namespace IronEditor.UI.WinForms
         ScriptRuntimeSetup setup;
         MyMemoryStream ms;
 
-        public MainFormController(IMainForm mainForm)
+        public PyjamaFormController(IMainForm mainForm)
         {
             MainForm = mainForm;
             // Engine stuff:

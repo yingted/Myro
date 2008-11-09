@@ -1,13 +1,8 @@
 using System;
 
-namespace IronEditor.UI.WinForms.Controls
+namespace Pyjama
 {
-    public class IDETextBoxEvent
-    {
-        public delegate void TextChangedHandler(object sender, EventArgs e);
-    }
-
-    public interface IIDETextBox
+    public interface IDocument
     {
         string Code { get; set; }
         string FontName { get; set; }
@@ -18,6 +13,6 @@ namespace IronEditor.UI.WinForms.Controls
         void Copy();
         void Paste();
         void SelectAll();
-        event IDETextBoxEvent.TextChangedHandler TextChanged;
+        event Document.TextChangedHandler TextChanged;
     }
 }

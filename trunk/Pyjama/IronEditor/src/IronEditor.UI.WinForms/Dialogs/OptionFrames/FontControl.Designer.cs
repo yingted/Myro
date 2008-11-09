@@ -1,4 +1,4 @@
-﻿namespace IronEditor.UI.WinForms.Dialogs.OptionFrames
+﻿namespace Pyjama.Dialogs.OptionFrames
 {
     partial class FontControl
     {

@@ -1,6 +1,6 @@
-﻿namespace IronEditor.UI.WinForms.Controls
+﻿namespace Pyjama
 {
-    partial class StandardIDETextBox
+    partial class Document
     {
         /// <summary> 
         /// Required designer variable.

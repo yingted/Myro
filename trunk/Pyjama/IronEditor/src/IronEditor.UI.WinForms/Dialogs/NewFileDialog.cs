@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 
-namespace IronEditor.UI.WinForms.Dialogs
+namespace Pyjama.Dialogs
 {
     public partial class NewFileDialog : BaseDialog
     {

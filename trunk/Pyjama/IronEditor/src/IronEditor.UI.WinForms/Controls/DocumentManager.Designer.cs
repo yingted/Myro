@@ -1,6 +1,6 @@
-﻿namespace IronEditor.UI.WinForms.Controls
+﻿namespace Pyjama
 {
-    partial class FileManager
+    partial class DocumentManager
     {
         /// <summary> 
         /// Required designer variable.
@@ -40,12 +40,12 @@
             this.tabControl.Size = new System.Drawing.Size(434, 368);
             this.tabControl.TabIndex = 0;
             // 
-            // FileManager
+            // DocumentManager
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.tabControl);
-            this.Name = "FileManager";
+            this.Name = "DocumentManager";
             this.Size = new System.Drawing.Size(434, 368);
             this.ResumeLayout(false);
 

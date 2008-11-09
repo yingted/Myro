@@ -2,13 +2,13 @@
 using System.IO;
 using System.Windows.Forms;
 
-namespace IronEditor.UI.WinForms.Controls
+namespace Pyjama
 {
-    public partial class FileManager : UserControl
+    public partial class DocumentManager : UserControl
     {
         private Font fontToUse;
 
-        public FileManager()
+        public DocumentManager()
         {
             InitializeComponent();
         }
@@ -30,7 +30,7 @@ namespace IronEditor.UI.WinForms.Controls
 
         private void UpdateActiveTabsFont()
         {
-            foreach (IDETab tab in tabControl.TabPages)
+            foreach (DocumentPage tab in tabControl.TabPages)
             {
                 tab.Input.Font = FontToUse;
             }
@@ -38,7 +38,7 @@ namespace IronEditor.UI.WinForms.Controls
 
         public void OpenFile(IMainForm main_form)
         {
-            IDETab tab = new IDETab(main_form);
+            DocumentPage tab = new DocumentPage(main_form);
             if (FontToUse != null)
                 tab.Input.Font = FontToUse;
             //tab.SetInitialText();
@@ -48,7 +48,7 @@ namespace IronEditor.UI.WinForms.Controls
 
         public void OpenFile(IMainForm main_form, ActiveCodeFile file)
         {
-            IDETab tab = new IDETab(main_form, file);
+            DocumentPage tab = new DocumentPage(main_form, file);
             if (FontToUse != null)
                 tab.Input.Font = FontToUse;
             tab.SetInitialText(File.ReadAllText(file.Location));
@@ -72,7 +72,7 @@ namespace IronEditor.UI.WinForms.Controls
             return block;
         }
 
-        public IDEInput GetCurrentInput()
+        public DocumentInput GetCurrentInput()
         {
             if (HasFileOpen)
                 return GetCurrentTab().Input;
@@ -80,10 +80,10 @@ namespace IronEditor.UI.WinForms.Controls
                 return null;
         }
 
-        private IDETab GetCurrentTab()
+        private DocumentPage GetCurrentTab()
         {
             if (tabControl.TabCount > 0)
-                return tabControl.SelectedTab as IDETab;
+                return tabControl.SelectedTab as DocumentPage;
 
             return null;
         }
@@ -91,7 +91,7 @@ namespace IronEditor.UI.WinForms.Controls
         public Control GetCurrentTabTextBox()
         {
             if (tabControl.TabCount > 0)
-                return ((IDETab)tabControl.SelectedTab).textBox as Control;
+                return ((DocumentPage)tabControl.SelectedTab).textBox as Control;
 
             return null;
         }
@@ -108,7 +108,7 @@ namespace IronEditor.UI.WinForms.Controls
             code.SetFileName(location);
             code.Unsaved = false;
             code.Untitled = false;
-            IDETab tab = GetCurrentTab();
+            DocumentPage tab = GetCurrentTab();
             tab.UpdateFileName(code);
             tab.UpdateSaveStatus();
         }

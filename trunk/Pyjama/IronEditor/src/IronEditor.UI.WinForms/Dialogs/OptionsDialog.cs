@@ -1,7 +1,7 @@
 ﻿using System.Windows.Forms;
-using IronEditor.UI.WinForms.Dialogs.OptionFrames;
+using Pyjama.Dialogs.OptionFrames;
 
-namespace IronEditor.UI.WinForms.Dialogs
+namespace Pyjama.Dialogs
 {
     public partial class OptionsDialog : BaseDialog
     {

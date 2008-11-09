@@ -1,5 +1,5 @@
 ﻿
-namespace IronEditor.UI.WinForms
+namespace Pyjama
 {
     public class ActiveCodeFile
     {

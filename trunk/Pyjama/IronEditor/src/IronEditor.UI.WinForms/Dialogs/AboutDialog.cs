@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Windows.Forms;
 
-namespace IronEditor.UI.WinForms.Dialogs
+namespace Pyjama.Dialogs
 {
     public partial class AboutDialog : BaseDialog
     {
@@ -20,7 +20,7 @@ namespace IronEditor.UI.WinForms.Dialogs
 
         private void urlHomepage_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            Process.Start("http://www.IronEditor.net");
+            Process.Start("http://www.Pyjama.net");
         }
     }
 }

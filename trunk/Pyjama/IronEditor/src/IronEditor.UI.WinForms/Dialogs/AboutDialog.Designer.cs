@@ -1,4 +1,4 @@
-﻿namespace IronEditor.UI.WinForms.Dialogs
+﻿namespace Pyjama.Dialogs
 {
     partial class AboutDialog
     {
@@ -108,7 +108,7 @@
             this.urlHomepage.Size = new System.Drawing.Size(198, 18);
             this.urlHomepage.TabIndex = 6;
             this.urlHomepage.TabStop = true;
-            this.urlHomepage.Text = "Project Homepage www.IronEditor.net";
+            this.urlHomepage.Text = "Project Homepage www.Pyjama.net";
             this.urlHomepage.UseCompatibleTextRendering = true;
             this.urlHomepage.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.urlHomepage_LinkClicked);
             // 
