@@ -1,0 +1,106 @@
+script: given
+input: n
+blocks: print move
+block: print
+input: "hello world"
+block: move
+input: n
+block: n
+input: 5
+
+
+script has possible input (if when or given) and blocks inside of it
+blocks have possible input and blocks inside of them
+
+tab: index
+	script: type, [when inputs], [given inputs]
+		block: type, [inputs]
+			block: type, [inputs]
+		block: type, [inputs]
+		block: type, [inputs]
+			block: type, [inputs]
+			block: type, [inputs]
+
+inputs are any information inside a block that's not another block--so strings, numbers, etc.
+what to do if a block is placed somewhere a string normally goes? blocks can be types of input, too, for a function. for a control structure, use tree.
+inputs: go in functions, if an input is another block that's a variable or expression, include in inputs list. what about a function inside a function? or if the expression has other expressions or variables in it?
+blocks: go in control structures and scripts
+
+using braces, if there's a function inside of a function, etc., it will work naturally--each input is either a block or a number or a string, if a control structure with multiple blocks there, use list (that's funny, it looks like Scheme)
+
+(tab (index)
+	(script (type) ([when inputs]) ([given inputs])
+		(block (type) ([inputs])
+		)
+	)
+)
+
+
+(tab (0)
+	(script (do) (None) (None)
+		(block (print) ("hello world")
+	)
+)
+
+(tab (0)
+	(script (when) (space) (None)
+		(block (pen down) (None))
+		(block (move) (block (plus) (xpos, 10)))
+	)
+)
+
+OR:
+
+(tab,0,(script,when,space,None,(block,pen down,None),(block,move,(block,plus,xpos,10))))
+
+
+*set up as XML--spaces only to help in design, will not be included in final save file*
+*attributes:
+
+<tab index="0">
+ <script type="do">
+  <whenInput>None</whenInput>
+  <givenInput>None</givenInput>
+ </script>
+ <blocks>
+  <block type="print">
+   <input>"hello world"</input>
+  </block>
+ </blocks>
+</tab>
+
+<tab index="1">
+ <script type="when">
+  <whenInput>"space"</whenInput>
+  <givenInput>None</givenInput>
+ </script>
+ <blocks>
+  <block type="pen down">
+   <input>None</input>
+  </block>
+  <block type="move">
+   <input>
+    <block type="xpos">
+     <input>None</input>
+    </block>
+   </input>
+  </block>
+ </blocks>
+</tab>
+
+*or elements:
+
+<tab>
+ <index>0</index>
+ <script>
+  <type>do</type>
+  <whenInput>None</whenInput>
+  <givenInput>None</givenInput>
+ </script>
+ <blocks>
+  <block>
+   <type>print</type>
+   <input>"hello world"</input>
+  </block>
+ </blocks>
+</tab>
