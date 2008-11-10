@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
-namespace TinyPG.Highlighter
+namespace Highlighter
 {
     #region Scanner
 
@@ -52,7 +52,7 @@ namespace TinyPG.Highlighter
             Patterns.Add(TokenType.DIRECTIVESTRING, regex);
             Tokens.Add(TokenType.DIRECTIVESTRING);
 
-            regex = new Regex(@"^(@TinyPG|@Parser|@Scanner|@Grammar|@ParseTree|@TextHighlighter)", RegexOptions.Compiled);
+            regex = new Regex(@"^(@Highlighter|@Parser|@Scanner|@Grammar|@ParseTree|@TextHighlighter)", RegexOptions.Compiled);
             Patterns.Add(TokenType.DIRECTIVEKEYWORD, regex);
             Tokens.Add(TokenType.DIRECTIVEKEYWORD);
 

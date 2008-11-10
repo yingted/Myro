@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 using System.Drawing;
 using System.Threading;
 
-namespace TinyPG.Highlighter
+namespace Highlighter
 {
     // Summary:
     //     System.EventArgs is the base class for classes containing event data.
@@ -351,10 +351,17 @@ namespace TinyPG.Highlighter
             Unlock();
         }
 
+		public string HighlightString(string text) {
+		  Tree = (ParseTree)Parser.Parse(text);
+		  Textbox.Rtf = "";
+		  HighlighTextCore();
+		  return Textbox.Rtf;
+		}
+
         /// <summary>
         /// this method should be used only by HighlightText or RestoreState methods
         /// </summary>
-        private void HighlighTextCore()
+        public void HighlighTextCore()
         {
             StringBuilder sb = new StringBuilder();
             if (Tree == null) return;

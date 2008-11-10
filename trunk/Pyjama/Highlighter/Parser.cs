@@ -3,7 +3,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace TinyPG.Highlighter
+namespace Highlighter
 {
     #region Parser
 

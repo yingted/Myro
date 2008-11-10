@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace TinyPG.Highlighter
+namespace Highlighter
 {
     #region ParseTree
     public class ParseErrors : List<ParseError>
