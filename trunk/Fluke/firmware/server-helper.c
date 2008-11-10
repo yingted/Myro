@@ -412,6 +412,9 @@ void serve_get_scrib_program()
   int addr;
   // get the address
   addr = getchblock();
+  addr = (addr << 8);
+  addr = addr | getchblock();
+
   // return the byte
   putch(img[addr]);
 }
