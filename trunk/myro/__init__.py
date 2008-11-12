@@ -1080,9 +1080,9 @@ def getIRMessage():
     else:
         raise AttributeError, "need to initialize robot"
 
-def sendIRMessage(msg, footer=True):
+def sendIRMessage(msg):
     if myro.globvars.robot:
-        return myro.globvars.robot.sendIRMessage(msg, footer)
+        return myro.globvars.robot.sendIRMessage(msg)
     else:
         raise AttributeError, "need to initialize robot"
 

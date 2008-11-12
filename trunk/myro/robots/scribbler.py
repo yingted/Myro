@@ -1100,11 +1100,9 @@ class Scribbler(Robot):
             self.lock.release()
         return line
 
-    def sendIRMessage(self, data, footer=True):
+    def sendIRMessage(self, data):
         try:
             self.lock.acquire()
-            if footer:
-                data = data + chr(0x01)
             self.ser.write(chr(Scribbler.SEND_IR_MESSAGE))            
             self.ser.write(chr(len(data)))            
             for i in data:
