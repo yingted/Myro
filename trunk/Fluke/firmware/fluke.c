@@ -499,7 +499,15 @@ void printdec(int sum)
   int ch = 0;
   int i = 0;
 
-  if (sum == 0) putch('0');
+  if (sum == 0) 
+    {
+      putch('0');
+    }
+  else if( sum < 0 )
+    {
+      sum *= -1;
+      putch('-');
+    }
 
   while (sum > 0 && i < 16)
     {

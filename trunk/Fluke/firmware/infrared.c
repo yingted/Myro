@@ -50,6 +50,11 @@ void ir_rx_init()
 
   TIMER1_CCR |= 0x7;     
 
+  // interrupt us every 5 milliseconds to make sure we catch
+  // the end of the packet
+  //TIMER1_MR0 = 50000;
+  //TIMER1_MCR = 0x3;   // reset the tiemr on match, and interrupt
+
   // start TIMER1
   TIMER1_TCR  = 0x1;      
 
@@ -67,15 +72,15 @@ void ir_rx_disable()
 
 void ir_irq()
 {  
-  static int current_time = 0;
-  static int last_time = 0;
+  //static int current_time = 0;
+  //static int last_time = 0;
   static int next_write = 0;
-  static int delta = 0;
-
-  current_time = TIMER1_CR0;  
-
-  delta = current_time - last_time;
-
+  //static int delta = 0;
+  
+  //current_time = TIMER1_CR0;  
+  
+  //delta = current_time - last_time;
+  
   next_write = producer_index + 1;  
   
   if (next_write == IR_BUFFER_SIZE)
@@ -85,7 +90,7 @@ void ir_irq()
   
   if (next_write != consumer_index)
     { 
-      ir_buffer[producer_index] = delta; //current_time - last_time;
+      ir_buffer[producer_index] = TIMER1_CR0; //delta; //current_time - last_time;
       
       producer_index ++;
       if (producer_index == IR_BUFFER_SIZE)
@@ -93,8 +98,11 @@ void ir_irq()
 	  producer_index = 0;
 	}
     }
+  
+  //last_time = current_time;
 
-  last_time = current_time;
+  TIMER1_TCR  = 0x2;       // reset counter
+  TIMER1_TCR  = 0x1;       // start counter
   
   TIMER1_IR = (1 << 4);    // clear the interrupt for capture 1.0
   VICVectAddr = 0;
@@ -117,6 +125,33 @@ int ir_queue_full()
     }
   
   return (next_write == consumer_index); 
+}
+
+
+int ir_queue_write(int data)
+{
+  int next_write = 0;
+  
+  next_write = producer_index + 1;  
+  
+  if (next_write == IR_BUFFER_SIZE)
+    {
+      next_write = 0;
+    }
+  
+  if (next_write != consumer_index)
+    { 
+      ir_buffer[producer_index] = data;
+      
+      producer_index ++;
+      if (producer_index == IR_BUFFER_SIZE)
+	{
+	  producer_index = 0;
+	}
+      return 0;
+    }
+
+  return -1;
 }
 
 
@@ -158,6 +193,17 @@ void process_ir_buffer()
   int bits = 0;
   uint32_t delay = 0;
 
+  // the condition where the data bits, parity bits and stop bits
+  // are all 1 causing the interrupt not to trigger
+  bits = (TIMER1_TC + NOMINAL_HIGH_BIT/2) / NOMINAL_HIGH_BIT;
+  if (data_bit + bits > 9)
+    {
+      ir_queue_write(TIMER1_TC); 
+      TIMER1_TCR  = 0x2;       // reset counter
+      TIMER1_TCR  = 0x1;       // start counter
+      ir_queue_write(1);      // write a dummy to keep bit state consistent
+    }
+  
   while (ir_queue_read(&delay) >= 0)
     {
       bits = 0;
@@ -174,9 +220,9 @@ void process_ir_buffer()
 	{
 	  if (delay <= NOMINAL_HIGH_BIT)
 	    bits = 1;
-	  else
+	  else	
 	    bits = (delay + NOMINAL_HIGH_BIT/2) / NOMINAL_HIGH_BIT;
-	}
+}
       else
 	{
 	  if (delay <= NOMINAL_LOW_BIT)
@@ -195,7 +241,7 @@ void process_ir_buffer()
       printdec(bits);
 #endif /* DEBUG_IR */
 
-      if (bitstate == START_BIT && pinstate)
+      if (bitstate == START_BIT && pinstate && bits)
 	{
 #ifdef DEBUG_IR
 	  putstr("\r\nSTART BIT");
@@ -292,7 +338,7 @@ void emit_zero(uint32_t emitter)
   // prescalar should be about 1 usec
   TIMER0_TCR  = 0x2;     // reset counter
   TIMER0_TCR  = 0x1;     // start counter
-  while (TIMER0_TC < 460)
+  while (TIMER0_TC < XMIT_ZERO_TIME)
     {
       // spin
     }
@@ -307,7 +353,7 @@ void emit_one(uint32_t emitter)
   TIMER0_TCR  = 0x2;     // reset counter
   TIMER0_TCR  = 0x1;     // start counter
 
-  while (total < 400)
+  while (total < XMIT_ONE_TIME)
     {
       TIMER0_TCR  = 0x2;     // reset counter
       TIMER0_TCR  = 0x1;     // start counter

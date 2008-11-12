@@ -6,10 +6,11 @@
 //#define NOMINAL_LOW_BIT    4250 
 //#define NOMINAL_HIGH_BIT   3750
 
-#define NOMINAL_LOW_BIT    4250 
-#define NOMINAL_HIGH_BIT   4000
+#define NOMINAL_LOW_BIT    4250         // data - zero  (ir receiver on)
+#define NOMINAL_HIGH_BIT   4100         // data - one   (ir recevier off)
 
-#define BIT_VARIANCE       1000
+#define XMIT_ZERO_TIME     460
+#define XMIT_ONE_TIME      400
 
 void ir_rx_init();
 void ir_rx_disable();
