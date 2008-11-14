@@ -525,6 +525,7 @@ void printdec(int sum)
     }
 }
 
+
 void printbin(int sum)
 {
   int i = 0;

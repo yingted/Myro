@@ -804,14 +804,16 @@ void serve_version()
 void serve_get_ir_message()
 {
   int i = 0;
+  int data = 0;
+  int to_read = msg_size;
+  
+  putch2b(to_read);
 
-  process_ir_buffer();
-  putch(msg_size);
-  for (i = 0; i <  msg_size; i++)
+  for (i = 0; i < to_read; i++)
     {
-      putch(msg_buffer[i]);
-    }  
-  msg_size = 0;
+      ir_queue_read(&data);
+      putch(data);
+    }
 }
 
 /*

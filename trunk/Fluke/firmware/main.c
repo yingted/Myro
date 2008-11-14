@@ -328,9 +328,9 @@ int main (void)
 	      get_info = 0;
 	    }	  	  
 	}
-      
+
       update_low_battery_light();
-    }  
+    }
 }
 
 // Ununsed IRQs
