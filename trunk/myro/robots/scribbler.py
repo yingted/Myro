@@ -1093,7 +1093,7 @@ class Scribbler(Robot):
         try:
             self.lock.acquire()
             self.ser.write(chr(Scribbler.GET_IR_MESSAGE))
-            size = ord(self.ser.read(1))
+            size = read_2byte(self.ser)
             while (len(line) < size):
                 line += self.ser.read(size-len(line))                   
         finally:
