@@ -372,6 +372,12 @@ def set_scribbler_memory(ser, offset, byte):
     ser.write(chr(SET_SCRIB_PROGRAM))
     write_2byte(ser, offset)
     ser.write(chr(byte))
+
+def get_scribbler_memory(ser, offset):
+    ser.write(chr(GET_SCRIB_PROGRAM))
+    write_2byte(ser, offset)
+    v = ord(ser.read(1))
+    return v
     
 def set_scribbler_start_program(ser, size):
     ser.write(chr(SET_START_PROGRAM))
