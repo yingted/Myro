@@ -1748,7 +1748,7 @@ public class Scheme {
 		  }
 	  }
 	}
-	return "[" + retval + "]";
+	return "(vector " + retval + ")";
   }
   
 

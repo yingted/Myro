@@ -84,6 +84,7 @@
     (begin? "Func<object,bool>" ())
     (lambda? "Func<object,bool>" ())
     (raise? "Func<object,bool>" ())
+    (dict? "Func<object,bool>" ())
     (try? "Func<object,bool>" ())
     (catch? "Func<object,bool>" ())
     (finally? "Func<object,bool>" ())

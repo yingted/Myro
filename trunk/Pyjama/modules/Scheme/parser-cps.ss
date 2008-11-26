@@ -27,6 +27,7 @@
 ;;         | (try <body> (finally <exp> ...))
 ;;         | (try <body> (catch <var> <exp> ...) (finally <exp> ...))
 ;;         | (raise <exp>)
+;;         | (dict (<exp> <exp>) ...)
 
 (define-datatype expression expression?
   (lit-exp
@@ -72,6 +73,8 @@
     (finally-exps (list-of expression?)))
   (raise-exp
     (exp expression?))
+  (dict-exp
+    (pairs (list-of (list-of expression?))))
   )
 
 ;;--------------------------------------------------------------------------
@@ -424,6 +427,10 @@
        (parse (cadr datum) handler
 	 (lambda-cont (v)
 	   (k (raise-exp v)))))
+      ((dict? datum)
+       (parse-pairs (cdr datum) handler
+	  (lambda-cont (v1)
+	     (k (dict-exp v1)))))
       ((application? datum)
        (parse (car datum) handler
 	 (lambda-cont (v1)
@@ -431,6 +438,18 @@
 	     (lambda-cont (v2)
 	       (k (app-exp v1 v2)))))))
       (else (handler (format "bad concrete syntax: ~a" datum))))))
+
+(define* parse-pairs
+  (lambda (pairs handler k)
+    (if (null? pairs)
+      (k '())
+      (parse (caar pairs) handler
+	(lambda-cont (a)
+	  (parse (cadar pairs) handler
+	    (lambda-cont (b)
+              (parse-pairs (cdr pairs) handler
+                  (lambda-cont (results)
+		      (k (cons (list a b) results)))))))))))
 
 (define* parse-all
   (lambda (datum-list handler k)
@@ -539,6 +558,7 @@
 (define begin? (tagged-list 'begin >= 2))
 (define lambda? (tagged-list 'lambda >= 3))
 (define raise? (tagged-list 'raise = 2))
+(define dict? (tagged-list 'dict >= 1))
 
 (define application?
   (lambda (datum)
@@ -551,7 +571,7 @@
     (and (symbol? x)
 	 (memq x '(quote quasiquote lambda if set! define begin
 		    cond and or let let* letrec case record-case
-		    try catch finally raise
+		    try catch finally raise dict
 		    )))))
 
 (define try? (tagged-list 'try >= 2))

@@ -132,6 +132,8 @@
 	(m exp env handler
 	  ;; todo: pass in more info to handler (k, env)
 	  (lambda-cont (e) (handler e))))
+      (dict-exp (pairs)
+	(k (list 'dict pairs)))
       (app-exp (operator operands)
 	(m operator env handler
 	  (lambda-cont (proc)
