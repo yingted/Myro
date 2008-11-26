@@ -220,7 +220,7 @@
 	    'list '+ '- '* '/ '< '> '= 'equal? 'eq? 'memq 'range 'set-car! 'set-cdr!
 	    'import 'get 'call-with-current-continuation 'call/cc
 	    'reverse 'append 'list->vector 'dir 'current-time 'map 'for-each 'env
-	    'using 'not 'printf)
+	    'using 'not 'printf 'vector)
       (list
 	;; exit
         (lambda-proc (args env2 handler k2)
@@ -325,6 +325,8 @@
 	(lambda-proc (args env2 handler k2) (k2 (not (car args))))
 	;; printf
 	(lambda-proc (args env2 handler k2) (k2 (printf-prim args)))
+        ;; vector
+	(lambda-proc (args env2 handler k2) (k2 (list->vector args)))
 	)))))
 
 ;; supports procedures of any number of arguments
