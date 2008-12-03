@@ -435,12 +435,12 @@
 
 (define dir
   (lambda (args env)
-    (sort symbol<? (flatten
-                     (append
-                       (map get-variables-from-frame (frames macro-env))
-                       (if (null? args)
-                           (map get-variables-from-frame (frames env))
-                           (map get-variables-from-frame (frames args))))))))
+    (sort symbol<? (if (null? args)
+		       (flatten 
+			(append
+			 (map get-variables-from-frame (frames macro-env))
+			 (map get-variables-from-frame (frames env))))
+			(get-variables-from-frame (car (frames (car args))))))))
 
 (define get-variables-from-frame
   (lambda (frame) 
