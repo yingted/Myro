@@ -274,9 +274,16 @@
 	(lambda-proc (args env2 handler k2) (k2 (apply * args)))
 	;; /
 	(lambda-proc (args env2 handler k2)
-	  (if (= (cadr args) 0)
-	    (handler "division by zero")
-	    (k2 (apply / args))))
+          (cond
+            ((= (length args) 1)
+             (if (= (car args) 0)
+                 (handler "division by zero")
+                 (k2 (apply / args))))
+            ((>= (length args) 2)
+             (if (= (cadr args) 0)
+                 (handler "division by zero")
+                 (k2 (apply / args))))
+            (else (handler "not enough args to /"))))
 	;; <
 	(lambda-proc (args env2 handler k2) (k2 (apply < args)))
 	;; >

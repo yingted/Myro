@@ -340,10 +340,10 @@ public class Scheme {
   public static Proc Equal_proc = new Proc("equal?", (Procedure1Bool) Equal, -1, 2);
   public static Proc Eq_proc = new Proc("eq?", (Procedure1Bool) Equal, -1, 2);
   public static Proc EqualSign_proc = new Proc("=", (Procedure1Bool) Equal, -1, 2);
-  public static Proc Divide_proc = new Proc("/", (Procedure1) Divide, -1, 1);
   public static Proc GreaterThan_proc = new Proc(">", (Procedure1Bool) GreaterThan, -1, 2);
   public static Proc LessThan_proc = new Proc("<", (Procedure1Bool) LessThan, -1, 2);
   public static Proc Multiply_proc = new Proc("*", (Procedure1) Multiply, -1, 1);
+  public static Proc Divide_proc = new Proc("/", (Procedure1) Divide, -1, 1);
   public static Proc Subtract_proc = new Proc("-", (Procedure1) Subtract, -1, 1);
   public static Proc cadr_proc = new Proc("cadr", (Procedure1) cadr, 1, 1);
   public static Proc car_proc = new Proc("car", (Procedure1) car, 1, 1);
@@ -1408,9 +1408,13 @@ public class Scheme {
 	// For dividing 1 or more numbers in list
 	object retval = car(obj);
 	object current = cdr(obj);
-	while (!Eq(current, EmptyList)) {
-	  retval = Divide(retval, car(current));
-	  current = cdr(current);
+	if (((int)length(current)) == 0) {
+	  retval = Divide(1, retval);
+	} else {
+	  while (!Eq(current, EmptyList)) {
+		retval = Divide(retval, car(current));
+		current = cdr(current);
+	  }
 	}
 	return retval;
   }
@@ -1545,22 +1549,43 @@ public class Scheme {
   }
 
   public static object Divide(object obj1, object obj2) {
+    Rational rat;
 	if ((obj1 is int) && (obj2 is int)) {
-	  return new Rational((int)obj1, (int)obj2);
+	  rat = new Rational((int)obj1, (int)obj2);
+      if (rat.denominator == 1)
+        return rat.numerator;
+      else
+        return rat;
 	} else {
 	  if (obj1 is Rational) {
 		if (obj2 is Rational) {
-		  return (((Rational)obj1) / ((Rational)obj2));
+		  rat = (((Rational)obj1) / ((Rational)obj2));
+          if (rat.denominator == 1)
+            return rat.numerator;
+          else
+            return rat;
 		} else if (obj2 is int) {
-		  return (((Rational)obj1) / ((int)obj2));
+		  rat = (((Rational)obj1) / ((int)obj2));
+          if (rat.denominator == 1)
+            return rat.numerator;
+          else
+            return rat;
 		} else if (obj2 is double) {
 		  return (((double)((Rational)obj1)) / ((double)obj2));
 		}
 	  } else if (obj2 is Rational) {
 		if (obj1 is Rational) {
-		  return (((Rational)obj1) / ((Rational)obj2));
+		  rat = (((Rational)obj1) / ((Rational)obj2));
+          if (rat.denominator == 1)
+            return rat.numerator;
+          else
+            return rat;
 		} else if (obj1 is int) {
-		  return (((int)obj1) / ((Rational)obj2));
+		  rat = (((int)obj1) / ((Rational)obj2));
+          if (rat.denominator == 1)
+            return rat.numerator;
+          else
+            return rat;
 		} else if (obj1 is double) {
 		  return (((double)obj1) / ((Rational)obj2));
 		}
