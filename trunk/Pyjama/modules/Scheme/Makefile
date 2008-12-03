@@ -92,6 +92,10 @@ fact: fact.exe
 fact.exe: fact.cs
 	$(MCS) fact.cs Scheme.cs getline.cs -main:PJScheme -lib:DLLs -r:Microsoft.VisualBasic.dll -r:Microsoft.Scripting.dll
 
+Scheme.exe: Scheme.cs fact.cs
+	$(MCS) Scheme.cs fact.cs getline.cs -main:Scheme -lib:DLLs -r:Microsoft.VisualBasic.dll -r:Microsoft.Scripting.dll
+	MONO_PATH=DLLs mono Scheme.exe
+
 DLR.exe: DLR.cs
 	gmcs DLR.cs -lib:DLLs -r:Microsoft.Scripting.dll -r:Microsoft.Scripting.Core.dll
 

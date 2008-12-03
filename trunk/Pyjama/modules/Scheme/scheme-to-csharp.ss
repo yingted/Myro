@@ -29,6 +29,7 @@
 			     first-frame
 			     set-first-frame!
 			     make-proc
+                             make-vector
 			     make-binding
 			     ))
 (define *function-signatures* '())

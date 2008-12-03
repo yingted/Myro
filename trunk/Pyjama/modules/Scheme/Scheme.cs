@@ -349,7 +349,7 @@ public class Scheme {
   public static Proc car_proc = new Proc("car", (Procedure1) car, 1, 1);
   public static Proc cdr_proc = new Proc("cdr", (Procedure1) cdr, 1, 1);
   public static Proc cons_proc = new Proc("cons", (Procedure2) cons, 2, 1);
-  public static Proc list_to_vector_proc = new Proc("list->vector", (Procedure1) list_to_vector, 1, 1);
+  public static Proc make_vector_proc = new Proc("list->vector", (Procedure1) make_vector, 1, 1);
   public static Proc memq_proc = new Proc("memq", (Procedure2Bool) memq, 2, 2);
   public static Proc range_proc = new Proc("range", (Procedure1) range, -1, 1);
   public static Proc reverse_proc = new Proc("reverse", (Procedure1) reverse, 1, 1);
@@ -927,6 +927,18 @@ public class Scheme {
 	return (bool) procedure_q(obj);
   }
 
+  public static object make_vector(object lyst) {
+	trace(2, "called: list_to_vector\n");
+	int len = (int) length(lyst);
+	object current = lyst;
+	object[] retval = new object[len];
+	for (int i = 0; i < len; i++) {
+	  retval[i] = car(current);
+	  current = cdr(current);
+	}
+	return new Vector(retval);
+  }
+
   public static object list_to_vector(object lyst) {
 	trace(2, "called: list_to_vector\n");
 	int len = (int) length(lyst);
@@ -974,7 +986,7 @@ public class Scheme {
   }
 
   public static bool vector_q(object obj) {
-	return (obj is object[]);
+	return (obj is Vector);
   }
 
   public static bool char_numeric_q(object c) {
@@ -2013,24 +2025,23 @@ public class Cons {
 
 public class Vector {
   
-  List<object> elements;
+  private object[] values;
   
-	public Vector(object cell) {
-	  elements = new List<object>();
-	  while (cell is Cons) {
-		elements.Add(((Cons)cell).car);
-		cell = ((Cons)cell).cdr;
-	  }
-	}
-  
+  public Vector(object[] args) {
+    values = args;
+  }
+
+  public object get(int index) {
+    return values[index];
+  }
+
   public override string ToString() {
 	string retval = "";
-	foreach (object s in elements) {
-	  if (retval != "") 
-		retval += " ";
-	  retval += s.ToString();
+    for (int i = 0; i < values.Length; i++) {
+      retval += " ";
+	  retval += values[i].ToString();
 	}
-	return String.Format("#({0})", retval);
+	return String.Format("(vector{0})", retval);
   }
   
 }
@@ -2107,6 +2118,10 @@ public class Vector {
 	printf("15: {0} \n", Multiply(Multiply( Multiply( intfact(12), 13), 14), 15));
 
 	printf("1827391823712983712983712938: {0}\n", BigIntegerParse("1827391823712983712983712938"));
+
+    printf("display(list_to_vector( list(1, 2, 3))): ");
+    display(list_to_vector( list(1, 2, 3)));
+    printf("\n");
   }
 
   public static long longfact(long n) {

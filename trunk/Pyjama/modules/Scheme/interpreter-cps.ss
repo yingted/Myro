@@ -308,7 +308,7 @@
 	;; append
 	(lambda-proc (args env2 handler k2) (k2 (apply append args)))
 	;; list->vector
-	(lambda-proc (args env2 handler k2) (k2 (apply list->vector args)))
+	(lambda-proc (args env2 handler k2) (k2 (apply make-vector args)))
 	;; dir
 	(lambda-proc (args env2 handler k2) (k2 (dir args env2)))
 	;; current-time
@@ -328,7 +328,7 @@
 	;; printf
 	(lambda-proc (args env2 handler k2) (k2 (printf-prim args)))
         ;; vector
-	(lambda-proc (args env2 handler k2) (k2 (list->vector args)))
+	(lambda-proc (args env2 handler k2) (k2 (make-vector args)))
 	)))))
 
 ;; supports procedures of any number of arguments
@@ -484,6 +484,8 @@
   (lambda (external-function-object)
     (lambda-proc (args env2 handler k2)
       (k2 (apply* external-function-object args)))))
+
+(define make-vector list->vector) ;; ignored in C#
 
 (define toplevel-env (make-toplevel-env))
 (define macro-env (make-macro-env))
