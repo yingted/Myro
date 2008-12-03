@@ -1142,8 +1142,8 @@ public class Scheme {
 	} else if (pair_q(obj)) {
 	  if (procedure_q(obj)) {
 		return "#<procedure>";
-	  } else if (Eq(car(obj), symbol("envionment"))) {
-		return String.Format("#<environment>"); //, car(obj));
+	  } else if (Eq(car(obj), symbol("environment"))) {
+		return "#<environment>"; //, car(obj));
 	  } else {
 		string retval = "";
 		object current = (Cons)obj;

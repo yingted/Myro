@@ -123,7 +123,13 @@
 	      (k new-binding))))))))
 
 (define* lookup-variable-components
+  ;; math.x.y.z
+  ;; components: '(test x y z) "" ...
+  ;; components: '(x y z) "test" ...
+  ;; components: '(y z) "test.x" ...
+  ;; components: '(z) "test.x.z" ...
   (lambda (components path env handler k)
+    ;;(printf "components: ~s path: ~s\n" components path)
     (let ((var (car components)))
       (lookup-module-binding var env path handler
 	(lambda-cont (binding)
