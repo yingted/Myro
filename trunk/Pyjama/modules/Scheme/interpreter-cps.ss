@@ -418,15 +418,26 @@
     (let ((fake-k (lambda-proc (args env2 handler k2) (k (car args)))))
       (proc (list fake-k) env handler k))))
 
+(define flatten
+  (lambda (lists)
+    (cond
+      ((null? lists) '())
+      ((list? (car lists))
+       (append (flatten (car lists)) (flatten (cdr lists))))
+      (else (cons (car lists) (flatten (cdr lists)))))))
+
 (define dir
   (lambda (args env)
-     (if (null? args)
- 	(map get-variables-from-frame (frames env))
-	(map get-variables-from-frame (frames args)))))
+    (sort symbol<? (flatten
+                     (append
+                       (map get-variables-from-frame (frames macro-env))
+                       (if (null? args)
+                           (map get-variables-from-frame (frames env))
+                           (map get-variables-from-frame (frames args))))))))
 
 (define get-variables-from-frame
   (lambda (frame) 
-    (sort symbol<? (map binding-variable frame))))
+    (map binding-variable frame)))
 
 (define symbol<?
   (lambda (a b)
