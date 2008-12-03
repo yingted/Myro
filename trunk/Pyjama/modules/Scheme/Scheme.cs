@@ -1393,9 +1393,13 @@ public class Scheme {
 	// For subtracting 1 or more numbers in list
 	object retval = car(obj);
 	object current = cdr(obj);
-	while (!Eq(current, EmptyList)) {
-	  retval = Subtract(retval, car(current));
-	  current = cdr(current);
+	if (((int)length(current)) == 0) {
+	  retval = Multiply(-1, retval);
+	} else {
+	  while (!Eq(current, EmptyList)) {
+		retval = Subtract(retval, car(current));
+		current = cdr(current);
+	  }
 	}
 	return retval;
   }
