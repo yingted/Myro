@@ -126,6 +126,7 @@
 (define char-delimiter?
   (lambda (c)
     (or (char-whitespace? c)
+	(char=? c #\')
 	(char=? c #\()
 	(char=? c #\[)
 	(char=? c #\))
