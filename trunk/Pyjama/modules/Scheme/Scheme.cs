@@ -1848,18 +1848,30 @@ public class Scheme {
   }
 
   public static object Append(object obj1, object obj2) {
-	if (obj1 is object[]) {
-	  Object lyst = list(obj1);
-	  Cons cell = (Cons) rdc(lyst);
-	  set_cdr_b(cell, obj2);
-	  return lyst;
-	} else if (obj1 is Cons) {
-	  Cons cell = (Cons) rdc(obj1);
-	  set_cdr_b(cell, obj2);
-	  return obj1;
-	} else {
-	  return new Cons(obj1, obj2);
-	}
+    if (! list_q(obj2)) {
+      throw new Exception(string.Format("error in append: need two lists"));
+    } else if (obj1 is object[]) {
+      Object lyst = list(obj1);
+      if (((int) length(lyst)) > 0) {
+	Cons cell = (Cons) rdc(lyst);
+	set_cdr_b(cell, obj2);
+	return lyst;
+      } else {
+	return obj2;
+      }
+    } else if (obj1 is Cons) {
+      if (((int) length(obj1)) > 0) {
+	Cons cell = (Cons) rdc(obj1);
+	set_cdr_b(cell, obj2);
+	return obj1;
+      } else {
+	return obj2;
+      }
+    } else if (obj1 == EmptyList) {
+      return obj2;
+    } else {
+      throw new Exception(string.Format("error in append: need two lists"));
+    }
   }
 
   public static object sqrt(object obj) {
