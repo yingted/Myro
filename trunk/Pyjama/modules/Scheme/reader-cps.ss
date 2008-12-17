@@ -8,6 +8,8 @@
 ;; scanner - character stream represented as a position number
 
 (define chars-to-scan 'undefined)
+(define read-line-count 1)
+(define read-char-count 0)
 
 (define 1st
   (lambda (n) (string-ref chars-to-scan n)))
@@ -41,11 +43,15 @@
 ;; for testing purposes
 (define scan-string
   (lambda (input)
+    (set! read-line-count 1)
+    (set! read-char-count 0)
     (scan-input input init-handler init-cont)))
 
 ;; for testing purposes
 (define scan-file
   (lambda (filename)
+    (set! read-line-count 1)
+    (set! read-char-count 0)
     (scan-input (read-content filename) init-handler init-cont)))
 
 ;;------------------------------------------------------------------------
@@ -61,11 +67,20 @@
   (lambda (action buffer chars handler k)  ;; k receives 2 args: token, chars-left
     (record-case action
       (shift (next)
-	(apply-action next (cons (1st chars) buffer) (remaining chars) handler k))
+	(begin
+	  (set! read-char-count (+ read-char-count 1))
+	  (apply-action next (cons (1st chars) buffer) (remaining chars) handler k)))
       (replace (new-char next)
 	(apply-action next (cons new-char buffer) (remaining chars) handler k))
+      (drop-newline (next)
+	(begin
+	  (set! read-line-count (+ read-line-count 1))
+	  (set! read-char-count 0)
+	  (apply-action next buffer (remaining chars) handler k)))
       (drop (next)
-	(apply-action next buffer (remaining chars) handler k))
+	(begin
+	  (set! read-char-count (+ read-char-count 1))
+	  (apply-action next buffer (remaining chars) handler k)))
       (goto (state)
 	(let ((action (apply-state state (1st chars))))
 	  (if (eq? action 'error)
@@ -73,15 +88,20 @@
 	    (apply-action action buffer chars handler k))))
       (emit (token-type)
 	(convert-buffer-to-token token-type buffer handler
-	  (lambda-cont (v) (k v chars))))
+	  (lambda-cont (v) (k (append v (list read-line-count read-char-count))
+			      chars))))
       (else (error 'apply-action "invalid action: ~a" action)))))
       
 (define* scan-error
   (lambda (chars handler)
     (let ((c (1st chars)))
       (if (char=? c #\nul)
-	(handler "unexpected end of input")
-	(handler (format "unexpected character ~a encountered" c))))))
+	(handler 
+	 (format "unexpected end of input at line: ~a col: ~a" 
+		 read-line-count read-char-count))
+	(handler 
+	 (format "unexpected character ~a encountered at line: ~a col: ~a" 
+		 c read-line-count read-char-count))))))
 
 (define* convert-buffer-to-token
   (lambda (token-type buffer handler k)
@@ -110,7 +130,7 @@
 	      ((string=? name "backspace") (k (list 'character #\backspace)))
 	      ((string=? name "return") (k (list 'character #\return)))
 	      ((string=? name "page") (k (list 'character #\page)))
-	      (else (handler (format "invalid character name '~a'" name))))))
+	      (else (handler (format "invalid character name '~a' at line: ~a col: ~a" name read-line-count read-char-count))))))
 	(string
 	  (k (list 'string (list->string buffer))))
 	(else
@@ -202,11 +222,11 @@
 	  ((char-sign? c) '(shift (goto signed-state)))
 	  ((char=? c #\.) '(shift (goto decimal-point-state)))
 	  ((char-numeric? c) '(shift (goto whole-number-state)))
-	  ((char=? c #\nul) '(emit end-marker))
+	  ((char=? c #\nul) '(drop (emit end-marker)))
 	  (else 'error)))
       (comment-state
 	(cond
-	  ((char=? c #\newline) '(drop (goto start-state)))
+	  ((char=? c #\newline) '(drop-newline (goto start-state)))
 	  ((char=? c #\nul) '(goto start-state))
 	  (else '(drop (goto comment-state)))))
       (comma-state
@@ -352,7 +372,30 @@
 	  (lambda-cont2 (sexp tokens-left)
 	    (if (token-type? (first tokens-left) 'end-marker)
 	      (k sexp tokens-left)
-	      (handler (format "tokens left over: ~a" tokens-left)))))))))
+	      (handler (format "tokens left over at line: ~a col: ~a" 
+			       (get-line-count (car tokens-left))
+			       (get-char-count (car tokens-left))
+			       )))))))))
+
+(define get-line-count
+  (lambda (token)
+    (rac (rdc token))))
+
+(define get-char-count
+  (lambda (token)
+    (rac token)))
+
+(define rac
+  (lambda (lyst)
+    (cond
+     ((null? (cdr lyst)) (car lyst))
+     (else (rac (cdr lyst))))))
+
+(define rdc
+  (lambda (lyst)
+    (cond
+     ((null? (cdr lyst)) '())
+     (else (cons (car lyst) (rdc (cdr lyst)))))))
 
 (define string->integer
   (lambda (str)
@@ -381,7 +424,10 @@
 	(let ((num (string->rational str)))
 	  (if (true? num)
 	    (k num (rest-of tokens))
-	    (handler (format "cannot represent ~a" str)))))
+	    (handler (format "cannot represent ~a at line: ~a col: ~a" 
+			     str 
+			     (get-line-count (car tokens)) 
+			     (get-char-count (car tokens)))))))
       (boolean (bool) (k bool (rest-of tokens)))
       (character (char) (k char (rest-of tokens)))
       (string (str) (k str (rest-of tokens)))
@@ -436,9 +482,10 @@
 	 ((token-type? (first tokens) expected-terminator)
 	  (k sexp (rest-of tokens)))
 	 ((eq? expected-terminator 'rparen)
-	  (handler "parenthesized list terminated by bracket"))
+	  (handler 
+	   (format "parenthesized list terminated by bracket at line: ~a col: ~a" (get-line-count (car tokens)) (get-char-count (car tokens)))))
 	 ((eq? expected-terminator 'rbracket)
-	  (handler "bracketed list terminated by parenthesis"))))
+	  (handler (format "bracketed list terminated by parenthesis at line: ~a col: ~a" (get-line-count (car tokens)) (get-char-count (car tokens)))))))
       (else (read-error tokens handler)))))
 
 (define* read-vector
@@ -457,8 +504,13 @@
   (lambda (tokens handler)
     (let ((token (first tokens)))
       (if (token-type? token 'end-marker)
-	(handler "unexpected end of input")
-	(handler (format "unexpected token ~a encountered" token))))))
+	(handler (format "unexpected end of input at line: ~a col: ~a" 
+			 (get-line-count (car tokens)) 
+			 (get-char-count (car tokens))))
+	(handler (format "unexpected token ~a encountered at line: ~a col: ~a" 
+			 (car token) 
+			 (get-line-count token)
+			 (get-char-count token)))))))
 
 ;;------------------------------------------------------------------------
 ;; file reader
