@@ -68,6 +68,7 @@
     (set-car! "void" ())
     (set-cdr! "void" ())
     (set-binding-value! "void" ())
+    (set-binding-docstring! "void" ())
     (set-first-frame! "void" ())
 
     (tagged-list "Func<object,bool>" ("object" "Predicate2" "object"))

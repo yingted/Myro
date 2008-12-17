@@ -6,19 +6,27 @@
 
 (define make-binding
   (lambda (variable value)
-    (cons variable value)))
+    (list variable "" value)))
 
 (define binding-variable
   (lambda (binding)
     (car binding)))
 
+(define binding-docstring
+  (lambda (binding)
+    (cadr binding)))
+
 (define binding-value
   (lambda (binding)
-    (cdr binding)))
+    (caddr binding)))
+
+(define set-binding-docstring!
+  (lambda (binding docstring)
+    (set-car! (cdr binding) docstring)))
 
 (define set-binding-value!
   (lambda (binding value)
-    (set-cdr! binding value)))
+    (set-car! (cddr binding) value)))
 
 ;; frames
 

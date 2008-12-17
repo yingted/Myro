@@ -434,7 +434,7 @@ public class Scheme {
   }
 
   public static object make_binding (object variable, object value) {
-	return ((object) cons ((object) variable, (object) value));
+	return ((object) list((object) variable, "", (object) value));
   }
   
   public static object first_frame (object env) {

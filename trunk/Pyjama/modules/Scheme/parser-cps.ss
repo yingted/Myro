@@ -43,7 +43,7 @@
     (rhs-exp expression?))
   (define-exp
     (id symbol?)
-    (rhs-exp expression?))
+    (rhs-exp (list-of expression?)))
   (define-syntax-exp
     (keyword symbol?)
     (clauses (list-of (list-of pattern?))))
@@ -121,7 +121,7 @@
 	      (process-macro-clauses (cdr clauses) datum handler k))))))))
 
 (define mit-define-transformer
-  (lambda-macro (datum k)
+  (lambda-macro (datum k) 
     (let ((name (caadr datum))
 	  (formals (cdadr datum))
 	  (bodies (cddr datum)))
@@ -374,9 +374,15 @@
 	 (mit-define-transformer datum
 	   (lambda-cont (v)
 	     (parse v handler k)))
-	 (parse (caddr datum) handler
-	   (lambda-cont (body)
-	     (k (define-exp (cadr datum) body))))))
+	 (if (= (length datum) 3) ;; (define x 1)
+	     (parse (caddr datum) handler 
+		(lambda-cont (body)
+		    (k (define-exp (cadr datum) (list body)))))
+	     (parse (cadddr datum) handler ;; (define x "" 8)
+		 (lambda-cont (body)
+		    (parse (caddr datum) handler
+			(lambda-cont (docstring)
+			    (k (define-exp (cadr datum) (list docstring body))))))))))
       ((define-syntax? datum)
        (k (define-syntax-exp (cadr datum) (cddr datum))))
       ((begin? datum)

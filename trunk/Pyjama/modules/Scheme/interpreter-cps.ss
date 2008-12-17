@@ -95,12 +95,22 @@
 		(set-binding-value! binding rhs-value)
 		(k '<void>))))))
       (define-exp (var rhs-exp)
-	(m rhs-exp env handler
-	  (lambda-cont (rhs-value)
-	    (lookup-binding-in-first-frame var env handler
-	      (lambda-cont (binding)
-		(set-binding-value! binding rhs-value)
-		(k '<void>))))))
+        (if (= (length rhs-exp) 1)
+            (m (car rhs-exp) env handler
+              (lambda-cont (rhs-value)
+                (lookup-binding-in-first-frame var env handler
+                  (lambda-cont (binding)
+                    (set-binding-value! binding rhs-value)
+                    (k '<void>)))))
+            (m (cadr rhs-exp) env handler ;; body
+              (lambda-cont (rhs-value)
+		 (m (car rhs-exp) env handler ;; docstring
+		    (lambda-cont (docstring)
+		       (lookup-binding-in-first-frame var env handler
+			  (lambda-cont (binding)
+			     (set-binding-docstring! binding docstring)
+			     (set-binding-value! binding rhs-value)
+			     (k '<void>)))))))))
       (define-syntax-exp (keyword clauses)
 	(lookup-binding-in-first-frame keyword macro-env handler
 	  (lambda-cont (binding)
@@ -222,7 +232,7 @@
 	    'list '+ '- '* '/ '< '> '= 'equal? 'eq? 'memq 'range 'set-car! 'set-cdr!
 	    'import 'get 'call-with-current-continuation 'call/cc
 	    'reverse 'append 'list->vector 'dir 'current-time 'map 'for-each 'env
-	    'using 'not 'printf 'vector)
+	    'using 'not 'printf 'vector 'help)
       (list
 	;; exit
         (lambda-proc (args env2 handler k2)
@@ -338,6 +348,9 @@
           (k2 '<void>))
         ;; vector
 	(lambda-proc (args env2 handler k2) (k2 (make-vector args)))
+        ;; help
+	(lambda-proc (args env2 handler k2) (help-prim (car args) 
+						       env2 handler k2))
 	)))))
 
 ;; supports procedures of any number of arguments
@@ -486,6 +499,12 @@
 	      (m exp env handler
 		(lambda-cont (v)
 		  (load-loop tokens-left env handler k))))))))))
+
+(define* help-prim
+  (lambda (var env handler k)
+    (lookup-binding var env handler
+	 (lambda-cont (binding)
+	     (k (binding-docstring binding))))))
 
 (define range
   (lambda args
