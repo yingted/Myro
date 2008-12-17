@@ -373,8 +373,8 @@
 	    (if (token-type? (first tokens-left) 'end-marker)
 	      (k sexp tokens-left)
 	      (handler (format "tokens left over at line: ~a col: ~a" 
-			       (get-line-count (car tokens-left))
-			       (get-char-count (car tokens-left))
+			       (get-line-count (first tokens-left))
+			       (get-char-count (first tokens-left))
 			       )))))))))
 
 (define get-line-count
@@ -426,8 +426,8 @@
 	    (k num (rest-of tokens))
 	    (handler (format "cannot represent ~a at line: ~a col: ~a" 
 			     str 
-			     (get-line-count (car tokens)) 
-			     (get-char-count (car tokens)))))))
+			     (get-line-count (first tokens)) 
+			     (get-char-count (first tokens)))))))
       (boolean (bool) (k bool (rest-of tokens)))
       (character (char) (k char (rest-of tokens)))
       (string (str) (k str (rest-of tokens)))
@@ -483,9 +483,9 @@
 	  (k sexp (rest-of tokens)))
 	 ((eq? expected-terminator 'rparen)
 	  (handler 
-	   (format "parenthesized list terminated by bracket at line: ~a col: ~a" (get-line-count (car tokens)) (get-char-count (car tokens)))))
+	   (format "parenthesized list terminated by bracket at line: ~a col: ~a" (get-line-count (first tokens)) (get-char-count (first tokens)))))
 	 ((eq? expected-terminator 'rbracket)
-	  (handler (format "bracketed list terminated by parenthesis at line: ~a col: ~a" (get-line-count (car tokens)) (get-char-count (car tokens)))))))
+	  (handler (format "bracketed list terminated by parenthesis at line: ~a col: ~a" (get-line-count (first tokens)) (get-char-count (first tokens)))))))
       (else (read-error tokens handler)))))
 
 (define* read-vector
@@ -505,8 +505,8 @@
     (let ((token (first tokens)))
       (if (token-type? token 'end-marker)
 	(handler (format "unexpected end of input at line: ~a col: ~a" 
-			 (get-line-count (car tokens)) 
-			 (get-char-count (car tokens))))
+			 (get-line-count token) 
+			 (get-char-count token)))
 	(handler (format "unexpected token ~a encountered at line: ~a col: ~a" 
 			 (car token) 
 			 (get-line-count token)
