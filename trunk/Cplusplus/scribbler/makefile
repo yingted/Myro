@@ -1,4 +1,4 @@
-CC = g++-
+CC = g++
 INCLUDES = headers `fltk-config --cxxflags` `Magick++-config --cppflags`
 FLTKLIB = `fltk-config --ldflags --libs`
 MAGICKLIB = `Magick++-config --ldflags --libs`
