@@ -188,15 +188,18 @@ void * capture_image(void * data) {
 
 		switch(videoData->color_mode) {
 			case 0: tempImageBuffer
-						= videoData->robot->takePicture("grayjpeg");
+						= videoData->robot
+							->takePicture("grayjpeg")->getRawImage();
 				break;
 			case 1:
 					tempImageBuffer
-						= videoData->robot->takePicture("jpeg");
+						= videoData
+						 ->robot->takePicture("jpeg")->getRawImage();
 				break;
 			case 2:
 					tempImageBuffer
-						= videoData->robot->takePicture("blob");
+						= videoData->robot
+						 ->takePicture("blob")->getRawImage();
 				break;
 			default: 
 			{

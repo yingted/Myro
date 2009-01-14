@@ -3,6 +3,7 @@
 
 #include "Robot.h"
 #include "serial.h"
+#include "Picture.h"
 #include <vector>
 #include <pthread.h>
 
@@ -373,13 +374,13 @@ class Scribbler: public Robot {
 	 * @param type - Valid values, "color", "gray", and "blob"
 	 * @return unsigned char array containing the image information.
 	 */
-	unsigned char * takePicture(std::string type =  "color");
+	Picture * takePicture(std::string type =  "color");
 	
 	/*
 	 * Not yet functional. This version is intended to be used for
 	 * taking the jpeg images. However, get jpeg scan is still buggy.
 	 */
-	unsigned char * takePicture(std::string type , int &size);
+	//unsigned char * takePicture(std::string type , int &size);
 
 	/**
 	 * Given that the blob tracking is configured, this function

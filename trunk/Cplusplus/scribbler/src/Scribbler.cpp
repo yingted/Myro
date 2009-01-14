@@ -6,6 +6,9 @@
 #include <assert.h>
 #include <iostream>
 #include <Magick++.h>
+#include "ColorPicture.h"
+#include "GrayPicture.h"
+
 using namespace Magick;
 
 #define PACKET_SIZE 9
@@ -1527,38 +1530,48 @@ std::vector<int> Scribbler::getData(std::vector<int> position) {
 	return dataV;
 }
 
-unsigned char * Scribbler::takePicture(std::string type) {
+Picture * Scribbler::takePicture(std::string type) {
 	unsigned char * imageBuffer = NULL;
 	int size;
+
+	Picture * image;
+
+	pthread_mutex_lock(this->image_lock);
 	if(type == "color") {
 		imageBuffer = grab_array_rgb();
+		image = new ColorPicture(imageBuffer, 256, 192);
 	}
 	else if( type == "gray" || type == "grey") {
-		pthread_mutex_lock(this->image_lock);
 		conf_window(0, 1, 0, 255, 191, 2, 2);
 		imageBuffer = grab_gray_array();
 		conf_gray_window(0, 2, 0, 128, 191, 1, 1);
-		pthread_mutex_unlock(this->image_lock);
+		image = new GrayPicture(imageBuffer, 256, 192);
 	}
 	else if( type == "blob" ) {
 		imageBuffer = grab_blob_array();
+		image = new ColorPicture(imageBuffer, 256, 192);
 	}
 	else if( type == "jpeg" ) {
 		imageBuffer = grab_jpeg_color(1,size);
+		image = new ColorPicture(imageBuffer, 256, 192);
 	}
 	else if( type == "jpeg-fast") {
 		imageBuffer = grab_jpeg_color(0,size);
+		image = new ColorPicture(imageBuffer, 256, 192);
 	}
 	else if( type == "grayjpeg") {
 		imageBuffer = grab_jpeg_gray(1,size);
+		image = new ColorPicture(imageBuffer, 256, 192);
 	}
 	else if( type == "grayjpeg-fast" ) {
 		imageBuffer = grab_jpeg_gray(0,size);
+		image = new ColorPicture(imageBuffer, 256, 192);
 	}
-	return imageBuffer;
+	pthread_mutex_unlock(this->image_lock);
+	return image;
 }
 
-unsigned char * Scribbler::takePicture(std::string type, int &size) {
+/*unsigned char * Scribbler::takePicture(std::string type, int &size) {
 	unsigned char * imageBuffer = NULL;
 	if(type == "jpeg") {
 		imageBuffer = grab_jpeg_color(1, size);
@@ -1573,7 +1586,7 @@ unsigned char * Scribbler::takePicture(std::string type, int &size) {
 		imageBuffer = grab_jpeg_gray(0, size);
 	}
 	return imageBuffer;
-}
+}*/
 
 std::vector<int> Scribbler::getBlob() {
 	std::vector<int> blob(3,0);

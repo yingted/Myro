@@ -25,25 +25,25 @@ int main(int argc, char ** argv) {
 	cout << "Testing Color, if image looks correct close display\n";
 	cout << "If not, try restarting robot, and rerunning test\n";
 
-	image_buffer = robot->takePicture("color");
+	image_buffer = robot->takePicture("color")->getRawImage();
 	robotImage = Image(256,192,"RGB",CharPixel,image_buffer);
 	robotImage.display();
 	free(image_buffer);
 
 	cout << "Testing Grayscale(Note Image should look Pink)\n";
-	image_buffer = robot->takePicture("gray");
+	image_buffer = robot->takePicture("gray")->getRawImage();
 	robotImage = Image(256,192,"G", CharPixel, image_buffer);
 	robotImage.display();
 	free(image_buffer);
 
 	cout << "Testing Jpeg Color\n";
-	image_buffer = robot->takePicture("jpeg");
+	image_buffer = robot->takePicture("jpeg")->getRawImage();
 	robotImage = Image(256,192,"RGB", CharPixel, image_buffer);
 	robotImage.display();
 	free(image_buffer);
 
 	cout << "Testing Jpeg Gray\n";
-	image_buffer = robot->takePicture("grayjpeg");
+	image_buffer = robot->takePicture("grayjpeg")->getRawImage();
 	robotImage = Image(256,192,"G", CharPixel, image_buffer);
 	robotImage.display();
 	free(image_buffer);

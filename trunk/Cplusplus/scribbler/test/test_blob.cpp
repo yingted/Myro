@@ -22,7 +22,7 @@ class PictureInPicture: public Filter {
 	~PictureInPicture(){}
 
 	void filter(unsigned char * image) {
-		unsigned char * colorImage = robot->takePicture("jpeg");
+		unsigned char * colorImage = robot->takePicture("jpeg")->getRawImage();
 
 		int height = getHeight();
 		int width = getWidth();
@@ -165,7 +165,7 @@ int main(int argc, char ** argv) {
 
 	unsigned char * tempImageBuffer 
 		= (unsigned char*)malloc(sizeof(unsigned char) * 256 * 192 * 3);
-	unsigned char * rgb_image_buffer = robot->takePicture();
+	unsigned char * rgb_image_buffer = robot->takePicture()->getRawImage();
 	while(!train) {
 		memcpy(tempImageBuffer, rgb_image_buffer, sizeof(unsigned char) *
 				256 * 192 * 3);
@@ -188,7 +188,7 @@ int main(int argc, char ** argv) {
 			train = 1;
 		else {
 			free(rgb_image_buffer);
-			rgb_image_buffer = robot->takePicture();
+			rgb_image_buffer = robot->takePicture()->getRawImage();
 		}
 	}
 	robot->conf_rle_range(rgb_image_buffer, x1, y1, x2, y2);

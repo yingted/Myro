@@ -16,9 +16,9 @@ clean:
 #.cpp.o:
 #	$(CC) $(CFLAGS) -c src/*.cpp
 
-libscribbler.a: src/Scribbler.cpp src/serial.cpp src/Robot.cpp
-	$(CC) $(CFLAGS) -c src/Scribbler.cpp src/serial.cpp src/Robot.cpp
-	ar ru libscribbler.a Scribbler.o serial.o Robot.o
+libscribbler.a: src/Myro.cpp src/Scribbler.cpp src/serial.cpp src/Robot.cpp src/ColorPicture.cpp src/GrayPicture.cpp src/Picture.cpp
+	$(CC) $(CFLAGS) -c src/Myro.cpp src/Scribbler.cpp src/serial.cpp src/Robot.cpp src/Picture.cpp src/GrayPicture.cpp src/ColorPicture.cpp
+	ar ru libscribbler.a Scribbler.o serial.o Robot.o Picture.o GrayPicture.o ColorPicture.o
 	ranlib libscribbler.a
 
 test_motor: test/test_motor.cpp libscribbler.a
