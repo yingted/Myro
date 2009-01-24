@@ -25,14 +25,15 @@ class Epuck(Robot):
         Robot.__init__(self)
         myro.globvars.robot = self
         self.robotinfo = {"robot": "epuck", "robot-version": "0.1"}
-        if isinstance(id, str):
+        if isinstance(id, str): # "COM27"
             portname = id
             portnum = int(portname[3:])
             if portnum >= 10:
                 portname = r'\\.\COM%d' % (portnum)
-        elif isinstance(id, int):
+                self.id = portnum
+        elif isinstance(id, int): # 1034
             portname = '/dev/tty.e-puck_%04d-COM1-1' % id
-#        self.port = serial.Serial(portname, 38400, timeout=5)
+            self.id = id
         self.port = serial.Serial(portname, 115200, timeout=5)
         # flushes the communication channel (use write, not send)
         self.port.write('\n')
@@ -52,7 +53,6 @@ class Epuck(Robot):
 #             self.send('L,%d,0' % n)
         # flash LEDs
         self.clockwiseLEDcycle(0.05)
-        self.id = id
         # default camera parameters
         self.setCameraMode('color', 40, 30, 8)
         self.currentTranslate = 0.0
