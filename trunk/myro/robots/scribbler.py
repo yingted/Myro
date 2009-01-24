@@ -814,7 +814,9 @@ class Scribbler(Robot):
                    "grayjpeg": "gray",
                    "grayjpeg-fast": "gray"}
     
-    def takePicture(self, mode="jpeg"):
+    def takePicture(self, mode=None):
+        if mode == None:
+            mode = "jpeg"
         width = 256
         height = 192
         p = Picture()

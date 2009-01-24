@@ -1197,7 +1197,7 @@ def makeArray(*args, **kwargs):
     """ Returns an array of the given dimensions. """
     return Array(*args, **kwargs)
 
-def takePicture(mode="jpeg"):
+def takePicture(mode=None):
     """ Takes a picture using the camera. Mode can be 'color', 'gray', or 'blob' """
     if myro.globvars.robot:
         return myro.globvars.robot.takePicture(mode)
@@ -1267,24 +1267,24 @@ def makePicture(*args):
         retval.set(x, y, array, mode)
     return retval
 
-def _mouseCallback(point, name="default"):
+def _mouseCallback(point, name="default", scale=1):
     window = myro.globvars.windows[name]
     picture = myro.globvars.pictures[name]
     pixel = picture.getPixel(point.x, point.y)
     window.lastX, window.lastY = point.x, point.y
     rgba = pixel.getRGBA()
     window.setStatusDirect("(%d, %d): (%d,%d,%d,a=%d)" %
-                           (point.x, point.y, rgba[0], rgba[1], rgba[2], rgba[3]))
+                           (point.x/scale, point.y/scale, rgba[0], rgba[1], rgba[2], rgba[3]))
 
-def _mouseCallbackRelease(point, name="default"):
+def _mouseCallbackRelease(point, name="default", scale=1):
     window = myro.globvars.windows[name]
     picture = myro.globvars.pictures[name]
     if abs(window.lastX - point.x) < 3 or abs(window.lastY - point.y) < 3:
         return
     if myro.globvars.robot != None:
         yMin,yMax,uMin,uMax,vMin,vMax = myro.globvars.robot.set_blob_yuv(
-                                         picture, window.lastX, window.lastY,
-                                         point.x, point.y)
+                                         picture, window.lastX/scale, window.lastY/scale,
+                                         point.x/scale, point.y/scale)
         window.setStatusDirect("Set configureBlob(%d,%d,%d,%d,%d,%d)" % (yMin, yMax, uMin, uMax, vMin,vMax) )
 
 def writePictureTo(picture, filename):
@@ -1326,12 +1326,15 @@ def show(picture, name="default"):
         myro.globvars.windows[name].delete("image")
     except:
         myro.globvars.windows[name] = GraphWin("Myro: %s" % name)
+    if picture.displayScale != 1:
+        picture = Picture(picture)
+        picture.scale(picture.displayScale)
     myro.globvars.pictures[name] = picture
     myro.globvars.windows[name]['width'] = picture.width
     myro.globvars.windows[name]['height'] = picture.height
     myro.globvars.pixmaps[name] = makePixmap(picture)
-    myro.globvars.windows[name].setMouseHandler(lambda point: _mouseCallback(point, name))
-    myro.globvars.windows[name].setMouseReleaseHandler(lambda point: _mouseCallbackRelease(point, name))
+    myro.globvars.windows[name].setMouseHandler(lambda point: _mouseCallback(point, name, picture.displayScale))
+    myro.globvars.windows[name].setMouseReleaseHandler(lambda point: _mouseCallbackRelease(point, name, picture.displayScale))
     myro.globvars.images[name] = Image(Point(picture.width/2, picture.height/2),
                                     myro.globvars.pixmaps[name])
     myro.globvars.images[name].draw(myro.globvars.windows[name])
@@ -1481,23 +1484,31 @@ def doTogether(*functions):
     >>> doTogether(f1, f2, f3)
     will call f1() f2() and f3() together.
     """
-    def makeThread(function):
+    thread_results = [None] * len(functions)
+    def makeThread(function, position):
+        def newfunction():
+            result = function()
+            thread_results[position] = result
+            return result
         import threading
         thread = threading.Thread()
-        thread.run = function
+        thread.run = newfunction
         return thread
     assert len(functions) >= 2, "doTogether: takes 2 (or more) functions"
     thread_list = []
     # first make the threads:
-    for function in functions:
-        thread_list.append(makeThread(function))
+    for i in range(len(functions)):
+        thread_list.append(makeThread(functions[i], i))
     # now, start them:
     for thread in thread_list:
         thread.start()
     # wait for them to finish:
     for thread in thread_list:
         thread.join()
-    print "ok"
+    if thread_results == [None] * len(functions):
+        print 'ok'
+    else:
+        return thread_results
 
 def beepScale(duration, start, stop, factor=2):
     """
@@ -1553,6 +1564,7 @@ sys.excepthook = _myroExceptionHandler
 from myro.robots.scribbler import Scribbler
 from myro.robots.surveyor import Surveyor, watch
 #from myro.robots.roomba import Roomba, Create
+from myro.robots.epuck import Epuck
 from myro.robots.simulator import SimScribbler
 from myro.graphics import *
 

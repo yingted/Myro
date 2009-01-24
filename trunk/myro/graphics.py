@@ -997,12 +997,22 @@ def makePixmap(picture):
     return Pixmap(photoimage)
 
 class Picture(object):
-    def __init__(self):
-        self.width = 0
-        self.height = 0
-        self.image = None
-        self.filename = None
-        self.mode = None
+    def __init__(self, original=None):
+        if original is not None:
+             self.width = original.width
+             self.height = original.height
+             self.image = original.image.copy()
+             self.filename = original.filename
+             self.mode = original.mode
+             self.displayScale = original.displayScale
+        else:
+             self.width = 0
+             self.height = 0
+             self.image = None
+             self.filename = None
+             self.mode = None
+             self.displayScale = 1
+             
 
     def set(self, width, height, data=None, mode="color", value=255):
         self.width = width
@@ -1032,6 +1042,27 @@ class Picture(object):
         if self.pixels == None:
             raise AttributeError, "Myro needs at least Python Imaging Library version 1.1.6"
         #self.image = ImageTk.PhotoImage(self.temp, master=_root)
+        maxsize = max(self.width, self.height) 
+        smallWindowThreshold = 250
+        if maxsize < smallWindowThreshold:
+             self.displayScale = smallWindowThreshold/maxsize
+
+    def rotate(self, degreesCCwise):
+         self.image = self.image.rotate(degreesCCwise)
+         self.pixels = self.image.load()
+         self.width = self.image.size[0]
+         self.height = self.image.size[1]
+
+    def resize(self, x, y):
+         self.image = self.image.resize((int(x), int(y)))
+         self.pixels = self.image.load()
+         self.width = self.image.size[0]
+         self.height = self.image.size[1]         
+
+    def scale(self, factor):
+         newWidth = int(self.width * factor)
+         newHeight = int(self.height * factor)
+         self.resize(newWidth, newHeight)
 
     def load(self, filename):
         #self.image = tk.PhotoImage(file=filename, master=_root)
