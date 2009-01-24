@@ -25,7 +25,13 @@ class Epuck(Robot):
         Robot.__init__(self)
         myro.globvars.robot = self
         self.robotinfo = {"robot": "epuck", "robot-version": "0.1"}
-        portname = '/dev/tty.e-puck_%04d-COM1-1' % id
+        if isinstance(id, str):
+            portname = id
+            portnum = int(portname[3:])
+            if portnum >= 10:
+                portname = r'\\.\COM%d' % (portnum)
+        elif isinstance(id, int):
+            portname = '/dev/tty.e-puck_%04d-COM1-1' % id
         self.port = serial.Serial(portname, 38400, timeout=5)
         # flushes the communication channel (use write, not send)
         self.port.write('V\n')
