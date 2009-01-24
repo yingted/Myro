@@ -32,9 +32,10 @@ class Epuck(Robot):
                 portname = r'\\.\COM%d' % (portnum)
         elif isinstance(id, int):
             portname = '/dev/tty.e-puck_%04d-COM1-1' % id
-        self.port = serial.Serial(portname, 38400, timeout=5)
+#        self.port = serial.Serial(portname, 38400, timeout=5)
+        self.port = serial.Serial(portname, 115200, timeout=5)
         # flushes the communication channel (use write, not send)
-        self.port.write('V\n')
+        self.port.write('\n')
         self.port.readline()
         while self.port.inWaiting() > 0:
             self.port.read(self.port.inWaiting())
@@ -128,18 +129,25 @@ class Epuck(Robot):
             self.setCameraMode(mode)
         self.port.write(chr(183)+chr(0))
         # first 3 bytes: mode, width, height
+        # note: if width or height of camera image exceeds 255, then the
+        # header width/height values will be wrong.
         dataLength = 3 + self.cameraBytes
         imageData = self.port.read(dataLength)
         if len(imageData) != dataLength:
             raise Exception("Received unexpected amount of camera data (expected %d, got %d)" %
                             (dataLength, len(imageData)))
-        modeNum, w, h = [ord(c) for c in imageData[:3]]
-        # w and h values are reversed for pre-June 2008 epucks (ID# < 1500)
-        # need to rotate 90 degrees after decoding (see end of method)
+        #modeNum, w, h = [ord(c) for c in imageData[:3]]
+        # ignore header
         data = imageData[3:]
+        w = self.cameraWidth
+        h = self.cameraHeight
+        # width and height values are also reversed for pre-June 2008
+        # epucks (ID# < 1500). need to rotate 90 degrees after decoding
+        # (see end of method).
+        if self.id < 1500:
+            w, h = h, w
         picture = Picture()
-        if modeNum == 0:
-            # greyscale
+        if self.cameraMode == 'gray':
             picture.set(w, h, data, 'gray')
         else:
             # color
@@ -160,9 +168,11 @@ class Epuck(Robot):
             # pre-June 2008 epucks
             picture.rotate(90)
         return picture
-        
+
     def help(self):
-        firstline = self.send('H')
+        # use write, not send
+        self.port.write('H\n')
+        firstline = self.port.readline()
         if len(firstline) == 0:
             print 'Sorry, no help'
         else:
@@ -172,7 +182,7 @@ class Epuck(Robot):
                 print response.strip()
                 time.sleep(0.01)
 
-    # closes the port connection to the robot
+#     # closes the port connection to the robot
     def close(self):
         print 'Disconnecting from e-puck %d' % self.id
         self.port.close()
@@ -251,25 +261,40 @@ class Epuck(Robot):
 
     ## front-right wrap-around to front-left
     def lightSensors(self):
-        s = self.send('o')[0].strip().split(',')
-        s = s[1:]
-        for i in range(8):
-            s[i] = int(s[i])
-            s[i] = (4000 - s[i])
-            s[i] = s[i]/4000.0
-        return s
+        vals = [float(v) for v in self.send('O').strip().split(',')[1:]]
+        return vals
+#         s = s[1:]
+#         for i in range(8):
+#             s[i] = int(s[i])
+#             s[i] = (4000 - s[i])
+#             s[i] = s[i]/4000.0
+#         return s
 
-    ## front-right wrap-around to front-left
+    ## looking down from top with camera at north...
+    # front right sensor is #0
+    # sensors proceed clockwise
+    # sensor#  angle of offset clockwise from north (counterclockwise)
+    # 0        20     (-340)
+    # 1        50     (-310)
+    # 2        90     (-270)
+    # 3        150    (-210)
+    # 4        210    (-150)
+    # 5        270    (-90)
+    # 6        310    (-50)
+    # 7        340    (-20)
     def distanceSensors(self):
-        s = self.send('n')[0].strip().split(',')
-        s = s[1:]
-        for i in range(8):
-            s[i] = float(s[i])
-            if s[i] < 600:
-                s[i] = -1.0
-            else:
-                s[i] = (s[i]/4000.0 * -s[i]/4000.0) + 1.0
-        return s
+        vals = [float(v) for v in self.send('N').strip().split(',')[1:]]
+        return vals
+
+    def getIR(self):
+        return self.distanceSensors()
+
+    def getIRAngle(self, sensorNum):
+        angles = [20, 50, 90, 150, 210, 270, 310, 340]
+        return angles[sensorNum]
+
+    # wheel encoders self.send('Q')
+    # goes from 0 up to 32767, then wraps to negatives values back up to 0...
 
     ## returns values as x y z
     def accelSensors(self):
@@ -461,7 +486,7 @@ class Epuck(Robot):
         pass
 
     def hardStop(self):
-        pass
+        self.stop()
 
 
 """

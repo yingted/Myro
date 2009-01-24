@@ -777,10 +777,14 @@ computer = Computer()
 # functions:
 def _cleanup():
     if myro.globvars.robot:
-        if "robot" in myro.globvars.robot.robotinfo:
-            myro.globvars.robot.stop() # hangs?
-            time.sleep(.5)                        
-        myro.globvars.robot.close()
+            if "robot" in myro.globvars.robot.robotinfo:
+                try:
+                    myro.globvars.robot.stop() # hangs?
+                    time.sleep(0.5)                        
+                except: # catch serial.SerialException
+                    # port already closed
+                    pass
+            myro.globvars.robot.close()
 
 import signal
 
@@ -1270,22 +1274,26 @@ def makePicture(*args):
 def _mouseCallback(point, name="default", scale=1):
     window = myro.globvars.windows[name]
     picture = myro.globvars.pictures[name]
-    pixel = picture.getPixel(point.x, point.y)
-    window.lastX, window.lastY = point.x, point.y
-    rgba = pixel.getRGBA()
-    window.setStatusDirect("(%d, %d): (%d,%d,%d,a=%d)" %
-                           (point.x/scale, point.y/scale, rgba[0], rgba[1], rgba[2], rgba[3]))
+    if 0 <= point.x < getWidth(picture)*scale and \
+            0 <= point.y < getHeight(picture)*scale:
+        pixel = picture.getPixel(point.x, point.y)
+        window.lastX, window.lastY = point.x, point.y
+        rgba = pixel.getRGBA()
+        window.setStatusDirect("(%d, %d): (%d,%d,%d,a=%d)" %
+                               (point.x/scale, point.y/scale, rgba[0], rgba[1], rgba[2], rgba[3]))
 
 def _mouseCallbackRelease(point, name="default", scale=1):
     window = myro.globvars.windows[name]
     picture = myro.globvars.pictures[name]
-    if abs(window.lastX - point.x) < 3 or abs(window.lastY - point.y) < 3:
-        return
-    if myro.globvars.robot != None:
-        yMin,yMax,uMin,uMax,vMin,vMax = myro.globvars.robot.set_blob_yuv(
-                                         picture, window.lastX/scale, window.lastY/scale,
-                                         point.x/scale, point.y/scale)
-        window.setStatusDirect("Set configureBlob(%d,%d,%d,%d,%d,%d)" % (yMin, yMax, uMin, uMax, vMin,vMax) )
+    if 0 <= point.x < getWidth(picture)*scale and \
+            0 <= point.y < getHeight(picture)*scale:
+        if abs(window.lastX - point.x) < 3 or abs(window.lastY - point.y) < 3:
+            return
+        if myro.globvars.robot != None:
+            yMin,yMax,uMin,uMax,vMin,vMax = myro.globvars.robot.set_blob_yuv(
+                                             picture, window.lastX/scale, window.lastY/scale,
+                                             point.x/scale, point.y/scale)
+            window.setStatusDirect("Set configureBlob(%d,%d,%d,%d,%d,%d)" % (yMin, yMax, uMin, uMax, vMin,vMax) )
 
 def writePictureTo(picture, filename):
     return picture.image.save(filename)

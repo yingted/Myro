@@ -1059,9 +1059,13 @@ class Picture(object):
          self.width = self.image.size[0]
          self.height = self.image.size[1]         
 
-    def scale(self, factor):
-         newWidth = int(self.width * factor)
-         newHeight = int(self.height * factor)
+    def scale(self, xfactor=None, yfactor=None):
+         if xfactor is None:
+              xfactor = 1
+         if yfactor is None:
+              yfactor = xfactor
+         newWidth = int(self.width * xfactor)
+         newHeight = int(self.height * yfactor)
          self.resize(newWidth, newHeight)
 
     def load(self, filename):
