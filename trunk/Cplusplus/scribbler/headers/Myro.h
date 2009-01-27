@@ -7,7 +7,6 @@
 
 #include "Scribbler.h"
 
-
 Scribbler robot;
 
 #define connect() \
@@ -18,7 +17,7 @@ Scribbler robot;
 
 #define disconnect() \
 	robot.disconnect(); \
-	return -1; 
+	return 0; 
 
 extern void wait(double time);
 extern bool timeRemaining(double start_time);
