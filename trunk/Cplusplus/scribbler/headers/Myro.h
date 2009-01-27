@@ -17,7 +17,7 @@ Scribbler robot;
     cout << "Connected to Robot\n";
 
 #define disconnect() \
-    robot.stop() \
+    robot.stop(); \
 	robot.disconnect(); \
 	return 0; 
 
