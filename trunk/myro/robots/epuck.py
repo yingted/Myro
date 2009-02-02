@@ -1,10 +1,10 @@
 from myro import Robot
 from myro.graphics import Picture
 import myro.globvars
-
-# this file merges my camera code with spike's EPuck.py code
-
 import serial, time, numpy
+
+def wait(seconds):
+    time.sleep(seconds)
 
 #----------------------------------------------------------------------------
 
@@ -19,51 +19,52 @@ import serial, time, numpy
 #     e.close()
 
 class Epuck(Robot):
+
+    sensorGroups = {'left': 5, 'right': 2, 'center': (0, 7),
+                    'front': (0, 7), 'front-left': 6, 'front-right': 1,
+                    'back': (3, 4), 'back-left': 4, 'back-right': 3}
+
     # takes in a numerical id and establishes a serial connection
     # to the specified robot.
     def __init__(self, id):
+        assert type(id) == int or type(id) == str, 'Bad ID value: %s' % id
         Robot.__init__(self)
         myro.globvars.robot = self
         self.robotinfo = {"robot": "epuck", "robot-version": "0.1"}
-        if isinstance(id, str): # "COM27"
+        if isinstance(id, str): # example: "COM27"
             portname = id
             portnum = int(portname[3:])
             if portnum >= 10:
                 portname = r'\\.\COM%d' % (portnum)
                 self.id = portnum
-        elif isinstance(id, int): # 1034
-            portname = '/dev/tty.e-puck_%04d-COM1-1' % id
+        elif isinstance(id, int): # example: 1034
+            # arrrrrrggghhh!!!!!
+            if id == 1781:
+                portname = '/dev/tty.%04d-COM1-1' % id
+            else:
+                portname = '/dev/tty.e-puck_%04d-COM1-1' % id
             self.id = id
         self.port = serial.Serial(portname, 115200, timeout=5)
-        # flushes the communication channel (use write, not send)
+        # flush communication channel (use write, not send)
         self.port.write('\n')
         self.port.readline()
-        while self.port.inWaiting() > 0:
-            self.port.read(self.port.inWaiting())
-            time.sleep(0.1)
-            
-        # reset
-#         self.send('R')
-#         # calibrate sensors
-#         self.send('K')
-#         # cycles through the LEDs once
-#         for n in range(8):
-#             self.send('L,%d,1' % n)
-#         for n in range(8):
-#             self.send('L,%d,0' % n)
-        # flash LEDs
-        self.clockwiseLEDcycle(0.05)
+        self._lastTranslate = 0
+        self._lastRotate = 0
         # default camera parameters
         self.setCameraMode('color', 40, 30, 8)
-        self.currentTranslate = 0.0
-        self.currentRotate = 0.0
+        # flash LEDs
+        self.onCycleLEDs(0.05)
+        self.offAllLEDs()
 
-    def test(self, s):
-        for i in range(4):
-            self.forward(s, .5)
-            self.turnLeft(s, .3)
+    # flushes out the communication channel - unreliable
+    def clear(self):
+        while self.port.inWaiting() > 0:
+            print self.port.read(self.port.inWaiting())
+            time.sleep(0.01)
+        print 'serial port cleared'
 
-    def send(self, msg):
+    # current version (1203)
+    def backup_send(self, msg):
 #        print "sending message '%s'" % msg
         self.port.write('%s\n' % msg)
         result = self.port.readline()
@@ -74,6 +75,17 @@ class Epuck(Robot):
 #             time.sleep(0.1)
 #        print "received '%s' with %d bytes left" % (result, self.port.inWaiting())
         return result
+
+    def send(self, msg):
+        assert msg[0] not in 'HKRVhkrv', \
+            "command '%s' not allowed with send" % msg[0]
+#        print "sending message '%s'" % msg
+        self.port.write('%s\n' % msg)
+        response = self.port.readline()
+        assert response != '' and response[0].upper() == msg[0].upper(), \
+            "Bad response: '%s' - check battery" % response.strip()
+#        print "received '%s' with %d bytes left" % (response, self.port.inWaiting())
+        return response
 
     def getCameraMode(self):
         info = self.send('I').split(',')
@@ -88,19 +100,19 @@ class Epuck(Robot):
         return (mode, width, height, zoom, bytes)
 
     def setCameraMode(self, mode=None, width=None, height=None, zoom=None):
-        if mode is None:
+        if mode == None:
             mode = self.cameraMode
         elif mode not in ('color', 'greyscale', 'grayscale', 'grey', 'gray'):
             raise Exception("Valid modes are 'color' or 'gray'")
-        if width is None:
+        if width == None:
             width = self.cameraWidth
         elif width < 0:
             raise Exception("Bad image width")
-        if height is None:
+        if height == None:
             height = self.cameraHeight
         elif height < 0:
             raise Exception("Bad image height")
-        if zoom is None:
+        if zoom == None:
             zoom = self.cameraZoom
         elif zoom < 0:
             raise Exception("Bad zoom level")
@@ -123,7 +135,7 @@ class Epuck(Robot):
         self.cameraBytes = bytes
 
     def takePicture(self, mode=None):
-        if mode is None:
+        if mode == None:
             mode = self.cameraMode
         elif mode != self.cameraMode:
             self.setCameraMode(mode)
@@ -169,23 +181,30 @@ class Epuck(Robot):
             picture.rotate(90)
         return picture
 
+    def version(self):
+        self.port.write('V\n')
+        print self.port.readline().strip()
+        time.sleep(0.1)
+        if self.port.inWaiting() > 0:
+            print self.port.read(self.port.inWaiting()).strip()
+
     def help(self):
         # use write, not send
         self.port.write('H\n')
-        firstline = self.port.readline()
-        if len(firstline) == 0:
-            print 'Sorry, no help'
-        else:
-            print firstline.strip()
-            while self.port.inWaiting() > 0:
-                response = self.port.readline()
-                print response.strip()
-                time.sleep(0.01)
+        response = self.port.readline()
+        assert response != '', "Bad response: '' - check battery"
+        print response.strip()
+        time.sleep(0.05)
+        while self.port.inWaiting() > 0:
+            response = self.port.readline()
+            print response.strip()
+            time.sleep(0.05)
 
-#     # closes the port connection to the robot
+    # closes the port connection to the robot
     def close(self):
-        print 'Disconnecting from e-puck %d' % self.id
-        self.port.close()
+        if self.port.isOpen():
+            print 'Disconnecting from e-puck %d' % self.id
+            self.port.close()
 
     # stops the robot and turns off its LEDs
     def standby(self):
@@ -199,76 +218,108 @@ class Epuck(Robot):
     # Movement
     ####
 
-    # stops the robot
-    def stop(self):
-        self.motors(0, 0)
+#     # sets the translation speed of the robot,
+#     # accounting for current rotation speed
+#     def translate(self, speed):
+#         cr = self.currentRotate
+#         self.move(speed, cr)
 
-    # sets the individual motor speeds
+#     # sets the rotation speed of the robot,
+#     # accounting for current translation speed
+#     def rotate(self, speed):
+#         ct = self.currentTranslate
+#         self.move(ct, speed)
+
+#     # combines the effects of translate and rotate, above
+#     def move(self, translation, rotation = 0.0):
+#         t = translation
+#         r = rotation
+#         at = abs(translation)
+#         ar = abs(rotation)
+#         if (at + ar) > 1.0:
+#             ratio = 1.0 / (at + ar)
+#             t = translation * ratio
+#             r = rotation * ratio
+#         self.currentTranslate = t
+#         self.currentRotate = r
+#         self.motors(t-r, t+r)
+
+    def move(self, translate, rotate):
+        assert -1 <= translate <= 1, 'move called with bad translate value: %g' % translate
+        assert -1 <= rotate <= 1, 'move called with bad rotate value: %g' % rotate
+        self._adjustSpeed(translate, rotate)
+
+    def move2(self, translate, rotate):
+        assert -1 <= translate <= 1, 'move called with bad translate value: %g' % translate
+        assert -1 <= rotate <= 1, 'move called with bad rotate value: %g' % rotate
+        self._adjustSpeed2(translate, rotate)
+
+    def translate(self, translate):
+        assert -1 <= translate <= 1, 'translate called with bad value: %g' % translate
+        self._adjustSpeed(translate, 0)
+
+    def rotate(self, rotate):
+        assert -1 <= rotate <= 1, 'rotate called with bad value: %g' % rotate
+        self._adjustSpeed(0, rotate)
+
+    def stop(self):
+        self._adjustSpeed(0, 0)
+
+    def forward(self, speed, seconds=None):
+        assert 0 <= speed <= 1, 'forward called with bad value: %g' % speed
+        self._adjustSpeed(speed, 0)
+
+    def backward(self, speed, seconds=None):
+        assert 0 <= speed <= 1, 'backward called with bad value: %g' % speed
+        self._adjustSpeed(-speed, 0)
+
+    def turnLeft(self, speed, seconds=None):
+        assert 0 <= speed <= 1, 'turnLeft called with bad value: %g' % speed
+        self._adjustSpeed(0, speed)
+
+    def turnRight(self, speed, seconds=None):
+        assert 0 <= speed <= 1, 'turnRight called with bad value: %g' % speed
+        self._adjustSpeed(0, -speed)
+
     def motors(self, left, right):
-        if left < -1: left = -1
-        if left > 1: left = 1
-        if right < -1: right = -1
-        if right > 1: right = 1
+        assert -1 <= left <= 1, 'motors called with bad left value: %g' % left
+        assert -1 <= right <= 1, 'motors called with bad right value: %g' % right
         left = int(left * 1000)
         right = int(right * 1000)
         self.send('D,%d,%d' % (left, right))
 
-    # sets the translation speed of the robot,
-    # accounting for current rotation speed
-    def translate(self, speed):
-        cr = self.currentRotate
-        self.move(speed, cr)
+    #----------------------------------------------------------------------
+    # internal sensors
 
-    # sets the rotation speed of the robot,
-    # accounting for current translation speed
-    def rotate(self, speed):
-        ct = self.currentTranslate
-        self.move(ct, speed)
+    def currentTime(self):
+        return time.time()
 
-    # combines the effects of translate and rotate, above
-    def move(self, translation, rotation = 0.0):
-        t = translation
-        r = rotation
-        at = abs(translation)
-        ar = abs(rotation)
-        if (at + ar) > 1.0:
-            ratio = 1.0 / (at + ar)
-            t = translation * ratio
-            r = rotation * ratio
-        self.currentTranslate = t
-        self.currentRotate = r
-        self.motors(t-r, t+r)
+    def getStall(self):
+        assert False, 'getStall not implemented for epuck'
 
-    #####
-    # Sensors
-    #####
+    def getBattery(self):
+        assert False, 'getBattery not implemented for epuck'
 
-    # a general selector function which gives access to all available sensors
-    # all sensor values are return as a list of values scaled to 0 to +1
-    # the values are ordered clockwise around the perimeter from the forward-most,
-    # right-most sensor (i.e. the front right microphone is robot.sensors('sound')[0])
-    def sensors(self, sensor):
-        if sensor == 'light':
-            return self.lightSensors()
-        elif sensor == 'accelerometer':
-            return accelSensors()
-        elif sensor == 'sound':
-            return self.soundSensors()
-        elif sensor == 'distance':
-            return self.distanceSensors()
-        else:
-            return "invalid sensor specification"
+    #----------------------------------------------------------------------
+    # external sensors
 
-    ## front-right wrap-around to front-left
-    def lightSensors(self):
-        vals = [float(v) for v in self.send('O').strip().split(',')[1:]]
-        return vals
-#         s = s[1:]
-#         for i in range(8):
-#             s[i] = int(s[i])
-#             s[i] = (4000 - s[i])
-#             s[i] = s[i]/4000.0
-#         return s
+    def getLight(self, position=None):
+        return self._readIR('O', position)
+
+    def getProximity(self, position=None):
+        return self._readIR('N', position)
+
+    def getDistance(self, position=None):
+        return self._readIR('N', position)
+
+    def getIR(self, position=None):
+        return self._readIR('N', position)
+
+    def getBright(self, position=None):
+        pass
+
+    def getObstacle(self, position=None):
+        pass
 
     ## looking down from top with camera at north...
     # front right sensor is #0
@@ -282,99 +333,198 @@ class Epuck(Robot):
     # 5        270    (-90)
     # 6        310    (-50)
     # 7        340    (-20)
-    def distanceSensors(self):
-        vals = [float(v) for v in self.send('N').strip().split(',')[1:]]
-        return vals
-
-    def getIR(self):
-        return self.distanceSensors()
-
-    def getIRAngle(self, sensorNum):
+    def getIRAngle(self, position):
+        assert type(position) == int and 0 <= position <= 7, \
+            'Bad position value: %s' % position
         angles = [20, 50, 90, 150, 210, 270, 310, 340]
-        return angles[sensorNum]
+        return angles[position]
+
+    #----------------------------------------------------------------------
+    ############## private methods ##############
+
+    # myro scribbler code
+    def _adjustSpeed(self, translate, rotate):
+        self._lastTranslate = translate
+        self._lastRotate = rotate
+        left  = min(max(translate - rotate, -1), 1)
+        right  = min(max(translate + rotate, -1), 1)
+        self.motors(left, right)
+
+    # Spike's code
+    def _adjustSpeed2(self, translate, rotate):
+        absTranslate = abs(translate)
+        absRotate = abs(rotate)
+        if (absTranslate + absRotate) > 1.0:
+            ratio = 1.0 / (absTranslate + absRotate)
+            translate = translate * ratio
+            rotate = rotate * ratio
+        self._lastTranslate = translate
+        self._lastRotate = rotate
+        left = translate - rotate
+        right = translate + rotate
+        self.motors(left, right)
+
+    def _readIR(self, command, position):
+        assert position == None \
+            or type(position) == int and 0 <= position <= 7 \
+            or type(position) == str and position in Epuck.sensorGroups, \
+            'Bad position value: %s' % position
+        vals = [int(x) for x in self.send(command).strip().split(',')[1:]]
+        if position == None:
+            return vals
+        elif type(position) == int:
+            return vals[position]
+        else:
+            group = Epuck.sensorGroups[position]
+            if type(group) == int:
+                return vals[group]
+            else:
+                # return average value for group
+                groupVals = [vals[i] for i in group]
+                return sum(groupVals) / len(groupVals)
+
+    ## returns [x, y, z]
+    def getAccel(self):
+        vals = [int(x) for x in self.send('A').strip().split(',')[1:]]
+        return vals
+            
+    ## returns [front-right, front-left, rear]
+    def getSound(self):
+        vals = [int(x) for x in self.send('U').strip().split(',')[1:]]
+        return vals
+        
+    # a general selector function which gives access to all available sensors
+    # all sensor values are return as a list of values scaled to 0 to +1
+    # the values are ordered clockwise around the perimeter from the forward-most,
+    # right-most sensor (i.e. the front right microphone is robot.sensors('sound')[0])
+    def getSensors(self, sensor):
+        assert sensor in ('light', 'proximity', 'distance', 'accelerometer', 'sound'), \
+            'Bad sensor specification: %s' % sensor
+        if sensor == 'light':
+            return self.getLight()
+        elif sensor == 'proximity' or sensor == 'distance':
+            return self.getProximity()
+        elif sensor == 'accelerometer':
+            return getAccel()
+        elif sensor == 'sound':
+            return self.getSound()
+
+    ## front-right wrap-around to front-left
+#     def lightSensors(self):
+#         vals = [float(v) for v in self.send('O').strip().split(',')[1:]]
+#         return vals
+#         s = s[1:]
+#         for i in range(8):
+#             s[i] = int(s[i])
+#             s[i] = (4000 - s[i])
+#             s[i] = s[i]/4000.0
+#         return s
 
     # wheel encoders self.send('Q')
-    # goes from 0 up to 32767, then wraps to negatives values back up to 0...
+    # goes from 0 up to 32767, then wraps to negative values back up to 0...
 
-    ## returns values as x y z
-    def accelSensors(self):
-        s = self.send('A')[0].strip().split(',')
-        s = s[1:]
-        ar = []
-        for i in range(3):
-            ar.append(int(s[i]))
-        return ar
-            
-    ## right, left, rear
-    def soundSensors(self):
-        s = self.send('U')[0].strip().split(',')
-        s = s[1:]
-        ar = []
-        for i in range(3):
-            ar.append(int(s[i]))
-        return ar        
-        
+    ######### sound and LEDs #########
 
-    #####
-    # LEDs
-    #####
+    def playSound(self, num):
+        assert 0 <= num <= 5, 'Bad sound number: %s' % num
+        self.send('T,%d' % num)
+    
+    def shutup(self):
+        self.send('T,0')
 
-    def frontLedOn(self):
-        self.send('F, 1')
-        
-    def frontLedOff(self):
-        self.send('F, 0')
-        
-    def frontLedToggle(self):
-        self.send('F, 2')
+    # returns the index of the LED closest to the given IR sensor
+    def sensorLED(self, sensorPosition):
+        LEDs = [0, 1, 2, 3, 5, 6, 7, 0]
+        return LEDs[sensorPosition]
 
-    def bodyLedOn(self):
-        self.send('B, 1')
+    def onFrontLED(self):
+        self.send('F,1')
         
-    def bodyLedOff(self):
-        self.send('B, 0')
+    def offFrontLED(self):
+        self.send('F,0')
         
-    def bodyLedToggle(self):
-        self.send('B, 2')
+    def toggleFrontLED(self):
+        self.send('F,2')
 
-    def allOn(self):
+    def flashFrontLED(self, delay=0):
+        self.toggleFrontLED()
+        time.sleep(delay)
+        self.toggleFrontLED()
+
+    def onBodyLED(self):
+        self.send('B,1')
+        
+    def offBodyLED(self):
+        self.send('B,0')
+        
+    def toggleBodyLED(self):
+        self.send('B,2')
+
+    def flashBodyLED(self, delay=0):
+        self.toggleBodyLED()
+        time.sleep(delay)
+        self.toggleBodyLED()
+
+    def onLED(self, num):
+        assert 0 <= num <= 7, 'Bad LED number: %s' % num
+        self.send('L,%d,1' % num)
+
+    def offLED(self, num):
+        assert 0 <= num <= 7, 'Bad LED number: %s' % num
+        self.send('L,%d,0' % num)
+
+    def toggleLED(self, num):
+        assert 0 <= num <= 7, 'Bad LED number: %s' % num
+        self.send('L,%d,2' % num)
+
+    def flashLED(self, num, delay=0):
+        self.toggleLED(num)
+        time.sleep(delay)
+        self.toggleLED(num)
+
+    def onAllLEDs(self):
         self.send('L,8,1')
 
-    def allOff(self):
+    def offAllLEDs(self):
         self.send('L,8,0')
 
-    def ledsOff(self, which=range(8)):
-        for n in which:
-            self.send('L,%d,0' % n)
-            #time.sleep(0.01)
+    def toggleAllLEDs(self):
+        # self.send('L,8,2') doesn't work
+        for num in (0, 4, 3, 5, 1, 7, 2, 6):
+            self.toggleLED(num)
 
-    def ledsOn(self, which=range(8)):
-        for n in which:
-            self.send('L,%d,1' % n)
-            #time.sleep(0.01)
+    def flashAllLEDs(self, delay=0):
+        # don't use toggleAllLEDs (too slow)
+        self.onAllLEDs()
+        time.sleep(delay)
+        self.offAllLEDs()
 
-    def ledsToggle(self, which=range(8)):
-        for n in which:
-            self.send('L,%d,2' % n)
-            #time.sleep(0.01)
+    # turns on the LEDs clockwise
+    def onCycleLEDs(self, delay=0):
+        for num in range(8):
+            self.onLED(num)
+            time.sleep(delay)
+
+    # turns off the LEDs clockwise
+    def offCycleLEDs(self, delay=0):
+        for num in range(8):
+            self.offLED(num)
+            time.sleep(delay)
+
+    # toggles the LEDs clockwise
+    def toggleCycleLEDs(self, delay=0):
+        for num in range(8):
+            self.toggleLED(num)
+            time.sleep(delay)
+
+    # flashes the LEDs clockwise
+    def flashCycleLEDs(self, delay=0):
+        for num in range(8):
+            self.flashLED(num, delay)
 
     #####
     ## Amusing Behaviors
     #####
-
-    # plays one of the preset E-Puck sounds: 5 options, chosen by setting num to the appropriate value.
-    def playSound(self, num):
-        s = self.send('T, %d' % num)
-        return s
-    
-    # cycles each of the LEDs on and off continuously, for a delay specified by the input.
-    def clockwiseLEDcycle(self, delay=0.1):
-        for n in range(8):
-            self.send('L,%d,1' % n)
-            time.sleep(delay)
-            #self.send('L,%d,0' % n)
-        time.sleep(delay)
-        self.allOff()
 
     # causes the E-Puck to approximate a very crude figure eight.
     def figureEight(self):
@@ -409,13 +559,6 @@ class Epuck(Robot):
         self.move(1, 1.0-adjust)
         self.spiralLeds(0.1)
 
-    # cycles the LEDs once, leaving each light on for a length of delay seconds
-    def spiralLeds(self, delay):
-        for n in range(8):
-            self.send('L,%d,1' % n)
-            time.sleep(delay)
-            self.send('L,%d,0' % n)
-
     # provides a simple, moderately glitchy wall-avoiding function.
     def simpleAvoid(self):
         while True:
@@ -433,16 +576,17 @@ class Epuck(Robot):
                 rot = 1
             self.move(tra, rot)
 
-    def rawDistances(self):
-        raw = [int(x) for x in self.send('n')[0].strip().split(',')[1:]]
-        if len(raw) == 0: return [0]
-        return raw
+#     def rawDistances(self):
+#         raw = [int(x) for x in self.send('n')[0].strip().split(',')[1:]]
+#         if len(raw) == 0: return [0]
+#         return raw
 
+    # won't work reliably - fix
     def calibrate(self):
         self.send('K')
         while True:
-            result = self.port.readlines()
-            if len(result) > 0: break
+            response = self.port.readlines()
+            if len(response) > 0: break
         print 'done'
 
     def sound(self, num):
@@ -476,11 +620,6 @@ class Epuck(Robot):
         assert len(vals) > 0, 'list is empty'
         m = max(vals)
         return vals.index(m)
-
-    # possible LEDs: 0, 1, 2, 3, 5, 6, 7
-    def whichLED(self, sensorIndex):
-        leds = { 0: 0, 1: 1, 2: 2, 3: 3, 4: 5, 5: 6, 6: 7, 7: 0 }
-        return leds[sensorIndex]
 
     def manual_flush(self):
         pass
@@ -581,18 +720,12 @@ WORD pixel565 = (red_value << 11) | (green_value << 5) | blue_value;
 #         distance = max(readings)
 #         if distance > 0:
 #             n = self.argmax(readings)
-#             led = self.whichLED(n)
+#             led = self.sensorLED(n)
 #             self.send('L,%d,1' % led)
 #             #(speed, rotate) = self.chooseAction(n, distance)
 #             #self.requestMove(speed, rotate)
 #         else:
 #             print 'nothing nearby'
-
-#     def whichLED(self, sensorIndex):
-#         if sensorIndex == 7:
-#             return 0
-#         else:
-#             return sensorIndex
 
 #     def chooseAction(self, sonarNum, scaledDistance):
 #         actions = { 0: (1,-1), 15: (1,-1),
