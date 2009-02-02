@@ -21,6 +21,9 @@ class Epuck(Robot):
                     'front': (0, 7), 'front-left': 6, 'front-right': 1,
                     'back': (3, 4), 'back-left': 4, 'back-right': 3}
 
+    robolab = {1197: 0, 1198: 1, 1190: 2, 1559: 4, 1602: 5, 1603: 6,
+               1604: 7, 1770: 8, 1781: 9}
+
     # takes in a numerical id and establishes a serial connection
     # to the specified robot.
     def __init__(self, id):
@@ -37,9 +40,11 @@ class Epuck(Robot):
         elif isinstance(id, int): # example: 1034
             # arrrrrrggghhh!!!!!
             if id == 1781:
-                portname = '/dev/tty.%04d-COM1-1' % id
+                portname = '/dev/rfcomm%d' % Epuck.robolab[id]
+                #portname = '/dev/tty.%04d-COM1-1' % id
             else:
-                portname = '/dev/tty.e-puck_%04d-COM1-1' % id
+                portname = '/dev/rfcomm%d' % Epuck.robolab[id]
+                #portname = '/dev/tty.e-puck_%04d-COM1-1' % id
             self.id = id
         self.port = serial.Serial(portname, 115200, timeout=5)
         # flush communication channel (use write, not send)
