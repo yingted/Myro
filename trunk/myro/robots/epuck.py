@@ -1,19 +1,36 @@
 from myro import Robot
 from myro.graphics import Picture
 import myro.globvars
-import serial, time, numpy
+import time, platform, serial, numpy
 
-#----------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
+# this function maps epuck ID numbers to port names, and is system-specific
 
-# # A complete sample program for the robot
-# def goForward(robotID, speed):
-#     e = EPuck(robotID)
-#     time.sleep(1)
-#     while max(e.sensors('distance')) == -1:
-#         e.move(speed)
-#     e.playSound(5)
-#     e.stop()
-#     e.close()
+def portname(id):
+    if platform.system() == 'Darwin':
+        assert type(id) is int and id > 0, 'Bad epuck ID number: %s' % (id,)
+        # arrrrrrggghhh!!!!!
+        if id == 1781:
+            return '/dev/tty.1781-COM1-1'
+        else:
+            return '/dev/tty.e-puck_%04d-COM1-1' % id
+    elif platform.system() == 'Linux':
+        assert type(id) is int and id > 0, 'Bad epuck ID number: %s' % (id,)
+        # SLC robot lab machines (see /etc/bluetooth/rfcomm.conf)
+        rfcommPortNumber = {1197: 0, 1198: 1, 1190: 2,
+                            1559: 4, 1602: 5, 1603: 6,
+                            1604: 7, 1770: 8, 1781: 9}
+        assert id in rfcommPortNumber, 'Unknown epuck ID number: %d' % (id,)
+        return '/dev/rfcomm%d' % rfcommPortNumber[id]
+    elif platform.system() == 'Windows':
+        assert type(id) is str, 'Bad port name: %s' % (id,)  # example: "COM27"
+        portname = id
+        portnum = int(portname[3:])
+        if portnum >= 10:
+            portname = r'\\.\COM%d' % portnum
+        return portname
+
+#-----------------------------------------------------------------------------
 
 class Epuck(Robot):
 
@@ -21,33 +38,15 @@ class Epuck(Robot):
                     'front': (0, 7), 'front-left': 6, 'front-right': 1,
                     'back': (3, 4), 'back-left': 4, 'back-right': 3}
 
-    robolab = {1197: 0, 1198: 1, 1190: 2, 1559: 4, 1602: 5, 1603: 6,
-               1604: 7, 1770: 8, 1781: 9}
-
-    # takes in a numerical id and establishes a serial connection
-    # to the specified robot.
+    # establishes a serial connection to the specified robot
     def __init__(self, id):
-        assert type(id) == int or type(id) == str, 'Bad ID value: %s' % id
         Robot.__init__(self)
         myro.globvars.robot = self
         self.robotinfo = {"robot": "epuck", "robot-version": "0.1"}
-        if isinstance(id, str): # example: "COM27"
-            portname = id
-            portnum = int(portname[3:])
-            if portnum >= 10:
-                portname = r'\\.\COM%d' % (portnum)
-                self.id = portnum
-        elif isinstance(id, int): # example: 1034
-            # arrrrrrggghhh!!!!!
-            if id == 1781:
-                portname = '/dev/rfcomm%d' % Epuck.robolab[id]
-                #portname = '/dev/tty.%04d-COM1-1' % id
-            else:
-                portname = '/dev/rfcomm%d' % Epuck.robolab[id]
-                #portname = '/dev/tty.e-puck_%04d-COM1-1' % id
-            self.id = id
-        self.port = serial.Serial(portname, 115200, timeout=5)
-        # flush communication channel (use write, not send)
+        self.portname = portname(id)
+        self.port = serial.Serial(self.portname, 115200, timeout=3)
+        self.id = id
+        # initialize communication (use write, not send)
         self.port.write('\n')
         self.port.readline()
         self._lastTranslate = 0
@@ -58,25 +57,15 @@ class Epuck(Robot):
         self.onCycleLEDs(0.05)
         self.offAllLEDs()
 
-    # flushes out the communication channel - unreliable
-    def clear(self):
+    def reset(self):
+        print 'Resetting robot...please wait'
+        self.port.write('R\n')
+        # flush communication channel
+        self.port.readlines()
         while self.port.inWaiting() > 0:
-            print self.port.read(self.port.inWaiting())
-            time.sleep(0.01)
-        print 'serial port cleared'
-
-    # current version (1203)
-    def backup_send(self, msg):
-#        print "sending message '%s'" % msg
-        self.port.write('%s\n' % msg)
-        result = self.port.readline()
-        if len(result) == 0 or result[0].upper() != msg[0].upper():
-            raise Exception("Bad response: '%s' - check battery" % result.strip())
-#         while self.port.inWaiting() > 0:
-#             result = self.port.read(self.port.inWaiting())
-#             time.sleep(0.1)
-#        print "received '%s' with %d bytes left" % (result, self.port.inWaiting())
-        return result
+            self.port.read(self.port.inWaiting())
+            time.sleep(0.5)
+        print 'Done'
 
     def send(self, msg):
         assert msg[0] not in 'HKRVhkrv', \
@@ -84,10 +73,13 @@ class Epuck(Robot):
 #        print "sending message '%s'" % msg
         self.port.write('%s\n' % msg)
         response = self.port.readline()
-        assert response != '' and response[0].upper() == msg[0].upper(), \
+        if len(response) == 0 or response[0].upper() != msg[0].upper():
             "Bad response: '%s' - check battery" % response.strip()
-#        print "received '%s' with %d bytes left" % (response, self.port.inWaiting())
-        return response
+            self.reset()
+            raise KeyboardInterrupt
+        else:
+#            print "received '%s' with %d bytes left" % (response, self.port.inWaiting())
+            return response
 
     def getCameraMode(self):
         info = self.send('I').split(',')
@@ -212,9 +204,6 @@ class Epuck(Robot):
     def standby(self):
         self.send('S')
 
-    # sends a reset command to the robot
-    def reset(self):
-        self.send('R')
 
     ####
     # Movement
@@ -305,6 +294,16 @@ class Epuck(Robot):
     #----------------------------------------------------------------------
     # external sensors
 
+    def calibrateSensors(self):
+        raw_input('Remove any objects in sensor range and then press RETURN...')
+        print 'Calibrating sensors...'
+        self.port.write('K\n')
+        self.port.readline()
+        self.port.readline()
+        print 'Calibration finished'
+        if self.port.inWaiting() > 0:
+            self.port.readlines()
+
     def getLight(self, position=None):
         return self._readIR('O', position)
 
@@ -385,22 +384,17 @@ class Epuck(Robot):
                 groupVals = [vals[i] for i in group]
                 return sum(groupVals) / len(groupVals)
 
-    ## returns [x, y, z]
+    ## return accelerometer readings as [x, y, z]
     def getAccel(self):
         vals = [int(x) for x in self.send('A').strip().split(',')[1:]]
         return vals
             
-    ## returns [front-right, front-left, rear]
-    def getSound(self):
-        vals = [int(x) for x in self.send('U').strip().split(',')[1:]]
-        return vals
-        
     # a general selector function which gives access to all available sensors
     # all sensor values are return as a list of values scaled to 0 to +1
     # the values are ordered clockwise around the perimeter from the forward-most,
     # right-most sensor (i.e. the front right microphone is robot.sensors('sound')[0])
     def getSensors(self, sensor):
-        assert sensor in ('light', 'proximity', 'distance', 'accelerometer', 'sound'), \
+        assert sensor in ('light', 'proximity', 'distance', 'accelerometer', 'sound', 'wheels'), \
             'Bad sensor specification: %s' % sensor
         if sensor == 'light':
             return self.getLight()
@@ -410,23 +404,26 @@ class Epuck(Robot):
             return getAccel()
         elif sensor == 'sound':
             return self.getSound()
+        elif sensor == 'wheels':
+            return self.getWheels()
 
-    ## front-right wrap-around to front-left
-#     def lightSensors(self):
-#         vals = [float(v) for v in self.send('O').strip().split(',')[1:]]
-#         return vals
-#         s = s[1:]
-#         for i in range(8):
-#             s[i] = int(s[i])
-#             s[i] = (4000 - s[i])
-#             s[i] = s[i]/4000.0
-#         return s
+    ######### wheel encoders (odometry) #########
 
-    # wheel encoders self.send('Q')
-    # goes from 0 up to 32767, then wraps to negative values back up to 0...
+    # values go from 0 up to 32767, then wrap to negative values back up to 0
+    def getWheels(self):
+        left, right = [int(x) for x in self.send('Q').strip().split(',')[1:]]
+        return (left, right)
+
+    def resetWheels(self):
+        self.send('P,0,0')
 
     ######### sound and LEDs #########
 
+    ## return microphone readings as [front-right, front-left, rear]
+    def getSound(self):
+        vals = [int(x) for x in self.send('U').strip().split(',')[1:]]
+        return vals
+        
     def playSound(self, num):
         assert 0 <= num <= 5, 'Bad sound number: %s' % num
         self.send('T,%d' % num)
@@ -524,110 +521,6 @@ class Epuck(Robot):
         for num in range(8):
             self.flashLED(num, delay)
 
-    #####
-    ## Amusing Behaviors
-    #####
-
-    # causes the E-Puck to approximate a very crude figure eight.
-    def figureEight(self):
-        self.currentRotation = 0.3
-        delay = 4.0
-        for i in range(10):
-            self.currentRotation = self.currentRotation*-1
-            self.move(0.3, self.currentRotation)
-            time.sleep(delay)
-            self.ledsToggle()
-
-    # causes the e-puck to spiral in gradually expanding circles.                        
-    def spiral(self):
-        adjust = 0
-        try:
-            while(True):
-                self.spiralStep(adjust)
-                adjust += 0.01
-        except:
-            KeyboardInterrupt
-            self.move(0,0)
-            self.ledsOff()
-            
-    # makes the e-puck cry for a random length of time, ten times.
-    def cry(self):
-        for i in range(10):
-            self.playSound(5)
-            time.sleep(1)
-            
-    # helper function for "spiral, above"
-    def spiralStep(self, adjust):
-        self.move(1, 1.0-adjust)
-        self.spiralLeds(0.1)
-
-    # provides a simple, moderately glitchy wall-avoiding function.
-    def simpleAvoid(self):
-        while True:
-            sensArray = self.sensors('distance')
-            rot = 0.0
-            tra = 0.2
-            if (sensArray[0] < 0.9 and sensArray[0] != -1) \
-               or (sensArray[1] < 0.9 and sensArray[1] != -1):
-                rot += 0.5
-            if (sensArray[7] < 0.9 and sensArray[7] != -1) \
-               or (sensArray[6] < 0.9 and sensArray[6] != -1):
-                rot -= 0.5
-            if -1 < sensArray[0] < 0.5 and -1 < sensArray[7] < 0.5:
-                tra = 0.0
-                rot = 1
-            self.move(tra, rot)
-
-#     def rawDistances(self):
-#         raw = [int(x) for x in self.send('n')[0].strip().split(',')[1:]]
-#         if len(raw) == 0: return [0]
-#         return raw
-
-    # won't work reliably - fix
-    def calibrate(self):
-        self.send('K')
-        while True:
-            response = self.port.readlines()
-            if len(response) > 0: break
-        print 'done'
-
-    def sound(self, num):
-        self.playSound(num)
-        delay = 0.1
-        if num == 5: delay = 1
-        time.sleep(delay)
-        self.playSound(0)
-
-    def respondToSensor(self, sensor, distance):
-        actions = { 0: (-1, -1),
-                    1: (-1, -0.3),
-                    2: (-0.8, 0.8),
-                    3: (0.5, 1),
-                    4: (1, 0.5),
-                    5: (0.8, -0.8),
-                    6: (-0.3, -1),
-                    7: (-1, -1)
-                    }
-        if sensor in actions:
-            (left, right) = actions[sensor]
-            #factor = min(1.0, distance / 200.0)
-            factor = 0.5
-            left = factor * left
-            right = factor * right
-            return (left, right)
-        else:
-            return None
-
-    def argmax(self, vals):
-        assert len(vals) > 0, 'list is empty'
-        m = max(vals)
-        return vals.index(m)
-
-    def manual_flush(self):
-        pass
-
-    def hardStop(self):
-        self.stop()
 
 
 """
@@ -660,107 +553,4 @@ values have been truncated to the correct number of bits:
 WORD pixel565 = (red_value << 11) | (green_value << 5) | blue_value;
 
 """
-#----------------------------------------------------------------------------
 
-# class RobotBrain():
-
-#     def __init__(self, id):
-#         self.robot = EPuck(id)
-#         self.behaviors = []
-#         # add behaviors, highest priorities first:
-#         self.addBehavior(AvoidBehavior())
-#         #self.addBehavior(WanderBehavior())
-#         #self.addBehavior(RestBehavior())
-
-#     def addBehavior(self, behavior):
-#         # give the behavior access to the robot object
-#         behavior.robot = self.robot
-#         self.behaviors.append(behavior)
-
-#     def step(self):
-#         behavior = self.updateAll()
-#         #print "%s is in control" % behavior
-#         self.robot.move(behavior.speed, behavior.rotate)
-#         time.sleep(0.5)
-
-#     def updateAll(self):
-#         # update all behaviors in order of priority
-#         for behavior in self.behaviors:
-#             behavior.flag = False
-#             behavior.update()
-#             # if the behavior fired, return it immediately
-#             if behavior.flag:
-#                 return behavior
-#         # if none fired, return the last (lowest-priority) behavior:
-#         return self.behaviors[-1]
-
-# #-----------------------------------------------------------------------
-# # base class for behaviors
-
-# class SubsumptionBehavior:
-
-#     def __init__(self):
-#         self.speed = 0
-#         self.rotate = 0
-#         self.flag = False
-#         # this will be set later when the behavior is created
-#         self.robot = None
-
-#     def __repr__(self):
-#         return self.__class__.__name__
-
-#     def requestMove(self, speed, rotate):
-#         self.speed = speed
-#         self.rotate = rotate
-#         self.flag = True
-
-# #-----------------------------------------------------------------------
-
-# class AvoidBehavior(SubsumptionBehavior):
-#     def update(self):
-#         readings = self.robot.sensors('distance')
-#         distance = max(readings)
-#         if distance > 0:
-#             n = self.argmax(readings)
-#             led = self.sensorLED(n)
-#             self.send('L,%d,1' % led)
-#             #(speed, rotate) = self.chooseAction(n, distance)
-#             #self.requestMove(speed, rotate)
-#         else:
-#             print 'nothing nearby'
-
-#     def chooseAction(self, sonarNum, scaledDistance):
-#         actions = { 0: (1,-1), 15: (1,-1),
-#                     7: (1,+1), 8: (1,+1),
-#                     1: (0.5,-1), 6: (0.5,+1),
-#                     2: (0.1,-1), 5: (0.1,+1),
-#                     3: (-1,+0.3), 4: (-1,-0.3),
-#                     14: (1,-1), 9: (1,+1),
-#                     13: (1,-0.5), 10: (1,+0.5),
-#                     12: (1,-0.3), 11: (1,+0.3)
-#                     }
-#         print 'responding to sonar %d' % sonarNum
-#         if sonarNum in actions:
-#             (s, r) = actions[sonarNum]
-#             factor = 1 - scaledDistance
-#             return (s * factor, r * factor)
-#         else:
-#             return (0, 0)
-
-#     def argmax(self, vals):
-#         assert len(vals) > 0, 'list is empty'
-#         m = max(vals)
-#         return vals.index(m)
-
-# class RestBehavior(SubsumptionBehavior):
-#     def update(self):
-#         self.requestMove(0, 0)
-
-# class WanderBehavior(SubsumptionBehavior):
-#     def update(self):
-#         self.requestMove(0.2, random.uniform(-0.5, 0.5))
-
-# #-----------------------------------------------------------------------
-
-# def INIT(engine):
-#     return SubsumptionBrain('Subsumption Brain', engine)
