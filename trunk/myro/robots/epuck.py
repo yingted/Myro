@@ -3,9 +3,6 @@ from myro.graphics import Picture
 import myro.globvars
 import serial, time, numpy
 
-def wait(seconds):
-    time.sleep(seconds)
-
 #----------------------------------------------------------------------------
 
 # # A complete sample program for the robot
