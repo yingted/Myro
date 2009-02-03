@@ -7,15 +7,15 @@ import time, platform, serial, numpy
 # this function maps epuck ID numbers to port names, and is system-specific
 
 def portname(id):
-    if platform.system() == 'Darwin':
-        assert type(id) is int and id > 0, 'Bad epuck ID number: %s' % (id,)
+    if platform.system() == 'Darwin':  # Mac OS X
+        assert type(id) is int and id > 0, 'Bad epuck ID: %s' % (id,)
         # arrrrrrggghhh!!!!!
         if id == 1781:
             return '/dev/tty.1781-COM1-1'
         else:
             return '/dev/tty.e-puck_%04d-COM1-1' % id
     elif platform.system() == 'Linux':
-        assert type(id) is int and id > 0, 'Bad epuck ID number: %s' % (id,)
+        assert type(id) is int and id > 0, 'Bad epuck ID: %s' % (id,)
         # SLC robot lab machines (see /etc/bluetooth/rfcomm.conf)
         rfcommPortNumber = {1197: 0, 1198: 1, 1190: 2,
                             1559: 4, 1602: 5, 1603: 6,
@@ -44,7 +44,7 @@ class Epuck(Robot):
         myro.globvars.robot = self
         self.robotinfo = {"robot": "epuck", "robot-version": "0.1"}
         self.portname = portname(id)
-        self.port = serial.Serial(self.portname, 115200, timeout=3)
+        self.port = serial.Serial(self.portname, 115200, timeout=1)
         self.id = id
         # initialize communication (use write, not send)
         self.port.write('\n')
@@ -64,7 +64,7 @@ class Epuck(Robot):
         self.port.readlines()
         while self.port.inWaiting() > 0:
             self.port.read(self.port.inWaiting())
-            time.sleep(0.5)
+            time.sleep(0.25)
         print 'Done'
 
     def send(self, msg):
@@ -80,6 +80,49 @@ class Epuck(Robot):
         else:
 #            print "received '%s' with %d bytes left" % (response, self.port.inWaiting())
             return response
+
+    def version(self):
+        self.port.write('V\n')
+        print self.port.readline().strip()
+        time.sleep(0.1)
+        if self.port.inWaiting() > 0:
+            print self.port.read(self.port.inWaiting()).strip()
+
+    def help(self):
+        # use write, not send
+        self.port.write('H\n')
+        response = self.port.readline()
+        assert response != '', "Bad response: '' - check battery"
+        print response.strip()
+        time.sleep(0.05)
+        while self.port.inWaiting() > 0:
+            response = self.port.readline()
+            print response.strip()
+            time.sleep(0.05)
+
+    # closes the port connection to the robot
+    def close(self):
+        if self.port.isOpen():
+            print 'Disconnecting from e-puck %d' % self.id
+            self.port.close()
+
+    # stops the robot and turns off its LEDs
+    def standby(self):
+        self.send('S')
+
+    def manual_flush(self):
+        print 'Interrupted!'
+        time.sleep(0.25)
+        if self.port.inWaiting() > 0:
+            self.port.read(self.port.inWaiting())
+            time.sleep(0.25)
+
+    def hardStop(self):
+        #self.stop()
+        self.send('S')
+
+    #----------------------------------------------------------------------
+    # camera
 
     def getCameraMode(self):
         info = self.send('I').split(',')
@@ -175,65 +218,36 @@ class Epuck(Robot):
             picture.rotate(90)
         return picture
 
-    def version(self):
-        self.port.write('V\n')
-        print self.port.readline().strip()
-        time.sleep(0.1)
-        if self.port.inWaiting() > 0:
-            print self.port.read(self.port.inWaiting()).strip()
+    # To extract the color components from an RGB 565 image, treat each
+    # pixel as a WORD type and use the following bit masks:
+    # 
+    # WORD red_mask = 0xF800;
+    # WORD green_mask = 0x7E0;
+    # WORD blue_mask = 0x1F;
+    # 
+    # Get the color components from a pixel as follows:
+    # 
+    # BYTE red_value = (pixel & red_mask) >> 11;
+    # BYTE green_value = (pixel & green_mask) >> 5;
+    # BYTE blue_value = (pixel & blue_mask);
+    # 
+    # Remember that the red and blue channels are 5 bits and the green
+    # channel is 6 bits. To convert these values to 8-bit components (for
+    # 24-bit or 32-bit RGB), you must left-shift the appropriate number of
+    # bits:
+    # 
+    # // Expand to 8-bit values.
+    # BYTE red   = red_value << 3;
+    # BYTE green = green_value << 2;
+    # BYTE blue  = blue_value << 3;
+    # 
+    # Reverse this process to create an RGB 565 pixel.  Assuming the color
+    # values have been truncated to the correct number of bits:
+    # 
+    # WORD pixel565 = (red_value << 11) | (green_value << 5) | blue_value;
 
-    def help(self):
-        # use write, not send
-        self.port.write('H\n')
-        response = self.port.readline()
-        assert response != '', "Bad response: '' - check battery"
-        print response.strip()
-        time.sleep(0.05)
-        while self.port.inWaiting() > 0:
-            response = self.port.readline()
-            print response.strip()
-            time.sleep(0.05)
-
-    # closes the port connection to the robot
-    def close(self):
-        if self.port.isOpen():
-            print 'Disconnecting from e-puck %d' % self.id
-            self.port.close()
-
-    # stops the robot and turns off its LEDs
-    def standby(self):
-        self.send('S')
-
-
-    ####
-    # Movement
-    ####
-
-#     # sets the translation speed of the robot,
-#     # accounting for current rotation speed
-#     def translate(self, speed):
-#         cr = self.currentRotate
-#         self.move(speed, cr)
-
-#     # sets the rotation speed of the robot,
-#     # accounting for current translation speed
-#     def rotate(self, speed):
-#         ct = self.currentTranslate
-#         self.move(ct, speed)
-
-#     # combines the effects of translate and rotate, above
-#     def move(self, translation, rotation = 0.0):
-#         t = translation
-#         r = rotation
-#         at = abs(translation)
-#         ar = abs(rotation)
-#         if (at + ar) > 1.0:
-#             ratio = 1.0 / (at + ar)
-#             t = translation * ratio
-#             r = rotation * ratio
-#         self.currentTranslate = t
-#         self.currentRotate = r
-#         self.motors(t-r, t+r)
+    #----------------------------------------------------------------------
+    # movement
 
     def move(self, translate, rotate):
         assert -1 <= translate <= 1, 'move called with bad translate value: %g' % translate
@@ -279,70 +293,6 @@ class Epuck(Robot):
         right = int(right * 1000)
         self.send('D,%d,%d' % (left, right))
 
-    #----------------------------------------------------------------------
-    # internal sensors
-
-    def currentTime(self):
-        return time.time()
-
-    def getStall(self):
-        assert False, 'getStall not implemented for epuck'
-
-    def getBattery(self):
-        assert False, 'getBattery not implemented for epuck'
-
-    #----------------------------------------------------------------------
-    # external sensors
-
-    def calibrateSensors(self):
-        raw_input('Remove any objects in sensor range and then press RETURN...')
-        print 'Calibrating sensors...'
-        self.port.write('K\n')
-        self.port.readline()
-        self.port.readline()
-        print 'Calibration finished'
-        if self.port.inWaiting() > 0:
-            self.port.readlines()
-
-    def getLight(self, position=None):
-        return self._readIR('O', position)
-
-    def getProximity(self, position=None):
-        return self._readIR('N', position)
-
-    def getDistance(self, position=None):
-        return self._readIR('N', position)
-
-    def getIR(self, position=None):
-        return self._readIR('N', position)
-
-    def getBright(self, position=None):
-        pass
-
-    def getObstacle(self, position=None):
-        pass
-
-    ## looking down from top with camera at north...
-    # front right sensor is #0
-    # sensors proceed clockwise
-    # sensor#  angle of offset clockwise from north (counterclockwise)
-    # 0        20     (-340)
-    # 1        50     (-310)
-    # 2        90     (-270)
-    # 3        150    (-210)
-    # 4        210    (-150)
-    # 5        270    (-90)
-    # 6        310    (-50)
-    # 7        340    (-20)
-    def getIRAngle(self, position):
-        assert type(position) == int and 0 <= position <= 7, \
-            'Bad position value: %s' % position
-        angles = [20, 50, 90, 150, 210, 270, 310, 340]
-        return angles[position]
-
-    #----------------------------------------------------------------------
-    ############## private methods ##############
-
     # myro scribbler code
     def _adjustSpeed(self, translate, rotate):
         self._lastTranslate = translate
@@ -365,12 +315,63 @@ class Epuck(Robot):
         right = translate + rotate
         self.motors(left, right)
 
+    #----------------------------------------------------------------------
+    # internal sensors
+
+    def currentTime(self):
+        return time.time()
+
+    def getStall(self):
+        assert False, 'getStall not implemented for epuck'
+
+    def getBattery(self):
+        assert False, 'getBattery not implemented for epuck'
+
+    #----------------------------------------------------------------------
+    # external sensors
+
+    ## looking down from top with camera at north...
+    # front right sensor is #0
+    # sensors proceed clockwise
+    # sensor#  angle of offset clockwise from north (counterclockwise)
+    # 0        20     (-340)
+    # 1        50     (-310)
+    # 2        90     (-270)
+    # 3        150    (-210)
+    # 4        210    (-150)
+    # 5        270    (-90)
+    # 6        310    (-50)
+    # 7        340    (-20)
+    def getIRAngle(self, position):
+        assert type(position) == int and 0 <= position <= 7, \
+            'Bad position value: %s' % position
+        angles = [20, 50, 90, 150, 210, 270, 310, 340]
+        return angles[position]
+
+    def getLight(self, position=None):
+        return self._readIR('O', position)
+
+    def getProximity(self, position=None):
+        return self._readIR('N', position)
+
+    def getDistance(self, position=None):
+        return self._readIR('N', position)
+
+    def getIR(self, position=None):
+        return self._readIR('N', position)
+
+    def getBright(self, position=None):
+        pass
+
+    def getObstacle(self, position=None):
+        pass
+
     def _readIR(self, command, position):
         assert position == None \
             or type(position) == int and 0 <= position <= 7 \
             or type(position) == str and position in Epuck.sensorGroups, \
             'Bad position value: %s' % position
-        vals = [int(x) for x in self.send(command).strip().split(',')[1:]]
+        vals = [min(int(x), 4000) for x in self.send(command).strip().split(',')[1:]]
         if position == None:
             return vals
         elif type(position) == int:
@@ -384,17 +385,33 @@ class Epuck(Robot):
                 groupVals = [vals[i] for i in group]
                 return sum(groupVals) / len(groupVals)
 
+    def calibrateSensors(self):
+        raw_input('Remove any objects in sensor range and then press RETURN...')
+        print 'Calibrating sensors...'
+        self.port.write('K\n')
+        self.port.readline()
+        self.port.readline()
+        print 'Calibration finished'
+        if self.port.inWaiting() > 0:
+            self.port.readlines()
+
     ## return accelerometer readings as [x, y, z]
     def getAccel(self):
         vals = [int(x) for x in self.send('A').strip().split(',')[1:]]
         return vals
             
+    # values go from 0 up to 32767, then wrap to negative values back up to 0
+    def getWheels(self):
+        left, right = [int(x) for x in self.send('Q').strip().split(',')[1:]]
+        return (left, right)
+
+    def resetWheels(self):
+        self.send('P,0,0')
+
     # a general selector function which gives access to all available sensors
-    # all sensor values are return as a list of values scaled to 0 to +1
-    # the values are ordered clockwise around the perimeter from the forward-most,
-    # right-most sensor (i.e. the front right microphone is robot.sensors('sound')[0])
     def getSensors(self, sensor):
-        assert sensor in ('light', 'proximity', 'distance', 'accelerometer', 'sound', 'wheels'), \
+        assert sensor in ('light', 'proximity', 'distance',
+                          'accelerometer', 'sound', 'wheels'), \
             'Bad sensor specification: %s' % sensor
         if sensor == 'light':
             return self.getLight()
@@ -406,18 +423,6 @@ class Epuck(Robot):
             return self.getSound()
         elif sensor == 'wheels':
             return self.getWheels()
-
-    ######### wheel encoders (odometry) #########
-
-    # values go from 0 up to 32767, then wrap to negative values back up to 0
-    def getWheels(self):
-        left, right = [int(x) for x in self.send('Q').strip().split(',')[1:]]
-        return (left, right)
-
-    def resetWheels(self):
-        self.send('P,0,0')
-
-    ######### sound and LEDs #########
 
     ## return microphone readings as [front-right, front-left, rear]
     def getSound(self):
@@ -431,10 +436,10 @@ class Epuck(Robot):
     def shutup(self):
         self.send('T,0')
 
-    # returns the index of the LED closest to the given IR sensor
-    def sensorLED(self, sensorPosition):
+    # returns the index number of the LED closest to the given IR sensor
+    def sensorLEDnum(self, sensorNum):
         LEDs = [0, 1, 2, 3, 5, 6, 7, 0]
-        return LEDs[sensorPosition]
+        return LEDs[sensorNum]
 
     def onFrontLED(self):
         self.send('F,1')
@@ -520,37 +525,4 @@ class Epuck(Robot):
     def flashCycleLEDs(self, delay=0):
         for num in range(8):
             self.flashLED(num, delay)
-
-
-
-"""
-To extract the color components from an RGB 565 image, treat each
-pixel as a WORD type and use the following bit masks:
-
-WORD red_mask = 0xF800;
-WORD green_mask = 0x7E0;
-WORD blue_mask = 0x1F;
-
-Get the color components from a pixel as follows:
-
-BYTE red_value = (pixel & red_mask) >> 11;
-BYTE green_value = (pixel & green_mask) >> 5;
-BYTE blue_value = (pixel & blue_mask);
-
-Remember that the red and blue channels are 5 bits and the green
-channel is 6 bits. To convert these values to 8-bit components (for
-24-bit or 32-bit RGB), you must left-shift the appropriate number of
-bits:
-
-// Expand to 8-bit values.
-BYTE red   = red_value << 3;
-BYTE green = green_value << 2;
-BYTE blue  = blue_value << 3;
-
-Reverse this process to create an RGB 565 pixel.  Assuming the color
-values have been truncated to the correct number of bits:
-
-WORD pixel565 = (red_value << 11) | (green_value << 5) | blue_value;
-
-"""
 

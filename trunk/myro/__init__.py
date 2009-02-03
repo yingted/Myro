@@ -789,11 +789,11 @@ def _cleanup():
 import signal
 
 def ctrlc_handler(signum, frame):
-    if myro.globvars.robot:            
+    if myro.globvars.robot:
         #myro.globvars.robot.open()
         #print "done opening"
         myro.globvars.robot.manual_flush()
-        if "robot" in myro.globvars.robot.robotinfo:            
+        if "robot" in myro.globvars.robot.robotinfo:
             myro.globvars.robot.hardStop()
     raise KeyboardInterrupt
 
