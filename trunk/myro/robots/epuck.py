@@ -20,7 +20,7 @@ def portname(id):
         rfcommPortNumber = {1197: 0, 1198: 1, 1190: 2,
                             1559: 4, 1602: 5, 1603: 6,
                             1604: 7, 1770: 8, 1781: 9}
-        assert id in rfcommPortNumber, 'Unknown epuck ID number: %d' % (id,)
+        assert id in rfcommPortNumber, 'Unknown epuck ID number: %d' % id
         return '/dev/rfcomm%d' % rfcommPortNumber[id]
     elif platform.system() == 'Windows':
         assert type(id) is str, 'Bad port name: %s' % (id,)  # example: "COM27"
@@ -56,6 +56,8 @@ class Epuck(Robot):
         # flash LEDs
         self.onCycleLEDs(0.05)
         self.offAllLEDs()
+        # set ambient light level
+        self.ambientLight = self.getAmbientLight()
 
     def reset(self):
         print 'Resetting robot...please wait'
@@ -99,6 +101,17 @@ class Epuck(Robot):
             response = self.port.readline()
             print response.strip()
             time.sleep(0.05)
+
+    def calibrateSensors(self):
+        raw_input('Remove all objects in sensor range and press RETURN...')
+        print 'Calibrating sensors...'
+        self.port.write('K\n')
+        self.port.readline()
+        self.port.readline()
+        self.calibrateLight()
+        print 'Calibration finished'
+        if self.port.inWaiting() > 0:
+            self.port.readlines()
 
     # closes the port connection to the robot
     def close(self):
@@ -360,6 +373,10 @@ class Epuck(Robot):
     def getIR(self, position=None):
         return self._readIR('N', position)
 
+    def getAmbientLight(self):
+        vals = self.getLight()
+        return sum(vals) / len(vals)
+
     def getBright(self, position=None):
         pass
 
@@ -384,16 +401,6 @@ class Epuck(Robot):
                 # return average value for group
                 groupVals = [vals[i] for i in group]
                 return sum(groupVals) / len(groupVals)
-
-    def calibrateSensors(self):
-        raw_input('Remove any objects in sensor range and then press RETURN...')
-        print 'Calibrating sensors...'
-        self.port.write('K\n')
-        self.port.readline()
-        self.port.readline()
-        print 'Calibration finished'
-        if self.port.inWaiting() > 0:
-            self.port.readlines()
 
     ## return accelerometer readings as [x, y, z]
     def getAccel(self):
