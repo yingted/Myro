@@ -63,10 +63,8 @@ class Epuck(Robot):
         print 'Resetting robot...please wait'
         self.port.write('R\n')
         # flush communication channel
-        self.port.readlines()
-        while self.port.inWaiting() > 0:
-            self.port.read(self.port.inWaiting())
-            time.sleep(0.25)
+        while self.port.readline() != '':
+            time.sleep(0.1)
         print 'Done'
 
     def send(self, msg):
