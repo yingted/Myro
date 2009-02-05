@@ -143,7 +143,7 @@ class Epuck(Robot):
         if self.id < 1500:
             # pre-June 2008 epucks
             width, height = height, width
-        return (mode, width, height, zoom, bytes)
+        return [mode, width, height, zoom, bytes]
 
     def setCameraMode(self, mode=None, width=None, height=None, zoom=None):
         if mode == None:
@@ -307,7 +307,7 @@ class Epuck(Robot):
 
     def getMotors(self):
         left, right = [int(x) for x in self.send('E').strip().split(',')[1:]]
-        return (left, right)
+        return [left, right]
 
     # myro scribbler code
     def _adjustSpeed(self, translate, rotate):
@@ -413,7 +413,7 @@ class Epuck(Robot):
     # values go from 0 up to 32767, then wrap to negative values back up to 0
     def getWheels(self):
         left, right = [int(x) for x in self.send('Q').strip().split(',')[1:]]
-        return (left, right)
+        return [left, right]
 
     def resetWheels(self):
         self.send('P,0,0')
