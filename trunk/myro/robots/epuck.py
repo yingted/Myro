@@ -52,8 +52,8 @@ class Epuck(Robot):
         self.port.readline()
         self._lastTranslate = 0
         self._lastRotate = 0
-        # default camera parameters
-        self.setCameraMode('color', 40, 30, 8)
+        # set camera parameters to default values
+        self.setCameraMode('color', 40, 40, 8)
         # flash LEDs
         self.onCycleLEDs(0.05)
         self.offAllLEDs()
@@ -62,20 +62,23 @@ class Epuck(Robot):
         print 'Resetting robot...please wait'
         self.port.write('R\n')
         self._clearLines()
+        self.cameraMode = 'color'
+        self.cameraWidth = 40
+        self.cameraHeight = 40
+        self.cameraZoom = 8
+        self.cameraBytes = 3200
         print 'done'
 
     def send(self, msg):
         assert msg[0] not in 'HKRVhkrv', "command '%s' not allowed with send" % msg[0]
-#        print "sending message '%s'" % msg
         self.port.write('%s\n' % msg)
         time.sleep(0.1)
         response = self.port.readline()
         if response == '' or response[0].upper() != msg[0].upper():
             print "Bad response: '%s' - check battery" % response.strip()
             self.reset()
-            raise KeyboardInterrupt
+            raise Exception
         else:
-#            print "received '%s' with %d bytes left" % (response, self.port.inWaiting())
             return response
 
     def version(self):
@@ -102,24 +105,12 @@ class Epuck(Robot):
             time.sleep(0.1)
             response = self.port.readline()
 
-#     def help(self):
-#         # use write, not send
-#         self.port.write('H\n')
-#         response = self.port.readline()
-#         assert response != '', "Bad response: '' - check battery"
-#         print response.strip()
-#         time.sleep(0.05)
-#         while self.port.inWaiting() > 0:
-#             response = self.port.readline()
-#             print response.strip()
-#             time.sleep(0.05)
-
     def calibrateSensors(self):
         raw_input('Remove all objects in sensor range, then press RETURN...')
         print 'Calibrating sensors...'
         self.port.write('K\n')
         self.port.readline()
-        time.sleep(3)
+        time.sleep(2)
         while self.port.readline().strip() != 'k, Calibration finished':
             time.sleep(0.1)
         print 'Calibration finished'
@@ -136,7 +127,8 @@ class Epuck(Robot):
 
     def hardStop(self):
         self.send('S')
-        self.send('D,0,0')   # necessary to reset internal motor speed info
+        self.send('D,0,0')  # necessary to reset internal motor speed info
+        self.send('T,0')
 
     #----------------------------------------------------------------------
     # camera
@@ -198,10 +190,13 @@ class Epuck(Robot):
         # note: if width or height of camera image exceeds 255, then the
         # header width/height values will be wrong.
         dataLength = 3 + self.cameraBytes
+        time.sleep(0.2)
         imageData = self.port.read(dataLength)
         if len(imageData) != dataLength:
-            raise Exception("Received unexpected amount of camera data (expected %d, got %d)" %
-                            (dataLength, len(imageData)))
+            print "Expected %d bytes from camera, got %d - check battery" % \
+                (dataLength, len(imageData))
+            self.reset()
+            raise Exception
         #modeNum, w, h = [ord(c) for c in imageData[:3]]
         # ignore header
         data = imageData[3:]
