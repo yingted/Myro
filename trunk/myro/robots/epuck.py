@@ -42,12 +42,13 @@ class Epuck(Robot):
     def __init__(self, id):
         Robot.__init__(self)
         myro.globvars.robot = self
-        self.robotinfo = {"robot": "epuck", "robot-version": "0.1"}
+        self.robotinfo = {'robot': 'epuck', 'robot-version': '0.1'}
         self.portname = portname(id)
         self.port = serial.Serial(self.portname, 115200, timeout=1)
         self.id = id
         # initialize communication (use write, not send)
         self.port.write('\n')
+        time.sleep(0.1)
         self.port.readline()
         self._lastTranslate = 0
         self._lastRotate = 0
@@ -56,25 +57,21 @@ class Epuck(Robot):
         # flash LEDs
         self.onCycleLEDs(0.05)
         self.offAllLEDs()
-        # set ambient light level
-        self.ambientLight = self.getAmbientLight()
 
     def reset(self):
         print 'Resetting robot...please wait'
         self.port.write('R\n')
-        # flush communication channel
-        while self.port.readline() != '':
-            time.sleep(0.1)
-        print 'Done'
+        self._clearLines()
+        print 'done'
 
     def send(self, msg):
-        assert msg[0] not in 'HKRVhkrv', \
-            "command '%s' not allowed with send" % msg[0]
+        assert msg[0] not in 'HKRVhkrv', "command '%s' not allowed with send" % msg[0]
 #        print "sending message '%s'" % msg
         self.port.write('%s\n' % msg)
+        time.sleep(0.1)
         response = self.port.readline()
-        if len(response) == 0 or response[0].upper() != msg[0].upper():
-            "Bad response: '%s' - check battery" % response.strip()
+        if response == '' or response[0].upper() != msg[0].upper():
+            print "Bad response: '%s' - check battery" % response.strip()
             self.reset()
             raise KeyboardInterrupt
         else:
@@ -83,33 +80,49 @@ class Epuck(Robot):
 
     def version(self):
         self.port.write('V\n')
-        print self.port.readline().strip()
-        time.sleep(0.1)
-        if self.port.inWaiting() > 0:
-            print self.port.read(self.port.inWaiting()).strip()
+        self._printLines()
 
     def help(self):
-        # use write, not send
         self.port.write('H\n')
+        self._printLines()
+
+    def _printLines(self):
+        time.sleep(0.1)
         response = self.port.readline()
-        assert response != '', "Bad response: '' - check battery"
-        print response.strip()
-        time.sleep(0.05)
-        while self.port.inWaiting() > 0:
-            response = self.port.readline()
+        while response != '':
             print response.strip()
-            time.sleep(0.05)
+            time.sleep(0.1)
+            response = self.port.readline()
+
+    # flushes communication channel
+    def _clearLines(self):
+        time.sleep(0.1)
+        response = self.port.readline()
+        while response != '':
+            time.sleep(0.1)
+            response = self.port.readline()
+
+#     def help(self):
+#         # use write, not send
+#         self.port.write('H\n')
+#         response = self.port.readline()
+#         assert response != '', "Bad response: '' - check battery"
+#         print response.strip()
+#         time.sleep(0.05)
+#         while self.port.inWaiting() > 0:
+#             response = self.port.readline()
+#             print response.strip()
+#             time.sleep(0.05)
 
     def calibrateSensors(self):
-        raw_input('Remove all objects in sensor range and press RETURN...')
+        raw_input('Remove all objects in sensor range, then press RETURN...')
         print 'Calibrating sensors...'
         self.port.write('K\n')
         self.port.readline()
-        self.port.readline()
-        self.calibrateLight()
+        time.sleep(3)
+        while self.port.readline().strip() != 'k, Calibration finished':
+            time.sleep(0.1)
         print 'Calibration finished'
-        if self.port.inWaiting() > 0:
-            self.port.readlines()
 
     # closes the port connection to the robot
     def close(self):
@@ -117,20 +130,13 @@ class Epuck(Robot):
             print 'Disconnecting from e-puck %d' % self.id
             self.port.close()
 
-    # stops the robot and turns off its LEDs
-    def standby(self):
-        self.send('S')
-
     def manual_flush(self):
-        print 'Interrupted!'
-        time.sleep(0.25)
-        if self.port.inWaiting() > 0:
-            self.port.read(self.port.inWaiting())
-            time.sleep(0.25)
+        print '\nInterrupted...please wait'
+        self._clearLines()
 
     def hardStop(self):
-        #self.stop()
         self.send('S')
+        self.send('D,0,0')   # necessary to reset internal motor speed info
 
     #----------------------------------------------------------------------
     # camera
@@ -265,10 +271,10 @@ class Epuck(Robot):
         assert -1 <= rotate <= 1, 'move called with bad rotate value: %g' % rotate
         self._adjustSpeed(translate, rotate)
 
-    def move2(self, translate, rotate):
-        assert -1 <= translate <= 1, 'move called with bad translate value: %g' % translate
-        assert -1 <= rotate <= 1, 'move called with bad rotate value: %g' % rotate
-        self._adjustSpeed2(translate, rotate)
+#     def move2(self, translate, rotate):
+#         assert -1 <= translate <= 1, 'move called with bad translate value: %g' % translate
+#         assert -1 <= rotate <= 1, 'move called with bad rotate value: %g' % rotate
+#         self._adjustSpeed2(translate, rotate)
 
     def translate(self, translate):
         assert -1 <= translate <= 1, 'translate called with bad value: %g' % translate
@@ -304,6 +310,10 @@ class Epuck(Robot):
         right = int(right * 1000)
         self.send('D,%d,%d' % (left, right))
 
+    def getMotors(self):
+        left, right = [int(x) for x in self.send('E').strip().split(',')[1:]]
+        return (left, right)
+
     # myro scribbler code
     def _adjustSpeed(self, translate, rotate):
         self._lastTranslate = translate
@@ -312,19 +322,19 @@ class Epuck(Robot):
         right  = min(max(translate + rotate, -1), 1)
         self.motors(left, right)
 
-    # Spike's code
-    def _adjustSpeed2(self, translate, rotate):
-        absTranslate = abs(translate)
-        absRotate = abs(rotate)
-        if (absTranslate + absRotate) > 1.0:
-            ratio = 1.0 / (absTranslate + absRotate)
-            translate = translate * ratio
-            rotate = rotate * ratio
-        self._lastTranslate = translate
-        self._lastRotate = rotate
-        left = translate - rotate
-        right = translate + rotate
-        self.motors(left, right)
+#     # Spike's code
+#     def _adjustSpeed2(self, translate, rotate):
+#         absTranslate = abs(translate)
+#         absRotate = abs(rotate)
+#         if (absTranslate + absRotate) > 1.0:
+#             ratio = 1.0 / (absTranslate + absRotate)
+#             translate = translate * ratio
+#             rotate = rotate * ratio
+#         self._lastTranslate = translate
+#         self._lastRotate = rotate
+#         left = translate - rotate
+#         right = translate + rotate
+#         self.motors(left, right)
 
     #----------------------------------------------------------------------
     # internal sensors
@@ -412,6 +422,10 @@ class Epuck(Robot):
 
     def resetWheels(self):
         self.send('P,0,0')
+
+    def getSelector(self):
+        position = int(self.send('C').strip().split(',')[1])
+        return position
 
     # a general selector function which gives access to all available sensors
     def getSensors(self, sensor):
