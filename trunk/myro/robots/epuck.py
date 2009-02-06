@@ -17,11 +17,14 @@ def portname(id):
     elif platform.system() == 'Linux':
         assert type(id) is int and id > 0, 'Bad epuck ID: %s' % (id,)
         # SLC robot lab machines (see /etc/bluetooth/rfcomm.conf)
-        rfcommPortNumber = {1197: 0, 1198: 1, 1190: 2,
+        rfcommPortNumber = {27: 0, 1197: 0, 1198: 1, 1190: 2,
                             1559: 4, 1602: 5, 1603: 6,
                             1604: 7, 1770: 8, 1781: 9}
-        assert id in rfcommPortNumber, 'Unknown epuck ID number: %d' % id
-        return '/dev/rfcomm%d' % rfcommPortNumber[id]
+        if id in rfcommPortNumber:
+            return '/dev/rfcomm%d' % rfcommPortNumber[id]
+        else:
+            print 'Warning: unknown epuck ID -- using /dev/rfcomm0'
+            return '/dev/rfcomm0'
     elif platform.system() == 'Windows':
         assert type(id) is str, 'Bad port name: %s' % (id,)  # example: "COM27"
         portname = id
@@ -48,15 +51,14 @@ class Epuck(Robot):
         self.id = id
         # initialize communication (use write, not send)
         self.port.write('\n')
-        time.sleep(0.1)
-        self.port.readline()
+        self._clearLines()
         self._lastTranslate = 0
         self._lastRotate = 0
         # set camera parameters to default values
         self.setCameraMode('color', 40, 40, 8)
         # flash LEDs
-        self.onCycleLEDs(0.05)
-        self.offAllLEDs()
+        self.onCycleLED(0.05)
+        self.offLED('all')
 
     def reset(self):
         print 'Resetting robot...please wait'
@@ -72,10 +74,10 @@ class Epuck(Robot):
     def send(self, msg):
         assert msg[0] not in 'HKRVhkrv', "command '%s' not allowed with send" % msg[0]
         self.port.write('%s\n' % msg)
-        time.sleep(0.1)
+#        time.sleep(0.01)
         response = self.port.readline()
         if response == '' or response[0].upper() != msg[0].upper():
-            print "Bad response: '%s' - check battery" % response.strip()
+            print "Bad response: '%s' -- check battery" % response.strip()
             self.reset()
             raise Exception
         else:
@@ -90,19 +92,19 @@ class Epuck(Robot):
         self._printLines()
 
     def _printLines(self):
-        time.sleep(0.1)
+        time.sleep(0.05)
         response = self.port.readline()
         while response != '':
             print response.strip()
-            time.sleep(0.1)
+            time.sleep(0.05)
             response = self.port.readline()
 
     # flushes communication channel
     def _clearLines(self):
-        time.sleep(0.1)
+        time.sleep(0.05)
         response = self.port.readline()
         while response != '':
-            time.sleep(0.1)
+            time.sleep(0.05)
             response = self.port.readline()
 
     def calibrateSensors(self):
@@ -112,7 +114,7 @@ class Epuck(Robot):
         self.port.readline()
         time.sleep(2)
         while self.port.readline().strip() != 'k, Calibration finished':
-            time.sleep(0.1)
+            time.sleep(0.05)
         print 'Calibration finished'
 
     # closes the port connection to the robot
@@ -193,7 +195,7 @@ class Epuck(Robot):
         time.sleep(0.2)
         imageData = self.port.read(dataLength)
         if len(imageData) != dataLength:
-            print "Expected %d bytes from camera, got %d - check battery" % \
+            print "Expected %d bytes from camera, got %d -- check battery" % \
                 (dataLength, len(imageData))
             self.reset()
             raise Exception
@@ -447,7 +449,7 @@ class Epuck(Robot):
         assert 0 <= num <= 5, 'Bad sound number: %s' % num
         self.send('T,%d' % num)
     
-    def shutup(self):
+    def shush(self):
         self.send('T,0')
 
     # returns the index number of the LED closest to the given IR sensor
@@ -455,88 +457,186 @@ class Epuck(Robot):
         LEDs = [0, 1, 2, 3, 5, 6, 7, 0]
         return LEDs[sensorNum]
 
-    def onFrontLED(self):
-        self.send('F,1')
-        
-    def offFrontLED(self):
-        self.send('F,0')
-        
-    def toggleFrontLED(self):
-        self.send('F,2')
+    def onLED(self, LED_descriptor='all'):
+        assert type(LED_descriptor) is str \
+            and LED_descriptor in ('all', 'front', 'body') \
+            or type(LED_descriptor) is int and 0 <= LED_descriptor <= 7, \
+            'Bad LED descriptor: %s' % (LED_descriptor,)
+        self._onLED(LED_descriptor)
 
-    def flashFrontLED(self, delay=0):
-        self.toggleFrontLED()
-        time.sleep(delay)
-        self.toggleFrontLED()
+    def _onLED(self, LED_descriptor):
+        if LED_descriptor == 'all':
+            self.send('L,8,1')
+        elif LED_descriptor == 'front':
+            self.send('F,1')
+        elif LED_descriptor == 'body':
+            self.send('B,1')
+        else:
+            self.send('L,%d,1' % LED_descriptor)
 
-    def onBodyLED(self):
-        self.send('B,1')
-        
-    def offBodyLED(self):
-        self.send('B,0')
-        
-    def toggleBodyLED(self):
-        self.send('B,2')
+    def offLED(self, LED_descriptor='all'):
+        assert type(LED_descriptor) is str \
+            and LED_descriptor in ('all', 'front', 'body') \
+            or type(LED_descriptor) is int and 0 <= LED_descriptor <= 7, \
+            'Bad LED descriptor: %s' % (LED_descriptor,)
+        self._offLED(LED_descriptor)
 
-    def flashBodyLED(self, delay=0):
-        self.toggleBodyLED()
-        time.sleep(delay)
-        self.toggleBodyLED()
+    def _offLED(self, LED_descriptor):
+        if LED_descriptor == 'all':
+            self.send('L,8,0')
+        elif LED_descriptor == 'front':
+            self.send('F,0')
+        elif LED_descriptor == 'body':
+            self.send('B,0')
+        else:
+            self.send('L,%d,0' % LED_descriptor)
 
-    def onLED(self, num):
-        assert 0 <= num <= 7, 'Bad LED number: %s' % num
-        self.send('L,%d,1' % num)
+    def toggleLED(self, LED_descriptor='all'):
+        assert type(LED_descriptor) is str \
+            and LED_descriptor in ('all', 'front', 'body') \
+            or type(LED_descriptor) is int and 0 <= LED_descriptor <= 7, \
+            'Bad LED descriptor: %s' % (LED_descriptor,)
+        self._toggleLED(LED_descriptor)
 
-    def offLED(self, num):
-        assert 0 <= num <= 7, 'Bad LED number: %s' % num
-        self.send('L,%d,0' % num)
+    def _toggleLED(self, LED_descriptor):
+        if LED_descriptor == 'all':
+            # self.send('L,8,2') doesn't work
+            for num in (0, 4, 3, 5, 1, 7, 2, 6):
+                self.send('L,%d,2' % num)
+        elif LED_descriptor == 'front':
+            self.send('F,2')
+        elif LED_descriptor == 'body':
+            self.send('B,2')
+        else:
+            self.send('L,%d,2' % LED_descriptor)
 
-    def toggleLED(self, num):
-        assert 0 <= num <= 7, 'Bad LED number: %s' % num
-        self.send('L,%d,2' % num)
+    def flashLED(self, LED_descriptor='all', delay=0):
+        assert type(LED_descriptor) is str \
+            and LED_descriptor in ('all', 'front', 'body') \
+            or type(LED_descriptor) is int and 0 <= LED_descriptor <= 7, \
+            'Bad LED descriptor: %s' % (LED_descriptor,)
+        self._flashLED(LED_descriptor, delay)
 
-    def flashLED(self, num, delay=0):
-        self.toggleLED(num)
-        time.sleep(delay)
-        self.toggleLED(num)
+    def _flashLED(self, LED_descriptor, delay):
+        if LED_descriptor == 'all':
+            # don't use toggleLED('all') -- too slow
+            self._onLED('all')
+            time.sleep(delay)
+            self._offLED('all')
+        elif LED_descriptor == 'front':
+            self._toggleLED('front')
+            time.sleep(delay)
+            self._toggleLED('front')
+        elif LED_descriptor == 'body':
+            self._toggleLED('body')
+            time.sleep(delay)
+            self._toggleLED('body')
+        else:
+            self._toggleLED(LED_descriptor)
+            time.sleep(delay)
+            self._toggleLED(LED_descriptor)
 
-    def onAllLEDs(self):
-        self.send('L,8,1')
-
-    def offAllLEDs(self):
-        self.send('L,8,0')
-
-    def toggleAllLEDs(self):
-        # self.send('L,8,2') doesn't work
-        for num in (0, 4, 3, 5, 1, 7, 2, 6):
-            self.toggleLED(num)
-
-    def flashAllLEDs(self, delay=0):
-        # don't use toggleAllLEDs (too slow)
-        self.onAllLEDs()
-        time.sleep(delay)
-        self.offAllLEDs()
-
-    # turns on the LEDs clockwise
-    def onCycleLEDs(self, delay=0):
+    def onCycleLED(self, delay=0):
         for num in range(8):
-            self.onLED(num)
+            self._onLED(num)
+            time.sleep(delay)
+        
+    def offCycleLED(self, delay=0):
+        for num in range(8):
+            self._offLED(num)
             time.sleep(delay)
 
-    # turns off the LEDs clockwise
-    def offCycleLEDs(self, delay=0):
+    def toggleCycleLED(self, delay=0):
         for num in range(8):
-            self.offLED(num)
+            self._toggleLED(num)
             time.sleep(delay)
 
-    # toggles the LEDs clockwise
-    def toggleCycleLEDs(self, delay=0):
-        for num in range(8):
-            self.toggleLED(num)
-            time.sleep(delay)
+    def flashCycleLED(self, delay=0):
+        for num in range(8) + [0]:
+            self._flashLED(num, delay)
 
-    # flashes the LEDs clockwise
-    def flashCycleLEDs(self, delay=0):
-        for num in range(8):
-            self.flashLED(num, delay)
 
+#     def onSpotlightLED(self):
+#         self.send('F,1')
+        
+#     def offSpotlightLED(self):
+#         self.send('F,0')
+        
+#     def toggleSpotlightLED(self):
+#         self.send('F,2')
+
+#     def flashSpotlightLED(self, delay=0):
+#         self.toggleSpotlightLED()
+#         time.sleep(delay)
+#         self.toggleSpotlightLED()
+
+#     def onBodyLED(self):
+#         self.send('B,1')
+        
+#     def offBodyLED(self):
+#         self.send('B,0')
+        
+#     def toggleBodyLED(self):
+#         self.send('B,2')
+
+#     def flashBodyLED(self, delay=0):
+#         self.toggleBodyLED()
+#         time.sleep(delay)
+#         self.toggleBodyLED()
+
+#     def onLED(self, num):
+#         assert 0 <= num <= 7, 'Bad LED number: %s' % num
+#         self.send('L,%d,1' % num)
+
+#     def offLED(self, num):
+#         assert 0 <= num <= 7, 'Bad LED number: %s' % num
+#         self.send('L,%d,0' % num)
+
+#     def toggleLED(self, num):
+#         assert 0 <= num <= 7, 'Bad LED number: %s' % num
+#         self.send('L,%d,2' % num)
+
+#     def flashLED(self, num, delay=0):
+#         self.toggleLED(num)
+#         time.sleep(delay)
+#         self.toggleLED(num)
+
+#     def onAllLEDs(self):
+#         self.send('L,8,1')
+
+#     def offAllLEDs(self):
+#         self.send('L,8,0')
+
+#     def toggleAllLEDs(self):
+#         # self.send('L,8,2') doesn't work
+#         for num in (0, 4, 3, 5, 1, 7, 2, 6):
+#             self.toggleLED(num)
+
+#     def flashAllLEDs(self, delay=0):
+#         # don't use toggleAllLEDs (too slow)
+#         self.onAllLEDs()
+#         time.sleep(delay)
+#         self.offAllLEDs()
+
+#     # turns on the LEDs clockwise
+#     def onCycleLEDs(self, delay=0):
+#         for num in range(8):
+#             self.onLED(num)
+#             time.sleep(delay)
+
+#     # turns off the LEDs clockwise
+#     def offCycleLEDs(self, delay=0):
+#         for num in range(8):
+#             self.offLED(num)
+#             time.sleep(delay)
+
+#     # toggles the LEDs clockwise
+#     def toggleCycleLEDs(self, delay=0):
+#         for num in range(8):
+#             self.toggleLED(num)
+#             time.sleep(delay)
+
+#     # flashes the LEDs clockwise
+#     def flashCycleLEDs(self, delay=0):
+#         for num in range(8):
+#             self.flashLED(num, delay)
