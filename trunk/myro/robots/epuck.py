@@ -16,7 +16,7 @@ def portname(id):
             return '/dev/tty.e-puck_%04d-COM1-1' % id
     elif platform.system() == 'Linux':
         assert type(id) is int and id > 0, 'Bad epuck ID: %s' % (id,)
-        # SLC robot lab machines (see /etc/bluetooth/rfcomm.conf)
+        # see /etc/bluetooth/rfcomm.conf
         rfcommPortNumber = {27: 0, 1197: 0, 1198: 1, 1190: 2,
                             1559: 4, 1602: 5, 1603: 6,
                             1604: 7, 1770: 8, 1781: 9}
@@ -52,34 +52,24 @@ class Epuck(Robot):
         # initialize communication (use write, not send)
         self.port.write('\n')
         self._clearLines()
-        self._lastTranslate = 0
-        self._lastRotate = 0
-        # set camera parameters to default values
         self.setCameraMode('color', 40, 40, 8)
         # flash LEDs
         self.onCycleLED(0.05)
         self.offLED('all')
 
     def reset(self):
-        print 'Resetting robot...please wait'
-        self.port.write('R\n')
+        raw_input("Press blue reset button on robot, then press RETURN...")
         self._clearLines()
-        self.cameraMode = 'color'
-        self.cameraWidth = 40
-        self.cameraHeight = 40
-        self.cameraZoom = 8
-        self.cameraBytes = 3200
-        print 'done'
+        self.setCameraMode('color', 40, 40, 8)
+        print 'Robot ready'
 
     def send(self, msg):
         assert msg[0] not in 'HKRVhkrv', "command '%s' not allowed with send" % msg[0]
         self.port.write('%s\n' % msg)
-#        time.sleep(0.01)
         response = self.port.readline()
         if response == '' or response[0].upper() != msg[0].upper():
             print "Bad response: '%s' -- check battery" % response.strip()
             self.reset()
-            raise Exception
         else:
             return response
 
@@ -129,7 +119,7 @@ class Epuck(Robot):
 
     def hardStop(self):
         self.send('S')
-        self.send('D,0,0')  # necessary to reset internal motor speed info
+        self.send('D,0,0')  # reset internal motor speed info
         self.send('T,0')
 
     #----------------------------------------------------------------------
@@ -198,7 +188,6 @@ class Epuck(Robot):
             print "Expected %d bytes from camera, got %d -- check battery" % \
                 (dataLength, len(imageData))
             self.reset()
-            raise Exception
         #modeNum, w, h = [ord(c) for c in imageData[:3]]
         # ignore header
         data = imageData[3:]
@@ -268,11 +257,6 @@ class Epuck(Robot):
         assert -1 <= rotate <= 1, 'move called with bad rotate value: %g' % rotate
         self._adjustSpeed(translate, rotate)
 
-#     def move2(self, translate, rotate):
-#         assert -1 <= translate <= 1, 'move called with bad translate value: %g' % translate
-#         assert -1 <= rotate <= 1, 'move called with bad rotate value: %g' % rotate
-#         self._adjustSpeed2(translate, rotate)
-
     def translate(self, translate):
         assert -1 <= translate <= 1, 'translate called with bad value: %g' % translate
         self._adjustSpeed(translate, 0)
@@ -287,18 +271,30 @@ class Epuck(Robot):
     def forward(self, speed, seconds=None):
         assert 0 <= speed <= 1, 'forward called with bad value: %g' % speed
         self._adjustSpeed(speed, 0)
+        if seconds is not None:
+            time.sleep(seconds)
+            self.stop()
 
     def backward(self, speed, seconds=None):
         assert 0 <= speed <= 1, 'backward called with bad value: %g' % speed
         self._adjustSpeed(-speed, 0)
+        if seconds is not None:
+            time.sleep(seconds)
+            self.stop()
 
     def turnLeft(self, speed, seconds=None):
         assert 0 <= speed <= 1, 'turnLeft called with bad value: %g' % speed
         self._adjustSpeed(0, speed)
+        if seconds is not None:
+            time.sleep(seconds)
+            self.stop()
 
     def turnRight(self, speed, seconds=None):
         assert 0 <= speed <= 1, 'turnRight called with bad value: %g' % speed
         self._adjustSpeed(0, -speed)
+        if seconds is not None:
+            time.sleep(seconds)
+            self.stop()
 
     def motors(self, left, right):
         assert -1 <= left <= 1, 'motors called with bad left value: %g' % left
@@ -313,10 +309,8 @@ class Epuck(Robot):
 
     # myro scribbler code
     def _adjustSpeed(self, translate, rotate):
-        self._lastTranslate = translate
-        self._lastRotate = rotate
-        left  = min(max(translate - rotate, -1), 1)
-        right  = min(max(translate + rotate, -1), 1)
+        left = min(max(translate - rotate, -1), 1)
+        right = min(max(translate + rotate, -1), 1)
         self.motors(left, right)
 
 #     # Spike's code
@@ -327,23 +321,9 @@ class Epuck(Robot):
 #             ratio = 1.0 / (absTranslate + absRotate)
 #             translate = translate * ratio
 #             rotate = rotate * ratio
-#         self._lastTranslate = translate
-#         self._lastRotate = rotate
 #         left = translate - rotate
 #         right = translate + rotate
 #         self.motors(left, right)
-
-    #----------------------------------------------------------------------
-    # internal sensors
-
-    def currentTime(self):
-        return time.time()
-
-    def getStall(self):
-        assert False, 'getStall not implemented for epuck'
-
-    def getBattery(self):
-        assert False, 'getBattery not implemented for epuck'
 
     #----------------------------------------------------------------------
     # external sensors
@@ -412,10 +392,10 @@ class Epuck(Robot):
         vals = [int(x) for x in self.send('A').strip().split(',')[1:]]
         return vals
             
-    # values go from 0 up to 32767, then wrap to negative values back up to 0
+    # values go from 0 to 65535, then wrap around to 0
     def getWheels(self):
         left, right = [int(x) for x in self.send('Q').strip().split(',')[1:]]
-        return [left, right]
+        return [left % 65536, right % 65536]
 
     def resetWheels(self):
         self.send('P,0,0')
@@ -448,9 +428,22 @@ class Epuck(Robot):
     def playSound(self, num):
         assert 0 <= num <= 5, 'Bad sound number: %s' % num
         self.send('T,%d' % num)
+        if num > 0:
+            waitTime = {1: 0.25, 2: 0.25, 3: 0.40, 4: 0.45, 5: 1.15}
+            time.sleep(waitTime[num])
+            self.send('T,0')
     
     def shush(self):
         self.send('T,0')
+
+    def currentTime(self):
+        return time.time()
+
+    def getStall(self):
+        assert False, 'getStall not implemented for epuck'
+
+    def getBattery(self):
+        assert False, 'getBattery not implemented for epuck'
 
     # returns the index number of the LED closest to the given IR sensor
     def getLEDnumber(self, sensorNum):
