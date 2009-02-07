@@ -232,7 +232,7 @@
 	    'list '+ '- '* '/ '< '> '= 'equal? 'eq? 'memq 'range 'set-car! 'set-cdr!
 	    'import 'get 'call-with-current-continuation 'call/cc
 	    'reverse 'append 'list->vector 'dir 'current-time 'map 'for-each 'env
-	    'using 'not 'printf 'vector 'help)
+	    'using 'not 'printf 'vector 'vector-set! 'vector-ref 'help)
       (list
 	;; exit
         (lambda-proc (args env2 handler k2)
@@ -348,6 +348,10 @@
           (k2 '<void>))
         ;; vector
 	(lambda-proc (args env2 handler k2) (k2 (make-vector args)))
+        ;; vector-set!
+	(lambda-proc (args env2 handler k2) (k2 (apply vector-set! args)))
+        ;; vector-ref
+	(lambda-proc (args env2 handler k2) (k2 (apply vector-ref args)))
         ;; help
 	(lambda-proc (args env2 handler k2) (help-prim (car args) 
 						       env2 handler k2))

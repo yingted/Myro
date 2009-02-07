@@ -213,6 +213,10 @@ public class Scheme {
   public delegate void Procedure2Void(object args1, object args2);
   public delegate bool Procedure2Bool(object args1, object args2);
 
+  public delegate object Procedure3(object args1, object args2, object args3);
+  public delegate void Procedure3Void(object args1, object args2, object args3);
+  public delegate bool Procedure3Bool(object args1, object args2, object args3);
+
   public static object symbol(object symbol) {
 	return config.symbol(symbol.ToString());
   }
@@ -307,7 +311,9 @@ public class Scheme {
 			retval = ((Procedure1Bool)proc)(actual);
 		} else if (args == 2) 
 		  retval = ((Procedure2Bool)proc)(car(actual), cadr(actual));
-	  }
+      } else {
+        throw new Exception(string.Format("error in call: invalid return type"));
+      }
 	  return retval;
 	}
 
@@ -322,6 +328,8 @@ public class Scheme {
 		retval = ((Procedure2)proc)(car(args1), car(args2));
 	  } else if (returntype == 2) { // return bool
 		retval = ((Procedure2Bool)proc)(args1, args2);
+      } else {
+        throw new Exception(string.Format("error in call: invalid return type"));
 	  }
 	  return retval;
 	}
@@ -350,6 +358,8 @@ public class Scheme {
   public static Proc cdr_proc = new Proc("cdr", (Procedure1) cdr, 1, 1);
   public static Proc cons_proc = new Proc("cons", (Procedure2) cons, 2, 1);
   public static Proc make_vector_proc = new Proc("list->vector", (Procedure1) make_vector, 1, 1);
+  public static Proc vector_ref_proc = new Proc("vector-ref", (Procedure2) vector_ref, 2, 1);
+  public static Proc vector_set_b_proc = new Proc("vector-set!", (Procedure3) vector_set_b, 3, 1);
   public static Proc memq_proc = new Proc("memq", (Procedure2Bool) memq, 2, 2);
   public static Proc range_proc = new Proc("range", (Procedure1) range, -1, 1);
   public static Proc reverse_proc = new Proc("reverse", (Procedure1) reverse, 1, 1);
@@ -937,6 +947,21 @@ public class Scheme {
 	  current = cdr(current);
 	}
 	return new Vector(retval);
+  }
+
+  public static object vector_set_b(object vector, object index, object value) {
+	trace(2, "called: vector_set_b\n");
+    Vector v = (Vector) vector;
+    int pos = (int) index;
+    v.set(pos, value);
+    return vector;
+  }
+
+  public static object vector_ref(object vector, object index) {
+	trace(2, "called: vector_ref\n");
+    Vector v = (Vector) vector;
+    int pos = (int) index;
+    return v.get(pos);
   }
 
   public static object list_to_vector(object lyst) {
@@ -2074,6 +2099,11 @@ public class Vector {
 
   public object get(int index) {
     return values[index];
+  }
+
+  public void set(int index, object value) {
+    printf("i = {0}, value = {1}\n", index, value);
+    values[index] = value;
   }
 
   public override string ToString() {
