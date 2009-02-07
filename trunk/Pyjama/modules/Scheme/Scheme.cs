@@ -474,6 +474,10 @@ public class Scheme {
  	set_env_b(env, symbol("int"), new Proc("int", (Procedure1)ToInt, 1, 1));
  	set_env_b(env, symbol("sort"), new Proc("sort", (Procedure2)sort, 2, 1));
  	set_env_b(env, symbol("list?"), new Proc("list?", (Procedure1Bool)list_q, 1, 2));
+ 	set_env_b(env, symbol("vector?"), new Proc("vector?", (Procedure1Bool)vector_q, 1, 2));
+	set_env_b(env, symbol("vector->list"), new Proc("vector->list", (Procedure1)my_vector_to_list, 1, 1));
+ 	set_env_b(env, symbol("pair?"), new Proc("pair?", (Procedure1Bool)pair_q, 1, 2));
+ 	set_env_b(env, symbol("string?"), new Proc("string?", (Procedure1Bool)string_q, 1, 2));
  	set_env_b(env, symbol("length"), new Proc("length", (Procedure1)length, 1, 1));
  	set_env_b(env, symbol("procedure?"), new Proc("procedure?", (Procedure1Bool)procedure_q_proc, 1, 2));
  	set_env_b(env, symbol("string<?"), new Proc("string<?", (Procedure2Bool) stringLessThan_q, 2, 2));
@@ -1706,8 +1710,12 @@ public class Scheme {
 	  } else {
 		throw new Exception("attempt to take length of an improper list");
 	  }
+	} else if (string_q(obj)) {
+	  return obj.ToString().Length;
+	} else if (vector_q(obj)) {
+	  return ((Vector)obj).length();
 	} else
-	  throw new Exception("attempt to take length of a non-list");
+	  throw new Exception("attempt to take length of a non-iterator");
   }
   
   public static object length_safe(object obj) {
@@ -2006,6 +2014,10 @@ public class Scheme {
 	return list(obj);
   }
 
+  public static object my_vector_to_list(object obj) {
+    return ((Vector)obj).ToList();
+  }
+
   public static object read_content(object filename) {
 	return File.OpenText(filename.ToString()).ReadToEnd();
   }
@@ -2099,6 +2111,14 @@ public class Vector {
 
   public object get(int index) {
     return values[index];
+  }
+
+  public object length() {
+    return values.Length;
+  }
+
+  public object ToList() {
+    return vector_to_list(values);
   }
 
   public void set(int index, object value) {

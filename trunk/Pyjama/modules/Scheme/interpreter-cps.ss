@@ -332,6 +332,7 @@
 	(lambda-proc (args env2 handler k2) (k2 (get-current-time)))
 	;; map
 	(lambda-proc (args env2 handler k2)
+	  (printf (car args))
 	  (map-prim (car args) (cdr args) env2 handler k2))
 	;; for-each
 	(lambda-proc (args env2 handler k2)
@@ -360,11 +361,27 @@
 ;; supports procedures of any number of arguments
 (define* map-prim
   (lambda (proc args env handler k)
-    (let ((len (length args)))
+    (let ((len (length args))
+	  (list-args (listify args)))
+      (printf list-args)
+      (newline)
       (cond
-	((= len 1) (map1 proc (car args) env handler k))
-	((= len 2) (map2 proc (car args) (cadr args) env handler k))
-	(else (mapN proc args env handler k))))))
+       ((= len 1) (map1 proc (car list-args) env handler k))
+       ((= len 2) (map2 proc (car list-args) (cadr list-args) env handler k))
+       (else (mapN proc list-args env handler k))))))
+
+(define listify
+  (lambda (arg-list)
+    (cond
+     ((null? arg-list) '())
+     ((list? (car arg-list)) (cons (car arg-list)
+				   (listify (cdr arg-list))))
+     ((vector? (car arg-list)) (cons (vector->list arg-list)
+				     (listify (cdr arg-list))))
+     ((string? (car arg-list)) (cons (string->list arg-list)
+				     (listify (cdr arg-list))))
+     (else (error 'map "cannot use object type '~a' in map" 
+		  (get_type (car arg-list))))))) ;; get_type is defined in C#
 
 ;; for improved efficiency
 (define* map1
