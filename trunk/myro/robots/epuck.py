@@ -453,7 +453,7 @@ class Epuck(Robot):
         self.send('T,0')
 
     # returns the index number of the LED closest to the given IR sensor
-    def sensorLEDnum(self, sensorNum):
+    def getLEDnumber(self, sensorNum):
         LEDs = [0, 1, 2, 3, 5, 6, 7, 0]
         return LEDs[sensorNum]
 
