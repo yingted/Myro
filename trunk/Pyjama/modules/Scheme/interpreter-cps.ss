@@ -332,7 +332,6 @@
 	(lambda-proc (args env2 handler k2) (k2 (get-current-time)))
 	;; map
 	(lambda-proc (args env2 handler k2)
-	  (printf (car args))
 	  (map-prim (car args) (cdr args) env2 handler k2))
 	;; for-each
 	(lambda-proc (args env2 handler k2)
@@ -363,8 +362,6 @@
   (lambda (proc args env handler k)
     (let ((len (length args))
 	  (list-args (listify args)))
-      (printf list-args)
-      (newline)
       (cond
        ((= len 1) (map1 proc (car list-args) env handler k))
        ((= len 2) (map2 proc (car list-args) (cadr list-args) env handler k))
@@ -376,9 +373,9 @@
      ((null? arg-list) '())
      ((list? (car arg-list)) (cons (car arg-list)
 				   (listify (cdr arg-list))))
-     ((vector? (car arg-list)) (cons (vector->list arg-list)
+     ((vector? (car arg-list)) (cons (my-vector->list (car arg-list))
 				     (listify (cdr arg-list))))
-     ((string? (car arg-list)) (cons (string->list arg-list)
+     ((string? (car arg-list)) (cons (string->list (car arg-list))
 				     (listify (cdr arg-list))))
      (else (error 'map "cannot use object type '~a' in map" 
 		  (get_type (car arg-list))))))) ;; get_type is defined in C#
@@ -417,11 +414,12 @@
 
 (define* for-each-prim
   (lambda (proc lists env handler k)
-    (if (null? (car lists))
-      (k '<void>)
-      (proc (map car lists) env handler
-	(lambda-cont (v1)
-	  (for-each-prim proc (map cdr lists) env handler k))))))
+    (let ((arg-list (listify lists)))
+      (if (null? (car arg-list))
+	  (k '<void>)
+	  (proc (map car arg-list) env handler
+             (lambda-cont (v1)
+		(for-each-prim proc (map cdr arg-list) env handler k)))))))
 
 (define get-current-time
   (lambda ()

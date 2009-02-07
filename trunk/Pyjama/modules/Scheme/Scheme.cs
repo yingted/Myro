@@ -420,7 +420,7 @@ public class Scheme {
   }
 
   public static object group(object chars, object delimiter) {
-	trace(2, "calling group({0}, {1})", chars, delimiter);
+	trace(10, "calling group({0}, {1})", chars, delimiter);
 	// given list of chars and a delim char, return a list of strings
 	object retval = EmptyList;
 	object buffer = EmptyList;
@@ -477,6 +477,7 @@ public class Scheme {
  	set_env_b(env, symbol("vector?"), new Proc("vector?", (Procedure1Bool)vector_q, 1, 2));
 	set_env_b(env, symbol("vector->list"), new Proc("vector->list", (Procedure1)my_vector_to_list, 1, 1));
  	set_env_b(env, symbol("pair?"), new Proc("pair?", (Procedure1Bool)pair_q, 1, 2));
+ 	set_env_b(env, symbol("iter?"), new Proc("iter?", (Procedure1Bool)iter_q, 1, 2));
  	set_env_b(env, symbol("string?"), new Proc("string?", (Procedure1Bool)string_q, 1, 2));
  	set_env_b(env, symbol("length"), new Proc("length", (Procedure1)length, 1, 1));
  	set_env_b(env, symbol("procedure?"), new Proc("procedure?", (Procedure1Bool)procedure_q_proc, 1, 2));
@@ -770,7 +771,7 @@ public class Scheme {
   }
 
   public static object list_tail(object lyst, object pos) {
-	trace(5, "calling list_tail({0}, {1})\n", lyst, pos);
+	trace(10, "calling list_tail({0}, {1})\n", lyst, pos);
 	if (null_q(lyst)) {
 	  if (Equal(pos, 0))
 		return EmptyList;
@@ -789,7 +790,7 @@ public class Scheme {
   }
 
   public static object list_head(object lyst, object pos) {
-	trace(5, "calling list_head({0}, {1})\n", lyst, pos);
+	trace(10, "calling list_head({0}, {1})\n", lyst, pos);
 	if (null_q(lyst)) {
 	  if (Equal(pos, 0))
 		return EmptyList;
@@ -921,7 +922,7 @@ public class Scheme {
   }
 
   public static Func<object,bool> tagged_list(object test_string, object pred, object value) {
-	trace(2, "called: tagged_list\n");
+	trace(10, "called: tagged_list\n");
 	return (object lyst) => {
 	  if (pair_q(lyst)) {
 		bool retval = (((bool)Eq(car(lyst), string_to_symbol(test_string))) && 
@@ -986,12 +987,12 @@ public class Scheme {
   }
 
   public static object make_string(object obj) {
-	trace(2, "called: make_string\n");
+	trace(9, "called: make_string\n");
 	if (obj == null || obj == (object) NULL) {
-	  trace(2, "make_string returned: \"\\0\"\n");
+	  trace(10, "make_string returned: \"\\0\"\n");
 	  return (object) "\0";
 	}
-	trace(2, "make_string returned: \"{0}\"\n", obj.ToString());
+	trace(10, "make_string returned: \"{0}\"\n", obj.ToString());
 	return obj.ToString();
   }
 
@@ -1049,12 +1050,12 @@ public class Scheme {
   }
 
   public static bool string_is__q(object o1, object o2) {
-	trace(4, "calling string=?({0}, {1})", o1, o2);
+	trace(10, "calling string=?({0}, {1})", o1, o2);
 	return ((o1 is string) && (o2 is string) && ((string)o1) == ((string)o2));
   }
   
   public static object string_to_list(object str) {
-	trace(2, "called: string_to_list: {0}\n", str);
+	trace(3, "called: string_to_list: {0}\n", str);
 	object retval = EmptyList;
 	object tail = EmptyList;
 	if (str != null) {
@@ -1151,7 +1152,7 @@ public class Scheme {
 
   public static string repr(object obj, int depth) {
 	if (depth > 3) return "...";
-	trace(3, "calling repr\n");
+	trace(10, "calling repr\n");
 	if (obj == null) {
 	  return ""; // FIXME: should give void when forced
 	} else if (obj is bool) {
@@ -1193,7 +1194,7 @@ public class Scheme {
   }
 
   public static string format_list(object args) {
-	trace(5, "calling format_list: {0} length={1}\n", args, length(args));
+	trace(10, "calling format_list: {0} length={1}\n", args, length(args));
 	if (pair_q(args)) {
 	  int len = (int)length(args);
 	  if (len == 1)
@@ -1289,7 +1290,7 @@ public class Scheme {
   }
 
   public static int cmp(object obj1, object obj2) {
-	trace(8, "calling cmp({0}, {1})\n", obj1, obj2);
+	trace(11, "calling cmp({0}, {1})\n", obj1, obj2);
 	if (obj1 is Symbol) {
 	  if (obj2 is Symbol) {
 		return cmp(obj1.ToString(), obj2.ToString());
@@ -1647,7 +1648,7 @@ public class Scheme {
   // List functions -----------------------------------------------
 
   public static object member(object obj1, object obj2) {
-	trace(2, "calling member({0}, {1})\n", obj1, obj2);
+	trace(11, "calling member({0}, {1})\n", obj1, obj2);
 	if (null_q(obj2)) {
 	  return false;
 	} else if (pair_q(obj2)) {
@@ -1692,10 +1693,14 @@ public class Scheme {
     return (x is Cons);
   }
 
+  public static bool iter_q(object x) {
+    return (pair_q(x) || vector_q(x) || string_q(x));
+  }
+
   public static object length(object obj) {
-	trace(3, "called: length\n");
+	trace(11, "called: length\n");
 	if (null_q(obj)) {
-	  trace(3, "length returned: {0}\n", 0);
+	  trace(11, "length returned: {0}\n", 0);
 	  return 0;
 	} else if (pair_q(obj)) {
 	  int len = 0;
@@ -1705,7 +1710,7 @@ public class Scheme {
 		current = cdr(current);
 	  }
 	  if (Eq(current, EmptyList)) {
-		trace(3, "length returned: {0}\n", len);
+		trace(11, "length returned: {0}\n", len);
 		return len;
 	  } else {
 		throw new Exception("attempt to take length of an improper list");
@@ -1719,9 +1724,9 @@ public class Scheme {
   }
   
   public static object length_safe(object obj) {
-	trace(3, "called: length_safe\n");
+	trace(11, "called: length_safe\n");
 	if (null_q(obj)) {
-	  trace(3, "length_safe returned: {0}\n", 0);
+	  trace(11, "length_safe returned: {0}\n", 0);
 	  return 0;
 	} else if (pair_q(obj)) {
 	  int len = 0;
@@ -1730,14 +1735,14 @@ public class Scheme {
 		len++;
 		current = cdr(current);
 	  }
-	  trace(3, "length_safe returned: {0}\n", len);
+	  trace(11, "length_safe returned: {0}\n", len);
 	  return len;
 	}
 	return -1;
   }
 
   public static bool list_q(object obj) {
-	trace(3, "called: list?({0})\n", repr(obj));
+	trace(11, "called: list?({0})\n", repr(obj));
 	if (null_q(obj)) {
 	  return true;
 	} else if (pair_q(obj)) {
