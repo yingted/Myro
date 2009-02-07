@@ -343,9 +343,7 @@
 	;; not
 	(lambda-proc (args env2 handler k2) (k2 (not (car args))))
 	;; printf
-        (lambda-proc (args env2 handler k2)
-          (apply printf-prim args)
-          (k2 '<void>))
+	(lambda-proc (args env2 handler k2) (apply printf-prim args) (k2 '<void>))
         ;; vector
 	(lambda-proc (args env2 handler k2) (k2 (make-vector args)))
         ;; vector-set!
