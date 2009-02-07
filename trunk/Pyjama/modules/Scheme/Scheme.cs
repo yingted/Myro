@@ -285,8 +285,13 @@ public class Scheme {
 			((Procedure1Void)proc)(car(actual));
 		  else
 			((Procedure1Void)proc)(actual);
-		} else if (args == 2) 
+		} else if (args == 2) {
 		  ((Procedure2Void)proc)(car(actual), cadr(actual));
+		} else if (args == 3) {
+		  ((Procedure3Void)proc)(car(actual), cadr(actual), caddr(actual));
+		} else {
+		  throw new Exception(string.Format("error in call: invalid args count"));
+		}
 	  } else if (returntype == 1) { // return object
 		if (args == -1) 
 		  retval = ((Procedure1)proc)(actual);
@@ -297,8 +302,13 @@ public class Scheme {
 			retval = ((Procedure1)proc)(car(actual));
 		  else
 			retval = ((Procedure1)proc)(actual);
-		} else if (args == 2) 
+		} else if (args == 2) {
 		  retval = ((Procedure2)proc)(car(actual), cadr(actual));
+		} else if (args == 3) {
+		  retval = ((Procedure3)proc)(car(actual), cadr(actual), caddr(actual));
+		} else {
+		  throw new Exception(string.Format("error in call: invalid args count"));
+		}
 	  } else if (returntype == 2) { // return bool
 		if (args == -1) 
 		  retval = ((Procedure1Bool)proc)(actual);
@@ -309,11 +319,16 @@ public class Scheme {
 			retval = ((Procedure1Bool)proc)(car(actual));
 		  else
 			retval = ((Procedure1Bool)proc)(actual);
-		} else if (args == 2) 
+		} else if (args == 2) {
 		  retval = ((Procedure2Bool)proc)(car(actual), cadr(actual));
-      } else {
-        throw new Exception(string.Format("error in call: invalid return type"));
-      }
+		} else if (args == 3) {
+		  retval = ((Procedure3Bool)proc)(car(actual), cadr(actual), caddr(actual));
+		} else {
+		  throw new Exception(string.Format("error in call: invalid args count"));
+		}
+	  } else {
+	    throw new Exception(string.Format("error in call: invalid return type"));
+	  }
 	  return retval;
 	}
 
@@ -324,12 +339,10 @@ public class Scheme {
 		((Procedure2Void)proc)(args1, args2);
 	  } else if (returntype == 1) { // return object
 		retval = ((Procedure2)proc)(args1, args2);
-	  } else if (returntype == 3) { // return object
-		retval = ((Procedure2)proc)(car(args1), car(args2));
 	  } else if (returntype == 2) { // return bool
 		retval = ((Procedure2Bool)proc)(args1, args2);
-      } else {
-        throw new Exception(string.Format("error in call: invalid return type"));
+	  } else {
+	    throw new Exception(string.Format("error in call: invalid return type"));
 	  }
 	  return retval;
 	}
@@ -359,7 +372,6 @@ public class Scheme {
   public static Proc cons_proc = new Proc("cons", (Procedure2) cons, 2, 1);
   public static Proc make_vector_proc = new Proc("list->vector", (Procedure1) make_vector, 1, 1);
   public static Proc vector_ref_proc = new Proc("vector-ref", (Procedure2) vector_ref, 2, 1);
-  public static Proc vector_set_b_proc = new Proc("vector-set!", (Procedure3) vector_set_b, 3, 1);
   public static Proc memq_proc = new Proc("memq", (Procedure2Bool) memq, 2, 2);
   public static Proc range_proc = new Proc("range", (Procedure1) range, -1, 1);
   public static Proc reverse_proc = new Proc("reverse", (Procedure1) reverse, 1, 1);
@@ -475,6 +487,7 @@ public class Scheme {
  	set_env_b(env, symbol("sort"), new Proc("sort", (Procedure2)sort, 2, 1));
  	set_env_b(env, symbol("list?"), new Proc("list?", (Procedure1Bool)list_q, 1, 2));
  	set_env_b(env, symbol("vector?"), new Proc("vector?", (Procedure1Bool)vector_q, 1, 2));
+ 	set_env_b(env, symbol("vector-set!"), new Proc("vector-set!", (Procedure3)vector_set_b, 3, 1));
 	set_env_b(env, symbol("vector->list"), new Proc("vector->list", (Procedure1)my_vector_to_list, 1, 1));
  	set_env_b(env, symbol("pair?"), new Proc("pair?", (Procedure1Bool)pair_q, 1, 2));
  	set_env_b(env, symbol("iter?"), new Proc("iter?", (Procedure1Bool)iter_q, 1, 2));
@@ -2127,7 +2140,6 @@ public class Vector {
   }
 
   public void set(int index, object value) {
-    printf("i = {0}, value = {1}\n", index, value);
     values[index] = value;
   }
 

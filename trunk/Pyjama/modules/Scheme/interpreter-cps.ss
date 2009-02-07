@@ -349,7 +349,7 @@
         ;; vector
 	(lambda-proc (args env2 handler k2) (k2 (make-vector args)))
         ;; vector-set!
-	(lambda-proc (args env2 handler k2) (k2 (apply vector-set! args)))
+	(lambda-proc (args env2 handler k2) (k2 (vector-set! (car args) (cadr args) (caddr args))))
         ;; vector-ref
 	(lambda-proc (args env2 handler k2) (k2 (apply vector-ref args)))
         ;; help
