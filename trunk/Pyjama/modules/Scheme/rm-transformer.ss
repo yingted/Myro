@@ -3,6 +3,7 @@
 ;; - define* functions will be converted to 0 arguments
 ;; - no internal define/define*'s
 
+;;(load "fn-transformer.ss")
 (load "ds-transformer.ss")
 
 ;; default transformer settings
