@@ -128,13 +128,12 @@
 		(fprintf output-port ";; ~a datatype~%~%" type)
 		(pretty-print make-function-code output-port)
 		(newline output-port)
+		;; FIXME: need an apply-TYPE
 		(for-each 
 		 (lambda (clause) 
 		   (pretty-print (make-cont-fn (cons obj-name arg-names) clause) output-port)
 		   (newline output-port))
 		 (reverse clauses)))))
-	  ;;(pretty-print apply-function-code output-port)
-	  ;;(newline output-port))))
 	  (else (error 'datatype "bad message: ~a" msg)))))))
 
 (define make-cont-fn
