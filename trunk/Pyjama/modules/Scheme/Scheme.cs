@@ -757,30 +757,41 @@ public class Scheme {
 	if (list_q(args)) {
 	  int len = (int) length(args);
 	  if (len == 1) { // (range 100)
-		return make_range(0, ((int)car(args)), 1); 
+	    return make_range(0, car(args), 1); 
 	  } else if (len == 2) { // (range start stop)
-		return make_range(((int)car(args)), ((int)cadr(args)), 1); 
+	    return make_range(car(args), cadr(args), 1); 
 	  } else if (len == 3) { // (range start stop incr)
-		return make_range(((int)car(args)), ((int)cadr(args)), 
-			((int)caddr(args))); 
+	    return make_range(car(args), cadr(args), caddr(args)); 
 	  }
 	}
 	throw new Exception("improper args to range");
   }
 
-  public static object make_range(int start, int stop, int incr) {
+  public static object make_range(object start, object stop, object incr) {
 	object retval = EmptyList;
 	object tail = EmptyList;
-	for (int i = start; i < stop; i += incr) {
-	  if (Eq(tail, EmptyList)) {
-		retval = list(i); // start of list
-		tail = retval;
-	  } else { // a pair
-		set_cdr_b(tail, cons(i, EmptyList));
-		tail = cdr(tail);
+	if (LessThan(start, stop)) {
+	  for (object i = start; LessThan(i, stop); i = Add(i, incr)) {
+	    if (Eq(tail, EmptyList)) {
+	      retval = list(i); // start of list
+	      tail = retval;
+	    } else { // a pair
+	      set_cdr_b(tail, cons(i, EmptyList));
+	      tail = cdr(tail);
+	    }
 	  }
-	}
-	return retval;
+	} else {
+	  for (object i = start; GreaterThan(i, stop); i = Add(i, incr)) {
+	    if (Eq(tail, EmptyList)) {
+	      retval = list(i); // start of list
+	      tail = retval;
+	    } else { // a pair
+	      set_cdr_b(tail, cons(i, EmptyList));
+	      tail = cdr(tail);
+	    }
+	  }
+        }
+        return retval;
   }
 
   public static object list_tail(object lyst, object pos) {
@@ -1378,7 +1389,45 @@ public class Scheme {
   }
 
   public static bool LessThan(object obj1, object obj2) {
-	return (ObjectType.ObjTst(obj1, obj2, false) < 0);
+	if (obj1 is Rational) {
+	  if (obj2 is Rational) {
+		return (((Rational)obj1) < ((Rational)obj2));
+	  } else if (obj2 is int) {
+		return (((Rational)obj1) < ((int)obj2));
+	  } else if (obj2 is double) {
+		return (((double)((Rational)obj1)) < ((double)obj2));
+	  }
+	} else if (obj2 is Rational) {
+	  if (obj1 is Rational) {
+		return (((Rational)obj1) < ((Rational)obj2));
+	  } else if (obj1 is int) {
+		return (((Rational)obj2) < ((int)obj1));
+	  } else if (obj1 is double) {
+		return (((double)((Rational)obj2)) < ((double)obj1));
+	  }
+	} else {
+	  try {
+	        return (ObjectType.ObjTst(obj1, obj2, false) < 0);
+	  } catch {
+		BigInteger b1 = null;
+		BigInteger b2 = null;
+		if (obj1 is int) {
+		  b1 = makeBigInteger((int) obj1);
+		} else if (obj1 is BigInteger) {
+		  b1 = (BigInteger)obj1;
+		} else
+		  throw new Exception(string.Format("can't convert {0} to bigint", obj1.GetType()));
+		if (obj2 is int) {
+		  b2 = makeBigInteger((int) obj2);
+		} else if (obj2 is BigInteger) {
+		  b2 = (BigInteger)obj2;
+		} else
+		  throw new Exception(string.Format("can't convert {0} to bigint", obj2.GetType()));
+		return b1 < b2;
+	  }
+	}
+	throw new Exception(String.Format("unable to compare {0} and {1}", 
+			obj1.GetType().ToString(), obj2.GetType().ToString()));
   }
 
   public static bool GreaterThan(object args) {
@@ -1386,7 +1435,45 @@ public class Scheme {
   }
 
   public static bool GreaterThan(object obj1, object obj2) {
-	return (ObjectType.ObjTst(obj1, obj2, false) > 0);
+	if (obj1 is Rational) {
+	  if (obj2 is Rational) {
+		return (((Rational)obj1) > ((Rational)obj2));
+	  } else if (obj2 is int) {
+		return (((Rational)obj1) > ((int)obj2));
+	  } else if (obj2 is double) {
+		return (((double)((Rational)obj1)) > ((double)obj2));
+	  }
+	} else if (obj2 is Rational) {
+	  if (obj1 is Rational) {
+		return (((Rational)obj1) > ((Rational)obj2));
+	  } else if (obj1 is int) {
+		return (((Rational)obj2) > ((int)obj1));
+	  } else if (obj1 is double) {
+		return (((double)((Rational)obj2)) > ((double)obj1));
+	  }
+	} else {
+	  try {
+	        return (ObjectType.ObjTst(obj1, obj2, false) > 0);
+	  } catch {
+		BigInteger b1 = null;
+		BigInteger b2 = null;
+		if (obj1 is int) {
+		  b1 = makeBigInteger((int) obj1);
+		} else if (obj1 is BigInteger) {
+		  b1 = (BigInteger)obj1;
+		} else
+		  throw new Exception(string.Format("can't convert {0} to bigint", obj1.GetType()));
+		if (obj2 is int) {
+		  b2 = makeBigInteger((int) obj2);
+		} else if (obj2 is BigInteger) {
+		  b2 = (BigInteger)obj2;
+		} else
+		  throw new Exception(string.Format("can't convert {0} to bigint", obj2.GetType()));
+		return b1 > b2;
+	  }
+	}
+	throw new Exception(String.Format("unable to compare {0} and {1}", 
+			obj1.GetType().ToString(), obj2.GetType().ToString()));
   }
 
   public static object not(object obj) {
