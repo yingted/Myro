@@ -207,6 +207,7 @@
     (case state
       (start-state
 	(cond
+	  ((char=? c #\newline) '(drop-newline (goto start-state)))
 	  ((char-whitespace? c) '(drop (goto start-state)))
 	  ((char=? c #\;) '(drop (goto comment-state)))
 	  ((char=? c #\() '(drop (emit lparen)))
@@ -366,6 +367,8 @@
 
 (define* read-datum
   (lambda (input handler k)  ;; k receives 2 args:  sexp, tokens-left
+    (set! read-char-count 0)
+    (set! read-line-count 1)
     (scan-input input handler
       (lambda-cont (tokens)
 	(read-sexp tokens handler
@@ -565,7 +568,23 @@
 ;;       (newline)
 ;;       (printf "done!\n"))))
 
+;; Handle command-line args too
+(define* load-files
+  (lambda (filenames handler k)
+    (if (null? filenames)
+	(k 'ok)
+	(read-datum (format "(import \\\"~a\\\")" (car filenames)) handler
+ 	    (lambda-cont2 (datum tokens-left)
+		(printf "   (import \\\"~a\\\")...\n" (car filenames))
+ 		(parse datum handler
+ 		    (lambda-cont (exp)
+ 			(m exp toplevel-env handler
+			   (lambda-cont (result)
+			      (load-files (cdr filenames) handler k))))))))))
+
 (define Main 
   (lambda (args)
-    (start)
+    (printf "Pyjama Scheme (0.1)\n")
+    (printf "(c) 2009, IPRE\n")
+    (load-files (list args) REP-handler REP-k)
     (trampoline)))
