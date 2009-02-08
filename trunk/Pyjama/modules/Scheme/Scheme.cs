@@ -966,6 +966,15 @@ public class Scheme {
 	return (bool) procedure_q(obj);
   }
 
+  public static object make_vector_size(object size) {
+    int len = (int) size;
+    object[] retval = new object[len];
+    for (int i = 0; i < len; i++) {
+      retval[i] = 0;
+    }
+    return new Vector(retval);
+  }
+
   public static object make_vector(object lyst) {
 	trace(2, "called: list_to_vector\n");
 	int len = (int) length(lyst);
