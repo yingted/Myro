@@ -53,13 +53,20 @@ class Epuck(Robot):
         self.port.write('\n')
         self._clearLines()
         self.setCameraMode('color', 40, 40, 8)
+        self._lastTranslate = 0
+        self._lastRotate = 0
         # flash LEDs
         self.onCycleLED(0.05)
         self.offLED('all')
 
     def reset(self):
-        raw_input("Press blue reset button on robot, then press RETURN...")
+        cmd = raw_input("Press blue reset button on robot, then press RETURN...")
+        if cmd != '':
+            print 'Aborted'
+            return
         self._clearLines()
+        self._lastTranslate = 0
+        self._lastRotate = 0
         self.setCameraMode('color', 40, 40, 8)
         print 'Robot ready'
 
@@ -98,7 +105,10 @@ class Epuck(Robot):
             response = self.port.readline()
 
     def calibrateSensors(self):
-        raw_input('Remove all objects in sensor range, then press RETURN...')
+        cmd = raw_input('Remove all objects in sensor range, then press RETURN...')
+        if cmd != '':
+            print 'Aborted'
+            return
         print 'Calibrating sensors...'
         self.port.write('K\n')
         self.port.readline()
@@ -121,6 +131,8 @@ class Epuck(Robot):
         self.send('S')
         self.send('D,0,0')  # reset internal motor speed info
         self.send('T,0')
+        self._lastTranslate = 0
+        self._lastRotate = 0
 
     #----------------------------------------------------------------------
     # camera
@@ -259,39 +271,39 @@ class Epuck(Robot):
 
     def translate(self, translate):
         assert -1 <= translate <= 1, 'translate called with bad value: %g' % translate
-        self._adjustSpeed(translate, 0)
+        self._adjustSpeed(translate, self._lastRotate)
 
     def rotate(self, rotate):
         assert -1 <= rotate <= 1, 'rotate called with bad value: %g' % rotate
-        self._adjustSpeed(0, rotate)
+        self._adjustSpeed(self._lastTranslate, rotate)
 
     def stop(self):
         self._adjustSpeed(0, 0)
 
     def forward(self, speed, seconds=None):
         assert 0 <= speed <= 1, 'forward called with bad value: %g' % speed
-        self._adjustSpeed(speed, 0)
+        self._adjustSpeed(speed, self._lastRotate)
         if seconds is not None:
             time.sleep(seconds)
             self.stop()
 
     def backward(self, speed, seconds=None):
         assert 0 <= speed <= 1, 'backward called with bad value: %g' % speed
-        self._adjustSpeed(-speed, 0)
+        self._adjustSpeed(-speed, self._lastRotate)
         if seconds is not None:
             time.sleep(seconds)
             self.stop()
 
     def turnLeft(self, speed, seconds=None):
         assert 0 <= speed <= 1, 'turnLeft called with bad value: %g' % speed
-        self._adjustSpeed(0, speed)
+        self._adjustSpeed(self._lastTranslate, speed)
         if seconds is not None:
             time.sleep(seconds)
             self.stop()
 
     def turnRight(self, speed, seconds=None):
         assert 0 <= speed <= 1, 'turnRight called with bad value: %g' % speed
-        self._adjustSpeed(0, -speed)
+        self._adjustSpeed(self._lastTranslate, -speed)
         if seconds is not None:
             time.sleep(seconds)
             self.stop()
@@ -299,31 +311,20 @@ class Epuck(Robot):
     def motors(self, left, right):
         assert -1 <= left <= 1, 'motors called with bad left value: %g' % left
         assert -1 <= right <= 1, 'motors called with bad right value: %g' % right
-        left = int(left * 1000)
-        right = int(right * 1000)
-        self.send('D,%d,%d' % (left, right))
+        translate = (right + left) / 2.0
+        rotate = (right - left) / 2.0
+        self._adjustSpeed(translate, rotate)
 
     def getMotors(self):
         left, right = [int(x) for x in self.send('E').strip().split(',')[1:]]
         return [left, right]
 
-    # myro scribbler code
     def _adjustSpeed(self, translate, rotate):
-        left = min(max(translate - rotate, -1), 1)
-        right = min(max(translate + rotate, -1), 1)
-        self.motors(left, right)
-
-#     # Spike's code
-#     def _adjustSpeed2(self, translate, rotate):
-#         absTranslate = abs(translate)
-#         absRotate = abs(rotate)
-#         if (absTranslate + absRotate) > 1.0:
-#             ratio = 1.0 / (absTranslate + absRotate)
-#             translate = translate * ratio
-#             rotate = rotate * ratio
-#         left = translate - rotate
-#         right = translate + rotate
-#         self.motors(left, right)
+        self._lastTranslate = translate
+        self._lastRotate = rotate
+        left = int(max(-1, min(1, translate - rotate)) * 1000)
+        right = int(max(-1, min(1, translate + rotate)) * 1000)
+        self.send('D,%d,%d' % (left, right))
 
     #----------------------------------------------------------------------
     # external sensors
@@ -373,7 +374,7 @@ class Epuck(Robot):
             or type(position) == int and 0 <= position <= 7 \
             or type(position) == str and position in Epuck.sensorGroups, \
             'Bad position value: %s' % position
-        vals = [min(int(x), 4000) for x in self.send(command).strip().split(',')[1:]]
+        vals = [max(0, min(4000, int(x))) for x in self.send(command).strip().split(',')[1:]]
         if position == None:
             return vals
         elif type(position) == int:
