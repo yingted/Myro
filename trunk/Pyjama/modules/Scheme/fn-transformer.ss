@@ -131,29 +131,29 @@
 		;; FIXME: need an apply-TYPE
 		(for-each 
 		 (lambda (clause) 
-		   (pretty-print (make-cont-fn (cons obj-name arg-names) clause) output-port)
+		   (pretty-print (make-cont-fn `(cdr ,obj-name) (cons obj-name arg-names) clause) output-port)
 		   (newline output-port))
 		 (reverse clauses)))))
 	  (else (error 'datatype "bad message: ~a" msg)))))))
 
 (define make-cont-fn
-  (lambda (arg-names clause)
+  (lambda (list-ref-exp arg-names clause)
     (let ((name (car clause))
 	  (args (cadr clause)))
       (if (= (length args) 0)
 	  `(define ,name (lambda ,arg-names
 			   ,@(cddr clause)))
-	  `(define ,name (lambda (value args)
-			   (let ,(make-let-fn args 0)
+	  `(define ,name (lambda ,arg-names
+			   (let ,(make-let-fn args list-ref-exp 0)
 			     ,@(cddr clause))))))))
 
 (define make-let-fn
-  (lambda (arg-names pos)
+  (lambda (arg-names list-ref-exp pos)
     (cond
      ((null? arg-names) '())
      (else
-      (cons (list (car arg-names) (list 'list-ref 'args pos))
-	    (make-let-fn (cdr arg-names) (+ pos 1)))))))
+      (cons (list (car arg-names) (list 'list-ref list-ref-exp pos))
+	    (make-let-fn (cdr arg-names) list-ref-exp (+ pos 1)))))))
 
 (define find-clause
   (lambda (fields code clauses)
