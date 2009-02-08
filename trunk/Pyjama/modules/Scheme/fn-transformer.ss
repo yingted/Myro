@@ -120,18 +120,23 @@
 ;; 			    (record-case (cdr ,obj-name)
 ;; 			      ,@(reverse clauses)
 ;; 			      (else (error (quote ,apply-name) ,error-string ,obj-name))))))
+ 		     (apply-function-code
+		      `(,define-sym ,apply-name
+			 (lambda ,(cons obj-name arg-names)
+			   ((cadr ,obj-name) ,obj-name ,@arg-names))))
  		     (make-function-code
-		      `(define ,make-name
+		      `(,define-sym ,make-name
 			 (lambda args
 			   (cons (quote ,type) args)))))
 		(fprintf output-port ";;~a~%" (make-string 70 #\-))
 		(fprintf output-port ";; ~a datatype~%~%" type)
 		(pretty-print make-function-code output-port)
 		(newline output-port)
-		;; FIXME: need an apply-TYPE
+		(pretty-print apply-function-code output-port)
+		(newline output-port)
 		(for-each 
 		 (lambda (clause) 
-		   (pretty-print (make-cont-fn `(cdr ,obj-name) (cons obj-name arg-names) clause) output-port)
+		   (pretty-print (make-cont-fn `(cddr ,obj-name) (cons obj-name arg-names) clause) output-port)
 		   (newline output-port))
 		 (reverse clauses)))))
 	  (else (error 'datatype "bad message: ~a" msg)))))))
@@ -141,11 +146,11 @@
     (let ((name (car clause))
 	  (args (cadr clause)))
       (if (= (length args) 0)
-	  `(define ,name (lambda ,arg-names
-			   ,@(cddr clause)))
-	  `(define ,name (lambda ,arg-names
-			   (let ,(make-let-fn args list-ref-exp 0)
-			     ,@(cddr clause))))))))
+	  `(define* ,name (lambda ,arg-names
+			    ,@(cddr clause)))
+	  `(define* ,name (lambda ,arg-names
+			    (let ,(make-let-fn args list-ref-exp 0)
+			      ,@(cddr clause))))))))
 
 (define make-let-fn
   (lambda (arg-names list-ref-exp pos)
