@@ -340,3 +340,6 @@
 	((cherry banana) (a . b) (list b a r))
 	((orange) () 'no)
 	(else 2 3 4)))))
+
+(test-all)
+(exit)
