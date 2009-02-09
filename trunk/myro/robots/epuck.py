@@ -1,7 +1,7 @@
 from myro import Robot
 from myro.graphics import Picture
 import myro.globvars
-import time, platform, serial, numpy
+import time, platform, serial, array
 
 #-----------------------------------------------------------------------------
 # this function maps epuck ID numbers to port names, and is system-specific
@@ -215,7 +215,7 @@ class Epuck(Robot):
             picture.set(w, h, data, 'gray')
         else:
             # color
-            buffer = numpy.array([0] * (w * h * 3), 'B')
+            buffer = array.array('B', [0] * (w * h * 3))
             j = 0
             for i in xrange(0, len(data), 2):
                 high = ord(data[i])   # big endian

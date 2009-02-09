@@ -139,10 +139,7 @@ except:
 
 
 tk = Tkinter	 
-try: 	 
-     from numpy import array	     
-except: 	 
-     print >> sys.stderr, "WARNING: numpy not found" 	 
+import array
 
 import math
 try:
@@ -1021,9 +1018,9 @@ class Picture(object):
         if mode.lower() == "color":
             if data == None:
                  if type(value) == int:
-                      data = array([value] * (height * width * 3), 'B')
+                      data = array.array('B', [value] * (height * width * 3))
                  elif len(value) == 3:
-                      data = array(value * (height * width), 'B')
+                      data = array.array('B', value * (height * width))
             self.image = PyImage.frombuffer("RGB", (self.width, self.height),
                                             data, "raw", "RGB", 0, 1)
         elif mode.lower() == "image": 	 

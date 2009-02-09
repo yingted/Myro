@@ -18,11 +18,7 @@ from myro import Robot, ask
 from myro.graphics import _askQuestion, Picture, rgb2yuv
 import myro.globvars
 import cStringIO
-# needed for new camera dongle
-try:
-    from numpy import array
-except:
-    pass
+import array
 
 class BufferedRead:
     def __init__(self, serial, size, start = 1):
@@ -862,7 +858,7 @@ class Scribbler(Robot):
     def _grab_blob_array(self):
         width = 256
         height = 192    
-        blobs = array([0] * (height * width), 'B') # zeros(((height + 1), (width + 1)), dtype=uint8)
+        blobs = array.array('B', [0] * (height * width)) # zeros(((height + 1), (width + 1)), dtype=uint8)
         line = ''
         try:
             self.lock.acquire()
@@ -921,7 +917,7 @@ class Scribbler(Robot):
     def _grab_array(self):
         width = 256
         height = 192
-        buffer = array([0] * (height * width * 3), 'B')
+        buffer = array.array('B', [0] * (height * width * 3))
         try:
             self.lock.acquire()
             oldtimeout = self.ser.timeout
@@ -972,7 +968,7 @@ class Scribbler(Robot):
     def _grab_array_bilinear_horizontal(self):
         width = 256
         height = 192
-        buffer = array([0] * (height * width * 3), 'B')
+        buffer = array.array('B', [0] * (height * width * 3))
         try:
             self.lock.acquire()
             oldtimeout = self.ser.timeout
@@ -1025,7 +1021,7 @@ class Scribbler(Robot):
     def _grab_array_bilinear_vert(self):
         width = 256
         height = 192
-        buffer = array([0] * (height * width * 3), 'B')
+        buffer = array.array('B', [0] * (height * width * 3))
         try:
             self.lock.acquire()
             oldtimeout = self.ser.timeout
