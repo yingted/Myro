@@ -315,15 +315,18 @@ class Epuck(Robot):
         rotate = (right - left) / 2.0
         self._adjustSpeed(translate, rotate)
 
-    def getMotors(self):
-        left, right = [int(x) for x in self.send('E').strip().split(',')[1:]]
-        return [left/1000.0, right/1000.0]
+    def getSpeed(self):
+        return (self._lastTranslate, self._lastRotate)
 
     def getTranslate(self):
         return self._lastTranslate
 
     def getRotate(self):
         return self._lastRotate
+
+    def getMotors(self):
+        left, right = [int(x) for x in self.send('E').strip().split(',')[1:]]
+        return [left/1000.0, right/1000.0]
 
     def _adjustSpeed(self, translate, rotate):
         self._lastTranslate = translate
