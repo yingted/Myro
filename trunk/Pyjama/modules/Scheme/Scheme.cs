@@ -486,6 +486,7 @@ public class Scheme {
  	set_env_b(env, symbol("int"), new Proc("int", (Procedure1)ToInt, 1, 1));
  	set_env_b(env, symbol("sort"), new Proc("sort", (Procedure2)sort, 2, 1));
  	set_env_b(env, symbol("list?"), new Proc("list?", (Procedure1Bool)list_q, 1, 2));
+ 	set_env_b(env, symbol("symbol?"), new Proc("symbol?", (Procedure1Bool)symbol_q, 1, 2));
  	set_env_b(env, symbol("vector?"), new Proc("vector?", (Procedure1Bool)vector_q, 1, 2));
  	set_env_b(env, symbol("vector-set!"), new Proc("vector-set!", (Procedure3)vector_set_b, 3, 1));
 	set_env_b(env, symbol("vector->list"), new Proc("vector->list", (Procedure1)my_vector_to_list, 1, 1));
@@ -1058,7 +1059,7 @@ public class Scheme {
   }
 
   public static bool symbol_q(object x) {
-	return (x is Symbol);
+	return (x is Symbol && x != EmptyList);
   }
 
   public static bool char_alphabetic_q(object o) {
@@ -1339,18 +1340,7 @@ public class Scheme {
   }
 
   public static bool Eq(object obj1, object obj2) {
-	if ((obj1 is Symbol) || (obj2 is Symbol)) {
-	  if ((obj1 is Symbol) && (obj2 is Symbol))
-		return ((Symbol)obj1).Equals(obj2);
-	  else return false;
-	} else {
-	  try {
-		bool retval = (obj1 == obj2);//(ObjectType.ObjTst(obj1, obj2, false) == 0);
-		return retval;
-	  } catch {
-		return false;
-	  }
-	}
+    return (obj1 == obj2); 
   }
 
   public static bool Equal(object obj1, object obj2) {
