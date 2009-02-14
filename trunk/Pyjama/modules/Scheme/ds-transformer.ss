@@ -142,6 +142,7 @@
 
 (define ds-transform-file
   (lambda (source-file . opts)
+    (printf "ds-transform: transforming ~s~%" source-file)
     (set! all-datatypes (make-all-datatypes))
     (set! need-eopl-support? #f)
     ;; check for name conflicts

@@ -228,7 +228,7 @@
   (lambda ()
     (make-initial-env-extended
      (make-initial-environment
-      (list 'exit 'eval 'parse 'apply 'sqrt 'print 'display 'newline 'load 'null? 'cons 'car 'cdr
+      (list 'exit 'eval 'parse 'parse-string 'apply 'sqrt 'print 'display 'newline 'load 'null? 'cons 'car 'cdr
 	    'list '+ '- '* '/ '< '> '= 'equal? 'eq? 'memq 'range 'set-car! 'set-cdr!
 	    'import 'get 'call-with-current-continuation 'call/cc
 	    'reverse 'append 'list->vector 'dir 'current-time 'map 'for-each 'env
@@ -243,12 +243,17 @@
 	  (halt* '(exiting the interpreter)))
 	;; eval
 	(lambda-proc (args env2 handler k2)
-	  (parse (car args) REP-handler
+	  (parse (car args) handler
 	    (lambda-cont (exp)
-	      (m exp toplevel-env REP-handler k2))))
+	      (m exp toplevel-env handler k2))))   ;; use toplevel-env here?
 	;; parse
 	(lambda-proc (args env2 handler k2)
-	  (parse (car args) REP-handler k2))
+	  (parse (car args) handler k2))
+	;; parse-string
+	(lambda-proc (args env2 handler k2)
+	  (read-datum (car args) handler
+	    (lambda-cont2 (datum tokens-left)
+	      (parse datum handler k2))))
 	;; apply
 	(lambda-proc (args env2 handler k2)
 	  (let ((proc (car args))
@@ -520,6 +525,14 @@
 		(lambda-cont (v)
 		  (load-loop tokens-left env handler k))))))))))
 
+(define* load-files
+  (lambda (filenames env handler k)
+    (if (null? filenames)
+      (k 'ok)
+      (load-file (car filenames) env handler
+	(lambda-cont (v)
+	  (load-files (cdr filenames) env handler k))))))
+
 (define* help-prim
   (lambda (var env handler k)
     (lookup-binding var env handler
@@ -548,4 +561,13 @@
 
 (define toplevel-env (make-toplevel-env))
 (define macro-env (make-macro-env))
+
+(define Main 
+  (lambda (args)
+    (printf "Pyjama Scheme (0.1)\n")
+    (printf "(c) 2009, IPRE\n")
+    ;; in the register machine, this call just sets up the registers
+    (load-files (list args) toplevel-env REP-handler REP-k)
+    ;; need this to start the computation after registers are set up
+    (trampoline)))
 

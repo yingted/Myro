@@ -569,22 +569,16 @@
 ;;       (printf "done!\n"))))
 
 ;; Handle command-line args too
-(define* load-files
-  (lambda (filenames handler k)
-    (if (null? filenames)
-	(k 'ok)
-	(read-datum (format "(import \\\"~a\\\")" (car filenames)) handler
- 	    (lambda-cont2 (datum tokens-left)
-		(printf "   (import \\\"~a\\\")...\n" (car filenames))
- 		(parse datum handler
- 		    (lambda-cont (exp)
- 			(m exp toplevel-env handler
-			   (lambda-cont (result)
-			      (load-files (cdr filenames) handler k))))))))))
+;;(define* load-files
+;;  (lambda (filenames handler k)
+;;    (if (null? filenames)
+;;	(k 'ok)
+;;	(read-datum (format "(import \\\"~a\\\")" (car filenames)) handler
+;; 	    (lambda-cont2 (datum tokens-left)
+;;		(printf "   (import \\\"~a\\\")...\n" (car filenames))
+;; 		(parse datum handler
+;; 		    (lambda-cont (exp)
+;; 			(m exp toplevel-env handler
+;;			   (lambda-cont (result)
+;;			      (load-files (cdr filenames) handler k))))))))))
 
-(define Main 
-  (lambda (args)
-    (printf "Pyjama Scheme (0.1)\n")
-    (printf "(c) 2009, IPRE\n")
-    (load-files (list args) REP-handler REP-k)
-    (trampoline)))

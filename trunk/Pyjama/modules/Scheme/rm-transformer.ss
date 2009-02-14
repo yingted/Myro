@@ -129,6 +129,7 @@
 
 (define rm-transform-file
   (lambda (source-file . opts)
+    (printf "rm-transform: transforming ~s~%" source-file)
     (set! register-table (make-register-table))
     (set! need-eopl-support? #f)
     (let ((eopl-defs '())
