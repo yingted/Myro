@@ -563,11 +563,11 @@
 (define macro-env (make-macro-env))
 
 (define Main 
-  (lambda (args)
+  (lambda args
     (printf "Pyjama Scheme (0.1)\n")
     (printf "(c) 2009, IPRE\n")
     ;; in the register machine, this call just sets up the registers
-    (load-files (list args) toplevel-env REP-handler REP-k)
+    (load-files args toplevel-env REP-handler REP-k)
     ;; need this to start the computation after registers are set up
     (trampoline)))
 
