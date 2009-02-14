@@ -48,3 +48,13 @@
 (define-syntax apply*
   (syntax-rules ()
     [(_ proc args ...) (apply proc args ...)]))
+
+
+(define-syntax define+
+  (syntax-rules ()
+    [(_ name body ...) (define name body ...)]))
+
+(define-syntax apply+
+  (syntax-rules ()
+    [(_ proc args ...) (proc args ...)]))
+

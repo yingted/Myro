@@ -4,6 +4,7 @@
 ;; default transformer settings
 (define *include-eopl-define-datatype-in-ds-code?* #t)
 (define *include-define*-in-ds-code?* #t)
+(define *generate-apply-functions-with-record-case-code?* #f)
 
 ;; assumes:
 ;; - lambda-cont, lambda-proc, etc. datatype forms
@@ -60,12 +61,12 @@
 	  (make-name (string->symbol (format "make-~a" abbreviation)))
 	  (apply-name (string->symbol (format "apply-~a" abbreviation)))
 	  (obj-name (if (list? (car application-template))
-		      (caar application-template)
-		      (car application-template)))
+			(caar application-template)
+			(car application-template)))
 	  (arg-names (cdr application-template))
 	  (all-obj-names (if (list? (car application-template))
-			   (car application-template)
-			   (list (car application-template))))
+			     (car application-template)
+			     (list (car application-template))))
 	  (clauses '())
 	  (counter 0))
       (lambda msg
@@ -114,23 +115,100 @@
 	      (let* ((output-port (if (null? port) (current-output-port) (car port)))
 		     (error-string (format "bad ~a: ~~a" type))
 		     (define-sym (if *include-define*-in-ds-code?* 'define* 'define))
-		     (apply-function-code
+ 		     (apply-function-code
+		      (if *generate-apply-functions-with-record-case-code?*
+ 		       `(,define-sym ,apply-name
+ 			  (lambda (,obj-name ,@arg-names)
+ 			    (record-case (cdr ,obj-name)
+ 			      ,@(reverse clauses)
+ 			      (else (error (quote ,apply-name) ,error-string ,obj-name)))))
 		       `(,define-sym ,apply-name
-			  (lambda ,(cons obj-name arg-names)
-			    (record-case (cdr ,obj-name)
-			      ,@(reverse clauses)
-			      (else (error (quote ,apply-name) ,error-string ,obj-name))))))
-		     (make-function-code
-		       `(define ,make-name
-			  (lambda args
-			    (cons (quote ,type) args)))))
+			  (lambda (,obj-name ,@arg-names)
+			    (apply+ (caddr ,obj-name) ,@arg-names (cdddr ,obj-name))))))
+ 		     (make-function-code
+		       ;; must use define, not define* here
+		      `(define ,make-name
+			 (lambda args (cons (quote ,type) args)))))
 		(fprintf output-port ";;~a~%" (make-string 70 #\-))
 		(fprintf output-port ";; ~a datatype~%~%" type)
 		(pretty-print make-function-code output-port)
 		(newline output-port)
 		(pretty-print apply-function-code output-port)
-		(newline output-port))))
+		(newline output-port)
+		(if (not *generate-apply-functions-with-record-case-code?*)
+		  (for-each
+		    (lambda (clause) 
+		      (pretty-print (make-obj-function arg-names clause) output-port)
+		      (newline output-port))
+		    (reverse clauses))))))
 	  (else (error 'datatype "bad message: ~a" msg)))))))
+
+;;------------------------------------------------------------------------
+;; continuation records look like this if
+;; *generate-apply-functions-with-record-case-code?* is true:
+;; (continuation <tag> args sym handler k ...etc... )
+;; or this if it is false:
+;; (continuation <tag> <func> args sym handler k ...etc... )
+
+(define make-obj-function
+  (lambda (arg-names clause)
+    (let ((name (car clause))
+	  (fields (cadr clause)))
+      `(define+ ,name (lambda (,@arg-names fields)
+			(let ,(make-let-bindings fields 0)
+			  ,@(cddr clause)))))))
+
+(define make-let-bindings
+  (lambda (fields pos)
+    (if (null? fields)
+      '()
+      (let ((first-binding
+	      (cond
+		((= pos 0) `(,(car fields) (car fields)))
+		((= pos 1) `(,(car fields) (cadr fields)))
+		((= pos 2) `(,(car fields) (caddr fields)))
+		((= pos 3) `(,(car fields) (cadddr fields)))
+		(else `(,(car fields) (list-ref fields ,pos))))))
+	(cons first-binding (make-let-bindings (cdr fields) (+ pos 1)))))))
+
+;; define+ means "don't registerize this function's parameters or let,
+;; but do transform the body.  apply+ means "don't registerize this
+;; function call".  examples:
+;;
+;;(define+ <cont-79>
+;;  (lambda (value fields)
+;;    (let ((args (list-ref fields 0))
+;;	  (sym (list-ref fields 1))
+;;	  (handler (list-ref fields 2))
+;;	  (k (list-ref fields 3)))
+;;      (cond
+;;       ((null? (cdr args)) (apply-cont k value))
+;;       ((not (environment? value))
+;;	(apply-handler handler (format "~a is not a module" sym)))
+;;       (else (get-primitive (cdr args) value handler k))))))
+;;
+;; data-structure versions:
+;;
+;;(define* make-cont (lambda args (cons 'continuation args)))
+;;
+;;(define* apply-cont
+;;  (lambda (k value)
+;;    (apply+ (cadr k) value (cddr k))))
+;;
+;;(define* apply-cont2
+;;  (lambda (k2 value1 value2)
+;;    (apply+ (cadr k2) value1 value2 (cddr k2))))
+;;
+;;;; registerized versions:
+;;
+;;(define* apply-cont
+;;  (lambda ()
+;;    ((cadr k_reg) value_reg (cddr k_reg))))
+;;
+;;(define* apply-cont2
+;;  (lambda ()
+;;    ((cadr k2_reg) value1_reg value2_reg (cddr k2_reg))))
+;;------------------------------------------------------------------------
 
 (define find-clause
   (lambda (fields code clauses)
@@ -261,9 +339,11 @@
 
 (define define*? (tagged-list 'define* >= 3))
 
+(define define+? (tagged-list 'define+ >= 3))
+
 (define mit-define->define
   (lambda (def)
-    ;; could be a define or a define*
+    ;; could be a define or define*
     (let ((name (caadr def))
 	  (formals (cdadr def))
 	  (bodies (cddr def)))
@@ -314,7 +394,9 @@
 			  record-field-order))
 		(tag (dt 'add-clause formals bodies fields params))
 		(make-name (dt 'get-make-name)))
-	   `(,make-name (quote ,tag) ,@fields)))
+	   (if *generate-apply-functions-with-record-case-code?*
+	       `(,make-name (quote ,tag) ,@fields)
+	       `(,make-name (quote ,tag) ,tag ,@fields))))
 	((datatype-application? code)
 	 (let ((dt (get-datatype 'datatype-application? code all-datatypes)))
 	   ((transform params) (cons (dt 'get-apply-name) code))))

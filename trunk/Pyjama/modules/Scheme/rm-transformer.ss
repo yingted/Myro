@@ -3,7 +3,6 @@
 ;; - define* functions will be converted to 0 arguments
 ;; - no internal define/define*'s
 
-;;(load "fn-transformer.ss")
 (load "ds-transformer.ss")
 
 ;; default transformer settings
@@ -149,6 +148,8 @@
 		      (set! eopl-defs (cons exp eopl-defs)))
 		     ((or (define? exp) (define*? exp))
 		      (set! defs (cons (preprocess-define exp) defs)))
+		     ((define+? exp)
+		      (set! defs (cons exp defs)))
 		     ;; skip top level calls to load
 		     (else 'skip))
 		   (transform-definitions input-port))))))
@@ -206,7 +207,11 @@
 	     ;; trampoline
 	     (fprintf output-port ";; the trampoline~%")
 	     (pretty-print
-	       '(define trampoline (lambda () (if pc (begin (pc) (trampoline)) final_reg)))
+	       '(define trampoline
+		  (lambda ()
+		    (if pc
+			(begin (pc) (trampoline))
+			final_reg)))
 	       output-port)
 	     (newline output-port)
 	     (pretty-print
@@ -342,6 +347,17 @@
 		  `(begin ,@new-exps))))
 	    ((define define*) (name body)
 	      `(,(car code) ,name ,(transform body)))
+	    (define+ (name body)
+	      (let* ((formals (cadr body))
+		     (let-exp (caddr body))
+		     (let-bindings (cadr let-exp))
+		     (let-bodies (cddr let-exp)))
+		`(define ,name
+		   (lambda ,formals
+		     (let ,let-bindings ,@(map transform let-bodies))))))
+	    ;; leave apply+ in final registerized code for now, as a
+	    ;; flag for the C# transformer to use
+	    (apply+ args code)
 	    (define-syntax args code)
 	    (and exps
 	      `(and ,@(map transform exps)))
@@ -652,6 +668,7 @@
 	   (if (lambda? body)
 	     `(,(car code) ,name ,(returnize body))
 	     `(,(car code) ,name ,body)))
+	  (apply+ args code)
 	  (define-syntax args code)
 	  (and exps `(return* ,code))
 	  (or exps `(return* ,code))
