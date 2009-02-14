@@ -1,18 +1,26 @@
 MCS=gmcs
 
-pjscheme-rm.ss: environments-cps.ss parser-cps.ss unifier-cps.ss \
-		interpreter-cps.ss reader-cps.ss ds-transformer.ss \
-		rm-transformer.ss 
+
+pjscheme: pjscheme.exe
+	MONO_PATH=DLLs mono --debug pjscheme.exe
+
+pjscheme-ds.ss: environments-cps.ss parser-cps.ss unifier-cps.ss \
+		interpreter-cps.ss reader-cps.ss ds-transformer.ss
 	$(RM) pjscheme-cps.ss
 	cat reader-cps.ss environments-cps.ss parser-cps.ss interpreter-cps.ss unifier-cps.ss > pjscheme-cps.ss
-	echo "(load \"rm-transformer.ss\")" > compile.ss
-	echo "(compile-level-output)" >> compile.ss
-	echo "(delete-file \"pjscheme-ds.ss\")" >> compile.ss
-	echo "(delete-file \"pjscheme-rm.ss\")" >> compile.ss
-	echo "(ds-transform-file \"pjscheme-cps.ss\" \"pjscheme-ds.ss\")" >> compile.ss
-	echo "(rm-transform-file \"pjscheme-ds.ss\" \"pjscheme-rm.ss\")" >> compile.ss
-	echo "(exit)" >> compile.ss
-	petite compile.ss
+	echo "(load \"ds-transformer.ss\")" > compile-ds.ss
+	echo "(delete-file \"pjscheme-ds.ss\")" >> compile-ds.ss
+	echo "(ds-transform-file \"pjscheme-cps.ss\" \"pjscheme-ds.ss\")" >> compile-ds.ss
+	echo "(exit)" >> compile-ds.ss
+	petite compile-ds.ss
+
+pjscheme-rm.ss: pjscheme-ds.ss
+	echo "(load \"rm-transformer.ss\")" > compile-rm.ss
+	echo "(compile-level-output)" >> compile-rm.ss
+	echo "(delete-file \"pjscheme-rm.ss\")" >> compile-rm.ss
+	echo "(rm-transform-file \"pjscheme-ds.ss\" \"pjscheme-rm.ss\")" >> compile-rm.ss
+	echo "(exit)" >> compile-rm.ss
+	petite compile-rm.ss
 
 run: pjscheme-rm.ss 
 	echo "(load \"pjscheme-rm.ss\")" > pjscheme-run.ss
@@ -28,9 +36,6 @@ pjscheme.exe: pjscheme-rm.ss scheme-to-csharp.ss Scheme.cs
 	indent -di0 -i3 pjscheme.cs
 	$(MCS) -debug pjscheme.cs Scheme.cs getline.cs -main:PJScheme \
 		-lib:DLLs -r:Microsoft.VisualBasic.dll -r:Microsoft.Scripting.dll
-
-pjscheme: pjscheme.exe
-	MONO_PATH=DLLs mono --debug pjscheme.exe
 
 Test.exe: Test.cs
 	$(MCS) Test.cs -lib:DLLs -r:Microsoft.VisualBasic.dll -r:Microsoft.Scripting.dll
@@ -103,7 +108,7 @@ External.dll: External.cs
 	$(MCS) External.cs -target:library
 
 clean:
-	$(RM) *.exe *~ pjscheme-ds.ss pjscheme-rm.ss compile.ss make-fact.ss \
+	$(RM) *.exe *~ pjscheme-ds.ss pjscheme-rm.ss compile-rm.ss make-fact.ss \
 		fact.cs make-pjscheme.ss pjscheme.exe pjscheme.cs pjscheme-cps.ss \
-		pjscheme-run.ss pjscheme.ss fact-rm.ss fact-ds.ss all*.ss testall.ss
+		pjscheme-run.ss pjscheme.ss fact-rm.ss fact-ds.ss all*.ss testall.ss compile-dm.ss
 
