@@ -134,6 +134,11 @@ class Epuck(Robot):
         self._lastTranslate = 0
         self._lastRotate = 0
 
+    # temporary. necessary to avoid crashes with clicking in
+    # a Picture window. need to fix.
+    def set_blob_yuv(self, *ignore1, **ignore2):
+        return (0, 0, 0, 0, 0, 0)
+
     #----------------------------------------------------------------------
     # camera
 
