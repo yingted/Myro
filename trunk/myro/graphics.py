@@ -1079,6 +1079,9 @@ class Picture(object):
             raise AttributeError, "Myro needs at least Python Imaging Library version 1.1.6"
     def __repr__(self):
         return "<Picture instance (%d x %d)>" % (self.width, self.height)
+    def getPixels(self):
+         return (Pixel(x, y, self) for x in range(self.width)
+                 for y in range(self.height))
     def getPixel(self, x, y):
         return Pixel( x, y, self)
     def getColor(self, x, y):

@@ -1382,8 +1382,7 @@ def getPixel(picture, x, y):
     return picture.getPixel(x, y)
 
 def getPixels(picture):
-    return (Pixel(x, y, picture) for x in range(getWidth(picture))
-            for y in range(getHeight(picture)))
+    return picture.getPixels()
 
 def setPixel(picture, x, y, color):
     return picture.setColor(x, y, color)
