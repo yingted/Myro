@@ -1350,6 +1350,10 @@ def show(picture, name="default"):
 def repaint(picture = None, name="default"):
     if picture == None:
         picture = myro.globvars.pictures[name]
+    elif picture.displayScale != 1:
+        picture = Picture(picture)
+        picture.scale(picture.displayScale)
+        myro.globvars.pictures[name] = picture
     # get a new photoimage from data
     photoimage = ImageTk.PhotoImage(picture.image)
     # replace the pixmap data:
