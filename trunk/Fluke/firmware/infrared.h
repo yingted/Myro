@@ -19,8 +19,11 @@
 //#define XMIT_EMIT_TIME      3600        // data - zero (ir receiver on)
 //#define XMIT_REST_TIME      4000        // data - one (ir receiver off)
 
-#define XMIT_EMIT_TIME      4000        // data - zero (ir receiver on)
-#define XMIT_REST_TIME      4400        // data - one (ir receiver off)
+#define XMIT_EMIT_TIME      3800        // data - zero (ir receiver on)
+#define XMIT_REST_TIME      4200        // data - one (ir receiver off)
+
+//#define XMIT_EMIT_TIME      4000        // data - zero (ir receiver on)
+//#define XMIT_REST_TIME      4400        // data - one (ir receiver off)
 
 #define XMIT_CYCLE_OFF_TIME   130      // how long are we off for of 40khz
 #define XMIT_CYCLE_ON_TIME    120      // how long are we on for of the 40Khz

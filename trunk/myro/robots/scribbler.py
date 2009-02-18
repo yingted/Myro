@@ -215,6 +215,7 @@ class Scribbler(Robot):
         self._fudge = range(4)
         self._oldFudge = range(4)
         self.dongle = None
+        
         info = self.getInfo()
         if "fluke" in info.keys():
             self.dongle = info["fluke"]
@@ -540,6 +541,7 @@ class Scribbler(Robot):
         self.manual_flush()
         # have to do this twice since sometime the first echo isn't
         # echoed correctly (spaces) from the scribbler
+
         self.ser.write(chr(Scribbler.GET_INFO) + (' ' * 8))
         retval = self.ser.readline()
         #print "Got", retval
@@ -807,8 +809,8 @@ class Scribbler(Robot):
     # use this lookup table to decide what picture to grab
     image_codes = {"jpeg": "color",
                    "jpeg-fast": "color",
-                   "grayjpeg": "gray",
-                   "grayjpeg-fast": "gray"}
+                   "grayjpeg": "rawgray",
+                   "grayjpeg-fast": "rawgray"}
     
     def takePicture(self, mode=None):
         if mode == None:
@@ -837,6 +839,10 @@ class Scribbler(Robot):
             jpeg = self.grab_jpeg_color(0)
             stream = cStringIO.StringIO(jpeg)  
             p.set(width, height, stream, "jpeg")
+        elif mode in ["gray", "grey"]:
+            jpeg = self.grab_jpeg_gray(1)
+            stream = cStringIO.StringIO(jpeg)  
+            p.set(width, height, stream, "jpeg")
         elif mode == "grayjpeg":
             jpeg = self.grab_jpeg_gray(1)
             stream = cStringIO.StringIO(jpeg)  
@@ -845,7 +851,7 @@ class Scribbler(Robot):
             jpeg = self.grab_jpeg_gray(0)
             stream = cStringIO.StringIO(jpeg)  
             p.set(width, height, stream, "jpeg")
-        elif mode in ["gray", "grey"]:
+        elif mode in ["grayraw", "greyraw"]:
             conf_window(self.ser, 0, 1, 0, 255, 191, 2, 2)
             a = self._grab_gray_array()
             conf_gray_window(self.ser, 0, 2, 0,    128, 191, 1, 1)
@@ -1088,6 +1094,16 @@ class Scribbler(Robot):
 
     def getIRMessage(self):
         line = ''
+        
+        if self.dongle:
+            version = map(int, self.dongle.split("."))
+        else:
+            version = [1, 0, 0]
+                
+        if version < [2, 8, 1]:
+            print "IR Messaging not support with your firmware"
+            return None
+
         try:
             self.lock.acquire()
             self.ser.write(chr(Scribbler.GET_IR_MESSAGE))
@@ -1099,6 +1115,15 @@ class Scribbler(Robot):
         return line
 
     def sendIRMessage(self, data):
+        if self.dongle:
+            version = map(int, self.dongle.split("."))
+        else:
+            version = [1, 0, 0]
+                
+        if version < [2, 8, 1]:
+            print "IR Messaging not support with your firmware"
+            return None
+
         try:
             self.lock.acquire()
             self.ser.write(chr(Scribbler.SEND_IR_MESSAGE))            

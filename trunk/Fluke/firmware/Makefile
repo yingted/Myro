@@ -15,6 +15,7 @@ ODFLAGS	= -x --syms
 LIBGCC=-L/usr/local/arm-elf/lib/gcc/arm-elf/4.1.1/ -lgcc
 #LIBGCC = -L/usr/local/arm/lib/gcc/arm-elf/4.1.1/ -lgcc
 
+MYROROBOT?=/dev/tty.scribbler
 PORT?=/dev/tty.usbserial
 
 OBJFILES = crt.o grab_frame.o interrupts.o usleep.o uart.o main.o \
@@ -29,7 +30,7 @@ download: lpc21isp main.hex
 dl2: download
 
 dl3:
-	python update-firmware.py main.hex /dev/tty.scribbler fast
+	python update-firmware.py main.hex $(MYROROBOT) fast
 
 main.hex: main.out 
 	$(CP) $(CPFLAGS) main.out main.hex

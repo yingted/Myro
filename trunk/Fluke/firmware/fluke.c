@@ -792,3 +792,21 @@ int check_ir_bounce(uint8_t emitters)
 
   return pulses;
 }
+
+
+void powerDown()
+{  
+  led_on();
+  uart1_set_rts();
+  UART1_IER |= (1 << 0); // Data available
+  PCON = 0x01;
+}
+
+void powerUp()
+{
+  led_off();
+  uart1_clear_rts();
+  TIMER0_TCR = 0x2;     // reset counter
+  TIMER0_TCR = 0x1;     // start counter
+  UART1_IER &= ~(1 << 0); // Data available
+}
