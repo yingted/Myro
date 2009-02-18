@@ -55,7 +55,7 @@ void uart1_queue_write(char ch)
     }
     
     // Enable THRE and status change interrupts
-    UART1_IER |= 0x0a;
+    UART1_IER = 0x0a;
 }
 
 void uart1_tx_handler()
@@ -75,7 +75,7 @@ void uart1_tx_handler()
         // If the queue is now empty, disable this interrupt
         if (uart1_tx_read == uart1_tx_write)
         {
-	    UART1_IER &= ~0x0a;	    
+            UART1_IER = 0;
         }
     }
 }
@@ -84,8 +84,6 @@ void uart1_tx_handler()
 void vic_uart1() __attribute__ ((interrupt("IRQ")));
 void vic_uart1()
 {
-  int data_available;
-
     int id = UART1_IIR & 0x0f;
     if (id == 0 || id == 2)
     {
@@ -94,10 +92,6 @@ void vic_uart1()
         
         // Reading UART1_IIR and UART1_MSR cleared the interrupt
     }
-    else if (id == 0 && id == 4)
-      {    
-	data_available = UART1_LSR & ULSR_RDR;
-      }
     
     VICVectAddr = 0;
 }

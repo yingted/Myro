@@ -162,23 +162,12 @@ int main (void)
   while (1)
     {
       //led_on();
-      if (TIMER0_TC > 30000000)
-	{
-	  //powerDown();
-	  //powerUp();
-	}
-
       ch = getch();     
-
       //led_off();
      	  
       // body of the firmware - process the byte code sent over bluetooth
       if (ch != -1)
 	{
-
-	  TIMER0_TCR  = 0x2;     // reset counter
-	  TIMER0_TCR  = 0x1;     // start counter
-	  
 	  cur_rqst[rqst_idx] = ch;
 
 	  // process the cmd if its intended for the fluke
