@@ -27,7 +27,7 @@ pyjama.exe:
 	-res:Properties/Settings.settings
 
 resx: 
-	mkdir res
+	mkdir -p res
 	resgen Dialogs/OptionFrames/FontControl.resx res/Pyjama.FontControl.resources
 	resgen Dialogs/AboutDialog.resx res/Pyjama.AboutDialog.resources
 	resgen Dialogs/OptionsDialog.resx res/Pyjama.OptionsDialog.resources
@@ -38,6 +38,9 @@ resx:
 	resgen BaseForm.resx res/Pyjama.BaseForm.resources
 	resgen PyjamaForm.resx res/Pyjama.PyjamaForm.resources
 	cd Properties; MONO_IOMAP=all resgen Resources.resx ../res/Pyjama.Properties.Resources.resources
+
+run:
+	MONO_PATH=../libs/DLR/ mono pyjama.exe
 
 clean:
 	$(RM) res/Pyjama.BaseDialog.resources \
@@ -52,12 +55,3 @@ clean:
 		res/Pyjama.PyjamaForm.resources \
 		pyjama.exe
 
-remove:
-	svn rm Dialogs/NewProjectDialog.resx
-	svn rm Dialogs/NewProjectDialog.Designer.cs
-	svn rm Dialogs/NewProjectDialog.cs
-	svn rm Dialogs/NewFileDialog.resx
-	svn rm Dialogs/NewFileDialog.Designer.cs
-	svn rm Dialogs/NewFileDialog.cs
-	svn rm Controls/CodeEditorIDETextBox.Designer.cs
-	svn rm Controls/CodeEditorIDETextBox.cs
