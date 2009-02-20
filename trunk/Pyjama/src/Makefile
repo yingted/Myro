@@ -1,4 +1,4 @@
-MONO_IOMAP=all
+## Makefile for building Pyjama with Mono
 
 pyjama.exe: 
 	MONO_PATH=../libs/DLR gmcs \
@@ -14,50 +14,50 @@ pyjama.exe:
 	-r:IronPythonTest.dll \
 	-r:Microsoft.Scripting.Core.dll \
 	-r:Microsoft.Scripting.dll \
-	-res:Dialogs/OptionFrames/FontControl.resources \
-	-res:Dialogs/AboutDialog.resources \
-	-res:Dialogs/OptionsDialog.resources \
-	-res:Controls/DocumentPage.resources \
-	-res:Controls/DocumentManager.resources \
-	-res:Controls/Console.resources \
-	-res:BaseDialog.resources \
-	-res:BaseForm.resources \
-	-res:PyjamaForm.resources \
-	-res:Properties/Resources.resources
+	-res:res/Pyjama.FontControl.resources \
+	-res:res/Pyjama.AboutDialog.resources \
+	-res:res/Pyjama.OptionsDialog.resources \
+	-res:res/Pyjama.DocumentPage.resources \
+	-res:res/Pyjama.DocumentManager.resources \
+	-res:res/Pyjama.Console.resources \
+	-res:res/Pyjama.BaseDialog.resources \
+	-res:res/Pyjama.BaseForm.resources \
+	-res:res/Pyjama.PyjamaForm.resources \
+	-res:res/Pyjama.Properties.Resources.resources \
+	-res:Properties/Settings.settings
 
-
-
-resx:
-	resgen Dialogs/OptionFrames/FontControl.resx
-	resgen Dialogs/AboutDialog.resx
-	resgen Dialogs/OptionsDialog.resx
-	resgen Controls/DocumentPage.resx
-	resgen Controls/DocumentManager.resx
-	resgen Controls/Console.resx
-	resgen BaseDialog.resx
-	resgen BaseForm.resx
-	resgen PyjamaForm.resx
-	cd Properties; resgen Resources.resx
+resx: 
+	mkdir res
+	resgen Dialogs/OptionFrames/FontControl.resx res/Pyjama.FontControl.resources
+	resgen Dialogs/AboutDialog.resx res/Pyjama.AboutDialog.resources
+	resgen Dialogs/OptionsDialog.resx res/Pyjama.OptionsDialog.resources
+	resgen Controls/DocumentPage.resx res/Pyjama.DocumentPage.resources
+	resgen Controls/DocumentManager.resx res/Pyjama.DocumentManager.resources
+	resgen Controls/Console.resx res/Pyjama.Console.resources
+	resgen BaseDialog.resx res/Pyjama.BaseDialog.resources
+	resgen BaseForm.resx res/Pyjama.BaseForm.resources
+	resgen PyjamaForm.resx res/Pyjama.PyjamaForm.resources
+	cd Properties; MONO_IOMAP=all resgen Resources.resx ../res/Pyjama.Properties.Resources.resources
 
 clean:
-	$(RM) BaseDialog.resources \
-		BaseForm.resources \
-		Controls/Console.resources \
-		Controls/DocumentManager.resources \
-		Controls/DocumentPage.resources \
-		Dialogs/AboutDialog.resources \
-		Dialogs/OptionFrames/FontControl.resources \
-		Dialogs/OptionsDialog.resources \
-		Properties/Resources.resources \
-		PyjamaForm.resources \
+	$(RM) res/Pyjama.BaseDialog.resources \
+		res/Pyjama.BaseForm.resources \
+		res/Pyjama.Console.resources \
+		res/Pyjama.DocumentManager.resources \
+		res/Pyjama.DocumentPage.resources \
+		res/Pyjama.AboutDialog.resources \
+		res/Pyjama.FontControl.resources \
+		res/Pyjama.OptionsDialog.resources \
+		res/Pyjama.Resources.resources \
+		res/Pyjama.PyjamaForm.resources \
 		pyjama.exe
 
 remove:
-	rm Dialogs/NewProjectDialog.resx
-	rm Dialogs/NewProjectDialog.Designer.cs
-	rm Dialogs/NewProjectDialog.cs
-	rm Dialogs/NewFileDialog.resx
-	rm Dialogs/NewFileDialog.Designer.cs
-	rm Dialogs/NewFileDialog.cs
-	rm Controls/CodeEditorIDETextBox.Designer.cs
-	rm Controls/CodeEditorIDETextBox.cs
+	svn rm Dialogs/NewProjectDialog.resx
+	svn rm Dialogs/NewProjectDialog.Designer.cs
+	svn rm Dialogs/NewProjectDialog.cs
+	svn rm Dialogs/NewFileDialog.resx
+	svn rm Dialogs/NewFileDialog.Designer.cs
+	svn rm Dialogs/NewFileDialog.cs
+	svn rm Controls/CodeEditorIDETextBox.Designer.cs
+	svn rm Controls/CodeEditorIDETextBox.cs
