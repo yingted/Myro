@@ -40,7 +40,7 @@ resx:
 	cd Properties; MONO_IOMAP=all resgen Resources.resx ../res/Pyjama.Properties.Resources.resources
 
 run:
-	MONO_PATH=../libs/DLR/ mono pyjama.exe
+	XMODIFIERS= MONO_PATH=../libs/DLR/ mono pyjama.exe
 
 clean:
 	$(RM) res/Pyjama.BaseDialog.resources \
