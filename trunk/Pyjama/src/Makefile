@@ -1,8 +1,8 @@
 ## Makefile for building Pyjama with Mono
 
 pyjama.exe: 
-	MONO_PATH=../libs:/usr/lib/mono/2.0/ \
-	 /usr/bin/gmcs \
+	MONO_PATH=../libs \
+	/usr/local/bin/gmcs \
 	-recurse:*.cs \
 	-main:Pyjama.Program \
 	-out:pyjama.exe \
@@ -40,7 +40,7 @@ resx:
 	cd Properties; MONO_IOMAP=all resgen Resources.resx ../res/Pyjama.Properties.Resources.resources
 
 run: pyjama.exe
-	XMODIFIERS= MONO_PATH=../libs /usr/bin/mono pyjama.exe
+	XMODIFIERS= MONO_PATH=../libs /usr/local/bin/mono pyjama.exe
 
 clean:
 	$(RM) res/Pyjama.BaseDialog.resources \
