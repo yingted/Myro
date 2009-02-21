@@ -1,7 +1,8 @@
 ## Makefile for building Pyjama with Mono
 
 pyjama.exe: 
-	MONO_PATH=../libs/DLR gmcs \
+	MONO_PATH=../libs:/usr/lib/mono/2.0/ \
+	 /usr/bin/gmcs \
 	-recurse:*.cs \
 	-main:Pyjama.Program \
 	-out:pyjama.exe \
@@ -11,7 +12,6 @@ pyjama.exe:
 	-r:Mono.Security \
 	-r:IronPython.dll \
 	-r:IronPython.Modules.dll \
-	-r:IronPythonTest.dll \
 	-r:Microsoft.Scripting.Core.dll \
 	-r:Microsoft.Scripting.dll \
 	-res:res/Pyjama.FontControl.resources \
@@ -39,8 +39,8 @@ resx:
 	resgen PyjamaForm.resx res/Pyjama.PyjamaForm.resources
 	cd Properties; MONO_IOMAP=all resgen Resources.resx ../res/Pyjama.Properties.Resources.resources
 
-run:
-	XMODIFIERS= MONO_PATH=../libs/DLR/ mono pyjama.exe
+run: pyjama.exe
+	XMODIFIERS= MONO_PATH=../libs /usr/bin/mono pyjama.exe
 
 clean:
 	$(RM) res/Pyjama.BaseDialog.resources \
