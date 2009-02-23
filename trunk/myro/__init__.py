@@ -1460,7 +1460,7 @@ def makeLighter(color):
 
 def odd(n): return (n % 2) == 1
 def even(n): return (n % 2) == 0
-def wall(): return getObstacle(1) > 4500
+def wall(threshold=4500): return getObstacle(1) > threshold 
 
 def loop(*functions):
     """
