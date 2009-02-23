@@ -4,7 +4,7 @@
 ;; default transformer settings
 (define *include-eopl-define-datatype-in-ds-code?* #t)
 (define *include-define*-in-ds-code?* #t)
-(define *generate-apply-functions-with-record-case-code?* #f)
+(define *generate-apply-functions-with-record-case-code?* #t)
 
 ;; assumes:
 ;; - lambda-cont, lambda-proc, etc. datatype forms
