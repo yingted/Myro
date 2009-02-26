@@ -795,7 +795,7 @@ def ctrlc_handler(signum, frame):
         myro.globvars.robot.manual_flush()
         if "robot" in myro.globvars.robot.robotinfo:
             myro.globvars.robot.hardStop()
-    #raise KeyboardException
+    #raise KeyboardInterrupt
     orig_ctrl_handler()
 
 orig_ctrl_handler = signal.getsignal(signal.SIGINT)
