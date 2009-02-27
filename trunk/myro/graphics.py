@@ -270,6 +270,12 @@ else:
     myro.globvars.gui = _root
     _root.withdraw()
 
+def updateGraphics():
+    """
+    Update the Tk graphics when not in IDLE, and there is no
+    graphics thread running to take care of updating.
+    """
+    _root.update_idletasks()
 
 def moveToTop(window):
     if not "darwin" in sys.platform and "win" in sys.platform:   

@@ -1,6 +1,7 @@
 # Myro globals and constants
 
 # globals:
+import sys
 simulator = None
 myropath  = None
 robot     = None
@@ -10,14 +11,17 @@ setup     = 0
 mediaFolder = ""
 askData   = {}
 sound     = 0
-runtkthread = 1
+if type(sys.stdout) == file:
+    runtkthread = 0
+else:
+    runtkthread = 1
 joysticks = []
 formats = ('itemName', 'ItemName', 'itemName') # function, class, variables
-
 windows = {}
 pictures = {}
 pixmaps = {}
 images = {}
+del sys
 
 # constants:
 import math
@@ -28,7 +32,6 @@ PITIMES180   = math.pi * 180.0
 DEG90RADS    = 0.5 * math.pi
 COSDEG90RADS = math.cos(DEG90RADS) / 1000.0
 SINDEG90RADS = math.sin(DEG90RADS) / 1000.0
-
 del math
 
 
