@@ -41,10 +41,12 @@ class Picture(myro.graphics.Picture):
         self.id = id
     def show(self):
         myro.show(self, 'Epuck %d' % self.id)
-        myro.updateGraphics()
+        if myro.globvars.runtkthread == 0:
+            myro.updateGraphics()
     def repaint(self):
         myro.show(self, 'Epuck %d' % self.id)
-        myro.updateGraphics()
+        if myro.globvars.runtkthread == 0:
+            myro.updateGraphics()
     def getWidth(self):
         return self.width
     def getHeight(self):
