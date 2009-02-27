@@ -1103,6 +1103,10 @@ class Picture(object):
         return self.pixels[x, y]
     def getAlpha(self, x, y):
         return self.pixels[x, y][3]
+    def getWidth(self):
+         return self.width
+    def getHeight(self):
+         return self.height
 
 class Pixel(object):
     def __init__(self, x, y, picture):
@@ -1121,6 +1125,7 @@ class Pixel(object):
                    rgba[3],
                    self.x, 
                    self.y))
+
     def getPixel(self, x, y):
         return Pixel( x, y, self.picture)
     def getColor(self):
@@ -1139,6 +1144,10 @@ class Pixel(object):
     def setAlpha(self, alpha):
         rgba = self.pixels[self.x, self.y]
         self.pixels[self.x, self.y] = (rgba[0], rgba[1], rgba[2], alpha)
+    def getX(self):
+         return self.x
+    def getY(self):
+         return self.y
 
     def __eq__(self, other):
         o1 = self.getRGBA()

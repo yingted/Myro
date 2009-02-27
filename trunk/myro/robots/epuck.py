@@ -1,5 +1,5 @@
+import myro
 from myro import Robot
-from myro.graphics import Picture
 import myro.globvars
 import time, platform, serial, array
 
@@ -35,7 +35,30 @@ def portname(id):
 
 #-----------------------------------------------------------------------------
 
-class Epuck(Robot):
+class Picture(myro.graphics.Picture):
+    def __init__(self, id):
+        myro.graphics.Picture.__init__(self)
+        self.id = id
+    def show(self):
+        myro.show(self, 'Epuck %d' % self.id)
+        myro.updateGraphics()
+    def repaint(self):
+        myro.show(self, 'Epuck %d' % self.id)
+        myro.updateGraphics()
+    def getWidth(self):
+        return self.width
+    def getHeight(self):
+        return self.height
+
+class Pixel(myro.graphics.Pixel):
+    def __init__(self, x, y, picture):
+        myro.graphics.Pixel.__init__(self, x, y, picture)
+    def getX():
+        return self.x
+    def getY():
+        return self.y
+
+class Epuck(myro.Robot):
 
     sensorGroups = {'left': 5, 'right': 2, 'center': (0, 7),
                     'front': (0, 7), 'front-left': 6, 'front-right': 1,
@@ -43,7 +66,7 @@ class Epuck(Robot):
 
     # establishes a serial connection to the specified robot
     def __init__(self, id):
-        Robot.__init__(self)
+        myro.Robot.__init__(self)
         myro.globvars.robot = self
         self.robotinfo = {'robot': 'epuck', 'robot-version': '0.1'}
         self.portname = portname(id)
@@ -215,7 +238,7 @@ class Epuck(Robot):
         # (see end of method).
         if self.id < 1500:
             w, h = h, w
-        picture = Picture()
+        picture = Picture(self.id)
         if self.cameraMode == 'gray':
             picture.set(w, h, data, 'gray')
         else:
