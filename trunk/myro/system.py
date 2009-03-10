@@ -579,6 +579,7 @@ def upgrade_fluke(url=None):
         s.write(chr(0x23))
         
     uf_storeinEEPROM(s, arlen, binarray)
-    print "Waiting for reboot"
+    print "Waiting for reboot..."
     time.sleep(2)
+    print "Done upgrading! Please turn your robot off and then back on, and exit and restart Python and Myro." 
     s.close()
