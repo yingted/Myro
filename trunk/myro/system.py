@@ -484,18 +484,23 @@ def upgrade_fluke(url=None):
     #define UF_SEGMENT_SIZE 132
 
     if myro.globvars.robot == None:
-        # force upgrade
-        print "Connecting for firmware installation..."
+        print "Connecting to Fluke for firmware installation..."
         myro.globvars.robot = SerialRobot()
-            
-    s = myro.globvars.robot.ser
-
-    # check to see if we can even upgrade
-    info = get_info_timeout(s)
+        s = myro.globvars.robot.ser
+        info = get_info_timeout(s)
+        if "fluke" in info:
+            info = info["fluke"]
+        else:
+            info = "0.0.0"            
+    elif myro.globvars.robot.dongle:
+        info = myro.globvars.robot.dongle
+        s = myro.globvars.robot.ser
 
     print info
+    version = map(int, info.split("."))
+    print "Version of fluke", version
     
-    if "fluke" not in info.keys():
+    if version <= [2, 4, 0]:
         print "(If you just upgraded Myro, please restart Python.)"
         print "Sorry, I can't upgrade the Fluke over Bluetooth."
         print "It must be upgraded manually over the serial port using lpc21isp."
@@ -507,7 +512,7 @@ def upgrade_fluke(url=None):
     install_count = 0
     filename = None
     if url.startswith("http://"):
-        fluke_ver = info["fluke"].split(".")
+        #fluke_ver = info["fluke"].split(".")
         print "Looking for Fluke upgrade at", url, "..."
         myro_ver = myro_version.split(".")
         # go to site, check for latest greater than our version
@@ -528,8 +533,8 @@ def upgrade_fluke(url=None):
                 if file.startswith("/fluke-upgrade-"):
                     end = file.index(".hex")
                     patch_ver = file[15:end].split(".")
-                    print patch_ver, fluke_ver
-                    if map(int, patch_ver) > map(int, fluke_ver):
+                    print patch_ver, version
+                    if map(int, patch_ver) > map(int, version):
                         # download it
                         print "   Downloading..."
                         filename = url_retrieve(url + file)
@@ -543,9 +548,6 @@ def upgrade_fluke(url=None):
     #info = myro.globvars.robot.getInfo()
     sendMagicKey = True
 
-    version = map(int, info["fluke"].split("."))
-    print "Version of fluke", version
-    
     if version <= [2, 5, 0]:
         sendMagicKey = False
         print "Older firmware version, Not sending magic key"
