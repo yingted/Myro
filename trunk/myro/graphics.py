@@ -1199,7 +1199,7 @@ class Color(object):
             raise AttributeError, "invalid arguments to Color(); needs at least 3 integers: red, green, blue (transparency optional)"
         self.rgb = map(lambda v: int(max(min(v,255),0)), self.rgb)
     def __repr__(self):
-        return "<Color instance (r=%d, g=%d, b=%d, a=%d)>)" % (self.rgb[0],
+        return "<Color instance (r=%d, g=%d, b=%d, a=%d)>" % (self.rgb[0],
                                                                self.rgb[1],
                                                                self.rgb[2],
                                                                self.alpha)
