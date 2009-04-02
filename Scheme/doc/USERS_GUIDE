@@ -1,0 +1,189 @@
+         User's Guide for Scheme Scribbler/Fluke Library
+                           by Aaron Hsu
+           Last Modified: Thu Dec 18 20:41:47 EST 2008
+                  Copyright (c) 2008 Aaron Hsu.
+            See LICENSE for distribution permissions.
+
+                             OVERVIEW
+
+This scribbler library is a partial implementation of the Myro
+software written by IPRE.  The most up-to-date information about
+this robot and its uses can be found at
+
+        <http://wiki.roboteducation.org>
+
+User's are encouraged to read over the above information for a more
+complete detail about the operation of the robot and the software
+in general.  This library attempts to remain faithful to the interface
+described above, but deviates where better solutions exist or make
+more sense.
+                                 
+                         KEY DIFFERENCES
+
+The following are some notes about the key differences between this
+library and the official Myro version.
+
+        * All procedures operating on the Scribbler take a robot
+          object.
+
+        * All procedure follow Scheme naming conventions instead
+          of the Camel Casing used by the Myro Software.  That is,
+          words are separated by a dash and all procedures are
+          lower-case.
+
+	* Not all procedures are implemented if they duplicate 
+	  functionality.
+                                 
+                        STABLE PROCEDURES
+
+The following procedures are believed to be relatively stable and of 
+general use.  They are documented only briefly here.
+
+latency : <parameter>
+
+	This is a parameter that can be used to control the latency
+	measures used by some procedures in the fluke for bluetooth
+	communicatoin.  You can set this to some value of seconds which
+	represents the relative latency of sending a command to the
+	Fluke via Bluetooth.
+
+initialize-scribbler : address(string) -> robot-object
+
+	This is the main connection procedure.  It is used to connect 
+	to a scribbler.  It returns a robot object that is used for 
+	all the other procedures.
+
+disconnect-scribblers : <> -> <>
+
+	Disconnects all scribblers from the computer.  THIS PROCEDURE 
+	IS KNOWN TO BE DANGEROUS, BECAUSE IT WILL DISCONNECT ALL 
+	SERIAL BLUETOOTH DEVICES CONNECTED OVER RFCOMM_SPPD.
+
+get-info : robot-object -> meta-info (association list)
+
+	Returns general information about the scribbler firmware as an 
+	association list.
+
+beep : robot-object duration (int) frequency (int) [frequency2 (int)] 
+       -> <void>
+
+	Makes the scribbler beep at the given frequency.  Using two 
+	frequencies will merge the tones.  Duration specifies the 
+	length to beep in seconds.
+
+get-battery : robot-object -> battery-power
+
+	Returns the battery reading.
+
+senses : robot-object -> sensor-values (association list)
+
+	Returns the sensor readings from the scribbler and some select 
+	readings from the fluke as an association list.
+
+get-obstacle : robot-object direction -> direction-reading
+	       robot-object direction dir2 ... -> (dir-reading read2 ...)
+
+	Returns the obstacle readings from the directions, 
+
+		'center 'left 'right
+
+get-bright : robot-object direction -> reading
+	     robot-object dir1 dir2 ... -> (reading reading2 ...)
+
+	Returns brightness.  See get-obstacle for directions.
+
+sleep : seconds -> <void>
+
+	Sleep for seconds.
+
+stop : robot-object -> <void>
+
+	Stops all scribbler movement.
+
+forward : robot-object -> <void>
+	  robot-object speed -> <void>
+	  robot-object speed duration -> <void>
+
+        Move the robot forward at a given speed (0 - 1) and duration
+        (seconds).
+
+backward : <see forward>
+
+	Same as forward but in opposite direction.
+
+turn-left : <see forward>
+turn-right: <see forward>
+
+	Self explanatory.
+
+translate : robot-object amount -> <void>
+
+	Moves the robot forward or backward according to the amount 
+	(-1 - 1).
+
+rotate : <see translate>
+
+	Rotates robot according to amount (-1 - 1)
+
+motors : robot-object left-power right-power -> <void>
+
+	Sets the motor power to wheels.
+
+move : robot-object translate rotate -> <void>
+
+	Composition of translate and rotate.
+
+get-name : robot-object -> name-string
+
+	Returns built-in name memory.
+
+get-password : robot-object -> password-string
+
+	Gets password string from scribbler memory.
+
+get-volume : robot-object -> quietness
+
+	Returns quietness, either quiet or loud.
+
+wall? : robot-object -> boolean
+
+	Indicates whether get-obstacle of the center is more than 4500.
+
+set-led! : robot-object position on? -> <void>
+
+	Sets the 'left, 'right, 'center, 'front, 'back leds.
+	The 'back led takes a number for on? instead of a boolean.
+
+set-name! : robot-object name-string -> <void>
+
+	Sets name for get-name procedure.
+
+set-volume! : robot-object on? -> <void>
+
+	Turns sound on or off.
+
+set-data! : robot-object index value -> <void>
+
+	Sets a byte of data in the 8-byte memory of the scribbler.
+
+set-ir-power! : robot-object power -> <void>
+
+	Sets the Infrared power on the robot.
+
+get-forwardness : robot-object -> 'scribbler|'fluke
+
+	Returns the direction that is forward for robot.
+
+set-fowardness! : robot-object 'fluke|'scribbler -> <void>
+
+	Sets the forwardness for get-fowardness.
+                                 
+                           MAINTENANCE
+
+Some procedures do not clean up the output that they get and thus,
+there is occassionally some strange junk data that is left on the
+buffer for the ports.  If this happens, just clean the input and
+output ports of the scribbler using
+
+	(flush-fluke-input (scribbler-in bot-object))
+	(flush-output-port (scribbler-out bot-object))

@@ -1,0 +1,73 @@
+2009-04-01  Aaron W. Hsu <arcfide@sacrideo.us>
+
+	* Fix sensing bugs by removing blob support
+	* Adjust INITIALIZE-SCRIBBLER to be a little nicer
+
+2009-03-21  Aaron W. Hsu <arcfide@sacrideo.us>
+
+	* Changes in the System Loading mechanism
+	* Miscellaneous bugs in argument passing
+	* Move everything into modules for better isolation
+	* Improve DISCONNECT handling by using callbacks.
+	* Add information about PORTING for IMPLEMENTORS_GUIDE
+	* Library Updates
+	* Add a Windows sys file set
+
+2009-01-22  Aaron W. Hsu <arcfide@sacrideo.us>
+
+	* Add a LATENCY parameter for timing sensitive procedures.
+	* Enhance the SLEEP procedures for handling more precision.
+
+2009-01-18  Aaron W. Hsu <arcfide@sacrideo.us>
+	
+	* Clean-up to Support multiple architectures
+
+2008-12-07  Aaron W. Hsu  <arcfide@sacrideo.us>
+
+	* Add SET-FORWARDNESS!
+	* Fix bug in WRITE-NUMBER/BYTES
+	* Add GET-FORWARDNESS
+	* Add GET-SERIAL-MEMORY
+
+2008-12-06  Aaron W. Hsu  <arcfide@sacrideo.us>
+
+	* Add WALL?
+	* Add GET-DATA
+	* Add GET-VOLUME
+	* Add SET-LED!
+	* Add SET-NAME!
+	* Made INITIALIZE-SCRIBBLER more friendly
+	* Fix buffering bug in GET-INFO
+	* Add and Use SET-VOLUME!
+	* Add SET-DATA!
+	* Add SET-IR-POWER!
+
+2008-12-05  Aaron W. Hsu  <arcfide@sacrideo.us>
+
+	* Add movement procedures
+	* Add GET-NAME
+	* Add GET-PASSWORD
+
+2008-12-04  Aaron W. Hsu  <arcfide@sacrideo.us>
+
+	* Convert to explicit object passing instead of 
+	  using parameters.
+	* Added SENSES and SCRIBBLER-READ
+	* Fixed GET-BATTERY
+	* Add SENSES
+	* Add GET-OBSTACLE
+        * Add GET-BRIGHT
+	* Add CONF-WINDOW
+	* Add CONF-GRAY-WINDOW
+	* Add GET-BLOB
+	* Add SLEEP
+
+2008-11-22  Aaron W. Hsu  <arcfide@illuminus.local>
+
+	* (Module): Add LOAD-INTELHEX
+	(Module): Add INTELHEX->VECTOR
+
+2008-11-20  Aaron W. Hsu  <arcfide@illuminus.local>
+
+	* (Module): Fix and Test IH-DECODE
+

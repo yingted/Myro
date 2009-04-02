@@ -1,0 +1,62 @@
+             Implementor's Guide to Scribbler Library
+                by Aaron Hsu <arcfide@sacrideo.us>
+           Last Modified: Thu Dec 18 22:04:07 EST 2008
+                  Copyright (c) 2008 Aaron Hsu.
+              See LICENSE for distribution details.
+
+
+Other than the informaion in the User's Guide, as an implementor,
+you should take note of low level communication procedures.
+
+The Scribbler robot takes 8-byte command packets, and returns its
+result as a ~20-byte packet (with some exceptions) that has 8 bytes
+of echo.  Most of the informaion you need it documents on the IPRE
+wiki, which can be found linked in the User's Guide.
+
+Most of the code in this library correspondes to the Python library
+in some way or another.  In general, the code is self-explanatory.
+However, the intelhex code can be confusing.  The intelhex procedures
+are reading a file consisting of bytes of data corresponding to a
+set of records, and parsing them according to their type.  These
+results are then written out.  However, this code is still expirimental
+and likely has large and egregious bugs in it.
+
+The code is written at the moment with the thought that other robots
+will be connected, and not just one.  This is why a parameter
+pointing to the "connected" robot is not used, and instead, at this
+stage, we favor an explicit object passing style.  In the future,
+we will change this so that there is a queue of robots in a parameter,
+and they can be referenced by name, or there can be a default
+selected that will be used when no robot is specified.
+
+Still, any changes should keep in mind the interface decisions
+mentioned in the User's Guide.
+
+Read the technical details in the IPRE website for more information.
+
+PORTING TO OTHER SYSTEMS
+
+There are two system dependent functions required for Scribbler.ss to
+operate. 
+
+SLEEP should take a sleep time in seconds (possibly floating), and sleep
+for that amount of time. It should have at least milisecond precision. 
+
+CONNECT-SCRIBBLER should take the name of the scribbler robot, for
+example, the COM port on Windows, or the TTY or Bluetooth name on
+OpenBSD, and should return an input port, an output port, and a
+disconnect procedure. This disconnect procedure is run after closing
+both ports when the scribbler is disconnected.
+
+Two system files in the sys directory should be created:
+
+	sys/${MT}.ss
+	sys/${MT}-objs.ss
+
+where ${MT} is the name of the system to which you are porting as
+returned by MACHINE-TYPE. the objs.ss file should contain any
+pre-definition loading expressions that must be run outside of the
+module for some reason, this would usually be a series of
+LOAD-SHARED-OBJECT expressions. the .ss file should contain a module
+which exports (automatically) SLEEP and CONNECT-SCRIBBLER.
+
