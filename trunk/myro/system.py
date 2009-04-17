@@ -301,7 +301,9 @@ def get_info_timeout(s):
 def load_scribbler(s, f, force=False):
     
     # check to see if we need to send magicKey when upgrading
-    if myro.globvars.robot and myro.globvars.robot.dongle:
+    if (myro.globvars.robot and 
+        "dongle" in dir(myro.globvars.robot) and 
+        myro.globvars.robot.dongle):
         info = myro.globvars.robot.dongle
     else:
         info = get_info_timeout(s)
