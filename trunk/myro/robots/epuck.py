@@ -294,10 +294,13 @@ class Epuck(myro.Robot):
     #----------------------------------------------------------------------
     # movement
 
-    def move(self, translate, rotate):
+    def move(self, translate, rotate, seconds=None):
         assert -1 <= translate <= 1, 'move called with bad translate value: %g' % translate
         assert -1 <= rotate <= 1, 'move called with bad rotate value: %g' % rotate
         self._adjustSpeed(translate, rotate)
+        if seconds is not None:
+            time.sleep(seconds)
+            self.stop()
 
     def translate(self, translate):
         assert -1 <= translate <= 1, 'translate called with bad value: %g' % translate
@@ -673,3 +676,37 @@ class Epuck(myro.Robot):
 #     def flashCycleLEDs(self, delay=0):
 #         for num in range(8):
 #             self.flashLED(num, delay)
+
+#-----------------------------------------------------------------------------
+# procedural interface
+
+def playSound(num):
+    myro.globvars.robot.playSound(num)
+
+def onLED(LED_descriptor='all'):
+    myro.globvars.robot.onLED(LED_descriptor)
+
+def offLED(LED_descriptor='all'):
+    myro.globvars.robot.offLED(LED_descriptor)
+
+def toggleLED(LED_descriptor='all'):
+    myro.globvars.robot.toggleLED(LED_descriptor)
+
+def flashLED(LED_descriptor='all', delay=0):
+    myro.globvars.robot.flashLED(LED_descriptor, delay)
+
+def onCycleLED(delay=0):
+    myro.globvars.robot.onCycleLED(delay)
+
+def offCycleLED(delay=0):
+    myro.globvars.robot.offCycleLED(delay)
+
+def toggleCycleLED(delay=0):
+    myro.globvars.robot.toggleCycleLED(delay)
+
+def flashCycleLED(delay=0):
+    myro.globvars.robot.flashCycleLED(delay)
+
+
+
+
