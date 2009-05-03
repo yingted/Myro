@@ -8,12 +8,18 @@
 # http://mcsp.wartburg.edu/zelle/python/
 
 import clr
+clr.AddReference("System")
+#clr.AddReference("Microsoft")
 clr.AddReference("System.Windows.Forms")
 clr.AddReference("System.Drawing")
 clr.AddReference("IronPython")
 
+import array
+array
+
+#from Microsoft import Array
 from System.Windows.Forms import *
-from System import Drawing, Array
+from System import Drawing
 from System.Threading import Thread, ThreadStart, AutoResetEvent
 from IronPython.Runtime.Calls import CallTarget0
 import math, sys
