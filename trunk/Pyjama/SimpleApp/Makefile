@@ -14,7 +14,7 @@ Resources.resources:
 SimpleApp.Form1.resources:
 	resgen Form1.resx SimpleApp.Form1.resources
 
-run:
+run: SimpleApp.exe
 	MONO_PATH=../libs/ /usr/local/bin/mono SimpleApp.exe
 
 clean:
