@@ -3,7 +3,43 @@
 pyjama.exe: 
 	MONO_PATH=../libs \
 	/usr/local/bin/gmcs \
-	-recurse:*.cs \
+	./ActiveCodeFile.cs \
+	./ApplicationInformation.cs \
+	./ApplicationOptions.cs \
+	./BaseDialog.Designer.cs \
+	./BaseDialog.cs \
+	./BaseForm.Designer.cs \
+	./BaseForm.cs \
+	./CodeBlock.cs \
+	./Controls/Console.Designer.cs \
+	./Controls/Console.cs \
+	./Controls/Document.Designer.cs \
+	./Controls/Document.cs \
+	./Controls/DocumentInput.cs \
+	./Controls/DocumentManager.Designer.cs \
+	./Controls/DocumentManager.cs \
+	./Controls/DocumentPage.cs \
+	./Controls/IDocument.cs \
+	./Dialogs/AboutDialog.Designer.cs \
+	./Dialogs/AboutDialog.cs \
+	./Dialogs/OptionFrames/FontControl.Designer.cs \
+	./Dialogs/OptionFrames/FontControl.cs \
+	./Dialogs/OptionsDialog.Designer.cs \
+	./Dialogs/OptionsDialog.cs \
+	./IMainForm.cs \
+	./LanguageSettings.cs \
+	./MonoEnvironment.cs \
+	./Program.cs \
+	./Properties/AssemblyInfo.cs \
+	./Properties/Resources.Designer.cs \
+	./Properties/Settings.Designer.cs \
+	./PyjamaForm.Designer.cs \
+	./PyjamaForm.cs \
+	./PyjamaFormController.cs \
+	./PyjamaInterfaces.cs \
+	./ShortcutKeyDispatcher.cs \
+	./TextBoxWriter.cs \
+	./UserSettings.cs \
 	-main:Pyjama.Program \
 	-out:pyjama.exe \
 	-r:Microsoft.VisualBasic.dll \
