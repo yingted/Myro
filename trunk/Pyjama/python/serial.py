@@ -1,13 +1,10 @@
 import clr
 # FIXME: weirdness trying to import from dlls:
-
 clr.AddReference("System")
 import System
 import System.IO
 from System.IO.Ports import SerialPort
-
 import string
-
 from serialutil import *
 
 VERSION = string.split("$Revision$")[1]
