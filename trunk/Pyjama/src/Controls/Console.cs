@@ -11,7 +11,7 @@ namespace Pyjama
 
         public UIIronTextBox.IronTextBoxControl GetOutput()
         {
-            return output;
+            return textbox;
         }
 
         private void controlTitle_Load(object sender, System.EventArgs e)

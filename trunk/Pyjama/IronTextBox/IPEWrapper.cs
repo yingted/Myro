@@ -94,6 +94,9 @@ namespace UIIronTextBox.IPEWrapper
         public override void Write(byte[] buffer, int offset, int count)
         {
             _stream.Write(buffer, offset, count);
+            // DSB
+            Flush();
+            System.Console.WriteLine("flush!");
         }
 
         public static StringBuilder sbOutput = new StringBuilder();

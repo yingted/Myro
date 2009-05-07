@@ -18,7 +18,7 @@ namespace Pyjama
                     _controller.LaunchHelp();
                     break;
                 case Keys.F5:
-                    _controller.Execute();
+                    _controller.ExecuteInThread();
                     break;
             }
         }

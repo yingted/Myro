@@ -51,7 +51,7 @@ namespace UIIronTextBox
     [ToolboxItem(true)]
     [ToolboxBitmap(typeof(IronTextBox))]
     [DesignerAttribute(typeof(IronTextBoxControl))]
-    internal class IronTextBox : TextBox
+    internal class IronTextBox : RichTextBox
     {
         #region IronTextBox members
         /// <summary>
@@ -188,11 +188,8 @@ namespace UIIronTextBox
             this.Location = new Point(0, 0);
             this.MaxLength = 0;
             this.Multiline = true;
-            this.Name = "consoleTextBox";
             this.AcceptsTab = true;
-            this.AcceptsReturn = true;    //for TextBox use
-            this.ScrollBars = System.Windows.Forms.ScrollBars.Both;   //for TextBox use
-            //this.ScrollBars = RichTextBoxScrollBars.Both;   //for RichTextBox use
+            this.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Both; 
             this.Size = new Size(400, 176);
             this.TabIndex = 0;
             this.Text = "";
@@ -358,7 +355,8 @@ namespace UIIronTextBox
         private void MoveCaretToEndOfText()
         {
             this.SelectionStart = this.TextLength;
-            this.ScrollToCaret();
+            //this.ScrollToCaret();
+            //System.Console.WriteLine("scroll to caret!");
         }
 
         /// <summary>
@@ -853,7 +851,7 @@ namespace UIIronTextBox
         /// </summary>
         /// <param name="pycode">python statement</param>
         /// <returns>object</returns>
-        object DoIPExecute(string pycode)
+        public object DoIPExecute(string pycode)
         {
             ScriptSource source = engine.CreateScriptSourceFromString(pycode, SourceCodeKind.SingleStatement);
             return source.Execute(scope);
@@ -1025,6 +1023,7 @@ namespace UIIronTextBox
                 {
                     try
                     {
+                        // FIXME: runs all at once, then prints result
                         DoIPExecute(command);
                         // DSB remove newline:
                         this.WriteText(IPEStreamWrapper.sbOutput.ToString());
@@ -1034,7 +1033,7 @@ namespace UIIronTextBox
 
                     catch (Exception err)//catch any errors
                     {
-                        this.WriteText("\r\nIronTextBoxControl error: " + err.Message);
+                        this.WriteText("\r\nPython error: " + err.Message);
                     }
                 }
             }
@@ -1101,8 +1100,7 @@ namespace UIIronTextBox
             this.consoleTextBox.Multiline = true;
             this.consoleTextBox.Name = "consoleTextBox";
             this.consoleTextBox.Prompt = ">>> ";
-            this.consoleTextBox.ScrollBars = ScrollBars.Both; //for TextBox use
-            //this.consoleTextBox.ScrollBars = RichTextBoxScrollBars.Both; //for RichTextBox use
+            this.consoleTextBox.ScrollBars = RichTextBoxScrollBars.Both; 
             this.consoleTextBox.Font = new Font("Lucida Console", 8.25F, FontStyle.Regular, GraphicsUnit.Point, ((Byte)(0)));
             this.consoleTextBox.Size = new Size(232, 216);
             this.consoleTextBox.TabIndex = 0;

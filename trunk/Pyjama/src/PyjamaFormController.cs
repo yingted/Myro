@@ -5,62 +5,17 @@ using System.IO;
 using System.Windows.Forms;
 using Pyjama.Dialogs;
 
-using Microsoft.Scripting;
-using Microsoft.Scripting.Hosting;
-
 namespace Pyjama
 {
-    public class MyMemoryStream : MemoryStream
-    {
-        private IMainForm mainform;
-
-        public MyMemoryStream(IMainForm form)
-        {
-            mainform = form;
-        }
-
-        public override void Write(Byte [] buffer, int offset, int count) {
-            mainform.PrintConsoleMessage(Encoding.UTF8.GetString(buffer, offset, count));
-        }
-    }
-
     public class PyjamaFormController
     {
         public IMainForm pyjamaForm { get; set; }
         List<LanguageSettings> languages;
-        private ScriptEngine engine;
-        ScriptRuntime env;
-        private ScriptScope scope;
-        ScriptRuntimeSetup setup;
-        MyMemoryStream ms;
 
         public PyjamaFormController(IMainForm mainForm)
         {
             pyjamaForm = mainForm;
-            // Engine stuff:
-            setup = new ScriptRuntimeSetup();
-            setup.LanguageSetups.Add(IronPython.Hosting.Python.CreateLanguageSetup(null));
-            //setup.LanguageSetups.Add(new LanguageSetup(assembly_qualified_name, displayName, languageNames, fileExtensions));
-            //env = ScriptRuntime.CreateFromConfiguration();
-            env = new ScriptRuntime(setup);
-            engine = env.GetEngine("py"); // env.GetEngine("rb");
-            scope = env.CreateScope();
-            ms = new MyMemoryStream(pyjamaForm);
-            env.IO.SetOutput(ms, new UTF8Encoding(false));
-            // Add assemblies that we might need:
-            engine.Runtime.LoadAssembly(typeof(string).Assembly);
-            //mscorlib.dll
-            engine.Runtime.LoadAssembly(typeof(System.Diagnostics.Debug).Assembly);
-            //System.dll
-
-
-
-            //LoadSettings();
-            // load one from command line
-            // or, open a blank one
             NewFile();
-            pyjamaForm.PrintConsoleMessage("Pyjama Python, Version 1.0.0\r\n>>> ");
-
         }
 
         private void LoadSettings()
@@ -88,40 +43,13 @@ namespace Pyjama
             MessageBox.Show("See http://PyjamaProject.org", "Help", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
-        internal void Execute()
+        internal void ExecuteInThread()
         {
             // Get text to eval:
             System.String code = pyjamaForm.GetCodeBlock().GetCodeToExecute();
             code = code.Trim();
-            pyjamaForm.PrintLineConsoleMessage(code);
-            try
-            {
-                ScriptSource source = engine.CreateScriptSourceFromString(code, SourceCodeKind.InteractiveCode);
-                object result = source.Execute(scope);
-            }
-            catch (System.Exception e1)
-            {
-                try
-                {
-                    ScriptSource source = engine.CreateScriptSourceFromString(code, SourceCodeKind.Statements);
-                    pyjamaForm.PrintLineConsoleMessage("Evaluating...");
-                    object result = source.Execute(scope);
-                }
-                catch (System.Exception e)
-                {
-                    pyjamaForm.PrintLineConsoleMessage("Exception: " + e.Message);
-                }
-            }
-            pyjamaForm.PrintPrompt();
+            pyjamaForm.Execute(code);
         }
-
-        //  Message="unexpected token 'print'"
-        //  Source="Microsoft.Scripting"
-        //  Column=1
-        //  ErrorCode=16
-        //  Line=1
-        //  SourceCode="print \"hello\"\r\n"
-        //  StackTrace:
 
         public List<LanguageSettings> GetLanguages()
         {
@@ -234,7 +162,6 @@ namespace Pyjama
         private string GetSaveLocation()
         {
             SaveFileDialog saveFileDialog = new SaveFileDialog();
-            //saveFileDialog.Filter = GetEngineFromCache().GetSaveFilter();
             if (saveFileDialog.ShowDialog() == DialogResult.OK)
                 return saveFileDialog.FileName;
             return string.Empty;

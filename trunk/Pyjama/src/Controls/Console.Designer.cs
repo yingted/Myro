@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.output = new UIIronTextBox.IronTextBoxControl();
+            this.textbox = new UIIronTextBox.IronTextBoxControl();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.consoleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.restartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -47,20 +47,20 @@
             //this.output.AcceptsTab = true;
             //this.output.AllowDrop = true;
             //this.output.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
-            this.output.BackColor = System.Drawing.SystemColors.WindowText;
-            this.output.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.output.Cursor = System.Windows.Forms.Cursors.Default;
-            this.output.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.output.Font = new System.Drawing.Font("Lucida Console", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.output.ForeColor = System.Drawing.SystemColors.Window;
-            this.output.Location = new System.Drawing.Point(0, 24);
-            this.output.Margin = new System.Windows.Forms.Padding(0);
+            this.textbox.BackColor = System.Drawing.SystemColors.WindowText;
+            this.textbox.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.textbox.Cursor = System.Windows.Forms.Cursors.Default;
+            this.textbox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textbox.Font = new System.Drawing.Font("Lucida Console", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textbox.ForeColor = System.Drawing.SystemColors.Window;
+            this.textbox.Location = new System.Drawing.Point(0, 24);
+            this.textbox.Margin = new System.Windows.Forms.Padding(0);
             //this.output.Multiline = true;
-            this.output.Name = "output";
+            this.textbox.Name = "output";
             //this.output.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Both;
-            this.output.Size = new System.Drawing.Size(300, 276);
-            this.output.TabIndex = 1;
-            this.output.TextChanged += new System.EventHandler(this.output_TextChanged);
+            this.textbox.Size = new System.Drawing.Size(300, 276);
+            this.textbox.TabIndex = 1;
+            this.textbox.TextChanged += new System.EventHandler(this.output_TextChanged);
             // 
             // menuStrip1
             // 
@@ -130,7 +130,7 @@
             // 
             // Console
             // 
-            this.Controls.Add(this.output);
+            this.Controls.Add(this.textbox);
             this.Controls.Add(this.menuStrip1);
             this.Name = "Console";
             this.Size = new System.Drawing.Size(300, 300);
@@ -152,7 +152,6 @@
         private System.Windows.Forms.ToolStripMenuItem rubyToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem schemeToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem restartToolStripMenuItem;
-        public UIIronTextBox.IronTextBoxControl output;
-
+        public UIIronTextBox.IronTextBoxControl textbox;
     }
 }

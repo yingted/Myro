@@ -10,10 +10,6 @@ namespace Pyjama
     public partial class PyjamaForm : BaseForm, IMainForm
     {
         private PyjamaFormController _controller;
-        bool need_newline = false;
-        bool need_prompt = true;
-        string prompt = ">>> ";
-        Thread execute_thread;
 
         public PyjamaForm()
         {
@@ -41,65 +37,12 @@ namespace Pyjama
 
         private void execute_Click(object sender, System.EventArgs e)
         {
-            // FIXME:
-            // set GUI in thread run state
-            // change cursor to busy
-            // FIXME:
-            // This won't work as you have to do some business with Invoke to coordinate:
-            //    execute_thread = new Thread( new ThreadStart(_controller.Execute));
-            //    execute_thread.Start();
-            // For now, just do it directly:
-            _controller.Execute();
-        }
-
-        public TextWriter GetOutputStream()
-        {
-            //return new TextBoxWriter(outputWindow.GetOutput());
-            return null;
+            _controller.ExecuteInThread();
         }
 
         public CodeBlock GetCodeBlock()
         {
             return docManager.GetCode();
-        }
-
-        public void PrintPrompt()
-        {
-            outputWindow.output.WriteText("testing> ");
-        }
-
-        public void PrintLineConsoleMessage(string message)
-        {
-            outputWindow.output.Text += message + "\r\n";
-            need_newline = false;
-            need_prompt = true;
-            // FIXME
-            //outputWindow.output.SelectionStart = outputWindow.output.Text.Length;
-            //outputWindow.output.SelectionLength = message.Length;
-            //outputWindow.output.SelectionColor = Color.Red;
-            // Make text a color:
-            // Move to end:
-            //outputWindow.output.SelectionStart = outputWindow.output.Text.Length;
-            //outputWindow.output.ScrollToCaret();
-        }
-
-        public void PrintConsoleMessage(string message)
-        {
-            PrintConsoleMessage(message, Color.White);
-        }
-
-        public void PrintConsoleMessage(string message, Color color)
-        {
-            outputWindow.output.Text += message;
-            // if not ending with newline
-            need_newline = !(message.EndsWith("\r") | message.EndsWith("\n"));
-            need_prompt = ! message.Equals("");
-            // FIXME:
-            //outputWindow.output.SelectionLength = message.Length;
-            //outputWindow.output.SelectionColor = color;
-            // Move to end:
-            //outputWindow.output.SelectionStart = outputWindow.output.Text.Length;
-            //outputWindow.output.ScrollToCaret();
         }
 
         public bool HasFileOpen
@@ -128,16 +71,6 @@ namespace Pyjama
         public string CurrentActiveFileLocation()
         {
             return docManager.GetCurrentFile().Location;
-        }
-
-        public void ClearOutputStream()
-        {
-            outputWindow.GetOutput().Clear();
-        }
-
-        public void ClearOpenFiles()
-        {
-            docManager.Clear();
         }
 
         public ActiveCodeFile GetCurrentActiveFile()
@@ -172,6 +105,11 @@ namespace Pyjama
             executeToolStripButton.Enabled = enable;
             undoToolStripMenuItem.Enabled = enable;
             selectAllToolStripMenuItem.Enabled = enable;
+        }
+
+        public void Execute(string code) {
+            // Interface to Shell
+            outputWindow.textbox.WriteText(code);
         }
 
 
