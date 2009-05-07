@@ -41,7 +41,7 @@
             this.ironTextBoxControl1.defBuilder = ((System.Text.StringBuilder)(resources.GetObject("ironTextBoxControl1.defBuilder")));
             this.ironTextBoxControl1.Location = new System.Drawing.Point(12, 12);
             this.ironTextBoxControl1.Name = "ironTextBoxControl1";
-            this.ironTextBoxControl1.Prompt = ">>>";
+            //this.ironTextBoxControl1.Prompt = ">>>";
             this.ironTextBoxControl1.Size = new System.Drawing.Size(603, 416);
             this.ironTextBoxControl1.TabIndex = 0;
             // 
@@ -64,7 +64,7 @@
             this.Controls.Add(this.ironTextBoxControl1);
             this.Name = "Form1";
             this.Text = "Form1";
-            this.Load += new System.EventHandler(this.Form1_Load);
+            //this.Load += new System.EventHandler(this.Form1_Load);
             this.ResumeLayout(false);
 
         }

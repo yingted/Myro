@@ -54,7 +54,8 @@ namespace Pyjama
 
         public TextWriter GetOutputStream()
         {
-            return new TextBoxWriter(outputWindow.GetOutput());
+            //return new TextBoxWriter(outputWindow.GetOutput());
+            return null;
         }
 
         public CodeBlock GetCodeBlock()
@@ -64,14 +65,7 @@ namespace Pyjama
 
         public void PrintPrompt()
         {
-            if (need_newline)
-                PrintConsoleMessage("\r\n");
-            if (need_prompt)
-                PrintConsoleMessage(prompt, Color.White);
-            need_newline = false;
-            need_prompt = false;
-            outputWindow.output.SelectionStart = outputWindow.output.Text.Length;
-            outputWindow.output.ScrollToCaret();
+            outputWindow.output.WriteText("testing> ");
         }
 
         public void PrintLineConsoleMessage(string message)
@@ -85,8 +79,8 @@ namespace Pyjama
             //outputWindow.output.SelectionColor = Color.Red;
             // Make text a color:
             // Move to end:
-            outputWindow.output.SelectionStart = outputWindow.output.Text.Length;
-            outputWindow.output.ScrollToCaret();
+            //outputWindow.output.SelectionStart = outputWindow.output.Text.Length;
+            //outputWindow.output.ScrollToCaret();
         }
 
         public void PrintConsoleMessage(string message)
@@ -104,8 +98,8 @@ namespace Pyjama
             //outputWindow.output.SelectionLength = message.Length;
             //outputWindow.output.SelectionColor = color;
             // Move to end:
-            outputWindow.output.SelectionStart = outputWindow.output.Text.Length;
-            outputWindow.output.ScrollToCaret();
+            //outputWindow.output.SelectionStart = outputWindow.output.Text.Length;
+            //outputWindow.output.ScrollToCaret();
         }
 
         public bool HasFileOpen

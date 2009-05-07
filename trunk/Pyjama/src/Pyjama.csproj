@@ -68,6 +68,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\..\..\..\..\Program Files\IronPython 2.0\IronPython.Modules.dll</HintPath>
     </Reference>
+    <Reference Include="IronTextBox, Version=2.0.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\IronTextBox\bin\Release\IronTextBox.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Scripting, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\..\..\..\..\Program Files\IronPython 2.0\Microsoft.Scripting.dll</HintPath>
@@ -134,12 +138,6 @@
     </Compile>
     <Compile Include="Dialogs\AboutDialog.Designer.cs">
       <DependentUpon>AboutDialog.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Dialogs\NewFileDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Dialogs\NewFileDialog.Designer.cs">
-      <DependentUpon>NewFileDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="Dialogs\OptionFrames\FontControl.cs">
       <SubType>UserControl</SubType>
@@ -231,10 +229,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Controls\DocumentPage.resx">
       <DependentUpon>DocumentPage.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Dialogs\NewFileDialog.resx">
-      <DependentUpon>NewFileDialog.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\OptionFrames\FontControl.resx">

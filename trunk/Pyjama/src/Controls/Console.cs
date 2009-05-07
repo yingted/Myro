@@ -9,7 +9,7 @@ namespace Pyjama
             InitializeComponent();
         }
 
-        public RichTextBox GetOutput()
+        public UIIronTextBox.IronTextBoxControl GetOutput()
         {
             return output;
         }

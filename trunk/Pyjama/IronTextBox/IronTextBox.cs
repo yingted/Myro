@@ -57,7 +57,7 @@ namespace UIIronTextBox
         /// <summary>
         /// Default prompt text.
         /// </summary>
-        private string prompt = ">>>";
+        private string prompt = ">>> ";
 
         /// <summary>
         /// Used for storing commands.
@@ -109,6 +109,7 @@ namespace UIIronTextBox
         internal IronTextBox()
         {
             InitializeComponent();
+            Prompt = prompt;
             printPrompt();
 
             // Set up the delays for the ToolTip.
@@ -143,13 +144,26 @@ namespace UIIronTextBox
         /// <param name="m"></param>
         protected override void WndProc(ref Message m)
         {
+            // This happens before key press handler
+            // Need to pass to base to have keypress handled
+            //System.Console.WriteLine("Window message received: " + m.Msg.ToString());
             switch (m.Msg)
             {
+                //case 0x000D: //Left arrow
+                    //if (!IsCaretAtWritablePosition())
+                   // {
+                        // DSB don't move out of area
+                    //return;
+                    //}
+                    //break;
                 case 0x0302: //WM_PASTE
                 case 0x0300: //WM_CUT
                 case 0x000C: //WM_SETTEXT
                     if (!IsCaretAtWritablePosition())
+                    {
+                        // DSB don't move out of area
                         MoveCaretToEndOfText();
+                    }
                     break;
                 case 0x0303: //WM_CLEAR
                     return;
@@ -207,7 +221,7 @@ namespace UIIronTextBox
                 printLine();
 
             //add the prompt
-            this.AddText(prompt);
+            this.AddText(Prompt);
         }
 
         /// <summary>
@@ -310,16 +324,16 @@ namespace UIIronTextBox
         private void AddText(string text)
         {
             //Optional////////////
-            scollection.Add(text);  //Optional
+            // DSB scollection.Add(text);  //Optional
             //this.Text = StringCollecttostring(scollection); //Optional
             //////////////////////
 
-            this.Enabled = false;
+            // DSB this.Enabled = false;
             this.Text += text;
             MoveCaretToEndOfText();
-            this.Enabled = true;
-            this.Focus();
-            this.Update();
+            // DSB this.Enabled = true;
+            // DSB this.Focus();
+            // DSB this.Update();
         }
 
         /// <summary>
@@ -373,18 +387,18 @@ namespace UIIronTextBox
         /// <returns></returns>
         private bool IsCaretAtWritablePosition()
         {
-            return IsCaretAtCurrentLine() && GetCurrentCaretColumnPosition() >= prompt.Length;
+            return IsCaretAtCurrentLine() && GetCurrentCaretColumnPosition() > prompt.Length;
         }
 
         /// <summary>
-        /// Sets the text of the prompt.  Default is ">>>"
+        /// Sets the text of the prompt.  
         /// </summary>
         /// <param name="val">string of new prompt</param>
         public void SetPromptText(string val)
         {
-            string currentLine = GetCurrentLine();
-            this.Select(0, prompt.Length);
-            this.SelectedText = val;
+            //string currentLine = GetCurrentLine();
+            //this.Select(0, prompt.Length);
+            //this.SelectedText = val;
             prompt = val;
         }
 
@@ -423,7 +437,10 @@ namespace UIIronTextBox
         /// <param name="e">KeyPressEventArgs</param>
         private void consoleTextBox_KeyPress(object sender, System.Windows.Forms.KeyPressEventArgs e)
         {
+            // Handle "keypress here"
+            // Need to handle non-keypress in the WndProc overload
             //If current key is a backspace and is just before prompt, then stay put!
+            //System.Console.WriteLine("KeyChar: " + e.KeyChar);
             if (e.KeyChar == (char)8 && IsCaretJustBeforePrompt())
             {
                 e.Handled = true;
@@ -575,8 +592,17 @@ namespace UIIronTextBox
             }
 
             // Prevent caret from moving before the prompt
-            if (e.KeyCode == System.Windows.Forms.Keys.Left && IsCaretJustBeforePrompt() || e.KeyCode == System.Windows.Forms.Keys.Back && IsCaretJustBeforePrompt())
+            if (e.KeyCode == System.Windows.Forms.Keys.Back && IsCaretJustBeforePrompt())
             {
+                e.Handled = true;
+            }
+            else if (e.KeyCode == System.Windows.Forms.Keys.Home)
+            {
+                /// DSB 
+                string currentLine = GetCurrentLine();
+                this.SelectionStart = this.Text.Length - currentLine.Length + prompt.Length;
+                //System.Console.WriteLine("currentLine = {0}, SelectionStart = {1}", currentLine, SelectionStart);
+                this.ScrollToCaret();
                 e.Handled = true;
             }
             else if (e.KeyCode == System.Windows.Forms.Keys.Down)
@@ -584,7 +610,8 @@ namespace UIIronTextBox
                 if (commandHistory.DoesNextCommandExist())
                 {
                     ReplaceTextAtPrompt(commandHistory.GetNextCommand());
-                }
+                } else
+                    ReplaceTextAtPrompt("");
                 e.Handled = true;
             }
             else if (e.KeyCode == System.Windows.Forms.Keys.Up)
@@ -592,7 +619,8 @@ namespace UIIronTextBox
                 if (commandHistory.DoesPreviousCommandExist())
                 {
                     ReplaceTextAtPrompt(commandHistory.GetPreviousCommand());
-                }
+                } else
+                    ReplaceTextAtPrompt(""); // FIXME: use templine, if started, and then ""
                 e.Handled = true;
             }
             else if (e.KeyCode == System.Windows.Forms.Keys.Right)
@@ -884,11 +912,11 @@ namespace UIIronTextBox
                     //consoleTextBox.global_eng = new PythonEngine();
                     this.WriteText("Not currently supported\r\n");
                 }
-                else if (command.StartsWith("prompt") && command.Length == 6)
+                else if (command.StartsWith("prompt"))
                 {
                     string[] parts = command.Split(new char[] { '=' });
                     if (parts.Length == 2 && parts[0].Trim() == "prompt")
-                        this.Prompt = parts[1].Trim();
+                        this.Prompt = parts[1];
                 }
                 else if (command == "btaf")
                 {
@@ -998,7 +1026,8 @@ namespace UIIronTextBox
                     try
                     {
                         DoIPExecute(command);
-                        this.WriteText(Environment.NewLine + IPEStreamWrapper.sbOutput.ToString());
+                        // DSB remove newline:
+                        this.WriteText(IPEStreamWrapper.sbOutput.ToString());
                         //added to fix "rearviewmirror" (IPEStreamWrapper.sbOutput not clearing) bug.
                         IPEStreamWrapper.sbOutput.Remove(0, IPEStreamWrapper.sbOutput.Length);        //Clear
                     }
@@ -1071,13 +1100,13 @@ namespace UIIronTextBox
             this.consoleTextBox.Location = new Point(0, 0);
             this.consoleTextBox.Multiline = true;
             this.consoleTextBox.Name = "consoleTextBox";
-            this.consoleTextBox.Prompt = ">>>";
+            this.consoleTextBox.Prompt = ">>> ";
             this.consoleTextBox.ScrollBars = ScrollBars.Both; //for TextBox use
             //this.consoleTextBox.ScrollBars = RichTextBoxScrollBars.Both; //for RichTextBox use
             this.consoleTextBox.Font = new Font("Lucida Console", 8.25F, FontStyle.Regular, GraphicsUnit.Point, ((Byte)(0)));
             this.consoleTextBox.Size = new Size(232, 216);
             this.consoleTextBox.TabIndex = 0;
-            this.consoleTextBox.Text = "";
+            this.consoleTextBox.Text = Prompt;
             // 
             // IronTextBoxControl
             // 

@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.output = new System.Windows.Forms.RichTextBox();
+            this.output = new UIIronTextBox.IronTextBoxControl();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.consoleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.restartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -44,8 +44,8 @@
             // output
             // 
             //this.output.AcceptsReturn = true;
-            this.output.AcceptsTab = true;
-            this.output.AllowDrop = true;
+            //this.output.AcceptsTab = true;
+            //this.output.AllowDrop = true;
             //this.output.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
             this.output.BackColor = System.Drawing.SystemColors.WindowText;
             this.output.BorderStyle = System.Windows.Forms.BorderStyle.None;
@@ -55,9 +55,9 @@
             this.output.ForeColor = System.Drawing.SystemColors.Window;
             this.output.Location = new System.Drawing.Point(0, 24);
             this.output.Margin = new System.Windows.Forms.Padding(0);
-            this.output.Multiline = true;
+            //this.output.Multiline = true;
             this.output.Name = "output";
-            this.output.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Both;
+            //this.output.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Both;
             this.output.Size = new System.Drawing.Size(300, 276);
             this.output.TabIndex = 1;
             this.output.TextChanged += new System.EventHandler(this.output_TextChanged);
@@ -152,7 +152,7 @@
         private System.Windows.Forms.ToolStripMenuItem rubyToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem schemeToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem restartToolStripMenuItem;
-        public System.Windows.Forms.RichTextBox output;
+        public UIIronTextBox.IronTextBoxControl output;
 
     }
 }

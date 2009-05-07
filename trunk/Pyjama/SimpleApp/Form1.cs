@@ -21,11 +21,11 @@ namespace SimpleApp
             this.Close();
         }
 
-        private void Form1_Load(object sender, EventArgs e)
-        {
+        //private void Form1_Load(object sender, EventArgs e)
+        //{
             //Here is how you can send commands to IronTextBox via the control itself
-            ironTextBoxControl1.WriteText("help\r\n");
-            ironTextBoxControl1.SimEnter();
-        }
+            //ironTextBoxControl1.WriteText("help\r\n");
+            //ironTextBoxControl1.SimEnter();
+        //}
     }
 }
