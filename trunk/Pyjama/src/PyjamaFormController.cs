@@ -5,7 +5,6 @@ using System.IO;
 using System.Windows.Forms;
 using Pyjama.Dialogs;
 
-using IronPython.Hosting;
 using Microsoft.Scripting;
 using Microsoft.Scripting.Hosting;
 
@@ -48,6 +47,13 @@ namespace Pyjama
             scope = env.CreateScope();
             ms = new MyMemoryStream(pyjamaForm);
             env.IO.SetOutput(ms, new UTF8Encoding(false));
+            // Add assemblies that we might need:
+            engine.Runtime.LoadAssembly(typeof(string).Assembly);
+            //mscorlib.dll
+            engine.Runtime.LoadAssembly(typeof(System.Diagnostics.Debug).Assembly);
+            //System.dll
+
+
 
             //LoadSettings();
             // load one from command line

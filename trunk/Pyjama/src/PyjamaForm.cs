@@ -2,9 +2,7 @@
 using System.Drawing;
 using System.Windows.Forms;
 using System.IO;
-using System.IO.IsolatedStorage;
 using System.Threading;
-using Pyjama;
 using Pyjama.Dialogs;
 
 namespace Pyjama
