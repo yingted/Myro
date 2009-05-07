@@ -39,7 +39,6 @@ pyjama.exe:
 	./PyjamaFormController.cs \
 	./PyjamaInterfaces.cs \
 	./ShortcutKeyDispatcher.cs \
-	./TextBoxWriter.cs \
 	./UserSettings.cs \
 	-main:Pyjama.Program \
 	-out:pyjama.exe \
@@ -47,6 +46,7 @@ pyjama.exe:
 	-r:System.Windows.Forms \
 	-r:System.Drawing \
 	-r:Mono.Security \
+	-r:IronTextBox.dll \
 	-r:IronPython.dll \
 	-r:IronPython.Modules.dll \
 	-r:Microsoft.Scripting.Core.dll \
