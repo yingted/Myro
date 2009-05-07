@@ -826,7 +826,11 @@ namespace UIIronTextBox
             if (!IsInDesignMode()) {
 	            engine = Python.CreateEngine();
 	            //Create the scope for the ScriptEngine
-	            scope = engine.CreateScope();            	
+	            scope = engine.CreateScope();
+                // Load mscorlib.dll:
+                engine.Runtime.LoadAssembly(typeof(string).Assembly);
+                //Load System.dll
+                engine.Runtime.LoadAssembly(typeof(System.Diagnostics.Debug).Assembly);
             }
 
             //IronTextBox's CommandEntered event
