@@ -694,35 +694,12 @@ namespace UIIronTextBox
     /// </summary>
     public class IronTextBoxControl : UserControl
     {
-        #region IronTextBoxControl members
-        /// <summary>
-        /// Main ScriptEngine
-        /// </summary>
+        public ScriptRuntime environment;
         public ScriptEngine engine;
-
-        /// <summary>
-        /// Main ScriptScope
-        /// </summary>
         public ScriptScope scope;
-
-        /// <summary>
-        /// The IronTextBox member.
-        /// </summary>
         public IronTextBox consoleTextBox;
-
-        /// <summary>
-        /// The CommandEntered event
-        /// </summary>
         public event EventCommandEntered CommandEntered;
-
-        /// <summary> 
-        /// Required designer variable.
-        /// </summary>
         private Container components = null;
-
-        /// <summary>
-        /// Adds def lines one by one.
-        /// </summary>
         public StringBuilder defBuilder
         {
             get { return consoleTextBox.defStmtBuilder; }
@@ -799,15 +776,17 @@ namespace UIIronTextBox
         public IronTextBoxControl()
         {
             InitializeComponent();
-	    engine = Python.CreateEngine();
-	    //IronRuby.Ruby.CreateEngine();
-	    
-	    //Create the scope for the ScriptEngine
-	    scope = engine.CreateScope();
-	    // Load mscorlib.dll:
-	    engine.Runtime.LoadAssembly(typeof(string).Assembly);
-	    //Load System.dll
-	    engine.Runtime.LoadAssembly(typeof(System.Diagnostics.Debug).Assembly);
+            environment = ScriptRuntime.CreateFromConfiguration();
+            scope = environment.CreateScope();
+            engine = environment.GetEngine("py");
+            // Load mscorlib.dll:
+            engine.Runtime.LoadAssembly(typeof(string).Assembly);
+            // Load Languages so that Host System can find DLLs:
+            engine.Runtime.LoadAssembly(typeof(IronPython.Hosting.Python).Assembly);
+            engine.Runtime.LoadAssembly(typeof(IronRuby.Hosting.RubyCommandLine).Assembly);
+            engine.Runtime.LoadAssembly(typeof(IronRuby.StandardLibrary.BigDecimal.Fraction).Assembly);
+            //Load System.dll
+            engine.Runtime.LoadAssembly(typeof(System.Diagnostics.Debug).Assembly);
             //IronTextBox's CommandEntered event
             CommandEntered += new UIIronTextBox.EventCommandEntered(irontextboxControl_CommandEntered);
         }
@@ -835,7 +814,7 @@ namespace UIIronTextBox
         public object DoIPExecute(string code)
         {
             ScriptSource source = engine.CreateScriptSourceFromString(code, 
-					     SourceCodeKind.SingleStatement);
+                         SourceCodeKind.SingleStatement);
             return source.Execute(scope);
         }
 
@@ -849,23 +828,23 @@ namespace UIIronTextBox
         public object DoIPEvaluate(string code)
         {
             ScriptSource source = engine.CreateScriptSourceFromString(code, 
-					     SourceCodeKind.Expression);
+                         SourceCodeKind.Expression);
             return source.Execute(scope);
         }
 
         void irontextboxControl_CommandEntered(object sender, UIIronTextBox.CommandEnteredEventArgs e)
         {
-	    string command = e.Command.TrimEnd();
-	    DoCommand(command);
-	}
+        string command = e.Command.TrimEnd();
+        DoCommand(command);
+    }
 
         public void DoCommand(string command) {
-	    engine.Runtime.IO.SetOutput(new UIIronTextBox.IPEWrapper.IPEStreamWrapper(
-					      IPEWrapper.IPEStreamWrapper.IPEngineResponse), 
-					engine.Runtime.IO.InputEncoding);
+            engine.Runtime.IO.SetOutput(new UIIronTextBox.IPEWrapper.IPEStreamWrapper(
+                          IPEWrapper.IPEStreamWrapper.IPEngineResponse), 
+                    engine.Runtime.IO.InputEncoding);
 
-	    //Create a temp object to use
-	    object tempobject;
+        //Create a temp object to use
+        object tempobject;
 
             //Begin IronTextBox evaluation if something there....
             if (command != "")
@@ -1003,25 +982,25 @@ namespace UIIronTextBox
 
                 else //misc commands...
                 {
-		  bool error = false;
-		  string err_message = null;
-		  try
+          bool error = false;
+          string err_message = null;
+          try
                     {
-		      // FIXME: runs all at once, then prints result
-		      DoIPExecute(command);
-		    }
-		  catch (Exception err)//catch any errors
+              // FIXME: runs all at once, then prints result
+              DoIPExecute(command);
+            }
+          catch (Exception err)//catch any errors
                     {
-		      err_message = err.Message;
-		      error = true;
+              err_message = err.Message;
+              error = true;
                     }
-		  // DSB remove newline:
-		  this.WriteText(IPEStreamWrapper.sbOutput.ToString());
-		  //added to fix "rearviewmirror" (IPEStreamWrapper.sbOutput not clearing) bug.
-		  IPEStreamWrapper.sbOutput.Remove(0, IPEStreamWrapper.sbOutput.Length);        //Clear
-		  if (error) {
-		    this.WriteText("\r\nPython error: " + err_message);
-		  }
+          // DSB remove newline:
+          this.WriteText(IPEStreamWrapper.sbOutput.ToString());
+          //added to fix "rearviewmirror" (IPEStreamWrapper.sbOutput not clearing) bug.
+          IPEStreamWrapper.sbOutput.Remove(0, IPEStreamWrapper.sbOutput.Length);        //Clear
+          if (error) {
+            this.WriteText("\r\nPython error: " + err_message);
+          }
                 }
             }
         }
@@ -1079,7 +1058,7 @@ namespace UIIronTextBox
             // 
             // consoleTextBox
             // 
-            //	this.consoleTextBox.AcceptsReturn = true;
+            //    this.consoleTextBox.AcceptsReturn = true;
             this.consoleTextBox.AcceptsTab = true;
             this.consoleTextBox.BackColor = Color.Black;
             this.consoleTextBox.ForeColor = Color.White;
@@ -1309,7 +1288,7 @@ namespace UIIronTextBox
 
                 //Ask the user if they would like to append the path
                 string message = "Do you need to append the folder:\r\n" + 
-		  Path.GetDirectoryName(Path.GetFullPath(ofd.FileName)) + "\r\n\r\nto the PythonEngine?";
+          Path.GetDirectoryName(Path.GetFullPath(ofd.FileName)) + "\r\n\r\nto the PythonEngine?";
                 string caption = "Append Folder Path";
                 MessageBoxButtons buttons = MessageBoxButtons.YesNo;
                 DialogResult result;
@@ -1642,7 +1621,6 @@ namespace UIIronTextBox
             }
         }
     }
-    #endregion IronTextBoxControl Class
 
     #region CommandHistory Class
     internal class CommandHistory

@@ -110,8 +110,8 @@ namespace Pyjama
         public void Execute(string code) {
             // Interface to Shell
             outputWindow.textbox.WriteText("Evaluating...\n");
-	    outputWindow.textbox.DoCommand(code);
-	    outputWindow.textbox.consoleTextBox.printPrompt();
+            outputWindow.textbox.DoCommand(code);
+            outputWindow.textbox.consoleTextBox.printPrompt();
         }
 
 
