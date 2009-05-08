@@ -73,7 +73,7 @@ class Serial(SerialBase):
 #         return self.ser.Handshake
 
     def getParity(self):
-        return self.ser.get_Parity()
+        return self.ser.Parity
 
     def setParity(self, value):
         if value == 'N':
