@@ -1,7 +1,7 @@
 ## Makefile for building Pyjama with Mono
 MONOPATH=/usr/local/bin
 
-pyjama.exe: 
+pyjama.exe: resx
 	MONO_PATH=../libs \
 	$(MONOPATH)/gmcs \
 	./ActiveCodeFile.cs \

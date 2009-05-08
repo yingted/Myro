@@ -21,7 +21,8 @@ array
 from System.Windows.Forms import *
 from System import Drawing
 from System.Threading import Thread, ThreadStart, AutoResetEvent
-from IronPython.Runtime.Calls import CallTarget0
+#from Microsoft.Scripting import CallTarget0
+from IronPython.Compiler import CallTarget0
 import math, sys
 
 _root = None
@@ -92,7 +93,7 @@ def _ip_thread():
         _root.Show()
         _root.Hide()
         _are.Set()                              # Signal that the thread running _ip_thread is ready for the main thread to send input to it.
-        Application.Run()
+        #Application.Run()
     finally:
         pass
 
@@ -1100,5 +1101,5 @@ def test():
     win.close()
 
 # -----------------------------------------------
-if __name__ == "__main__":
-    test()
+#if __name__ == "__main__":
+#    test()

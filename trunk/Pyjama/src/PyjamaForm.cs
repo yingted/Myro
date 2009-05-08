@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Drawing;
 using System.Windows.Forms;
 using System.IO;
@@ -109,7 +109,9 @@ namespace Pyjama
 
         public void Execute(string code) {
             // Interface to Shell
-            outputWindow.textbox.WriteText(code);
+            outputWindow.textbox.WriteText("Evaluating...\n");
+	    outputWindow.textbox.DoCommand(code);
+	    outputWindow.textbox.consoleTextBox.printPrompt();
         }
 
 

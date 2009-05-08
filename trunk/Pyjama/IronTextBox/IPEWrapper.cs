@@ -68,7 +68,6 @@ namespace UIIronTextBox.IPEWrapper
         public override void Flush()
         {
             _stream.Flush();
-
             _stream.Seek(0, SeekOrigin.Begin);
             StreamReader sr = new StreamReader(_stream, Encoding.ASCII);
             _response(sr.ReadToEnd());
@@ -94,9 +93,6 @@ namespace UIIronTextBox.IPEWrapper
         public override void Write(byte[] buffer, int offset, int count)
         {
             _stream.Write(buffer, offset, count);
-            // DSB
-            Flush();
-            System.Console.WriteLine("flush!");
         }
 
         public static StringBuilder sbOutput = new StringBuilder();

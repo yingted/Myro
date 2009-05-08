@@ -1,3 +1,5 @@
+using System.Drawing;
+
 ﻿namespace Pyjama
 {
     partial class PyjamaForm

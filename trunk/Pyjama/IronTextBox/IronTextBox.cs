@@ -38,6 +38,7 @@ using System.ComponentModel;//ToolboxItem
 using System.Drawing;       //ToolboxBitmap
 using IronPython.Runtime;   //PythonDictionary
 using IronPython.Hosting;   //PythonEngine
+using IronRuby.Hosting;
 using Microsoft.Scripting;  //ScriptDomainManager
 using Microsoft.Scripting.Hosting;
 
@@ -51,7 +52,7 @@ namespace UIIronTextBox
     [ToolboxItem(true)]
     [ToolboxBitmap(typeof(IronTextBox))]
     [DesignerAttribute(typeof(IronTextBoxControl))]
-    internal class IronTextBox : RichTextBox
+    public class IronTextBox : RichTextBox
     {
         #region IronTextBox members
         /// <summary>
@@ -109,7 +110,6 @@ namespace UIIronTextBox
         internal IronTextBox()
         {
             InitializeComponent();
-            Prompt = prompt;
             printPrompt();
 
             // Set up the delays for the ToolTip.
@@ -183,7 +183,6 @@ namespace UIIronTextBox
             // 
             // consoleTextBox
             // 
-            this.BackColor = Color.White;
             this.Dock = DockStyle.Fill;
             this.Location = new Point(0, 0);
             this.MaxLength = 0;
@@ -220,6 +219,7 @@ namespace UIIronTextBox
             //add the prompt
             this.AddText(Prompt);
         }
+
 
         /// <summary>
         /// Sends a newline character to the IronTextBox
@@ -526,10 +526,6 @@ namespace UIIronTextBox
                     string rawcommand = (string)this.Lines.GetValue(this.Lines.Length - 2);
                     rawcommand = rawcommand.Replace(Prompt, "");
                     string tempprompt = (string)this.Lines.GetValue(this.Lines.Length - 1);
-
-                    //PythonEngine iptemp = new PythonEngine();
-
-                    //examine to see what type of raw_input
                     if (rawcommand.Trim().Equals("raw_input()"))
                     {
                         IsRawInput = false;
@@ -700,19 +696,19 @@ namespace UIIronTextBox
     {
         #region IronTextBoxControl members
         /// <summary>
-        /// Main IronPython ScriptEngine
+        /// Main ScriptEngine
         /// </summary>
         public ScriptEngine engine;
 
         /// <summary>
-        /// Main IronPython ScriptScope
+        /// Main ScriptScope
         /// </summary>
         public ScriptScope scope;
 
         /// <summary>
         /// The IronTextBox member.
         /// </summary>
-        private IronTextBox consoleTextBox;
+        public IronTextBox consoleTextBox;
 
         /// <summary>
         /// The CommandEntered event
@@ -751,7 +747,7 @@ namespace UIIronTextBox
         /// </summary>
         public Color ConsoleTextForeColor
         {
-            get { return consoleTextBox != null ? consoleTextBox.ForeColor : Color.Black; }
+            get { return consoleTextBox != null ? consoleTextBox.ForeColor : Color.White; }
             set
             {
                 if (consoleTextBox != null)
@@ -764,7 +760,7 @@ namespace UIIronTextBox
         /// </summary>
         public Color ConsoleTextBackColor
         {
-            get { return consoleTextBox != null ? consoleTextBox.BackColor : Color.White; }
+            get { return consoleTextBox != null ? consoleTextBox.BackColor : Color.Black; }
             set
             {
                 if (consoleTextBox != null)
@@ -796,43 +792,22 @@ namespace UIIronTextBox
         #endregion IronTextBoxControl members
 
         
-		public static bool IsInDesignMode()
-		{
-		  bool returnFlag = false;
-		
-		#if DEBUG  
-		  if ( System.ComponentModel.LicenseManager.UsageMode == System.ComponentModel.LicenseUsageMode.Designtime )
-		  {
-		        returnFlag = true;
-		  }
-		  else if ( Process.GetCurrentProcess().ProcessName.ToUpper().Equals( "DEVENV" ) )
-		  {
-		        returnFlag = true;
-		  }
-		#endif
-		
-		  return returnFlag;
-		}        
-        
         /// <summary>
         /// IronTextBoxControl
         /// </summary>
+
         public IronTextBoxControl()
         {
             InitializeComponent();
-
-            //Create the ScriptRuntime
-            //engine = ScriptRuntime.CreateFromConfiguration().GetEngine("py");
-            if (!IsInDesignMode()) {
-	            engine = Python.CreateEngine();
-	            //Create the scope for the ScriptEngine
-	            scope = engine.CreateScope();
-                // Load mscorlib.dll:
-                engine.Runtime.LoadAssembly(typeof(string).Assembly);
-                //Load System.dll
-                engine.Runtime.LoadAssembly(typeof(System.Diagnostics.Debug).Assembly);
-            }
-
+	    engine = Python.CreateEngine();
+	    //IronRuby.Ruby.CreateEngine();
+	    
+	    //Create the scope for the ScriptEngine
+	    scope = engine.CreateScope();
+	    // Load mscorlib.dll:
+	    engine.Runtime.LoadAssembly(typeof(string).Assembly);
+	    //Load System.dll
+	    engine.Runtime.LoadAssembly(typeof(System.Diagnostics.Debug).Assembly);
             //IronTextBox's CommandEntered event
             CommandEntered += new UIIronTextBox.EventCommandEntered(irontextboxControl_CommandEntered);
         }
@@ -843,9 +818,10 @@ namespace UIIronTextBox
         /// </summary>
         /// <param name="pyfile">Python file (.py)</param>
         /// <returns>object</returns>
-        object DoIPExecuteFile(string pyfile)
+
+        public object DoIPExecuteFile(string filename)
         {
-            ScriptSource source = engine.CreateScriptSourceFromFile(pyfile);
+            ScriptSource source = engine.CreateScriptSourceFromFile(filename);
             return source.Execute(scope);
         }
 
@@ -855,9 +831,11 @@ namespace UIIronTextBox
         /// </summary>
         /// <param name="pycode">python statement</param>
         /// <returns>object</returns>
-        public object DoIPExecute(string pycode)
+
+        public object DoIPExecute(string code)
         {
-            ScriptSource source = engine.CreateScriptSourceFromString(pycode, SourceCodeKind.SingleStatement);
+            ScriptSource source = engine.CreateScriptSourceFromString(code, 
+					     SourceCodeKind.SingleStatement);
             return source.Execute(scope);
         }
 
@@ -867,27 +845,27 @@ namespace UIIronTextBox
         /// </summary>
         /// <param name="pycode">Python expression</param>
         /// <returns>object</returns>
-        object DoIPEvaluate(string pycode)
+
+        public object DoIPEvaluate(string code)
         {
-            ScriptSource source = engine.CreateScriptSourceFromString(pycode, SourceCodeKind.Expression);
+            ScriptSource source = engine.CreateScriptSourceFromString(code, 
+					     SourceCodeKind.Expression);
             return source.Execute(scope);
         }
 
-        /// <summary>
-        /// irontextboxControl_CommandEntered
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        /// 
-        
         void irontextboxControl_CommandEntered(object sender, UIIronTextBox.CommandEnteredEventArgs e)
         {
-            string command = e.Command.TrimEnd();
+	    string command = e.Command.TrimEnd();
+	    DoCommand(command);
+	}
 
-            engine.Runtime.IO.SetOutput(new UIIronTextBox.IPEWrapper.IPEStreamWrapper(IPEWrapper.IPEStreamWrapper.IPEngineResponse), engine.Runtime.IO.InputEncoding);
+        public void DoCommand(string command) {
+	    engine.Runtime.IO.SetOutput(new UIIronTextBox.IPEWrapper.IPEStreamWrapper(
+					      IPEWrapper.IPEStreamWrapper.IPEngineResponse), 
+					engine.Runtime.IO.InputEncoding);
 
-            //Create a temp object to use
-            object tempobject;
+	    //Create a temp object to use
+	    object tempobject;
 
             //Begin IronTextBox evaluation if something there....
             if (command != "")
@@ -1025,20 +1003,25 @@ namespace UIIronTextBox
 
                 else //misc commands...
                 {
-                    try
+		  bool error = false;
+		  string err_message = null;
+		  try
                     {
-                        // FIXME: runs all at once, then prints result
-                        DoIPExecute(command);
-                        // DSB remove newline:
-                        this.WriteText(IPEStreamWrapper.sbOutput.ToString());
-                        //added to fix "rearviewmirror" (IPEStreamWrapper.sbOutput not clearing) bug.
-                        IPEStreamWrapper.sbOutput.Remove(0, IPEStreamWrapper.sbOutput.Length);        //Clear
-                    }
-
-                    catch (Exception err)//catch any errors
+		      // FIXME: runs all at once, then prints result
+		      DoIPExecute(command);
+		    }
+		  catch (Exception err)//catch any errors
                     {
-                        this.WriteText("\r\nPython error: " + err.Message);
+		      err_message = err.Message;
+		      error = true;
                     }
+		  // DSB remove newline:
+		  this.WriteText(IPEStreamWrapper.sbOutput.ToString());
+		  //added to fix "rearviewmirror" (IPEStreamWrapper.sbOutput not clearing) bug.
+		  IPEStreamWrapper.sbOutput.Remove(0, IPEStreamWrapper.sbOutput.Length);        //Clear
+		  if (error) {
+		    this.WriteText("\r\nPython error: " + err_message);
+		  }
                 }
             }
         }
@@ -1098,12 +1081,13 @@ namespace UIIronTextBox
             // 
             //	this.consoleTextBox.AcceptsReturn = true;
             this.consoleTextBox.AcceptsTab = true;
-            this.consoleTextBox.BackColor = Color.White;
+            this.consoleTextBox.BackColor = Color.Black;
+            this.consoleTextBox.ForeColor = Color.White;
             this.consoleTextBox.Dock = DockStyle.Fill;
             this.consoleTextBox.Location = new Point(0, 0);
             this.consoleTextBox.Multiline = true;
             this.consoleTextBox.Name = "consoleTextBox";
-            this.consoleTextBox.Prompt = ">>> ";
+            this.consoleTextBox.Prompt = "python> ";
             this.consoleTextBox.ScrollBars = RichTextBoxScrollBars.Both; 
             this.consoleTextBox.Font = new Font("Lucida Console", 8.25F, FontStyle.Regular, GraphicsUnit.Point, ((Byte)(0)));
             this.consoleTextBox.Size = new Size(232, 216);
@@ -1116,7 +1100,6 @@ namespace UIIronTextBox
             this.Name = "IronTextBoxControl";
             this.Size = new Size(232, 216);
             this.ResumeLayout(false);
-
         }
         #endregion
 
@@ -1325,7 +1308,8 @@ namespace UIIronTextBox
                 ofd.ShowDialog();
 
                 //Ask the user if they would like to append the path
-                string message = "Do you need to append the folder:\r\n" + Path.GetDirectoryName(Path.GetFullPath(ofd.FileName)) + "\r\n\r\nto the PythonEngine?";
+                string message = "Do you need to append the folder:\r\n" + 
+		  Path.GetDirectoryName(Path.GetFullPath(ofd.FileName)) + "\r\n\r\nto the PythonEngine?";
                 string caption = "Append Folder Path";
                 MessageBoxButtons buttons = MessageBoxButtons.YesNo;
                 DialogResult result;
