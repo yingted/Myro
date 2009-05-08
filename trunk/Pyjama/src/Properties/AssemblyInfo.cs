@@ -11,13 +11,13 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyDescription("Pyjama Application (Debug)")]
     [assembly: AssemblyConfiguration("Debug")]
 #else
-    [assembly: AssemblyDescription("DLR Host Application (Release)")]
+[assembly: AssemblyDescription("Python and Ruby IDE (Release)")]
     [assembly: AssemblyConfiguration("Release")]
 #endif
 
-[assembly: AssemblyCompany("Douglas S. Blank")]
+[assembly: AssemblyCompany("RobotEducation.org")]
 [assembly: AssemblyProduct("Pyjama Editor")]
-[assembly: AssemblyCopyright("Copyright © 2008")]
+[assembly: AssemblyCopyright("Copyright © 2009")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
