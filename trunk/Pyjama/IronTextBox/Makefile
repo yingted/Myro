@@ -5,7 +5,6 @@ IronTextBox.dll: ./Paths.cs ./IPEWrapper.cs ./IronTextBox.cs ./Properties/Assemb
 	./IPEWrapper.cs \
 	./IronTextBox.cs \
 	./Properties/AssemblyInfo.cs \
-	-r:./pyjama.exe.config \
 	-r:System.Data \
 	-r:System.Drawing \
 	-r:System.Windows.Forms \
