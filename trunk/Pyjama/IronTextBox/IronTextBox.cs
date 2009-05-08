@@ -218,6 +218,10 @@ namespace UIIronTextBox
 
             //add the prompt
             this.AddText(Prompt);
+	    this.Select(this.TextLength - prompt.Length, prompt.Length);
+	    this.SelectionFont = new Font("Verdana", 8, FontStyle.Bold);
+	    this.SelectionColor = Color.Red;
+	    this.AddText(""); // clears the selection
         }
 
 
