@@ -28,6 +28,9 @@ pyjama.exe: resx
 	./Dialogs/OptionsDialog.Designer.cs \
 	./Dialogs/OptionsDialog.cs \
 	./IMainForm.cs \
+	./IronTextBox.cs \
+	./IPEWrapper.cs \
+	./Paths.cs \
 	./LanguageSettings.cs \
 	./MonoEnvironment.cs \
 	./Program.cs \
@@ -46,9 +49,10 @@ pyjama.exe: resx
 	-r:System.Windows.Forms \
 	-r:System.Drawing \
 	-r:Mono.Security \
-	-r:IronTextBox.dll \
 	-r:IronPython.dll \
 	-r:IronPython.Modules.dll \
+	-r:IronRuby.dll \
+	-r:IronRuby.Libraries.dll \
 	-r:Microsoft.Scripting.Core.dll \
 	-r:Microsoft.Scripting.dll \
 	-res:res/Pyjama.FontControl.resources \
