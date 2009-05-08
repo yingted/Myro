@@ -110,15 +110,12 @@ namespace UIIronTextBox
         internal IronTextBox()
         {
             InitializeComponent();
-            printPrompt();
-
             // Set up the delays for the ToolTip.
             intellisense.AutoPopDelay = 1000;
             intellisense.InitialDelay = 100;
             intellisense.ReshowDelay = 100;
             // Force the ToolTip text to be displayed whether or not the form is active.
             intellisense.ShowAlways = true;
-
         }
 
         #region Overrides
@@ -783,6 +780,17 @@ namespace UIIronTextBox
             environment = ScriptRuntime.CreateFromConfiguration();
             scope = environment.CreateScope();
             engine = environment.GetEngine("py");
+	    if (System.Environment.OSVersion.Platform == System.PlatformID.Unix) {
+	      engine.SetSearchPaths(new string[] {
+		  "/home/dblank/Myro/Pyjama/python",
+		    "/usr/lib/python2.5",
+		    "/usr/lib/python2.5/site-packages"});
+	    } else {
+	      engine.SetSearchPaths(new string[] {
+		  Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments) + @"\Myro\Pyjama\python",
+		    @"C:\Python24\Lib",
+		    @"C:\Python24\site-packages"});
+	    }
             // Load mscorlib.dll:
             engine.Runtime.LoadAssembly(typeof(string).Assembly);
             // Load Languages so that Host System can find DLLs:
@@ -870,10 +878,15 @@ namespace UIIronTextBox
                 {
                     this.WriteText(GetHelpText());
                 }
-                else if (command == "newconsole")
+                else if (command == "python")
                 {
-                    //consoleTextBox.global_eng = new PythonEngine();
-                    this.WriteText("Not currently supported\r\n");
+		  engine = environment.GetEngine("py");
+		  Prompt = "python> ";
+                }
+                else if (command == "ruby")
+                {
+		  engine = environment.GetEngine("rb");
+		  Prompt = "ruby  > ";
                 }
                 else if (command.StartsWith("prompt"))
                 {
@@ -909,13 +922,6 @@ namespace UIIronTextBox
                 {
                     //btwfi - Browse To Walk FIle. Calls OpenFileDialog.
                     this.WalkPythonFile();
-                }
-                else if (command == "rew")
-                {
-                    //btwfi - Browse To Walk FIle. Calls OpenFileDialog.
-                    StringBuilder SBCode = new StringBuilder();
-                    this.RewritePyFiletoSB(out SBCode);
-                    DoIPExecute(SBCode.ToString()); //transformed object code from a .py
                 }
                 else if (command.StartsWith("paths"))
                 {
@@ -1017,34 +1023,34 @@ namespace UIIronTextBox
         {
             string helpText;
             StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.Append("*******************************************");
+            stringBuilder.Append("*********************");
             stringBuilder.Append(System.Environment.NewLine);
-            stringBuilder.Append("**   IronTextBox version 2.0.2.0b Help   **");
+            stringBuilder.Append("**   Pyjama Help   **");
             stringBuilder.Append(System.Environment.NewLine);
-            stringBuilder.Append("*******************************************");
+            stringBuilder.Append("*********************");
             stringBuilder.Append(System.Environment.NewLine);
-            stringBuilder.Append("You are using (" + engine.LanguageVersion + ")");
+            stringBuilder.Append("DLR version " + engine.LanguageVersion);
             stringBuilder.Append(System.Environment.NewLine);
             stringBuilder.Append(System.Environment.NewLine);
             stringBuilder.Append("Commands Available:");
             stringBuilder.Append(System.Environment.NewLine);
-            stringBuilder.Append("(1) prompt - Changes prompt. Usage: prompt=<desired_prompt>");
+            stringBuilder.Append(" prompt - Changes prompt. Usage: prompt=<desired_prompt>");
             stringBuilder.Append(System.Environment.NewLine);
-            stringBuilder.Append("(2) history - prints history of entered commands.");
+            stringBuilder.Append(" history - prints history of entered commands");
             stringBuilder.Append(System.Environment.NewLine);
-            stringBuilder.Append("(3) cls - Clears the screen.");
+            stringBuilder.Append(" cls - Clears the screen");
             stringBuilder.Append(System.Environment.NewLine);
-            stringBuilder.Append("(4) newconsole - Clears the current PythonEngine.");
+            stringBuilder.Append(" python - New Python Shell");
             stringBuilder.Append(System.Environment.NewLine);
-            stringBuilder.Append("(5) btaf - Browse To Append Folder. Calls FolderBrowserDialog.");
+            stringBuilder.Append(" btaf - Browse To Append Folder. Calls FolderBrowserDialog.");
             stringBuilder.Append(System.Environment.NewLine);
-            stringBuilder.Append("(6) btwfi - Browse To Walk FIle. Calls OpenFileDialog.");
+            stringBuilder.Append(" btwfi - Browse To Walk File. Calls OpenFileDialog.");
             stringBuilder.Append(System.Environment.NewLine);
-            stringBuilder.Append("(7) paths [-arg] - [args: -misc, -python24, -ironpython, -all] (-all=default)");
+            stringBuilder.Append(" paths [-arg] - [args: -misc, -python24, -ironpython, -all] (-all=default)");
             stringBuilder.Append(System.Environment.NewLine);
-            stringBuilder.Append("(8) rew - Re-Write a Python file into a StringBuilder.(for testing)");
+            stringBuilder.Append(" rew - Re-Write a Python file into a StringBuilder.(for testing)");
             stringBuilder.Append(System.Environment.NewLine);
-            stringBuilder.Append("(9) runfile - Run a .Py file.  Calls OpenFileDialog to PythonEngine.RunFile.");
+            stringBuilder.Append(" runfile - Run a .Py file.  Calls OpenFileDialog to PythonEngine.RunFile.");
             stringBuilder.Append(System.Environment.NewLine);
             helpText = stringBuilder.ToString();
             return helpText;
@@ -1075,7 +1081,6 @@ namespace UIIronTextBox
             this.consoleTextBox.Font = new Font("Lucida Console", 8.25F, FontStyle.Regular, GraphicsUnit.Point, ((Byte)(0)));
             this.consoleTextBox.Size = new Size(232, 216);
             this.consoleTextBox.TabIndex = 0;
-            this.consoleTextBox.Text = Prompt;
             // 
             // IronTextBoxControl
             // 
@@ -1083,6 +1088,7 @@ namespace UIIronTextBox
             this.Name = "IronTextBoxControl";
             this.Size = new Size(232, 216);
             this.ResumeLayout(false);
+	    this.consoleTextBox.printPrompt();
         }
         #endregion
 
@@ -1357,106 +1363,6 @@ namespace UIIronTextBox
 
         }
 
-        /// <summary>
-        /// Opens a Python file and reads line by line into a StringBuilder.
-        /// </summary>
-        /// <param name="sbCode">out StringBuilder</param>
-        public void RewritePyFiletoSB(out StringBuilder sbCode)
-        {
-            StringBuilder sb = new StringBuilder();
-
-            //See if sys is imported...
-            if (!DoIPEvaluate("dir()").ToString().Contains("sys"))
-            {
-                consoleTextBox.printPrompt();
-                consoleTextBox.WriteText("import sys");
-                this.SimEnter();
-            }
-
-            //Browse to the file...
-            OpenFileDialog ofd = new OpenFileDialog();
-            ofd.InitialDirectory = UIIronTextBox.Paths.MiscDirs.vs_Projects;
-            ofd.Filter = "Python files (*.py)|*.py|All files (*.*)|*.*";
-            ofd.ShowDialog();
-
-            try
-            {
-                string filetext = File.ReadAllText(ofd.FileName);
-                //tabs create a problem when trying to remove comments
-                filetext = filetext.Replace("\t", "    ");
-
-                // Create an instance of StreamReader to read from a file.
-                // The using statement also closes the StreamReader.
-                using (StringReader sr = new StringReader(filetext))
-                {
-                    String line;
-                    int pos = 0;
-                    // Read and display lines from the file until the end of 
-                    // the file is reached.
-                    while ((line = sr.ReadLine()) != null)
-                    {
-
-                        /////temp testing
-                        /// "        # unpp augmented predicate"
-                        /// "        """ "
-                        ///if (line == "    def chunk_lemmatised(self,lemmatised_text):")
-                        ///{
-                        ///    int temp = pos;
-                        ///}
-                        /////temp testing
-
-                        //if the line is a # comment line, or a single line do not add...
-                        if (!line.StartsWith("#") && !line.StartsWith("    #") && !line.StartsWith("        #") && !line.StartsWith("            #") && !line.Equals("\r\n") && line != "")
-                        {
-                            //catch """ comments
-                            if (line.StartsWith("\"\"\"") || line.StartsWith("    \"\"\"") || line.StartsWith("        \"\"\"") || line.StartsWith("            \"\"\""))
-                            {
-                                //the line may also end with """, so if it is not read until end
-                                if (!IsSingleCommentLine(line))
-                                {
-                                    //get to the end of the comments
-                                    while (!sr.ReadLine().TrimEnd().EndsWith("\"\"\""))
-                                    {
-                                        //do nothing
-                                    }
-                                }
-
-                                //reassign line
-                                line = sr.ReadLine();
-                            }
-
-                            //the line may also end with """, so if it is not read until end
-                            if (!IsSingleCommentLine(line))
-                            {
-                                //if the line ends with """, then delete """ and read until end
-                                if (line.TrimEnd().EndsWith("\"\"\"") && line.IndexOf("\"\"\"") == line.Length - 3)
-                                {
-                                    //remove """ and reassign line
-                                    line = line.Remove(line.Length - 3);
-
-                                    //get to the end of the comments
-                                    while (!sr.ReadLine().TrimEnd().EndsWith("\"\"\""))
-                                    {
-                                        //do nothing
-                                    }
-                                }
-                                //then append line
-                                sb.AppendLine(line);
-                            }
-                        }
-                        pos = sb.Length;
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                // Let the user know what went wrong.
-                consoleTextBox.WriteText("The file could not be read:");
-                consoleTextBox.WriteText(e.Message);
-            }
-
-            sbCode = sb;
-        }
 
         /// <summary>
         /// 

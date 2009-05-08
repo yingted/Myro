@@ -1418,7 +1418,7 @@ from myro.robots.scribbler import Scribbler
 #from myro.robots.surveyor import Surveyor, watch
 #from myro.robots.roomba import Roomba, Create
 #from myro.robots.simulator import SimScribbler
-from graphics import *
+#from graphics import *
 
 #######
 ## have to load pygame after mostly everything
