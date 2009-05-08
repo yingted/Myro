@@ -5,11 +5,14 @@ IronTextBox.dll: ./Paths.cs ./IPEWrapper.cs ./IronTextBox.cs ./Properties/Assemb
 	./IPEWrapper.cs \
 	./IronTextBox.cs \
 	./Properties/AssemblyInfo.cs \
+	-r:./pyjama.exe.config \
 	-r:System.Data \
 	-r:System.Drawing \
 	-r:System.Windows.Forms \
 	-r:../libs/IronPython \
+	-r:../libs/IronPython.Modules \
 	-r:../libs/IronRuby \
+	-r:../libs/IronRuby.Libraries \
 	-r:../libs/Microsoft.Scripting \
 	-target:library -out:IronTextBox.dll
 	cp IronTextBox.dll ../libs/
