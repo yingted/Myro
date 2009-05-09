@@ -109,9 +109,12 @@ namespace Pyjama
 
         public void Execute(string code) {
             // Interface to Shell
+            outputWindow.textbox.WriteText("\n");
             outputWindow.textbox.WriteText("Evaluating...\n");
             outputWindow.textbox.DoCommand(code);
             outputWindow.textbox.consoleTextBox.printPrompt();
+            outputWindow.textbox.consoleTextBox.ScrollToCaret();
+            //SelectionStart = this.TextLength;
         }
 
 
@@ -246,6 +249,31 @@ namespace Pyjama
         }
 
         private void fileManager1_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void mainContentSplit_SplitterMoved(object sender, SplitterEventArgs e)
+        {
+
+        }
+
+        private void toolStripStatusLabel6_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void toolStripComboBox1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void toolStripSplitButton1_ButtonClick(object sender, EventArgs e)
+        {
+
+        }
+
+        private void statusStrip2_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
         {
 
         }

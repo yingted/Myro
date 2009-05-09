@@ -42,8 +42,6 @@ using IronRuby.Hosting;
 using Microsoft.Scripting;  //ScriptDomainManager
 using Microsoft.Scripting.Hosting;
 
-using UIIronTextBox.Paths;
-using UIIronTextBox.Utils;
 using UIIronTextBox.IPEWrapper;
 
 namespace UIIronTextBox
@@ -110,6 +108,7 @@ namespace UIIronTextBox
         internal IronTextBox()
         {
             InitializeComponent();
+            this.WordWrap = false;
             // Set up the delays for the ToolTip.
             intellisense.AutoPopDelay = 1000;
             intellisense.InitialDelay = 100;
@@ -142,25 +141,13 @@ namespace UIIronTextBox
         protected override void WndProc(ref Message m)
         {
             // This happens before key press handler
-            // Need to pass to base to have keypress handled
+            // Need to pass to base to have message handled
             //System.Console.WriteLine("Window message received: " + m.Msg.ToString());
             switch (m.Msg)
             {
-                //case 0x000D: //Left arrow
-                    //if (!IsCaretAtWritablePosition())
-                   // {
-                        // DSB don't move out of area
-                    //return;
-                    //}
-                    //break;
                 case 0x0302: //WM_PASTE
                 case 0x0300: //WM_CUT
                 case 0x000C: //WM_SETTEXT
-                    if (!IsCaretAtWritablePosition())
-                    {
-                        // DSB don't move out of area
-                        MoveCaretToEndOfText();
-                    }
                     break;
                 case 0x0303: //WM_CLEAR
                     return;
@@ -185,7 +172,7 @@ namespace UIIronTextBox
             this.MaxLength = 0;
             this.Multiline = true;
             this.AcceptsTab = true;
-            this.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Both; 
+            this.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Both;
             this.Size = new Size(400, 176);
             this.TabIndex = 0;
             this.Text = "";
@@ -215,10 +202,11 @@ namespace UIIronTextBox
 
             //add the prompt
             this.AddText(Prompt);
-        this.Select(this.TextLength - prompt.Length, prompt.Length);
-        this.SelectionFont = new Font("Verdana", 8, FontStyle.Bold);
-        this.SelectionColor = Color.Red;
-        this.AddText(""); // clears the selection
+            this.Select(this.TextLength - prompt.Length, prompt.Length - 2);
+            this.SelectionColor = Color.Red;
+            this.Select(this.TextLength, 0); // clears the selection
+            MoveCaretToEndOfText();
+            this.SelectionColor = Color.White;
         }
 
 
@@ -255,22 +243,13 @@ namespace UIIronTextBox
         }
 
         /// <summary>
-        /// Returns true if Keys.Enter
-        /// </summary>
-        /// <param name="key">Keys</param>
-        /// <returns>Returns true if Keys.Enter</returns>
-        private bool IsTerminatorKey(System.Windows.Forms.Keys key)
-        {
-            return key == Keys.Enter;
-        }
-
-        /// <summary>
         /// Returns true if (char)13 '\r'
         /// </summary>
         /// <param name="keyChar">char of keypressed</param>
         /// <returns>Returns true if (char)13 '\r'</returns>
         private bool IsTerminatorKey(char keyChar)
         {
+            //System.Console.WriteLine((int)keyChar);
             return ((int)keyChar) == 13;
         }
 
@@ -319,18 +298,20 @@ namespace UIIronTextBox
         /// Adds text to the IronTextBox
         /// </summary>
         /// <param name="text">text to be added</param>
-        private void AddText(string text)
+        public void AddText(string text)
         {
             //Optional////////////
             // DSB scollection.Add(text);  //Optional
             //this.Text = StringCollecttostring(scollection); //Optional
             //////////////////////
 
-            // DSB this.Enabled = false;
+            // DSB 
+            this.Enabled = false;
+            //System.Console.WriteLine("addText: '{0}'", text);
             this.Text += text;
             MoveCaretToEndOfText();
-            // DSB this.Enabled = true;
-            // DSB this.Focus();
+            this.Enabled = true;
+            this.Focus();
             // DSB this.Update();
         }
 
@@ -356,6 +337,7 @@ namespace UIIronTextBox
         private void MoveCaretToEndOfText()
         {
             this.SelectionStart = this.TextLength;
+            this.Select(this.Text.Length, 0);
             //this.ScrollToCaret();
             //System.Console.WriteLine("scroll to caret!");
         }
@@ -364,7 +346,7 @@ namespace UIIronTextBox
         /// Returns true is the caret is just before the current prompt.
         /// </summary>
         /// <returns></returns>
-        private bool IsCaretJustBeforePrompt()
+        public bool IsCaretJustBeforePrompt()
         {
             return IsCaretAtCurrentLine() && GetCurrentCaretColumnPosition() == prompt.Length;
         }
@@ -373,10 +355,11 @@ namespace UIIronTextBox
         /// Returns the column position. Useful for selections.
         /// </summary>
         /// <returns></returns>
-        private int GetCurrentCaretColumnPosition()
+        public int GetCurrentCaretColumnPosition()
         {
             string currentLine = GetCurrentLine();
             int currentCaretPosition = this.SelectionStart;
+            //System.Console.WriteLine("pos={0}", (currentCaretPosition - this.TextLength + currentLine.Length));
             return (currentCaretPosition - this.TextLength + currentLine.Length);
         }
 
@@ -384,6 +367,7 @@ namespace UIIronTextBox
         /// Is the caret at a writable position.
         /// </summary>
         /// <returns></returns>
+
         private bool IsCaretAtWritablePosition()
         {
             return IsCaretAtCurrentLine() && GetCurrentCaretColumnPosition() > prompt.Length;
@@ -439,12 +423,7 @@ namespace UIIronTextBox
             // Handle "keypress here"
             // Need to handle non-keypress in the WndProc overload
             //If current key is a backspace and is just before prompt, then stay put!
-            //System.Console.WriteLine("KeyChar: " + e.KeyChar);
-            if (e.KeyChar == (char)8 && IsCaretJustBeforePrompt())
-            {
-                e.Handled = true;
-                return;
-            }
+            //System.Console.WriteLine("console key PRESS KeyChar: " + (int)e.KeyChar);
 
             //If current key is enter
             if (IsTerminatorKey(e.KeyChar))
@@ -472,7 +451,7 @@ namespace UIIronTextBox
                     if (currentCommand.EndsWith(":"))
                     {
                         //we are in the first line of a def, it has already printed to console
-                        
+
                         //autoindent the current autoindent value
                         //int asize = Parser.GetNextAutoIndentSize(this.defStmtBuilder.ToString()+"\r\n", 4);
 
@@ -521,8 +500,8 @@ namespace UIIronTextBox
                     e.Handled = true;
                     return;
                 }
-                                
-                if(IsRawInput)
+
+                if (IsRawInput)
                 {
                     string rawcommand = (string)this.Lines.GetValue(this.Lines.Length - 2);
                     rawcommand = rawcommand.Replace(Prompt, "");
@@ -537,25 +516,18 @@ namespace UIIronTextBox
                         rawprompt = "";
                         e.Handled = true;
                         printPrompt();
-                        MoveCaretToEndOfText();
                         return;
                     }
-                    
-
                 }
-
                 //if(GetTextAtPrompt().Trim().Equals(""))
-                    printPrompt();
+                printPrompt();
             }
-
-
             /*
             // Handle backspace and stringcollection to help the commandhistory accuracy and debugging.
             if (e.KeyChar == (char)8 && (GetStringCollectValue(scollection, scollection.Count - 1).Length == 1) && commandHistory.LastCommand.Contains(GetStringCollectValue(scollection, scollection.Count - 1)))
             {
                 scollection.RemoveAt(scollection.Count - 1);
             }*/
-
         }
 
         /// <summary>
@@ -580,14 +552,17 @@ namespace UIIronTextBox
         /// <param name="e">KeyEventArgs</param>
         private void ConsoleControl_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
         {
-            // If the caret is anywhere else, set it back when a key is pressed.
-            if (!IsCaretAtWritablePosition() && !(e.Control || IsTerminatorKey(e.KeyCode)))
-            {
-                MoveCaretToEndOfText();
-            }
+            //System.Console.WriteLine("console key DOWN KeyCode: " + (int)e.KeyCode);
 
-            // Prevent caret from moving before the prompt
-            if (e.KeyCode == System.Windows.Forms.Keys.Back && IsCaretJustBeforePrompt())
+            if (IsCaretJustBeforePrompt())
+            {
+                if (e.KeyCode == Keys.Back || e.KeyCode == Keys.Left)
+                {
+                    // eat them!
+                    e.Handled = true;
+                }
+            }
+            if (e.KeyCode == System.Windows.Forms.Keys.Enter)
             {
                 e.Handled = true;
             }
@@ -597,7 +572,7 @@ namespace UIIronTextBox
                 string currentLine = GetCurrentLine();
                 this.SelectionStart = this.Text.Length - currentLine.Length + prompt.Length;
                 //System.Console.WriteLine("currentLine = {0}, SelectionStart = {1}", currentLine, SelectionStart);
-                this.ScrollToCaret();
+                //this.ScrollToCaret();
                 e.Handled = true;
             }
             else if (e.KeyCode == System.Windows.Forms.Keys.Down)
@@ -605,7 +580,8 @@ namespace UIIronTextBox
                 if (commandHistory.DoesNextCommandExist())
                 {
                     ReplaceTextAtPrompt(commandHistory.GetNextCommand());
-                } else
+                }
+                else
                     ReplaceTextAtPrompt("");
                 e.Handled = true;
             }
@@ -614,28 +590,31 @@ namespace UIIronTextBox
                 if (commandHistory.DoesPreviousCommandExist())
                 {
                     ReplaceTextAtPrompt(commandHistory.GetPreviousCommand());
-                } else
+                }
+                else
                     ReplaceTextAtPrompt(""); // FIXME: use templine, if started, and then ""
                 e.Handled = true;
             }
-            else if (e.KeyCode == System.Windows.Forms.Keys.Right)
-            {
-                // Performs command completion
-                string currentTextAtPrompt = GetTextAtPrompt();
-                string lastCommand = commandHistory.LastCommand;
+            /*
+        else if (e.KeyCode == System.Windows.Forms.Keys.Escape)
+        {
+            // Performs command completion
+            string currentTextAtPrompt = GetTextAtPrompt();
+            string lastCommand = commandHistory.LastCommand;
 
-                //If the last command is not nul and no text at the current prompt or lastcommand starts with the currenttext at the current prompt,
-                //then autofill because the right arrow key was pressed.
-                if (lastCommand != null && (currentTextAtPrompt.Length == 0 || lastCommand.StartsWith(currentTextAtPrompt)))
+            //If the last command is not nul and no text at the current prompt or lastcommand starts with the currenttext at the current prompt,
+            //then autofill because the right arrow key was pressed.
+            if (lastCommand != null && (currentTextAtPrompt.Length == 0 || lastCommand.StartsWith(currentTextAtPrompt)))
+            {
+                if (lastCommand.Length > currentTextAtPrompt.Length)
                 {
-                    if (lastCommand.Length > currentTextAtPrompt.Length)
-                    {
-                        int i = scollection.Count;
-                        //scollection.Insert(scollection.Count, lastCommand[currentTextAtPrompt.Length].ToString());
-                        this.AddText(lastCommand[currentTextAtPrompt.Length].ToString());
-                    }
+                    int i = scollection.Count;
+                    //scollection.Insert(scollection.Count, lastCommand[currentTextAtPrompt.Length].ToString());
+                    this.AddText(lastCommand[currentTextAtPrompt.Length].ToString());
                 }
             }
+        }
+             */
         }
 
 
@@ -767,9 +746,9 @@ namespace UIIronTextBox
             get { return consoleTextBox.Prompt; }
             set { consoleTextBox.Prompt = value; }
         }
-        #endregion IronTextBoxControl members
+    #endregion IronTextBoxControl members
 
-        
+
         /// <summary>
         /// IronTextBoxControl
         /// </summary>
@@ -792,12 +771,15 @@ namespace UIIronTextBox
             //environment = ScriptRuntime.CreateFromConfiguration();
             scope = environment.CreateScope();
             engine = environment.GetEngine("py");
-            if (System.Environment.OSVersion.Platform == System.PlatformID.Unix) {
-              engine.SetSearchPaths(new string[] {
+            if (System.Environment.OSVersion.Platform == System.PlatformID.Unix)
+            {
+                engine.SetSearchPaths(new string[] {
                     "/home/dblank/Myro/Pyjama/python",
                     "/usr/lib/python2.5",
                     "/usr/lib/python2.5/site-packages"});
-            } else {
+            }
+            else
+            {
                 engine.SetSearchPaths(new string[] {
                     Environment.GetFolderPath(System.Environment.SpecialFolder.DesktopDirectory) 
                         + @"\Myro\Pyjama\python",
@@ -840,7 +822,7 @@ namespace UIIronTextBox
 
         public object DoIPExecute(string code)
         {
-            ScriptSource source = engine.CreateScriptSourceFromString(code, 
+            ScriptSource source = engine.CreateScriptSourceFromString(code,
                          SourceCodeKind.SingleStatement);
             return source.Execute(scope);
         }
@@ -854,40 +836,32 @@ namespace UIIronTextBox
 
         public object DoIPEvaluate(string code)
         {
-            ScriptSource source = engine.CreateScriptSourceFromString(code, 
+            ScriptSource source = engine.CreateScriptSourceFromString(code,
                          SourceCodeKind.Expression);
             return source.Execute(scope);
         }
 
         void irontextboxControl_CommandEntered(object sender, UIIronTextBox.CommandEnteredEventArgs e)
         {
-        string command = e.Command.TrimEnd();
-        DoCommand(command);
-    }
+            string command = e.Command.TrimEnd();
+            DoCommand(command);
+        }
 
-        public void DoCommand(string command) {
+        public void DoCommand(string command)
+        {
             engine.Runtime.IO.SetOutput(new UIIronTextBox.IPEWrapper.IPEStreamWrapper(
-                          IPEWrapper.IPEStreamWrapper.IPEngineResponse), 
+                          IPEWrapper.IPEStreamWrapper.IPEngineResponse),
                     engine.Runtime.IO.InputEncoding);
 
-        //Create a temp object to use
-        object tempobject;
+            //Create a temp object to use
+            object tempobject;
 
             //Begin IronTextBox evaluation if something there....
             if (command != "")
             {
-                if (command == "cls")
-                    this.Clear();
-                else if (command == "history")
+                if (command == "clear")
                 {
-                    string[] commands = this.GetCommandHistory();
-                    StringBuilder stringBuilder = new StringBuilder(commands.Length);
-                    foreach (string s in commands)
-                    {
-                        stringBuilder.Append(s);
-                        stringBuilder.Append(System.Environment.NewLine);
-                    }
-                    this.WriteText(stringBuilder.ToString());
+                    this.Clear();
                 }
                 else if (command == "help")
                 {
@@ -895,62 +869,19 @@ namespace UIIronTextBox
                 }
                 else if (command == "python")
                 {
-          engine = environment.GetEngine("py");
-          Prompt = "python> ";
+                    engine = environment.GetEngine("py");
+                    Prompt = "python> ";
                 }
                 else if (command == "ruby")
                 {
-          engine = environment.GetEngine("rb");
-          Prompt = "ruby  > ";
-                }
-                else if (command.StartsWith("prompt"))
-                {
-                    string[] parts = command.Split(new char[] { '=' });
-                    if (parts.Length == 2 && parts[0].Trim() == "prompt")
-                        this.Prompt = parts[1];
-                }
-                else if (command == "btaf")
-                {
-                    //btaf = Browse To Append File....
-                    //Check to see if sys is loaded
-                    if (!DoIPEvaluate("dir()").ToString().Contains("sys"))
-                    {
-                        consoleTextBox.printPrompt();
-                        consoleTextBox.WriteText("import sys");
-                        this.SimEnter();
-                    }
-
-                    System.Windows.Forms.FolderBrowserDialog ofd = new System.Windows.Forms.FolderBrowserDialog();
-                    ofd.SelectedPath = UIIronTextBox.Paths.MiscDirs.vs_Projects;
-                    ofd.ShowDialog();
-                    consoleTextBox.printPrompt();
-                    consoleTextBox.WriteText("sys.path.append(\"" + ofd.SelectedPath + "\")");
-                    this.SimEnter();
+                    engine = environment.GetEngine("rb");
+                    Prompt = "ruby  > ";
                 }
                 else if (command == "runfile")
                 {
                     //runfile - Run a .Py file.  Calls OpenFileDialog to PythonEngine.RunFile....
                     //  goodfor debuging .y file within IDE
                     this.Runfile();
-                }
-                else if (command == "btwfi")
-                {
-                    //btwfi - Browse To Walk FIle. Calls OpenFileDialog.
-                    this.WalkPythonFile();
-                }
-                else if (command.StartsWith("paths"))
-                {
-                    //Appends all hardcoded common paths stored in UIIronTextBox.Paths
-                    //paths [-arg] - [args: -misc, -python24, -ironpython, -all] (-all=default)
-                    if (command.Contains(" -"))
-                    {
-                        string[] splitcommand = command.Split('-');
-                        splitcommand[1] = splitcommand[1].Trim();
-                        this.ImportPaths(splitcommand[1]);
-                    }
-                    else
-                        this.ImportPaths(command.Trim());
-
                 }
                 else if (command.TrimEnd().EndsWith(":") == true)
                 {
@@ -983,7 +914,7 @@ namespace UIIronTextBox
                         //old//s = ParsetheText(consoleTextBox.global_eng.Sys, new CompilerContext(), defBuilder.ToString(), endOfInput, out parsingMultiLineString, out isMultiLine);
                         string[] seperators = new string[] { "\r" };
                         string[] allpieces = defBuilder.ToString().Split(seperators, StringSplitOptions.None);
-                        
+
                         if (/*Options.AutoIndentSize != 0 &&*/ line.Trim().Length == 0)
                             numberOfBlankLines++;
                         else
@@ -1007,30 +938,32 @@ namespace UIIronTextBox
 
                 else //misc commands...
                 {
-                   bool error = false;
-                   string err_message = null;
-		   object result = null;
-                   try
+                    bool error = false;
+                    string err_message = null;
+                    object result = null;
+                    try
                     {
-                     // FIXME: runs all at once, then prints result
-                    result = DoIPExecute(command);
+                        // FIXME: runs all at once, then prints result
+                        result = DoIPExecute(command);
                     }
                     catch (Exception err)//catch any errors
                     {
                         err_message = err.Message;
                         error = true;
                     }
-          // DSB remove newline:
-          this.WriteText(IPEStreamWrapper.sbOutput.ToString());
-	  if (result != null) {
-	    this.WriteText("--> " + result.ToString());
-	  }
+                    // DSB remove newline:
+                    this.WriteText(IPEStreamWrapper.sbOutput.ToString());
+                    if (result != null)
+                    {
+                        this.WriteText("--> " + result.ToString());
+                    }
 
-          //added to fix "rearviewmirror" (IPEStreamWrapper.sbOutput not clearing) bug.
-          IPEStreamWrapper.sbOutput.Remove(0, IPEStreamWrapper.sbOutput.Length);        //Clear
-          if (error) {
-            this.WriteText("\r\nPython error: " + err_message);
-          }
+                    //added to fix "rearviewmirror" (IPEStreamWrapper.sbOutput not clearing) bug.
+                    IPEStreamWrapper.sbOutput.Remove(0, IPEStreamWrapper.sbOutput.Length);        //Clear
+                    if (error)
+                    {
+                        this.WriteText("\r\nPython error: " + err_message);
+                    }
                 }
             }
         }
@@ -1054,21 +987,12 @@ namespace UIIronTextBox
             stringBuilder.Append(System.Environment.NewLine);
             stringBuilder.Append("Commands Available:");
             stringBuilder.Append(System.Environment.NewLine);
-            stringBuilder.Append(" prompt - Changes prompt. Usage: prompt=<desired_prompt>");
+            stringBuilder.Append(" clear - Clears the screen");
             stringBuilder.Append(System.Environment.NewLine);
-            stringBuilder.Append(" history - prints history of entered commands");
+            stringBuilder.Append(" python - Switch to Python");
             stringBuilder.Append(System.Environment.NewLine);
-            stringBuilder.Append(" cls - Clears the screen");
+            stringBuilder.Append(" ruby - Switch to Ruby");
             stringBuilder.Append(System.Environment.NewLine);
-            stringBuilder.Append(" python - New Python Shell");
-            stringBuilder.Append(System.Environment.NewLine);
-            stringBuilder.Append(" btaf - Browse To Append Folder. Calls FolderBrowserDialog.");
-            stringBuilder.Append(System.Environment.NewLine);
-            stringBuilder.Append(" btwfi - Browse To Walk File. Calls OpenFileDialog.");
-            stringBuilder.Append(System.Environment.NewLine);
-            stringBuilder.Append(" paths [-arg] - [args: -misc, -python24, -ironpython, -all] (-all=default)");
-            stringBuilder.Append(System.Environment.NewLine);
-            stringBuilder.Append(" rew - Re-Write a Python file into a StringBuilder.(for testing)");
             stringBuilder.Append(System.Environment.NewLine);
             stringBuilder.Append(" runfile - Run a .Py file.  Calls OpenFileDialog to PythonEngine.RunFile.");
             stringBuilder.Append(System.Environment.NewLine);
@@ -1097,7 +1021,7 @@ namespace UIIronTextBox
             this.consoleTextBox.Multiline = true;
             this.consoleTextBox.Name = "consoleTextBox";
             this.consoleTextBox.Prompt = "python> ";
-            this.consoleTextBox.ScrollBars = RichTextBoxScrollBars.Both; 
+            this.consoleTextBox.ScrollBars = RichTextBoxScrollBars.Both;
             this.consoleTextBox.Font = new Font("Lucida Console", 8.25F, FontStyle.Regular, GraphicsUnit.Point, ((Byte)(0)));
             this.consoleTextBox.Size = new Size(232, 216);
             this.consoleTextBox.TabIndex = 0;
@@ -1108,6 +1032,7 @@ namespace UIIronTextBox
             this.Name = "IronTextBoxControl";
             this.Size = new Size(232, 216);
             this.ResumeLayout(false);
+            this.consoleTextBox.AddText("Pyjama Shell\n------------\n\n");
             this.consoleTextBox.printPrompt();
         }
         #endregion
@@ -1200,180 +1125,20 @@ namespace UIIronTextBox
         }
 
         /// <summary>
-        /// Opens a Python files and reads line by line into IronTextBox.
-        /// </summary>
-        /// <param name="fullpathfilename">fullpathfilename</param>
-        public void WalkPythonFile(string fullpathfilename)
-        {
-            try
-            {
-                string filetext = File.ReadAllText(fullpathfilename);
-                //tabs create a problem when trying to remove comments
-                filetext = filetext.Replace("\t", "    ");
-
-                // Create an instance of StreamReader to read from a file.
-                // The using statement also closes the StreamReader.
-                using (StringReader sr = new StringReader(filetext))
-                {
-                    String line;
-                    StringBuilder sb = new StringBuilder();
-                    int pos = 0;
-                    // Read and display lines from the file until the end of 
-                    // the file is reached.
-                    while ((line = sr.ReadLine()) != null)
-                    {
-                       //if the line is a # comment line, or a single line do not add...
-                        if (!line.StartsWith("#") && !line.StartsWith("    #") && !line.StartsWith("        #") && !line.StartsWith("            #") && !line.Equals("\r\n") && line != "")
-                        {
-                            //catch """ comments
-                            if (line.StartsWith("\"\"\"") || line.StartsWith("    \"\"\"") || line.StartsWith("        \"\"\"") || line.StartsWith("            \"\"\""))
-                            {
-                                //the line may also end with """, so if it is not read until end
-                                if (!IsSingleCommentLine(line))
-                                {
-                                    //get to the end of the comments
-                                    while (!sr.ReadLine().TrimEnd().EndsWith("\"\"\""))
-                                    {
-                                        //do nothing
-                                    }
-                                }
-
-                                //reassign line
-                                line = sr.ReadLine();
-                            }
-
-                            //the line may also end with """, so if it is not read until end
-                            if (!IsSingleCommentLine(line))
-                            {
-                                //if the line ends with """, then delete """ and read until end
-                                if (line.TrimEnd().EndsWith("\"\"\"") && line.IndexOf("\"\"\"") == line.Length - 3)
-                                {
-                                    //remove """ and reassign line
-                                    line = line.Remove(line.Length - 3);
-
-                                    //get to the end of the comments
-                                    while (!sr.ReadLine().TrimEnd().EndsWith("\"\"\""))
-                                    {
-                                        //do nothing
-                                    }
-                                }
-                                //then append line
-                                sb.AppendLine(line);
-
-                                consoleTextBox.WriteText(line);
-                                SimEnter();
-                            }
-                        }
-
-
-                        pos = sb.Length;
-                        //if a blank line, enter previous text as a FuncDef
-                        if (line == "" && sb.Length != 0)
-                        {
-                            try //try to find last ""
-                            {
-                                //consoleTextBox.WriteText(sb.ToString());
-                                SimEnter();
-                            }
-                            catch
-                            {
-
-                            }
-
-                        }
-                        //consoleTextBox.WriteText(line);
-
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                // Let the user know what went wrong.
-                consoleTextBox.WriteText("The file could not be read:");
-                consoleTextBox.WriteText(e.Message);
-            }
-
-        }
-
-        /// <summary>
-        /// Opens a FolderBrowserDialog to load a Python file to read it line by line into IronTextBox.
-        /// </summary>
-        public void WalkPythonFile()
-        {
-            try
-            {
-                //See if sys is imported...
-                if (!DoIPEvaluate("dir()").ToString().Contains("sys"))
-                {
-                    consoleTextBox.printPrompt();
-                    consoleTextBox.WriteText("import sys");
-                    this.SimEnter();
-                }
-
-                //Browse to the file...
-                OpenFileDialog ofd = new OpenFileDialog();
-                ofd.InitialDirectory = UIIronTextBox.Paths.MiscDirs.vs_Projects;
-                ofd.Filter = "Python files (*.py)|*.py|All files (*.*)|*.*";
-                ofd.ShowDialog();
-
-                //Ask the user if they would like to append the path
-                string message = "Do you need to append the folder:\r\n" + 
-          Path.GetDirectoryName(Path.GetFullPath(ofd.FileName)) + "\r\n\r\nto the PythonEngine?";
-                string caption = "Append Folder Path";
-                MessageBoxButtons buttons = MessageBoxButtons.YesNo;
-                DialogResult result;
-
-                // Displays the MessageBox.
-                result = MessageBox.Show(this, message, caption, buttons);
-                if (result == DialogResult.Yes)
-                {
-                    consoleTextBox.printPrompt();
-                    consoleTextBox.WriteText("sys.path.append(\"" + Path.GetDirectoryName(Path.GetFullPath(ofd.FileName)) + "\")");
-                    this.SimEnter();
-
-                    //Keep asking until No
-                    while (result.Equals(DialogResult.Yes))
-                    {
-                        //Ask the user if more folders are needed to be appended
-                        message = "Do you need to append another folder?";
-                        result = MessageBox.Show(this, message, caption, buttons);
-                        if (result == DialogResult.Yes)
-                        {
-                            System.Windows.Forms.FolderBrowserDialog fbd = new System.Windows.Forms.FolderBrowserDialog();
-                            fbd.SelectedPath = Path.GetDirectoryName(Path.GetFullPath(ofd.FileName));
-                            fbd.ShowDialog();
-                            consoleTextBox.printPrompt();
-                            consoleTextBox.WriteText("sys.path.append(\"" + fbd.SelectedPath + "\")");
-                            this.SimEnter();
-                        }
-                    }
-                }
-
-                WalkPythonFile(ofd.FileName);
-            }
-            catch (Exception e)
-            {
-                // Let the user know what went wrong.
-                consoleTextBox.WriteText("The file could not be read:");
-                consoleTextBox.WriteText(e.Message);
-            }
-        }
-
-        /// <summary>
         /// Run a .Py file.  Calls OpenFileDialog to PythonEngine.RunFile.
         /// </summary>
         public void Runfile()
         {
             try
             {
-            //Browse to the file...
-            OpenFileDialog ofd = new OpenFileDialog();
-            ofd.InitialDirectory = UIIronTextBox.Paths.MiscDirs.vs_Projects;
-            ofd.Filter = "Python files (*.py)|*.py|All files (*.*)|*.*";
-            ofd.ShowDialog();
+                //Browse to the file...
+                OpenFileDialog ofd = new OpenFileDialog();
+                //ofd.InitialDirectory = UIIronTextBox.Paths.MiscDirs.vs_Projects;
+                ofd.Filter = "Python files (*.py)|*.py|All files (*.*)|*.*";
+                ofd.ShowDialog();
 
-            DoIPExecuteFile(ofd.FileName);
-                
+                DoIPExecuteFile(ofd.FileName);
+
             }
             catch (Exception ex)
             {
@@ -1424,131 +1189,6 @@ namespace UIIronTextBox
                 newArrayList.Add(myEnumerator.Current.ToString());
 
             return newArrayList;
-        }
-
-        /// <summary>
-        /// ImportPaths
-        /// </summary>
-        /// <param name="arg"></param>
-        public void ImportPaths(string arg)
-        {
-            StringCollection scMiscDirs = new StringCollection();
-            scMiscDirs.Add(UIIronTextBox.Paths.MiscDirs.ConceptNet);
-            scMiscDirs.Add(UIIronTextBox.Paths.MiscDirs.montylingua);
-            scMiscDirs.Add(UIIronTextBox.Paths.MiscDirs.vs_Projects);
-            StringEnumerator SCEMiscDirs = scMiscDirs.GetEnumerator();
-
-            StringCollection scPython24Dirs = new StringCollection();
-            scPython24Dirs.Add(UIIronTextBox.Paths.Python24Dirs.Python24_DLLs);
-            scPython24Dirs.Add(UIIronTextBox.Paths.Python24Dirs.Python24_Lib);
-            scPython24Dirs.Add(UIIronTextBox.Paths.Python24Dirs.Python24_Lib_lib_tk);
-            scPython24Dirs.Add(UIIronTextBox.Paths.Python24Dirs.Python24_libs);
-            scPython24Dirs.Add(UIIronTextBox.Paths.Python24Dirs.Python24_Tools);
-            scPython24Dirs.Add(UIIronTextBox.Paths.Python24Dirs.Python24_Tools_Scripts);
-            StringEnumerator SCEPython24Dirs = scPython24Dirs.GetEnumerator();
-
-            StringCollection scIronPythonDirs = new StringCollection();
-            scIronPythonDirs.Add(UIIronTextBox.Paths.IronPythonDirs.IronPython_Tutorial);
-            //scIronPythonDirs.Add(UIIronTextBox.Paths.IronPythonDirs.Runtime);
-            StringEnumerator SCEIronPythonDirs = scIronPythonDirs.GetEnumerator();
-
-            //Create All SC
-            StringCollection scAll = new StringCollection();
-            while (SCEMiscDirs.MoveNext())
-            {
-                scAll.Add(SCEMiscDirs.Current);
-            }
-            while (SCEPython24Dirs.MoveNext())
-            {
-                scAll.Add(SCEPython24Dirs.Current);
-            }
-            while (SCEIronPythonDirs.MoveNext())
-            {
-                scAll.Add(SCEIronPythonDirs.Current);
-            }
-            StringEnumerator SCEAll = scAll.GetEnumerator();
-
-            //Reset Enums
-            SCEMiscDirs.Reset();
-            SCEPython24Dirs.Reset();
-            SCEIronPythonDirs.Reset();
-
-            //Check to see if sys is loaded
-            if (!DoIPEvaluate("dir()").ToString().Contains("sys"))
-            {
-                consoleTextBox.printPrompt();
-                consoleTextBox.WriteText("import sys");
-                this.SimEnter();
-            }
-            else
-                consoleTextBox.printPrompt();
-            
-
-            try
-            {
-                switch (arg)
-                {
-                    case "misc":
-                        {
-                            while (SCEMiscDirs.MoveNext())
-                            {
-                                //consoleTextBox.printPrompt();
-                                consoleTextBox.WriteText("sys.path.append(\"" + SCEMiscDirs.Current + "\")");
-                                this.SimEnter();
-                            }
-                            break;
-                        }
-                    case "python24":
-                        {
-                            while (SCEPython24Dirs.MoveNext())
-                            {
-                                //consoleTextBox.printPrompt();
-                                consoleTextBox.WriteText("sys.path.append(\"" + SCEPython24Dirs.Current + "\")");
-                                this.SimEnter();
-                            }
-                            break;
-                        }
-                    case "ironpython":
-                        {
-                            while (SCEIronPythonDirs.MoveNext())
-                            {
-                                //consoleTextBox.printPrompt();
-                                consoleTextBox.WriteText("sys.path.append(\"" + SCEIronPythonDirs.Current + "\")");
-                                this.SimEnter();
-                            }
-                            break;
-                        }
-                    case "all":
-                        {
-                            while (SCEAll.MoveNext())
-                            {
-                                //consoleTextBox.printPrompt();
-                                consoleTextBox.WriteText("sys.path.append(\"" + SCEAll.Current + "\")");
-                                this.SimEnter();
-                            }
-                            break;
-                        }
-                    case "paths":
-                        {
-                            while (SCEAll.MoveNext())
-                            {
-                                //consoleTextBox.printPrompt();
-                                consoleTextBox.WriteText("sys.path.append(\"" + SCEAll.Current + "\")");
-                                this.SimEnter();
-                            }
-                            break;
-                        }
-                    default:
-                        consoleTextBox.WriteText("Invalid arg. Only: -misc, -python24, -ironpython, -all");
-                        break;
-                }
-            }
-            catch (Exception e)
-            {
-                // Let the user know what went wrong.
-                consoleTextBox.WriteText("ImportPaths error: ");
-                consoleTextBox.WriteText(e.Message);
-            }
         }
     }
 
@@ -1606,58 +1246,6 @@ namespace UIIronTextBox
         }
     }
     #endregion CommandHistory Class
-
-    #region Utils
-    namespace Utils
-    {
-        /// <summary>
-        /// 
-        /// </summary>
-        public class Converts
-        {
-            /// <summary>
-            /// Custom MessageBox call. Excepts some random objects from IronPython and converts to string.
-            /// </summary>
-            /// <param name="inobject">Output object from IronPython.</param>
-            public static void MessageBoxIronPy(Object inobject)
-            {
-                Type itstype = inobject.GetType();
-
-                switch (itstype.FullName)
-                {
-                    case "IronPython.Runtime.PythonDictionary":
-                        PythonDictionary IPDict = new PythonDictionary();
-                        IPDict = (PythonDictionary)inobject;
-                        MessageBox.Show(IPDict.ToString());
-                        break;
-                    case "IronPython.Runtime.List":
-                        List IPList = new List();
-                        IPList = (List)inobject;
-                        MessageBox.Show(IPList.ToString());
-                        break;
-                    case "System.String":
-                        MessageBox.Show(inobject.ToString());
-                        break;
-                    case "System.Int32":
-                        MessageBox.Show(Convert.ToString(inobject));
-                        break;
-                    case "System.Collections.Specialized.StringCollection":
-                        StringCollection IPSC = new StringCollection();
-                        IPSC = (StringCollection)inobject;
-                        StringEnumerator SCE = IPSC.GetEnumerator();
-                        string output = "";
-                        while (SCE.MoveNext())
-                            output += SCE.Current.ToString();
-                        MessageBox.Show(output);
-                        break;
-                    default:
-                        MessageBox.Show(inobject.GetType().ToString() + " not yet implemented.");
-                        break;
-                }
-            }
-        }
-    }
-    #endregion Utils
 
     #region CommandEnteredEventArgs Class
     /// <summary>

@@ -28,9 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.textbox = new UIIronTextBox.IronTextBoxControl();
-            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
-            this.consoleToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Console));
             this.restartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.languageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.pythonToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -38,50 +36,8 @@
             this.schemeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
             this.printToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.menuStrip1.SuspendLayout();
+            this.textbox = new UIIronTextBox.IronTextBoxControl();
             this.SuspendLayout();
-            // 
-            // output
-            // 
-            //this.output.AcceptsReturn = true;
-            //this.output.AcceptsTab = true;
-            //this.output.AllowDrop = true;
-            //this.output.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
-            this.textbox.BackColor = System.Drawing.SystemColors.WindowText;
-            this.textbox.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textbox.Cursor = System.Windows.Forms.Cursors.Default;
-            this.textbox.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textbox.Font = new System.Drawing.Font("Lucida Console", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.textbox.ForeColor = System.Drawing.SystemColors.Window;
-            this.textbox.Location = new System.Drawing.Point(0, 24);
-            this.textbox.Margin = new System.Windows.Forms.Padding(0);
-            //this.output.Multiline = true;
-            this.textbox.Name = "output";
-            //this.output.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Both;
-            this.textbox.Size = new System.Drawing.Size(300, 276);
-            this.textbox.TabIndex = 1;
-            this.textbox.TextChanged += new System.EventHandler(this.output_TextChanged);
-            // 
-            // menuStrip1
-            // 
-            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.consoleToolStripMenuItem});
-            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
-            this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(300, 24);
-            this.menuStrip1.TabIndex = 3;
-            this.menuStrip1.Text = "menuStrip1";
-            // 
-            // consoleToolStripMenuItem
-            // 
-            this.consoleToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.restartToolStripMenuItem,
-            this.languageToolStripMenuItem,
-            this.toolStripMenuItem1,
-            this.printToolStripMenuItem});
-            this.consoleToolStripMenuItem.Name = "consoleToolStripMenuItem";
-            this.consoleToolStripMenuItem.Size = new System.Drawing.Size(62, 20);
-            this.consoleToolStripMenuItem.Text = "Console";
             // 
             // restartToolStripMenuItem
             // 
@@ -128,23 +84,40 @@
             this.printToolStripMenuItem.Size = new System.Drawing.Size(126, 22);
             this.printToolStripMenuItem.Text = "Print...";
             // 
+            // textbox
+            // 
+            this.textbox.AutoScroll = true;
+            this.textbox.BackColor = System.Drawing.SystemColors.WindowText;
+            this.textbox.ConsoleTextBackColor = System.Drawing.Color.Black;
+            this.textbox.ConsoleTextFont = new System.Drawing.Font("Lucida Console", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textbox.ConsoleTextForeColor = System.Drawing.Color.White;
+            this.textbox.Cursor = System.Windows.Forms.Cursors.Default;
+            this.textbox.defBuilder = ((System.Text.StringBuilder)(resources.GetObject("textbox.defBuilder")));
+            this.textbox.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.textbox.Font = new System.Drawing.Font("Lucida Console", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textbox.ForeColor = System.Drawing.SystemColors.Window;
+            this.textbox.Location = new System.Drawing.Point(0, 0);
+            this.textbox.Margin = new System.Windows.Forms.Padding(0);
+            this.textbox.Name = "textbox";
+            this.textbox.Prompt = "python> ";
+            this.textbox.Size = new System.Drawing.Size(300, 300);
+            this.textbox.TabIndex = 1;
+            this.textbox.TextChanged += new System.EventHandler(this.output_TextChanged);
+            this.textbox.Load += new System.EventHandler(this.textbox_Load);
+            // 
             // Console
             // 
+            this.AutoScroll = true;
             this.Controls.Add(this.textbox);
-            this.Controls.Add(this.menuStrip1);
+            this.DoubleBuffered = true;
             this.Name = "Console";
             this.Size = new System.Drawing.Size(300, 300);
-            this.menuStrip1.ResumeLayout(false);
-            this.menuStrip1.PerformLayout();
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
         #endregion
 
-        private System.Windows.Forms.MenuStrip menuStrip1;
-        private System.Windows.Forms.ToolStripMenuItem consoleToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem languageToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem printToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem1;

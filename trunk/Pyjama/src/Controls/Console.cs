@@ -23,5 +23,10 @@ namespace Pyjama
         {
 
         }
+
+        private void textbox_Load(object sender, System.EventArgs e)
+        {
+
+        }
     }
 }

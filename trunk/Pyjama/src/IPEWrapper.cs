@@ -103,24 +103,19 @@ namespace UIIronTextBox.IPEWrapper
         /// <param name="text"></param>
         public static void IPEngineResponse(string text)
         {
-            
-            if (!string.IsNullOrEmpty(text.Trim()))
+            if (text != null)
             {
-                //sbOutput.Remove(0, sbOutput.Length);        //Clear
-                text = text.Replace("\\n", "\r\n");         //to support newline for textbox use
-                sbOutput.Append(text + Environment.NewLine);
+                sbOutput.Append(text);
             }
         }
 
-        public static object retobject = new object();
         /// <summary>
         /// Method that allows capture of IronPython output
         /// </summary>
         /// <param name="text"></param>
-        public static void IPEngineResponseO(object o)
+        public static object IPEngineResponseO(object o)
         {
-            Type itstype = o.GetType();
-            retobject = o;
+            return o;
         }
     }
 }
