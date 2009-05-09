@@ -215,10 +215,10 @@ namespace UIIronTextBox
 
             //add the prompt
             this.AddText(Prompt);
-	    this.Select(this.TextLength - prompt.Length, prompt.Length);
-	    this.SelectionFont = new Font("Verdana", 8, FontStyle.Bold);
-	    this.SelectionColor = Color.Red;
-	    this.AddText(""); // clears the selection
+        this.Select(this.TextLength - prompt.Length, prompt.Length);
+        this.SelectionFont = new Font("Verdana", 8, FontStyle.Bold);
+        this.SelectionColor = Color.Red;
+        this.AddText(""); // clears the selection
         }
 
 
@@ -792,19 +792,19 @@ namespace UIIronTextBox
             //environment = ScriptRuntime.CreateFromConfiguration();
             scope = environment.CreateScope();
             engine = environment.GetEngine("py");
-    	    if (System.Environment.OSVersion.Platform == System.PlatformID.Unix) {
-	          engine.SetSearchPaths(new string[] {
-		            "/home/dblank/Myro/Pyjama/python",
-		            "/usr/lib/python2.5",
-    		        "/usr/lib/python2.5/site-packages"});
-	        } else {
+            if (System.Environment.OSVersion.Platform == System.PlatformID.Unix) {
+              engine.SetSearchPaths(new string[] {
+                    "/home/dblank/Myro/Pyjama/python",
+                    "/usr/lib/python2.5",
+                    "/usr/lib/python2.5/site-packages"});
+            } else {
                 engine.SetSearchPaths(new string[] {
-		            Environment.GetFolderPath(System.Environment.SpecialFolder.DesktopDirectory) 
+                    Environment.GetFolderPath(System.Environment.SpecialFolder.DesktopDirectory) 
                         + @"\Myro\Pyjama\python",
-	    	        @"C:\Python24\Lib",
-		            @"C:\Python24\site-packages",
-		            @"C:\Python25\Lib",
-    		        @"C:\Python25\site-packages"});
+                    @"C:\Python24\Lib",
+                    @"C:\Python24\site-packages",
+                    @"C:\Python25\Lib",
+                    @"C:\Python25\site-packages"});
             }
             // Load mscorlib.dll:
             engine.Runtime.LoadAssembly(typeof(string).Assembly);
@@ -895,13 +895,13 @@ namespace UIIronTextBox
                 }
                 else if (command == "python")
                 {
-		  engine = environment.GetEngine("py");
-		  Prompt = "python> ";
+          engine = environment.GetEngine("py");
+          Prompt = "python> ";
                 }
                 else if (command == "ruby")
                 {
-		  engine = environment.GetEngine("rb");
-		  Prompt = "ruby  > ";
+          engine = environment.GetEngine("rb");
+          Prompt = "ruby  > ";
                 }
                 else if (command.StartsWith("prompt"))
                 {
@@ -1007,20 +1007,25 @@ namespace UIIronTextBox
 
                 else //misc commands...
                 {
-          bool error = false;
-          string err_message = null;
-          try
+                   bool error = false;
+                   string err_message = null;
+		   object result = null;
+                   try
                     {
-              // FIXME: runs all at once, then prints result
-              DoIPExecute(command);
-            }
-          catch (Exception err)//catch any errors
+                     // FIXME: runs all at once, then prints result
+                    result = DoIPExecute(command);
+                    }
+                    catch (Exception err)//catch any errors
                     {
-              err_message = err.Message;
-              error = true;
+                        err_message = err.Message;
+                        error = true;
                     }
           // DSB remove newline:
           this.WriteText(IPEStreamWrapper.sbOutput.ToString());
+	  if (result != null) {
+	    this.WriteText("--> " + result.ToString());
+	  }
+
           //added to fix "rearviewmirror" (IPEStreamWrapper.sbOutput not clearing) bug.
           IPEStreamWrapper.sbOutput.Remove(0, IPEStreamWrapper.sbOutput.Length);        //Clear
           if (error) {
@@ -1103,7 +1108,7 @@ namespace UIIronTextBox
             this.Name = "IronTextBoxControl";
             this.Size = new Size(232, 216);
             this.ResumeLayout(false);
-	    this.consoleTextBox.printPrompt();
+            this.consoleTextBox.printPrompt();
         }
         #endregion
 
