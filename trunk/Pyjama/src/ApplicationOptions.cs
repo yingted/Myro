@@ -35,7 +35,8 @@ namespace Pyjama
 
         public static void SaveUserSettings(IsolatedStorageFile isoFile, UserSettings settings)
         {
-            IsolatedStorageFileStream isoStream = new IsolatedStorageFileStream( "UserSettings.xml", FileMode.OpenOrCreate, FileAccess.Write, isoFile);
+            IsolatedStorageFileStream isoStream = new IsolatedStorageFileStream( "UserSettings.xml", 
+		FileMode.OpenOrCreate, FileAccess.Write, isoFile);
 
             try
             {
@@ -54,7 +55,8 @@ namespace Pyjama
                                                  IsolatedStorageScope.Assembly |
                                                  IsolatedStorageScope.Domain,
                                                  GetTypeFromEvidence(AppDomain.CurrentDomain.Evidence, typeof(Url)),
-                                                 GetTypeFromEvidence(Assembly.GetAssembly(typeof(ApplicationOptions)).Evidence, typeof(Url)));
+                                                 GetTypeFromEvidence(Assembly.GetAssembly(typeof(ApplicationOptions)).Evidence, 
+								     typeof(Url)));
         }
 
 
@@ -71,7 +73,8 @@ namespace Pyjama
 
         public static UserSettings LoadUserSettings(IsolatedStorageFile isoFile)
         {
-            IsolatedStorageFileStream isoStream = new IsolatedStorageFileStream("UserSettings.xml", FileMode.OpenOrCreate, FileAccess.Read, isoFile);
+            IsolatedStorageFileStream isoStream = new IsolatedStorageFileStream("UserSettings.xml", 
+                  FileMode.OpenOrCreate, FileAccess.Read, isoFile);
 
             try
             {

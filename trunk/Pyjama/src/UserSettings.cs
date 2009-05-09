@@ -15,5 +15,12 @@ namespace IronEditor.UI.WinForms
                 return new Font(FontName, FontSize);
             }
         }
+        public Font ConsoleFont
+        {
+            get
+            {
+                return new Font(FontName, FontSize);
+            }
+        }
     }
 }

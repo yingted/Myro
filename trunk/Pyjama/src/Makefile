@@ -30,7 +30,6 @@ pyjama.exe: resx
 	./IMainForm.cs \
 	./IronTextBox.cs \
 	./IPEWrapper.cs \
-	./Paths.cs \
 	./LanguageSettings.cs \
 	./MonoEnvironment.cs \
 	./Program.cs \

@@ -730,7 +730,7 @@ namespace UIIronTextBox
         /// </summary>
         public Font ConsoleTextFont
         {
-            get { return consoleTextBox != null ? consoleTextBox.Font : new Font("Lucida Console", 8); }
+            get { return consoleTextBox != null ? consoleTextBox.Font : new Font("Lucida Console", 10); }
             set
             {
                 if (consoleTextBox != null)
