@@ -29,7 +29,6 @@ pyjama.exe: resx
 	./Dialogs/OptionsDialog.cs \
 	./IMainForm.cs \
 	./IronTextBox.cs \
-	./IPEWrapper.cs \
 	./LanguageSettings.cs \
 	./MonoEnvironment.cs \
 	./Program.cs \

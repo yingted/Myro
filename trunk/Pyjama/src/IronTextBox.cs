@@ -42,8 +42,6 @@ using IronRuby.Hosting;
 using Microsoft.Scripting;  //ScriptDomainManager
 using Microsoft.Scripting.Hosting;
 
-using UIIronTextBox.IPEWrapper;
-
 namespace UIIronTextBox
 {
     #region IronTextBox Class
@@ -195,11 +193,9 @@ namespace UIIronTextBox
         public void printPrompt()
         {
             string currentText = this.Text;
-
-            //add newline if it does not exist
+            //add newline if it needs one
             if ((currentText.Length != 0) && (currentText[currentText.Length - 1] != '\n'))
                 printLine();
-
             //add the prompt
             this.AddText(Prompt);
             this.Select(this.TextLength - prompt.Length, prompt.Length - 2);
@@ -209,6 +205,15 @@ namespace UIIronTextBox
             this.SelectionColor = Color.White;
         }
 
+        public void printTextOnNewline(string text)
+        {
+            string currentText = this.Text;
+            //add newline if it needs one
+            if ((currentText.Length != 0) && (currentText[currentText.Length - 1] != '\n'))
+                printLine();
+            //add the prompt
+            this.AddText(text);
+        }
 
         /// <summary>
         /// Sends a newline character to the IronTextBox
@@ -300,19 +305,12 @@ namespace UIIronTextBox
         /// <param name="text">text to be added</param>
         public void AddText(string text)
         {
-            //Optional////////////
-            // DSB scollection.Add(text);  //Optional
-            //this.Text = StringCollecttostring(scollection); //Optional
-            //////////////////////
-
-            // DSB 
             this.Enabled = false;
-            //System.Console.WriteLine("addText: '{0}'", text);
             this.Text += text;
             MoveCaretToEndOfText();
             this.Enabled = true;
             this.Focus();
-            // DSB this.Update();
+            this.Update();
         }
 
         /// <summary>
@@ -428,13 +426,9 @@ namespace UIIronTextBox
             //If current key is enter
             if (IsTerminatorKey(e.KeyChar))
             {
-                //**ANY CHANGES HERE MUST ALSO BE COPIED TO SimEnter()**
                 e.Handled = true;
                 string currentCommand = GetTextAtPrompt();
-
-                //Optional: add the command to the stringcollection
                 scollection.Add(currentCommand);
-                ///////////////////////////////////////////////////
 
                 //If it is not an empty command, then "fire" the command
                 if (currentCommand.Length != 0 && this.defStmtBuilder.Length == 0 && !IsRawInput)
@@ -483,53 +477,9 @@ namespace UIIronTextBox
                         }
                     }
                 }
-
-                //raw_input support...
-                if (currentCommand.Trim().Contains("raw_input("))
-                {
-                    IsRawInput = true;
-
-                    //Note: if raw_input is in quotes this will not work
-                    //fyi: IronPython.Modules.Builtin.RawInput();
-                    //remove the "\r\n" from IPEWrapper
-                    this.Text = this.Text.Remove(this.Text.Length - "\r\n".Length, "\r\n".Length);
-                    rawprompt = (string)this.Lines.GetValue(this.Lines.Length - 1);
-                    MoveCaretToEndOfText();
-
-                    //AddText(temp);
-                    e.Handled = true;
-                    return;
-                }
-
-                if (IsRawInput)
-                {
-                    string rawcommand = (string)this.Lines.GetValue(this.Lines.Length - 2);
-                    rawcommand = rawcommand.Replace(Prompt, "");
-                    string tempprompt = (string)this.Lines.GetValue(this.Lines.Length - 1);
-                    if (rawcommand.Trim().Equals("raw_input()"))
-                    {
-                        IsRawInput = false;
-                    }
-                    else// s = raw_input('--> ')
-                    {
-                        IsRawInput = false;
-                        rawprompt = "";
-                        e.Handled = true;
-                        printPrompt();
-                        return;
-                    }
-                }
-                //if(GetTextAtPrompt().Trim().Equals(""))
                 printPrompt();
             }
-            /*
-            // Handle backspace and stringcollection to help the commandhistory accuracy and debugging.
-            if (e.KeyChar == (char)8 && (GetStringCollectValue(scollection, scollection.Count - 1).Length == 1) && commandHistory.LastCommand.Contains(GetStringCollectValue(scollection, scollection.Count - 1)))
-            {
-                scollection.RemoveAt(scollection.Count - 1);
-            }*/
-        }
-
+	}
         /// <summary>
         /// Build a string of returning spaces for indenting
         /// </summary>
@@ -595,26 +545,6 @@ namespace UIIronTextBox
                     ReplaceTextAtPrompt(""); // FIXME: use templine, if started, and then ""
                 e.Handled = true;
             }
-            /*
-        else if (e.KeyCode == System.Windows.Forms.Keys.Escape)
-        {
-            // Performs command completion
-            string currentTextAtPrompt = GetTextAtPrompt();
-            string lastCommand = commandHistory.LastCommand;
-
-            //If the last command is not nul and no text at the current prompt or lastcommand starts with the currenttext at the current prompt,
-            //then autofill because the right arrow key was pressed.
-            if (lastCommand != null && (currentTextAtPrompt.Length == 0 || lastCommand.StartsWith(currentTextAtPrompt)))
-            {
-                if (lastCommand.Length > currentTextAtPrompt.Length)
-                {
-                    int i = scollection.Count;
-                    //scollection.Insert(scollection.Count, lastCommand[currentTextAtPrompt.Length].ToString());
-                    this.AddText(lastCommand[currentTextAtPrompt.Length].ToString());
-                }
-            }
-        }
-             */
         }
 
 
@@ -800,47 +730,6 @@ namespace UIIronTextBox
             CommandEntered += new UIIronTextBox.EventCommandEntered(irontextboxControl_CommandEntered);
         }
 
-        /// <summary>
-        /// Executes the Python file within the IronTextBox environment.
-        /// A nice way to quickly get a Python module in CLI to test or use.
-        /// </summary>
-        /// <param name="pyfile">Python file (.py)</param>
-        /// <returns>object</returns>
-
-        public object DoIPExecuteFile(string filename)
-        {
-            ScriptSource source = engine.CreateScriptSourceFromFile(filename);
-            return source.Execute(scope);
-        }
-
-        /// <summary>
-        /// Executes the code in SourceCodeKind.SingleStatement to fire the command event
-        /// Use DoIPEvaluate if you do not wish to fire the command event
-        /// </summary>
-        /// <param name="pycode">python statement</param>
-        /// <returns>object</returns>
-
-        public object DoIPExecute(string code)
-        {
-            ScriptSource source = engine.CreateScriptSourceFromString(code,
-                         SourceCodeKind.SingleStatement);
-            return source.Execute(scope);
-        }
-
-        /// <summary>
-        /// Executes the code in SourceCodeKind.Expression not to fire the command event
-        /// Use DoIPExecute if you do wish to fire the command event
-        /// </summary>
-        /// <param name="pycode">Python expression</param>
-        /// <returns>object</returns>
-
-        public object DoIPEvaluate(string code)
-        {
-            ScriptSource source = engine.CreateScriptSourceFromString(code,
-                         SourceCodeKind.Expression);
-            return source.Execute(scope);
-        }
-
         void irontextboxControl_CommandEntered(object sender, UIIronTextBox.CommandEnteredEventArgs e)
         {
             string command = e.Command.TrimEnd();
@@ -849,15 +738,8 @@ namespace UIIronTextBox
 
         public void DoCommand(string command)
         {
-            engine.Runtime.IO.SetOutput(new UIIronTextBox.IPEWrapper.IPEStreamWrapper(
-                          IPEWrapper.IPEStreamWrapper.IPEngineResponse),
-                    engine.Runtime.IO.InputEncoding);
-
-            //Create a temp object to use
-            object tempobject;
-
-            //Begin IronTextBox evaluation if something there....
-            if (command != "")
+	  
+	  if (command != "")
             {
                 if (command == "clear")
                 {
@@ -879,93 +761,77 @@ namespace UIIronTextBox
                 }
                 else if (command == "runfile")
                 {
-                    //runfile - Run a .Py file.  Calls OpenFileDialog to PythonEngine.RunFile....
-                    //  goodfor debuging .y file within IDE
-                    this.Runfile();
+		  //Browse to the file...
+		  OpenFileDialog ofd = new OpenFileDialog();
+		  //ofd.InitialDirectory = UIIronTextBox.Paths.MiscDirs.vs_Projects;
+		  ofd.Filter = "Python files (*.py)|*.py|All files (*.*)|*.*";
+		  ofd.ShowDialog();
+		  Execute(ofd.FileName, SourceCodeKind.File);
                 }
-                else if (command.TrimEnd().EndsWith(":") == true)
+                else // Command
                 {
-                    //Need to do a ReadStatement...
-                    try
-                    {
-                        bool isMultiLine = false;
-                        int autoIndentSize = 0;
-                        int numberOfBlankLines = 0;
-                        object ExecWrapper = null;
-                        bool result;
-
-                        string line = command;
-                        if (line == null)
-                        {
-                            if (ExecWrapper != null)
-                            {
-                                //Ops.Call(ExecWrapper, new object[] { null });//not needed for IP2?
-                            }
-                            result = false;
-                        }
-
-                        defBuilder.Append(line);
-                        defBuilder.Append("\r\n");
-
-                        bool endOfInput = (line.Length == 0);
-                        bool parsingMultiLineString;
-                        bool parsingMultiLineCmpdStmt;
-
-                        //old//s = ParsetheText(consoleTextBox.global_eng.Sys, new CompilerContext(), defBuilder.ToString(), endOfInput, out parsingMultiLineString, out isMultiLine);
-                        string[] seperators = new string[] { "\r" };
-                        string[] allpieces = defBuilder.ToString().Split(seperators, StringSplitOptions.None);
-
-                        if (/*Options.AutoIndentSize != 0 &&*/ line.Trim().Length == 0)
-                            numberOfBlankLines++;
-                        else
-                            numberOfBlankLines = 0;
-
-
-                        if (allpieces.Length > 1)
-                        {
-                            // Note that splitting a string literal over multiple lines does not 
-                            // constitute a multi-line statement.
-                            isMultiLine = true;
-                        }
-
-                        //autoIndentSize = Parser.GetNextAutoIndentSize(defBuilder.ToString(), autoIndentSize);//Not needed in IP2?
-                        result = true;
-                    }
-                    catch
-                    {
-                    }
-                }
-
-                else //misc commands...
-                {
-                    bool error = false;
-                    string err_message = null;
-                    object result = null;
-                    try
-                    {
-                        // FIXME: runs all at once, then prints result
-                        result = DoIPExecute(command);
-                    }
-                    catch (Exception err)//catch any errors
-                    {
-                        err_message = err.Message;
-                        error = true;
-                    }
-                    // DSB remove newline:
-                    this.WriteText(IPEStreamWrapper.sbOutput.ToString());
-                    if (result != null)
-                    {
-                        this.WriteText("--> " + result.ToString());
-                    }
-
-                    //added to fix "rearviewmirror" (IPEStreamWrapper.sbOutput not clearing) bug.
-                    IPEStreamWrapper.sbOutput.Remove(0, IPEStreamWrapper.sbOutput.Length);        //Clear
-                    if (error)
-                    {
-                        this.WriteText("\r\nPython error: " + err_message);
-                    }
+		  Execute(command, SourceCodeKind.InteractiveCode);
                 }
             }
+        }
+
+	public object Execute(string command, SourceCodeKind sctype) {
+	  bool error = false;
+	  string err_message = null;
+	  object result = null;
+	  string output = null;
+	  MemoryStream ms = new MemoryStream();
+	  engine.Runtime.IO.SetOutput(ms, new StreamWriter(ms));
+	  ScriptSource source = null;
+	  // Compile:
+	  if (sctype == SourceCodeKind.File) {
+	    source = engine.CreateScriptSourceFromFile(command, Encoding.GetEncoding("utf-8"));
+	  } else {
+	    source = engine.CreateScriptSourceFromString(command, sctype);
+	  }
+	  // Run:
+	  try {
+	    result = source.Execute(scope);
+	  }
+	  catch (Exception err) {
+	    if (sctype != SourceCodeKind.File) {
+	      // Let's try as statements
+	      err_message = err.Message;
+	      error = true;
+	      source = engine.CreateScriptSourceFromString(command, SourceCodeKind.Statements);
+	      try {
+		result = source.Execute(scope);
+		err_message = null;
+		error = false;
+	      } catch (Exception err2) {
+		err_message = err2.Message;
+		error = true;
+	      }
+	    }
+	  } 
+	  output = ReadFromStream(ms);
+	  // ----------- Output:
+	  if (output != null)
+	    {
+	      this.WriteText(output);
+	    }
+	  if (error)
+	    {
+	      consoleTextBox.printTextOnNewline("Script error: " + err_message + "\n");
+	    } 
+	  else if (result != null) {
+	    this.WriteText(result.ToString());
+	  }
+
+	  return result;
+	}
+
+	private static string ReadFromStream(MemoryStream ms) {
+	  int length = (int)ms.Length;
+	  Byte[] bytes = new Byte[length];
+	  ms.Seek(0, SeekOrigin.Begin);
+	  ms.Read(bytes, 0, (int)ms.Length);
+	  return Encoding.GetEncoding("utf-8").GetString(bytes, 0, (int)ms.Length);
         }
 
         /// <summary>
@@ -1089,65 +955,6 @@ namespace UIIronTextBox
         {
             consoleTextBox.WriteText(text);
         }
-
-        /// <summary>
-        /// Simulate the Enter KeyPress event.
-        /// </summary>
-        public void SimEnter()
-        {
-            string currentCommand = consoleTextBox.GetTextAtPrompt();
-            consoleTextBox.Focus();
-
-            //Optional: add the command to the stringcollection
-            //consoleTextBox.scollection.Add(currentCommand);
-            ///////////////////////////////////////////////////
-
-            //If it is not an empty command, then "fire" the command
-            if (currentCommand.Length != 0)
-            {
-                //consoleTextBox.printLine();
-                ((UIIronTextBox.IronTextBoxControl)consoleTextBox.Parent).FireCommandEntered(currentCommand);
-                consoleTextBox.AddcommandHistory(currentCommand);
-            }
-            else
-            {
-                //if it is an empty command let's see if we just finished a def statement
-                if (consoleTextBox.defStmtBuilder.Length != 0)
-                {
-                    ((UIIronTextBox.IronTextBoxControl)consoleTextBox.Parent).FireCommandEntered(consoleTextBox.defStmtBuilder.ToString());
-                    consoleTextBox.AddcommandHistory(consoleTextBox.defStmtBuilder.ToString());
-
-                    //we just finished a def so clear the defbuilder
-                    consoleTextBox.defStmtBuilder = consoleTextBox.defStmtBuilder.Remove(0, consoleTextBox.defStmtBuilder.Length);
-                }
-            }
-            consoleTextBox.printPrompt();
-        }
-
-        /// <summary>
-        /// Run a .Py file.  Calls OpenFileDialog to PythonEngine.RunFile.
-        /// </summary>
-        public void Runfile()
-        {
-            try
-            {
-                //Browse to the file...
-                OpenFileDialog ofd = new OpenFileDialog();
-                //ofd.InitialDirectory = UIIronTextBox.Paths.MiscDirs.vs_Projects;
-                ofd.Filter = "Python files (*.py)|*.py|All files (*.*)|*.*";
-                ofd.ShowDialog();
-
-                DoIPExecuteFile(ofd.FileName);
-
-            }
-            catch (Exception ex)
-            {
-                consoleTextBox.WriteText("The file could not be read:");
-                consoleTextBox.WriteText(ex.Message);
-            }
-
-        }
-
 
         /// <summary>
         /// 
