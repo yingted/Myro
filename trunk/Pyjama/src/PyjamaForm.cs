@@ -219,7 +219,7 @@ namespace Pyjama
         private UserSettings CreateUserSettings(OptionsDialog dialog)
         {
             UserSettings settings = new UserSettings();
-            settings.FontName = dialog.SelectedFont();
+            settings.FontName = dialog.SelectedName();
             settings.FontSize = dialog.SelectedSize();
 
             return settings;

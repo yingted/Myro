@@ -42,7 +42,7 @@
             // 
             this.cancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.cancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.cancel.Location = new System.Drawing.Point(536, 9);
+            this.cancel.Location = new System.Drawing.Point(455, 9);
             this.cancel.Name = "cancel";
             this.cancel.Size = new System.Drawing.Size(75, 23);
             this.cancel.TabIndex = 0;
@@ -53,7 +53,7 @@
             // save
             // 
             this.save.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.save.Location = new System.Drawing.Point(455, 9);
+            this.save.Location = new System.Drawing.Point(374, 9);
             this.save.Name = "save";
             this.save.Size = new System.Drawing.Size(75, 23);
             this.save.TabIndex = 1;
@@ -68,25 +68,26 @@
             this.panel1.Dock = System.Windows.Forms.DockStyle.Left;
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(145, 329);
+            this.panel1.Size = new System.Drawing.Size(148, 175);
             this.panel1.TabIndex = 2;
             // 
             // optionsTree
             // 
-            this.optionsTree.Dock = System.Windows.Forms.DockStyle.Left;
+            this.optionsTree.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)));
             this.optionsTree.Location = new System.Drawing.Point(0, 0);
             this.optionsTree.Name = "optionsTree";
             this.optionsTree.ShowRootLines = false;
-            this.optionsTree.Size = new System.Drawing.Size(145, 329);
+            this.optionsTree.Size = new System.Drawing.Size(145, 175);
             this.optionsTree.TabIndex = 3;
             this.optionsTree.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.optionsTree_AfterSelect);
             // 
             // optionPanel
             // 
             this.optionPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.optionPanel.Location = new System.Drawing.Point(145, 0);
+            this.optionPanel.Location = new System.Drawing.Point(148, 0);
             this.optionPanel.Name = "optionPanel";
-            this.optionPanel.Size = new System.Drawing.Size(478, 329);
+            this.optionPanel.Size = new System.Drawing.Size(394, 175);
             this.optionPanel.TabIndex = 3;
             // 
             // panel3
@@ -95,9 +96,9 @@
             this.panel3.Controls.Add(this.save);
             this.panel3.Controls.Add(this.cancel);
             this.panel3.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panel3.Location = new System.Drawing.Point(0, 329);
+            this.panel3.Location = new System.Drawing.Point(0, 175);
             this.panel3.Name = "panel3";
-            this.panel3.Size = new System.Drawing.Size(623, 44);
+            this.panel3.Size = new System.Drawing.Size(542, 44);
             this.panel3.TabIndex = 4;
             // 
             // OptionsDialog
@@ -105,13 +106,18 @@
             this.AcceptButton = this.save;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScroll = true;
+            this.AutoSize = true;
+            this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.CancelButton = this.cancel;
-            this.ClientSize = new System.Drawing.Size(623, 373);
+            this.ClientSize = new System.Drawing.Size(542, 219);
             this.Controls.Add(this.optionPanel);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.panel3);
+            this.MaximizeBox = true;
+            this.MinimumSize = new System.Drawing.Size(548, 245);
             this.Name = "OptionsDialog";
-            this.Text = "Application Options";
+            this.Text = "Pyjama Options";
             this.panel1.ResumeLayout(false);
             this.panel3.ResumeLayout(false);
             this.ResumeLayout(false);

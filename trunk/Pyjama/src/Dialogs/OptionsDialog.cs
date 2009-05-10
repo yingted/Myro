@@ -6,14 +6,26 @@ namespace Pyjama.Dialogs
     public partial class OptionsDialog : BaseDialog
     {
         private FontControl fontControl;
+        private FontControl shellFontControl;
+
         public float SelectedSize()
         {
             return fontControl.GetSize();
         }
 
-        public string SelectedFont()
+        public string SelectedName()
         {
             return fontControl.GetFont();
+        }
+
+        public float ShellFontSize()
+        {
+            return shellFontControl.GetSize();
+        }
+
+        public string ShellFont()
+        {
+            return shellFontControl.GetFont();
         }
 
         public OptionsDialog()
@@ -24,12 +36,19 @@ namespace Pyjama.Dialogs
             fontControl = new FontControl(settings);
             fontControl.Dock = DockStyle.Top;
 
+            shellFontControl = new FontControl(settings);
+            shellFontControl.Dock = DockStyle.Top;
 
             TreeNode fontNode = new TreeNode();
-            fontNode.Text = "Font";
+            fontNode.Text = "Editor Font";
             fontNode.Tag = fontControl;
 
+            TreeNode shellFontNode = new TreeNode();
+            shellFontNode.Text = "Shell Font";
+            shellFontNode.Tag = shellFontControl;
+
             optionsTree.Nodes.Add(fontNode);
+            optionsTree.Nodes.Add(shellFontNode);
         }
 
  
