@@ -154,7 +154,6 @@
     <Compile Include="Dialogs\OptionsDialog.Designer.cs">
       <DependentUpon>OptionsDialog.cs</DependentUpon>
     </Compile>
-    <Compile Include="IPEWrapper.cs" />
     <Compile Include="IronTextBox.cs">
       <SubType>Component</SubType>
     </Compile>
