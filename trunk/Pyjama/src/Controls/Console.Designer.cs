@@ -89,12 +89,12 @@
             this.textbox.AutoScroll = true;
             this.textbox.BackColor = System.Drawing.SystemColors.WindowText;
             this.textbox.ConsoleTextBackColor = System.Drawing.Color.Black;
-            this.textbox.ConsoleTextFont = new System.Drawing.Font("Lucida Console", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textbox.ConsoleTextFont = new System.Drawing.Font("DejaVu Sans Mono", 10);
             this.textbox.ConsoleTextForeColor = System.Drawing.Color.White;
             this.textbox.Cursor = System.Windows.Forms.Cursors.Default;
             this.textbox.defBuilder = ((System.Text.StringBuilder)(resources.GetObject("textbox.defBuilder")));
             this.textbox.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textbox.Font = new System.Drawing.Font("Lucida Console", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.textbox.Font = new System.Drawing.Font("DejaVu Sans Mono", 10);
             this.textbox.ForeColor = System.Drawing.SystemColors.Window;
             this.textbox.Location = new System.Drawing.Point(0, 0);
             this.textbox.Margin = new System.Windows.Forms.Padding(0);

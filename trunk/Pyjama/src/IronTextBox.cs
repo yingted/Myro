@@ -44,13 +44,11 @@ using Microsoft.Scripting.Hosting;
 
 namespace UIIronTextBox
 {
-    #region IronTextBox Class
     [ToolboxItem(true)]
     [ToolboxBitmap(typeof(IronTextBox))]
     [DesignerAttribute(typeof(IronTextBoxControl))]
     public class IronTextBox : RichTextBox
     {
-        #region IronTextBox members
         /// <summary>
         /// Default prompt text.
         /// </summary>
@@ -101,8 +99,6 @@ namespace UIIronTextBox
         /// </summary>
         public string rawprompt = "";
 
-        #endregion IronTextBox members
-
         internal IronTextBox()
         {
             InitializeComponent();
@@ -115,7 +111,6 @@ namespace UIIronTextBox
             intellisense.ShowAlways = true;
         }
 
-        #region Overrides
         /// <summary> 
         /// Clean up any resources being used.
         /// </summary>
@@ -152,13 +147,7 @@ namespace UIIronTextBox
             }
             base.WndProc(ref m);
         }
-        #endregion Overrides
 
-        #region Component Designer generated code
-        /// <summary> 
-        /// Required method for Designer support - do not modify 
-        /// the contents of this method with the code editor.
-        /// </summary>
         private void InitializeComponent()
         {
             this.SuspendLayout();
@@ -173,7 +162,6 @@ namespace UIIronTextBox
             this.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Both;
             this.Size = new Size(400, 176);
             this.TabIndex = 0;
-            this.Text = "";
             this.KeyPress += new KeyPressEventHandler(this.consoleTextBox_KeyPress);
             this.KeyDown += new KeyEventHandler(ConsoleControl_KeyDown);
             // 
@@ -184,24 +172,21 @@ namespace UIIronTextBox
             this.ResumeLayout(false);
 
         }
-        #endregion
 
-        #region IronTextBox Base Methods
-        /// <summary>
-        /// Sends the prompt to the IronTextBox
-        /// </summary>
         public void printPrompt()
         {
+	  //System.Console.WriteLine("[print prompt]");
             string currentText = this.Text;
             //add newline if it needs one
             if ((currentText.Length != 0) && (currentText[currentText.Length - 1] != '\n'))
-                printLine();
+	      printLine();
             //add the prompt
             this.AddText(Prompt);
             this.Select(this.TextLength - prompt.Length, prompt.Length - 2);
-            this.SelectionColor = Color.Red;
-            this.Select(this.TextLength, 0); // clears the selection
+            this.SelectionColor = Color.Yellow;
+            //this.Select(this.TextLength, 0); // clears the selection
             MoveCaretToEndOfText();
+	    this.SelectionStart = this.TextLength;
             this.SelectionColor = Color.White;
         }
 
@@ -220,18 +205,11 @@ namespace UIIronTextBox
             this.AddText(text);
         }
 
-        /// <summary>
-        /// Sends a newline character to the IronTextBox
-        /// </summary>
         public void printLine()
         {
             this.AddText(System.Environment.NewLine);
         }
 
-        /// <summary>
-        /// Returns currentline's text string
-        /// </summary>
-        /// <returns>Returns currentline's text string</returns>
         public string GetTextAtPrompt()
         {
             if (GetCurrentLine() != "")
@@ -243,30 +221,17 @@ namespace UIIronTextBox
             }
         }
 
-        /// <summary>
-        /// Add a command to IronTextBox command history.
-        /// </summary>
-        /// <param name="currentCommand">IronTextBox command line</param>
         public void AddcommandHistory(string currentCommand)
         {
             commandHistory.Add(currentCommand);
         }
 
-        /// <summary>
-        /// Returns true if (char)13 '\r'
-        /// </summary>
-        /// <param name="keyChar">char of keypressed</param>
-        /// <returns>Returns true if (char)13 '\r'</returns>
         private bool IsTerminatorKey(char keyChar)
         {
             //System.Console.WriteLine((int)keyChar);
             return ((int)keyChar) == 13;
         }
 
-        /// <summary>
-        /// Returns the current line, including prompt.
-        /// </summary>
-        /// <returns>Returns the current line, including prompt.</returns>
         private string GetCurrentLine()
         {
             if (this.Lines.Length > 0)
@@ -277,10 +242,6 @@ namespace UIIronTextBox
                 return "";
         }
 
-        /// <summary>
-        /// Replaces the text at the current prompt.
-        /// </summary>
-        /// <param name="text">new text to replace old text.</param>
         private void ReplaceTextAtPrompt(string text)
         {
             string currentLine = GetCurrentLine();
@@ -295,33 +256,22 @@ namespace UIIronTextBox
             }
         }
 
-        /// <summary>
-        /// Returns true if caret is positioned on the currentline.
-        /// </summary>
-        /// <returns>Returns true if caret is positioned on the currentline.</returns>
         private bool IsCaretAtCurrentLine()
         {
             return this.TextLength - this.SelectionStart <= GetCurrentLine().Length;
         }
 
-        /// <summary>
-        /// Adds text to the IronTextBox
-        /// </summary>
-        /// <param name="text">text to be added</param>
         public void AddText(string text)
         {
             this.Enabled = false;
-            this.Text += text;
-            MoveCaretToEndOfText();
+	    //System.Console.WriteLine("AddText: '{0}'", text);
+            this.AppendText(text);
             this.Enabled = true;
+            //MoveCaretToEndOfText();
+            //this.Update();
             this.Focus();
-            this.Update();
         }
 
-        /// <summary>
-        /// Returns a string retrieved from a StringCollection.
-        /// </summary>
-        /// <param name="inCol">StringCollection to be searched.</param>
         public string StringCollecttostring(System.Collections.Specialized.StringCollection inCol)
         {
             string value = "";
@@ -340,7 +290,7 @@ namespace UIIronTextBox
         private void MoveCaretToEndOfText()
         {
             this.SelectionStart = this.TextLength;
-            this.Select(this.Text.Length, 0);
+            this.Select(this.TextLength, 0);
             //this.ScrollToCaret();
             //System.Console.WriteLine("scroll to caret!");
         }
@@ -397,98 +347,28 @@ namespace UIIronTextBox
             set { SetPromptText(value); }
         }
 
-        /// <summary>
-        /// Returns the string array of the command history. 
-        /// </summary>
-        /// <returns></returns>
         public string[] GetCommandHistory()
         {
             return commandHistory.GetCommandHistory();
         }
 
-        /// <summary>
-        /// Adds text to the IronTextBox.
-        /// </summary>
-        /// <param name="text"></param>
         public void WriteText(string text)
         {
             this.AddText(text);
         }
 
-        #region IronTextBox Events
-        /// <summary>
-        /// Handle KeyPress events here.
-        /// </summary>
-        /// <param name="sender">object</param>
-        /// <param name="e">KeyPressEventArgs</param>
         private void consoleTextBox_KeyPress(object sender, System.Windows.Forms.KeyPressEventArgs e)
         {
-            // Handle "keypress here"
-            // Need to handle non-keypress in the WndProc overload
-            //If current key is a backspace and is just before prompt, then stay put!
-            //System.Console.WriteLine("console key PRESS KeyChar: " + (int)e.KeyChar);
-
-            //If current key is enter
             if (IsTerminatorKey(e.KeyChar))
             {
                 e.Handled = true;
                 string currentCommand = GetTextAtPrompt();
-                scollection.Add(currentCommand);
-
-                //If it is not an empty command, then "fire" the command
-                if (currentCommand.Length != 0 && this.defStmtBuilder.Length == 0 && !IsRawInput)
-                {
-                    if (!currentCommand.Trim().Contains("raw_input"))
-                        printLine();
-                    ((UIIronTextBox.IronTextBoxControl)this.Parent).FireCommandEntered(currentCommand);
-                    commandHistory.Add(currentCommand);
-                }
-
-                //if we are doing a def statement (currentCommand.EndsWith(":"))
-                if (this.defStmtBuilder.Length != 0)
-                {
-                    if (currentCommand.EndsWith(":"))
-                    {
-                        //we are in the first line of a def, it has already printed to console
-
-                        //autoindent the current autoindent value
-                        //int asize = Parser.GetNextAutoIndentSize(this.defStmtBuilder.ToString()+"\r\n", 4);
-
-                        //don't printPrompt();
-                        ReplaceTextAtPrompt("..." + CreateIndentstring(4));
-                        e.Handled = true;
-                        return;
-
-                    }
-                    else//We are past the first line, and are indenting or ending a def
-                    {
-                        this.defStmtBuilder.Append(currentCommand + "\r\n");
-
-                        //if it is an empty command let's see if we just finished a def statement
-                        if (currentCommand.Trim().Equals(""))
-                        {
-                            ((UIIronTextBox.IronTextBoxControl)this.Parent).FireCommandEntered(this.defStmtBuilder.ToString().Trim());
-                            commandHistory.Add(this.defStmtBuilder.ToString());
-
-                            //we just finished a def so clear the defbuilder
-                            this.defStmtBuilder = this.defStmtBuilder.Remove(0, this.defStmtBuilder.Length);
-                        }
-                        else
-                        {
-                            //don't printPrompt();
-                            AddText("\r\n..." + CreateIndentstring(4));
-                            e.Handled = true;
-                            return;
-                        }
-                    }
-                }
+		commandHistory.Add(currentCommand);
+		((UIIronTextBox.IronTextBoxControl)this.Parent).DoCommand(currentCommand);
                 printPrompt();
             }
 	}
-        /// <summary>
-        /// Build a string of returning spaces for indenting
-        /// </summary>
-        /// <param name="indentsize"></param>
+
         /// <returns></returns>
         public string CreateIndentstring(int indentsize)
         {
@@ -525,7 +405,7 @@ namespace UIIronTextBox
             {
                 /// DSB 
                 string currentLine = GetCurrentLine();
-                this.SelectionStart = this.Text.Length - currentLine.Length + prompt.Length;
+                this.SelectionStart = this.TextLength - currentLine.Length + prompt.Length;
                 //System.Console.WriteLine("currentLine = {0}, SelectionStart = {1}", currentLine, SelectionStart);
                 //this.ScrollToCaret();
                 e.Handled = true;
@@ -553,35 +433,10 @@ namespace UIIronTextBox
         }
 
 
-        #endregion IronTextBox Events
-
-        #endregion IronTextBox Base Methods
-
-        #region IronTextBox IronPython Support
-        /// <summary>
-        /// Stores input commands from IronTextBox
-        /// </summary>
         StringCollection input = new StringCollection();
-
-        /// <summary>
-        /// Stores output generated from IronPython
-        /// </summary>
         StringCollection output = new StringCollection();
-
-        #endregion IronTextBox IronPython Support
-
-        #region StringCollection support
-        /// <summary>
-        /// Commands and strings from IronTextBox.AddText() gets stored here
-        /// Status: Currently not used 3/12/06 11:16am
-        /// </summary>
         System.Collections.Specialized.StringCollection scollection = new System.Collections.Specialized.StringCollection();
 
-        /// <summary>
-        /// Returns a string retrieved from a StringCollection.
-        /// </summary>
-        /// <param name="inCol">StringCollection to be searched.</param>
-        /// <param name="index">index of StringCollection to retrieve.</param>
         public string GetStringCollectValue(System.Collections.Specialized.StringCollection inCol, int index)
         {
             string value = "";
@@ -599,14 +454,8 @@ namespace UIIronTextBox
 
             return value;
         }
-        #endregion StringCollection support
     }
-    #endregion IronTextBox Class
 
-    #region IronTextBoxControl Class
-    /// <summary>
-    /// Summary description for IronTextBoxControl.
-    /// </summary>
     public class IronTextBoxControl : UserControl
     {
         public ScriptRuntime environment;
@@ -681,12 +530,6 @@ namespace UIIronTextBox
             get { return consoleTextBox.Prompt; }
             set { consoleTextBox.Prompt = value; }
         }
-    #endregion IronTextBoxControl members
-
-
-        /// <summary>
-        /// IronTextBoxControl
-        /// </summary>
 
         public IronTextBoxControl()
         {
@@ -743,7 +586,7 @@ namespace UIIronTextBox
 
         public void DoCommand(string command)
         {
-	  
+	  //System.Console.WriteLine("DoCommand: '{0}'", command);
 	  if (command != "")
             {
                 if (command == "clear")
@@ -781,6 +624,8 @@ namespace UIIronTextBox
         }
 
 	public void Execute(string command, SourceCodeKind sctype) {
+	  ExceptionOperations eo;
+	  eo = engine.GetService<ExceptionOperations>();
 	  bool error = false;
 	  string err_message = null;
 	  string output = null;
@@ -795,11 +640,12 @@ namespace UIIronTextBox
 	    source = engine.CreateScriptSourceFromString(command, sctype);
 	  }
 	  // Run:
+	  //System.Console.WriteLine("Executing '{0}'...", command);
 	  try {
 	    source.Execute(scope);
 	  }
 	  catch (Exception err) {
-	    err_message = err.Message;
+	    err_message = eo.FormatException(err);
 	    error = true;
 	    if (sctype != SourceCodeKind.File) {
 	      // Let's try again, as statements:
@@ -811,7 +657,7 @@ namespace UIIronTextBox
 		error = false;
 	      } catch (Exception err2) {
 		// Fail!
-		err_message = err2.Message;
+		err_message = eo.FormatException(err);
 		error = true;
 	      }
 	    }
@@ -820,7 +666,11 @@ namespace UIIronTextBox
 	  // ----------- Output:
 	  if (error)
 	    {
-	      consoleTextBox.printTextOnNewline("Script error: " + err_message + "\n");
+	      consoleTextBox.SelectionStart = consoleTextBox.TextLength;
+	      consoleTextBox.SelectionColor = Color.Red;
+	      consoleTextBox.printTextOnNewline(err_message);
+	      consoleTextBox.SelectionStart = consoleTextBox.TextLength;
+	      consoleTextBox.SelectionColor = Color.White;
 	    } 
 	  else if (output != null)
 	    {
@@ -870,11 +720,6 @@ namespace UIIronTextBox
             return helpText;
         }
 
-        #region Component Designer generated code
-        /// <summary> 
-        /// Required method for Designer support - do not modify 
-        /// the contents of this method with the code editor.
-        /// </summary>
         private void InitializeComponent()
         {
             this.consoleTextBox = new UIIronTextBox.IronTextBox();
@@ -902,15 +747,10 @@ namespace UIIronTextBox
             this.Name = "IronTextBoxControl";
             this.Size = new Size(232, 216);
             this.ResumeLayout(false);
-            this.consoleTextBox.AddText("Pyjama Shell\n------------\n\n");
+            this.consoleTextBox.Text = "Pyjama Shell\n~~~~~~~~~~~~~~~~~~~~\n";
             this.consoleTextBox.printPrompt();
         }
-        #endregion
 
-        #region Overides
-        /// <summary> 
-        /// Clean up any resources being used.
-        /// </summary>
         protected override void Dispose(bool disposing)
         {
             if (disposing)
@@ -922,12 +762,7 @@ namespace UIIronTextBox
             }
             base.Dispose(disposing);
         }
-        #endregion Overides
 
-        /// <summary>
-        /// Run the command.
-        /// </summary>
-        /// <param name="command">Command line string.</param>
         internal void FireCommandEntered(string command)
         {
             OnCommandEntered(command);
@@ -1003,7 +838,6 @@ namespace UIIronTextBox
         }
     }
 
-    #region CommandHistory Class
     internal class CommandHistory
     {
         private int currentPosn;
@@ -1056,12 +890,7 @@ namespace UIIronTextBox
             return (string[])commandHistory.ToArray(typeof(string));
         }
     }
-    #endregion CommandHistory Class
 
-    #region CommandEnteredEventArgs Class
-    /// <summary>
-    /// Command argument class.
-    /// </summary>
     public class CommandEnteredEventArgs : EventArgs
     {
         string command;
@@ -1075,7 +904,6 @@ namespace UIIronTextBox
             get { return command; }
         }
     }
-    #endregion CommandEnteredEventArgs Class
 
     public delegate void EventCommandEntered(object sender, CommandEnteredEventArgs e);
 }
