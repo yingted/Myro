@@ -106,7 +106,7 @@ namespace UIIronTextBox
         internal IronTextBox()
         {
             InitializeComponent();
-            this.WordWrap = false;
+            this.WordWrap = true;
             // Set up the delays for the ToolTip.
             intellisense.AutoPopDelay = 1000;
             intellisense.InitialDelay = 100;
@@ -207,10 +207,15 @@ namespace UIIronTextBox
 
         public void printTextOnNewline(string text)
         {
+	  //System.Console.WriteLine("newline?");
             string currentText = this.Text;
             //add newline if it needs one
-            if ((currentText.Length != 0) && (currentText[currentText.Length - 1] != '\n'))
+            if (currentText.Length != 0) {
+	      if (currentText[currentText.Length - 1] != '\n' && 
+		  currentText[currentText.Length - 1] != '\r') {
                 printLine();
+	      }
+	    }
             //add the prompt
             this.AddText(text);
         }
@@ -660,7 +665,7 @@ namespace UIIronTextBox
         /// </summary>
         public Font ConsoleTextFont
         {
-            get { return consoleTextBox != null ? consoleTextBox.Font : new Font("Lucida Console", 10); }
+            get { return consoleTextBox != null ? consoleTextBox.Font : new Font("DejaVu Sans Mono", 10); }
             set
             {
                 if (consoleTextBox != null)
@@ -775,13 +780,13 @@ namespace UIIronTextBox
             }
         }
 
-	public object Execute(string command, SourceCodeKind sctype) {
+	public void Execute(string command, SourceCodeKind sctype) {
 	  bool error = false;
 	  string err_message = null;
-	  object result = null;
 	  string output = null;
 	  MemoryStream ms = new MemoryStream();
 	  engine.Runtime.IO.SetOutput(ms, new StreamWriter(ms));
+	  engine.Runtime.IO.SetErrorOutput(ms, new StreamWriter(ms));
 	  ScriptSource source = null;
 	  // Compile:
 	  if (sctype == SourceCodeKind.File) {
@@ -791,19 +796,21 @@ namespace UIIronTextBox
 	  }
 	  // Run:
 	  try {
-	    result = source.Execute(scope);
+	    source.Execute(scope);
 	  }
 	  catch (Exception err) {
+	    err_message = err.Message;
+	    error = true;
 	    if (sctype != SourceCodeKind.File) {
-	      // Let's try as statements
-	      err_message = err.Message;
-	      error = true;
+	      // Let's try again, as statements:
 	      source = engine.CreateScriptSourceFromString(command, SourceCodeKind.Statements);
 	      try {
-		result = source.Execute(scope);
+		source.Execute(scope);
+		// It worked!
 		err_message = null;
 		error = false;
 	      } catch (Exception err2) {
+		// Fail!
 		err_message = err2.Message;
 		error = true;
 	      }
@@ -811,19 +818,16 @@ namespace UIIronTextBox
 	  } 
 	  output = ReadFromStream(ms);
 	  // ----------- Output:
-	  if (output != null)
-	    {
-	      this.WriteText(output);
-	    }
 	  if (error)
 	    {
 	      consoleTextBox.printTextOnNewline("Script error: " + err_message + "\n");
 	    } 
-	  else if (result != null) {
-	    this.WriteText(result.ToString());
-	  }
-
-	  return result;
+	  else if (output != null)
+	    {
+	      // This is printed out if no error
+	      consoleTextBox.printTextOnNewline(output);
+	    }
+	  return;
 	}
 
 	private static string ReadFromStream(MemoryStream ms) {
@@ -887,8 +891,8 @@ namespace UIIronTextBox
             this.consoleTextBox.Multiline = true;
             this.consoleTextBox.Name = "consoleTextBox";
             this.consoleTextBox.Prompt = "python> ";
-            this.consoleTextBox.ScrollBars = RichTextBoxScrollBars.Both;
-            this.consoleTextBox.Font = new Font("Lucida Console", 8.25F, FontStyle.Regular, GraphicsUnit.Point, ((Byte)(0)));
+            this.consoleTextBox.ScrollBars = RichTextBoxScrollBars.Vertical;
+            this.consoleTextBox.Font = new Font("DejaVu Sans Mono", 10);
             this.consoleTextBox.Size = new Size(232, 216);
             this.consoleTextBox.TabIndex = 0;
             // 

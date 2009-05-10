@@ -11,7 +11,7 @@ namespace Pyjama
     {
         private PyjamaFormController _controller;
 
-        public PyjamaForm()
+        public PyjamaForm(string [] args)
         {
             InitializeComponent();
             KeyDown += new KeyEventHandler(mainForm_KeyDown);
@@ -23,6 +23,16 @@ namespace Pyjama
             SetButtonsStatus();
             ApplyUserSettings(ApplicationOptions.LoadUserSettings(ApplicationOptions.GetIsolatedStorage()));
             //this.ActiveControl = this.outputWindow.output; // Output window gets cursor
+
+	    int opened = 0;
+	    foreach (string filename in args) {
+	      OpenFile(filename);
+	      opened++;
+	    }
+	    if (opened == 0) {
+	      NewFile();
+	    }
+
             this.ActiveControl = docManager.GetCurrentTabTextBox(); // tab text gets cursor
             this.languageName.Text = "Python";
             this.columnNumber.Text = "" + 1;
@@ -53,6 +63,18 @@ namespace Pyjama
         public void OpenFile(IMainForm main_form, ActiveCodeFile file)
         {
             docManager.OpenFile(main_form, file);
+            SetButtonsStatus();
+        }
+
+        public void OpenFile(string filename)
+        {
+            _controller.OpenFile(filename);
+            SetButtonsStatus();
+        }
+
+        public void NewFile()
+        {
+            _controller.NewFile();
             SetButtonsStatus();
         }
 

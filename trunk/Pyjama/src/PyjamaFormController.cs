@@ -10,26 +10,10 @@ namespace Pyjama
     public class PyjamaFormController
     {
         public IMainForm pyjamaForm { get; set; }
-        List<LanguageSettings> languages;
 
         public PyjamaFormController(IMainForm mainForm)
         {
             pyjamaForm = mainForm;
-            NewFile();
-        }
-
-        private void LoadSettings()
-        {
-            LanguageSettingsLoader loader = new LanguageSettingsLoader();
-
-            if (Directory.Exists(ApplicationOptions.SettingsDirectory))
-                languages = loader.LoadSettings(ApplicationOptions.SettingsDirectory);
-            else
-            {
-                languages = new List<LanguageSettings>(); //HACK: Not sure what to do about this.
-                //MessageBox.Show("Config directory not found. No language information loaded.",
-                //                "Config directory not found", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
         }
 
         public void DisplayAboutDialog()
@@ -51,11 +35,6 @@ namespace Pyjama
             pyjamaForm.Execute(code);
         }
 
-        public List<LanguageSettings> GetLanguages()
-        {
-            return languages;
-        }
-
         public void NewFile()
         {
             ActiveCodeFile file = CreateDefaultActiveFile("Python");
@@ -75,25 +54,19 @@ namespace Pyjama
             }
         }
 
+        public void OpenFile(string filename)
+        {
+	  ActiveCodeFile file = new ActiveCodeFile(filename);
+	  file.Unsaved = false;
+	  OpenFile(file);
+        }
+
         public void OpenFile(ActiveCodeFile file)
         {
             if (File.Exists(file.Location))
                 pyjamaForm.OpenFile(pyjamaForm, file);
             else
                 throw new FileNotFoundException("File not found", file.Location);
-        }
-
-        private LanguageSettings FindLanguageByExtension(string ext)
-        {
-            return languages.Find(l => l.FileExtensions.Contains(ext));
-        }
-
-        private string[] FindExtensionByLanguage(string langauge)
-        {
-            if (languages != null)
-                return languages.Find(l => l.Language == langauge).FileExtensions.Split(';');
-            else
-                return new string[0];
         }
 
         public void Exit()
@@ -103,9 +76,8 @@ namespace Pyjama
 
         private ActiveCodeFile CreateDefaultActiveFile(string language)
         {
-            string[] fileExt = FindExtensionByLanguage(language);
-            string usedFileExt = fileExt.Length > 0 ? fileExt[0] : ApplicationOptions.DefaultExtension;
-
+	  // FIXME: connect to loaded languages in Shell
+            string usedFileExt = ApplicationOptions.DefaultExtension;
             string file = Path.GetFileNameWithoutExtension(Path.GetRandomFileName()) + usedFileExt;
             string path = Path.Combine(Path.GetTempPath(), file);
             using (StreamWriter sw = new StreamWriter(path))

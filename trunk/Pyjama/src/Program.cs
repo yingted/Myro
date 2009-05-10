@@ -9,12 +9,12 @@ namespace Pyjama
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main()
+        static void Main(string [] args)
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             ApplicationOptions.LoadOptions();
-            Application.Run(new PyjamaForm());
+            Application.Run(new PyjamaForm(args));
         }
     }
 }
