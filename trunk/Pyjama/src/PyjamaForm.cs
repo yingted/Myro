@@ -26,6 +26,7 @@ namespace Pyjama
 
 	    int opened = 0;
 	    foreach (string filename in args) {
+	      // FIXME: if file exists
 	      OpenFile(filename);
 	      opened++;
 	    }
@@ -34,6 +35,7 @@ namespace Pyjama
 	    }
 
             this.ActiveControl = docManager.GetCurrentTabTextBox(); // tab text gets cursor
+	    // FIXME: make a general language changer
             this.languageName.Text = "Python";
             this.columnNumber.Text = "" + 1;
             this.lineNumber.Text = "" + 1;
@@ -134,7 +136,7 @@ namespace Pyjama
             // Interface to Shell
             outputWindow.textbox.consoleTextBox.printTextOnNewline("Evaluating...\n");
             outputWindow.textbox.DoCommand(code);
-            //outputWindow.textbox.consoleTextBox.printPrompt();
+            outputWindow.textbox.consoleTextBox.printPrompt();
             //outputWindow.textbox.consoleTextBox.ScrollToCaret();
             //SelectionStart = this.TextLength;
         }
@@ -316,9 +318,11 @@ namespace Pyjama
 
         private void shellLanguageSelect1_Click(object sender, EventArgs e)
         {
+	  // FIXME: make general
             shellLanguageButton.Text = "Python";
             outputWindow.textbox.Prompt = "python> ";
             outputWindow.textbox.engine = outputWindow.textbox.environment.GetEngine("py");
+            outputWindow.textbox.consoleTextBox.printPrompt();
             shellLanguageSelect1.Checked = true;
             shellLanguageSelect2.Checked = false;
             shellLanguageSelect1.Checked = false;
@@ -326,9 +330,12 @@ namespace Pyjama
 
         private void shellLanguageSelect2_Click(object sender, EventArgs e)
         {
+	  // FIXME: make general
             shellLanguageButton.Text = "Ruby";
             outputWindow.textbox.Prompt = "ruby  > ";
             outputWindow.textbox.engine = outputWindow.textbox.environment.GetEngine("rb");
+            outputWindow.textbox.consoleTextBox.printPrompt();
+
             shellLanguageSelect1.Checked = false;
             shellLanguageSelect2.Checked = true;
             shellLanguageSelect1.Checked = false;
@@ -336,6 +343,7 @@ namespace Pyjama
 
         private void shellLanguageSelect3_Click(object sender, EventArgs e)
         {
+	  // FIXME: make general
             shellLanguageButton.Text = "Scheme";
             shellLanguageSelect1.Checked = false;
             shellLanguageSelect2.Checked = false;
@@ -345,24 +353,23 @@ namespace Pyjama
         private void runButton_Click(object sender, EventArgs e)
         {
             string code = commandTextBox.Text;
-            outputWindow.textbox.consoleTextBox.printPrompt();
             outputWindow.textbox.consoleTextBox.AddText(code);
             outputWindow.textbox.DoCommand(code);
+            outputWindow.textbox.consoleTextBox.printPrompt();
             commandTextBox.Text = "";
         }
-        /*
+
         private void commandTextBox_KeyPress(object sender, System.Windows.Forms.KeyPressEventArgs e)
         {
-            if (IsTerminatorKey(e.KeyChar))
+            if (outputWindow.textbox.consoleTextBox.IsTerminatorKey(e.KeyChar))
             {
                 e.Handled = true;
                 string code = commandTextBox.Text;
-                outputWindow.textbox.consoleTextBox.printPrompt();
                 outputWindow.textbox.consoleTextBox.AddText(code);
                 outputWindow.textbox.DoCommand(code);
                 commandTextBox.Text = "";
+                outputWindow.textbox.consoleTextBox.printPrompt();
             }
         }
-   */
     }
 }

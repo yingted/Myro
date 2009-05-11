@@ -1,4 +1,5 @@
 using System.Drawing;
+using System.Windows.Forms;
 
 ﻿namespace Pyjama
 {
@@ -275,6 +276,7 @@ using System.Drawing;
             resources.ApplyResources(this.commandTextBox, "commandTextBox");
             this.commandTextBox.ForeColor = System.Drawing.SystemColors.HighlightText;
             this.commandTextBox.Name = "commandTextBox";
+	    //this.commandTextBox.KeyPressed += new KeyPressEventHandler(this.commandTextBox_KeyPress);
             // 
             // runButton
             // 

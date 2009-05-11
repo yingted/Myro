@@ -171,7 +171,6 @@ namespace UIIronTextBox
             this.Name = "IronTextBox";
             this.Size = new Size(400, 176);
             this.ResumeLayout(false);
-
         }
 
         public void printPrompt()
@@ -245,7 +244,7 @@ namespace UIIronTextBox
             commandHistory.Add(currentCommand);
         }
 
-        private bool IsTerminatorKey(char keyChar)
+        public bool IsTerminatorKey(char keyChar)
         {
             //System.Console.WriteLine((int)keyChar);
             return ((int)keyChar) == 13;
@@ -782,7 +781,7 @@ namespace UIIronTextBox
             this.Size = new Size(232, 216);
             this.ResumeLayout(false);
             this.consoleTextBox.Text = "";
-            //this.consoleTextBox.printPrompt();
+            this.consoleTextBox.printPrompt();
         }
 
         protected override void Dispose(bool disposing)
