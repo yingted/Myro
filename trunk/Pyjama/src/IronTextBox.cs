@@ -186,7 +186,7 @@ namespace UIIronTextBox
             this.Select(this.TextLength - prompt.Length, prompt.Length - 2);
             this.SelectionColor = Color.Yellow;
             //this.Select(this.TextLength, 0); // clears the selection
-            MoveCaretToEndOfText();
+            //MoveCaretToEndOfText();
             this.SelectionStart = this.TextLength;
             this.SelectionColor = Color.White;
         }
@@ -202,7 +202,7 @@ namespace UIIronTextBox
             this.Select(this.TextLength - 8, 8 - 2);
             this.SelectionColor = Color.Green;
             //this.Select(this.TextLength, 0); // clears the selection
-            MoveCaretToEndOfText();
+            //MoveCaretToEndOfText();
             this.SelectionStart = this.TextLength;
             this.SelectionColor = Color.White;
         }
@@ -282,11 +282,12 @@ namespace UIIronTextBox
 
         public void AddText(string text)
         {
-            this.Enabled = false;
+	  // Don't disable... doesn't update scrollbars, etc if it needs to.
+	  //this.Enabled = false;
             //System.Console.WriteLine("AddText: '{0}'", text);
             this.AppendText(text);
-            this.Enabled = true;
-            //MoveCaretToEndOfText();
+            //this.Enabled = true;
+            MoveCaretToEndOfText();
             //this.Update();
             this.Focus();
         }
@@ -310,7 +311,7 @@ namespace UIIronTextBox
         {
             this.SelectionStart = this.TextLength;
             this.Select(this.TextLength, 0);
-            //this.ScrollToCaret();
+            this.ScrollToCaret();
             //System.Console.WriteLine("scroll to caret!");
         }
 

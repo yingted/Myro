@@ -135,7 +135,7 @@ namespace Pyjama
             outputWindow.textbox.consoleTextBox.printTextOnNewline("Evaluating...\n");
             outputWindow.textbox.DoCommand(code);
             //outputWindow.textbox.consoleTextBox.printPrompt();
-            outputWindow.textbox.consoleTextBox.ScrollToCaret();
+            //outputWindow.textbox.consoleTextBox.ScrollToCaret();
             //SelectionStart = this.TextLength;
         }
 
