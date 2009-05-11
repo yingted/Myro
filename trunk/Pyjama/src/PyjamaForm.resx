@@ -194,13 +194,13 @@
   <data name="toolStripStatusLabel11.Text" xml:space="preserve">
     <value>Line: </value>
   </data>
-  <data name="toolStripStatusLabel12.Size" type="System.Drawing.Size, System.Drawing">
+  <data name="lineNumber.Size" type="System.Drawing.Size, System.Drawing">
     <value>33, 17</value>
   </data>
-  <data name="toolStripStatusLabel12.Text" xml:space="preserve">
+  <data name="lineNumber.Text" xml:space="preserve">
     <value>0</value>
   </data>
-  <data name="toolStripStatusLabel12.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+  <data name="lineNumber.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
     <value>MiddleLeft</value>
   </data>
   <data name="toolStripStatusLabel13.Font" type="System.Drawing.Font, System.Drawing">
@@ -212,20 +212,20 @@
   <data name="toolStripStatusLabel13.Text" xml:space="preserve">
     <value>Column:</value>
   </data>
-  <data name="toolStripStatusLabel14.Size" type="System.Drawing.Size, System.Drawing">
+  <data name="columnNumber.Size" type="System.Drawing.Size, System.Drawing">
     <value>33, 17</value>
   </data>
-  <data name="toolStripStatusLabel14.Text" xml:space="preserve">
+  <data name="columnNumber.Text" xml:space="preserve">
     <value>0</value>
   </data>
-  <data name="toolStripStatusLabel14.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+  <data name="columnNumber.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
     <value>MiddleLeft</value>
   </data>
   <data name="statusStrip1.Location" type="System.Drawing.Point, System.Drawing">
-    <value>0, 208</value>
+    <value>0, 274</value>
   </data>
   <data name="statusStrip1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>633, 22</value>
+    <value>504, 22</value>
   </data>
   <assembly alias="mscorlib" name="mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="statusStrip1.TabIndex" type="System.Int32, mscorlib">
@@ -265,7 +265,7 @@
     <value>0, 0, 0, 25</value>
   </data>
   <data name="docManager.Size" type="System.Drawing.Size, System.Drawing">
-    <value>633, 230</value>
+    <value>504, 296</value>
   </data>
   <data name="docManager.TabIndex" type="System.Int32, mscorlib">
     <value>6</value>
@@ -274,7 +274,7 @@
     <value>docManager</value>
   </data>
   <data name="&gt;&gt;docManager.Type" xml:space="preserve">
-    <value>Pyjama.DocumentManager, Pyjama, Version=1.0.3418.7389, Culture=neutral, PublicKeyToken=null</value>
+    <value>Pyjama.DocumentManager, Pyjama, Version=1.0.3418.18856, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;docManager.Parent" xml:space="preserve">
     <value>mainContentSplit.Panel1</value>
@@ -325,7 +325,7 @@
     <value>0, 0, 0, 0</value>
   </data>
   <data name="outputWindow.Size" type="System.Drawing.Size, System.Drawing">
-    <value>633, 164</value>
+    <value>504, 130</value>
   </data>
   <data name="outputWindow.TabIndex" type="System.Int32, mscorlib">
     <value>15</value>
@@ -334,7 +334,7 @@
     <value>outputWindow</value>
   </data>
   <data name="&gt;&gt;outputWindow.Type" xml:space="preserve">
-    <value>Pyjama.Console, Pyjama, Version=1.0.3418.7389, Culture=neutral, PublicKeyToken=null</value>
+    <value>Pyjama.Console, Pyjama, Version=1.0.3418.18856, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;outputWindow.Parent" xml:space="preserve">
     <value>splitContainer1.Panel1</value>
@@ -376,7 +376,7 @@
     <value>Vertical</value>
   </data>
   <data name="commandTextBox.Size" type="System.Drawing.Size, System.Drawing">
-    <value>492, 78</value>
+    <value>391, 46</value>
   </data>
   <data name="commandTextBox.TabIndex" type="System.Int32, mscorlib">
     <value>10</value>
@@ -421,7 +421,7 @@
     <value>0, 0</value>
   </data>
   <data name="runButton.Size" type="System.Drawing.Size, System.Drawing">
-    <value>137, 78</value>
+    <value>109, 46</value>
   </data>
   <data name="runButton.TabIndex" type="System.Int32, mscorlib">
     <value>11</value>
@@ -454,10 +454,10 @@
     <value>1</value>
   </data>
   <data name="commandContainer.Size" type="System.Drawing.Size, System.Drawing">
-    <value>633, 78</value>
+    <value>504, 46</value>
   </data>
   <data name="commandContainer.SplitterDistance" type="System.Int32, mscorlib">
-    <value>492</value>
+    <value>391</value>
   </data>
   <data name="commandContainer.TabIndex" type="System.Int32, mscorlib">
     <value>0</value>
@@ -487,10 +487,10 @@
     <value>1</value>
   </data>
   <data name="splitContainer1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>633, 249</value>
+    <value>504, 183</value>
   </data>
   <data name="splitContainer1.SplitterDistance" type="System.Int32, mscorlib">
-    <value>164</value>
+    <value>130</value>
   </data>
   <data name="splitContainer1.SplitterWidth" type="System.Int32, mscorlib">
     <value>7</value>
@@ -589,10 +589,10 @@
     <value>MiddleRight</value>
   </data>
   <data name="statusStrip2.Location" type="System.Drawing.Point, System.Drawing">
-    <value>0, 249</value>
+    <value>0, 183</value>
   </data>
   <data name="statusStrip2.Size" type="System.Drawing.Size, System.Drawing">
-    <value>633, 22</value>
+    <value>504, 22</value>
   </data>
   <data name="statusStrip2.TabIndex" type="System.Int32, mscorlib">
     <value>7</value>
@@ -631,10 +631,10 @@
     <value>0</value>
   </data>
   <data name="mainContentSplit.Size" type="System.Drawing.Size, System.Drawing">
-    <value>635, 515</value>
+    <value>506, 515</value>
   </data>
   <data name="mainContentSplit.SplitterDistance" type="System.Int32, mscorlib">
-    <value>232</value>
+    <value>298</value>
   </data>
   <data name="mainContentSplit.SplitterWidth" type="System.Int32, mscorlib">
     <value>10</value>
@@ -857,7 +857,7 @@
     <value>0, 0</value>
   </data>
   <data name="toolStrip1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>635, 25</value>
+    <value>506, 25</value>
   </data>
   <data name="toolStrip1.TabIndex" type="System.Int32, mscorlib">
     <value>0</value>
@@ -884,7 +884,7 @@
     <value>0, 0</value>
   </data>
   <data name="toolStrip.Size" type="System.Drawing.Size, System.Drawing">
-    <value>635, 25</value>
+    <value>506, 25</value>
   </data>
   <data name="toolStrip.TabIndex" type="System.Int32, mscorlib">
     <value>3</value>
@@ -908,7 +908,7 @@
     <value>0, 24</value>
   </data>
   <data name="main.Size" type="System.Drawing.Size, System.Drawing">
-    <value>635, 540</value>
+    <value>506, 540</value>
   </data>
   <data name="main.TabIndex" type="System.Int32, mscorlib">
     <value>1</value>
@@ -1242,7 +1242,7 @@
     <value>0, 0</value>
   </data>
   <data name="menuStrip1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>635, 24</value>
+    <value>506, 24</value>
   </data>
   <data name="menuStrip1.TabIndex" type="System.Int32, mscorlib">
     <value>2</value>
@@ -1304,15 +1304,6 @@
   <data name="toolStripStatusLabel3.Text" xml:space="preserve">
     <value>Line: </value>
   </data>
-  <data name="lineNumber.Size" type="System.Drawing.Size, System.Drawing">
-    <value>33, 17</value>
-  </data>
-  <data name="lineNumber.Text" xml:space="preserve">
-    <value>0</value>
-  </data>
-  <data name="lineNumber.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
-    <value>MiddleLeft</value>
-  </data>
   <data name="toolStripStatusLabel4.Font" type="System.Drawing.Font, System.Drawing">
     <value>Microsoft Sans Serif, 9pt, style=Bold</value>
   </data>
@@ -1321,15 +1312,6 @@
   </data>
   <data name="toolStripStatusLabel4.Text" xml:space="preserve">
     <value>Column:</value>
-  </data>
-  <data name="columnNumber.Size" type="System.Drawing.Size, System.Drawing">
-    <value>33, 17</value>
-  </data>
-  <data name="columnNumber.Text" xml:space="preserve">
-    <value>0</value>
-  </data>
-  <data name="columnNumber.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
-    <value>MiddleLeft</value>
   </data>
   <metadata name="$this.Localizable" type="System.Boolean, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
@@ -1341,7 +1323,7 @@
     <value>6, 13</value>
   </data>
   <data name="$this.ClientSize" type="System.Drawing.Size, System.Drawing">
-    <value>635, 564</value>
+    <value>506, 564</value>
   </data>
   <data name="$this.Text" xml:space="preserve">
     <value>{0} - {1}</value>
@@ -1388,10 +1370,10 @@
   <data name="&gt;&gt;toolStripStatusLabel11.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripStatusLabel, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;toolStripStatusLabel12.Name" xml:space="preserve">
-    <value>toolStripStatusLabel12</value>
+  <data name="&gt;&gt;lineNumber.Name" xml:space="preserve">
+    <value>lineNumber</value>
   </data>
-  <data name="&gt;&gt;toolStripStatusLabel12.Type" xml:space="preserve">
+  <data name="&gt;&gt;lineNumber.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripStatusLabel, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;toolStripStatusLabel13.Name" xml:space="preserve">
@@ -1400,10 +1382,10 @@
   <data name="&gt;&gt;toolStripStatusLabel13.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripStatusLabel, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;toolStripStatusLabel14.Name" xml:space="preserve">
-    <value>toolStripStatusLabel14</value>
+  <data name="&gt;&gt;columnNumber.Name" xml:space="preserve">
+    <value>columnNumber</value>
   </data>
-  <data name="&gt;&gt;toolStripStatusLabel14.Type" xml:space="preserve">
+  <data name="&gt;&gt;columnNumber.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripStatusLabel, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;toolStripStatusLabel5.Name" xml:space="preserve">
@@ -1712,28 +1694,16 @@
   <data name="&gt;&gt;toolStripStatusLabel3.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripStatusLabel, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;lineNumber.Name" xml:space="preserve">
-    <value>lineNumber</value>
-  </data>
-  <data name="&gt;&gt;lineNumber.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripStatusLabel, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="&gt;&gt;toolStripStatusLabel4.Name" xml:space="preserve">
     <value>toolStripStatusLabel4</value>
   </data>
   <data name="&gt;&gt;toolStripStatusLabel4.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripStatusLabel, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;columnNumber.Name" xml:space="preserve">
-    <value>columnNumber</value>
-  </data>
-  <data name="&gt;&gt;columnNumber.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripStatusLabel, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="&gt;&gt;$this.Name" xml:space="preserve">
     <value>PyjamaForm</value>
   </data>
   <data name="&gt;&gt;$this.Type" xml:space="preserve">
-    <value>Pyjama.BaseForm, Pyjama, Version=1.0.3418.7389, Culture=neutral, PublicKeyToken=null</value>
+    <value>Pyjama.BaseForm, Pyjama, Version=1.0.3418.18856, Culture=neutral, PublicKeyToken=null</value>
   </data>
 </root>

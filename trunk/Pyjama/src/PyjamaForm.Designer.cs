@@ -40,9 +40,9 @@ using System.Drawing;
             this.rubyToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.schemeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripStatusLabel11 = new System.Windows.Forms.ToolStripStatusLabel();
-            this.toolStripStatusLabel12 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.lineNumber = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel13 = new System.Windows.Forms.ToolStripStatusLabel();
-            this.toolStripStatusLabel14 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.columnNumber = new System.Windows.Forms.ToolStripStatusLabel();
             this.docManager = new Pyjama.DocumentManager();
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.outputWindow = new Pyjama.Console();
@@ -105,9 +105,7 @@ using System.Drawing;
             this.toolStripStatusLabel2 = new System.Windows.Forms.ToolStripStatusLabel();
             this.languageName = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel3 = new System.Windows.Forms.ToolStripStatusLabel();
-            this.lineNumber = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel4 = new System.Windows.Forms.ToolStripStatusLabel();
-            this.columnNumber = new System.Windows.Forms.ToolStripStatusLabel();
             this.mainContentSplit.Panel1.SuspendLayout();
             this.mainContentSplit.Panel2.SuspendLayout();
             this.mainContentSplit.SuspendLayout();
@@ -156,9 +154,9 @@ using System.Drawing;
             this.toolStripStatusLabel9,
             this.toolStripStatusLabel10,
             this.toolStripStatusLabel11,
-            this.toolStripStatusLabel12,
+            this.lineNumber,
             this.toolStripStatusLabel13,
-            this.toolStripStatusLabel14});
+            this.columnNumber});
             resources.ApplyResources(this.statusStrip1, "statusStrip1");
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.SizingGrip = false;
@@ -206,23 +204,23 @@ using System.Drawing;
             resources.ApplyResources(this.toolStripStatusLabel11, "toolStripStatusLabel11");
             this.toolStripStatusLabel11.Name = "toolStripStatusLabel11";
             // 
-            // toolStripStatusLabel12
+            // lineNumber
             // 
-            this.toolStripStatusLabel12.Name = "toolStripStatusLabel12";
-            this.toolStripStatusLabel12.Padding = new System.Windows.Forms.Padding(20, 0, 0, 0);
-            resources.ApplyResources(this.toolStripStatusLabel12, "toolStripStatusLabel12");
+            this.lineNumber.Name = "lineNumber";
+            this.lineNumber.Padding = new System.Windows.Forms.Padding(20, 0, 0, 0);
+            resources.ApplyResources(this.lineNumber, "lineNumber");
             // 
             // toolStripStatusLabel13
             // 
             resources.ApplyResources(this.toolStripStatusLabel13, "toolStripStatusLabel13");
             this.toolStripStatusLabel13.Name = "toolStripStatusLabel13";
             // 
-            // toolStripStatusLabel14
+            // columnNumber
             // 
-            this.toolStripStatusLabel14.BackColor = System.Drawing.SystemColors.Control;
-            this.toolStripStatusLabel14.Name = "toolStripStatusLabel14";
-            this.toolStripStatusLabel14.Padding = new System.Windows.Forms.Padding(20, 0, 0, 0);
-            resources.ApplyResources(this.toolStripStatusLabel14, "toolStripStatusLabel14");
+            this.columnNumber.BackColor = System.Drawing.SystemColors.Control;
+            this.columnNumber.Name = "columnNumber";
+            this.columnNumber.Padding = new System.Windows.Forms.Padding(20, 0, 0, 0);
+            resources.ApplyResources(this.columnNumber, "columnNumber");
             // 
             // docManager
             // 
@@ -277,8 +275,6 @@ using System.Drawing;
             resources.ApplyResources(this.commandTextBox, "commandTextBox");
             this.commandTextBox.ForeColor = System.Drawing.SystemColors.HighlightText;
             this.commandTextBox.Name = "commandTextBox";
-            //this.commandTextBox.KeyPress += new System.KeyPressEventHandler(this.commandTextBox_KeyPress);
-
             // 
             // runButton
             // 
@@ -682,22 +678,10 @@ using System.Drawing;
             resources.ApplyResources(this.toolStripStatusLabel3, "toolStripStatusLabel3");
             this.toolStripStatusLabel3.Name = "toolStripStatusLabel3";
             // 
-            // lineNumber
-            // 
-            this.lineNumber.Name = "lineNumber";
-            this.lineNumber.Padding = new System.Windows.Forms.Padding(20, 0, 0, 0);
-            resources.ApplyResources(this.lineNumber, "lineNumber");
-            // 
             // toolStripStatusLabel4
             // 
             resources.ApplyResources(this.toolStripStatusLabel4, "toolStripStatusLabel4");
             this.toolStripStatusLabel4.Name = "toolStripStatusLabel4";
-            // 
-            // columnNumber
-            // 
-            this.columnNumber.Name = "columnNumber";
-            this.columnNumber.Padding = new System.Windows.Forms.Padding(20, 0, 0, 0);
-            resources.ApplyResources(this.columnNumber, "columnNumber");
             // 
             // PyjamaForm
             // 
@@ -790,17 +774,13 @@ using System.Drawing;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel2;
         private System.Windows.Forms.ToolStripStatusLabel languageName;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel3;
-        private System.Windows.Forms.ToolStripStatusLabel lineNumber;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel4;
-        private System.Windows.Forms.ToolStripStatusLabel columnNumber;
         private DocumentManager docManager;
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel8;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel9;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel11;
-        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel12;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel13;
-        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel14;
         private System.Windows.Forms.ToolStripDropDownButton toolStripStatusLabel10;
         private System.Windows.Forms.ToolStripMenuItem pythonToolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem rubyToolStripMenuItem1;
@@ -817,6 +797,8 @@ using System.Drawing;
         private System.Windows.Forms.TextBox commandTextBox;
         private System.Windows.Forms.Button runButton;
         private Console outputWindow;
+        private System.Windows.Forms.ToolStripStatusLabel lineNumber;
+        private System.Windows.Forms.ToolStripStatusLabel columnNumber;
 
 
 

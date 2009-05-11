@@ -36,6 +36,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.DoubleBuffered = true;
             this.Name = "Document";
+            this.Load += new System.EventHandler(this.Document_Load);
             this.ResumeLayout(false);
 
         }

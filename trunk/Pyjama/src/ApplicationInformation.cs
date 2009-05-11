@@ -5,7 +5,7 @@ namespace Pyjama
     {
         public static string Version()
         {
-            return "1.0.3";
+            return "1.0.4";
         }
 
         public static string Title()

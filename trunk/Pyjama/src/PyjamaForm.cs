@@ -80,6 +80,7 @@ namespace Pyjama
 
         public void UpdateGUI(int col, int line)
         {
+            //System.Console.WriteLine("UpdateGUI: {0}, {1}", col, line);
             this.columnNumber.Text = "" + col;
             this.lineNumber.Text = "" + line;
         }

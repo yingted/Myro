@@ -115,5 +115,10 @@ namespace Pyjama
             textBox.SelectAll();
         }
 
+        private void Document_Load(object sender, EventArgs e)
+        {
+
+        }
+
     }
 }
