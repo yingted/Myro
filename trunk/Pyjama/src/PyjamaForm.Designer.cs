@@ -276,7 +276,8 @@ using System.Windows.Forms;
             resources.ApplyResources(this.commandTextBox, "commandTextBox");
             this.commandTextBox.ForeColor = System.Drawing.SystemColors.HighlightText;
             this.commandTextBox.Name = "commandTextBox";
-	    //this.commandTextBox.KeyPressed += new KeyPressEventHandler(this.commandTextBox_KeyPress);
+	        //this.commandTextBox.KeyPress += new KeyPressEventHandler(this.commandTextBox_KeyPress);
+            this.commandTextBox.KeyDown += new KeyEventHandler(this.commandTextBox_KeyDown);
             // 
             // runButton
             // 

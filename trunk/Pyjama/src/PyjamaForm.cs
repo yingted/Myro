@@ -137,7 +137,7 @@ namespace Pyjama
             outputWindow.textbox.consoleTextBox.printTextOnNewline("Evaluating...\n");
             outputWindow.textbox.DoCommand(code);
             outputWindow.textbox.consoleTextBox.printPrompt();
-            //outputWindow.textbox.consoleTextBox.ScrollToCaret();
+            commandTextBox.Focus();
             //SelectionStart = this.TextLength;
         }
 
@@ -357,19 +357,21 @@ namespace Pyjama
             outputWindow.textbox.DoCommand(code);
             outputWindow.textbox.consoleTextBox.printPrompt();
             commandTextBox.Text = "";
+            commandTextBox.Focus();
         }
 
-        private void commandTextBox_KeyPress(object sender, System.Windows.Forms.KeyPressEventArgs e)
+        private void commandTextBox_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
         {
-            if (outputWindow.textbox.consoleTextBox.IsTerminatorKey(e.KeyChar))
-            {
-                e.Handled = true;
-                string code = commandTextBox.Text;
-                outputWindow.textbox.consoleTextBox.AddText(code);
-                outputWindow.textbox.DoCommand(code);
-                commandTextBox.Text = "";
-                outputWindow.textbox.consoleTextBox.printPrompt();
-            }
-        }
-    }
+		  if (e.KeyCode == Keys.Enter && e.Control)
+		  {
+			e.Handled = true;
+			string code = commandTextBox.Text;
+			outputWindow.textbox.consoleTextBox.AddText(code);
+			outputWindow.textbox.DoCommand(code);
+			commandTextBox.Text = "";
+			outputWindow.textbox.consoleTextBox.printPrompt();
+			commandTextBox.Focus();
+		  }
+		}
+	}
 }

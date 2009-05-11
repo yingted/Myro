@@ -654,6 +654,7 @@ namespace UIIronTextBox
             engine.Runtime.IO.SetErrorOutput(ms, new StreamWriter(ms));
             ScriptSource source = null;
             // Compile:
+			command = command.Trim();
             if (sctype == SourceCodeKind.File)
             {
                 source = engine.CreateScriptSourceFromFile(command, Encoding.GetEncoding("utf-8"));
@@ -666,7 +667,17 @@ namespace UIIronTextBox
             //System.Console.WriteLine("Executing '{0}'...", command);
             try
             {
-                source.Execute(scope);
+			  source.Compile(); // if it fails, it could be Statements 
+  			  // Compiled successfully! Execute
+              try
+              {
+			      source.Execute(scope);
+              } 
+              catch (Exception err3) // If fails, something is wrong!
+              {
+                  err_message = eo.FormatException(err3);
+                  error = true;
+              }
             }
             catch (Exception err)
             {
@@ -679,14 +690,14 @@ namespace UIIronTextBox
                     try
                     {
                         source.Execute(scope);
-                        // It worked!
+                        // It worked! Clear the error
                         err_message = null;
                         error = false;
                     }
                     catch (Exception err2)
                     {
                         // Fail!
-                        err_message = eo.FormatException(err);
+                        err_message = eo.FormatException(err2);
                         error = true;
                     }
                 }
