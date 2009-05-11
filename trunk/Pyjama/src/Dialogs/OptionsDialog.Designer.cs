@@ -68,38 +68,37 @@
             this.panel1.Dock = System.Windows.Forms.DockStyle.Left;
             this.panel1.Location = new System.Drawing.Point(0, 0);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(148, 175);
+            this.panel1.Size = new System.Drawing.Size(145, 176);
             this.panel1.TabIndex = 2;
             // 
             // optionsTree
             // 
-            this.optionsTree.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)));
+            this.optionsTree.Dock = System.Windows.Forms.DockStyle.Left;
             this.optionsTree.Location = new System.Drawing.Point(0, 0);
             this.optionsTree.Name = "optionsTree";
             this.optionsTree.ShowRootLines = false;
-            this.optionsTree.Size = new System.Drawing.Size(145, 175);
+            this.optionsTree.Size = new System.Drawing.Size(145, 176);
             this.optionsTree.TabIndex = 3;
             this.optionsTree.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.optionsTree_AfterSelect);
             // 
             // optionPanel
             // 
-            this.optionPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.optionPanel.Location = new System.Drawing.Point(148, 0);
+            this.optionPanel.Dock = System.Windows.Forms.DockStyle.Top;
+            this.optionPanel.Location = new System.Drawing.Point(145, 0);
             this.optionPanel.Name = "optionPanel";
-            this.optionPanel.Size = new System.Drawing.Size(394, 175);
+            this.optionPanel.Size = new System.Drawing.Size(397, 175);
             this.optionPanel.TabIndex = 3;
             // 
             // panel3
             // 
-            this.panel3.AutoSize = true;
             this.panel3.Controls.Add(this.save);
             this.panel3.Controls.Add(this.cancel);
             this.panel3.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panel3.Location = new System.Drawing.Point(0, 175);
+            this.panel3.Location = new System.Drawing.Point(0, 176);
             this.panel3.Name = "panel3";
             this.panel3.Size = new System.Drawing.Size(542, 44);
             this.panel3.TabIndex = 4;
+            this.panel3.Paint += new System.Windows.Forms.PaintEventHandler(this.panel3_Paint);
             // 
             // OptionsDialog
             // 
@@ -110,7 +109,7 @@
             this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.CancelButton = this.cancel;
-            this.ClientSize = new System.Drawing.Size(542, 219);
+            this.ClientSize = new System.Drawing.Size(542, 220);
             this.Controls.Add(this.optionPanel);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.panel3);

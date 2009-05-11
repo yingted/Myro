@@ -68,5 +68,10 @@ namespace Pyjama.Dialogs
         {
             DialogResult = DialogResult.Cancel;
         }
+
+        private void panel3_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
     }
 }
