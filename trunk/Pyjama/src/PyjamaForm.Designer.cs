@@ -270,7 +270,7 @@ using System.Drawing;
             // 
             this.commandTextBox.AcceptsReturn = true;
             this.commandTextBox.AcceptsTab = true;
-            this.commandTextBox.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.commandTextBox.BackColor = System.Drawing.SystemColors.WindowText;
             this.commandTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
             resources.ApplyResources(this.commandTextBox, "commandTextBox");
             this.commandTextBox.ForeColor = System.Drawing.SystemColors.HighlightText;
