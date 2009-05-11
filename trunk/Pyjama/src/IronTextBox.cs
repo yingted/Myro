@@ -103,6 +103,7 @@ namespace UIIronTextBox
         {
             InitializeComponent();
             this.WordWrap = true;
+            this.ReadOnly = true;
             // Set up the delays for the ToolTip.
             intellisense.AutoPopDelay = 1000;
             intellisense.InitialDelay = 100;
@@ -162,8 +163,8 @@ namespace UIIronTextBox
             this.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Both;
             this.Size = new Size(400, 176);
             this.TabIndex = 0;
-            this.KeyPress += new KeyPressEventHandler(this.consoleTextBox_KeyPress);
-            this.KeyDown += new KeyEventHandler(ConsoleControl_KeyDown);
+            //this.KeyPress += new KeyPressEventHandler(this.consoleTextBox_KeyPress);
+            //this.KeyDown += new KeyEventHandler(ConsoleControl_KeyDown);
             // 
             // IronTextBoxControl
             // 
@@ -175,32 +176,50 @@ namespace UIIronTextBox
 
         public void printPrompt()
         {
-	  //System.Console.WriteLine("[print prompt]");
+            //System.Console.WriteLine("[print prompt]");
             string currentText = this.Text;
             //add newline if it needs one
             if ((currentText.Length != 0) && (currentText[currentText.Length - 1] != '\n'))
-	      printLine();
+                printLine();
             //add the prompt
             this.AddText(Prompt);
             this.Select(this.TextLength - prompt.Length, prompt.Length - 2);
             this.SelectionColor = Color.Yellow;
             //this.Select(this.TextLength, 0); // clears the selection
             MoveCaretToEndOfText();
-	    this.SelectionStart = this.TextLength;
+            this.SelectionStart = this.TextLength;
+            this.SelectionColor = Color.White;
+        }
+
+        public void printResult()
+        {
+            string currentText = this.Text;
+            //add newline if it needs one
+            if ((currentText.Length != 0) && (currentText[currentText.Length - 1] != '\n'))
+                printLine();
+            //add the prompt
+            this.AddText("Result: "); // 8
+            this.Select(this.TextLength - 8, 8 - 2);
+            this.SelectionColor = Color.Green;
+            //this.Select(this.TextLength, 0); // clears the selection
+            MoveCaretToEndOfText();
+            this.SelectionStart = this.TextLength;
             this.SelectionColor = Color.White;
         }
 
         public void printTextOnNewline(string text)
         {
-	  //System.Console.WriteLine("newline?");
+            //System.Console.WriteLine("newline?");
             string currentText = this.Text;
             //add newline if it needs one
-            if (currentText.Length != 0) {
-	      if (currentText[currentText.Length - 1] != '\n' && 
-		  currentText[currentText.Length - 1] != '\r') {
-                printLine();
-	      }
-	    }
+            if (currentText.Length != 0)
+            {
+                if (currentText[currentText.Length - 1] != '\n' &&
+                currentText[currentText.Length - 1] != '\r')
+                {
+                    printLine();
+                }
+            }
             //add the prompt
             this.AddText(text);
         }
@@ -264,7 +283,7 @@ namespace UIIronTextBox
         public void AddText(string text)
         {
             this.Enabled = false;
-	    //System.Console.WriteLine("AddText: '{0}'", text);
+            //System.Console.WriteLine("AddText: '{0}'", text);
             this.AppendText(text);
             this.Enabled = true;
             //MoveCaretToEndOfText();
@@ -363,11 +382,11 @@ namespace UIIronTextBox
             {
                 e.Handled = true;
                 string currentCommand = GetTextAtPrompt();
-		commandHistory.Add(currentCommand);
-		((UIIronTextBox.IronTextBoxControl)this.Parent).DoCommand(currentCommand);
+                commandHistory.Add(currentCommand);
+                ((UIIronTextBox.IronTextBoxControl)this.Parent).DoCommand(currentCommand);
                 printPrompt();
             }
-	}
+        }
 
         /// <returns></returns>
         public string CreateIndentstring(int indentsize)
@@ -586,8 +605,8 @@ namespace UIIronTextBox
 
         public void DoCommand(string command)
         {
-	  //System.Console.WriteLine("DoCommand: '{0}'", command);
-	  if (command != "")
+            //System.Console.WriteLine("DoCommand: '{0}'", command);
+            if (command != "")
             {
                 if (command == "clear")
                 {
@@ -609,83 +628,97 @@ namespace UIIronTextBox
                 }
                 else if (command == "runfile")
                 {
-		  //Browse to the file...
-		  OpenFileDialog ofd = new OpenFileDialog();
-		  //ofd.InitialDirectory = UIIronTextBox.Paths.MiscDirs.vs_Projects;
-		  ofd.Filter = "Python files (*.py)|*.py|All files (*.*)|*.*";
-		  ofd.ShowDialog();
-		  Execute(ofd.FileName, SourceCodeKind.File);
+                    //Browse to the file...
+                    OpenFileDialog ofd = new OpenFileDialog();
+                    //ofd.InitialDirectory = UIIronTextBox.Paths.MiscDirs.vs_Projects;
+                    ofd.Filter = "Python files (*.py)|*.py|All files (*.*)|*.*";
+                    ofd.ShowDialog();
+                    Execute(ofd.FileName, SourceCodeKind.File);
                 }
                 else // Command
                 {
-		  Execute(command, SourceCodeKind.InteractiveCode);
+                    Execute(command, SourceCodeKind.InteractiveCode);
                 }
             }
         }
 
-	public void Execute(string command, SourceCodeKind sctype) {
-	  ExceptionOperations eo;
-	  eo = engine.GetService<ExceptionOperations>();
-	  bool error = false;
-	  string err_message = null;
-	  string output = null;
-	  MemoryStream ms = new MemoryStream();
-	  engine.Runtime.IO.SetOutput(ms, new StreamWriter(ms));
-	  engine.Runtime.IO.SetErrorOutput(ms, new StreamWriter(ms));
-	  ScriptSource source = null;
-	  // Compile:
-	  if (sctype == SourceCodeKind.File) {
-	    source = engine.CreateScriptSourceFromFile(command, Encoding.GetEncoding("utf-8"));
-	  } else {
-	    source = engine.CreateScriptSourceFromString(command, sctype);
-	  }
-	  // Run:
-	  //System.Console.WriteLine("Executing '{0}'...", command);
-	  try {
-	    source.Execute(scope);
-	  }
-	  catch (Exception err) {
-	    err_message = eo.FormatException(err);
-	    error = true;
-	    if (sctype != SourceCodeKind.File) {
-	      // Let's try again, as statements:
-	      source = engine.CreateScriptSourceFromString(command, SourceCodeKind.Statements);
-	      try {
-		source.Execute(scope);
-		// It worked!
-		err_message = null;
-		error = false;
-	      } catch (Exception err2) {
-		// Fail!
-		err_message = eo.FormatException(err);
-		error = true;
-	      }
-	    }
-	  } 
-	  output = ReadFromStream(ms);
-	  // ----------- Output:
-	  if (error)
-	    {
-	      consoleTextBox.SelectionStart = consoleTextBox.TextLength;
-	      consoleTextBox.SelectionColor = Color.Red;
-	      consoleTextBox.printTextOnNewline(err_message);
-	      consoleTextBox.SelectionStart = consoleTextBox.TextLength;
-	      consoleTextBox.SelectionColor = Color.White;
-	    } 
-	  else if (output != null)
-	    {
-	      // This is printed out if no error
-	      consoleTextBox.printTextOnNewline(output);
-	    }
-	  return;
-	}
+        public void Execute(string command, SourceCodeKind sctype)
+        {
+            ExceptionOperations eo;
+            eo = engine.GetService<ExceptionOperations>();
+            bool error = false;
+            string err_message = null;
+            string output = null;
+            MemoryStream ms = new MemoryStream();
+            engine.Runtime.IO.SetOutput(ms, new StreamWriter(ms));
+            engine.Runtime.IO.SetErrorOutput(ms, new StreamWriter(ms));
+            ScriptSource source = null;
+            // Compile:
+            if (sctype == SourceCodeKind.File)
+            {
+                source = engine.CreateScriptSourceFromFile(command, Encoding.GetEncoding("utf-8"));
+            }
+            else
+            {
+                source = engine.CreateScriptSourceFromString(command, sctype);
+            }
+            // Run:
+            //System.Console.WriteLine("Executing '{0}'...", command);
+            try
+            {
+                source.Execute(scope);
+            }
+            catch (Exception err)
+            {
+                err_message = eo.FormatException(err);
+                error = true;
+                if (sctype != SourceCodeKind.File)
+                {
+                    // Let's try again, as statements:
+                    source = engine.CreateScriptSourceFromString(command, SourceCodeKind.Statements);
+                    try
+                    {
+                        source.Execute(scope);
+                        // It worked!
+                        err_message = null;
+                        error = false;
+                    }
+                    catch (Exception err2)
+                    {
+                        // Fail!
+                        err_message = eo.FormatException(err);
+                        error = true;
+                    }
+                }
+            }
+            output = ReadFromStream(ms);
+            // ----------- Output:
+            if (error)
+            {
+                consoleTextBox.SelectionStart = consoleTextBox.TextLength;
+                consoleTextBox.printTextOnNewline(err_message);
+                consoleTextBox.Select(consoleTextBox.TextLength - err_message.Length, err_message.Length);
+                consoleTextBox.SelectionColor = Color.Red;
+                consoleTextBox.SelectionStart = consoleTextBox.TextLength;
+                consoleTextBox.Select(consoleTextBox.TextLength, 0);
+                consoleTextBox.SelectionColor = Color.White;
+            }
+            else if (output != null)
+            {
+                // This is printed out if no error
+                consoleTextBox.printResult();
+                consoleTextBox.printTextOnNewline(output);
+            }
+            return;
+        }
 
-	private static string ReadFromStream(MemoryStream ms) {
-	  int length = (int)ms.Length;
-	  Byte[] bytes = new Byte[length];
-	  ms.Seek(0, SeekOrigin.Begin);
-	  ms.Read(bytes, 0, (int)ms.Length);
-	  return Encoding.GetEncoding("utf-8").GetString(bytes, 0, (int)ms.Length);
+        private static string ReadFromStream(MemoryStream ms)
+        {
+            int length = (int)ms.Length;
+            Byte[] bytes = new Byte[length];
+            ms.Seek(0, SeekOrigin.Begin);
+            ms.Read(bytes, 0, (int)ms.Length);
+            return Encoding.GetEncoding("utf-8").GetString(bytes, 0, (int)ms.Length);
         }
 
         /// <summary>
@@ -747,8 +780,8 @@ namespace UIIronTextBox
             this.Name = "IronTextBoxControl";
             this.Size = new Size(232, 216);
             this.ResumeLayout(false);
-            this.consoleTextBox.Text = "Pyjama Shell\n~~~~~~~~~~~~~~~~~~~~\n";
-            this.consoleTextBox.printPrompt();
+            this.consoleTextBox.Text = "";
+            //this.consoleTextBox.printPrompt();
         }
 
         protected override void Dispose(bool disposing)

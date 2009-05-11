@@ -31,24 +31,32 @@ using System.Drawing;
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PyjamaForm));
-            this.main = new System.Windows.Forms.Panel();
             this.mainContentSplit = new System.Windows.Forms.SplitContainer();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel8 = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel9 = new System.Windows.Forms.ToolStripStatusLabel();
-            this.toolStripStatusLabel10 = new System.Windows.Forms.ToolStripStatusLabel();
+            this.toolStripStatusLabel10 = new System.Windows.Forms.ToolStripDropDownButton();
+            this.pythonToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.rubyToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.schemeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripStatusLabel11 = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel12 = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel13 = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel14 = new System.Windows.Forms.ToolStripStatusLabel();
             this.docManager = new Pyjama.DocumentManager();
+            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.outputWindow = new Pyjama.Console();
+            this.commandContainer = new System.Windows.Forms.SplitContainer();
+            this.commandTextBox = new System.Windows.Forms.TextBox();
+            this.runButton = new System.Windows.Forms.Button();
             this.statusStrip2 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel5 = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel6 = new System.Windows.Forms.ToolStripStatusLabel();
-            this.toolStripDropDownButton1 = new System.Windows.Forms.ToolStripDropDownButton();
-            this.pythonToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.rubyToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.shellLanguageButton = new System.Windows.Forms.ToolStripDropDownButton();
+            this.shellLanguageSelect1 = new System.Windows.Forms.ToolStripMenuItem();
+            this.shellLanguageSelect2 = new System.Windows.Forms.ToolStripMenuItem();
+            this.shellLanguageSelect3 = new System.Windows.Forms.ToolStripMenuItem();
+            this.main = new System.Windows.Forms.Panel();
             this.toolStrip = new System.Windows.Forms.Panel();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.newToolStripButton = new System.Windows.Forms.ToolStripButton();
@@ -100,29 +108,28 @@ using System.Drawing;
             this.lineNumber = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel4 = new System.Windows.Forms.ToolStripStatusLabel();
             this.columnNumber = new System.Windows.Forms.ToolStripStatusLabel();
-            this.main.SuspendLayout();
             this.mainContentSplit.Panel1.SuspendLayout();
             this.mainContentSplit.Panel2.SuspendLayout();
             this.mainContentSplit.SuspendLayout();
             this.statusStrip1.SuspendLayout();
+            this.splitContainer1.Panel1.SuspendLayout();
+            this.splitContainer1.Panel2.SuspendLayout();
+            this.splitContainer1.SuspendLayout();
+            this.commandContainer.Panel1.SuspendLayout();
+            this.commandContainer.Panel2.SuspendLayout();
+            this.commandContainer.SuspendLayout();
             this.statusStrip2.SuspendLayout();
+            this.main.SuspendLayout();
             this.toolStrip.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
-            // main
-            // 
-            this.main.BackColor = System.Drawing.SystemColors.Control;
-            this.main.Controls.Add(this.mainContentSplit);
-            this.main.Controls.Add(this.toolStrip);
-            resources.ApplyResources(this.main, "main");
-            this.main.Name = "main";
-            // 
             // mainContentSplit
             // 
-            this.mainContentSplit.BackColor = System.Drawing.SystemColors.ActiveCaption;
-            this.mainContentSplit.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.mainContentSplit.BackColor = System.Drawing.SystemColors.Info;
+            this.mainContentSplit.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.mainContentSplit.Cursor = System.Windows.Forms.Cursors.Default;
             resources.ApplyResources(this.mainContentSplit, "mainContentSplit");
             this.mainContentSplit.FixedPanel = System.Windows.Forms.FixedPanel.Panel1;
             this.mainContentSplit.Name = "mainContentSplit";
@@ -131,11 +138,14 @@ using System.Drawing;
             // 
             this.mainContentSplit.Panel1.Controls.Add(this.statusStrip1);
             this.mainContentSplit.Panel1.Controls.Add(this.docManager);
+            resources.ApplyResources(this.mainContentSplit.Panel1, "mainContentSplit.Panel1");
             // 
             // mainContentSplit.Panel2
             // 
-            this.mainContentSplit.Panel2.Controls.Add(this.outputWindow);
+            this.mainContentSplit.Panel2.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.mainContentSplit.Panel2.Controls.Add(this.splitContainer1);
             this.mainContentSplit.Panel2.Controls.Add(this.statusStrip2);
+            resources.ApplyResources(this.mainContentSplit.Panel2, "mainContentSplit.Panel2");
             this.mainContentSplit.SplitterMoved += new System.Windows.Forms.SplitterEventHandler(this.mainContentSplit_SplitterMoved);
             // 
             // statusStrip1
@@ -166,9 +176,30 @@ using System.Drawing;
             // 
             // toolStripStatusLabel10
             // 
+            this.toolStripStatusLabel10.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.pythonToolStripMenuItem1,
+            this.rubyToolStripMenuItem1,
+            this.schemeToolStripMenuItem});
             this.toolStripStatusLabel10.Name = "toolStripStatusLabel10";
             this.toolStripStatusLabel10.Padding = new System.Windows.Forms.Padding(70, 0, 0, 0);
             resources.ApplyResources(this.toolStripStatusLabel10, "toolStripStatusLabel10");
+            // 
+            // pythonToolStripMenuItem1
+            // 
+            this.pythonToolStripMenuItem1.Checked = true;
+            this.pythonToolStripMenuItem1.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.pythonToolStripMenuItem1.Name = "pythonToolStripMenuItem1";
+            resources.ApplyResources(this.pythonToolStripMenuItem1, "pythonToolStripMenuItem1");
+            // 
+            // rubyToolStripMenuItem1
+            // 
+            this.rubyToolStripMenuItem1.Name = "rubyToolStripMenuItem1";
+            resources.ApplyResources(this.rubyToolStripMenuItem1, "rubyToolStripMenuItem1");
+            // 
+            // schemeToolStripMenuItem
+            // 
+            this.schemeToolStripMenuItem.Name = "schemeToolStripMenuItem";
+            resources.ApplyResources(this.schemeToolStripMenuItem, "schemeToolStripMenuItem");
             // 
             // toolStripStatusLabel11
             // 
@@ -200,13 +231,61 @@ using System.Drawing;
             this.docManager.FontToUse = null;
             this.docManager.Name = "docManager";
             // 
+            // splitContainer1
+            // 
+            resources.ApplyResources(this.splitContainer1, "splitContainer1");
+            this.splitContainer1.BackColor = System.Drawing.SystemColors.ControlLight;
+            this.splitContainer1.FixedPanel = System.Windows.Forms.FixedPanel.Panel2;
+            this.splitContainer1.Name = "splitContainer1";
+            // 
+            // splitContainer1.Panel1
+            // 
+            this.splitContainer1.Panel1.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.splitContainer1.Panel1.Controls.Add(this.outputWindow);
+            // 
+            // splitContainer1.Panel2
+            // 
+            this.splitContainer1.Panel2.Controls.Add(this.commandContainer);
+            // 
             // outputWindow
             // 
             resources.ApplyResources(this.outputWindow, "outputWindow");
             this.outputWindow.BackColor = System.Drawing.SystemColors.WindowText;
             this.outputWindow.Cursor = System.Windows.Forms.Cursors.Default;
-            this.outputWindow.ForeColor = System.Drawing.SystemColors.Window;
+            this.outputWindow.ForeColor = System.Drawing.SystemColors.HighlightText;
             this.outputWindow.Name = "outputWindow";
+            // 
+            // commandContainer
+            // 
+            resources.ApplyResources(this.commandContainer, "commandContainer");
+            this.commandContainer.Name = "commandContainer";
+            // 
+            // commandContainer.Panel1
+            // 
+            this.commandContainer.Panel1.Controls.Add(this.commandTextBox);
+            // 
+            // commandContainer.Panel2
+            // 
+            this.commandContainer.Panel2.Controls.Add(this.runButton);
+            // 
+            // commandTextBox
+            // 
+            this.commandTextBox.AcceptsReturn = true;
+            this.commandTextBox.AcceptsTab = true;
+            this.commandTextBox.BackColor = System.Drawing.SystemColors.ActiveCaptionText;
+            this.commandTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            resources.ApplyResources(this.commandTextBox, "commandTextBox");
+            this.commandTextBox.ForeColor = System.Drawing.SystemColors.HighlightText;
+            this.commandTextBox.Name = "commandTextBox";
+            //this.commandTextBox.KeyPress += new System.KeyPressEventHandler(this.commandTextBox_KeyPress);
+
+            // 
+            // runButton
+            // 
+            resources.ApplyResources(this.runButton, "runButton");
+            this.runButton.Name = "runButton";
+            this.runButton.UseVisualStyleBackColor = true;
+            this.runButton.Click += new System.EventHandler(this.runButton_Click);
             // 
             // statusStrip2
             // 
@@ -215,7 +294,7 @@ using System.Drawing;
             this.statusStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStatusLabel5,
             this.toolStripStatusLabel6,
-            this.toolStripDropDownButton1});
+            this.shellLanguageButton});
             resources.ApplyResources(this.statusStrip2, "statusStrip2");
             this.statusStrip2.Name = "statusStrip2";
             this.statusStrip2.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.statusStrip2_ItemClicked);
@@ -232,24 +311,46 @@ using System.Drawing;
             this.toolStripStatusLabel6.Name = "toolStripStatusLabel6";
             this.toolStripStatusLabel6.Click += new System.EventHandler(this.toolStripStatusLabel6_Click);
             // 
-            // toolStripDropDownButton1
+            // shellLanguageButton
             // 
-            this.toolStripDropDownButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.toolStripDropDownButton1.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.pythonToolStripMenuItem,
-            this.rubyToolStripMenuItem});
-            resources.ApplyResources(this.toolStripDropDownButton1, "toolStripDropDownButton1");
-            this.toolStripDropDownButton1.Name = "toolStripDropDownButton1";
+            this.shellLanguageButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.shellLanguageButton.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.shellLanguageSelect1,
+            this.shellLanguageSelect2,
+            this.shellLanguageSelect3});
+            resources.ApplyResources(this.shellLanguageButton, "shellLanguageButton");
+            this.shellLanguageButton.Name = "shellLanguageButton";
+            this.shellLanguageButton.Padding = new System.Windows.Forms.Padding(70, 0, 0, 0);
             // 
-            // pythonToolStripMenuItem
+            // shellLanguageSelect1
             // 
-            this.pythonToolStripMenuItem.Name = "pythonToolStripMenuItem";
-            resources.ApplyResources(this.pythonToolStripMenuItem, "pythonToolStripMenuItem");
+            this.shellLanguageSelect1.Checked = true;
+            this.shellLanguageSelect1.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.shellLanguageSelect1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.shellLanguageSelect1.Name = "shellLanguageSelect1";
+            resources.ApplyResources(this.shellLanguageSelect1, "shellLanguageSelect1");
+            this.shellLanguageSelect1.Click += new System.EventHandler(this.shellLanguageSelect1_Click);
             // 
-            // rubyToolStripMenuItem
+            // shellLanguageSelect2
             // 
-            this.rubyToolStripMenuItem.Name = "rubyToolStripMenuItem";
-            resources.ApplyResources(this.rubyToolStripMenuItem, "rubyToolStripMenuItem");
+            this.shellLanguageSelect2.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.shellLanguageSelect2.Name = "shellLanguageSelect2";
+            resources.ApplyResources(this.shellLanguageSelect2, "shellLanguageSelect2");
+            this.shellLanguageSelect2.Click += new System.EventHandler(this.shellLanguageSelect2_Click);
+            // 
+            // shellLanguageSelect3
+            // 
+            this.shellLanguageSelect3.Name = "shellLanguageSelect3";
+            resources.ApplyResources(this.shellLanguageSelect3, "shellLanguageSelect3");
+            this.shellLanguageSelect3.Click += new System.EventHandler(this.shellLanguageSelect3_Click);
+            // 
+            // main
+            // 
+            this.main.BackColor = System.Drawing.SystemColors.Control;
+            this.main.Controls.Add(this.mainContentSplit);
+            this.main.Controls.Add(this.toolStrip);
+            resources.ApplyResources(this.main, "main");
+            this.main.Name = "main";
             // 
             // toolStrip
             // 
@@ -607,8 +708,6 @@ using System.Drawing;
             this.Name = "PyjamaForm";
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Show;
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.mainForm_FormClosing);
-            this.main.ResumeLayout(false);
-            this.main.PerformLayout();
             this.mainContentSplit.Panel1.ResumeLayout(false);
             this.mainContentSplit.Panel1.PerformLayout();
             this.mainContentSplit.Panel2.ResumeLayout(false);
@@ -616,8 +715,18 @@ using System.Drawing;
             this.mainContentSplit.ResumeLayout(false);
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
+            this.splitContainer1.Panel1.ResumeLayout(false);
+            this.splitContainer1.Panel1.PerformLayout();
+            this.splitContainer1.Panel2.ResumeLayout(false);
+            this.splitContainer1.ResumeLayout(false);
+            this.commandContainer.Panel1.ResumeLayout(false);
+            this.commandContainer.Panel1.PerformLayout();
+            this.commandContainer.Panel2.ResumeLayout(false);
+            this.commandContainer.ResumeLayout(false);
             this.statusStrip2.ResumeLayout(false);
             this.statusStrip2.PerformLayout();
+            this.main.ResumeLayout(false);
+            this.main.PerformLayout();
             this.toolStrip.ResumeLayout(false);
             this.toolStrip.PerformLayout();
             this.toolStrip1.ResumeLayout(false);
@@ -677,9 +786,6 @@ using System.Drawing;
         private System.Windows.Forms.ToolStripButton toolStripButton1;
         private System.Windows.Forms.ToolStripButton toolStripButton2;
         private System.Windows.Forms.ToolStripMenuItem closeTabToolStripMenuItem;
-        private System.Windows.Forms.StatusStrip statusStrip2;
-        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel5;
-        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel6;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel2;
         private System.Windows.Forms.ToolStripStatusLabel languageName;
@@ -688,17 +794,28 @@ using System.Drawing;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel4;
         private System.Windows.Forms.ToolStripStatusLabel columnNumber;
         private DocumentManager docManager;
-        private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton1;
-        private System.Windows.Forms.ToolStripMenuItem pythonToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem rubyToolStripMenuItem;
         private System.Windows.Forms.StatusStrip statusStrip1;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel8;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel9;
-        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel10;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel11;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel12;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel13;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel14;
+        private System.Windows.Forms.ToolStripDropDownButton toolStripStatusLabel10;
+        private System.Windows.Forms.ToolStripMenuItem pythonToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem rubyToolStripMenuItem1;
+        private System.Windows.Forms.ToolStripMenuItem schemeToolStripMenuItem;
+        private System.Windows.Forms.StatusStrip statusStrip2;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel5;
+        private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel6;
+        private System.Windows.Forms.ToolStripDropDownButton shellLanguageButton;
+        private System.Windows.Forms.ToolStripMenuItem shellLanguageSelect1;
+        private System.Windows.Forms.ToolStripMenuItem shellLanguageSelect2;
+        private System.Windows.Forms.ToolStripMenuItem shellLanguageSelect3;
+        private System.Windows.Forms.SplitContainer splitContainer1;
+        private System.Windows.Forms.SplitContainer commandContainer;
+        private System.Windows.Forms.TextBox commandTextBox;
+        private System.Windows.Forms.Button runButton;
         private Console outputWindow;
 
 

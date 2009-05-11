@@ -30,6 +30,7 @@ namespace Pyjama
         internal void ExecuteInThread()
         {
             // Get text to eval:
+            // FIXME: check to see where focus is
             System.String code = pyjamaForm.GetCodeBlock().GetCodeToExecute();
             code = code.Trim();
             pyjamaForm.Execute(code);

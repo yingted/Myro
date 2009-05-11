@@ -129,7 +129,7 @@
     <value>Horizontal</value>
   </data>
   <metadata name="statusStrip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>439, 16</value>
+    <value>0, 208</value>
   </metadata>
   <data name="toolStripStatusLabel8.Font" type="System.Drawing.Font, System.Drawing">
     <value>Microsoft Sans Serif, 9pt, style=Italic</value>
@@ -155,14 +155,35 @@
   <data name="toolStripStatusLabel9.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
     <value>MiddleLeft</value>
   </data>
+  <data name="pythonToolStripMenuItem1.Size" type="System.Drawing.Size, System.Drawing">
+    <value>116, 22</value>
+  </data>
+  <data name="pythonToolStripMenuItem1.Text" xml:space="preserve">
+    <value>Python</value>
+  </data>
+  <data name="rubyToolStripMenuItem1.Size" type="System.Drawing.Size, System.Drawing">
+    <value>116, 22</value>
+  </data>
+  <data name="rubyToolStripMenuItem1.Text" xml:space="preserve">
+    <value>Ruby</value>
+  </data>
+  <data name="schemeToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>116, 22</value>
+  </data>
+  <data name="schemeToolStripMenuItem.Text" xml:space="preserve">
+    <value>Scheme</value>
+  </data>
+  <data name="toolStripStatusLabel10.RightToLeft" type="System.Windows.Forms.RightToLeft, System.Windows.Forms">
+    <value>Yes</value>
+  </data>
   <data name="toolStripStatusLabel10.Size" type="System.Drawing.Size, System.Drawing">
-    <value>111, 17</value>
+    <value>128, 20</value>
   </data>
   <data name="toolStripStatusLabel10.Text" xml:space="preserve">
     <value>Python</value>
   </data>
   <data name="toolStripStatusLabel10.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
-    <value>MiddleLeft</value>
+    <value>MiddleRight</value>
   </data>
   <data name="toolStripStatusLabel11.Font" type="System.Drawing.Font, System.Drawing">
     <value>Microsoft Sans Serif, 9pt, style=Bold</value>
@@ -201,10 +222,10 @@
     <value>MiddleLeft</value>
   </data>
   <data name="statusStrip1.Location" type="System.Drawing.Point, System.Drawing">
-    <value>0, 206</value>
+    <value>0, 208</value>
   </data>
   <data name="statusStrip1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>631, 22</value>
+    <value>633, 22</value>
   </data>
   <assembly alias="mscorlib" name="mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="statusStrip1.TabIndex" type="System.Int32, mscorlib">
@@ -244,7 +265,7 @@
     <value>0, 0, 0, 25</value>
   </data>
   <data name="docManager.Size" type="System.Drawing.Size, System.Drawing">
-    <value>631, 228</value>
+    <value>633, 230</value>
   </data>
   <data name="docManager.TabIndex" type="System.Int32, mscorlib">
     <value>6</value>
@@ -253,13 +274,16 @@
     <value>docManager</value>
   </data>
   <data name="&gt;&gt;docManager.Type" xml:space="preserve">
-    <value>Pyjama.DocumentManager, Pyjama, Version=1.0.3417.37027, Culture=neutral, PublicKeyToken=null</value>
+    <value>Pyjama.DocumentManager, Pyjama, Version=1.0.3418.7389, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;docManager.Parent" xml:space="preserve">
     <value>mainContentSplit.Panel1</value>
   </data>
   <data name="&gt;&gt;docManager.ZOrder" xml:space="preserve">
     <value>1</value>
+  </data>
+  <data name="mainContentSplit.Panel1.RightToLeft" type="System.Windows.Forms.RightToLeft, System.Windows.Forms">
+    <value>No</value>
   </data>
   <data name="&gt;&gt;mainContentSplit.Panel1.Name" xml:space="preserve">
     <value>mainContentSplit.Panel1</value>
@@ -276,7 +300,19 @@
   <data name="mainContentSplit.Panel1MinSize" type="System.Int32, mscorlib">
     <value>0</value>
   </data>
+  <data name="splitContainer1.Anchor" type="System.Windows.Forms.AnchorStyles, System.Windows.Forms">
+    <value>Top, Bottom, Left, Right</value>
+  </data>
+  <data name="splitContainer1.Location" type="System.Drawing.Point, System.Drawing">
+    <value>0, -3</value>
+  </data>
+  <data name="splitContainer1.Orientation" type="System.Windows.Forms.Orientation, System.Windows.Forms">
+    <value>Horizontal</value>
+  </data>
   <data name="outputWindow.AutoScroll" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="outputWindow.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
   </data>
   <data name="outputWindow.Dock" type="System.Windows.Forms.DockStyle, System.Windows.Forms">
@@ -289,25 +325,193 @@
     <value>0, 0, 0, 0</value>
   </data>
   <data name="outputWindow.Size" type="System.Drawing.Size, System.Drawing">
-    <value>631, 247</value>
+    <value>633, 164</value>
   </data>
   <data name="outputWindow.TabIndex" type="System.Int32, mscorlib">
-    <value>8</value>
+    <value>15</value>
   </data>
   <data name="&gt;&gt;outputWindow.Name" xml:space="preserve">
     <value>outputWindow</value>
   </data>
   <data name="&gt;&gt;outputWindow.Type" xml:space="preserve">
-    <value>Pyjama.Console, Pyjama, Version=1.0.3417.37027, Culture=neutral, PublicKeyToken=null</value>
+    <value>Pyjama.Console, Pyjama, Version=1.0.3418.7389, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;outputWindow.Parent" xml:space="preserve">
-    <value>mainContentSplit.Panel2</value>
+    <value>splitContainer1.Panel1</value>
   </data>
   <data name="&gt;&gt;outputWindow.ZOrder" xml:space="preserve">
     <value>0</value>
   </data>
+  <data name="&gt;&gt;splitContainer1.Panel1.Name" xml:space="preserve">
+    <value>splitContainer1.Panel1</value>
+  </data>
+  <data name="&gt;&gt;splitContainer1.Panel1.Type" xml:space="preserve">
+    <value>System.Windows.Forms.SplitterPanel, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;splitContainer1.Panel1.Parent" xml:space="preserve">
+    <value>splitContainer1</value>
+  </data>
+  <data name="&gt;&gt;splitContainer1.Panel1.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <data name="commandContainer.Dock" type="System.Windows.Forms.DockStyle, System.Windows.Forms">
+    <value>Fill</value>
+  </data>
+  <data name="commandContainer.Location" type="System.Drawing.Point, System.Drawing">
+    <value>0, 0</value>
+  </data>
+  <data name="commandTextBox.Dock" type="System.Windows.Forms.DockStyle, System.Windows.Forms">
+    <value>Fill</value>
+  </data>
+  <data name="commandTextBox.Font" type="System.Drawing.Font, System.Drawing">
+    <value>Lucida Console, 9.75pt</value>
+  </data>
+  <data name="commandTextBox.Location" type="System.Drawing.Point, System.Drawing">
+    <value>0, 0</value>
+  </data>
+  <data name="commandTextBox.Multiline" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="commandTextBox.ScrollBars" type="System.Windows.Forms.ScrollBars, System.Windows.Forms">
+    <value>Vertical</value>
+  </data>
+  <data name="commandTextBox.Size" type="System.Drawing.Size, System.Drawing">
+    <value>492, 78</value>
+  </data>
+  <data name="commandTextBox.TabIndex" type="System.Int32, mscorlib">
+    <value>10</value>
+  </data>
+  <data name="&gt;&gt;commandTextBox.Name" xml:space="preserve">
+    <value>commandTextBox</value>
+  </data>
+  <data name="&gt;&gt;commandTextBox.Type" xml:space="preserve">
+    <value>System.Windows.Forms.TextBox, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;commandTextBox.Parent" xml:space="preserve">
+    <value>commandContainer.Panel1</value>
+  </data>
+  <data name="&gt;&gt;commandTextBox.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <data name="&gt;&gt;commandContainer.Panel1.Name" xml:space="preserve">
+    <value>commandContainer.Panel1</value>
+  </data>
+  <data name="&gt;&gt;commandContainer.Panel1.Type" xml:space="preserve">
+    <value>System.Windows.Forms.SplitterPanel, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;commandContainer.Panel1.Parent" xml:space="preserve">
+    <value>commandContainer</value>
+  </data>
+  <data name="&gt;&gt;commandContainer.Panel1.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <data name="runButton.AutoSizeMode" type="System.Windows.Forms.AutoSizeMode, System.Windows.Forms">
+    <value>GrowAndShrink</value>
+  </data>
+  <data name="runButton.Dock" type="System.Windows.Forms.DockStyle, System.Windows.Forms">
+    <value>Fill</value>
+  </data>
+  <data name="runButton.Font" type="System.Drawing.Font, System.Drawing">
+    <value>Tahoma, 12pt</value>
+  </data>
+  <data name="runButton.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
+  <data name="runButton.Location" type="System.Drawing.Point, System.Drawing">
+    <value>0, 0</value>
+  </data>
+  <data name="runButton.Size" type="System.Drawing.Size, System.Drawing">
+    <value>137, 78</value>
+  </data>
+  <data name="runButton.TabIndex" type="System.Int32, mscorlib">
+    <value>11</value>
+  </data>
+  <data name="runButton.Text" xml:space="preserve">
+    <value>Run!</value>
+  </data>
+  <data name="&gt;&gt;runButton.Name" xml:space="preserve">
+    <value>runButton</value>
+  </data>
+  <data name="&gt;&gt;runButton.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Button, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;runButton.Parent" xml:space="preserve">
+    <value>commandContainer.Panel2</value>
+  </data>
+  <data name="&gt;&gt;runButton.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <data name="&gt;&gt;commandContainer.Panel2.Name" xml:space="preserve">
+    <value>commandContainer.Panel2</value>
+  </data>
+  <data name="&gt;&gt;commandContainer.Panel2.Type" xml:space="preserve">
+    <value>System.Windows.Forms.SplitterPanel, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;commandContainer.Panel2.Parent" xml:space="preserve">
+    <value>commandContainer</value>
+  </data>
+  <data name="&gt;&gt;commandContainer.Panel2.ZOrder" xml:space="preserve">
+    <value>1</value>
+  </data>
+  <data name="commandContainer.Size" type="System.Drawing.Size, System.Drawing">
+    <value>633, 78</value>
+  </data>
+  <data name="commandContainer.SplitterDistance" type="System.Int32, mscorlib">
+    <value>492</value>
+  </data>
+  <data name="commandContainer.TabIndex" type="System.Int32, mscorlib">
+    <value>0</value>
+  </data>
+  <data name="&gt;&gt;commandContainer.Name" xml:space="preserve">
+    <value>commandContainer</value>
+  </data>
+  <data name="&gt;&gt;commandContainer.Type" xml:space="preserve">
+    <value>System.Windows.Forms.SplitContainer, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;commandContainer.Parent" xml:space="preserve">
+    <value>splitContainer1.Panel2</value>
+  </data>
+  <data name="&gt;&gt;commandContainer.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <data name="&gt;&gt;splitContainer1.Panel2.Name" xml:space="preserve">
+    <value>splitContainer1.Panel2</value>
+  </data>
+  <data name="&gt;&gt;splitContainer1.Panel2.Type" xml:space="preserve">
+    <value>System.Windows.Forms.SplitterPanel, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;splitContainer1.Panel2.Parent" xml:space="preserve">
+    <value>splitContainer1</value>
+  </data>
+  <data name="&gt;&gt;splitContainer1.Panel2.ZOrder" xml:space="preserve">
+    <value>1</value>
+  </data>
+  <data name="splitContainer1.Size" type="System.Drawing.Size, System.Drawing">
+    <value>633, 249</value>
+  </data>
+  <data name="splitContainer1.SplitterDistance" type="System.Int32, mscorlib">
+    <value>164</value>
+  </data>
+  <data name="splitContainer1.SplitterWidth" type="System.Int32, mscorlib">
+    <value>7</value>
+  </data>
+  <data name="splitContainer1.TabIndex" type="System.Int32, mscorlib">
+    <value>8</value>
+  </data>
+  <data name="&gt;&gt;splitContainer1.Name" xml:space="preserve">
+    <value>splitContainer1</value>
+  </data>
+  <data name="&gt;&gt;splitContainer1.Type" xml:space="preserve">
+    <value>System.Windows.Forms.SplitContainer, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;splitContainer1.Parent" xml:space="preserve">
+    <value>mainContentSplit.Panel2</value>
+  </data>
+  <data name="&gt;&gt;splitContainer1.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
   <metadata name="statusStrip2.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>585, 17</value>
+    <value>0, 249</value>
   </metadata>
   <data name="toolStripStatusLabel5.Font" type="System.Drawing.Font, System.Drawing">
     <value>Microsoft Sans Serif, 9pt, style=Italic</value>
@@ -333,53 +537,62 @@
   <data name="toolStripStatusLabel6.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
     <value>MiddleLeft</value>
   </data>
-  <data name="pythonToolStripMenuItem.ShortcutKeys" type="System.Windows.Forms.Keys, System.Windows.Forms">
+  <data name="shellLanguageSelect1.ShortcutKeyDisplayString" xml:space="preserve">
+    <value>Crtl+1</value>
+  </data>
+  <data name="shellLanguageSelect1.ShortcutKeys" type="System.Windows.Forms.Keys, System.Windows.Forms">
     <value>Ctrl+1</value>
   </data>
-  <data name="pythonToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>146, 22</value>
+  <data name="shellLanguageSelect1.Size" type="System.Drawing.Size, System.Drawing">
+    <value>156, 22</value>
   </data>
-  <data name="pythonToolStripMenuItem.Text" xml:space="preserve">
+  <data name="shellLanguageSelect1.Text" xml:space="preserve">
     <value>Python</value>
   </data>
-  <data name="rubyToolStripMenuItem.ShortcutKeys" type="System.Windows.Forms.Keys, System.Windows.Forms">
+  <data name="shellLanguageSelect2.ShortcutKeyDisplayString" xml:space="preserve">
     <value>Ctrl+2</value>
   </data>
-  <data name="rubyToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>146, 22</value>
+  <data name="shellLanguageSelect2.ShortcutKeys" type="System.Windows.Forms.Keys, System.Windows.Forms">
+    <value>Ctrl+2</value>
   </data>
-  <data name="rubyToolStripMenuItem.Text" xml:space="preserve">
+  <data name="shellLanguageSelect2.Size" type="System.Drawing.Size, System.Drawing">
+    <value>156, 22</value>
+  </data>
+  <data name="shellLanguageSelect2.Text" xml:space="preserve">
     <value>Ruby</value>
   </data>
-  <data name="toolStripDropDownButton1.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
-    <value>
-        iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8
-        YQUAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAAgxJREFUOE+lkvtL
-        U2EYx+0PEbtpFwnBKPGKiJImGP0gYhIYs1E5GF5gIxkpA00JRSmMEF0ohMh+GaRWYlqabMVcNdS2QpaI
-        VqiDIYhk397vA6fXhCjyhYdzeM/5fp7vczkAdeL2cwho7v/wWzT1zcN+Pwhr51uY2/y41PQaF+wzKKiZ
-        QvaN58g0jyLd5KEUcQbg+84P/Cm2tncQjW3j68YWIqubCC3FcOJc478BAuGoZM6zvoRnakXEruEIjhc4
-        /g5gZop9c+voGAyLbQIfeBZxLL9BA1jzXvuGbWamuKh+GmmVbswE19A59FEBbmoAG7YbsLtm2mZmiml9
-        cvabNDwpz6YB7LYBoMXCumkJr7LOmnnHzBQ/9X2Bo2cOibm1GsBREbAQiYmw/8lnuCeWkVzcgnZlnw1j
-        3HV/wuNXK6i/9x5Hc6wawDlTXHbLJ+LZUBQPRyKwdQdxutwl1h+NLXHh5Ht1ewBHsiwawCW57HyDAfWR
-        dvl0uhZQ1eqX8aVc7EKLqrum651ATLf9OJx5XQM4KmY0xPzZ0hFAiQJnXB0WwME0E3IsL5B17ZlADqWb
-        NYDrOepdlcysmTWWOrxqbceRWtaLk0VO1XW72D5Vckd2gMBfq8zdpmUG62NJvKM4+XyziDk24xmfWoGE
-        s1c0gHPmbrPTpHNJKOCo2G1mZs20zcwUJ5yp1AB5+8/zEwgF5GMVDxh4AAAAAElFTkSuQmCC
-</value>
+  <data name="shellLanguageSelect3.ShortcutKeyDisplayString" xml:space="preserve">
+    <value>Ctrl+3</value>
   </data>
-  <data name="toolStripDropDownButton1.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
+  <data name="shellLanguageSelect3.ShortcutKeys" type="System.Windows.Forms.Keys, System.Windows.Forms">
+    <value>Ctrl+3</value>
+  </data>
+  <data name="shellLanguageSelect3.Size" type="System.Drawing.Size, System.Drawing">
+    <value>156, 22</value>
+  </data>
+  <data name="shellLanguageSelect3.Text" xml:space="preserve">
+    <value>Scheme</value>
+  </data>
+  <data name="shellLanguageButton.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
     <value>Magenta</value>
   </data>
-  <data name="toolStripDropDownButton1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>54, 20</value>
+  <data name="shellLanguageButton.RightToLeft" type="System.Windows.Forms.RightToLeft, System.Windows.Forms">
+    <value>Yes</value>
   </data>
-  <data name="toolStripDropDownButton1.Text" xml:space="preserve">
+  <data name="shellLanguageButton.Size" type="System.Drawing.Size, System.Drawing">
+    <value>128, 20</value>
+  </data>
+  <data name="shellLanguageButton.Text" xml:space="preserve">
     <value>Python</value>
   </data>
+  <data name="shellLanguageButton.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+    <value>MiddleRight</value>
+  </data>
   <data name="statusStrip2.Location" type="System.Drawing.Point, System.Drawing">
-    <value>0, 247</value>
+    <value>0, 249</value>
   </data>
   <data name="statusStrip2.Size" type="System.Drawing.Size, System.Drawing">
-    <value>631, 22</value>
+    <value>633, 22</value>
   </data>
   <data name="statusStrip2.TabIndex" type="System.Int32, mscorlib">
     <value>7</value>
@@ -398,6 +611,9 @@
   </data>
   <data name="&gt;&gt;statusStrip2.ZOrder" xml:space="preserve">
     <value>1</value>
+  </data>
+  <data name="mainContentSplit.Panel2.RightToLeft" type="System.Windows.Forms.RightToLeft, System.Windows.Forms">
+    <value>No</value>
   </data>
   <data name="&gt;&gt;mainContentSplit.Panel2.Name" xml:space="preserve">
     <value>mainContentSplit.Panel2</value>
@@ -442,7 +658,7 @@
     <value>True</value>
   </data>
   <metadata name="toolStrip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>132, 17</value>
+    <value>0, 0</value>
   </metadata>
   <data name="toolStrip1.Dock" type="System.Windows.Forms.DockStyle, System.Windows.Forms">
     <value>Fill</value>
@@ -710,10 +926,10 @@
     <value>0</value>
   </data>
   <metadata name="menuStrip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>17, 17</value>
+    <value>0, 0</value>
   </metadata>
   <data name="newToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>159, 22</value>
+    <value>167, 22</value>
   </data>
   <data name="newToolStripMenuItem.Text" xml:space="preserve">
     <value>New Script</value>
@@ -742,13 +958,13 @@
     <value>Ctrl+O</value>
   </data>
   <data name="openToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>159, 22</value>
+    <value>167, 22</value>
   </data>
   <data name="openToolStripMenuItem.Text" xml:space="preserve">
     <value>&amp;Open File</value>
   </data>
   <data name="toolStripSeparator.Size" type="System.Drawing.Size, System.Drawing">
-    <value>156, 6</value>
+    <value>164, 6</value>
   </data>
   <data name="saveToolStripMenuItem.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
@@ -773,22 +989,22 @@
     <value>Ctrl+S</value>
   </data>
   <data name="saveToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>159, 22</value>
+    <value>167, 22</value>
   </data>
   <data name="saveToolStripMenuItem.Text" xml:space="preserve">
     <value>&amp;Save</value>
   </data>
   <data name="saveAsToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>159, 22</value>
+    <value>167, 22</value>
   </data>
   <data name="saveAsToolStripMenuItem.Text" xml:space="preserve">
     <value>Save &amp;As...</value>
   </data>
   <data name="toolStripSeparator1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>156, 6</value>
+    <value>164, 6</value>
   </data>
   <data name="scriptToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>101, 22</value>
+    <value>104, 22</value>
   </data>
   <data name="scriptToolStripMenuItem.Text" xml:space="preserve">
     <value>Script</value>
@@ -813,31 +1029,31 @@
     <value>Magenta</value>
   </data>
   <data name="printToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>159, 22</value>
+    <value>167, 22</value>
   </data>
   <data name="printToolStripMenuItem.Text" xml:space="preserve">
     <value>Print...</value>
   </data>
   <data name="toolStripSeparator2.Size" type="System.Drawing.Size, System.Drawing">
-    <value>156, 6</value>
+    <value>164, 6</value>
   </data>
   <data name="toolStripSeparator2.Visible" type="System.Boolean, mscorlib">
     <value>False</value>
   </data>
   <data name="closeTabToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>159, 22</value>
+    <value>167, 22</value>
   </data>
   <data name="closeTabToolStripMenuItem.Text" xml:space="preserve">
     <value>Close Tab</value>
   </data>
   <data name="exitToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>159, 22</value>
+    <value>167, 22</value>
   </data>
   <data name="exitToolStripMenuItem.Text" xml:space="preserve">
     <value>E&amp;xit</value>
   </data>
   <data name="fileToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>35, 20</value>
+    <value>37, 20</value>
   </data>
   <data name="fileToolStripMenuItem.Text" xml:space="preserve">
     <value>&amp;File</value>
@@ -846,7 +1062,7 @@
     <value>Ctrl+Z</value>
   </data>
   <data name="undoToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>156, 22</value>
+    <value>164, 22</value>
   </data>
   <data name="undoToolStripMenuItem.Text" xml:space="preserve">
     <value>&amp;Undo</value>
@@ -855,7 +1071,7 @@
     <value>Ctrl+Y</value>
   </data>
   <data name="redoToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>156, 22</value>
+    <value>164, 22</value>
   </data>
   <data name="redoToolStripMenuItem.Text" xml:space="preserve">
     <value>&amp;Redo</value>
@@ -864,7 +1080,7 @@
     <value>False</value>
   </data>
   <data name="toolStripSeparator3.Size" type="System.Drawing.Size, System.Drawing">
-    <value>153, 6</value>
+    <value>161, 6</value>
   </data>
   <data name="cutToolStripMenuItem.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
@@ -886,7 +1102,7 @@
     <value>Ctrl+X</value>
   </data>
   <data name="cutToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>156, 22</value>
+    <value>164, 22</value>
   </data>
   <data name="cutToolStripMenuItem.Text" xml:space="preserve">
     <value>Cu&amp;t</value>
@@ -913,7 +1129,7 @@
     <value>Ctrl+C</value>
   </data>
   <data name="copyToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>156, 22</value>
+    <value>164, 22</value>
   </data>
   <data name="copyToolStripMenuItem.Text" xml:space="preserve">
     <value>&amp;Copy</value>
@@ -942,25 +1158,25 @@
     <value>Ctrl+V</value>
   </data>
   <data name="pasteToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>156, 22</value>
+    <value>164, 22</value>
   </data>
   <data name="pasteToolStripMenuItem.Text" xml:space="preserve">
     <value>&amp;Paste</value>
   </data>
   <data name="toolStripSeparator4.Size" type="System.Drawing.Size, System.Drawing">
-    <value>153, 6</value>
+    <value>161, 6</value>
   </data>
   <data name="selectAllToolStripMenuItem.ShortcutKeys" type="System.Windows.Forms.Keys, System.Windows.Forms">
     <value>Ctrl+A</value>
   </data>
   <data name="selectAllToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>156, 22</value>
+    <value>164, 22</value>
   </data>
   <data name="selectAllToolStripMenuItem.Text" xml:space="preserve">
     <value>Select &amp;All</value>
   </data>
   <data name="editToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>37, 20</value>
+    <value>39, 20</value>
   </data>
   <data name="editToolStripMenuItem.Text" xml:space="preserve">
     <value>&amp;Edit</value>
@@ -969,25 +1185,25 @@
     <value>F5</value>
   </data>
   <data name="executeToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>112, 22</value>
+    <value>114, 22</value>
   </data>
   <data name="executeToolStripMenuItem.Text" xml:space="preserve">
     <value>Run</value>
   </data>
   <data name="languageToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>46, 20</value>
+    <value>49, 20</value>
   </data>
   <data name="languageToolStripMenuItem.Text" xml:space="preserve">
     <value>Script</value>
   </data>
   <data name="optionsToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>123, 22</value>
+    <value>125, 22</value>
   </data>
   <data name="optionsToolStripMenuItem.Text" xml:space="preserve">
     <value>&amp;Options...</value>
   </data>
   <data name="toolsToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>44, 20</value>
+    <value>48, 20</value>
   </data>
   <data name="toolsToolStripMenuItem.Text" xml:space="preserve">
     <value>&amp;Tools</value>
@@ -996,7 +1212,7 @@
     <value>F1</value>
   </data>
   <data name="contentsToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>137, 22</value>
+    <value>141, 22</value>
   </data>
   <data name="contentsToolStripMenuItem.Text" xml:space="preserve">
     <value>&amp;Contents</value>
@@ -1005,19 +1221,19 @@
     <value>False</value>
   </data>
   <data name="toolStripSeparator5.Size" type="System.Drawing.Size, System.Drawing">
-    <value>134, 6</value>
+    <value>138, 6</value>
   </data>
   <data name="toolStripSeparator5.Visible" type="System.Boolean, mscorlib">
     <value>False</value>
   </data>
   <data name="aboutToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>137, 22</value>
+    <value>141, 22</value>
   </data>
   <data name="aboutToolStripMenuItem.Text" xml:space="preserve">
     <value>&amp;About...</value>
   </data>
   <data name="helpToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>40, 20</value>
+    <value>44, 20</value>
   </data>
   <data name="helpToolStripMenuItem.Text" xml:space="preserve">
     <value>&amp;Help</value>
@@ -1118,6 +1334,9 @@
   <metadata name="$this.Localizable" type="System.Boolean, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
   </metadata>
+  <metadata name="$this.TrayHeight" type="System.Int32, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>28</value>
+  </metadata>
   <data name="$this.AutoScaleDimensions" type="System.Drawing.SizeF, System.Drawing">
     <value>6, 13</value>
   </data>
@@ -1143,7 +1362,25 @@
     <value>toolStripStatusLabel10</value>
   </data>
   <data name="&gt;&gt;toolStripStatusLabel10.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripStatusLabel, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Windows.Forms.ToolStripDropDownButton, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;pythonToolStripMenuItem1.Name" xml:space="preserve">
+    <value>pythonToolStripMenuItem1</value>
+  </data>
+  <data name="&gt;&gt;pythonToolStripMenuItem1.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;rubyToolStripMenuItem1.Name" xml:space="preserve">
+    <value>rubyToolStripMenuItem1</value>
+  </data>
+  <data name="&gt;&gt;rubyToolStripMenuItem1.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;schemeToolStripMenuItem.Name" xml:space="preserve">
+    <value>schemeToolStripMenuItem</value>
+  </data>
+  <data name="&gt;&gt;schemeToolStripMenuItem.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;toolStripStatusLabel11.Name" xml:space="preserve">
     <value>toolStripStatusLabel11</value>
@@ -1181,22 +1418,28 @@
   <data name="&gt;&gt;toolStripStatusLabel6.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripStatusLabel, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;toolStripDropDownButton1.Name" xml:space="preserve">
-    <value>toolStripDropDownButton1</value>
+  <data name="&gt;&gt;shellLanguageButton.Name" xml:space="preserve">
+    <value>shellLanguageButton</value>
   </data>
-  <data name="&gt;&gt;toolStripDropDownButton1.Type" xml:space="preserve">
+  <data name="&gt;&gt;shellLanguageButton.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripDropDownButton, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;pythonToolStripMenuItem.Name" xml:space="preserve">
-    <value>pythonToolStripMenuItem</value>
+  <data name="&gt;&gt;shellLanguageSelect1.Name" xml:space="preserve">
+    <value>shellLanguageSelect1</value>
   </data>
-  <data name="&gt;&gt;pythonToolStripMenuItem.Type" xml:space="preserve">
+  <data name="&gt;&gt;shellLanguageSelect1.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;rubyToolStripMenuItem.Name" xml:space="preserve">
-    <value>rubyToolStripMenuItem</value>
+  <data name="&gt;&gt;shellLanguageSelect2.Name" xml:space="preserve">
+    <value>shellLanguageSelect2</value>
   </data>
-  <data name="&gt;&gt;rubyToolStripMenuItem.Type" xml:space="preserve">
+  <data name="&gt;&gt;shellLanguageSelect2.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;shellLanguageSelect3.Name" xml:space="preserve">
+    <value>shellLanguageSelect3</value>
+  </data>
+  <data name="&gt;&gt;shellLanguageSelect3.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;newToolStripButton.Name" xml:space="preserve">
@@ -1491,6 +1734,6 @@
     <value>PyjamaForm</value>
   </data>
   <data name="&gt;&gt;$this.Type" xml:space="preserve">
-    <value>Pyjama.BaseForm, Pyjama, Version=1.0.3417.37027, Culture=neutral, PublicKeyToken=null</value>
+    <value>Pyjama.BaseForm, Pyjama, Version=1.0.3418.7389, Culture=neutral, PublicKeyToken=null</value>
   </data>
 </root>

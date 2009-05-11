@@ -133,7 +133,7 @@ namespace Pyjama
             // Interface to Shell
             outputWindow.textbox.consoleTextBox.printTextOnNewline("Evaluating...\n");
             outputWindow.textbox.DoCommand(code);
-            outputWindow.textbox.consoleTextBox.printPrompt();
+            //outputWindow.textbox.consoleTextBox.printPrompt();
             outputWindow.textbox.consoleTextBox.ScrollToCaret();
             //SelectionStart = this.TextLength;
         }
@@ -298,5 +298,70 @@ namespace Pyjama
         {
 
         }
+
+        private void flowLayoutPanel1_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
+
+        private void tableLayoutPanel1_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+        }
+
+        private void shellLanguageSelect1_Click(object sender, EventArgs e)
+        {
+            shellLanguageButton.Text = "Python";
+            outputWindow.textbox.Prompt = "python> ";
+            outputWindow.textbox.engine = outputWindow.textbox.environment.GetEngine("py");
+            shellLanguageSelect1.Checked = true;
+            shellLanguageSelect2.Checked = false;
+            shellLanguageSelect1.Checked = false;
+        }
+
+        private void shellLanguageSelect2_Click(object sender, EventArgs e)
+        {
+            shellLanguageButton.Text = "Ruby";
+            outputWindow.textbox.Prompt = "ruby  > ";
+            outputWindow.textbox.engine = outputWindow.textbox.environment.GetEngine("rb");
+            shellLanguageSelect1.Checked = false;
+            shellLanguageSelect2.Checked = true;
+            shellLanguageSelect1.Checked = false;
+        }
+
+        private void shellLanguageSelect3_Click(object sender, EventArgs e)
+        {
+            shellLanguageButton.Text = "Scheme";
+            shellLanguageSelect1.Checked = false;
+            shellLanguageSelect2.Checked = false;
+            shellLanguageSelect1.Checked = true;
+        }
+
+        private void runButton_Click(object sender, EventArgs e)
+        {
+            string code = commandTextBox.Text;
+            outputWindow.textbox.consoleTextBox.printPrompt();
+            outputWindow.textbox.consoleTextBox.AddText(code);
+            outputWindow.textbox.DoCommand(code);
+            commandTextBox.Text = "";
+        }
+        /*
+        private void commandTextBox_KeyPress(object sender, System.Windows.Forms.KeyPressEventArgs e)
+        {
+            if (IsTerminatorKey(e.KeyChar))
+            {
+                e.Handled = true;
+                string code = commandTextBox.Text;
+                outputWindow.textbox.consoleTextBox.printPrompt();
+                outputWindow.textbox.consoleTextBox.AddText(code);
+                outputWindow.textbox.DoCommand(code);
+                commandTextBox.Text = "";
+            }
+        }
+   */
     }
 }

@@ -257,7 +257,6 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Properties\app.manifest" />
     <None Include="Resources\Start.png" />
     <None Include="Resources\FastRun.png" />
     <None Include="Resources\Untitled.png" />
