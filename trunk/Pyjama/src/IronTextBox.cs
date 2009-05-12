@@ -701,13 +701,21 @@ namespace UIIronTextBox
               } 
               catch (Exception err3) // If fails, something is wrong!
               {
+				try {
                   err_message = eo.FormatException(err3);
-                  error = true;
+				} catch {
+				  err_message = "An error occurred, and then an error in formatting the error occurred.";
+				}
+				error = true;
               }
             }
             catch (Exception err)
             {
-                err_message = eo.FormatException(err);
+			    try {
+				   err_message = eo.FormatException(err);
+				} catch {
+				  err_message = "An error occurred, and then an error in formatting the error occurred.";
+				}
                 error = true;
                 if (sctype != SourceCodeKind.File)
                 {
