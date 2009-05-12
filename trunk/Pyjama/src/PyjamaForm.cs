@@ -11,11 +11,11 @@ namespace Pyjama
     {
         private PyjamaFormController _controller;
 
-        public PyjamaForm(string [] args)
+        public PyjamaForm(string[] args)
         {
             InitializeComponent();
             KeyDown += new KeyEventHandler(mainForm_KeyDown);
-            
+
             _controller = new PyjamaFormController(this);
 
             Text = string.Format(Text, ApplicationInformation.Title(), ApplicationInformation.Version());
@@ -24,18 +24,20 @@ namespace Pyjama
             ApplyUserSettings(ApplicationOptions.LoadUserSettings(ApplicationOptions.GetIsolatedStorage()));
             //this.ActiveControl = this.outputWindow.output; // Output window gets cursor
 
-	    int opened = 0;
-	    foreach (string filename in args) {
-	      // FIXME: if file exists
-	      OpenFile(filename);
-	      opened++;
-	    }
-	    if (opened == 0) {
-	      NewFile();
-	    }
+            int opened = 0;
+            foreach (string filename in args)
+            {
+                // FIXME: if file exists
+                OpenFile(filename);
+                opened++;
+            }
+            if (opened == 0)
+            {
+                NewFile();
+            }
 
             this.ActiveControl = docManager.GetCurrentTabTextBox(); // tab text gets cursor
-	    // FIXME: make a general language changer
+            // FIXME: make a general language changer
             this.languageName.Text = "Python";
             this.columnNumber.Text = "" + 1;
             this.lineNumber.Text = "" + 1;
@@ -132,11 +134,10 @@ namespace Pyjama
             selectAllToolStripMenuItem.Enabled = enable;
         }
 
-        public void Execute(string code) {
+        public void Execute(string code)
+        {
             // Interface to Shell
-            outputWindow.textbox.consoleTextBox.printTextOnNewline("Evaluating...\n");
             outputWindow.textbox.DoCommand(code);
-            outputWindow.textbox.consoleTextBox.printPrompt();
             commandTextBox.Focus();
             //SelectionStart = this.TextLength;
         }
@@ -223,7 +224,7 @@ namespace Pyjama
         private void optionsToolStripMenuItem_Click(object sender, System.EventArgs e)
         {
             OptionsDialog dialog = new OptionsDialog();
-            if(dialog.ShowDialog() == DialogResult.OK)
+            if (dialog.ShowDialog() == DialogResult.OK)
             {
                 UserSettings settings = CreateUserSettings(dialog);
                 ApplicationOptions.SaveUserSettings(ApplicationOptions.GetIsolatedStorage(), settings);
@@ -254,7 +255,7 @@ namespace Pyjama
 
         private void mainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            
+
         }
 
         private void outputWindow_Load(object sender, EventArgs e)
@@ -318,9 +319,9 @@ namespace Pyjama
 
         private void shellLanguageSelect1_Click(object sender, EventArgs e)
         {
-	  // FIXME: make general
+            // FIXME: make general
             shellLanguageButton.Text = "Python";
-            outputWindow.textbox.Prompt = "python> ";
+            outputWindow.textbox.Prompt = "Python Mode ----";
             outputWindow.textbox.engine = outputWindow.textbox.environment.GetEngine("py");
             outputWindow.textbox.consoleTextBox.printPrompt();
             shellLanguageSelect1.Checked = true;
@@ -330,9 +331,9 @@ namespace Pyjama
 
         private void shellLanguageSelect2_Click(object sender, EventArgs e)
         {
-	  // FIXME: make general
+            // FIXME: make general
             shellLanguageButton.Text = "Ruby";
-            outputWindow.textbox.Prompt = "ruby  > ";
+            outputWindow.textbox.Prompt = "Ruby Mode ----";
             outputWindow.textbox.engine = outputWindow.textbox.environment.GetEngine("rb");
             outputWindow.textbox.consoleTextBox.printPrompt();
 
@@ -343,7 +344,7 @@ namespace Pyjama
 
         private void shellLanguageSelect3_Click(object sender, EventArgs e)
         {
-	  // FIXME: make general
+            // FIXME: make general
             shellLanguageButton.Text = "Scheme";
             shellLanguageSelect1.Checked = false;
             shellLanguageSelect2.Checked = false;
@@ -353,25 +354,59 @@ namespace Pyjama
         private void runButton_Click(object sender, EventArgs e)
         {
             string code = commandTextBox.Text;
-            outputWindow.textbox.consoleTextBox.AddText(code);
+            code = code.Trim();
             outputWindow.textbox.DoCommand(code);
-            outputWindow.textbox.consoleTextBox.printPrompt();
             commandTextBox.Text = "";
             commandTextBox.Focus();
         }
 
+        private void commandTextBox_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (((int)e.KeyChar) == 13)
+            {
+                e.Handled = true;
+                outputWindow.textbox.DoCommand(commandTextBox.Text);
+                commandTextBox.Text = "";
+                commandTextBox.Focus();
+            }
+        }
+
         private void commandTextBox_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
         {
-		  if (e.KeyCode == Keys.Enter && e.Control)
-		  {
-			e.Handled = true;
-			string code = commandTextBox.Text;
-			outputWindow.textbox.consoleTextBox.AddText(code);
-			outputWindow.textbox.DoCommand(code);
-			commandTextBox.Text = "";
-			outputWindow.textbox.consoleTextBox.printPrompt();
-			commandTextBox.Focus();
-		  }
-		}
-	}
+            if (e.KeyCode == System.Windows.Forms.Keys.Down)
+            {
+                if (outputWindow.textbox.consoleTextBox.commandHistory.DoesNextCommandExist())
+                {
+                    commandTextBox.Text = outputWindow.textbox.consoleTextBox.commandHistory.GetNextCommand();
+                }
+                else
+                    commandTextBox.Text = "";
+                e.Handled = true;
+            }
+            else if (e.KeyCode == System.Windows.Forms.Keys.Up)
+            {
+                if (outputWindow.textbox.consoleTextBox.commandHistory.DoesPreviousCommandExist())
+                {
+                    commandTextBox.Text = outputWindow.textbox.consoleTextBox.commandHistory.GetPreviousCommand();
+                }
+                else
+                    commandTextBox.Text = ""; // FIXME: use templine, if started, and then ""
+                e.Handled = true;
+            }
+
+            /*
+                  if (e.KeyCode == Keys.Enter && e.Control)
+                  {
+                    e.Handled = true;
+                    string code = commandTextBox.Text.Trim();
+                    outputWindow.textbox.consoleTextBox.AddText(code);
+                    outputWindow.textbox.DoCommand(code);
+                    commandTextBox.Text = "";
+                    //outputWindow.textbox.consoleTextBox.printPrompt();
+                    commandTextBox.Focus();
+                  }
+                }
+             */
+        }
+    }
 }

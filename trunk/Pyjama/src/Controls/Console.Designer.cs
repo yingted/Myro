@@ -99,7 +99,7 @@
             this.textbox.Location = new System.Drawing.Point(0, 0);
             this.textbox.Margin = new System.Windows.Forms.Padding(0);
             this.textbox.Name = "textbox";
-            this.textbox.Prompt = "python> ";
+            this.textbox.Prompt = "Python Mode ----";
             this.textbox.Size = new System.Drawing.Size(300, 300);
             this.textbox.TabIndex = 1;
             this.textbox.TextChanged += new System.EventHandler(this.output_TextChanged);

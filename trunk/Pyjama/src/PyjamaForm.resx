@@ -129,7 +129,7 @@
     <value>Horizontal</value>
   </data>
   <metadata name="statusStrip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>0, 208</value>
+    <value>0, 274</value>
   </metadata>
   <data name="toolStripStatusLabel8.Font" type="System.Drawing.Font, System.Drawing">
     <value>Microsoft Sans Serif, 9pt, style=Italic</value>
@@ -174,16 +174,16 @@
     <value>Scheme</value>
   </data>
   <data name="toolStripStatusLabel10.RightToLeft" type="System.Windows.Forms.RightToLeft, System.Windows.Forms">
-    <value>Yes</value>
+    <value>No</value>
   </data>
   <data name="toolStripStatusLabel10.Size" type="System.Drawing.Size, System.Drawing">
-    <value>128, 20</value>
+    <value>93, 20</value>
   </data>
   <data name="toolStripStatusLabel10.Text" xml:space="preserve">
     <value>Python</value>
   </data>
   <data name="toolStripStatusLabel10.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
-    <value>MiddleRight</value>
+    <value>MiddleLeft</value>
   </data>
   <data name="toolStripStatusLabel11.Font" type="System.Drawing.Font, System.Drawing">
     <value>Microsoft Sans Serif, 9pt, style=Bold</value>
@@ -274,7 +274,7 @@
     <value>docManager</value>
   </data>
   <data name="&gt;&gt;docManager.Type" xml:space="preserve">
-    <value>Pyjama.DocumentManager, Pyjama, Version=1.0.3418.18918, Culture=neutral, PublicKeyToken=null</value>
+    <value>Pyjama.DocumentManager, Pyjama, Version=1.0.3418.38760, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;docManager.Parent" xml:space="preserve">
     <value>mainContentSplit.Panel1</value>
@@ -325,7 +325,7 @@
     <value>0, 0, 0, 0</value>
   </data>
   <data name="outputWindow.Size" type="System.Drawing.Size, System.Drawing">
-    <value>504, 130</value>
+    <value>504, 110</value>
   </data>
   <data name="outputWindow.TabIndex" type="System.Int32, mscorlib">
     <value>15</value>
@@ -334,7 +334,7 @@
     <value>outputWindow</value>
   </data>
   <data name="&gt;&gt;outputWindow.Type" xml:space="preserve">
-    <value>Pyjama.Console, Pyjama, Version=1.0.3418.18918, Culture=neutral, PublicKeyToken=null</value>
+    <value>Pyjama.Console, Pyjama, Version=1.0.3418.38760, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;outputWindow.Parent" xml:space="preserve">
     <value>splitContainer1.Panel1</value>
@@ -376,7 +376,7 @@
     <value>Vertical</value>
   </data>
   <data name="commandTextBox.Size" type="System.Drawing.Size, System.Drawing">
-    <value>391, 46</value>
+    <value>391, 66</value>
   </data>
   <data name="commandTextBox.TabIndex" type="System.Int32, mscorlib">
     <value>10</value>
@@ -405,6 +405,9 @@
   <data name="&gt;&gt;commandContainer.Panel1.ZOrder" xml:space="preserve">
     <value>0</value>
   </data>
+  <data name="tableLayoutPanel1.ColumnCount" type="System.Int32, mscorlib">
+    <value>1</value>
+  </data>
   <data name="runButton.AutoSizeMode" type="System.Windows.Forms.AutoSizeMode, System.Windows.Forms">
     <value>GrowAndShrink</value>
   </data>
@@ -412,19 +415,19 @@
     <value>Fill</value>
   </data>
   <data name="runButton.Font" type="System.Drawing.Font, System.Drawing">
-    <value>Tahoma, 12pt</value>
+    <value>Tahoma, 9.75pt</value>
   </data>
   <data name="runButton.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
     <value>NoControl</value>
   </data>
   <data name="runButton.Location" type="System.Drawing.Point, System.Drawing">
-    <value>0, 0</value>
+    <value>3, 36</value>
   </data>
   <data name="runButton.Size" type="System.Drawing.Size, System.Drawing">
-    <value>109, 46</value>
+    <value>103, 27</value>
   </data>
   <data name="runButton.TabIndex" type="System.Int32, mscorlib">
-    <value>11</value>
+    <value>13</value>
   </data>
   <data name="runButton.Text" xml:space="preserve">
     <value>Run!</value>
@@ -436,10 +439,73 @@
     <value>System.Windows.Forms.Button, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;runButton.Parent" xml:space="preserve">
-    <value>commandContainer.Panel2</value>
+    <value>tableLayoutPanel1</value>
   </data>
   <data name="&gt;&gt;runButton.ZOrder" xml:space="preserve">
     <value>0</value>
+  </data>
+  <data name="commandLabel.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="commandLabel.Dock" type="System.Windows.Forms.DockStyle, System.Windows.Forms">
+    <value>Fill</value>
+  </data>
+  <data name="commandLabel.Location" type="System.Drawing.Point, System.Drawing">
+    <value>3, 0</value>
+  </data>
+  <data name="commandLabel.Size" type="System.Drawing.Size, System.Drawing">
+    <value>103, 33</value>
+  </data>
+  <data name="commandLabel.TabIndex" type="System.Int32, mscorlib">
+    <value>0</value>
+  </data>
+  <data name="commandLabel.Text" xml:space="preserve">
+    <value>&lt; Python Input</value>
+  </data>
+  <data name="commandLabel.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
+    <value>MiddleCenter</value>
+  </data>
+  <data name="&gt;&gt;commandLabel.Name" xml:space="preserve">
+    <value>commandLabel</value>
+  </data>
+  <data name="&gt;&gt;commandLabel.Type" xml:space="preserve">
+    <value>System.Windows.Forms.Label, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;commandLabel.Parent" xml:space="preserve">
+    <value>tableLayoutPanel1</value>
+  </data>
+  <data name="&gt;&gt;commandLabel.ZOrder" xml:space="preserve">
+    <value>1</value>
+  </data>
+  <data name="tableLayoutPanel1.Dock" type="System.Windows.Forms.DockStyle, System.Windows.Forms">
+    <value>Fill</value>
+  </data>
+  <data name="tableLayoutPanel1.Location" type="System.Drawing.Point, System.Drawing">
+    <value>0, 0</value>
+  </data>
+  <data name="tableLayoutPanel1.RowCount" type="System.Int32, mscorlib">
+    <value>2</value>
+  </data>
+  <data name="tableLayoutPanel1.Size" type="System.Drawing.Size, System.Drawing">
+    <value>109, 66</value>
+  </data>
+  <data name="tableLayoutPanel1.TabIndex" type="System.Int32, mscorlib">
+    <value>0</value>
+  </data>
+  <data name="&gt;&gt;tableLayoutPanel1.Name" xml:space="preserve">
+    <value>tableLayoutPanel1</value>
+  </data>
+  <data name="&gt;&gt;tableLayoutPanel1.Type" xml:space="preserve">
+    <value>System.Windows.Forms.TableLayoutPanel, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;tableLayoutPanel1.Parent" xml:space="preserve">
+    <value>commandContainer.Panel2</value>
+  </data>
+  <data name="&gt;&gt;tableLayoutPanel1.ZOrder" xml:space="preserve">
+    <value>0</value>
+  </data>
+  <data name="tableLayoutPanel1.LayoutSettings" type="System.Windows.Forms.TableLayoutSettings, System.Windows.Forms">
+    <value>&lt;?xml version="1.0" encoding="utf-16"?&gt;&lt;TableLayoutSettings&gt;&lt;Controls&gt;&lt;Control Name="runButton" Row="1" RowSpan="1" Column="0" ColumnSpan="1" /&gt;&lt;Control Name="commandLabel" Row="0" RowSpan="1" Column="0" ColumnSpan="1" /&gt;&lt;/Controls&gt;&lt;Columns Styles="Percent,50" /&gt;&lt;Rows Styles="Percent,50,Percent,50" /&gt;&lt;/TableLayoutSettings&gt;</value>
   </data>
   <data name="&gt;&gt;commandContainer.Panel2.Name" xml:space="preserve">
     <value>commandContainer.Panel2</value>
@@ -454,7 +520,7 @@
     <value>1</value>
   </data>
   <data name="commandContainer.Size" type="System.Drawing.Size, System.Drawing">
-    <value>504, 46</value>
+    <value>504, 66</value>
   </data>
   <data name="commandContainer.SplitterDistance" type="System.Int32, mscorlib">
     <value>391</value>
@@ -490,7 +556,7 @@
     <value>504, 183</value>
   </data>
   <data name="splitContainer1.SplitterDistance" type="System.Int32, mscorlib">
-    <value>130</value>
+    <value>110</value>
   </data>
   <data name="splitContainer1.SplitterWidth" type="System.Int32, mscorlib">
     <value>7</value>
@@ -511,7 +577,7 @@
     <value>0</value>
   </data>
   <metadata name="statusStrip2.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>0, 249</value>
+    <value>0, 183</value>
   </metadata>
   <data name="toolStripStatusLabel5.Font" type="System.Drawing.Font, System.Drawing">
     <value>Microsoft Sans Serif, 9pt, style=Italic</value>
@@ -577,16 +643,16 @@
     <value>Magenta</value>
   </data>
   <data name="shellLanguageButton.RightToLeft" type="System.Windows.Forms.RightToLeft, System.Windows.Forms">
-    <value>Yes</value>
+    <value>No</value>
   </data>
   <data name="shellLanguageButton.Size" type="System.Drawing.Size, System.Drawing">
-    <value>128, 20</value>
+    <value>93, 20</value>
   </data>
   <data name="shellLanguageButton.Text" xml:space="preserve">
     <value>Python</value>
   </data>
   <data name="shellLanguageButton.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
-    <value>MiddleRight</value>
+    <value>MiddleLeft</value>
   </data>
   <data name="statusStrip2.Location" type="System.Drawing.Point, System.Drawing">
     <value>0, 183</value>
@@ -1704,6 +1770,6 @@
     <value>PyjamaForm</value>
   </data>
   <data name="&gt;&gt;$this.Type" xml:space="preserve">
-    <value>Pyjama.BaseForm, Pyjama, Version=1.0.3418.18918, Culture=neutral, PublicKeyToken=null</value>
+    <value>Pyjama.BaseForm, Pyjama, Version=1.0.3418.38760, Culture=neutral, PublicKeyToken=null</value>
   </data>
 </root>

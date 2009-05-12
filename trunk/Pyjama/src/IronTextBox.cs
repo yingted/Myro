@@ -57,7 +57,7 @@ namespace UIIronTextBox
         /// <summary>
         /// Used for storing commands.
         /// </summary>
-        private UIIronTextBox.CommandHistory commandHistory = new CommandHistory();
+        public UIIronTextBox.CommandHistory commandHistory = new CommandHistory();
 
         /// <summary> 
         /// Required designer variable.
@@ -182,23 +182,24 @@ namespace UIIronTextBox
                 printLine();
             //add the prompt
             this.AddText(Prompt);
-            this.Select(this.TextLength - prompt.Length, prompt.Length - 2);
+            this.Select(this.TextLength - prompt.Length, prompt.Length);
             this.SelectionColor = Color.Yellow;
             //this.Select(this.TextLength, 0); // clears the selection
             //MoveCaretToEndOfText();
             this.SelectionStart = this.TextLength;
             this.SelectionColor = Color.White;
+            this.AddText("\n");
         }
 
-        public void printResult()
+        public void printResult(string text)
         {
             string currentText = this.Text;
             //add newline if it needs one
             if ((currentText.Length != 0) && (currentText[currentText.Length - 1] != '\n'))
                 printLine();
             //add the prompt
-            this.AddText("Result: "); // 8
-            this.Select(this.TextLength - 8, 8 - 2);
+            this.AddText(text); 
+            this.Select(this.TextLength - text.Length, text.Length);
             this.SelectionColor = Color.Green;
             //this.Select(this.TextLength, 0); // clears the selection
             //MoveCaretToEndOfText();
@@ -384,7 +385,7 @@ namespace UIIronTextBox
                 string currentCommand = GetTextAtPrompt();
                 commandHistory.Add(currentCommand);
                 ((UIIronTextBox.IronTextBoxControl)this.Parent).DoCommand(currentCommand);
-                printPrompt();
+                //printPrompt();
             }
         }
 
@@ -606,8 +607,12 @@ namespace UIIronTextBox
         public void DoCommand(string command)
         {
             //System.Console.WriteLine("DoCommand: '{0}'", command);
+
+            command = command.Trim();
             if (command != "")
             {
+                this.consoleTextBox.printTextOnNewline(">>> " + command);
+                this.consoleTextBox.AddcommandHistory(command);
                 if (command == "clear")
                 {
                     this.Clear();
@@ -619,12 +624,12 @@ namespace UIIronTextBox
                 else if (command == "python")
                 {
                     engine = environment.GetEngine("py");
-                    Prompt = "python> ";
+                    Prompt = "Python Mode ----";
                 }
                 else if (command == "ruby")
                 {
                     engine = environment.GetEngine("rb");
-                    Prompt = "ruby  > ";
+                    Prompt = "Ruby Mode ----";
                 }
                 else if (command == "runfile")
                 {
@@ -706,18 +711,18 @@ namespace UIIronTextBox
             // ----------- Output:
             if (error)
             {
-                consoleTextBox.SelectionStart = consoleTextBox.TextLength;
+                //consoleTextBox.SelectionStart = consoleTextBox.TextLength;
+                err_message = err_message.Replace("\r\n", "\n");
                 consoleTextBox.printTextOnNewline(err_message);
                 consoleTextBox.Select(consoleTextBox.TextLength - err_message.Length, err_message.Length);
                 consoleTextBox.SelectionColor = Color.Red;
-                consoleTextBox.SelectionStart = consoleTextBox.TextLength;
+                //consoleTextBox.SelectionStart = consoleTextBox.TextLength;
                 consoleTextBox.Select(consoleTextBox.TextLength, 0);
                 consoleTextBox.SelectionColor = Color.White;
             }
-            else if (output != null)
+            else if (output != null && output.Trim() != "")
             {
                 // This is printed out if no error
-                consoleTextBox.printResult();
                 consoleTextBox.printTextOnNewline(output);
             }
             return;
@@ -779,7 +784,7 @@ namespace UIIronTextBox
             this.consoleTextBox.Location = new Point(0, 0);
             this.consoleTextBox.Multiline = true;
             this.consoleTextBox.Name = "consoleTextBox";
-            this.consoleTextBox.Prompt = "python> ";
+            this.consoleTextBox.Prompt = "Python Mode ----";
             this.consoleTextBox.ScrollBars = RichTextBoxScrollBars.Vertical;
             this.consoleTextBox.Font = new Font("DejaVu Sans Mono", 10);
             this.consoleTextBox.Size = new Size(232, 216);
@@ -791,7 +796,7 @@ namespace UIIronTextBox
             this.Name = "IronTextBoxControl";
             this.Size = new Size(232, 216);
             this.ResumeLayout(false);
-            this.consoleTextBox.Text = "";
+            this.consoleTextBox.Text = "Output Window";
             this.consoleTextBox.printPrompt();
         }
 
@@ -882,13 +887,13 @@ namespace UIIronTextBox
         }
     }
 
-    internal class CommandHistory
+    public class CommandHistory
     {
         private int currentPosn;
         private string lastCommand;
         private ArrayList commandHistory = new ArrayList();
 
-        internal CommandHistory()
+        public CommandHistory()
         {
         }
 

@@ -49,7 +49,9 @@ using System.Windows.Forms;
             this.outputWindow = new Pyjama.Console();
             this.commandContainer = new System.Windows.Forms.SplitContainer();
             this.commandTextBox = new System.Windows.Forms.TextBox();
+            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.runButton = new System.Windows.Forms.Button();
+            this.commandLabel = new System.Windows.Forms.Label();
             this.statusStrip2 = new System.Windows.Forms.StatusStrip();
             this.toolStripStatusLabel5 = new System.Windows.Forms.ToolStripStatusLabel();
             this.toolStripStatusLabel6 = new System.Windows.Forms.ToolStripStatusLabel();
@@ -117,6 +119,7 @@ using System.Windows.Forms;
             this.commandContainer.Panel1.SuspendLayout();
             this.commandContainer.Panel2.SuspendLayout();
             this.commandContainer.SuspendLayout();
+            this.tableLayoutPanel1.SuspendLayout();
             this.statusStrip2.SuspendLayout();
             this.main.SuspendLayout();
             this.toolStrip.SuspendLayout();
@@ -180,7 +183,7 @@ using System.Windows.Forms;
             this.rubyToolStripMenuItem1,
             this.schemeToolStripMenuItem});
             this.toolStripStatusLabel10.Name = "toolStripStatusLabel10";
-            this.toolStripStatusLabel10.Padding = new System.Windows.Forms.Padding(70, 0, 0, 0);
+            this.toolStripStatusLabel10.Padding = new System.Windows.Forms.Padding(35, 0, 0, 0);
             resources.ApplyResources(this.toolStripStatusLabel10, "toolStripStatusLabel10");
             // 
             // pythonToolStripMenuItem1
@@ -265,7 +268,7 @@ using System.Windows.Forms;
             // 
             // commandContainer.Panel2
             // 
-            this.commandContainer.Panel2.Controls.Add(this.runButton);
+            this.commandContainer.Panel2.Controls.Add(this.tableLayoutPanel1);
             // 
             // commandTextBox
             // 
@@ -276,8 +279,15 @@ using System.Windows.Forms;
             resources.ApplyResources(this.commandTextBox, "commandTextBox");
             this.commandTextBox.ForeColor = System.Drawing.SystemColors.HighlightText;
             this.commandTextBox.Name = "commandTextBox";
-	        //this.commandTextBox.KeyPress += new KeyPressEventHandler(this.commandTextBox_KeyPress);
-            this.commandTextBox.KeyDown += new KeyEventHandler(this.commandTextBox_KeyDown);
+            this.commandTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.commandTextBox_KeyDown);
+            this.commandTextBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.commandTextBox_KeyPress);
+            // 
+            // tableLayoutPanel1
+            // 
+            resources.ApplyResources(this.tableLayoutPanel1, "tableLayoutPanel1");
+            this.tableLayoutPanel1.Controls.Add(this.runButton, 0, 1);
+            this.tableLayoutPanel1.Controls.Add(this.commandLabel, 0, 0);
+            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
             // 
             // runButton
             // 
@@ -285,6 +295,11 @@ using System.Windows.Forms;
             this.runButton.Name = "runButton";
             this.runButton.UseVisualStyleBackColor = true;
             this.runButton.Click += new System.EventHandler(this.runButton_Click);
+            // 
+            // commandLabel
+            // 
+            resources.ApplyResources(this.commandLabel, "commandLabel");
+            this.commandLabel.Name = "commandLabel";
             // 
             // statusStrip2
             // 
@@ -319,7 +334,7 @@ using System.Windows.Forms;
             this.shellLanguageSelect3});
             resources.ApplyResources(this.shellLanguageButton, "shellLanguageButton");
             this.shellLanguageButton.Name = "shellLanguageButton";
-            this.shellLanguageButton.Padding = new System.Windows.Forms.Padding(70, 0, 0, 0);
+            this.shellLanguageButton.Padding = new System.Windows.Forms.Padding(35, 0, 0, 0);
             // 
             // shellLanguageSelect1
             // 
@@ -710,6 +725,8 @@ using System.Windows.Forms;
             this.commandContainer.Panel1.PerformLayout();
             this.commandContainer.Panel2.ResumeLayout(false);
             this.commandContainer.ResumeLayout(false);
+            this.tableLayoutPanel1.ResumeLayout(false);
+            this.tableLayoutPanel1.PerformLayout();
             this.statusStrip2.ResumeLayout(false);
             this.statusStrip2.PerformLayout();
             this.main.ResumeLayout(false);
@@ -798,10 +815,12 @@ using System.Windows.Forms;
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.SplitContainer commandContainer;
         private System.Windows.Forms.TextBox commandTextBox;
-        private System.Windows.Forms.Button runButton;
         private Console outputWindow;
         private System.Windows.Forms.ToolStripStatusLabel lineNumber;
         private System.Windows.Forms.ToolStripStatusLabel columnNumber;
+        private TableLayoutPanel tableLayoutPanel1;
+        private Button runButton;
+        private Label commandLabel;
 
 
 

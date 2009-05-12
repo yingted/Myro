@@ -29,6 +29,7 @@ namespace Pyjama
 
         internal void ExecuteInThread()
         {
+            // F5 Method.
             // Get text to eval:
             // FIXME: check to see where focus is
             System.String code = pyjamaForm.GetCodeBlock().GetCodeToExecute();
