@@ -424,7 +424,12 @@ namespace Pyjama
             else if (e.KeyCode == System.Windows.Forms.Keys.Up)
             {
                 // If cursor is on the first line
-                if (commandTextBox.GetLineFromCharIndex(commandTextBox.SelectionStart) == 0)
+#if MONO
+	        int firstLine = commandTextBox.GetLineFromCharIndex(commandTextBox.SelectionStart) - 1;
+#else
+	        int firstLine = commandTextBox.GetLineFromCharIndex(commandTextBox.SelectionStart);
+#endif
+                if (firstLine == 0)
                 {
                     if (outputWindow.textbox.consoleTextBox.commandHistory.DoesPreviousCommandExist())
                     {

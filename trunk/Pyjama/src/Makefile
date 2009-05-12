@@ -81,7 +81,7 @@ pyjama.exe: res res/Pyjama.FontControl.resources res/Pyjama.AboutDialog.resource
 		./ShortcutKeyDispatcher.cs \
 		./UserSettings.cs 
 	MONO_PATH=../libs \
-	$(MONOPATH)/gmcs \
+	$(MONOPATH)/gmcs -define:MONO \
 	./ActiveCodeFile.cs \
 	./ApplicationInformation.cs \
 	./ApplicationOptions.cs \
