@@ -25,7 +25,8 @@ namespace Pyjama
             textBox.KeyPress += new KeyPressEventHandler(textBox_KeyPress);
             textBox.KeyUp += new KeyEventHandler(textBox_KeyUp);
             textBox.TextChanged += textbox_TextChanged;
-            textBox.Font = new Font("Courier New", 10); 
+            textBox.Font = new Font("Courier New", 10);
+            textBox.WordWrap = false;
             Controls.Add(textBox);
         }
 

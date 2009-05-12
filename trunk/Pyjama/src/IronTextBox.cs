@@ -31,11 +31,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
-//using System.Data;
 using System.Text;
 using System.Windows.Forms;
 using System.ComponentModel;//ToolboxItem
 using System.Drawing;       //ToolboxBitmap
+using System.Threading;
+
 using IronPython.Runtime;   //PythonDictionary
 using IronPython.Hosting;   //PythonEngine
 using IronRuby.Hosting;
@@ -642,7 +643,12 @@ namespace UIIronTextBox
                 }
                 else // Command
                 {
-                    Execute(command, SourceCodeKind.InteractiveCode);
+                    ThreadStart starter = delegate { Execute(command, SourceCodeKind.InteractiveCode); };
+                    Thread t = new Thread(new ThreadStart(starter));
+                    t.IsBackground = true;
+                    t.Start();
+                    this.Cursor = Cursors.WaitCursor;
+                    //Execute(command, SourceCodeKind.InteractiveCode);
                 }
             }
         }
@@ -711,21 +717,46 @@ namespace UIIronTextBox
             // ----------- Output:
             if (error)
             {
-                //consoleTextBox.SelectionStart = consoleTextBox.TextLength;
-                err_message = err_message.Replace("\r\n", "\n");
-                consoleTextBox.printTextOnNewline(err_message);
-                consoleTextBox.Select(consoleTextBox.TextLength - err_message.Length, err_message.Length);
-                consoleTextBox.SelectionColor = Color.Red;
-                //consoleTextBox.SelectionStart = consoleTextBox.TextLength;
-                consoleTextBox.Select(consoleTextBox.TextLength, 0);
-                consoleTextBox.SelectionColor = Color.White;
+                DisplayError(err_message);
             }
             else if (output != null && output.Trim() != "")
             {
                 // This is printed out if no error
-                consoleTextBox.printTextOnNewline(output);
+                StringParameterDelegate spd = new StringParameterDelegate(consoleTextBox.printTextOnNewline);
+                BeginInvoke(spd, new object [] {output});
+                //consoleTextBox.printTextOnNewline(output);
             }
+            Invoke (new MethodInvoker(FinishCommand));
             return;
+        }
+
+        delegate void StringParameterDelegate(string value);
+
+        private void FinishCommand()
+        {
+            // Put the text cursor in the commandtextBox
+            // Put the mouse cursor back
+            this.Cursor = Cursors.Default;
+        }
+
+        private void DisplayError(string err_message)
+        {
+            if (InvokeRequired)
+            {
+                // We're not in the UI thread, so we need to call BeginInvoke
+                BeginInvoke(new StringParameterDelegate(DisplayError), new object[] { err_message });
+                return;
+            }
+            // Must be on the UI thread if we've got this far
+
+            //consoleTextBox.SelectionStart = consoleTextBox.TextLength;
+            err_message = err_message.Replace("\r\n", "\n");
+            consoleTextBox.printTextOnNewline(err_message);
+            consoleTextBox.Select(consoleTextBox.TextLength - err_message.Length, err_message.Length);
+            consoleTextBox.SelectionColor = Color.Red;
+            //consoleTextBox.SelectionStart = consoleTextBox.TextLength;
+            consoleTextBox.Select(consoleTextBox.TextLength, 0);
+            consoleTextBox.SelectionColor = Color.White;
         }
 
         private static string ReadFromStream(MemoryStream ms)
