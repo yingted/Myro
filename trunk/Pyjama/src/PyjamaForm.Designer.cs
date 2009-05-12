@@ -96,8 +96,13 @@ using System.Windows.Forms;
             this.pasteToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.selectAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripSeparator8 = new System.Windows.Forms.ToolStripSeparator();
+            this.selectEditorToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.languageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.executeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.shellToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.evaluateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.newlineToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.optionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -574,7 +579,9 @@ using System.Windows.Forms;
             this.copyToolStripMenuItem,
             this.pasteToolStripMenuItem,
             this.toolStripSeparator4,
-            this.selectAllToolStripMenuItem});
+            this.selectAllToolStripMenuItem,
+            this.toolStripSeparator8,
+            this.selectEditorToolStripMenuItem});
             this.editToolStripMenuItem.Name = "editToolStripMenuItem";
             resources.ApplyResources(this.editToolStripMenuItem, "editToolStripMenuItem");
             // 
@@ -623,10 +630,23 @@ using System.Windows.Forms;
             resources.ApplyResources(this.selectAllToolStripMenuItem, "selectAllToolStripMenuItem");
             this.selectAllToolStripMenuItem.Click += new System.EventHandler(this.selectAllToolStripMenuItem_Click);
             // 
+            // toolStripSeparator8
+            // 
+            this.toolStripSeparator8.Name = "toolStripSeparator8";
+            resources.ApplyResources(this.toolStripSeparator8, "toolStripSeparator8");
+            // 
+            // selectEditorToolStripMenuItem
+            // 
+            this.selectEditorToolStripMenuItem.Name = "selectEditorToolStripMenuItem";
+            resources.ApplyResources(this.selectEditorToolStripMenuItem, "selectEditorToolStripMenuItem");
+            // 
             // languageToolStripMenuItem
             // 
             this.languageToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.executeToolStripMenuItem});
+            this.executeToolStripMenuItem,
+            this.shellToolStripMenuItem,
+            this.evaluateToolStripMenuItem,
+            this.newlineToolStripMenuItem});
             this.languageToolStripMenuItem.Name = "languageToolStripMenuItem";
             resources.ApplyResources(this.languageToolStripMenuItem, "languageToolStripMenuItem");
             // 
@@ -635,6 +655,24 @@ using System.Windows.Forms;
             this.executeToolStripMenuItem.Name = "executeToolStripMenuItem";
             resources.ApplyResources(this.executeToolStripMenuItem, "executeToolStripMenuItem");
             this.executeToolStripMenuItem.Click += new System.EventHandler(this.execute_Click);
+            // 
+            // shellToolStripMenuItem
+            // 
+            this.shellToolStripMenuItem.Name = "shellToolStripMenuItem";
+            resources.ApplyResources(this.shellToolStripMenuItem, "shellToolStripMenuItem");
+            this.shellToolStripMenuItem.Click += new System.EventHandler(this.shellToolStripMenuItem_Click);
+            // 
+            // evaluateToolStripMenuItem
+            // 
+            this.evaluateToolStripMenuItem.Name = "evaluateToolStripMenuItem";
+            resources.ApplyResources(this.evaluateToolStripMenuItem, "evaluateToolStripMenuItem");
+            this.evaluateToolStripMenuItem.Click += new System.EventHandler(this.runButton_Click);
+            // 
+            // newlineToolStripMenuItem
+            // 
+            this.newlineToolStripMenuItem.Name = "newlineToolStripMenuItem";
+            resources.ApplyResources(this.newlineToolStripMenuItem, "newlineToolStripMenuItem");
+            this.newlineToolStripMenuItem.Click += new System.EventHandler(this.newlineToolStripMenuItem_Click);
             // 
             // toolsToolStripMenuItem
             // 
@@ -822,6 +860,11 @@ using System.Windows.Forms;
         private TableLayoutPanel tableLayoutPanel1;
         private Button runButton;
         private Label commandLabel;
+        private ToolStripMenuItem shellToolStripMenuItem;
+        private ToolStripMenuItem evaluateToolStripMenuItem;
+        private ToolStripSeparator toolStripSeparator8;
+        private ToolStripMenuItem selectEditorToolStripMenuItem;
+        private ToolStripMenuItem newlineToolStripMenuItem;
 
 
 

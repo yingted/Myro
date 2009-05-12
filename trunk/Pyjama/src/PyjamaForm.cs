@@ -142,6 +142,11 @@ namespace Pyjama
             //SelectionStart = this.TextLength;
         }
 
+        public void SelectCommandShell()
+        {
+            commandTextBox.Focus();
+        }
+
 
         #region Menu Items
 
@@ -321,7 +326,7 @@ namespace Pyjama
         {
             // FIXME: make general
             shellLanguageButton.Text = "Python";
-            outputWindow.textbox.Prompt = "Python Mode ----";
+            outputWindow.textbox.Prompt = "---- Python Mode ----";
             outputWindow.textbox.engine = outputWindow.textbox.environment.GetEngine("py");
             outputWindow.textbox.consoleTextBox.printPrompt();
             shellLanguageSelect1.Checked = true;
@@ -333,7 +338,7 @@ namespace Pyjama
         {
             // FIXME: make general
             shellLanguageButton.Text = "Ruby";
-            outputWindow.textbox.Prompt = "Ruby Mode ----";
+            outputWindow.textbox.Prompt = "---- Ruby Mode ----";
             outputWindow.textbox.engine = outputWindow.textbox.environment.GetEngine("rb");
             outputWindow.textbox.consoleTextBox.printPrompt();
 
@@ -370,6 +375,13 @@ namespace Pyjama
 	      commandTextBox.Focus();
 	      e.Handled = true;
             }
+            if (e.KeyChar == '\t') // tab
+            {
+                int start = commandTextBox.SelectionStart;
+                commandTextBox.Text = commandTextBox.Text.Insert(start, "    ");
+                commandTextBox.SelectionStart = start + 4;
+                e.Handled = true;
+            }
         }
 
 	// Mono bug
@@ -395,23 +407,34 @@ namespace Pyjama
 	    }
 	  else if (e.KeyCode == System.Windows.Forms.Keys.Down)
             {
-                if (outputWindow.textbox.consoleTextBox.commandHistory.DoesNextCommandExist())
+                // If cursor is on the last line
+                int currentLine = commandTextBox.GetLineFromCharIndex(commandTextBox.SelectionStart);
+                int lastLine = commandTextBox.GetLineFromCharIndex(commandTextBox.TextLength);
+                if (currentLine == lastLine)
                 {
-                    commandTextBox.Text = outputWindow.textbox.consoleTextBox.commandHistory.GetNextCommand();
+                    if (outputWindow.textbox.consoleTextBox.commandHistory.DoesNextCommandExist())
+                    {
+                        commandTextBox.Text = outputWindow.textbox.consoleTextBox.commandHistory.GetNextCommand();
+                    }
+                    else
+                        commandTextBox.Text = "";
+                    e.Handled = true;
                 }
-                else
-                    commandTextBox.Text = "";
-                e.Handled = true;
             }
             else if (e.KeyCode == System.Windows.Forms.Keys.Up)
             {
-                if (outputWindow.textbox.consoleTextBox.commandHistory.DoesPreviousCommandExist())
+                // If cursor is on the first line
+                if (commandTextBox.GetLineFromCharIndex(commandTextBox.SelectionStart) == 0)
                 {
-                    commandTextBox.Text = outputWindow.textbox.consoleTextBox.commandHistory.GetPreviousCommand();
+                    if (outputWindow.textbox.consoleTextBox.commandHistory.DoesPreviousCommandExist())
+                    {
+                        commandTextBox.Text = outputWindow.textbox.consoleTextBox.commandHistory.GetPreviousCommand();
+                    }
+                    else
+                        commandTextBox.Text = ""; // FIXME: use templine, if started, and then ""
+                    commandTextBox.Select(commandTextBox.TextLength, 0);
+                    e.Handled = true;
                 }
-                else
-                    commandTextBox.Text = ""; // FIXME: use templine, if started, and then ""
-                e.Handled = true;
             }
 
             /*
@@ -427,6 +450,16 @@ namespace Pyjama
                   }
                 }
              */
+        }
+
+        private void shellToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            this.SelectCommandShell();
+        }
+
+        private void newlineToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // Emit <Ctrl+ENTER>
         }
     }
 }

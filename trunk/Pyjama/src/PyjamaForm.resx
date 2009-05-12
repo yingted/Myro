@@ -225,7 +225,7 @@
     <value>0, 274</value>
   </data>
   <data name="statusStrip1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>504, 22</value>
+    <value>482, 22</value>
   </data>
   <assembly alias="mscorlib" name="mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="statusStrip1.TabIndex" type="System.Int32, mscorlib">
@@ -265,7 +265,7 @@
     <value>0, 0, 0, 25</value>
   </data>
   <data name="docManager.Size" type="System.Drawing.Size, System.Drawing">
-    <value>504, 296</value>
+    <value>482, 296</value>
   </data>
   <data name="docManager.TabIndex" type="System.Int32, mscorlib">
     <value>6</value>
@@ -274,7 +274,7 @@
     <value>docManager</value>
   </data>
   <data name="&gt;&gt;docManager.Type" xml:space="preserve">
-    <value>Pyjama.DocumentManager, Pyjama, Version=1.0.3418.38760, Culture=neutral, PublicKeyToken=null</value>
+    <value>Pyjama.DocumentManager, Pyjama, Version=1.0.3419.21024, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;docManager.Parent" xml:space="preserve">
     <value>mainContentSplit.Panel1</value>
@@ -325,7 +325,7 @@
     <value>0, 0, 0, 0</value>
   </data>
   <data name="outputWindow.Size" type="System.Drawing.Size, System.Drawing">
-    <value>504, 110</value>
+    <value>482, 160</value>
   </data>
   <data name="outputWindow.TabIndex" type="System.Int32, mscorlib">
     <value>15</value>
@@ -334,7 +334,7 @@
     <value>outputWindow</value>
   </data>
   <data name="&gt;&gt;outputWindow.Type" xml:space="preserve">
-    <value>Pyjama.Console, Pyjama, Version=1.0.3418.38760, Culture=neutral, PublicKeyToken=null</value>
+    <value>Pyjama.Console, Pyjama, Version=1.0.3419.21024, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;outputWindow.Parent" xml:space="preserve">
     <value>splitContainer1.Panel1</value>
@@ -376,7 +376,7 @@
     <value>Vertical</value>
   </data>
   <data name="commandTextBox.Size" type="System.Drawing.Size, System.Drawing">
-    <value>391, 66</value>
+    <value>373, 66</value>
   </data>
   <data name="commandTextBox.TabIndex" type="System.Int32, mscorlib">
     <value>10</value>
@@ -424,7 +424,7 @@
     <value>3, 36</value>
   </data>
   <data name="runButton.Size" type="System.Drawing.Size, System.Drawing">
-    <value>103, 27</value>
+    <value>99, 27</value>
   </data>
   <data name="runButton.TabIndex" type="System.Int32, mscorlib">
     <value>13</value>
@@ -454,13 +454,13 @@
     <value>3, 0</value>
   </data>
   <data name="commandLabel.Size" type="System.Drawing.Size, System.Drawing">
-    <value>103, 33</value>
+    <value>99, 33</value>
   </data>
   <data name="commandLabel.TabIndex" type="System.Int32, mscorlib">
     <value>0</value>
   </data>
   <data name="commandLabel.Text" xml:space="preserve">
-    <value>&lt; Python Input</value>
+    <value>Python Mode</value>
   </data>
   <data name="commandLabel.TextAlign" type="System.Drawing.ContentAlignment, System.Drawing">
     <value>MiddleCenter</value>
@@ -487,7 +487,7 @@
     <value>2</value>
   </data>
   <data name="tableLayoutPanel1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>109, 66</value>
+    <value>105, 66</value>
   </data>
   <data name="tableLayoutPanel1.TabIndex" type="System.Int32, mscorlib">
     <value>0</value>
@@ -520,10 +520,10 @@
     <value>1</value>
   </data>
   <data name="commandContainer.Size" type="System.Drawing.Size, System.Drawing">
-    <value>504, 66</value>
+    <value>482, 66</value>
   </data>
   <data name="commandContainer.SplitterDistance" type="System.Int32, mscorlib">
-    <value>391</value>
+    <value>373</value>
   </data>
   <data name="commandContainer.TabIndex" type="System.Int32, mscorlib">
     <value>0</value>
@@ -553,10 +553,10 @@
     <value>1</value>
   </data>
   <data name="splitContainer1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>504, 183</value>
+    <value>482, 233</value>
   </data>
   <data name="splitContainer1.SplitterDistance" type="System.Int32, mscorlib">
-    <value>110</value>
+    <value>160</value>
   </data>
   <data name="splitContainer1.SplitterWidth" type="System.Int32, mscorlib">
     <value>7</value>
@@ -655,10 +655,10 @@
     <value>MiddleLeft</value>
   </data>
   <data name="statusStrip2.Location" type="System.Drawing.Point, System.Drawing">
-    <value>0, 183</value>
+    <value>0, 233</value>
   </data>
   <data name="statusStrip2.Size" type="System.Drawing.Size, System.Drawing">
-    <value>504, 22</value>
+    <value>482, 22</value>
   </data>
   <data name="statusStrip2.TabIndex" type="System.Int32, mscorlib">
     <value>7</value>
@@ -697,7 +697,7 @@
     <value>0</value>
   </data>
   <data name="mainContentSplit.Size" type="System.Drawing.Size, System.Drawing">
-    <value>506, 515</value>
+    <value>484, 565</value>
   </data>
   <data name="mainContentSplit.SplitterDistance" type="System.Int32, mscorlib">
     <value>298</value>
@@ -923,7 +923,7 @@
     <value>0, 0</value>
   </data>
   <data name="toolStrip1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>506, 25</value>
+    <value>484, 25</value>
   </data>
   <data name="toolStrip1.TabIndex" type="System.Int32, mscorlib">
     <value>0</value>
@@ -950,7 +950,7 @@
     <value>0, 0</value>
   </data>
   <data name="toolStrip.Size" type="System.Drawing.Size, System.Drawing">
-    <value>506, 25</value>
+    <value>484, 25</value>
   </data>
   <data name="toolStrip.TabIndex" type="System.Int32, mscorlib">
     <value>3</value>
@@ -974,7 +974,7 @@
     <value>0, 24</value>
   </data>
   <data name="main.Size" type="System.Drawing.Size, System.Drawing">
-    <value>506, 540</value>
+    <value>484, 590</value>
   </data>
   <data name="main.TabIndex" type="System.Int32, mscorlib">
     <value>1</value>
@@ -1241,6 +1241,18 @@
   <data name="selectAllToolStripMenuItem.Text" xml:space="preserve">
     <value>Select &amp;All</value>
   </data>
+  <data name="toolStripSeparator8.Size" type="System.Drawing.Size, System.Drawing">
+    <value>161, 6</value>
+  </data>
+  <data name="selectEditorToolStripMenuItem.ShortcutKeys" type="System.Windows.Forms.Keys, System.Windows.Forms">
+    <value>F6</value>
+  </data>
+  <data name="selectEditorToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>164, 22</value>
+  </data>
+  <data name="selectEditorToolStripMenuItem.Text" xml:space="preserve">
+    <value>Select Editor</value>
+  </data>
   <data name="editToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
     <value>39, 20</value>
   </data>
@@ -1251,25 +1263,52 @@
     <value>F5</value>
   </data>
   <data name="executeToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>114, 22</value>
+    <value>178, 22</value>
   </data>
   <data name="executeToolStripMenuItem.Text" xml:space="preserve">
     <value>Run</value>
   </data>
+  <data name="shellToolStripMenuItem.ShortcutKeys" type="System.Windows.Forms.Keys, System.Windows.Forms">
+    <value>F7</value>
+  </data>
+  <data name="shellToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>178, 22</value>
+  </data>
+  <data name="shellToolStripMenuItem.Text" xml:space="preserve">
+    <value>Select Shell</value>
+  </data>
+  <data name="evaluateToolStripMenuItem.ShortcutKeyDisplayString" xml:space="preserve">
+    <value>Enter</value>
+  </data>
+  <data name="evaluateToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>178, 22</value>
+  </data>
+  <data name="evaluateToolStripMenuItem.Text" xml:space="preserve">
+    <value>Evaluate</value>
+  </data>
+  <data name="newlineToolStripMenuItem.ShortcutKeyDisplayString" xml:space="preserve">
+    <value>Ctrl+Enter</value>
+  </data>
+  <data name="newlineToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>178, 22</value>
+  </data>
+  <data name="newlineToolStripMenuItem.Text" xml:space="preserve">
+    <value>Newline</value>
+  </data>
   <data name="languageToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>49, 20</value>
+    <value>44, 20</value>
   </data>
   <data name="languageToolStripMenuItem.Text" xml:space="preserve">
     <value>Shell</value>
   </data>
   <data name="optionsToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>125, 22</value>
+    <value>178, 22</value>
   </data>
   <data name="optionsToolStripMenuItem.Text" xml:space="preserve">
     <value>Configure Pyjama...</value>
   </data>
   <data name="toolsToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>48, 20</value>
+    <value>61, 20</value>
   </data>
   <data name="toolsToolStripMenuItem.Text" xml:space="preserve">
     <value>Options</value>
@@ -1308,7 +1347,7 @@
     <value>0, 0</value>
   </data>
   <data name="menuStrip1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>506, 24</value>
+    <value>484, 24</value>
   </data>
   <data name="menuStrip1.TabIndex" type="System.Int32, mscorlib">
     <value>2</value>
@@ -1389,7 +1428,7 @@
     <value>6, 13</value>
   </data>
   <data name="$this.ClientSize" type="System.Drawing.Size, System.Drawing">
-    <value>506, 564</value>
+    <value>484, 614</value>
   </data>
   <data name="$this.Text" xml:space="preserve">
     <value>{0} - {1}</value>
@@ -1688,6 +1727,18 @@
   <data name="&gt;&gt;selectAllToolStripMenuItem.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="&gt;&gt;toolStripSeparator8.Name" xml:space="preserve">
+    <value>toolStripSeparator8</value>
+  </data>
+  <data name="&gt;&gt;toolStripSeparator8.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripSeparator, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;selectEditorToolStripMenuItem.Name" xml:space="preserve">
+    <value>selectEditorToolStripMenuItem</value>
+  </data>
+  <data name="&gt;&gt;selectEditorToolStripMenuItem.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="&gt;&gt;languageToolStripMenuItem.Name" xml:space="preserve">
     <value>languageToolStripMenuItem</value>
   </data>
@@ -1698,6 +1749,24 @@
     <value>executeToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;executeToolStripMenuItem.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;shellToolStripMenuItem.Name" xml:space="preserve">
+    <value>shellToolStripMenuItem</value>
+  </data>
+  <data name="&gt;&gt;shellToolStripMenuItem.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;evaluateToolStripMenuItem.Name" xml:space="preserve">
+    <value>evaluateToolStripMenuItem</value>
+  </data>
+  <data name="&gt;&gt;evaluateToolStripMenuItem.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;newlineToolStripMenuItem.Name" xml:space="preserve">
+    <value>newlineToolStripMenuItem</value>
+  </data>
+  <data name="&gt;&gt;newlineToolStripMenuItem.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;toolsToolStripMenuItem.Name" xml:space="preserve">
@@ -1770,6 +1839,6 @@
     <value>PyjamaForm</value>
   </data>
   <data name="&gt;&gt;$this.Type" xml:space="preserve">
-    <value>Pyjama.BaseForm, Pyjama, Version=1.0.3418.38760, Culture=neutral, PublicKeyToken=null</value>
+    <value>Pyjama.BaseForm, Pyjama, Version=1.0.3419.21024, Culture=neutral, PublicKeyToken=null</value>
   </data>
 </root>

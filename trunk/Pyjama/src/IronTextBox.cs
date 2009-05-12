@@ -232,8 +232,8 @@ namespace UIIronTextBox
 
         public string GetTextAtPrompt()
         {
-            if (GetCurrentLine() != "")
-                return GetCurrentLine().Substring(prompt.Length);
+            if (GetCurrentLineText() != "")
+                return GetCurrentLineText().Substring(prompt.Length);
             else
             {
                 string mystring = (string)this.Lines.GetValue(this.Lines.Length - 2);
@@ -252,7 +252,7 @@ namespace UIIronTextBox
             return ((int)keyChar) == 13;
         }
 
-        private string GetCurrentLine()
+        public string GetCurrentLineText()
         {
             if (this.Lines.Length > 0)
             {
@@ -264,7 +264,7 @@ namespace UIIronTextBox
 
         private void ReplaceTextAtPrompt(string text)
         {
-            string currentLine = GetCurrentLine();
+            string currentLine = GetCurrentLineText();
             int charactersAfterPrompt = currentLine.Length - prompt.Length;
 
             if (charactersAfterPrompt == 0)
@@ -278,7 +278,7 @@ namespace UIIronTextBox
 
         private bool IsCaretAtCurrentLine()
         {
-            return this.TextLength - this.SelectionStart <= GetCurrentLine().Length;
+            return this.TextLength - this.SelectionStart <= GetCurrentLineText().Length;
         }
 
         public void AddText(string text)
@@ -331,10 +331,16 @@ namespace UIIronTextBox
         /// <returns></returns>
         public int GetCurrentCaretColumnPosition()
         {
-            string currentLine = GetCurrentLine();
+            string currentLine = GetCurrentLineText();
             int currentCaretPosition = this.SelectionStart;
             //System.Console.WriteLine("pos={0}", (currentCaretPosition - this.TextLength + currentLine.Length));
             return (currentCaretPosition - this.TextLength + currentLine.Length);
+        }
+
+        public int GetCurrentLinePosition()
+        {
+            // Zero-based
+            return (this.GetLineFromCharIndex(this.SelectionStart));
         }
 
         /// <summary>
@@ -353,7 +359,7 @@ namespace UIIronTextBox
         /// <param name="val">string of new prompt</param>
         public void SetPromptText(string val)
         {
-            //string currentLine = GetCurrentLine();
+            //string currentLine = GetCurrentLineText();
             //this.Select(0, prompt.Length);
             //this.SelectedText = val;
             prompt = val;
@@ -425,7 +431,7 @@ namespace UIIronTextBox
             else if (e.KeyCode == System.Windows.Forms.Keys.Home)
             {
                 /// DSB 
-                string currentLine = GetCurrentLine();
+                string currentLine = GetCurrentLineText();
                 this.SelectionStart = this.TextLength - currentLine.Length + prompt.Length;
                 //System.Console.WriteLine("currentLine = {0}, SelectionStart = {1}", currentLine, SelectionStart);
                 //this.ScrollToCaret();
@@ -612,7 +618,15 @@ namespace UIIronTextBox
             command = command.Trim();
             if (command != "")
             {
-                this.consoleTextBox.printTextOnNewline(">>> " + command);
+                bool first = true;
+                foreach (string line in command.Split('\n'))
+                {
+                    if (first)
+                        this.consoleTextBox.printTextOnNewline(">>> " + line);
+                    else
+                        this.consoleTextBox.printTextOnNewline("... " + line);
+                    first = false;
+                }
                 this.consoleTextBox.AddcommandHistory(command);
                 if (command == "clear")
                 {
@@ -625,12 +639,12 @@ namespace UIIronTextBox
                 else if (command == "python")
                 {
                     engine = environment.GetEngine("py");
-                    Prompt = "Python Mode ----";
+                    Prompt = "---- Python Mode ----";
                 }
                 else if (command == "ruby")
                 {
                     engine = environment.GetEngine("rb");
-                    Prompt = "Ruby Mode ----";
+                    Prompt = "---- Ruby Mode ----";
                 }
                 else if (command == "runfile")
                 {
@@ -646,8 +660,9 @@ namespace UIIronTextBox
                     ThreadStart starter = delegate { Execute(command, SourceCodeKind.InteractiveCode); };
                     Thread t = new Thread(new ThreadStart(starter));
                     t.IsBackground = true;
+                    // FIXME: set cursor to stay this way till done
+                    this.TopLevelControl.Cursor = Cursors.WaitCursor;
                     t.Start();
-                    this.Cursor = Cursors.WaitCursor;
                     //Execute(command, SourceCodeKind.InteractiveCode);
                 }
             }
@@ -736,7 +751,10 @@ namespace UIIronTextBox
         {
             // Put the text cursor in the commandtextBox
             // Put the mouse cursor back
-            this.Cursor = Cursors.Default;
+            this.TopLevelControl.Cursor = Cursors.Default;
+            consoleTextBox.Select(consoleTextBox.TextLength, 0);
+            consoleTextBox.ScrollToCaret();
+            ((Pyjama.PyjamaForm)this.TopLevelControl).SelectCommandShell();
         }
 
         private void DisplayError(string err_message)
@@ -815,7 +833,7 @@ namespace UIIronTextBox
             this.consoleTextBox.Location = new Point(0, 0);
             this.consoleTextBox.Multiline = true;
             this.consoleTextBox.Name = "consoleTextBox";
-            this.consoleTextBox.Prompt = "Python Mode ----";
+            this.consoleTextBox.Prompt = "---- Python Mode ----";
             this.consoleTextBox.ScrollBars = RichTextBoxScrollBars.Vertical;
             this.consoleTextBox.Font = new Font("DejaVu Sans Mono", 10);
             this.consoleTextBox.Size = new Size(232, 216);
@@ -827,7 +845,7 @@ namespace UIIronTextBox
             this.Name = "IronTextBoxControl";
             this.Size = new Size(232, 216);
             this.ResumeLayout(false);
-            this.consoleTextBox.Text = "Output Window";
+            this.consoleTextBox.Text = "Pyjama Output";
             this.consoleTextBox.printPrompt();
         }
 

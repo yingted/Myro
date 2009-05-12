@@ -12,5 +12,6 @@ namespace Pyjama
         ActiveCodeFile GetCurrentActiveFile();
         void SetSaveInformationForActiveFile(string location);
         void Execute(string code);
+        void SelectCommandShell();
     }
 }

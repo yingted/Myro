@@ -34,7 +34,13 @@ namespace Pyjama
             // FIXME: check to see where focus is
             System.String code = pyjamaForm.GetCodeBlock().GetCodeToExecute();
             code = code.Trim();
+            code = code.Replace("\n", "\r\n");
             pyjamaForm.Execute(code);
+        }
+
+        public void SelectCommandShell()
+        {
+            pyjamaForm.SelectCommandShell();
         }
 
         public void NewFile()
