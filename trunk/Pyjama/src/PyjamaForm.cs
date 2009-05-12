@@ -362,18 +362,38 @@ namespace Pyjama
 
         private void commandTextBox_KeyPress(object sender, KeyPressEventArgs e)
         {
-            if (((int)e.KeyChar) == 13)
+	  //System.Console.WriteLine("KeyChar: {0}", (int)e.KeyChar);
+            if (((int)e.KeyChar) == 13 && !controlKeyDown)
             {
-                e.Handled = true;
-                outputWindow.textbox.DoCommand(commandTextBox.Text);
-                commandTextBox.Text = "";
-                commandTextBox.Focus();
+	      outputWindow.textbox.DoCommand(commandTextBox.Text);
+              commandTextBox.Text = "";
+	      commandTextBox.Focus();
+	      e.Handled = true;
             }
         }
 
+	// Mono bug
+	private bool controlKeyDown = false;
+
+        private void commandTextBox_KeyUp(object sender, System.Windows.Forms.KeyEventArgs e)
+	{
+	  controlKeyDown = false;
+	}
+
         private void commandTextBox_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
         {
-            if (e.KeyCode == System.Windows.Forms.Keys.Down)
+	  //System.Console.WriteLine("KeyCode: {0} {1}", e.KeyCode, e.Control);
+
+	  if (e.KeyCode == System.Windows.Forms.Keys.Enter && e.Control)
+	    {
+	      // Mono bug work-around: doesn't handle the key
+	      controlKeyDown = true;
+	      //outputWindow.textbox.DoCommand(commandTextBox.Text);
+	      //commandTextBox.Text = "";
+	      //commandTextBox.Focus();
+	      //e.Handled = true;
+	    }
+	  else if (e.KeyCode == System.Windows.Forms.Keys.Down)
             {
                 if (outputWindow.textbox.consoleTextBox.commandHistory.DoesNextCommandExist())
                 {

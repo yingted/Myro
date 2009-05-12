@@ -280,6 +280,7 @@ using System.Windows.Forms;
             this.commandTextBox.ForeColor = System.Drawing.SystemColors.HighlightText;
             this.commandTextBox.Name = "commandTextBox";
             this.commandTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.commandTextBox_KeyDown);
+            this.commandTextBox.KeyUp += new System.Windows.Forms.KeyEventHandler(this.commandTextBox_KeyUp);
             this.commandTextBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.commandTextBox_KeyPress);
             // 
             // tableLayoutPanel1
