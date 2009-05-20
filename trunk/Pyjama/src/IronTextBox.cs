@@ -128,6 +128,21 @@ namespace UIIronTextBox
             base.Dispose(disposing);
         }
 
+	protected override void OnKeyDown(KeyEventArgs e)
+	{
+	  //System.Console.WriteLine("OnKeyDown?");
+	  if (e.KeyData == Keys.Tab)
+	    {
+	      //System.Console.WriteLine("OnKeyDown!");
+	      this.SelectedText = "    ";                
+	      e.Handled = true;
+	    }
+	  else
+	    {
+	      base.OnKeyDown(e);
+	    }
+	}
+	
         /// <summary>
         /// Overridden to protect against deletion of contents
         /// cutting the text and deleting it from the context menu

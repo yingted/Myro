@@ -367,7 +367,7 @@ namespace Pyjama
 
         private void commandTextBox_KeyPress(object sender, KeyPressEventArgs e)
         {
-	  //System.Console.WriteLine("KeyChar: {0}", (int)e.KeyChar);
+	  System.Console.WriteLine("KeyPress: {0}", (int)e.KeyChar);
             if (((int)e.KeyChar) == 13 && !controlKeyDown)
             {
 	      outputWindow.textbox.DoCommand(commandTextBox.Text);
@@ -375,13 +375,16 @@ namespace Pyjama
 	      commandTextBox.Focus();
 	      e.Handled = true;
             }
+	    /*
             if (e.KeyChar == '\t') // tab
             {
-                int start = commandTextBox.SelectionStart;
-                commandTextBox.Text = commandTextBox.Text.Insert(start, "    ");
-                commandTextBox.SelectionStart = start + 4;
-                e.Handled = true;
+	      System.Console.WriteLine("tab!");
+	      int start = commandTextBox.SelectionStart;
+	      commandTextBox.Text = commandTextBox.Text.Insert(start, "    ");
+	      commandTextBox.SelectionStart = start + 4;
+	      e.Handled = true;
             }
+	    */
         }
 
 	// Mono bug
@@ -389,12 +392,13 @@ namespace Pyjama
 
         private void commandTextBox_KeyUp(object sender, System.Windows.Forms.KeyEventArgs e)
 	{
+	  System.Console.WriteLine("KeyUp: {0} {1}", e.KeyCode, e.Control);
 	  controlKeyDown = false;
 	}
 
         private void commandTextBox_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
         {
-	  //System.Console.WriteLine("KeyCode: {0} {1}", e.KeyCode, e.Control);
+	  System.Console.WriteLine("KeyDown: {0} {1}", e.KeyCode, e.Control);
 
 	  if (e.KeyCode == System.Windows.Forms.Keys.Enter && e.Control)
 	    {

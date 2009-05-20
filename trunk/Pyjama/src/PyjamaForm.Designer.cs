@@ -3,6 +3,24 @@ using System.Windows.Forms;
 
 ﻿namespace Pyjama
 {
+
+  class MyTextBox: TextBox {
+    protected override void OnKeyDown(KeyEventArgs e)
+    {
+      //System.Console.WriteLine("OnKeyDown?");
+      if (e.KeyData == Keys.Tab)
+	{
+	  //System.Console.WriteLine("OnKeyDown!");
+	  this.SelectedText = "    ";                
+	  e.Handled = true;
+	}
+      else
+	{
+	  base.OnKeyDown(e);
+	}
+    }
+  }
+
     partial class PyjamaForm
     {
         /// <summary>
@@ -48,7 +66,7 @@ using System.Windows.Forms;
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.outputWindow = new Pyjama.Console();
             this.commandContainer = new System.Windows.Forms.SplitContainer();
-            this.commandTextBox = new System.Windows.Forms.TextBox();
+            this.commandTextBox = new MyTextBox();
             this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
             this.runButton = new System.Windows.Forms.Button();
             this.commandLabel = new System.Windows.Forms.Label();
@@ -277,7 +295,7 @@ using System.Windows.Forms;
             // 
             // commandTextBox
             // 
-            this.commandTextBox.AcceptsReturn = true;
+            //this.commandTextBox.AcceptsReturn = true;
             this.commandTextBox.AcceptsTab = true;
             this.commandTextBox.BackColor = System.Drawing.SystemColors.WindowText;
             this.commandTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
