@@ -367,49 +367,48 @@ namespace Pyjama
 
         private void commandTextBox_KeyPress(object sender, KeyPressEventArgs e)
         {
-	  System.Console.WriteLine("KeyPress: {0}", (int)e.KeyChar);
+            System.Console.WriteLine("KeyPress: {0}", (int)e.KeyChar);
             if (((int)e.KeyChar) == 13 && !controlKeyDown)
             {
-	      outputWindow.textbox.DoCommand(commandTextBox.Text);
-              commandTextBox.Text = "";
-	      commandTextBox.Focus();
-	      e.Handled = true;
+                outputWindow.textbox.DoCommand(commandTextBox.Text);
+                commandTextBox.Text = "";
+                commandTextBox.Focus();
+                e.Handled = true;
             }
-	    /*
+            // For Windows
             if (e.KeyChar == '\t') // tab
             {
-	      System.Console.WriteLine("tab!");
-	      int start = commandTextBox.SelectionStart;
-	      commandTextBox.Text = commandTextBox.Text.Insert(start, "    ");
-	      commandTextBox.SelectionStart = start + 4;
-	      e.Handled = true;
+                //System.Console.WriteLine("tab!");
+                //int start = commandTextBox.SelectionStart;
+                //commandTextBox.Text = commandTextBox.Text.Insert(start, "    ");
+                //commandTextBox.SelectionStart = start + 4;
+                e.Handled = true;
             }
-	    */
         }
 
-	// Mono bug
-	private bool controlKeyDown = false;
+        // Mono bug
+        private bool controlKeyDown = false;
 
         private void commandTextBox_KeyUp(object sender, System.Windows.Forms.KeyEventArgs e)
-	{
-	  System.Console.WriteLine("KeyUp: {0} {1}", e.KeyCode, e.Control);
-	  controlKeyDown = false;
-	}
+        {
+            System.Console.WriteLine("KeyUp: {0} {1}", e.KeyCode, e.Control);
+            controlKeyDown = false;
+        }
 
         private void commandTextBox_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
         {
-	  System.Console.WriteLine("KeyDown: {0} {1}", e.KeyCode, e.Control);
+            System.Console.WriteLine("KeyDown: {0} {1}", e.KeyCode, e.Control);
 
-	  if (e.KeyCode == System.Windows.Forms.Keys.Enter && e.Control)
-	    {
-	      // Mono bug work-around: doesn't handle the key
-	      controlKeyDown = true;
-	      //outputWindow.textbox.DoCommand(commandTextBox.Text);
-	      //commandTextBox.Text = "";
-	      //commandTextBox.Focus();
-	      //e.Handled = true;
-	    }
-	  else if (e.KeyCode == System.Windows.Forms.Keys.Down)
+            if (e.KeyCode == System.Windows.Forms.Keys.Enter && e.Control)
+            {
+                // Mono bug work-around: doesn't handle the key
+                controlKeyDown = true;
+                //outputWindow.textbox.DoCommand(commandTextBox.Text);
+                //commandTextBox.Text = "";
+                //commandTextBox.Focus();
+                //e.Handled = true;
+            }
+            else if (e.KeyCode == System.Windows.Forms.Keys.Down)
             {
                 // If cursor is on the last line
                 int currentLine = commandTextBox.GetLineFromCharIndex(commandTextBox.SelectionStart);
@@ -431,7 +430,7 @@ namespace Pyjama
 #if MONO
 	        int firstLine = commandTextBox.GetLineFromCharIndex(commandTextBox.SelectionStart) - 1;
 #else
-	        int firstLine = commandTextBox.GetLineFromCharIndex(commandTextBox.SelectionStart);
+                int firstLine = commandTextBox.GetLineFromCharIndex(commandTextBox.SelectionStart);
 #endif
                 if (firstLine == 0)
                 {
@@ -469,6 +468,11 @@ namespace Pyjama
         private void newlineToolStripMenuItem_Click(object sender, EventArgs e)
         {
             // Emit <Ctrl+ENTER>
+        }
+
+        private void commandTextBox_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

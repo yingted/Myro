@@ -134,7 +134,7 @@
       <DependentUpon>Console.cs</DependentUpon>
     </Compile>
     <Compile Include="Controls\Document.cs">
-      <SubType>UserControl</SubType>
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="Controls\Document.Designer.cs">
       <DependentUpon>Document.cs</DependentUpon>

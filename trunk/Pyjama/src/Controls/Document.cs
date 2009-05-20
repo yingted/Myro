@@ -62,7 +62,7 @@ namespace Pyjama
             //textBox.AcceptsReturn = true;
             textBox.AcceptsTab = true;
             textBox.Dock = DockStyle.Fill;
-            //textBox.KeyPress += new KeyPressEventHandler(textBox_KeyPress);
+            textBox.KeyPress += new KeyPressEventHandler(textBox_KeyPress);
             textBox.KeyUp += new KeyEventHandler(textBox_KeyUp);
             textBox.TextChanged += textbox_TextChanged;
             textBox.Font = new Font("Courier New", 10);
@@ -81,7 +81,6 @@ namespace Pyjama
             MainForm.UpdateGUI(col, line);
         }
 
-	/*
         void textBox_KeyPress(object sender, KeyPressEventArgs e)
         {
 	    System.Console.WriteLine("Document.textBox_KeyPress: {0}, handled: {1}", 
@@ -90,14 +89,13 @@ namespace Pyjama
             // Add ability to handle newlines after line ending with colon
             if (e.KeyChar == '\t') // tab
             {
-	      System.Console.WriteLine("tab!");
-                int start = textBox.SelectionStart;
-                textBox.Text = textBox.Text.Insert(start, "    ");
-                textBox.SelectionStart = start + 4;
+	          System.Console.WriteLine("tab!");
+                //int start = textBox.SelectionStart;
+                //textBox.Text = textBox.Text.Insert(start, "    ");
+                //textBox.SelectionStart = start + 4;
                 e.Handled = true;
             }
         }
-	*/
 
         void textbox_TextChanged(object sender, EventArgs e)
         {
