@@ -121,7 +121,6 @@ pyjama.exe: res res/Pyjama.FontControl.resources res/Pyjama.AboutDialog.resource
 	./UserSettings.cs \
 	-main:Pyjama.Program \
 	-out:pyjama.exe \
-	-r:Microsoft.VisualBasic.dll \
 	-r:System.Windows.Forms \
 	-r:System.Drawing \
 	-r:Mono.Security \
