@@ -1,41 +1,41 @@
 ## Makefile for building Pyjama with Mono
-MONOPATH=/usr/local/bin
+BINPATH ?= /usr/local/bin
 
 run: pyjama.exe
-	XMODIFIERS= MONO_PATH=../libs $(MONOPATH)/mono pyjama.exe
+	XMODIFIERS= MONO_PATH=../libs $(BINPATH)/mono pyjama.exe
 
 res:
 	mkdir -p res
 
 res/Pyjama.FontControl.resources: Dialogs/OptionFrames/FontControl.resx
-	resgen Dialogs/OptionFrames/FontControl.resx res/Pyjama.FontControl.resources
+	$(BINPATH)/resgen Dialogs/OptionFrames/FontControl.resx res/Pyjama.FontControl.resources
 
 res/Pyjama.AboutDialog.resources: Dialogs/AboutDialog.resx
-	resgen Dialogs/AboutDialog.resx res/Pyjama.AboutDialog.resources
+	$(BINPATH)/resgen Dialogs/AboutDialog.resx res/Pyjama.AboutDialog.resources
 
 res/Pyjama.OptionsDialog.resources: Dialogs/OptionsDialog.resx
-	resgen Dialogs/OptionsDialog.resx res/Pyjama.OptionsDialog.resources
+	$(BINPATH)/resgen Dialogs/OptionsDialog.resx res/Pyjama.OptionsDialog.resources
 
 res/Pyjama.DocumentPage.resources: Controls/DocumentPage.resx
-	resgen Controls/DocumentPage.resx res/Pyjama.DocumentPage.resources
+	$(BINPATH)/resgen Controls/DocumentPage.resx res/Pyjama.DocumentPage.resources
 
 res/Pyjama.DocumentManager.resources: Controls/DocumentManager.resx
-	resgen Controls/DocumentManager.resx res/Pyjama.DocumentManager.resources
+	$(BINPATH)/resgen Controls/DocumentManager.resx res/Pyjama.DocumentManager.resources
 
 res/Pyjama.Console.resources: Controls/Console.resx
-	resgen Controls/Console.resx res/Pyjama.Console.resources
+	$(BINPATH)/resgen Controls/Console.resx res/Pyjama.Console.resources
 
 res/Pyjama.BaseDialog.resources: BaseDialog.resx
-	resgen BaseDialog.resx res/Pyjama.BaseDialog.resources
+	$(BINPATH)/resgen BaseDialog.resx res/Pyjama.BaseDialog.resources
 
 res/Pyjama.BaseForm.resources: BaseForm.resx
-	resgen BaseForm.resx res/Pyjama.BaseForm.resources
+	$(BINPATH)/resgen BaseForm.resx res/Pyjama.BaseForm.resources
 
 res/Pyjama.PyjamaForm.resources: PyjamaForm.resx
-	resgen PyjamaForm.resx res/Pyjama.PyjamaForm.resources
+	$(BINPATH)/resgen PyjamaForm.resx res/Pyjama.PyjamaForm.resources
 
 res/Pyjama.Properties.Resources.resources: Properties/Resources.resx
-	cd Properties; MONO_IOMAP=all resgen Resources.resx ../res/Pyjama.Properties.Resources.resources
+	cd Properties; MONO_IOMAP=all $(BINPATH)/resgen Resources.resx ../res/Pyjama.Properties.Resources.resources
 
 pyjama.exe: res res/Pyjama.FontControl.resources res/Pyjama.AboutDialog.resources \
 		res/Pyjama.OptionsDialog.resources res/Pyjama.DocumentPage.resources \
@@ -81,7 +81,7 @@ pyjama.exe: res res/Pyjama.FontControl.resources res/Pyjama.AboutDialog.resource
 		./ShortcutKeyDispatcher.cs \
 		./UserSettings.cs 
 	MONO_PATH=../libs \
-	$(MONOPATH)/gmcs -define:MONO \
+	$(BINPATH)/gmcs -define:MONO \
 	./ActiveCodeFile.cs \
 	./ApplicationInformation.cs \
 	./ApplicationOptions.cs \
