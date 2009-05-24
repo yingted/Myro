@@ -146,11 +146,14 @@ class Window(Form):
             self.Size = Drawing.Size(width+dwidth, height+dheight)
 
             # Turn on double buffering
-            self.SetStyle(ControlStyles.UserPaint, True)
-            self.SetStyle(ControlStyles.DoubleBuffer, True)
-            self.SetStyle(ControlStyles.ResizeRedraw, True)
-            self.SetStyle(ControlStyles.AllPaintingInWmPaint, True)
-            self.UpdateStyles()
+            try:
+                self.SetStyle(ControlStyles.UserPaint, True)
+                self.SetStyle(ControlStyles.DoubleBuffer, True)
+                self.SetStyle(ControlStyles.ResizeRedraw, True)
+                self.SetStyle(ControlStyles.AllPaintingInWmPaint, True)
+                self.UpdateStyles()
+            except:
+                print "Mono bug: skipping double-buffer settings"
 
             # items list maintians a list of graphic items
             # to be drawn on the canvas.
