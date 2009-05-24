@@ -500,12 +500,28 @@ namespace UIIronTextBox
 
     public class PyjamaModule
     {
-        public Control TopLevelControl = null; // Is there a GUI running? Handle for Invoke
-        public bool ThreadRunning = false;     // Is there a Thread running? 
+        public Control CurrentControl = null; // Is there a GUI running? Handle for Invoke
+        public bool ThreadRunning = true;     // Is there a Thread running? 
+        private Control _override = null;
 
-        public PyjamaModule(Control toplevelcontrol, bool thread) {
-            this.TopLevelControl = toplevelcontrol;
+        public PyjamaModule(Control control, bool thread) {
+            this.CurrentControl = control;
             this.ThreadRunning = thread;
+        }
+
+        public Control TopLevelControl 
+        {
+            get {
+                if (_override != null)
+                {
+                    return _override;
+                }
+                else
+                {
+                    return this.CurrentControl.TopLevelControl;
+                }
+            }
+            set { _override = value;}
         }
     }
 
@@ -517,8 +533,7 @@ namespace UIIronTextBox
         public IronTextBox consoleTextBox;
         public event EventCommandEntered CommandEntered;
         private Container components = null;
-        public bool runInThread = true;
-        public bool engineInitialized = false;
+        public PyjamaModule pyjamaModule = null;
 
         public StringBuilder defBuilder
         {
@@ -602,7 +617,6 @@ namespace UIIronTextBox
                     new[] { "IronRuby", "Ruby", "rb" },
                     new[] { ".rb" }));
             environment = new ScriptRuntime(scriptRuntimeSetup);
-            //environment = ScriptRuntime.CreateFromConfiguration();
             scope = environment.CreateScope();
             engine = environment.GetEngine("py");
             if (System.Environment.OSVersion.Platform == System.PlatformID.Unix)
@@ -642,8 +656,11 @@ namespace UIIronTextBox
 
         public void DoCommand(string command)
         {
-            //System.Console.WriteLine("DoCommand: '{0}'", command);
-
+            if (pyjamaModule == null)
+            {
+                pyjamaModule = new PyjamaModule(this, true);
+                environment.Globals.SetVariable("pyjama", pyjamaModule);
+            }
             command = command.Trim();
             if (command != "")
             {
@@ -686,7 +703,7 @@ namespace UIIronTextBox
                 }
                 else // Command
                 {
-                    if (runInThread)
+                    if (pyjamaModule.ThreadRunning)
                     {
                         ThreadStart starter = delegate { Execute(command, SourceCodeKind.InteractiveCode); };
                         Thread t = new Thread(new ThreadStart(starter));
@@ -705,14 +722,6 @@ namespace UIIronTextBox
 
         public void Execute(string command, SourceCodeKind sctype)
         {
-            if (!engineInitialized)
-            {
-                environment.Globals.SetVariable("pyjama",
-                    new PyjamaModule(this.TopLevelControl, this.runInThread));
-                //engine.SetVariable(scope, "pyjama", 
-                //    new PyjamaModule(this.TopLevelControl, this.runInThread));
-                engineInitialized = true;
-            }
             ExceptionOperations eo;
             eo = engine.GetService<ExceptionOperations>();
             bool error = false;
