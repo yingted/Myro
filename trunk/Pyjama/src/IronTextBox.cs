@@ -498,6 +498,17 @@ namespace UIIronTextBox
         }
     }
 
+    public class PyjamaModule
+    {
+        public Control TopLevelControl = null; // Is there a GUI running? Handle for Invoke
+        public bool ThreadRunning = false;     // Is there a Thread running? 
+
+        public PyjamaModule(Control toplevelcontrol, bool thread) {
+            this.TopLevelControl = toplevelcontrol;
+            this.ThreadRunning = thread;
+        }
+    }
+
     public class IronTextBoxControl : UserControl
     {
         public ScriptRuntime environment;
@@ -506,6 +517,9 @@ namespace UIIronTextBox
         public IronTextBox consoleTextBox;
         public event EventCommandEntered CommandEntered;
         private Container components = null;
+        public bool runInThread = true;
+        public bool engineInitialized = false;
+
         public StringBuilder defBuilder
         {
             get { return consoleTextBox.defStmtBuilder; }
@@ -672,19 +686,33 @@ namespace UIIronTextBox
                 }
                 else // Command
                 {
-                    ThreadStart starter = delegate { Execute(command, SourceCodeKind.InteractiveCode); };
-                    Thread t = new Thread(new ThreadStart(starter));
-                    t.IsBackground = true;
-                    // FIXME: set cursor to stay this way till done
-                    this.TopLevelControl.Cursor = Cursors.WaitCursor;
-                    t.Start();
-                    //Execute(command, SourceCodeKind.InteractiveCode);
+                    if (runInThread)
+                    {
+                        ThreadStart starter = delegate { Execute(command, SourceCodeKind.InteractiveCode); };
+                        Thread t = new Thread(new ThreadStart(starter));
+                        t.IsBackground = true;
+                        // FIXME: set cursor to stay this way till done
+                        this.TopLevelControl.Cursor = Cursors.WaitCursor;
+                        t.Start();
+                    }
+                    else
+                    {
+                        Execute(command, SourceCodeKind.InteractiveCode);
+                    }
                 }
             }
         }
 
         public void Execute(string command, SourceCodeKind sctype)
         {
+            if (!engineInitialized)
+            {
+                environment.Globals.SetVariable("pyjama",
+                    new PyjamaModule(this.TopLevelControl, this.runInThread));
+                //engine.SetVariable(scope, "pyjama", 
+                //    new PyjamaModule(this.TopLevelControl, this.runInThread));
+                engineInitialized = true;
+            }
             ExceptionOperations eo;
             eo = engine.GetService<ExceptionOperations>();
             bool error = false;

@@ -3,29 +3,33 @@
 # graphics module for IronPython
 # Mark F. Russo
 # 7/18/2008
+# Doug Blank
+# 5/24/2009
 #
 # Original graphics module by John Zelle of Wartburg College
 # http://mcsp.wartburg.edu/zelle/python/
 
 import clr
+clr.AddReference("Microsoft.Scripting.Core")
 clr.AddReference("System")
-#clr.AddReference("Microsoft")
 clr.AddReference("System.Windows.Forms")
 clr.AddReference("System.Drawing")
 clr.AddReference("IronPython")
 
-import array
-array
-
-#from Microsoft import Array
+from System import Array
 from System.Windows.Forms import *
 from System import Drawing
 from System.Threading import Thread, ThreadStart, AutoResetEvent
-#from Microsoft.Scripting import CallTarget0
-from IronPython.Compiler import CallTarget0
+from Microsoft import Func
 import math, sys
 
-_root = None
+try:
+    import pyjama
+except:
+    print "Running outside of Pyjama..."
+    class pyjama:
+        TopLevelControl = None
+        ThreadRunning = False
 
 # Map color strings to internal color objects.
 # This can be extended with many additional colors.
@@ -87,15 +91,19 @@ DEAD_THREAD = "Graphics thread quit unexpectedly"
 
 def _ip_thread():
     try:
-        global _root
         global _are
-        _root = Form(Size = Drawing.Size(0,0))  # Create the dummy control, and show then hide it to get Windows Forms to initialize it.
-        _root.Show()
-        _root.Hide()
-        #_are.Set()                              # Signal that the thread running _ip_thread is ready for the main thread to send input to it.
-        #Application.Run()
+        if not pyjama.TopLevelControl:
+            # Create the dummy control, and show then hide it to get
+            # Windows Forms to initialize it.
+            pyjama.TopLevelControl = Form(Size = Drawing.Size(0,0))  
+            pyjama.TopLevelControl.Show()
+            pyjama.TopLevelControl.Hide()
+        # Signal that the thread running _ip_thread is ready for
+        # the main thread to send input to it.
+        _are.Set()                              
+        Application.Run()
     finally:
-        pass
+        print "Cannot start ipgraphics thread"
 
 def _ip_shutdown():
     # Close all GraphWin windows and gracefully shutdown main form
@@ -104,19 +112,27 @@ def _ip_shutdown():
     # occur while directly enumerating over items in Forms collection.
     frms = [f for f in Application.OpenForms if isinstance(f, GraphWin)]
     for f in frms: f.close()
-    _root.Invoke(CallTarget0(Application.Exit))
-
-# Interpeter exit should clean up and terminate thread.
-#sys.exitfunc = _ip_shutdown
+    pyjama.TopLevelControl.Invoke(Func[object](Application.Exit))
 
 # Start the thread.
-#_are = AutoResetEvent(False)
-#Thread(ThreadStart(_ip_thread)).Start()
-#_are.WaitOne()
-_ip_thread()
+if not pyjama.ThreadRunning:
+    _are = AutoResetEvent(False)
+    Thread(ThreadStart(_ip_thread)).Start()
+    _are.WaitOne()
+    _ip_thread()
+    # Interpeter exit should clean up and terminate thread.
+    sys.exitfunc = _ip_shutdown
+else: # else thread is running
+    if not pyjama.TopLevelControl: # but no GUI, then we'll just start one here:
+        print "Starting my own GUI Listener..."
+        # Create the dummy control, and show then hide it to get 
+        # Windows Forms to initialize it.
+        pyjama.TopLevelControl = Form(Size = Drawing.Size(0,0))  
+        pyjama.TopLevelControl.Show()
+        pyjama.TopLevelControl.Hide()
 
 # ----------------------------------------
-class GraphWin(Form):
+class Window(Form):
 
     # - - - - - - - - - - - - - - - - -
     def __init__(self, title="Graphics Window",
@@ -160,8 +176,9 @@ class GraphWin(Form):
             
             # Refresh set to autoflush.
             if autoflush: self.Invalidate()
-        _root.Invoke(CallTarget0(__init_help))
-        
+
+        pyjama.TopLevelControl.Invoke(Func[object](__init_help))
+
     # - - - - - - - - - - - - - - - - -
     def _onPaint(self, sender, e):
         # Will draw in antialias mode if smooth is True.
@@ -197,7 +214,7 @@ class GraphWin(Form):
         self.__checkOpen()
         clr = _color_map[color]
         def tmp(): self.BackColor = clr
-        _root.Invoke(CallTarget0(tmp))
+        pyjama.TopLevelControl.Invoke(Func[object](tmp))
 
     # - - - - - - - - - - - - - - - - -
     def setCoords(self, x1, y1, x2, y2):
@@ -210,7 +227,7 @@ class GraphWin(Form):
         """Close this GraphWin window"""
         if self.closed: return
         def tmp(): self.__close_help()
-        _root.Invoke(CallTarget0(self.__close_help))
+        pyjama.TopLevelControl.Invoke(Func[object](self.__close_help))
 
     # - - - - - - - - - - - - - - - - -
     def __close_help(self):
@@ -227,7 +244,7 @@ class GraphWin(Form):
     def __autoflush(self):
         # Only called from remote thread.
         if self.autoflush:
-            _root.Invoke(CallTarget0(self.Invalidate))
+            pyjama.TopLevelControl.Invoke(Func[object](self.Invalidate))
 
     # - - - - - - - - - - - - - - - - -
     def plot(self, x, y, color="black"):
@@ -252,7 +269,7 @@ class GraphWin(Form):
     def flush(self):
         """Flush drawing to the window"""
         self.__checkOpen()
-        _root.Invoke(CallTarget0(self.Invalidate))
+        pyjama.TopLevelControl.Invoke(Func[object](self.Invalidate))
 
     # - - - - - - - - - - - - - - - - -
     def update(self):
@@ -383,11 +400,13 @@ class GraphicsObject(object):
     # - - - - - - - - - - - - - - - - -
     def setFill(self, color):
         """Set interior color to color"""
-        if self.fill_color == color: return
-        if self.brush: self.brush.Dispose()
-        clr = _color_map[color]
-        self.brush = Drawing.SolidBrush(clr)
-        self.fill_color = color
+        def tmp(): 
+            if self.fill_color == color: return
+            if self.brush: self.brush.Dispose()
+            clr = _color_map[color]
+            self.brush = Drawing.SolidBrush(clr)
+            self.fill_color = color
+        pyjama.TopLevelControl.Invoke(Func[object](tmp))
     
     # - - - - - - - - - - - - - - - - -
     def setOutline(self, color):
@@ -422,7 +441,7 @@ class GraphicsObject(object):
         self.canvas = graphwin
         self.canvas.append(self)
         if graphwin.autoflush:
-            _root.Invoke(CallTarget0(self.canvas.Invalidate))
+            pyjama.TopLevelControl.Invoke(Func[object](self.canvas.Invalidate))
 
     # - - - - - - - - - - - - - - - - -
     def undraw(self):
@@ -434,7 +453,7 @@ class GraphicsObject(object):
         if not self.canvas.isClosed():
             self.canvas.remove(self)
             if self.canvas.autoflush:
-                _root.Invoke(CallTarget0(self.canvas.Invalidate))
+                pyjama.TopLevelControl.Invoke(Func[object](self.canvas.Invalidate))
         self.canvas = None
 
     # - - - - - - - - - - - - - - - - -
@@ -446,7 +465,7 @@ class GraphicsObject(object):
         canvas = self.canvas
         if canvas and not canvas.isClosed():
             if canvas.autoflush:
-                _root.Invoke(CallTarget0(self.canvas.Invalidate))
+                pyjama.TopLevelControl.Invoke(Func[object](self.canvas.Invalidate))
 
     # - - - - - - - - - - - - - - - - -
     def _draw(self, canvas, options):
@@ -469,6 +488,9 @@ class Point(GraphicsObject):
         self.setOutline("black")
         self.x = x
         self.y = y
+
+    def __repr__(self):
+        return "<Point at (%d,%d)>" % (self.x, self.y)
     
     # - - - - - - - - - - - - - - - - -
     def _draw(self, g):
@@ -610,6 +632,12 @@ class Line(_BBox):
         #self.setOutline = self.setFill
         self._arrow = "none"
         self.setFill("black")
+
+    def __repr__(self):
+        return "<Line at (%d,%d),(%d,%d)>" % (self.p1.x, 
+                                              self.p1.y, 
+                                              self.p2.x, 
+                                              self.p2.y)
         
     # - - - - - - - - - - - - - - - - -
     def clone(self):
@@ -738,7 +766,9 @@ class Text(GraphicsObject):
     
     # - - - - - - - - - - - - - - - - -
     def setText(self,text):
-        self._text = text
+        #self._text = text
+        def tmp(): self._text = text
+        pyjama.TopLevelControl.Invoke(Func[object](tmp))
     
     # - - - - - - - - - - - - - - - - -
     def getText(self):
@@ -795,8 +825,8 @@ class Entry(GraphicsObject):
             tb = TextBox()
             tb.Visible = False
             return tb
-        iar = _root.BeginInvoke(CallTarget0(tmp))
-        self.entry = _root.EndInvoke(iar)
+        iar = pyjama.TopLevelControl.BeginInvoke(Func[object](tmp))
+        self.entry = pyjama.TopLevelControl.EndInvoke(iar)
         GraphicsObject.__init__(self)
         self.font = Drawing.Font("Helvetica", 12)
         self.anchor = p.clone()
@@ -821,10 +851,10 @@ class Entry(GraphicsObject):
         # Add to controls and draw
         self.canvas.append(self)
         def tmp(): self.canvas.Controls.Add(self.entry)
-        _root.Invoke(CallTarget0(tmp))
+        pyjama.TopLevelControl.Invoke(Func[object](tmp))
         
         if self.canvas.autoflush:
-            _root.Invoke(CallTarget0(self.canvas.Invalidate))
+            pyjama.TopLevelControl.Invoke(Func[object](self.canvas.Invalidate))
 
     # - - - - - - - - - - - - - - - - -
     def _draw(self, g):
@@ -855,14 +885,14 @@ class Entry(GraphicsObject):
             def tmp():
                 self.canvas.Controls.Remove(self.entry)
                 if self.canvas.autoflush: self.canvas.Invalidate()
-            _root.Invoke(CallTarget0(tmp))
+            pyjama.TopLevelControl.Invoke(Func[object](tmp))
         self.canvas = None
 
     # - - - - - - - - - - - - - - - - -
     def getText(self):
         def tmp(): return self.entry.Text
-        iar = _root.BeginInvoke(CallTarget0(tmp))
-        return _root.EndInvoke(iar)
+        iar = pyjama.TopLevelControl.BeginInvoke(Func[object](tmp))
+        return pyjama.TopLevelControl.EndInvoke(iar)
 
     # - - - - - - - - - - - - - - - - -
     def _move(self, dx, dy):
@@ -882,17 +912,19 @@ class Entry(GraphicsObject):
     # - - - - - - - - - - - - - - - - -
     def setText(self, t):
         def tmp(): self.entry.Text = t
-        _root.Invoke(CallTarget0(tmp))
+        pyjama.TopLevelControl.Invoke(Func[object](tmp))
         
     # - - - - - - - - - - - - - - - - -
     def setFill(self, color):
         """Set interior color to color"""
-        if self.fill_color == color: return
-        clr = _color_map[color]
-        if clr == Drawing.Color.Transparent:
-            clr = Drawing.Color.White
-        self.entry.BackColor = clr
-        self.fill_color = color
+        def tmp():
+            if self.fill_color == color: return
+            clr = _color_map[color]
+            if clr == Drawing.Color.Transparent:
+                clr = Drawing.Color.White
+            self.entry.BackColor = clr
+            self.fill_color = color
+        pyjama.TopLevelControl.Invoke(Func[object](tmp))
     
     # - - - - - - - - - - - - - - - - -
     def setFace(self, face):
@@ -932,7 +964,7 @@ class Entry(GraphicsObject):
         self.color=color
         clr = _color_map[color]
         def tmp(): self.entry.ForeColor = clr
-        _root.Invoke(CallTarget0(tmp))
+        pyjama.TopLevelControl.Invoke(Func[object](tmp))
 
 # -----------------------------------------------
 class Image(GraphicsObject):
@@ -989,15 +1021,15 @@ class Image(GraphicsObject):
     def getWidth(self):
         """Returns the width of the image in pixels"""
         def tmp(): return self.img.Width
-        iar = _root.BeginInvoke(CallTarget0(tmp))
-        return _root.EndInvoke(iar)
+        iar = pyjama.TopLevelControl.BeginInvoke(Func[object](tmp))
+        return pyjama.TopLevelControl.EndInvoke(iar)
 
     # - - - - - - - - - - - - - - - - -
     def getHeight(self):
         """Returns the height of the image in pixels"""
         def tmp(): return self.img.Height
-        iar = _root.BeginInvoke(CallTarget0(tmp))
-        return _root.EndInvoke(iar)
+        iar = pyjama.TopLevelControl.BeginInvoke(Func[object](tmp))
+        return pyjama.TopLevelControl.EndInvoke(iar)
     
     # - - - - - - - - - - - - - - - - -
     def getPixel(self, x, y):
@@ -1008,8 +1040,8 @@ class Image(GraphicsObject):
         def tmp():
             clr = self.img.GetPixel(x,y)
             return [clr.R, clr.G, clr.B]
-        iar = _root.BeginInvoke(CallTarget0(tmp))
-        return _root.EndInvoke(iar)
+        iar = pyjama.TopLevelControl.BeginInvoke(Func[object](tmp))
+        return pyjama.TopLevelControl.EndInvoke(iar)
 
     # - - - - - - - - - - - - - - - - -
     def setPixel(self, x, y, (r,g,b)):
@@ -1018,13 +1050,12 @@ class Image(GraphicsObject):
         """
         clr = color_rgb(r,g,b)
         def tmp(): self.img.SetPixel(x, y, clr)
-        _root.Invoke(CallTarget0(tmp))
+        pyjama.TopLevelControl.Invoke(Func[object](tmp))
     
     # - - - - - - - - - - - - - - - - -
     def save(self, filename):
         """Saves the pixmap image to filename.
         The format for the save image is determined from the filname extension.
-
         """
         path, name = os.path.split(filename)
         ext = name.split(".")[-1]
@@ -1039,9 +1070,8 @@ class Image(GraphicsObject):
         elif ext == 'tiff': frmt = Drawing.Imaging.ImageFormat.Tiff
         elif ext == 'wmf':  frmt = Drawing.Imaging.ImageFormat.Wmf
         else:               frmt = Drawing.Imaging.ImageFormat.Bmp
-
         def tmp(): self.img.Save(filename, frmt)
-        _root.Invoke(CallTarget0(tmp))
+        pyjama.TopLevelControl.Invoke(Func[object](tmp))
 
 # -----------------------------------------------
 def color_rgb(r,g,b,a=255):
@@ -1053,54 +1083,55 @@ def color_rgb(r,g,b,a=255):
 
 # -----------------------------------------------
 # For compatibility.
-# The Pixmap and Bitmap objects are now merged.
+# The Pixmap and Bitmap objects are now merged:
 Pixmap = Image
+# Window is a more general name:
+GraphWin = Window
 
 # -----------------------------------------------
 def test():
     win = GraphWin()
     win.setCoords(0,0,10,10)
-#     t = Text(Point(5,5), "Centered Text")
-#     t.draw(win)
-#     p = Polygon(Point(1,1), Point(5,3), Point(2,7))
-#     p.draw(win)
-#     e = Entry(Point(5,6), 10)
-#     e.draw(win)
-#     #win.getMouse()
-#     p.setFill("red")
-#     p.setOutline("blue")
-#     p.setWidth(2)
-#     s = ""
-#     for pt in p.getPoints():
-#         s = s + "(%0.1f,%0.1f) " % (pt.getX(), pt.getY())
-#     t.setText(e.getText())
-#     e.setFill("green")
-#     e.setText("Spam!")
-#     e.move(2,0)
-#     #win.getMouse()
-#     p.move(2,3)
-#     s = ""
-#     for pt in p.getPoints():
-#         s = s + "(%0.1f,%0.1f) " % (pt.getX(), pt.getY())
-#     t.setText(s)
-#     #win.getMouse()
-#     p.undraw()
-#     e.undraw()
-#     t.setStyle("bold")
-#     #win.getMouse()
-#     t.setStyle("normal")
-#     #win.getMouse()
-#     t.setStyle("italic")
-#     #win.getMouse()
-#     t.setStyle("bold italic")
-#     #win.getMouse()
-#     t.setSize(14)
-#     #win.getMouse()
-#     t.setFace("arial")
-#     t.setSize(20)
-#     #win.getMouse()
-#     win.close()
+    t = Text(Point(5,5), "Centered Text")
+    t.draw(win)
+    p = Polygon(Point(1,1), Point(5,3), Point(2,7))
+    p.draw(win)
+    e = Entry(Point(5,6), 10)
+    e.draw(win)
+    print win.getMouse()
+    p.setFill("red")
+    p.setOutline("blue")
+    p.setWidth(2)
+    s = ""
+    for pt in p.getPoints():
+        s = s + "(%0.1f,%0.1f) " % (pt.getX(), pt.getY())
+    t.setText(e.getText())
+    e.setFill("green")
+    e.setText("Spam!")
+    e.move(2,0)
+    print win.getMouse()
+    p.move(2,3)
+    s = ""
+    for pt in p.getPoints():
+        s = s + "(%0.1f,%0.1f) " % (pt.getX(), pt.getY())
+    t.setText(s)
+    print win.getMouse()
+    p.undraw()
+    e.undraw()
+    t.setStyle("bold")
+    print win.getMouse()
+    t.setStyle("normal")
+    print win.getMouse()
+    t.setStyle("italic")
+    print win.getMouse()
+    t.setStyle("bold italic")
+    print win.getMouse()
+    t.setSize(14)
+    print win.getMouse()
+    t.setFace("arial")
+    t.setSize(20)
+    return win
 
 # -----------------------------------------------
-#if __name__ == "__main__":
-#    test()
+if __name__ == "__main__":
+    test()

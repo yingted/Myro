@@ -74,8 +74,8 @@ namespace Pyjama
         {
             // Do things when a key goes down  
             // FIXME: this can be wrong when selecting
-	    System.Console.WriteLine("textBox_KeyUp: {0} {1} handled: {2}", 
-				     e.KeyCode, e.Control, e.Handled);
+	        //System.Console.WriteLine("textBox_KeyUp: {0} {1} handled: {2}", 
+			//	     e.KeyCode, e.Control, e.Handled);
             int col = (textBox.SelectionStart - textBox.GetFirstCharIndexOfCurrentLine() + 1);
             int line = (textBox.GetLineFromCharIndex(textBox.SelectionStart) + 1);
             MainForm.UpdateGUI(col, line);
@@ -83,13 +83,13 @@ namespace Pyjama
 
         void textBox_KeyPress(object sender, KeyPressEventArgs e)
         {
-	    System.Console.WriteLine("Document.textBox_KeyPress: {0}, handled: {1}", 
-				     (int)e.KeyChar,
-				     e.Handled);
+	        //System.Console.WriteLine("Document.textBox_KeyPress: {0}, handled: {1}", 
+			//	     (int)e.KeyChar,
+			//	     e.Handled);
             // Add ability to handle newlines after line ending with colon
             if (e.KeyChar == '\t') // tab
             {
-	          System.Console.WriteLine("tab!");
+	            //System.Console.WriteLine("tab!");
                 //int start = textBox.SelectionStart;
                 //textBox.Text = textBox.Text.Insert(start, "    ");
                 //textBox.SelectionStart = start + 4;

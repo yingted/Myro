@@ -79,7 +79,22 @@ namespace Pyjama
 
         public void Exit()
         {
-            Application.Exit();
+            try
+            {
+                Application.Exit();
+            }
+            catch
+            {
+                System.Console.Write("Shutting down...");
+                try
+                {
+                    Application.Exit();
+                }
+                catch
+                {
+                    System.Console.WriteLine("done!");
+                }
+            }
         }
 
         private ActiveCodeFile CreateDefaultActiveFile(string language)
