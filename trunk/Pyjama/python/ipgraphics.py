@@ -144,7 +144,7 @@ class Window(Form):
             dwidth  = self.Width  - self.ClientSize.Width
             dheight = self.Height - self.ClientSize.Height
             self.Size = Drawing.Size(width+dwidth, height+dheight)
-
+            self.TopMost = True
             # Turn on double buffering
             try:
                 self.SetStyle(ControlStyles.UserPaint, True)
