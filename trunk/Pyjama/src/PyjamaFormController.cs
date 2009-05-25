@@ -79,13 +79,13 @@ namespace Pyjama
 
         public void Exit()
         {
-            bool not_done = true;
+            bool done = false;
             System.Console.Write("Pyjama is shutting down...");
-            while (not_done) {
+            while (!done) {
                 try
                 {
-                    Application.Exit();
-                    not_done = false;
+                    Application.ExitThread(); // Was Exit(), but that caused errors with other windows
+                    done = true;
                 }
                 catch
                 {

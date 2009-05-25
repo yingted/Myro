@@ -45,6 +45,8 @@ using Microsoft.Scripting.Hosting;
 
 namespace UIIronTextBox
 {
+    delegate void StringParameterDelegate(string value);
+
     [ToolboxItem(true)]
     [ToolboxBitmap(typeof(IronTextBox))]
     [DesignerAttribute(typeof(IronTextBoxControl))]
@@ -128,21 +130,21 @@ namespace UIIronTextBox
             base.Dispose(disposing);
         }
 
-	protected override void OnKeyDown(KeyEventArgs e)
-	{
-	  //System.Console.WriteLine("OnKeyDown?");
-	  if (e.KeyData == Keys.Tab)
-	    {
-	      //System.Console.WriteLine("OnKeyDown!");
-	      this.SelectedText = "    ";                
-	      e.Handled = true;
-	    }
-	  else
-	    {
-	      base.OnKeyDown(e);
-	    }
-	}
-	
+        protected override void OnKeyDown(KeyEventArgs e)
+        {
+            //System.Console.WriteLine("OnKeyDown?");
+            if (e.KeyData == Keys.Tab)
+            {
+                //System.Console.WriteLine("OnKeyDown!");
+                this.SelectedText = "    ";
+                e.Handled = true;
+            }
+            else
+            {
+                base.OnKeyDown(e);
+            }
+        }
+
         /// <summary>
         /// Overridden to protect against deletion of contents
         /// cutting the text and deleting it from the context menu
@@ -214,7 +216,7 @@ namespace UIIronTextBox
             if ((currentText.Length != 0) && (currentText[currentText.Length - 1] != '\n'))
                 printLine();
             //add the prompt
-            this.AddText(text); 
+            this.AddText(text);
             this.Select(this.TextLength - text.Length, text.Length);
             this.SelectionColor = Color.Green;
             //this.Select(this.TextLength, 0); // clears the selection
@@ -225,6 +227,13 @@ namespace UIIronTextBox
 
         public void printTextOnNewline(string text)
         {
+            if (InvokeRequired)
+            {
+                // We're not in the UI thread, so we need to call BeginInvoke
+                BeginInvoke(new StringParameterDelegate(printTextOnNewline),
+                new object[] { text });
+                return;
+            }
             //System.Console.WriteLine("newline?");
             string currentText = this.Text;
             //add newline if it needs one
@@ -298,9 +307,16 @@ namespace UIIronTextBox
 
         public void AddText(string text)
         {
-	  // Don't disable... doesn't update scrollbars, etc if it needs to.
-	  //this.Enabled = false;
+            // Don't disable... doesn't update scrollbars, etc if it needs to.
+            //this.Enabled = false;
             //System.Console.WriteLine("AddText: '{0}'", text);
+            if (InvokeRequired)
+            {
+                // We're not in the UI thread, so we need to call BeginInvoke
+                BeginInvoke(new StringParameterDelegate(AddText),
+                new object[] { text });
+                return;
+            }
             this.AppendText(text);
             //this.Enabled = true;
             MoveCaretToEndOfText();
@@ -501,17 +517,19 @@ namespace UIIronTextBox
     public class PyjamaModule
     {
         public Control CurrentControl = null; // Is there a GUI running? Handle for Invoke
-        public bool ThreadRunning = true;     // Is there a Thread running? 
+        public bool Threaded = true;     // Is there a Thread running? 
         private Control _override = null;
 
-        public PyjamaModule(Control control, bool thread) {
+        public PyjamaModule(Control control, bool thread)
+        {
             this.CurrentControl = control;
-            this.ThreadRunning = thread;
+            this.Threaded = thread;
         }
 
-        public Control TopLevelControl 
+        public Control TopLevelControl
         {
-            get {
+            get
+            {
                 if (_override != null)
                 {
                     return _override;
@@ -521,7 +539,7 @@ namespace UIIronTextBox
                     return this.CurrentControl.TopLevelControl;
                 }
             }
-            set { _override = value;}
+            set { _override = value; }
         }
     }
 
@@ -534,7 +552,7 @@ namespace UIIronTextBox
         public event EventCommandEntered CommandEntered;
         private Container components = null;
         public PyjamaModule pyjamaModule = null;
-	public Thread backgroundThread = null;
+        public Thread backgroundThread = null;
 
         public StringBuilder defBuilder
         {
@@ -669,9 +687,9 @@ namespace UIIronTextBox
                 foreach (string line in command.Split('\n'))
                 {
                     if (first)
-                        this.consoleTextBox.printTextOnNewline(">>> " + line);
+                        this.consoleTextBox.printTextOnNewline(">>> " + line + "\n");
                     else
-                        this.consoleTextBox.printTextOnNewline("... " + line);
+                        this.consoleTextBox.printTextOnNewline("... " + line + "\n");
                     first = false;
                 }
                 this.consoleTextBox.AddcommandHistory(command);
@@ -704,14 +722,16 @@ namespace UIIronTextBox
                 }
                 else // Command
                 {
-                    if (pyjamaModule.ThreadRunning)
+                    if (pyjamaModule.Threaded)
                     {
-			if (backgroundThread != null) { // FIXME: tie to ESCAPE
-			    // check to see if running
-			    // use TerminateScriptExecution of
-			    // PlatformAdoptionLayer, or
-			    // kill thread
-			}
+                        if (backgroundThread != null && backgroundThread.IsAlive)
+                        { // FIXME: tie to ESCAPE
+                            // check to see if running
+                            // use TerminateScriptExecution of
+                            // PlatformAdoptionLayer, or
+                            // kill thread
+                            backgroundThread.Suspend();
+                        }
                         ThreadStart starter = delegate { Execute(command, SourceCodeKind.InteractiveCode); };
                         backgroundThread = new Thread(new ThreadStart(starter));
                         backgroundThread.IsBackground = true;
@@ -727,6 +747,63 @@ namespace UIIronTextBox
             }
         }
 
+        class GUIStream : Stream
+        {
+            private IronTextBox consoleTextBox = null;
+            public GUIStream(IronTextBox ctb) 
+            {
+                consoleTextBox = ctb;
+            }
+            public override bool CanRead
+            {
+                get { return false; }
+            }
+            public override bool CanSeek
+            {
+                get { return false; }
+            }
+            public override long Seek(long offset, SeekOrigin origin)
+            {
+                throw new NotImplementedException();
+            }
+            public override int Read(byte[] buffer, int offset, int count)
+            {
+                throw new NotImplementedException();
+            }
+            public override void SetLength(long value)
+            {
+                throw new NotImplementedException();
+            }
+            public override bool CanWrite
+            {
+                get { return true; }
+            }
+            public override long Length
+            {
+                get { return 0; }
+            }
+            public override long Position
+            {
+                get { return 0; }
+                set { }
+            }
+            public override void Flush()
+            {
+                // no op; nothing to do?
+            }
+
+            public override void Write(byte[] buffer, int offset, int count)
+            {
+                string text = "";
+                for (int pos = offset; pos < count; pos++)
+                {
+                    text += (char)buffer[pos];
+                }
+                consoleTextBox.AddText(text);
+            }
+
+        }
+
         public void Execute(string command, SourceCodeKind sctype)
         {
             ExceptionOperations eo;
@@ -734,12 +811,12 @@ namespace UIIronTextBox
             bool error = false;
             string err_message = null;
             string output = null;
-            MemoryStream ms = new MemoryStream();
+            GUIStream ms = new GUIStream(consoleTextBox);
             engine.Runtime.IO.SetOutput(ms, new StreamWriter(ms));
             engine.Runtime.IO.SetErrorOutput(ms, new StreamWriter(ms));
             ScriptSource source = null;
             // Compile:
-			command = command.Trim();
+            command = command.Trim();
             if (sctype == SourceCodeKind.File)
             {
                 source = engine.CreateScriptSourceFromFile(command, Encoding.GetEncoding("utf-8"));
@@ -752,29 +829,35 @@ namespace UIIronTextBox
             //System.Console.WriteLine("Executing '{0}'...", command);
             try
             {
-			  source.Compile(); // if it fails, it could be Statements 
-  			  // Compiled successfully! Execute
-              try
-              {
-			      source.Execute(scope);
-              } 
-              catch (Exception err3) // If fails, something is wrong!
-              {
-				try {
-                  err_message = eo.FormatException(err3);
-				} catch {
-				  err_message = "An error occurred, and then an error in formatting the error occurred.";
-				}
-				error = true;
-              }
+                source.Compile(); // if it fails, it could be Statements 
+                // Compiled successfully! Execute
+                try
+                {
+                    source.Execute(scope);
+                }
+                catch (Exception err3) // If fails, something is wrong!
+                {
+                    try
+                    {
+                        err_message = eo.FormatException(err3);
+                    }
+                    catch
+                    {
+                        err_message = "An error occurred, and then an error in formatting the error occurred.";
+                    }
+                    error = true;
+                }
             }
             catch (Exception err)
             {
-			    try {
-				   err_message = eo.FormatException(err);
-				} catch {
-				  err_message = "An error occurred, and then an error in formatting the error occurred.";
-				}
+                try
+                {
+                    err_message = eo.FormatException(err);
+                }
+                catch
+                {
+                    err_message = "An error occurred, and then an error in formatting the error occurred.";
+                }
                 error = true;
                 if (sctype != SourceCodeKind.File)
                 {
@@ -795,24 +878,24 @@ namespace UIIronTextBox
                     }
                 }
             }
-            output = ReadFromStream(ms);
-            // ----------- Output:
             if (error)
             {
                 DisplayError(err_message);
             }
+            /*
+            output = ReadFromStream(ms);
+            // ----------- Output:
             else if (output != null && output.Trim() != "")
             {
                 // This is printed out if no error
                 StringParameterDelegate spd = new StringParameterDelegate(consoleTextBox.printTextOnNewline);
-                BeginInvoke(spd, new object [] {output});
+                BeginInvoke(spd, new object[] { output });
                 //consoleTextBox.printTextOnNewline(output);
             }
-            Invoke (new MethodInvoker(FinishCommand));
+             */
+            Invoke(new MethodInvoker(FinishCommand));
             return;
         }
-
-        delegate void StringParameterDelegate(string value);
 
         private void FinishCommand()
         {
@@ -829,8 +912,8 @@ namespace UIIronTextBox
             if (InvokeRequired)
             {
                 // We're not in the UI thread, so we need to call BeginInvoke
-                BeginInvoke(new StringParameterDelegate(DisplayError), 
-			    new object[] { err_message });
+                BeginInvoke(new StringParameterDelegate(DisplayError),
+                new object[] { err_message });
                 return;
             }
             // Must be on the UI thread if we've got this far
@@ -958,6 +1041,12 @@ namespace UIIronTextBox
         /// <param name="text"></param>
         public void WriteText(string text)
         {
+            if (InvokeRequired)
+            {
+                // We're not in the UI thread, so we need to call BeginInvoke
+                BeginInvoke(new StringParameterDelegate(WriteText), new object[] { text });
+                return;
+            }
             consoleTextBox.WriteText(text);
         }
 

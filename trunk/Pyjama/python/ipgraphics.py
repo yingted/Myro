@@ -29,7 +29,7 @@ except:
     print "Running outside of Pyjama..."
     class pyjama:
         TopLevelControl = None
-        ThreadRunning = False
+        Threaded = False
 
 # Map color strings to internal color objects.
 # This can be extended with many additional colors.
@@ -115,7 +115,7 @@ def _ip_shutdown():
     pyjama.TopLevelControl.Invoke(Func[object](Application.Exit))
 
 # Start the thread.
-if not pyjama.ThreadRunning:
+if not pyjama.Threaded:
     _are = AutoResetEvent(False)
     Thread(ThreadStart(_ip_thread)).Start()
     _are.WaitOne()
