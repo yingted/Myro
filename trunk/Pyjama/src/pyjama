@@ -1,5 +1,3 @@
 #!/bin/sh
 
-make pyjama.exe
-
-XMODIFIERS= MONO_PATH=../libs /usr/local/bin/mono pyjama.exe $@
+XMODIFIERS= MONO_PATH=../libs $BINPATH/mono pyjama.exe $@

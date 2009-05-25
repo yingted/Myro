@@ -534,6 +534,7 @@ namespace UIIronTextBox
         public event EventCommandEntered CommandEntered;
         private Container components = null;
         public PyjamaModule pyjamaModule = null;
+	public Thread backgroundThread = null;
 
         public StringBuilder defBuilder
         {
@@ -705,12 +706,18 @@ namespace UIIronTextBox
                 {
                     if (pyjamaModule.ThreadRunning)
                     {
+			if (backgroundThread != null) { // FIXME: tie to ESCAPE
+			    // check to see if running
+			    // use TerminateScriptExecution of
+			    // PlatformAdoptionLayer, or
+			    // kill thread
+			}
                         ThreadStart starter = delegate { Execute(command, SourceCodeKind.InteractiveCode); };
-                        Thread t = new Thread(new ThreadStart(starter));
-                        t.IsBackground = true;
+                        backgroundThread = new Thread(new ThreadStart(starter));
+                        backgroundThread.IsBackground = true;
                         // FIXME: set cursor to stay this way till done
                         this.TopLevelControl.Cursor = Cursors.WaitCursor;
-                        t.Start();
+                        backgroundThread.Start();
                     }
                     else
                     {
@@ -822,7 +829,8 @@ namespace UIIronTextBox
             if (InvokeRequired)
             {
                 // We're not in the UI thread, so we need to call BeginInvoke
-                BeginInvoke(new StringParameterDelegate(DisplayError), new object[] { err_message });
+                BeginInvoke(new StringParameterDelegate(DisplayError), 
+			    new object[] { err_message });
                 return;
             }
             // Must be on the UI thread if we've got this far

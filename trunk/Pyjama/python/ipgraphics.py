@@ -414,20 +414,24 @@ class GraphicsObject(object):
     # - - - - - - - - - - - - - - - - -
     def setOutline(self, color):
         """Set outline color to color"""
-        if self.outline_color == color: return
-        if self.pen: self.pen.Dispose()
-        clr = _color_map[color]
-        self.pen = Drawing.Pen(clr, self.outline_width)
-        self.outline_color = color
+        def tmp(): 
+            if self.outline_color == color: return
+            if self.pen: self.pen.Dispose()
+            clr = _color_map[color]
+            self.pen = Drawing.Pen(clr, self.outline_width)
+            self.outline_color = color
+        pyjama.TopLevelControl.Invoke(Func[object](tmp))
         
     # - - - - - - - - - - - - - - - - -
     def setWidth(self, width):
         """Set line weight to width"""
-        if self.outline_width == width: return
-        if self.pen: self.pen.Dispose()
-        clr = _color_map[self.outline_color]
-        self.pen = Drawing.Pen(clr, width)
-        self.outline_width = width
+        def tmp(): 
+            if self.outline_width == width: return
+            if self.pen: self.pen.Dispose()
+            clr = _color_map[self.outline_color]
+            self.pen = Drawing.Pen(clr, width)
+            self.outline_width = width
+        pyjama.TopLevelControl.Invoke(Func[object](tmp))
 
     # - - - - - - - - - - - - - - - - -
     def draw(self, graphwin):
