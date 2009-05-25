@@ -1,3 +1,5 @@
 #!/bin/sh
 
-XMODIFIERS= MONO_PATH=../libs $BINPATH/mono pyjama.exe $@
+PYJAMAPATH=/home/dblank/Myro/Pyjama/src
+
+XMODIFIERS= MONO_PATH=$PYJAMAPATH/../libs $BINPATH/mono $PYJAMAPATH/pyjama.exe $@
