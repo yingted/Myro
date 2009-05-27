@@ -343,6 +343,7 @@ namespace UIIronTextBox
         {
             this.SelectionStart = this.TextLength;
             this.Select(this.TextLength, 0);
+            this.SelectionStart = this.TextLength;
             this.ScrollToCaret();
             //System.Console.WriteLine("scroll to caret!");
         }
@@ -916,6 +917,10 @@ namespace UIIronTextBox
             {
                 DisplayError(err_message);
             }
+            else
+            {
+                ScrollToBottom();
+            }
             /*
             output = ReadFromStream(ms);
             // ----------- Output:
@@ -931,12 +936,26 @@ namespace UIIronTextBox
             return;
         }
 
+        private void ScrollToBottom()
+        {
+            if (InvokeRequired)
+            {
+                // We're not in the UI thread, so we need to call BeginInvoke
+                Invoke(new MethodInvoker(ScrollToBottom));
+                return;
+            }
+            consoleTextBox.Select(consoleTextBox.TextLength, 0);
+            consoleTextBox.SelectionStart = consoleTextBox.TextLength;
+            consoleTextBox.ScrollToCaret();
+        }
+
         private void FinishCommand()
         {
             // Put the text cursor in the commandtextBox
             // Put the mouse cursor back
             this.TopLevelControl.Cursor = Cursors.Default;
             consoleTextBox.Select(consoleTextBox.TextLength, 0);
+            consoleTextBox.SelectionStart = consoleTextBox.TextLength;
             consoleTextBox.ScrollToCaret();
             ((Pyjama.PyjamaForm)this.TopLevelControl).SelectCommandShell();
         }
@@ -954,9 +973,13 @@ namespace UIIronTextBox
 
             //consoleTextBox.SelectionStart = consoleTextBox.TextLength;
             err_message = err_message.Replace("\r\n", "\n");
+            if (!err_message.EndsWith("\n"))
+                err_message += "\n";
             consoleTextBox.printTextOnNewline(err_message);
             consoleTextBox.Select(consoleTextBox.TextLength - err_message.Length, err_message.Length);
             consoleTextBox.SelectionColor = Color.Red;
+            consoleTextBox.SelectionStart = consoleTextBox.TextLength;
+            consoleTextBox.ScrollToCaret();
             //consoleTextBox.SelectionStart = consoleTextBox.TextLength;
             consoleTextBox.Select(consoleTextBox.TextLength, 0);
             consoleTextBox.SelectionColor = Color.White;
