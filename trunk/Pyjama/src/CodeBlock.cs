@@ -7,6 +7,11 @@ namespace Pyjama
         public string Language { get; set; }
         public DocumentInput Code { get; set; }
 
+        public bool IsSnippet()
+        {
+            return (Code.SelectedText.Length > 0);
+        }
+
         public string GetCodeToExecute()
         {
             if (Code.SelectedText.Length > 0)

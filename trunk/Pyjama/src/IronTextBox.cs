@@ -673,6 +673,29 @@ namespace UIIronTextBox
             DoCommand(command);
         }
 
+        public void DoFile(string filename)
+        {
+            if (pyjamaModule == null)
+            {
+                pyjamaModule = new PyjamaModule(this, true);
+                environment.Globals.SetVariable("pyjama", pyjamaModule);
+            }
+            // FIXME: uses cached version; how to force reload?
+            if (pyjamaModule.Threaded)
+            {
+                ThreadStart starter = delegate { Execute(filename, SourceCodeKind.File); };
+                backgroundThread = new Thread(new ThreadStart(starter));
+                backgroundThread.IsBackground = true;
+                // FIXME: set cursor to stay this way till done
+                this.TopLevelControl.Cursor = Cursors.WaitCursor;
+                backgroundThread.Start();
+            }
+            else
+            {
+                Execute(filename, SourceCodeKind.File);
+            }
+        }
+
         public void DoCommand(string command)
         {
             if (pyjamaModule == null)
@@ -718,7 +741,7 @@ namespace UIIronTextBox
                     //ofd.InitialDirectory = UIIronTextBox.Paths.MiscDirs.vs_Projects;
                     ofd.Filter = "Python files (*.py)|*.py|All files (*.*)|*.*";
                     ofd.ShowDialog();
-                    Execute(ofd.FileName, SourceCodeKind.File);
+                    DoFile(ofd.FileName);
                 }
                 else // Command
                 {
@@ -819,6 +842,12 @@ namespace UIIronTextBox
             command = command.Trim();
             if (sctype == SourceCodeKind.File)
             {
+                string directory = Path.GetDirectoryName(command);
+                ICollection<string> dirs = engine.GetSearchPaths();
+                if (!dirs.Contains(directory)) {
+                    dirs.Add(directory);
+                    engine.SetSearchPaths(dirs);
+                }
                 source = engine.CreateScriptSourceFromFile(command, Encoding.GetEncoding("utf-8"));
             }
             else

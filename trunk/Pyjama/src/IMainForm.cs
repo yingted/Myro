@@ -13,5 +13,6 @@ namespace Pyjama
         void SetSaveInformationForActiveFile(string location);
         void Execute(string code);
         void SelectCommandShell();
+        void ExecuteFile(string filename);
     }
 }

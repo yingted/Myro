@@ -142,6 +142,12 @@ namespace Pyjama
             //SelectionStart = this.TextLength;
         }
 
+        public void ExecuteFile(string filename) // FIXME: take language
+        {
+            outputWindow.textbox.DoFile(filename);
+            commandTextBox.Focus();
+        }
+
         public void SelectCommandShell()
         {
             commandTextBox.Focus();

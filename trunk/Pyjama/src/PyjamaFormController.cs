@@ -32,10 +32,19 @@ namespace Pyjama
             // F5 Method.
             // Get text to eval:
             // FIXME: check to see where focus is
-            System.String code = pyjamaForm.GetCodeBlock().GetCodeToExecute();
-            code = code.Trim();
-            code = code.Replace("\n", "\r\n");
-            pyjamaForm.Execute(code);
+            CodeBlock codeBlock = pyjamaForm.GetCodeBlock();
+            if (codeBlock.IsSnippet())
+            {
+                string code = codeBlock.GetCodeToExecute();
+                code = code.Trim();
+                code = code.Replace("\n", "\r\n");
+                pyjamaForm.Execute(code);
+            }
+            else
+            {
+                string filename = pyjamaForm.GetCurrentActiveFile().Location;
+                pyjamaForm.ExecuteFile(filename); // FIXME: pass in language
+            }
         }
 
         public void SelectCommandShell()

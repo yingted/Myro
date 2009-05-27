@@ -64,35 +64,35 @@
   <ItemGroup>
     <Reference Include="IronPython, Version=2.6.0.1, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\libs\IronPython.dll</HintPath>
+      <HintPath>..\..\..\DLR-0.91\Bin\Debug\IronPython.dll</HintPath>
     </Reference>
     <Reference Include="IronPython.Modules, Version=2.6.0.1, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\libs\IronPython.Modules.dll</HintPath>
+      <HintPath>..\..\..\DLR-0.91\Bin\Debug\IronPython.Modules.dll</HintPath>
     </Reference>
-    <Reference Include="IronRuby, Version=0.4.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="IronRuby, Version=0.3.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\libs\IronRuby.dll</HintPath>
+      <HintPath>..\..\..\DLR-0.91\Bin\Debug\IronRuby.dll</HintPath>
     </Reference>
-    <Reference Include="IronRuby.Libraries, Version=0.4.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="IronRuby.Libraries, Version=0.3.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\libs\IronRuby.Libraries.dll</HintPath>
+      <HintPath>..\..\..\DLR-0.91\Bin\Debug\IronRuby.Libraries.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Dynamic, Version=0.9.5.1, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\libs\Microsoft.Dynamic.dll</HintPath>
+      <HintPath>..\..\..\DLR-0.91\Bin\Debug\Microsoft.Dynamic.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Scripting, Version=0.9.5.1, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\libs\Microsoft.Scripting.dll</HintPath>
+      <HintPath>..\..\..\DLR-0.91\Bin\Debug\Microsoft.Scripting.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Scripting.Core, Version=0.9.5.1, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\libs\Microsoft.Scripting.Core.dll</HintPath>
+      <HintPath>..\..\..\DLR-0.91\Bin\Debug\Microsoft.Scripting.Core.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Scripting.ExtensionAttribute, Version=0.9.5.1, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\libs\Microsoft.Scripting.ExtensionAttribute.dll</HintPath>
+      <HintPath>..\..\..\DLR-0.91\Bin\Debug\Microsoft.Scripting.ExtensionAttribute.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">

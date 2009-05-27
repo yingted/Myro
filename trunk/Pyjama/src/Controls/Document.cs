@@ -37,11 +37,14 @@ namespace Pyjama
                 this.SelectedText = "    ";
                 e.Handled = true;
             }
+            // FIXME: if the previous line is unfinished
+            /*
             else if (e.KeyData == Keys.Enter)
             {
                 this.SelectedText = "\n    ";
                 e.Handled = true;
-	    }
+	        }
+             */
             else
             {
                 base.OnKeyDown(e);
