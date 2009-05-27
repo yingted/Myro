@@ -42,8 +42,11 @@ namespace Pyjama
             }
             else
             {
-                string filename = pyjamaForm.GetCurrentActiveFile().Location;
-                pyjamaForm.ExecuteFile(filename); // FIXME: pass in language
+		Save();
+                if (!activeFile.Unsaved) {
+                    string filename = pyjamaForm.GetCurrentActiveFile().Location;
+                    pyjamaForm.ExecuteFile(filename); // FIXME: pass in language
+                }
             }
         }
 
