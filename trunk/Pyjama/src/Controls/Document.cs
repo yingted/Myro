@@ -37,6 +37,7 @@ namespace Pyjama
                 this.SelectedText = "    ";
                 e.Handled = true;
             }
+			// MAKE SURE THIS MATCHES KeyPress, below
             // FIXME: if the previous line is unfinished
             /*
             else if (e.KeyData == Keys.Enter)
@@ -143,10 +144,12 @@ namespace Pyjama
 
         void textBox_KeyPress(object sender, KeyPressEventArgs e)
         {
-            if (e.KeyChar == '\t' || e.KeyChar == '\r') // tab or enter/return to eat
-            {
-                e.Handled = true;
-            }
+		  // MAKE SURE THIS MATCHES OnKeyDown of MyRichTextBox
+		  if (e.KeyChar == '\t') 
+			// e.KeyChar == '\r') // tab or enter/return to eat
+		  {
+			e.Handled = true;
+		  }
         }
 
         void Parse(string text)
