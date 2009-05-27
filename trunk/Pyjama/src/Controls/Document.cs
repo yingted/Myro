@@ -9,23 +9,23 @@ namespace Pyjama
 
     public class MyRichTextBox : RichTextBox
     {
-	/*
-	public MyRichTextBox() {
-	    // Double buffer
-	    this.SetStyle(ControlStyles.UserPaint, true);
-            this.SetStyle(ControlStyles.DoubleBuffer, true);
-            this.SetStyle(ControlStyles.ResizeRedraw, true);
-            this.SetStyle(ControlStyles.AllPaintingInWmPaint, true);
-	}
-	*/
+        /*
+        public MyRichTextBox() {
+            // Double buffer
+            this.SetStyle(ControlStyles.UserPaint, true);
+                this.SetStyle(ControlStyles.DoubleBuffer, true);
+                this.SetStyle(ControlStyles.ResizeRedraw, true);
+                this.SetStyle(ControlStyles.AllPaintingInWmPaint, true);
+        }
+        */
 
-	/*
-	protected override void WndProc(ref Message m) {
-	    if ((m.Msg != 0x2111) || ((((uint)m.WParam >> 16)
-				       & 0xFFFF) != 768))
-		base.WndProc(ref m);
-	} 
-	*/
+        /*
+        protected override void WndProc(ref Message m) {
+            if ((m.Msg != 0x2111) || ((((uint)m.WParam >> 16)
+                           & 0xFFFF) != 768))
+            base.WndProc(ref m);
+        } 
+        */
 
         // Document Typing/Display Widget
         protected override void OnKeyDown(KeyEventArgs e)
@@ -78,8 +78,8 @@ namespace Pyjama
         public new event Document.TextChangedHandler TextChanged;
         private IMainForm MainForm;
         private MyRichTextBox textBox;
-        private Dictionary<string,Color> colors = new Dictionary<string,Color>();
-        private Dictionary<string,Font> fonts = new Dictionary<string,Font>();
+        private Dictionary<string, Color> colors = new Dictionary<string, Color>();
+        private Dictionary<string, Font> fonts = new Dictionary<string, Font>();
         public String[] keywords;
         public String[] syntax;
 
@@ -98,6 +98,7 @@ namespace Pyjama
             textBox.KeyPress += new KeyPressEventHandler(textBox_KeyPress);
             textBox.KeyUp += new KeyEventHandler(textBox_KeyUp);
             textBox.TextChanged += textbox_TextChanged;
+            textBox.MouseClick += new MouseEventHandler(textBox_MouseClick);
             textBox.Font = new Font("Courier New", 10);
             textBox.WordWrap = false;
             // Resue fonts on formatting:
@@ -116,10 +117,17 @@ namespace Pyjama
                                       "continue", "exec", "import", "pass", "yield",
                                       "def", "finally", "in",
                                       "as", "with"};
-	    syntax = new string[] { "self", "print", "None", "True", "False"};
+            syntax = new string[] { "self", "print", "None", "True", "False" };
 
             // -----------------------------
             Controls.Add(textBox);
+        }
+
+        void textBox_MouseClick(object sender, MouseEventArgs e)
+        {
+            int col = (textBox.SelectionStart - textBox.GetFirstCharIndexOfCurrentLine() + 1);
+            int line = (textBox.GetLineFromCharIndex(textBox.SelectionStart) + 1);
+            MainForm.UpdateGUI(col, line);
         }
 
         void textBox_KeyUp(object sender, KeyEventArgs e)
@@ -200,7 +208,7 @@ namespace Pyjama
                 m_rtb.SelectedText = token;
             }
             m_rtb.SelectedText = "\n";
-        } 
+        }
 
         void textbox_TextChanged(object sender, EventArgs e)
         {
@@ -212,21 +220,22 @@ namespace Pyjama
             int start = 0, end = 0;
             for (start = m_rtb.SelectionStart - 1; start > 0; start--)
             {
-                if (m_rtb.Text[start] == '\n') {
-		    start++; 
-		    break; 
-		}
+                if (m_rtb.Text[start] == '\n')
+                {
+                    start++;
+                    break;
+                }
             }
             // Calculate the end position of the current line.
             for (end = m_rtb.SelectionStart; end < m_rtb.Text.Length; end++)
             {
-                if (m_rtb.Text[end] == '\n') 
-		    break;
+                if (m_rtb.Text[end] == '\n')
+                    break;
             }
-	    start = start < 0 ? 0 : start;
-	    //System.Console.WriteLine("start={0}, stop={1}", start, end);
+            start = start < 0 ? 0 : start;
+            //System.Console.WriteLine("start={0}, stop={1}", start, end);
             // Extract the current line that is being edited.
-	    String line = m_rtb.Text.Substring(start, end - start);
+            String line = m_rtb.Text.Substring(start, end - start);
             // Backup the users current selection point.
             int selectionStart = m_rtb.SelectionStart;
             int selectionLength = m_rtb.SelectionLength;
@@ -236,10 +245,11 @@ namespace Pyjama
             int index = start;
             foreach (string token in tokens)
             {
-		if (token.Trim() == "") {
-		    index += token.Length;
-		    continue;
-		}
+                if (token.Trim() == "")
+                {
+                    index += token.Length;
+                    continue;
+                }
                 // Set the token's default color and font.
                 m_rtb.SelectionStart = index;
                 m_rtb.SelectionLength = token.Length;
@@ -281,7 +291,7 @@ namespace Pyjama
                 }
                 // Check whether the token is a special syntax
                 for (int i = 0; i < syntax.Length; i++)
-		    {
+                {
                     if (syntax[i] == token)
                     {
                         // Apply alternative color and font to highlight keyword.

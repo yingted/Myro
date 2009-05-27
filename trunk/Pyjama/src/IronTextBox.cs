@@ -842,12 +842,17 @@ namespace UIIronTextBox
             command = command.Trim();
             if (sctype == SourceCodeKind.File)
             {
+                // FIXME: surely a better way to add directories to engine?
                 string directory = Path.GetDirectoryName(command);
                 ICollection<string> dirs = engine.GetSearchPaths();
                 if (!dirs.Contains(directory)) {
-                    dirs.Add(directory);
-                    engine.SetSearchPaths(dirs);
+                    string[] dir_array = new string[dirs.Count + 1];
+                    dirs.CopyTo(dir_array, 0);
+                    dir_array[dir_array.Length - 1] = directory;
+                    engine.SetSearchPaths(dir_array);
                 }
+                System.Environment.CurrentDirectory = directory;
+                //engine.Runtime.Host.PlatformAdaptationLayer
                 source = engine.CreateScriptSourceFromFile(command, Encoding.GetEncoding("utf-8"));
             }
             else

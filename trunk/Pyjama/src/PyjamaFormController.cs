@@ -42,7 +42,8 @@ namespace Pyjama
             }
             else
             {
-		Save();
+                Save();
+                ActiveCodeFile activeFile = pyjamaForm.GetCurrentActiveFile();
                 if (!activeFile.Unsaved) {
                     string filename = pyjamaForm.GetCurrentActiveFile().Location;
                     pyjamaForm.ExecuteFile(filename); // FIXME: pass in language
@@ -76,9 +77,9 @@ namespace Pyjama
 
         public void OpenFile(string filename)
         {
-	  ActiveCodeFile file = new ActiveCodeFile(filename);
-	  file.Unsaved = false;
-	  OpenFile(file);
+	        ActiveCodeFile file = new ActiveCodeFile(filename);
+            file.Unsaved = false;
+	        OpenFile(file);
         }
 
         public void OpenFile(ActiveCodeFile file)

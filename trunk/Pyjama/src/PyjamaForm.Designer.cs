@@ -325,6 +325,7 @@ using System.Windows.Forms;
              // 
              resources.ApplyResources(this.commandLabel, "commandLabel");
              this.commandLabel.Name = "commandLabel";
+             this.commandLabel.Click += new System.EventHandler(this.commandLabel_Click);
              // 
              // statusStrip2
              // 

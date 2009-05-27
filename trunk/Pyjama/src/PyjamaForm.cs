@@ -27,8 +27,9 @@ namespace Pyjama
             int opened = 0;
             foreach (string filename in args)
             {
-                // FIXME: if file exists
-                OpenFile(filename);
+                string fullFilename = Path.GetFullPath(filename);
+                // FIXME: if file exists, or allow create, if dir exists?
+                OpenFile(fullFilename);
                 opened++;
             }
             if (opened == 0)
@@ -332,9 +333,11 @@ namespace Pyjama
         {
             // FIXME: make general
             shellLanguageButton.Text = "Python";
+            commandLabel.Text = "Python Mode";
             outputWindow.textbox.Prompt = "---- Python Mode ----";
             outputWindow.textbox.engine = outputWindow.textbox.environment.GetEngine("py");
             outputWindow.textbox.consoleTextBox.printPrompt();
+            commandTextBox.Focus();
             shellLanguageSelect1.Checked = true;
             shellLanguageSelect2.Checked = false;
             shellLanguageSelect1.Checked = false;
@@ -344,10 +347,11 @@ namespace Pyjama
         {
             // FIXME: make general
             shellLanguageButton.Text = "Ruby";
+            commandLabel.Text = "Ruby Mode";
             outputWindow.textbox.Prompt = "---- Ruby Mode ----";
             outputWindow.textbox.engine = outputWindow.textbox.environment.GetEngine("rb");
             outputWindow.textbox.consoleTextBox.printPrompt();
-
+            commandTextBox.Focus();
             shellLanguageSelect1.Checked = false;
             shellLanguageSelect2.Checked = true;
             shellLanguageSelect1.Checked = false;
@@ -357,6 +361,11 @@ namespace Pyjama
         {
             // FIXME: make general
             shellLanguageButton.Text = "Scheme";
+            commandLabel.Text = "Scheme Mode";
+            outputWindow.textbox.Prompt = "---- Scheme Mode ----";
+            //outputWindow.textbox.engine = outputWindow.textbox.environment.GetEngine("rb");
+            outputWindow.textbox.consoleTextBox.printPrompt();
+            commandTextBox.Focus();
             shellLanguageSelect1.Checked = false;
             shellLanguageSelect2.Checked = false;
             shellLanguageSelect1.Checked = true;
@@ -477,6 +486,11 @@ namespace Pyjama
         }
 
         private void commandTextBox_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void commandLabel_Click(object sender, EventArgs e)
         {
 
         }
