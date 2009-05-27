@@ -204,8 +204,9 @@ namespace Pyjama
 
         void textbox_TextChanged(object sender, EventArgs e)
         {
-            //if (TextChanged != null)
-            //    TextChanged(this, e);
+            // Modify signal, for "*" and mark dirty:
+            if (TextChanged != null)
+                TextChanged(this, e);
             MyRichTextBox m_rtb = textBox;
             // Calculate the starting position of the current line.
             int start = 0, end = 0;
