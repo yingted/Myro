@@ -682,6 +682,8 @@ namespace UIIronTextBox
                 environment.Globals.SetVariable("pyjama", pyjamaModule);
             }
             // FIXME: uses cached version; how to force reload?
+            // look through sys.modules, if module.__file__ matches, then delete it, and reload it
+            // from this file with same name as before
             if (pyjamaModule.Threaded)
             {
                 ThreadStart starter = delegate { Execute(filename, SourceCodeKind.File); };
