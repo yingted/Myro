@@ -685,8 +685,11 @@ namespace UIIronTextBox
             // FIXME: uses cached version; how to force reload?
             // look through sys.modules, if module.__file__ matches, then delete it, and reload it
             // from this file with same name as before
+            
+            //ScriptScope sys = engine.GetSysModule(); // sys
+            //sys.GetVariable("__file__");
+            //? Microsoft.Scripting.SourceLocation;
             /*
-            ScriptScope sys = engine.GetSysModule(); // sys
             IronPython.Runtime.PythonDictionary dict = (IronPython.Runtime.PythonDictionary)sys.GetVariable("modules");
             List list = dict.items();
             foreach (PythonTuple name_module in list)
@@ -694,12 +697,12 @@ namespace UIIronTextBox
                 string name = (string)name_module[0];
                 System.Console.WriteLine(name);
                 Microsoft.Scripting.Runtime.Scope modScope = (Microsoft.Scripting.Runtime.Scope) name_module[1];
-                //System.Console.WriteLine("   File: {0}", modScope.ContainsName(Symbol("__file__")));
+                System.Console.WriteLine("   File: {0}",  modScope.ContainsName(Symbol("__file__")));
             }
+            */
             //foreach (KeyValuePair<string, object> pair in sys.GetItems()) {
             //    System.Console.WriteLine(pair);
             //}
-            */
             if (pyjamaModule.Threaded)
             {
                 ThreadStart starter = delegate { Execute(filename, SourceCodeKind.File); };
