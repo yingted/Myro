@@ -554,6 +554,7 @@ namespace UIIronTextBox
         private Container components = null;
         public PyjamaModule pyjamaModule = null;
         public Thread backgroundThread = null;
+        private string resultMessage = null;
 
         public StringBuilder defBuilder
         {
@@ -684,6 +685,21 @@ namespace UIIronTextBox
             // FIXME: uses cached version; how to force reload?
             // look through sys.modules, if module.__file__ matches, then delete it, and reload it
             // from this file with same name as before
+            /*
+            ScriptScope sys = engine.GetSysModule(); // sys
+            IronPython.Runtime.PythonDictionary dict = (IronPython.Runtime.PythonDictionary)sys.GetVariable("modules");
+            List list = dict.items();
+            foreach (PythonTuple name_module in list)
+            {
+                string name = (string)name_module[0];
+                System.Console.WriteLine(name);
+                Microsoft.Scripting.Runtime.Scope modScope = (Microsoft.Scripting.Runtime.Scope) name_module[1];
+                //System.Console.WriteLine("   File: {0}", modScope.ContainsName(Symbol("__file__")));
+            }
+            //foreach (KeyValuePair<string, object> pair in sys.GetItems()) {
+            //    System.Console.WriteLine(pair);
+            //}
+            */
             if (pyjamaModule.Threaded)
             {
                 ThreadStart starter = delegate { Execute(filename, SourceCodeKind.File); };
@@ -836,7 +852,7 @@ namespace UIIronTextBox
             eo = engine.GetService<ExceptionOperations>();
             bool error = false;
             string err_message = null;
-            string output = null;
+            resultMessage = null;
             GUIStream ms = new GUIStream(consoleTextBox);
             engine.Runtime.IO.SetOutput(ms, new StreamWriter(ms));
             engine.Runtime.IO.SetErrorOutput(ms, new StreamWriter(ms));
@@ -848,56 +864,64 @@ namespace UIIronTextBox
                 // FIXME: surely a better way to add directories to engine?
                 string directory = Path.GetDirectoryName(command);
                 ICollection<string> dirs = engine.GetSearchPaths();
-                if (!dirs.Contains(directory)) {
+                if (!dirs.Contains(directory))
+                {
                     string[] dir_array = new string[dirs.Count + 1];
-                    dirs.CopyTo(dir_array, 0);
-                    dir_array[dir_array.Length - 1] = directory;
+                    // put the new one first, to override any other similar named file
+                    dir_array.SetValue(directory, 0);
+                    dirs.CopyTo(dir_array, 1);
+                    //dir_array[dir_array.Length - 1] = directory;
                     engine.SetSearchPaths(dir_array);
                 }
                 System.Environment.CurrentDirectory = directory;
                 //engine.Runtime.Host.PlatformAdaptationLayer
-                source = engine.CreateScriptSourceFromFile(command, Encoding.GetEncoding("utf-8"));
-            }
-            else
-            {
-                source = engine.CreateScriptSourceFromString(command, sctype);
-            }
-            // Run:
-            //System.Console.WriteLine("Executing '{0}'...", command);
-            try
-            {
-                source.Compile(); // if it fails, it could be Statements 
-                // Compiled successfully! Execute
+                //source = engine.CreateScriptSourceFromFile(command, Encoding.GetEncoding("utf-8"));
                 try
                 {
-                    source.Execute(scope);
+                    engine.ExecuteFile(command, scope);
+                    resultMessage = string.Format("=> Loaded '{0}'\n", command);
                 }
-                catch (Exception err3) // If fails, something is wrong!
+                catch (Exception err4) // If fails, something is wrong!
+                {
+                    error = true;
+                    err_message = eo.FormatException(err4);
+                }
+            }
+            else // Not a file; either a experssion, statement, or set of statements
+            {
+                source = engine.CreateScriptSourceFromString(command, sctype);
+                try
+                {
+                    source.Compile(); // if it fails, it could be Statements 
+                    // Compiled successfully! Execute
+                    try
+                    {
+                        source.Execute(scope);
+                    }
+                    catch (Exception err3) // If fails, something is wrong!
+                    {
+                        try
+                        {
+                            err_message = eo.FormatException(err3);
+                        }
+                        catch
+                        {
+                            err_message = "An error occurred, and then an error in formatting the error occurred.";
+                        }
+                        error = true;
+                    }
+                }
+                catch (Exception err)
                 {
                     try
                     {
-                        err_message = eo.FormatException(err3);
+                        err_message = eo.FormatException(err);
                     }
                     catch
                     {
                         err_message = "An error occurred, and then an error in formatting the error occurred.";
                     }
                     error = true;
-                }
-            }
-            catch (Exception err)
-            {
-                try
-                {
-                    err_message = eo.FormatException(err);
-                }
-                catch
-                {
-                    err_message = "An error occurred, and then an error in formatting the error occurred.";
-                }
-                error = true;
-                if (sctype != SourceCodeKind.File)
-                {
                     // Let's try again, as statements:
                     source = engine.CreateScriptSourceFromString(command, SourceCodeKind.Statements);
                     try
@@ -923,17 +947,6 @@ namespace UIIronTextBox
             {
                 ScrollToBottom();
             }
-            /*
-            output = ReadFromStream(ms);
-            // ----------- Output:
-            else if (output != null && output.Trim() != "")
-            {
-                // This is printed out if no error
-                StringParameterDelegate spd = new StringParameterDelegate(consoleTextBox.printTextOnNewline);
-                BeginInvoke(spd, new object[] { output });
-                //consoleTextBox.printTextOnNewline(output);
-            }
-             */
             Invoke(new MethodInvoker(FinishCommand));
             return;
         }
@@ -955,6 +968,8 @@ namespace UIIronTextBox
         {
             // Put the text cursor in the commandtextBox
             // Put the mouse cursor back
+            if (resultMessage != null)
+                consoleTextBox.printTextOnNewline(resultMessage);
             this.TopLevelControl.Cursor = Cursors.Default;
             consoleTextBox.Select(consoleTextBox.TextLength, 0);
             consoleTextBox.SelectionStart = consoleTextBox.TextLength;
