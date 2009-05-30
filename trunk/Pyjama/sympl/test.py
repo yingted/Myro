@@ -1,7 +1,19 @@
 import sympl
 s = sympl.Sympl()
 
-feo = s.ExecuteFile("test.sympl")
+#feo = s.ExecuteFile("test.sympl")
+feo = s.CreateScope()
+
+s.ExecuteExpr("""(import System)""", feo)
+
+s.ExecuteExpr("""(defun print (x)
+   ;;.NET prints null as empty string, so need to test for it here
+   ;; and print "nil" ... when 'if' and 'eq' work.
+   ;;(if (eq x nil)
+   ;;    (system.console.writeline "nil")
+   ;;    (system.console.writeline x))
+   (system.console.writeline x)
+   x)""", feo)
 
 print "ExecuteExpr ... ",
 s.ExecuteExpr("(print 5)", feo)
