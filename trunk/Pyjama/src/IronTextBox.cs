@@ -801,7 +801,7 @@ namespace UIIronTextBox
             }
             public override bool CanRead
             {
-                get { return false; }
+                get { return true; }
             }
             public override bool CanSeek
             {
@@ -811,9 +811,28 @@ namespace UIIronTextBox
             {
                 throw new NotImplementedException();
             }
+	    private bool ready = true;
+
             public override int Read(byte[] buffer, int offset, int count)
             {
-                throw new NotImplementedException();
+		//System.Console.WriteLine("buffer='{0}', offset={1}, count={2}",
+		//			buffer, offset, count);
+		if (ready) {
+		    // FIXME: get input from GUI
+		    // set mode to input
+		    // set button to enter
+		    // don't execute, but grab text for this
+		    // put in buffer
+		    // return length
+		    ready = false;
+		    string text = System.Console.ReadLine();
+		    int pos = 0;
+		    foreach (char c in text) {
+			buffer[pos++] = (byte)c;
+		    }
+		    return pos;
+		}
+		return 0;
             }
             public override void SetLength(long value)
             {
@@ -857,6 +876,9 @@ namespace UIIronTextBox
             string err_message = null;
             resultMessage = null;
             GUIStream ms = new GUIStream(consoleTextBox);
+            engine.Runtime.IO.SetInput(ms, 
+				       new StreamReader(ms), 
+				       Encoding.GetEncoding("utf-8"));
             engine.Runtime.IO.SetOutput(ms, new StreamWriter(ms));
             engine.Runtime.IO.SetErrorOutput(ms, new StreamWriter(ms));
             ScriptSource source = null;

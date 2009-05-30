@@ -36,8 +36,8 @@ print "Enter expressions.  Enter blank line to abort input."
 print "Enter 'exit (the symbol) to exit."
 print "\n"
 while True:
-    print prompt,
-    input = Console.ReadLine()
+    #print prompt,
+    input = raw_input(prompt) #= Console.ReadLine()
     if (input == ""):
         exprstr = ""
         prompt = ">>> "
