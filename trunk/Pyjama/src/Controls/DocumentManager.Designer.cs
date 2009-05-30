@@ -28,7 +28,8 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.tabControl = new DocumentTabControl(); 
+            //this.tabControl = new DocumentTabControl(); 
+            this.tabControl = new System.Windows.Forms.TabControl(); 
             this.SuspendLayout();
             // 
             // tabControl
@@ -55,6 +56,7 @@
 
         #endregion
 
-        private DocumentTabControl tabControl;
+	//private DocumentTabControl tabControl;
+	private System.Windows.Forms.TabControl tabControl;
     }
 }

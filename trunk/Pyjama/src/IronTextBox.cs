@@ -1182,12 +1182,19 @@ namespace UIIronTextBox
 
         internal void Add(string command)
         {
+	    // DOS style:
+	    /*
             if (command != lastCommand)
             {
                 commandHistory.Add(command);
                 lastCommand = command;
                 currentPosn = commandHistory.Count;
             }
+	    */
+	    // readline style:
+	    commandHistory.Add(command);
+	    lastCommand = command;
+            currentPosn = commandHistory.Count;
         }
 
         internal bool DoesPreviousCommandExist()
@@ -1203,6 +1210,7 @@ namespace UIIronTextBox
         internal string GetPreviousCommand()
         {
             lastCommand = (string)commandHistory[--currentPosn];
+            lastCommand = (string)commandHistory[currentPosn];
             return lastCommand;
         }
 

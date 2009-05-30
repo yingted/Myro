@@ -201,7 +201,13 @@ namespace Pyjama
 
         private void undoToolStripMenuItem_Click(object sender, System.EventArgs e)
         {
-            GetNotNullIDEInput().Undo();
+	    if (commandTextBox.ContainsFocus) {
+		commandTextBox.Undo();
+	    } else if (outputWindow.ContainsFocus) {
+		outputWindow.textbox.consoleTextBox.Undo();
+	    } else {
+		GetNotNullIDEInput().Undo();
+	    }
         }
 
         private DocumentInput GetNotNullIDEInput()
@@ -215,22 +221,48 @@ namespace Pyjama
 
         private void cutToolStripMenuItem_Click(object sender, System.EventArgs e)
         {
-            GetNotNullIDEInput().Cut();
+	    if (commandTextBox.ContainsFocus) {
+		commandTextBox.Cut();
+	    } else if (outputWindow.ContainsFocus) {
+		// because read-only, copy not cut:
+		outputWindow.textbox.consoleTextBox.Copy();
+	    } else {
+		GetNotNullIDEInput().Cut();
+	    }
         }
 
         private void copyToolStripMenuItem_Click(object sender, System.EventArgs e)
         {
-            GetNotNullIDEInput().Copy();
+	    if (commandTextBox.ContainsFocus) {
+		commandTextBox.Copy();
+	    } else if (outputWindow.ContainsFocus) {
+		outputWindow.textbox.consoleTextBox.Copy();
+	    } else {
+		GetNotNullIDEInput().Copy();
+	    }
         }
 
         private void pasteToolStripMenuItem_Click(object sender, System.EventArgs e)
         {
-            GetNotNullIDEInput().Paste();
+	    if (commandTextBox.ContainsFocus) {
+		commandTextBox.Paste();
+	    } else if (outputWindow.ContainsFocus) {
+		//outputWindow.textbox.consoleTextBox.Paste();
+		//read-only
+	    } else {
+		GetNotNullIDEInput().Paste();
+	    }
         }
 
         private void selectAllToolStripMenuItem_Click(object sender, System.EventArgs e)
         {
-            GetNotNullIDEInput().SelectAll();
+	    if (commandTextBox.ContainsFocus) {
+		commandTextBox.SelectAll();
+	    } else if (outputWindow.ContainsFocus) {
+		outputWindow.textbox.consoleTextBox.SelectAll();
+	    } else {
+		GetNotNullIDEInput().SelectAll();
+	    }
         }
 
         private void optionsToolStripMenuItem_Click(object sender, System.EventArgs e)

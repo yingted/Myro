@@ -18,9 +18,9 @@ from Microsoft.Runtime.CompilerServices import CallSite
 import System.Reflection as refl
 clr.AddReference("Microsoft.Scripting.Core")
 
-from Microsoft import Func
+from Microsoft import (Action, Func)
 
-from System import (Action, MissingMemberException, #ArgumentException,
+from System import (MissingMemberException, #ArgumentException,
                     InvalidOperationException, Boolean, MissingMemberException,
                     Type, Array, Delegate, Void)
 #import System.String as String

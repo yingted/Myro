@@ -1,7 +1,7 @@
 import sympl
 s = sympl.Sympl()
 
-feo = s.ExecuteFile(r"..\examples\test.sympl")
+feo = s.ExecuteFile("test.sympl")
 
 print "ExecuteExpr ... ",
 s.ExecuteExpr("(print 5)", feo)
