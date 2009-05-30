@@ -28,12 +28,14 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.tabControl = new System.Windows.Forms.TabControl();
+            this.tabControl = new DocumentTabControl(); 
             this.SuspendLayout();
             // 
             // tabControl
             // 
+            this.tabControl.AllowDrop = true;
             this.tabControl.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tabControl.HotTrack = true;
             this.tabControl.Location = new System.Drawing.Point(0, 0);
             this.tabControl.Name = "tabControl";
             this.tabControl.SelectedIndex = 0;
@@ -53,6 +55,6 @@
 
         #endregion
 
-        private System.Windows.Forms.TabControl tabControl;
+        private DocumentTabControl tabControl;
     }
 }

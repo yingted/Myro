@@ -8,6 +8,7 @@ namespace Pyjama
         public DocumentInput Input { get; set; }
         public ActiveCodeFile ActiveFile { get; set; }
         public Document textBox;
+        private System.ComponentModel.IContainer components;
         public IMainForm MainForm;
 
         public DocumentPage(IMainForm main_form, ActiveCodeFile file)
@@ -15,6 +16,7 @@ namespace Pyjama
         {
             UpdateFileName(file);
             ActiveFile = file;
+            //this.ImageIndex = 0;
         }
 
         public DocumentPage(IMainForm main_form, string fileExtension)
@@ -22,6 +24,7 @@ namespace Pyjama
             MainForm = main_form;
             Text = "NewFile";
             CreateTextBox(fileExtension);
+            //this.ImageIndex = 0;
         }
 
         public DocumentPage(IMainForm main_form)
@@ -29,6 +32,7 @@ namespace Pyjama
             MainForm = main_form;
             Text = "NewFile";
             CreateTextBox(string.Empty);
+            //this.ImageIndex = 0;
         }
 
         private void CreateTextBox(string fileExtension)
@@ -86,8 +90,13 @@ namespace Pyjama
         private void InitializeComponent()
         {
             this.SuspendLayout();
+            // 
+            // DocumentPage
+            // 
+            this.AllowDrop = true;
             this.ResumeLayout(false);
 
         }
     }
+
 }
