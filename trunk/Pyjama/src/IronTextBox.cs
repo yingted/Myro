@@ -825,6 +825,7 @@ namespace UIIronTextBox
 		    // put in buffer
 		    // return length
 		    ready = false;
+		    System.Console.Write("Pyjama Input> ");
 		    string text = System.Console.ReadLine();
 		    int pos = 0;
 		    foreach (char c in text) {
