@@ -132,17 +132,6 @@ namespace UIIronTextBox
 
         protected override void OnKeyDown(KeyEventArgs e)
         {
-            //System.Console.WriteLine("OnKeyDown?");
-            if (e.KeyData == Keys.Tab)
-            {
-                //System.Console.WriteLine("OnKeyDown!");
-                this.SelectedText = "    ";
-                e.Handled = true;
-            }
-            else
-            {
-                base.OnKeyDown(e);
-            }
         }
 
         /// <summary>
@@ -270,12 +259,6 @@ namespace UIIronTextBox
             commandHistory.Add(currentCommand);
         }
 
-        public bool IsTerminatorKey(char keyChar)
-        {
-            //System.Console.WriteLine((int)keyChar);
-            return ((int)keyChar) == 13;
-        }
-
         public string GetCurrentLineText()
         {
             if (this.Lines.Length > 0)
@@ -320,7 +303,6 @@ namespace UIIronTextBox
             this.AppendText(text);
             //this.Enabled = true;
             MoveCaretToEndOfText();
-            //this.Update();
             this.Focus();
         }
 
@@ -336,36 +318,23 @@ namespace UIIronTextBox
             return value;
         }
 
-        /// <summary>
-        /// Move caret to the end of the current text.
-        /// </summary>
         private void MoveCaretToEndOfText()
         {
             this.SelectionStart = this.TextLength;
             this.Select(this.TextLength, 0);
             this.SelectionStart = this.TextLength;
             this.ScrollToCaret();
-            //System.Console.WriteLine("scroll to caret!");
         }
 
-        /// <summary>
-        /// Returns true is the caret is just before the current prompt.
-        /// </summary>
-        /// <returns></returns>
         public bool IsCaretJustBeforePrompt()
         {
             return IsCaretAtCurrentLine() && GetCurrentCaretColumnPosition() == prompt.Length;
         }
 
-        /// <summary>
-        /// Returns the column position. Useful for selections.
-        /// </summary>
-        /// <returns></returns>
         public int GetCurrentCaretColumnPosition()
         {
             string currentLine = GetCurrentLineText();
             int currentCaretPosition = this.SelectionStart;
-            //System.Console.WriteLine("pos={0}", (currentCaretPosition - this.TextLength + currentLine.Length));
             return (currentCaretPosition - this.TextLength + currentLine.Length);
         }
 
@@ -375,31 +344,16 @@ namespace UIIronTextBox
             return (this.GetLineFromCharIndex(this.SelectionStart));
         }
 
-        /// <summary>
-        /// Is the caret at a writable position.
-        /// </summary>
-        /// <returns></returns>
-
         private bool IsCaretAtWritablePosition()
         {
             return IsCaretAtCurrentLine() && GetCurrentCaretColumnPosition() > prompt.Length;
         }
 
-        /// <summary>
-        /// Sets the text of the prompt.  
-        /// </summary>
-        /// <param name="val">string of new prompt</param>
         public void SetPromptText(string val)
         {
-            //string currentLine = GetCurrentLineText();
-            //this.Select(0, prompt.Length);
-            //this.SelectedText = val;
             prompt = val;
         }
 
-        /// <summary>
-        /// Gets and sets the IronTextBox prompt.
-        /// </summary>
         public string Prompt
         {
             get { return prompt; }
@@ -418,17 +372,8 @@ namespace UIIronTextBox
 
         private void consoleTextBox_KeyPress(object sender, System.Windows.Forms.KeyPressEventArgs e)
         {
-            if (IsTerminatorKey(e.KeyChar))
-            {
-                e.Handled = true;
-                string currentCommand = GetTextAtPrompt();
-                commandHistory.Add(currentCommand);
-                ((UIIronTextBox.IronTextBoxControl)this.Parent).DoCommand(currentCommand);
-                //printPrompt();
-            }
         }
 
-        /// <returns></returns>
         public string CreateIndentstring(int indentsize)
         {
             string r = "";
@@ -439,58 +384,9 @@ namespace UIIronTextBox
             return r;
         }
 
-        /// <summary>
-        /// KeyEvent control for staying inside the currentline and autocomplete features
-        /// </summary>
-        /// <param name="sender">object</param>
-        /// <param name="e">KeyEventArgs</param>
         private void ConsoleControl_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
         {
-            //System.Console.WriteLine("console key DOWN KeyCode: " + (int)e.KeyCode);
-
-            if (IsCaretJustBeforePrompt())
-            {
-                if (e.KeyCode == Keys.Back || e.KeyCode == Keys.Left)
-                {
-                    // eat them!
-                    e.Handled = true;
-                }
-            }
-            if (e.KeyCode == System.Windows.Forms.Keys.Enter)
-            {
-                e.Handled = true;
-            }
-            else if (e.KeyCode == System.Windows.Forms.Keys.Home)
-            {
-                /// DSB 
-                string currentLine = GetCurrentLineText();
-                this.SelectionStart = this.TextLength - currentLine.Length + prompt.Length;
-                //System.Console.WriteLine("currentLine = {0}, SelectionStart = {1}", currentLine, SelectionStart);
-                //this.ScrollToCaret();
-                e.Handled = true;
-            }
-            else if (e.KeyCode == System.Windows.Forms.Keys.Down)
-            {
-                if (commandHistory.DoesNextCommandExist())
-                {
-                    ReplaceTextAtPrompt(commandHistory.GetNextCommand());
-                }
-                else
-                    ReplaceTextAtPrompt("");
-                e.Handled = true;
-            }
-            else if (e.KeyCode == System.Windows.Forms.Keys.Up)
-            {
-                if (commandHistory.DoesPreviousCommandExist())
-                {
-                    ReplaceTextAtPrompt(commandHistory.GetPreviousCommand());
-                }
-                else
-                    ReplaceTextAtPrompt(""); // FIXME: use templine, if started, and then ""
-                e.Handled = true;
-            }
         }
-
 
         StringCollection input = new StringCollection();
         StringCollection output = new StringCollection();
@@ -685,7 +581,7 @@ namespace UIIronTextBox
             // FIXME: uses cached version; how to force reload?
             // look through sys.modules, if module.__file__ matches, then delete it, and reload it
             // from this file with same name as before
-            
+
             //ScriptScope sys = engine.GetSysModule(); // sys
             //sys.GetVariable("__file__");
             //? Microsoft.Scripting.SourceLocation;
@@ -795,7 +691,7 @@ namespace UIIronTextBox
         class GUIStream : Stream
         {
             private IronTextBox consoleTextBox = null;
-            public GUIStream(IronTextBox ctb) 
+            public GUIStream(IronTextBox ctb)
             {
                 consoleTextBox = ctb;
             }
@@ -811,29 +707,31 @@ namespace UIIronTextBox
             {
                 throw new NotImplementedException();
             }
-	    private bool ready = true;
+            private bool ready = true;
 
             public override int Read(byte[] buffer, int offset, int count)
             {
-		//System.Console.WriteLine("buffer='{0}', offset={1}, count={2}",
-		//			buffer, offset, count);
-		if (ready) {
-		    // FIXME: get input from GUI
-		    // set mode to input
-		    // set button to enter
-		    // don't execute, but grab text for this
-		    // put in buffer
-		    // return length
-		    ready = false;
-		    System.Console.Write("Pyjama Input> ");
-		    string text = System.Console.ReadLine();
-		    int pos = 0;
-		    foreach (char c in text) {
-			buffer[pos++] = (byte)c;
-		    }
-		    return pos;
-		}
-		return 0;
+                //System.Console.WriteLine("buffer='{0}', offset={1}, count={2}",
+                //			buffer, offset, count);
+                if (ready)
+                {
+                    // FIXME: get input from GUI
+                    // set mode to input
+                    // set button to enter
+                    // don't execute, but grab text for this
+                    // put in buffer
+                    // return length
+                    ready = false;
+                    System.Console.Write("Pyjama Input> ");
+                    string text = System.Console.ReadLine();
+                    int pos = 0;
+                    foreach (char c in text)
+                    {
+                        buffer[pos++] = (byte)c;
+                    }
+                    return pos;
+                }
+                return 0;
             }
             public override void SetLength(long value)
             {
@@ -877,9 +775,9 @@ namespace UIIronTextBox
             string err_message = null;
             resultMessage = null;
             GUIStream ms = new GUIStream(consoleTextBox);
-            engine.Runtime.IO.SetInput(ms, 
-				       new StreamReader(ms), 
-				       Encoding.GetEncoding("utf-8"));
+            engine.Runtime.IO.SetInput(ms,
+                       new StreamReader(ms),
+                       Encoding.GetEncoding("utf-8"));
             engine.Runtime.IO.SetOutput(ms, new StreamWriter(ms));
             engine.Runtime.IO.SetErrorOutput(ms, new StreamWriter(ms));
             ScriptSource source = null;
@@ -1205,18 +1103,18 @@ namespace UIIronTextBox
 
         internal void Add(string command)
         {
-	    // DOS style:
-	    /*
-            if (command != lastCommand)
-            {
-                commandHistory.Add(command);
-                lastCommand = command;
-                currentPosn = commandHistory.Count;
-            }
-	    */
-	    // readline style:
-	    commandHistory.Add(command);
-	    lastCommand = command;
+            // DOS style:
+            /*
+                if (command != lastCommand)
+                {
+                    commandHistory.Add(command);
+                    lastCommand = command;
+                    currentPosn = commandHistory.Count;
+                }
+            */
+            // readline style:
+            commandHistory.Add(command);
+            lastCommand = command;
             currentPosn = commandHistory.Count;
         }
 

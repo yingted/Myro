@@ -442,10 +442,13 @@ namespace Pyjama
             controlKeyDown = false;
         }
 
+        private string tempCommandText = "";
+
         private void commandTextBox_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
         {
             //System.Console.WriteLine("KeyDown: {0} {1}", e.KeyCode, e.Control);
 
+            System.Console.WriteLine("start temp = '{0}'", tempCommandText);
             if (e.KeyCode == System.Windows.Forms.Keys.Enter && e.Control)
             {
                 // Mono bug work-around: doesn't handle the key
@@ -454,6 +457,11 @@ namespace Pyjama
                 //commandTextBox.Text = "";
                 //commandTextBox.Focus();
                 //e.Handled = true;
+            }
+            else if (e.KeyCode == System.Windows.Forms.Keys.Enter)
+            {
+                // clear temp text
+                tempCommandText = "";
             }
             else if (e.KeyCode == System.Windows.Forms.Keys.Down)
             {
@@ -466,8 +474,14 @@ namespace Pyjama
                     {
                         commandTextBox.Text = outputWindow.textbox.consoleTextBox.commandHistory.GetNextCommand();
                     }
-                    else
+                    else 
+                    {
+                        if (!commandTextBox.Text.Equals(""))
+                        {
+                            tempCommandText = commandTextBox.Text;
+                        }
                         commandTextBox.Text = "";
+                    }
                     e.Handled = true;
                 }
             }
@@ -483,28 +497,25 @@ namespace Pyjama
                 {
                     if (outputWindow.textbox.consoleTextBox.commandHistory.DoesPreviousCommandExist())
                     {
+                        if (!outputWindow.textbox.consoleTextBox.commandHistory.DoesNextCommandExist())
+                        {
+                            if (!commandTextBox.Text.Equals(""))
+                            {
+                                tempCommandText = commandTextBox.Text;
+                            }
+                        }
                         commandTextBox.Text = outputWindow.textbox.consoleTextBox.commandHistory.GetPreviousCommand();
+                        commandTextBox.Select(commandTextBox.TextLength, 0);
                     }
                     else
-                        commandTextBox.Text = ""; // FIXME: use templine, if started, and then ""
-                    commandTextBox.Select(commandTextBox.TextLength, 0);
+                    {
+                        if (!tempCommandText.Equals(""))
+                            commandTextBox.Text = tempCommandText;
+                    }
                     e.Handled = true;
                 }
             }
-
-            /*
-                  if (e.KeyCode == Keys.Enter && e.Control)
-                  {
-                    e.Handled = true;
-                    string code = commandTextBox.Text.Trim();
-                    outputWindow.textbox.consoleTextBox.AddText(code);
-                    outputWindow.textbox.DoCommand(code);
-                    commandTextBox.Text = "";
-                    //outputWindow.textbox.consoleTextBox.printPrompt();
-                    commandTextBox.Focus();
-                  }
-                }
-             */
+            System.Console.WriteLine("end temp = '{0}'", tempCommandText);
         }
 
         private void shellToolStripMenuItem_Click(object sender, EventArgs e)
