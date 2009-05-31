@@ -274,7 +274,7 @@
     <value>docManager</value>
   </data>
   <data name="&gt;&gt;docManager.Type" xml:space="preserve">
-    <value>Pyjama.DocumentManager, Pyjama, Version=1.0.3434.12891, Culture=neutral, PublicKeyToken=null</value>
+    <value>Pyjama.DocumentManager, Pyjama, Version=1.0.3438.38152, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;docManager.Parent" xml:space="preserve">
     <value>mainContentSplit.Panel1</value>
@@ -334,7 +334,7 @@
     <value>outputWindow</value>
   </data>
   <data name="&gt;&gt;outputWindow.Type" xml:space="preserve">
-    <value>Pyjama.Console, Pyjama, Version=1.0.3434.12891, Culture=neutral, PublicKeyToken=null</value>
+    <value>Pyjama.Console, Pyjama, Version=1.0.3438.38152, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;outputWindow.Parent" xml:space="preserve">
     <value>splitContainer1.Panel1</value>
@@ -385,7 +385,7 @@
     <value>commandTextBox</value>
   </data>
   <data name="&gt;&gt;commandTextBox.Type" xml:space="preserve">
-    <value>Pyjama.MyTextBox, Pyjama, Version=1.0.3434.12891, Culture=neutral, PublicKeyToken=null</value>
+    <value>Pyjama.MyTextBox, Pyjama, Version=1.0.3438.38152, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;commandTextBox.Parent" xml:space="preserve">
     <value>commandContainer.Panel1</value>
@@ -1069,11 +1069,23 @@
   <data name="toolStripSeparator1.Size" type="System.Drawing.Size, System.Drawing">
     <value>164, 6</value>
   </data>
-  <data name="scriptToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
-    <value>104, 22</value>
+  <data name="printSetupMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>132, 22</value>
   </data>
-  <data name="scriptToolStripMenuItem.Text" xml:space="preserve">
-    <value>Script</value>
+  <data name="printSetupMenuItem.Text" xml:space="preserve">
+    <value>Setup</value>
+  </data>
+  <data name="previewMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>132, 22</value>
+  </data>
+  <data name="previewMenuItem.Text" xml:space="preserve">
+    <value>Preview</value>
+  </data>
+  <data name="printScriptMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>132, 22</value>
+  </data>
+  <data name="printScriptMenuItem.Text" xml:space="preserve">
+    <value>Print Script</value>
   </data>
   <data name="printToolStripMenuItem.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
@@ -1649,10 +1661,22 @@
   <data name="&gt;&gt;printToolStripMenuItem.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;scriptToolStripMenuItem.Name" xml:space="preserve">
-    <value>scriptToolStripMenuItem</value>
+  <data name="&gt;&gt;printSetupMenuItem.Name" xml:space="preserve">
+    <value>printSetupMenuItem</value>
   </data>
-  <data name="&gt;&gt;scriptToolStripMenuItem.Type" xml:space="preserve">
+  <data name="&gt;&gt;printSetupMenuItem.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;previewMenuItem.Name" xml:space="preserve">
+    <value>previewMenuItem</value>
+  </data>
+  <data name="&gt;&gt;previewMenuItem.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;printScriptMenuItem.Name" xml:space="preserve">
+    <value>printScriptMenuItem</value>
+  </data>
+  <data name="&gt;&gt;printScriptMenuItem.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;toolStripSeparator2.Name" xml:space="preserve">
@@ -1839,6 +1863,6 @@
     <value>PyjamaForm</value>
   </data>
   <data name="&gt;&gt;$this.Type" xml:space="preserve">
-    <value>Pyjama.BaseForm, Pyjama, Version=1.0.3434.12891, Culture=neutral, PublicKeyToken=null</value>
+    <value>Pyjama.BaseForm, Pyjama, Version=1.0.3438.38152, Culture=neutral, PublicKeyToken=null</value>
   </data>
 </root>

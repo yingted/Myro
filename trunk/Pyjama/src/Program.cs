@@ -15,7 +15,6 @@ namespace Pyjama
             Application.SetCompatibleTextRenderingDefault(false);
             ApplicationOptions.LoadOptions();
             Application.Run(new PyjamaForm(args));
-            //Application.Run(new Form1());
         }
     }
 }

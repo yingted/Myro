@@ -117,7 +117,7 @@
     </Compile>
     <Compile Include="ActiveCodeFile.cs" />
     <Compile Include="PrintDocument.cs">
-      <SubType>Form</SubType>
+      <SubType>Component</SubType>
     </Compile>
     <Compile Include="CodeBlock.cs" />
     <Compile Include="Controls\DocumentTabControl.cs">

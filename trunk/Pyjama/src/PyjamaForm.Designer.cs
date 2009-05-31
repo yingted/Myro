@@ -102,7 +102,9 @@ using System.Windows.Forms;
              this.saveAsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
              this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
              this.printToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-             this.scriptToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+             this.printSetupMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+             this.previewMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+             this.printScriptMenuItem = new System.Windows.Forms.ToolStripMenuItem();
              this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
              this.closeTabToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
              this.exitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -442,6 +444,7 @@ using System.Windows.Forms;
              this.printToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
              resources.ApplyResources(this.printToolStripButton, "printToolStripButton");
              this.printToolStripButton.Name = "printToolStripButton";
+             this.printToolStripButton.Click += new System.EventHandler(this.printToolStripButton_Click);
              // 
              // toolStripSeparator6
              // 
@@ -561,14 +564,29 @@ using System.Windows.Forms;
              // printToolStripMenuItem
              // 
              this.printToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.scriptToolStripMenuItem});
+            this.printSetupMenuItem,
+            this.previewMenuItem,
+            this.printScriptMenuItem});
              resources.ApplyResources(this.printToolStripMenuItem, "printToolStripMenuItem");
              this.printToolStripMenuItem.Name = "printToolStripMenuItem";
              // 
-             // scriptToolStripMenuItem
+             // printSetupMenuItem
              // 
-             this.scriptToolStripMenuItem.Name = "scriptToolStripMenuItem";
-             resources.ApplyResources(this.scriptToolStripMenuItem, "scriptToolStripMenuItem");
+             this.printSetupMenuItem.Name = "printSetupMenuItem";
+             resources.ApplyResources(this.printSetupMenuItem, "printSetupMenuItem");
+             this.printSetupMenuItem.Click += new System.EventHandler(this.printSetupMenuItem_Click);
+             // 
+             // previewMenuItem
+             // 
+             this.previewMenuItem.Name = "previewMenuItem";
+             resources.ApplyResources(this.previewMenuItem, "previewMenuItem");
+             this.previewMenuItem.Click += new System.EventHandler(this.previewMenuItem_Click);
+             // 
+             // printScriptMenuItem
+             // 
+             this.printScriptMenuItem.Name = "printScriptMenuItem";
+             resources.ApplyResources(this.printScriptMenuItem, "printScriptMenuItem");
+             this.printScriptMenuItem.Click += new System.EventHandler(this.printScriptMenuItem_Click);
              // 
              // toolStripSeparator2
              // 
@@ -840,7 +858,7 @@ using System.Windows.Forms;
          private System.Windows.Forms.ToolStripMenuItem languageToolStripMenuItem;
          private System.Windows.Forms.ToolStripMenuItem executeToolStripMenuItem;
          private System.Windows.Forms.ToolStripButton executeToolStripButton;
-         private System.Windows.Forms.ToolStripMenuItem scriptToolStripMenuItem;
+         private System.Windows.Forms.ToolStripMenuItem printSetupMenuItem;
          private System.Windows.Forms.ToolStripMenuItem newToolStripMenuItem;
          private System.Windows.Forms.ToolStripButton toolStripButton1;
          private System.Windows.Forms.ToolStripButton toolStripButton2;
@@ -881,6 +899,8 @@ using System.Windows.Forms;
          private ToolStripSeparator toolStripSeparator8;
          private ToolStripMenuItem selectEditorToolStripMenuItem;
          private ToolStripMenuItem newlineToolStripMenuItem;
+         private ToolStripMenuItem previewMenuItem;
+         private ToolStripMenuItem printScriptMenuItem;
 
 
 

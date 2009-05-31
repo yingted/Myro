@@ -10,6 +10,7 @@ namespace Pyjama
     public partial class PyjamaForm : BaseForm, IMainForm
     {
         private PyjamaFormController _controller;
+        private PrintEngine _printEngine;
 
         public PyjamaForm(string[] args)
         {
@@ -17,6 +18,7 @@ namespace Pyjama
             KeyDown += new KeyEventHandler(mainForm_KeyDown);
 
             _controller = new PyjamaFormController(this);
+            _printEngine = new PrintEngine(_controller);
 
             Text = string.Format(Text, ApplicationInformation.Title(), ApplicationInformation.Version());
 
@@ -485,6 +487,26 @@ namespace Pyjama
         private void commandLabel_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void printSetupMenuItem_Click(object sender, EventArgs e)
+        {
+            _printEngine.ShowPageSettings();
+        }
+
+        private void previewMenuItem_Click(object sender, EventArgs e)
+        {
+            _printEngine.ShowPreview();
+        }
+
+        private void printScriptMenuItem_Click(object sender, EventArgs e)
+        {
+            _printEngine.ShowPrintDialog();
+        }
+
+        private void printToolStripButton_Click(object sender, EventArgs e)
+        {
+            _printEngine.ShowPreview();
         }
     }
 }
