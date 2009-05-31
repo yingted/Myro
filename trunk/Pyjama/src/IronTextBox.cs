@@ -190,7 +190,7 @@ namespace UIIronTextBox
             //MoveCaretToEndOfText();
             this.SelectionStart = this.TextLength;
             this.SelectionColor = Color.White;
-            this.AddText("\n");
+            this.AddText("\n>>> ");
         }
 
         public void printResult(string text)
@@ -284,7 +284,7 @@ namespace UIIronTextBox
             this.AppendText(text);
             //this.Enabled = true;
             MoveCaretToEndOfText();
-            this.Focus();
+            //this.Focus();
         }
 
         public string StringCollecttostring(System.Collections.Specialized.StringCollection inCol)
@@ -608,38 +608,32 @@ namespace UIIronTextBox
                 foreach (string line in command.Split('\n'))
                 {
                     if (first)
-                        this.consoleTextBox.printTextOnNewline(">>> " + line + "\n");
+                        this.consoleTextBox.AddText(line + "\n");
                     else
                         this.consoleTextBox.printTextOnNewline("... " + line + "\n");
                     first = false;
                 }
                 this.consoleTextBox.AddcommandHistory(command);
-                if (command == "clear")
+		// Interactive Meta Commands
+                if (command == "#clear")
                 {
                     this.Clear();
                 }
-                else if (command == "help")
+                else if (command == "#help")
                 {
                     this.WriteText(GetHelpText());
                 }
-                else if (command == "python")
+                else if (command == "#python")
                 {
                     engine = environment.GetEngine("py");
                     Prompt = "---- Python Mode ----";
+		    WriteText(Prompt + "\n");
                 }
-                else if (command == "ruby")
+                else if (command == "#ruby")
                 {
                     engine = environment.GetEngine("rb");
                     Prompt = "---- Ruby Mode ----";
-                }
-                else if (command == "runfile")
-                {
-                    //Browse to the file...
-                    OpenFileDialog ofd = new OpenFileDialog();
-                    //ofd.InitialDirectory = UIIronTextBox.Paths.MiscDirs.vs_Projects;
-                    ofd.Filter = "Python files (*.py)|*.py|All files (*.*)|*.*";
-                    ofd.ShowDialog();
-                    DoFile(ofd.FileName);
+		    WriteText(Prompt + "\n");
                 }
                 else // Command
                 {
@@ -868,6 +862,7 @@ namespace UIIronTextBox
             // Put the mouse cursor back
             if (resultMessage != null)
                 consoleTextBox.printTextOnNewline(resultMessage);
+	    consoleTextBox.printTextOnNewline(">>> ");
             this.TopLevelControl.Cursor = Cursors.Default;
             consoleTextBox.Select(consoleTextBox.TextLength, 0);
             consoleTextBox.SelectionStart = consoleTextBox.TextLength;
@@ -898,6 +893,7 @@ namespace UIIronTextBox
             //consoleTextBox.SelectionStart = consoleTextBox.TextLength;
             consoleTextBox.Select(consoleTextBox.TextLength, 0);
             consoleTextBox.SelectionColor = Color.White;
+	    consoleTextBox.printTextOnNewline(">>> ");
         }
 
         /// <summary>
@@ -917,16 +913,14 @@ namespace UIIronTextBox
             stringBuilder.Append("DLR version " + engine.LanguageVersion);
             stringBuilder.Append(System.Environment.NewLine);
             stringBuilder.Append(System.Environment.NewLine);
-            stringBuilder.Append("Commands Available:");
+            stringBuilder.Append("Meta Commands Available:");
             stringBuilder.Append(System.Environment.NewLine);
-            stringBuilder.Append(" clear - Clears the screen");
+            stringBuilder.Append(" #clear - Clears the screen");
             stringBuilder.Append(System.Environment.NewLine);
-            stringBuilder.Append(" python - Switch to Python");
+            stringBuilder.Append(" #python - Switch to Python");
             stringBuilder.Append(System.Environment.NewLine);
-            stringBuilder.Append(" ruby - Switch to Ruby");
+            stringBuilder.Append(" #ruby - Switch to Ruby");
             stringBuilder.Append(System.Environment.NewLine);
-            stringBuilder.Append(System.Environment.NewLine);
-            stringBuilder.Append(" runfile - Run a .Py file.  Calls OpenFileDialog to PythonEngine.RunFile.");
             stringBuilder.Append(System.Environment.NewLine);
             helpText = stringBuilder.ToString();
             return helpText;
@@ -959,7 +953,7 @@ namespace UIIronTextBox
             this.Name = "IronTextBoxControl";
             this.Size = new Size(232, 216);
             this.ResumeLayout(false);
-            this.consoleTextBox.Text = "Pyjama Output";
+            this.consoleTextBox.Text = "Pyjama Output:";
             this.consoleTextBox.printPrompt();
         }
 

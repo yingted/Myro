@@ -54,6 +54,8 @@ _color_map = {
     ''              : Drawing.Color.Transparent
 }
 
+colors = _color_map.keys()
+
 # Font face map.
 # This can be extended.
 _font_face_map = {
@@ -857,11 +859,12 @@ class Entry(GraphicsObject):
         
         # Add to controls and draw
         self.canvas.append(self)
-        def tmp(): self.canvas.Controls.Add(self.entry)
+        def tmp(): 
+            self.canvas.Controls.Add(self.entry)
+            if self.canvas.autoflush:
+                self.canvas.Invalidate()
         pyjama.TopLevelControl.Invoke(Func[object](tmp))
         
-        if self.canvas.autoflush:
-            pyjama.TopLevelControl.Invoke(Func[object](self.canvas.Invalidate))
 
     # - - - - - - - - - - - - - - - - -
     def _draw(self, g):
