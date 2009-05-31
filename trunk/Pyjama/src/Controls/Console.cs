@@ -14,11 +14,6 @@ namespace Pyjama
             return textbox;
         }
 
-        private void controlTitle_Load(object sender, System.EventArgs e)
-        {
-
-        }
-
         private void output_TextChanged(object sender, System.EventArgs e)
         {
 

@@ -172,7 +172,6 @@ using System.Windows.Forms;
              this.mainContentSplit.Panel2.Controls.Add(this.splitContainer1);
              this.mainContentSplit.Panel2.Controls.Add(this.statusStrip2);
              resources.ApplyResources(this.mainContentSplit.Panel2, "mainContentSplit.Panel2");
-             this.mainContentSplit.SplitterMoved += new System.Windows.Forms.SplitterEventHandler(this.mainContentSplit_SplitterMoved);
              // 
              // statusStrip1
              // 
@@ -337,7 +336,6 @@ using System.Windows.Forms;
             this.shellLanguageButton});
              resources.ApplyResources(this.statusStrip2, "statusStrip2");
              this.statusStrip2.Name = "statusStrip2";
-             this.statusStrip2.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.statusStrip2_ItemClicked);
              // 
              // toolStripStatusLabel5
              // 
@@ -349,7 +347,6 @@ using System.Windows.Forms;
              // 
              resources.ApplyResources(this.toolStripStatusLabel6, "toolStripStatusLabel6");
              this.toolStripStatusLabel6.Name = "toolStripStatusLabel6";
-             this.toolStripStatusLabel6.Click += new System.EventHandler(this.toolStripStatusLabel6_Click);
              // 
              // shellLanguageButton
              // 
@@ -768,7 +765,6 @@ using System.Windows.Forms;
              this.Controls.Add(this.menuStrip1);
              this.Name = "PyjamaForm";
              this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Show;
-             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.mainForm_FormClosing);
              this.mainContentSplit.Panel1.ResumeLayout(false);
              this.mainContentSplit.Panel1.PerformLayout();
              this.mainContentSplit.Panel2.ResumeLayout(false);

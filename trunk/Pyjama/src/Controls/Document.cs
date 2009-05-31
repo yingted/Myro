@@ -159,6 +159,7 @@ namespace Pyjama
 		  }
         }
 
+	/*
         void Parse(string text)
         {
             // Foreach line in input,
@@ -167,9 +168,10 @@ namespace Pyjama
             String[] lines = r.Split(text);
             foreach (string l in lines)
             {
-                //ParseLine(l);
+                ParseLine(l);
             }
         }
+	*/
 
         private static bool EndSymbol(char c)
         {

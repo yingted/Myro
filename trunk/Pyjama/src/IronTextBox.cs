@@ -170,11 +170,6 @@ namespace UIIronTextBox
             this.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.Both;
             this.Size = new Size(400, 176);
             this.TabIndex = 0;
-            //this.KeyPress += new KeyPressEventHandler(this.consoleTextBox_KeyPress);
-            //this.KeyDown += new KeyEventHandler(ConsoleControl_KeyDown);
-            // 
-            // IronTextBoxControl
-            // 
             this.Name = "IronTextBox";
             this.Size = new Size(400, 176);
             this.ResumeLayout(false);
@@ -269,20 +264,6 @@ namespace UIIronTextBox
                 return "";
         }
 
-        private void ReplaceTextAtPrompt(string text)
-        {
-            string currentLine = GetCurrentLineText();
-            int charactersAfterPrompt = currentLine.Length - prompt.Length;
-
-            if (charactersAfterPrompt == 0)
-                this.AddText(text);
-            else
-            {
-                this.Select(this.TextLength - charactersAfterPrompt, charactersAfterPrompt);
-                this.SelectedText = text;
-            }
-        }
-
         private bool IsCaretAtCurrentLine()
         {
             return this.TextLength - this.SelectionStart <= GetCurrentLineText().Length;
@@ -344,11 +325,6 @@ namespace UIIronTextBox
             return (this.GetLineFromCharIndex(this.SelectionStart));
         }
 
-        private bool IsCaretAtWritablePosition()
-        {
-            return IsCaretAtCurrentLine() && GetCurrentCaretColumnPosition() > prompt.Length;
-        }
-
         public void SetPromptText(string val)
         {
             prompt = val;
@@ -370,10 +346,6 @@ namespace UIIronTextBox
             this.AddText(text);
         }
 
-        private void consoleTextBox_KeyPress(object sender, System.Windows.Forms.KeyPressEventArgs e)
-        {
-        }
-
         public string CreateIndentstring(int indentsize)
         {
             string r = "";
@@ -382,32 +354,6 @@ namespace UIIronTextBox
                 r += " ";
             }
             return r;
-        }
-
-        private void ConsoleControl_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
-        {
-        }
-
-        StringCollection input = new StringCollection();
-        StringCollection output = new StringCollection();
-        System.Collections.Specialized.StringCollection scollection = new System.Collections.Specialized.StringCollection();
-
-        public string GetStringCollectValue(System.Collections.Specialized.StringCollection inCol, int index)
-        {
-            string value = "";
-            int count = 0;
-            System.Collections.Specialized.StringEnumerator myEnumerator = inCol.GetEnumerator();
-            while (myEnumerator.MoveNext())
-            {
-                if (index == count)
-                {
-                    value = myEnumerator.Current;
-                }
-
-                count = count + 1;
-            }
-
-            return value;
         }
     }
 
@@ -573,6 +519,10 @@ namespace UIIronTextBox
 
         public void DoFile(string filename)
         {
+	    if (backgroundThread != null && backgroundThread.IsAlive) {
+		DisplayError("Cannot run script; I'm processing...");
+		return;
+	    }
             if (pyjamaModule == null)
             {
                 pyjamaModule = new PyjamaModule(this, true);
@@ -631,19 +581,21 @@ namespace UIIronTextBox
         internal void CancelCommand()
         {
             if (backgroundThread != null && backgroundThread.IsAlive)
-            { // FIXME: tie to ESCAPE
-                // check to see if running
-                // use TerminateScriptExecution of
-                // PlatformAdoptionLayer, or
-                // kill thread
-                //engine.Runtime.Host.PlatformAdaptationLayer.TerminateScriptExecution(0);
-                backgroundThread.Suspend();
+            { 
+                //engine.Runtime.Host.PlatformAdaptationLayer?;
+		backgroundThread.Abort();
+		backgroundThread.Join();
+		DisplayError("Script aborted!");
             }
             SetRunButton("Run!");
         }
 
         public void DoCommand(string command)
         {
+	    if (backgroundThread != null && backgroundThread.IsAlive) {
+		DisplayError("Cannot evaluate script; I'm processing...");
+		return;
+	    }
             if (pyjamaModule == null)
             {
                 pyjamaModule = new PyjamaModule(this, true);
@@ -946,15 +898,6 @@ namespace UIIronTextBox
             //consoleTextBox.SelectionStart = consoleTextBox.TextLength;
             consoleTextBox.Select(consoleTextBox.TextLength, 0);
             consoleTextBox.SelectionColor = Color.White;
-        }
-
-        private static string ReadFromStream(MemoryStream ms)
-        {
-            int length = (int)ms.Length;
-            Byte[] bytes = new Byte[length];
-            ms.Seek(0, SeekOrigin.Begin);
-            ms.Read(bytes, 0, (int)ms.Length);
-            return Encoding.GetEncoding("utf-8").GetString(bytes, 0, (int)ms.Length);
         }
 
         /// <summary>
