@@ -81,8 +81,7 @@ namespace Pyjama
         private MyRichTextBox textBox;
         private Dictionary<string, Color> colors = new Dictionary<string, Color>();
         private Dictionary<string, Font> fonts = new Dictionary<string, Font>();
-        public String[] keywords;
-        public String[] syntax;
+        public Dictionary<string, int> keywords;
 
         public delegate void TextChangedHandler(object sender, EventArgs e);
 
@@ -111,14 +110,22 @@ namespace Pyjama
             fonts.Add("comment", new Font("Courier New", 10, FontStyle.Regular));
             colors.Add("keyword", Color.Blue);
             fonts.Add("keyword", new Font("Courier New", 10, FontStyle.Bold));
-            keywords = new string[] { "and", "del", "for", "is", "raise",
-                                      "assert", "elif", "from", "lambda", "return",
-                                      "break", "else", "global", "not", "try",
-                                      "class", "except", "if", "or", "while",
-                                      "continue", "exec", "import", "pass", "yield",
-                                      "def", "finally", "in",
-                                      "as", "with"};
-            syntax = new string[] { "self", "print", "None", "True", "False" };
+            colors.Add("quote", Color.LightBlue);
+            fonts.Add("quote", new Font("Courier New", 10, FontStyle.Regular));
+            keywords = new Dictionary<string, int> {{ "and", 1}, {"del", 1}, {"for", 1}, 
+                                                    {"is", 1}, {"raise", 1},
+                                                    {"assert",1}, {"elif",1}, {"from",1}, 
+                                                    {"lambda",1}, {"return",1},
+                                                    {"break",1}, {"else",1}, {"global",1}, 
+                                                    {"not",1}, {"try",1},
+                                                    {"class",1}, {"except",1}, {"if",1}, 
+                                                    {"or",1}, {"while",1},
+                                                    {"continue",1}, {"exec",1}, {"import",1}, 
+                                                    {"pass",1}, {"yield",1},
+                                                    {"def",1}, {"finally",1}, {"in",1},
+                                                    {"as",1}, {"with",1},
+                                                    {"self",2}, {"print",2}, {"None",2}, 
+                                                    {"True",2}, {"False",2} };
 
             // -----------------------------
             Controls.Add(textBox);
@@ -160,57 +167,15 @@ namespace Pyjama
             String[] lines = r.Split(text);
             foreach (string l in lines)
             {
-                ParseLine(l);
+                //ParseLine(l);
             }
         }
 
-        void ParseLine(string line)
+        private static bool EndSymbol(char c)
         {
-            RichTextBox m_rtb = textBox;
-
-            Regex r = new Regex("([ \\t{}();])");
-            String[] tokens = r.Split(line);
-            foreach (string token in tokens)
-            {
-                // Set the token's default color and font.
-                m_rtb.SelectionColor = colors["default"];
-                m_rtb.SelectionFont = fonts["default"];
-                // Check for a comment.
-                if (token.StartsWith("#"))
-                {
-                    // Find the start of the comment and then extract the whole comment.
-                    int index = line.IndexOf("#");
-                    string comment = line.Substring(index, line.Length - index);
-                    m_rtb.SelectionColor = colors["comment"];
-                    m_rtb.SelectionFont = fonts["comment"];
-                    m_rtb.SelectedText = comment;
-                    break;
-                }
-                // Check whether the token is a keyword. 
-                for (int i = 0; i < keywords.Length; i++)
-                {
-                    if (keywords[i] == token)
-                    {
-                        // Apply alternative color and font to highlight keyword.
-                        m_rtb.SelectionColor = colors["keyword"];
-                        m_rtb.SelectionFont = fonts["keyword"];
-                        break;
-                    }
-                }
-                // Check whether the token is a special syntax
-                for (int i = 0; i < syntax.Length; i++)
-                {
-                    if (syntax[i] == token)
-                    {
-                        // Apply alternative color and font to highlight keyword.
-                        m_rtb.SelectionColor = colors["syntax"];
-                        m_rtb.SelectionFont = fonts["syntax"];
-                        break;
-                    }
-                }
-                m_rtb.SelectedText = token;
-            }
-            m_rtb.SelectedText = "\n";
+            return (c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == ',' ||
+                    c == '(' || c == ')' || c == '.' || c == '-' || c == '/' || c == '\0' ||
+                    c == ':' || c == '\\' || c == '*' || c == '@' || c == '%');
         }
 
         void textbox_TextChanged(object sender, EventArgs e)
@@ -238,76 +203,111 @@ namespace Pyjama
             start = start < 0 ? 0 : start;
             //System.Console.WriteLine("start={0}, stop={1}", start, end);
             // Extract the current line that is being edited.
-            String line = m_rtb.Text.Substring(start, end - start);
+            String line = m_rtb.Text.Substring(start, end - start) + '\0';
             // Backup the users current selection point.
             int selectionStart = m_rtb.SelectionStart;
             int selectionLength = m_rtb.SelectionLength;
-            // Split the line into tokens.
-            Regex r = new Regex("([ \\t{}();:,.])");
-            string[] tokens = r.Split(line);
             int index = start;
-            foreach (string token in tokens)
+            int line_pos = 0;
+            int mode = 0; // 0 start; 1 in token; 2 in double quote; 3 in quote
+            int tokenStart = 0;
+            string token;
+            foreach (char c in line)
             {
-                if (token.Trim() == "")
+                if (mode == 0)
                 {
-                    index += token.Length;
-                    continue;
-                }
-                // Set the token's default color and font.
-                m_rtb.SelectionStart = index;
-                m_rtb.SelectionLength = token.Length;
-                m_rtb.SelectionColor = colors["default"];
-                m_rtb.SelectionFont = fonts["default"];
-                // Check for a comment.
-                if (token.StartsWith("#"))
-                {
-                    // Find the start of the comment and then extract the whole comment.
-                    int length = line.Length - (index - start);
-                    string commentText = m_rtb.Text.Substring(index, length);
-                    m_rtb.SelectionStart = index;
-                    m_rtb.SelectionLength = length;
-                    m_rtb.SelectionColor = colors["comment"];
-                    m_rtb.SelectionFont = fonts["comment"];
-                    break;
-                }
-                else if (token.StartsWith("\""))
-                {
-                    // Find the start of the comment and then extract the whole comment.
-                    int length = line.Length - (index - start);
-                    string commentText = m_rtb.Text.Substring(index, length);
-                    m_rtb.SelectionStart = index;
-                    m_rtb.SelectionLength = length;
-                    m_rtb.SelectionColor = colors["syntax"];
-                    m_rtb.SelectionFont = fonts["syntax"];
-                    break;
-                }
-                // Check whether the token is a keyword. 
-                for (int i = 0; i < keywords.Length; i++)
-                {
-                    if (token == keywords[i])
+                    if (c == '"') {
+                        mode = 2;
+                        tokenStart = index;
+                    } else if (c == '\'') {
+                        mode = 3;
+                        tokenStart = index;
+                    } else if (c == '#')
                     {
-                        // Apply alternative color and font to highlight keyword.        
-                        m_rtb.SelectionColor = colors["keyword"];
-                        m_rtb.SelectionFont = fonts["keyword"];
-                        break;
+                        m_rtb.SelectionStart = index;
+                        m_rtb.SelectionLength = line.Length - line_pos;
+                        m_rtb.SelectionColor = colors["comment"];
+                        m_rtb.SelectionFont = fonts["comment"];
+                        break; // done!
                     }
-                }
-                // Check whether the token is a special syntax
-                for (int i = 0; i < syntax.Length; i++)
-                {
-                    if (syntax[i] == token)
+                    else if (!EndSymbol(c)) // start of token, number, or word
                     {
-                        // Apply alternative color and font to highlight keyword.
-                        m_rtb.SelectionColor = colors["syntax"];
-                        m_rtb.SelectionFont = fonts["syntax"];
-                        break;
+                        mode = 1;
+                        tokenStart = index;
                     }
+                } // else more token or quote
+                else if (mode == 1) // in token
+                {
+                    if (EndSymbol(c)) // end of token
+                    {
+                        token = m_rtb.Text.Substring(tokenStart, index - tokenStart);
+                        if (keywords.ContainsKey(token))
+                        {
+                            mode = 0;
+                            int colorCode = keywords[token];
+                            if (colorCode == 1)
+                            {
+                                m_rtb.SelectionStart = tokenStart;
+                                m_rtb.SelectionLength = token.Length;
+                                m_rtb.SelectionColor = colors["keyword"];
+                                m_rtb.SelectionFont = fonts["keyword"];
+                            }
+                            else if (colorCode == 2)
+                            {
+                                m_rtb.SelectionStart = tokenStart;
+                                m_rtb.SelectionLength = token.Length;
+                                m_rtb.SelectionColor = colors["syntax"];
+                                m_rtb.SelectionFont = fonts["syntax"];
+                            }
+                        }
+                        else
+                        {
+                            mode = 0;
+                            m_rtb.SelectionStart = tokenStart;
+                            m_rtb.SelectionLength = token.Length;
+                            m_rtb.SelectionColor = colors["default"];
+                            m_rtb.SelectionFont = fonts["default"];
+                        }
+                    } // else still in token
                 }
-                index += token.Length;
+                else if (mode == 2) // in double quote
+                {
+                    if (c == '"' || c == '\0') // end of double quote
+                    {
+                        mode = 0;
+                        if (c == '"')
+                            token = m_rtb.Text.Substring(tokenStart, index - tokenStart + 1);
+                        else
+                            token = m_rtb.Text.Substring(tokenStart, index - tokenStart);
+                        m_rtb.SelectionStart = tokenStart;
+                        m_rtb.SelectionLength = token.Length;
+                        m_rtb.SelectionColor = colors["quote"];
+                        m_rtb.SelectionFont = fonts["quote"];
+                    } // else still in double quote
+                }
+                else if (mode == 3) // in quote
+                {
+                    if (c == '\'' || c == '\0') // end of quote
+                    {
+                        mode = 0;
+                        if (c == '\'')
+                            token = m_rtb.Text.Substring(tokenStart, index - tokenStart + 1);
+                        else
+                            token = m_rtb.Text.Substring(tokenStart, index - tokenStart);
+                        m_rtb.SelectionStart = tokenStart;
+                        m_rtb.SelectionLength = token.Length;
+                        m_rtb.SelectionColor = colors["quote"];
+                        m_rtb.SelectionFont = fonts["quote"];
+                    } // else still in quote
+                }
+                index++;
+                line_pos++;
             }
             // Restore the users current selection point.    
             m_rtb.SelectionStart = selectionStart;
             m_rtb.SelectionLength = selectionLength;
+            m_rtb.SelectionColor = colors["default"];
+            m_rtb.SelectionFont = fonts["default"];
         }
 
         public int CurrentColumn
