@@ -461,7 +461,7 @@ namespace Pyjama
             }
             //System.Console.WriteLine("KeyDown: {0} {1}", e.KeyCode, e.Control);
 
-            System.Console.WriteLine("start temp = '{0}'", tempCommandText);
+            //System.Console.WriteLine("start temp = '{0}'", tempCommandText);
             if (e.KeyCode == System.Windows.Forms.Keys.Enter && e.Control)
             {
                 // Mono bug work-around: doesn't handle the key
@@ -528,7 +528,7 @@ namespace Pyjama
                     e.Handled = true;
                 }
             }
-            System.Console.WriteLine("end temp = '{0}'", tempCommandText);
+            //System.Console.WriteLine("end temp = '{0}'", tempCommandText);
         }
 
         private void shellToolStripMenuItem_Click(object sender, EventArgs e)
