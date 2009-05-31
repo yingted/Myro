@@ -601,7 +601,9 @@ namespace UIIronTextBox
             //}
             if (pyjamaModule.Threaded)
             {
-                ThreadStart starter = delegate { Execute(filename, SourceCodeKind.File); };
+                ThreadStart starter = delegate {
+                    Execute(filename, SourceCodeKind.File);
+                };
                 backgroundThread = new Thread(new ThreadStart(starter));
                 backgroundThread.IsBackground = true;
                 // FIXME: set cursor to stay this way till done
@@ -612,6 +614,32 @@ namespace UIIronTextBox
             {
                 Execute(filename, SourceCodeKind.File);
             }
+        }
+
+        public void SetRunButton(string text)
+        {
+            if (InvokeRequired)
+            {
+                BeginInvoke(new StringParameterDelegate(SetRunButton),
+                            new object[] { text });
+                return;
+            }
+            Pyjama.PyjamaForm pjform = (Pyjama.PyjamaForm) this.TopLevelControl;
+            pjform.runButton.Text = text;
+        }
+
+        internal void CancelCommand()
+        {
+            if (backgroundThread != null && backgroundThread.IsAlive)
+            { // FIXME: tie to ESCAPE
+                // check to see if running
+                // use TerminateScriptExecution of
+                // PlatformAdoptionLayer, or
+                // kill thread
+                //engine.Runtime.Host.PlatformAdaptationLayer.TerminateScriptExecution(0);
+                backgroundThread.Suspend();
+            }
+            SetRunButton("Run!");
         }
 
         public void DoCommand(string command)
@@ -665,14 +693,6 @@ namespace UIIronTextBox
                 {
                     if (pyjamaModule.Threaded)
                     {
-                        if (backgroundThread != null && backgroundThread.IsAlive)
-                        { // FIXME: tie to ESCAPE
-                            // check to see if running
-                            // use TerminateScriptExecution of
-                            // PlatformAdoptionLayer, or
-                            // kill thread
-                            backgroundThread.Suspend();
-                        }
                         ThreadStart starter = delegate { Execute(command, SourceCodeKind.InteractiveCode); };
                         backgroundThread = new Thread(new ThreadStart(starter));
                         backgroundThread.IsBackground = true;
@@ -769,6 +789,7 @@ namespace UIIronTextBox
 
         public void Execute(string command, SourceCodeKind sctype)
         {
+            SetRunButton("Stop!");
             ExceptionOperations eo;
             eo = engine.GetService<ExceptionOperations>();
             bool error = false;
@@ -872,6 +893,7 @@ namespace UIIronTextBox
                 ScrollToBottom();
             }
             Invoke(new MethodInvoker(FinishCommand));
+            SetRunButton("Run!");
             return;
         }
 

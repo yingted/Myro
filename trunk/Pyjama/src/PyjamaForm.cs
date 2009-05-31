@@ -405,11 +405,15 @@ namespace Pyjama
 
         private void runButton_Click(object sender, EventArgs e)
         {
-            string code = commandTextBox.Text;
-            code = code.Trim();
-            outputWindow.textbox.DoCommand(code);
-            commandTextBox.Text = "";
-            commandTextBox.Focus();
+            if (runButton.Text.Equals("Run!")) {
+                string code = commandTextBox.Text;
+                code = code.Trim();
+                outputWindow.textbox.DoCommand(code);
+                commandTextBox.Text = "";
+                commandTextBox.Focus();
+            } else {
+                outputWindow.textbox.CancelCommand();
+            }
         }
 
         private void commandTextBox_KeyPress(object sender, KeyPressEventArgs e)
@@ -443,9 +447,18 @@ namespace Pyjama
         }
 
         private string tempCommandText = "";
+        public bool inputMode = false;
 
         private void commandTextBox_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
         {
+            if (inputMode)
+            {
+                if (e.KeyCode == System.Windows.Forms.Keys.Enter)
+                {
+                    e.Handled = true;
+                }
+                return;
+            }
             //System.Console.WriteLine("KeyDown: {0} {1}", e.KeyCode, e.Control);
 
             System.Console.WriteLine("start temp = '{0}'", tempCommandText);

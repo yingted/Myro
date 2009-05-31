@@ -878,7 +878,7 @@ using System.Windows.Forms;
          private System.Windows.Forms.ToolStripStatusLabel lineNumber;
          private System.Windows.Forms.ToolStripStatusLabel columnNumber;
          private TableLayoutPanel tableLayoutPanel1;
-         private Button runButton;
+         public Button runButton;
          private Label commandLabel;
          private ToolStripMenuItem shellToolStripMenuItem;
          private ToolStripMenuItem evaluateToolStripMenuItem;
