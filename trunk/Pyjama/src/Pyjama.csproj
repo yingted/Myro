@@ -116,6 +116,9 @@
       <DependentUpon>BaseForm.cs</DependentUpon>
     </Compile>
     <Compile Include="ActiveCodeFile.cs" />
+    <Compile Include="PrintDocument.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="CodeBlock.cs" />
     <Compile Include="Controls\DocumentTabControl.cs">
       <SubType>Component</SubType>
@@ -252,6 +255,10 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\OptionsDialog.resx">
       <DependentUpon>OptionsDialog.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="PrintDocument.resx">
+      <DependentUpon>PrintDocument.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Resources\DeleteHS.png">
