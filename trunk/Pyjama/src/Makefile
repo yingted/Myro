@@ -1,7 +1,7 @@
 ## Makefile for building Pyjama with Mono
 
 run: pyjama.exe
-	XMODIFIERS= MONO_PATH=../libs mono pyjama.exe
+	XMODIFIERS= MONO_PATH=../libs mono --debug pyjama.exe
 
 res:
 	mkdir -p res
@@ -86,7 +86,7 @@ pyjama.exe: res res/Pyjama.FontControl.resources \
 		ShortcutKeyDispatcher.cs \
 		UserSettings.cs 
 	MONO_PATH=../libs \
-	gmcs -define:MONO \
+	gmcs -debug -define:MONO \
 	./ActiveCodeFile.cs \
 	./ApplicationInformation.cs \
 	./ApplicationOptions.cs \

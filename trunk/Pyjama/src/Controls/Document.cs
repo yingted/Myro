@@ -9,7 +9,6 @@ namespace Pyjama
 
     public class MyRichTextBox : RichTextBox
     {
-        /*
         public MyRichTextBox() {
             // Double buffer
             this.SetStyle(ControlStyles.UserPaint, true);
@@ -17,16 +16,24 @@ namespace Pyjama
                 this.SetStyle(ControlStyles.ResizeRedraw, true);
                 this.SetStyle(ControlStyles.AllPaintingInWmPaint, true);
         }
-        */
 
-        /*
         protected override void WndProc(ref Message m) {
-            if ((m.Msg != 0x2111) || ((((uint)m.WParam >> 16)
-                           & 0xFFFF) != 768))
+		  //if ((m.Msg != 0x2111) || ((((uint)m.WParam >> 16)
+		  //& 0xFFFF) != 768))
+		  try {
             base.WndProc(ref m);
+		  } catch {
+			System.Console.WriteLine("Mono bug caught!");
+			string oldRtf = Rtf;
+			int oldSelectionStart = SelectionStart;
+			int oldSelectionLength = SelectionLength;
+			Clear();
+			Rtf = oldRtf;
+			SelectionStart = oldSelectionStart;
+			SelectionLength = oldSelectionLength;
+		  }
         } 
-        */
-
+		
         // Document Typing/Display Widget
         protected override void OnKeyDown(KeyEventArgs e)
         {
