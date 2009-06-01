@@ -63,7 +63,7 @@ using System.Windows.Forms;
              this.lineNumber = new System.Windows.Forms.ToolStripStatusLabel();
              this.toolStripStatusLabel13 = new System.Windows.Forms.ToolStripStatusLabel();
              this.columnNumber = new System.Windows.Forms.ToolStripStatusLabel();
-             this.docManager = new Pyjama.DocumentManager();
+             this._docManager = new Pyjama.DocumentManager();
              this.splitContainer1 = new System.Windows.Forms.SplitContainer();
              this.outputWindow = new Pyjama.Console();
              this.commandContainer = new System.Windows.Forms.SplitContainer();
@@ -91,8 +91,6 @@ using System.Windows.Forms;
              this.pasteToolStripButton = new System.Windows.Forms.ToolStripButton();
              this.toolStripSeparator7 = new System.Windows.Forms.ToolStripSeparator();
              this.toolStripButton1 = new System.Windows.Forms.ToolStripButton();
-             this.toolStripButton2 = new System.Windows.Forms.ToolStripButton();
-             this.executeToolStripButton = new System.Windows.Forms.ToolStripButton();
              this.menuStrip1 = new System.Windows.Forms.MenuStrip();
              this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
              this.newToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -165,7 +163,7 @@ using System.Windows.Forms;
              // mainContentSplit.Panel1
              // 
              this.mainContentSplit.Panel1.Controls.Add(this.statusStrip1);
-             this.mainContentSplit.Panel1.Controls.Add(this.docManager);
+             this.mainContentSplit.Panel1.Controls.Add(this._docManager);
              resources.ApplyResources(this.mainContentSplit.Panel1, "mainContentSplit.Panel1");
              // 
              // mainContentSplit.Panel2
@@ -251,12 +249,12 @@ using System.Windows.Forms;
              this.columnNumber.Padding = new System.Windows.Forms.Padding(20, 0, 0, 0);
              resources.ApplyResources(this.columnNumber, "columnNumber");
              // 
-             // docManager
+             // _docManager
              // 
-             resources.ApplyResources(this.docManager, "docManager");
-             this.docManager.BackColor = System.Drawing.SystemColors.Control;
-             this.docManager.FontToUse = null;
-             this.docManager.Name = "docManager";
+             this._docManager.BackColor = System.Drawing.SystemColors.Control;
+             this._docManager.FontToUse = null;
+             resources.ApplyResources(this._docManager, "_docManager");
+             this._docManager.Name = "_docManager";
              // 
              // splitContainer1
              // 
@@ -411,9 +409,7 @@ using System.Windows.Forms;
             this.copyToolStripButton,
             this.pasteToolStripButton,
             this.toolStripSeparator7,
-            this.toolStripButton1,
-            this.toolStripButton2,
-            this.executeToolStripButton});
+            this.toolStripButton1});
              this.toolStrip1.Name = "toolStrip1";
              this.toolStrip1.RenderMode = System.Windows.Forms.ToolStripRenderMode.Professional;
              // 
@@ -485,21 +481,6 @@ using System.Windows.Forms;
              this.toolStripButton1.Name = "toolStripButton1";
              this.toolStripButton1.Click += new System.EventHandler(this.execute_Click);
              // 
-             // toolStripButton2
-             // 
-             this.toolStripButton2.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-             this.toolStripButton2.Image = global::Pyjama.Properties.Resources.Start;
-             resources.ApplyResources(this.toolStripButton2, "toolStripButton2");
-             this.toolStripButton2.Name = "toolStripButton2";
-             // 
-             // executeToolStripButton
-             // 
-             this.executeToolStripButton.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-             this.executeToolStripButton.Image = global::Pyjama.Properties.Resources.FastRun;
-             resources.ApplyResources(this.executeToolStripButton, "executeToolStripButton");
-             this.executeToolStripButton.Name = "executeToolStripButton";
-             this.executeToolStripButton.Click += new System.EventHandler(this.execute_Click);
-             // 
              // menuStrip1
              // 
              this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -532,6 +513,7 @@ using System.Windows.Forms;
              this.newToolStripMenuItem.Image = global::Pyjama.Properties.Resources.NewDocumentHS;
              this.newToolStripMenuItem.Name = "newToolStripMenuItem";
              resources.ApplyResources(this.newToolStripMenuItem, "newToolStripMenuItem");
+             this.newToolStripMenuItem.Click += new System.EventHandler(this.newToolStripMenuItem_Click_1);
              // 
              // openToolStripMenuItem
              // 
@@ -597,6 +579,7 @@ using System.Windows.Forms;
              // 
              this.closeTabToolStripMenuItem.Name = "closeTabToolStripMenuItem";
              resources.ApplyResources(this.closeTabToolStripMenuItem, "closeTabToolStripMenuItem");
+             this.closeTabToolStripMenuItem.Click += new System.EventHandler(this.closeTabToolStripMenuItem_Click);
              // 
              // exitToolStripMenuItem
              // 
@@ -674,6 +657,7 @@ using System.Windows.Forms;
              // 
              this.selectEditorToolStripMenuItem.Name = "selectEditorToolStripMenuItem";
              resources.ApplyResources(this.selectEditorToolStripMenuItem, "selectEditorToolStripMenuItem");
+             this.selectEditorToolStripMenuItem.Click += new System.EventHandler(this.selectEditorToolStripMenuItem_Click);
              // 
              // languageToolStripMenuItem
              // 
@@ -857,18 +841,16 @@ using System.Windows.Forms;
          private System.Windows.Forms.ToolStripSeparator toolStripSeparator7;
          private System.Windows.Forms.ToolStripMenuItem languageToolStripMenuItem;
          private System.Windows.Forms.ToolStripMenuItem executeToolStripMenuItem;
-         private System.Windows.Forms.ToolStripButton executeToolStripButton;
          private System.Windows.Forms.ToolStripMenuItem printSetupMenuItem;
          private System.Windows.Forms.ToolStripMenuItem newToolStripMenuItem;
          private System.Windows.Forms.ToolStripButton toolStripButton1;
-         private System.Windows.Forms.ToolStripButton toolStripButton2;
          private System.Windows.Forms.ToolStripMenuItem closeTabToolStripMenuItem;
          private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
          private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel2;
          private System.Windows.Forms.ToolStripStatusLabel languageName;
          private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel3;
          private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel4;
-         private DocumentManager docManager;
+         private DocumentManager _docManager;
          private System.Windows.Forms.StatusStrip statusStrip1;
          private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel8;
          private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel9;

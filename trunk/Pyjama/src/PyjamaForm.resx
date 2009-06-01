@@ -246,40 +246,25 @@
   <data name="&gt;&gt;statusStrip1.ZOrder" xml:space="preserve">
     <value>0</value>
   </data>
-  <data name="docManager.AutoSize" type="System.Boolean, mscorlib">
-    <value>True</value>
-  </data>
-  <data name="docManager.AutoSizeMode" type="System.Windows.Forms.AutoSizeMode, System.Windows.Forms">
-    <value>GrowAndShrink</value>
-  </data>
-  <data name="docManager.Dock" type="System.Windows.Forms.DockStyle, System.Windows.Forms">
-    <value>Fill</value>
-  </data>
-  <data name="docManager.Location" type="System.Drawing.Point, System.Drawing">
+  <data name="_docManager.Location" type="System.Drawing.Point, System.Drawing">
     <value>0, 0</value>
   </data>
-  <data name="docManager.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>3, 3, 3, 100</value>
+  <data name="_docManager.Size" type="System.Drawing.Size, System.Drawing">
+    <value>479, 271</value>
   </data>
-  <data name="docManager.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
-    <value>0, 0, 0, 25</value>
+  <data name="_docManager.TabIndex" type="System.Int32, mscorlib">
+    <value>14</value>
   </data>
-  <data name="docManager.Size" type="System.Drawing.Size, System.Drawing">
-    <value>482, 296</value>
+  <data name="&gt;&gt;_docManager.Name" xml:space="preserve">
+    <value>_docManager</value>
   </data>
-  <data name="docManager.TabIndex" type="System.Int32, mscorlib">
-    <value>6</value>
+  <data name="&gt;&gt;_docManager.Type" xml:space="preserve">
+    <value>Pyjama.DocumentManager, Pyjama, Version=1.0.3439.133, Culture=neutral, PublicKeyToken=null</value>
   </data>
-  <data name="&gt;&gt;docManager.Name" xml:space="preserve">
-    <value>docManager</value>
-  </data>
-  <data name="&gt;&gt;docManager.Type" xml:space="preserve">
-    <value>Pyjama.DocumentManager, Pyjama, Version=1.0.3438.38152, Culture=neutral, PublicKeyToken=null</value>
-  </data>
-  <data name="&gt;&gt;docManager.Parent" xml:space="preserve">
+  <data name="&gt;&gt;_docManager.Parent" xml:space="preserve">
     <value>mainContentSplit.Panel1</value>
   </data>
-  <data name="&gt;&gt;docManager.ZOrder" xml:space="preserve">
+  <data name="&gt;&gt;_docManager.ZOrder" xml:space="preserve">
     <value>1</value>
   </data>
   <data name="mainContentSplit.Panel1.RightToLeft" type="System.Windows.Forms.RightToLeft, System.Windows.Forms">
@@ -334,7 +319,7 @@
     <value>outputWindow</value>
   </data>
   <data name="&gt;&gt;outputWindow.Type" xml:space="preserve">
-    <value>Pyjama.Console, Pyjama, Version=1.0.3438.38152, Culture=neutral, PublicKeyToken=null</value>
+    <value>Pyjama.Console, Pyjama, Version=1.0.3439.133, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;outputWindow.Parent" xml:space="preserve">
     <value>splitContainer1.Panel1</value>
@@ -385,7 +370,7 @@
     <value>commandTextBox</value>
   </data>
   <data name="&gt;&gt;commandTextBox.Type" xml:space="preserve">
-    <value>Pyjama.MyTextBox, Pyjama, Version=1.0.3438.38152, Culture=neutral, PublicKeyToken=null</value>
+    <value>Pyjama.MyTextBox, Pyjama, Version=1.0.3439.133, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;commandTextBox.Parent" xml:space="preserve">
     <value>commandContainer.Panel1</value>
@@ -900,24 +885,6 @@
   </data>
   <data name="toolStripButton1.Text" xml:space="preserve">
     <value>Run</value>
-  </data>
-  <data name="toolStripButton2.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Magenta</value>
-  </data>
-  <data name="toolStripButton2.Size" type="System.Drawing.Size, System.Drawing">
-    <value>23, 22</value>
-  </data>
-  <data name="toolStripButton2.Text" xml:space="preserve">
-    <value>Pause</value>
-  </data>
-  <data name="executeToolStripButton.ImageTransparentColor" type="System.Drawing.Color, System.Drawing">
-    <value>Magenta</value>
-  </data>
-  <data name="executeToolStripButton.Size" type="System.Drawing.Size, System.Drawing">
-    <value>23, 22</value>
-  </data>
-  <data name="executeToolStripButton.Text" xml:space="preserve">
-    <value>toolStripButton1</value>
   </data>
   <data name="toolStrip1.Location" type="System.Drawing.Point, System.Drawing">
     <value>0, 0</value>
@@ -1601,18 +1568,6 @@
   <data name="&gt;&gt;toolStripButton1.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="&gt;&gt;toolStripButton2.Name" xml:space="preserve">
-    <value>toolStripButton2</value>
-  </data>
-  <data name="&gt;&gt;toolStripButton2.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;executeToolStripButton.Name" xml:space="preserve">
-    <value>executeToolStripButton</value>
-  </data>
-  <data name="&gt;&gt;executeToolStripButton.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripButton, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="&gt;&gt;fileToolStripMenuItem.Name" xml:space="preserve">
     <value>fileToolStripMenuItem</value>
   </data>
@@ -1863,6 +1818,6 @@
     <value>PyjamaForm</value>
   </data>
   <data name="&gt;&gt;$this.Type" xml:space="preserve">
-    <value>Pyjama.BaseForm, Pyjama, Version=1.0.3438.38152, Culture=neutral, PublicKeyToken=null</value>
+    <value>Pyjama.BaseForm, Pyjama, Version=1.0.3439.133, Culture=neutral, PublicKeyToken=null</value>
   </data>
 </root>

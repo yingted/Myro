@@ -120,9 +120,6 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="CodeBlock.cs" />
-    <Compile Include="Controls\DocumentTabControl.cs">
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Include="Controls\DocumentManager.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -243,10 +240,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Controls\DocumentPage.resx">
       <DependentUpon>DocumentPage.cs</DependentUpon>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Controls\DocumentTabControl.resx">
-      <DependentUpon>DocumentTabControl.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Dialogs\OptionFrames\FontControl.resx">

@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             //this.tabControl = new DocumentTabControl(); 
-            this.tabControl = new System.Windows.Forms.TabControl(); 
+            this.tabControl = new System.Windows.Forms.TabControl();
             this.SuspendLayout();
             // 
             // tabControl
@@ -56,7 +56,19 @@
 
         #endregion
 
-	//private DocumentTabControl tabControl;
-	private System.Windows.Forms.TabControl tabControl;
+        //private DocumentTabControl tabControl;
+        private System.Windows.Forms.TabControl tabControl;
+
+        public void CloseTab()
+        {
+            if (tabControl.TabCount > 0)
+                tabControl.TabPages.Remove(tabControl.SelectedTab);
+        }
+        public void FocusActiveTab()
+        {
+            if (tabControl.TabCount > 0)
+                ((DocumentPage)tabControl.SelectedTab).textBox.Focus();
+        }
+
     }
 }

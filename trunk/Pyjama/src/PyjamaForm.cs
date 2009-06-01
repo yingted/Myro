@@ -39,7 +39,7 @@ namespace Pyjama
                 NewFile();
             }
 
-            this.ActiveControl = docManager.GetCurrentTabTextBox(); // tab text gets cursor
+            this.ActiveControl = _docManager.GetCurrentTabTextBox(); // tab text gets cursor
             // FIXME: make a general language changer
             this.languageName.Text = "Python";
             this.columnNumber.Text = "" + 1;
@@ -59,17 +59,23 @@ namespace Pyjama
 
         public CodeBlock GetCodeBlock()
         {
-            return docManager.GetCode();
+            return _docManager.GetCode();
         }
 
         public bool HasFileOpen
         {
-            get { return docManager.HasFileOpen; }
+            get { return _docManager.HasFileOpen; }
+        }
+
+        public void CloseTab()
+        {
+            _docManager.CloseTab();
+            SetButtonsStatus();
         }
 
         public void OpenFile(IMainForm main_form, ActiveCodeFile file)
         {
-            docManager.OpenFile(main_form, file);
+            _docManager.OpenFile(main_form, file);
             SetButtonsStatus();
         }
 
@@ -100,17 +106,17 @@ namespace Pyjama
 
         public string CurrentActiveFileLocation()
         {
-            return docManager.GetCurrentFile().Location;
+            return _docManager.GetCurrentFile().Location;
         }
 
         public ActiveCodeFile GetCurrentActiveFile()
         {
-            return docManager.GetCurrentFile();
+            return _docManager.GetCurrentFile();
         }
 
         public void SetSaveInformationForActiveFile(string location)
         {
-            docManager.SetSaveInformationForActiveFile(location);
+            _docManager.SetSaveInformationForActiveFile(location);
         }
 
         private void SetButtonsStatus()
@@ -132,7 +138,6 @@ namespace Pyjama
             printToolStripMenuItem.Enabled = enable;
             printToolStripButton.Enabled = enable;
             executeToolStripMenuItem.Enabled = enable;
-            executeToolStripButton.Enabled = enable;
             undoToolStripMenuItem.Enabled = enable;
             selectAllToolStripMenuItem.Enabled = enable;
         }
@@ -214,7 +219,7 @@ namespace Pyjama
 
         private DocumentInput GetNotNullIDEInput()
         {
-            DocumentInput input = docManager.GetCurrentInput();
+            DocumentInput input = _docManager.GetCurrentInput();
             if (input == null)
                 return new DocumentInput(null);
             else
@@ -284,7 +289,7 @@ namespace Pyjama
                 return;
 
             outputWindow.GetOutput().Font = settings.UIFont;
-            docManager.FontToUse = settings.UIFont;
+            _docManager.FontToUse = settings.UIFont;
         }
 
         private UserSettings CreateUserSettings(OptionsDialog dialog)
@@ -507,6 +512,24 @@ namespace Pyjama
         private void printToolStripButton_Click(object sender, EventArgs e)
         {
             _printEngine.ShowPreview();
+        }
+
+        private void closeTabToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            _docManager.CloseTab();
+        }
+
+        private void newToolStripMenuItem_Click_1(object sender, EventArgs e)
+        {
+            Cursor current = Cursor.Current;
+            Cursor.Current = Cursors.WaitCursor;
+            _controller.NewFile();
+            Cursor.Current = current;
+        }
+
+        private void selectEditorToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            _docManager.FocusActiveTab();
         }
     }
 }
