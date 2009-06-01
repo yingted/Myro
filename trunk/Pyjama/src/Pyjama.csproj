@@ -14,9 +14,9 @@
     <FileAlignment>512</FileAlignment>
     <ManifestCertificateThumbprint>52A2F9A90133C00E4045DC583F60B7D2FB1A0F20</ManifestCertificateThumbprint>
     <ManifestKeyFile>IronEditor.UI.WinForms_TemporaryKey.pfx</ManifestKeyFile>
-    <GenerateManifests>false</GenerateManifests>
+    <GenerateManifests>true</GenerateManifests>
     <TargetZone>LocalIntranet</TargetZone>
-    <SignManifests>false</SignManifests>
+    <SignManifests>true</SignManifests>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <SignAssembly>false</SignAssembly>
     <AssemblyOriginatorKeyFile>
@@ -36,7 +36,7 @@
     <ProductName>Pyjama Editor and Shell</ProductName>
     <PublisherName>RobotEducation.org</PublisherName>
     <OpenBrowserOnPublish>false</OpenBrowserOnPublish>
-    <ApplicationRevision>24</ApplicationRevision>
+    <ApplicationRevision>25</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>

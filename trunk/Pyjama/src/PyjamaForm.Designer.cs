@@ -252,8 +252,8 @@ using System.Windows.Forms;
              // _docManager
              // 
              this._docManager.BackColor = System.Drawing.SystemColors.Control;
-             this._docManager.FontToUse = null;
              resources.ApplyResources(this._docManager, "_docManager");
+             this._docManager.FontToUse = null;
              this._docManager.Name = "_docManager";
              // 
              // splitContainer1
