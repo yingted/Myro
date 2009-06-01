@@ -73,6 +73,7 @@ pyjama.exe: res res/Pyjama.FontControl.resources \
 		IronTextBox.cs \
 		LanguageSettings.cs \
 		MonoEnvironment.cs \
+		PrintDocument.cs \
 		Program.cs \
 		Properties/AssemblyInfo.cs \
 		Properties/Resources.Designer.cs \
@@ -113,6 +114,7 @@ pyjama.exe: res res/Pyjama.FontControl.resources \
 	./IronTextBox.cs \
 	./LanguageSettings.cs \
 	./MonoEnvironment.cs \
+	./PrintDocument.cs \
 	./Program.cs \
 	./Properties/AssemblyInfo.cs \
 	./Properties/Resources.Designer.cs \

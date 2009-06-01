@@ -206,6 +206,7 @@ namespace Pyjama
             //System.Console.WriteLine("start={0}, stop={1}", start, end);
             // Extract the current line that is being edited.
             String line = m_rtb.Text.Substring(start, end - start) + '\0';
+
             // Backup the users current selection point.
             int selectionStart = m_rtb.SelectionStart;
             int selectionLength = m_rtb.SelectionLength;
@@ -227,7 +228,7 @@ namespace Pyjama
                     } else if (c == '#')
                     {
                         m_rtb.SelectionStart = index;
-                        m_rtb.SelectionLength = line.Length - line_pos;
+                        m_rtb.SelectionLength = line.Length - line_pos - 1;
                         m_rtb.SelectionColor = colors["comment"];
                         m_rtb.SelectionFont = fonts["comment"];
                         break; // done!
