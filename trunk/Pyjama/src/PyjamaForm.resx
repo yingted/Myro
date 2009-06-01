@@ -246,6 +246,12 @@
   <data name="&gt;&gt;statusStrip1.ZOrder" xml:space="preserve">
     <value>0</value>
   </data>
+  <data name="_docManager.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="_docManager.AutoSizeMode" type="System.Windows.Forms.AutoSizeMode, System.Windows.Forms">
+    <value>GrowAndShrink</value>
+  </data>
   <data name="_docManager.Dock" type="System.Windows.Forms.DockStyle, System.Windows.Forms">
     <value>Fill</value>
   </data>
@@ -253,16 +259,23 @@
     <value>0, 0</value>
   </data>
   <data name="_docManager.Size" type="System.Drawing.Size, System.Drawing">
-    <value>482, 296</value>
+    <value>479, 271</value>
   </data>
   <data name="_docManager.TabIndex" type="System.Int32, mscorlib">
     <value>14</value>
   </data>
   <data name="&gt;&gt;_docManager.Name" xml:space="preserve">
+    <value>0</value>
+  </data>
     <value>_docManager</value>
+  <data name="_docManager.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>3, 3, 3, 100</value>
+  </data>
+  <data name="_docManager.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
+    <value>0, 0, 0, 25</value>
   </data>
   <data name="&gt;&gt;_docManager.Type" xml:space="preserve">
-    <value>Pyjama.DocumentManager, Pyjama, Version=1.0.3439.1745, Culture=neutral, PublicKeyToken=null</value>
+    <value>Pyjama.DocumentManager, Pyjama, Version=1.0.3439.133, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;_docManager.Parent" xml:space="preserve">
     <value>mainContentSplit.Panel1</value>
@@ -322,7 +335,7 @@
     <value>outputWindow</value>
   </data>
   <data name="&gt;&gt;outputWindow.Type" xml:space="preserve">
-    <value>Pyjama.Console, Pyjama, Version=1.0.3439.1745, Culture=neutral, PublicKeyToken=null</value>
+    <value>Pyjama.Console, Pyjama, Version=1.0.3439.133, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;outputWindow.Parent" xml:space="preserve">
     <value>splitContainer1.Panel1</value>
@@ -373,7 +386,7 @@
     <value>commandTextBox</value>
   </data>
   <data name="&gt;&gt;commandTextBox.Type" xml:space="preserve">
-    <value>Pyjama.MyTextBox, Pyjama, Version=1.0.3439.1745, Culture=neutral, PublicKeyToken=null</value>
+    <value>Pyjama.MyTextBox, Pyjama, Version=1.0.3439.133, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;commandTextBox.Parent" xml:space="preserve">
     <value>commandContainer.Panel1</value>
@@ -1821,6 +1834,6 @@
     <value>PyjamaForm</value>
   </data>
   <data name="&gt;&gt;$this.Type" xml:space="preserve">
-    <value>Pyjama.BaseForm, Pyjama, Version=1.0.3439.1745, Culture=neutral, PublicKeyToken=null</value>
+    <value>Pyjama.BaseForm, Pyjama, Version=1.0.3439.133, Culture=neutral, PublicKeyToken=null</value>
   </data>
 </root>

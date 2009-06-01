@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            //this.tabControl = new DocumentTabControl(); 
             this.tabControl = new System.Windows.Forms.TabControl();
             this.SuspendLayout();
             // 
@@ -47,6 +46,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScroll = true;
             this.Controls.Add(this.tabControl);
             this.Name = "DocumentManager";
             this.Size = new System.Drawing.Size(434, 368);
