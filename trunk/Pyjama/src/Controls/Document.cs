@@ -9,6 +9,7 @@ namespace Pyjama
 
     public class MyRichTextBox : RichTextBox
     {
+            /*
         public MyRichTextBox() {
             // Double buffer
             this.SetStyle(ControlStyles.UserPaint, true);
@@ -16,6 +17,7 @@ namespace Pyjama
                 this.SetStyle(ControlStyles.ResizeRedraw, true);
                 this.SetStyle(ControlStyles.AllPaintingInWmPaint, true);
         }
+             */
 
         protected override void WndProc(ref Message m) {
 		  //if ((m.Msg != 0x2111) || ((((uint)m.WParam >> 16)
