@@ -608,7 +608,7 @@
     <value>Crtl+1</value>
   </data>
   <data name="shellLanguageSelect1.ShortcutKeys" type="System.Windows.Forms.Keys, System.Windows.Forms">
-    <value>Ctrl+1</value>
+    <value>Ctrl+D1</value>
   </data>
   <data name="shellLanguageSelect1.Size" type="System.Drawing.Size, System.Drawing">
     <value>156, 22</value>
@@ -620,7 +620,7 @@
     <value>Ctrl+2</value>
   </data>
   <data name="shellLanguageSelect2.ShortcutKeys" type="System.Windows.Forms.Keys, System.Windows.Forms">
-    <value>Ctrl+2</value>
+    <value>Ctrl+D2</value>
   </data>
   <data name="shellLanguageSelect2.Size" type="System.Drawing.Size, System.Drawing">
     <value>156, 22</value>
