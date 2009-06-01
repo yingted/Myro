@@ -494,10 +494,10 @@ namespace UIIronTextBox
                 engine.SetSearchPaths(new string[] {
                     Environment.GetFolderPath(System.Environment.SpecialFolder.DesktopDirectory) 
                         + @"\Myro\Pyjama\python",
-                    @"C:\Python24\Lib",
-                    @"C:\Python24\site-packages",
                     @"C:\Python25\Lib",
-                    @"C:\Python25\site-packages"});
+                    @"C:\Python25\site-packages",
+                    @"C:\Python24\Lib",
+                    @"C:\Python24\site-packages"});
             }
             // Load mscorlib.dll:
             engine.Runtime.LoadAssembly(typeof(string).Assembly);
