@@ -245,7 +245,7 @@ using System.Windows.Forms;
              // 
              this.lineNumberEntry.Name = "lineNumberEntry";
              resources.ApplyResources(this.lineNumberEntry, "lineNumberEntry");
-             this.lineNumberEntry.KeyUp += new System.Windows.Forms.KeyEventHandler(this.lineNumberEntry_KeyUp);
+             this.lineNumberEntry.KeyDown += new System.Windows.Forms.KeyEventHandler(this.lineNumberEntry_KeyDown);
              this.lineNumberEntry.Click += new System.EventHandler(this.lineNumberEntry_Click);
              // 
              // toolStripStatusLabel13

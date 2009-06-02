@@ -542,10 +542,12 @@ namespace Pyjama
             lineNumberEntry.Text = lineNumber.Text;
             // FIXME: not the proper way... need to call routine
             // to put this in the right place.
-            lineNumber.DropDownItems[0].Owner.Visible = true;
+            //lineNumber.DropDownItems[0].Owner.Visible = true;
         }
-        private void lineNumberEntry_KeyUp(object sender, System.Windows.Forms.KeyEventArgs e)
+
+        private void lineNumberEntry_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
         {
+		  //System.Console.WriteLine("KeyUp KeyCode = {0}", e.KeyCode);
             if (e.KeyCode != Keys.Return) return;
             int lineno;
             try
