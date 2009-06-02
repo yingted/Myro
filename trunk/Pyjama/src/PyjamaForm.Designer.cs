@@ -239,7 +239,12 @@ using System.Windows.Forms;
              this.lineNumber.Name = "lineNumber";
              this.lineNumber.Padding = new System.Windows.Forms.Padding(20, 0, 0, 0);
              resources.ApplyResources(this.lineNumber, "lineNumber");
-             this.lineNumber.ButtonClick += new System.EventHandler(this.lineNumber_Click);
+             this.lineNumber.ButtonClick += delegate(object sender, System.EventArgs e)
+                                                {
+                                                    if (!lineNumber.DropDownItems[0].Owner.Visible)
+                                                        lineNumberEntry.Text = lineNumber.Text;
+                                                    this.lineNumber.ShowDropDown();
+                                                };
              // 
              // lineNumberEntry
              // 
