@@ -556,8 +556,8 @@ namespace Pyjama
             {
                 int pos = rtb.GetFirstCharIndexFromLine(lineno);
                 rtb.Select(pos, 0);
-                rtb.Focus();
                 _docManager.GetCurrentTab().textBox.UpdateGUI();
+				_docManager.FocusActiveTab();
                 lineNumber.DropDownItems[0].Owner.Visible = false;
                 e.Handled = true;
             }
