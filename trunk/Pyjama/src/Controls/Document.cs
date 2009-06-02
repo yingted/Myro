@@ -9,20 +9,13 @@ namespace Pyjama
 
     public class MyRichTextBox : RichTextBox
     {
-            /*
-        public MyRichTextBox() {
-            // Double buffer
-            this.SetStyle(ControlStyles.UserPaint, true);
-                this.SetStyle(ControlStyles.DoubleBuffer, true);
-                this.SetStyle(ControlStyles.ResizeRedraw, true);
-                this.SetStyle(ControlStyles.AllPaintingInWmPaint, true);
-        }
-             */
-
+        public bool lockUpdate = false;
         protected override void WndProc(ref Message m) {
-		  //if ((m.Msg != 0x2111) || ((((uint)m.WParam >> 16)
-		  //& 0xFFFF) != 768))
-		  try {
+          if (lockUpdate)
+            if (m.Msg == 15) 
+                return;
+          try
+          {
             base.WndProc(ref m);
 		  } catch {
 			System.Console.WriteLine("Mono bug caught!");
@@ -93,6 +86,8 @@ namespace Pyjama
         public Dictionary<string, int> keywords;
 
         public delegate void TextChangedHandler(object sender, EventArgs e);
+        int mode = 0; // used in parsing richtext
+        int[] last_mode = new int[10000];
 
         public Document(IMainForm main_form)
         {
@@ -115,12 +110,14 @@ namespace Pyjama
             fonts.Add("default", new Font("Courier New", 10, FontStyle.Regular));
             colors.Add("syntax", Color.Red);
             fonts.Add("syntax", new Font("Courier New", 10, FontStyle.Regular));
-            colors.Add("comment", Color.LightGreen);
+            colors.Add("comment", Color.DarkGreen);
             fonts.Add("comment", new Font("Courier New", 10, FontStyle.Regular));
             colors.Add("keyword", Color.Blue);
             fonts.Add("keyword", new Font("Courier New", 10, FontStyle.Bold));
-            colors.Add("quote", Color.LightBlue);
+            colors.Add("quote", Color.DarkBlue);
             fonts.Add("quote", new Font("Courier New", 10, FontStyle.Regular));
+            colors.Add("doublequote", Color.DarkGreen);
+            fonts.Add("doublequote", new Font("Courier New", 10, FontStyle.Regular));
             keywords = new Dictionary<string, int> {{ "and", 1}, {"del", 1}, {"for", 1}, 
                                                     {"is", 1}, {"raise", 1},
                                                     {"assert",1}, {"elif",1}, {"from",1}, 
@@ -168,21 +165,7 @@ namespace Pyjama
 		  }
         }
 
-	/*
-        void Parse(string text)
-        {
-            // Foreach line in input,
-            // identify key words and format them when adding to the rich text box.
-            Regex r = new Regex("\\n");
-            String[] lines = r.Split(text);
-            foreach (string l in lines)
-            {
-                ParseLine(l);
-            }
-        }
-	*/
-
-        private static bool EndSymbol(char c)
+	    private static bool EndSymbol(char c)
         {
             return (c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == ',' ||
                     c == '(' || c == ')' || c == '.' || c == '-' || c == '/' || c == '\0' ||
@@ -194,36 +177,37 @@ namespace Pyjama
             // Modify signal, for "*" and mark dirty:
             if (TextChanged != null)
                 TextChanged(this, e);
-            MyRichTextBox m_rtb = textBox;
-            // Calculate the starting position of the current line.
-            int start = 0, end = 0;
-            for (start = m_rtb.SelectionStart - 1; start > 0; start--)
+            int lineno = textBox.GetLineFromCharIndex(textBox.GetFirstCharIndexOfCurrentLine());
+            textBox.lockUpdate = true;
+            if (lineno == 0)
+                mode = 0; // start out in no mode
+            else 
+                mode = last_mode[lineno - 1]; // else get last left off mode
+            for (int i = lineno; i < lineno + 30; i++)
             {
-                if (m_rtb.Text[start] == '\n')
-                {
-                    start++;
-                    break;
-                }
+                FormatLine(i);
             }
-            // Calculate the end position of the current line.
-            for (end = m_rtb.SelectionStart; end < m_rtb.Text.Length; end++)
-            {
-                if (m_rtb.Text[end] == '\n')
-                    break;
-            }
-            start = start < 0 ? 0 : start;
-            //System.Console.WriteLine("start={0}, stop={1}", start, end);
-            // Extract the current line that is being edited.
-            String line = m_rtb.Text.Substring(start, end - start) + '\0';
+            textBox.lockUpdate = false;
+        }
 
+        public void FormatLine(int lineno) {
+            // FIXME: everything works, but I need to treat triple quote/double 
+            // as unique (because you can have single quotes in double quotes
+            if (lineno >= textBox.Lines.Length || lineno < 0)
+                return;
+            String line = textBox.Lines[lineno] + '\0';
+            int start = textBox.GetFirstCharIndexFromLine(lineno);
             // Backup the users current selection point.
-            int selectionStart = m_rtb.SelectionStart;
-            int selectionLength = m_rtb.SelectionLength;
+            int selectionStart = textBox.SelectionStart;
+            int selectionLength = textBox.SelectionLength;
             int index = start;
             int line_pos = 0;
-            int mode = 0; // 0 start; 1 in token; 2 in double quote; 3 in quote
             int tokenStart = 0;
             string token;
+            if (mode == 2) // inside quote
+                tokenStart = index;
+            else if (mode == 3) // inside double quote
+                tokenStart = index;
             foreach (char c in line)
             {
                 if (mode == 0)
@@ -236,10 +220,11 @@ namespace Pyjama
                         tokenStart = index;
                     } else if (c == '#')
                     {
-                        m_rtb.SelectionStart = index;
-                        m_rtb.SelectionLength = line.Length - line_pos - 1;
-                        m_rtb.SelectionColor = colors["comment"];
-                        m_rtb.SelectionFont = fonts["comment"];
+                        mode = 0;
+                        textBox.SelectionStart = index;
+                        textBox.SelectionLength = line.Length - line_pos - 1;
+                        textBox.SelectionColor = colors["comment"];
+                        textBox.SelectionFont = fonts["comment"];
                         break; // done!
                     }
                     else if (!EndSymbol(c)) // start of token, number, or word
@@ -252,33 +237,33 @@ namespace Pyjama
                 {
                     if (EndSymbol(c)) // end of token
                     {
-                        token = m_rtb.Text.Substring(tokenStart, index - tokenStart);
+                        token = textBox.Text.Substring(tokenStart, index - tokenStart);
                         if (keywords.ContainsKey(token))
                         {
                             mode = 0;
                             int colorCode = keywords[token];
                             if (colorCode == 1)
                             {
-                                m_rtb.SelectionStart = tokenStart;
-                                m_rtb.SelectionLength = token.Length;
-                                m_rtb.SelectionColor = colors["keyword"];
-                                m_rtb.SelectionFont = fonts["keyword"];
+                                textBox.SelectionStart = tokenStart;
+                                textBox.SelectionLength = token.Length;
+                                textBox.SelectionColor = colors["keyword"];
+                                textBox.SelectionFont = fonts["keyword"];
                             }
                             else if (colorCode == 2)
                             {
-                                m_rtb.SelectionStart = tokenStart;
-                                m_rtb.SelectionLength = token.Length;
-                                m_rtb.SelectionColor = colors["syntax"];
-                                m_rtb.SelectionFont = fonts["syntax"];
+                                textBox.SelectionStart = tokenStart;
+                                textBox.SelectionLength = token.Length;
+                                textBox.SelectionColor = colors["syntax"];
+                                textBox.SelectionFont = fonts["syntax"];
                             }
                         }
                         else
                         {
                             mode = 0;
-                            m_rtb.SelectionStart = tokenStart;
-                            m_rtb.SelectionLength = token.Length;
-                            m_rtb.SelectionColor = colors["default"];
-                            m_rtb.SelectionFont = fonts["default"];
+                            textBox.SelectionStart = tokenStart;
+                            textBox.SelectionLength = token.Length;
+                            textBox.SelectionColor = colors["default"];
+                            textBox.SelectionFont = fonts["default"];
                         }
                     } // else still in token
                 }
@@ -286,40 +271,49 @@ namespace Pyjama
                 {
                     if (c == '"' || c == '\0') // end of double quote
                     {
-                        mode = 0;
                         if (c == '"')
-                            token = m_rtb.Text.Substring(tokenStart, index - tokenStart + 1);
+                        {
+                            mode = 0;
+                            token = textBox.Text.Substring(tokenStart, index - tokenStart + 1);
+                        }
                         else
-                            token = m_rtb.Text.Substring(tokenStart, index - tokenStart);
-                        m_rtb.SelectionStart = tokenStart;
-                        m_rtb.SelectionLength = token.Length;
-                        m_rtb.SelectionColor = colors["quote"];
-                        m_rtb.SelectionFont = fonts["quote"];
+                        {
+                            token = textBox.Text.Substring(tokenStart, index - tokenStart);
+                        }
+                        textBox.SelectionStart = tokenStart;
+                        textBox.SelectionLength = token.Length;
+                        textBox.SelectionColor = colors["doublequote"];
+                        textBox.SelectionFont = fonts["doublequote"];
                     } // else still in double quote
                 }
                 else if (mode == 3) // in quote
                 {
                     if (c == '\'' || c == '\0') // end of quote
                     {
-                        mode = 0;
                         if (c == '\'')
-                            token = m_rtb.Text.Substring(tokenStart, index - tokenStart + 1);
+                        {
+                            mode = 0;
+                            token = textBox.Text.Substring(tokenStart, index - tokenStart + 1);
+                        }
                         else
-                            token = m_rtb.Text.Substring(tokenStart, index - tokenStart);
-                        m_rtb.SelectionStart = tokenStart;
-                        m_rtb.SelectionLength = token.Length;
-                        m_rtb.SelectionColor = colors["quote"];
-                        m_rtb.SelectionFont = fonts["quote"];
+                        {
+                            token = textBox.Text.Substring(tokenStart, index - tokenStart);
+                        }
+                        textBox.SelectionStart = tokenStart;
+                        textBox.SelectionLength = token.Length;
+                        textBox.SelectionColor = colors["quote"];
+                        textBox.SelectionFont = fonts["quote"];
                     } // else still in quote
                 }
                 index++;
                 line_pos++;
             }
+            last_mode[lineno] = mode; // what mode did we leave off in?
             // Restore the users current selection point.    
-            m_rtb.SelectionStart = selectionStart;
-            m_rtb.SelectionLength = selectionLength;
-            m_rtb.SelectionColor = colors["default"];
-            m_rtb.SelectionFont = fonts["default"];
+            textBox.SelectionStart = selectionStart;
+            textBox.SelectionLength = selectionLength;
+            textBox.SelectionColor = colors["default"];
+            textBox.SelectionFont = fonts["default"];
         }
 
         public int CurrentColumn
