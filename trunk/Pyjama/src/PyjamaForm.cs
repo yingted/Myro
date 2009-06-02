@@ -534,12 +534,12 @@ namespace Pyjama
 
         private void lineNumberEntry_Click(object sender, EventArgs e)
         {
-            lineNumberEntry.Text = lineNumber.Text;
+            if (!lineNumber.DropDownItems[0].Owner.Visible)
+                lineNumberEntry.Text = lineNumber.Text;
         }
 
         private void lineNumber_Click(object sender, EventArgs e)
         {
-            lineNumberEntry.Text = lineNumber.Text;
             // FIXME: not the proper way... need to call routine
             // to put this in the right place.
             //lineNumber.DropDownItems[0].Owner.Visible = true;
@@ -566,6 +566,7 @@ namespace Pyjama
                 rtb.Focus();
                 _docManager.GetCurrentTab().textBox.UpdateGUI();
                 lineNumber.DropDownItems[0].Owner.Visible = false;
+                e.Handled = true;
             }
         }
 
