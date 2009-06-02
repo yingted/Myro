@@ -60,7 +60,8 @@ using System.Windows.Forms;
              this.rubyToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
              this.schemeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
              this.toolStripStatusLabel11 = new System.Windows.Forms.ToolStripStatusLabel();
-             this.lineNumber = new System.Windows.Forms.ToolStripStatusLabel();
+             this.lineNumber = new System.Windows.Forms.ToolStripSplitButton();
+             this.lineNumberEntry = new System.Windows.Forms.ToolStripTextBox();
              this.toolStripStatusLabel13 = new System.Windows.Forms.ToolStripStatusLabel();
              this.columnNumber = new System.Windows.Forms.ToolStripStatusLabel();
              this._docManager = new Pyjama.DocumentManager();
@@ -133,6 +134,7 @@ using System.Windows.Forms;
              this.languageName = new System.Windows.Forms.ToolStripStatusLabel();
              this.toolStripStatusLabel3 = new System.Windows.Forms.ToolStripStatusLabel();
              this.toolStripStatusLabel4 = new System.Windows.Forms.ToolStripStatusLabel();
+             this.textBox1 = new System.Windows.Forms.TextBox();
              this.mainContentSplit.Panel1.SuspendLayout();
              this.mainContentSplit.Panel2.SuspendLayout();
              this.mainContentSplit.SuspendLayout();
@@ -233,9 +235,17 @@ using System.Windows.Forms;
              // 
              // lineNumber
              // 
+             this.lineNumber.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.lineNumberEntry});
              this.lineNumber.Name = "lineNumber";
              this.lineNumber.Padding = new System.Windows.Forms.Padding(20, 0, 0, 0);
              resources.ApplyResources(this.lineNumber, "lineNumber");
+             this.lineNumber.Click += new System.EventHandler(this.lineNumber_Click);
+             // 
+             // lineNumberEntry
+             // 
+             this.lineNumberEntry.Name = "lineNumberEntry";
+             resources.ApplyResources(this.lineNumberEntry, "lineNumberEntry");
              // 
              // toolStripStatusLabel13
              // 
@@ -759,10 +769,16 @@ using System.Windows.Forms;
              resources.ApplyResources(this.toolStripStatusLabel4, "toolStripStatusLabel4");
              this.toolStripStatusLabel4.Name = "toolStripStatusLabel4";
              // 
+             // textBox1
+             // 
+             resources.ApplyResources(this.textBox1, "textBox1");
+             this.textBox1.Name = "textBox1";
+             // 
              // PyjamaForm
              // 
              resources.ApplyResources(this, "$this");
              this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+             this.Controls.Add(this.textBox1);
              this.Controls.Add(this.main);
              this.Controls.Add(this.menuStrip1);
              this.Name = "PyjamaForm";
@@ -871,8 +887,6 @@ using System.Windows.Forms;
          private System.Windows.Forms.SplitContainer commandContainer;
          private MyTextBox commandTextBox;
          private Console outputWindow;
-         private System.Windows.Forms.ToolStripStatusLabel lineNumber;
-         private System.Windows.Forms.ToolStripStatusLabel columnNumber;
          private TableLayoutPanel tableLayoutPanel1;
          public Button runButton;
          private Label commandLabel;
@@ -883,6 +897,10 @@ using System.Windows.Forms;
          private ToolStripMenuItem newlineToolStripMenuItem;
          private ToolStripMenuItem previewMenuItem;
          private ToolStripMenuItem printScriptMenuItem;
+         private TextBox textBox1;
+         private ToolStripSplitButton lineNumber;
+         private ToolStripTextBox lineNumberEntry;
+         private ToolStripStatusLabel columnNumber;
 
 
 

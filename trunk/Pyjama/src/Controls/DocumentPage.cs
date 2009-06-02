@@ -76,8 +76,8 @@ namespace Pyjama
         public void SetInitialText(string text)
         {
             Input.Text = text;
+            textBox.FormatAll();
             RemoveSaveStatus();
-            
         }
 
         private void RemoveSaveStatus()

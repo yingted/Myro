@@ -194,8 +194,11 @@
   <data name="toolStripStatusLabel11.Text" xml:space="preserve">
     <value>Line: </value>
   </data>
+  <data name="lineNumberEntry.Size" type="System.Drawing.Size, System.Drawing">
+    <value>100, 23</value>
+  </data>
   <data name="lineNumber.Size" type="System.Drawing.Size, System.Drawing">
-    <value>33, 17</value>
+    <value>49, 20</value>
   </data>
   <data name="lineNumber.Text" xml:space="preserve">
     <value>0</value>
@@ -246,6 +249,9 @@
   <data name="&gt;&gt;statusStrip1.ZOrder" xml:space="preserve">
     <value>0</value>
   </data>
+  <data name="_docManager.AutoScroll" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
   <data name="_docManager.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
   </data>
@@ -258,24 +264,23 @@
   <data name="_docManager.Location" type="System.Drawing.Point, System.Drawing">
     <value>0, 0</value>
   </data>
-  <data name="_docManager.Size" type="System.Drawing.Size, System.Drawing">
-    <value>479, 271</value>
-  </data>
-  <data name="_docManager.TabIndex" type="System.Int32, mscorlib">
-    <value>14</value>
-  </data>
-  <data name="&gt;&gt;_docManager.Name" xml:space="preserve">
-    <value>0</value>
-  </data>
-    <value>_docManager</value>
   <data name="_docManager.Margin" type="System.Windows.Forms.Padding, System.Windows.Forms">
     <value>3, 3, 3, 100</value>
   </data>
   <data name="_docManager.Padding" type="System.Windows.Forms.Padding, System.Windows.Forms">
     <value>0, 0, 0, 25</value>
   </data>
+  <data name="_docManager.Size" type="System.Drawing.Size, System.Drawing">
+    <value>482, 296</value>
+  </data>
+  <data name="_docManager.TabIndex" type="System.Int32, mscorlib">
+    <value>14</value>
+  </data>
+  <data name="&gt;&gt;_docManager.Name" xml:space="preserve">
+    <value>_docManager</value>
+  </data>
   <data name="&gt;&gt;_docManager.Type" xml:space="preserve">
-    <value>Pyjama.DocumentManager, Pyjama, Version=1.0.3439.133, Culture=neutral, PublicKeyToken=null</value>
+    <value>Pyjama.DocumentManager, Pyjama, Version=1.0.3440.22336, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;_docManager.Parent" xml:space="preserve">
     <value>mainContentSplit.Panel1</value>
@@ -335,7 +340,7 @@
     <value>outputWindow</value>
   </data>
   <data name="&gt;&gt;outputWindow.Type" xml:space="preserve">
-    <value>Pyjama.Console, Pyjama, Version=1.0.3439.133, Culture=neutral, PublicKeyToken=null</value>
+    <value>Pyjama.Console, Pyjama, Version=1.0.3440.22336, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;outputWindow.Parent" xml:space="preserve">
     <value>splitContainer1.Panel1</value>
@@ -386,7 +391,7 @@
     <value>commandTextBox</value>
   </data>
   <data name="&gt;&gt;commandTextBox.Type" xml:space="preserve">
-    <value>Pyjama.MyTextBox, Pyjama, Version=1.0.3439.133, Culture=neutral, PublicKeyToken=null</value>
+    <value>Pyjama.MyTextBox, Pyjama, Version=1.0.3440.22336, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;commandTextBox.Parent" xml:space="preserve">
     <value>commandContainer.Panel1</value>
@@ -608,7 +613,7 @@
     <value>Crtl+1</value>
   </data>
   <data name="shellLanguageSelect1.ShortcutKeys" type="System.Windows.Forms.Keys, System.Windows.Forms">
-    <value>Ctrl+D1</value>
+    <value>Ctrl+1</value>
   </data>
   <data name="shellLanguageSelect1.Size" type="System.Drawing.Size, System.Drawing">
     <value>156, 22</value>
@@ -620,7 +625,7 @@
     <value>Ctrl+2</value>
   </data>
   <data name="shellLanguageSelect2.ShortcutKeys" type="System.Windows.Forms.Keys, System.Windows.Forms">
-    <value>Ctrl+D2</value>
+    <value>Ctrl+2</value>
   </data>
   <data name="shellLanguageSelect2.Size" type="System.Drawing.Size, System.Drawing">
     <value>156, 22</value>
@@ -972,7 +977,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;main.ZOrder" xml:space="preserve">
-    <value>0</value>
+    <value>1</value>
   </data>
   <metadata name="menuStrip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>0, 0</value>
@@ -1360,7 +1365,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;menuStrip1.ZOrder" xml:space="preserve">
-    <value>1</value>
+    <value>2</value>
   </data>
   <data name="toolStripStatusLabel1.Font" type="System.Drawing.Font, System.Drawing">
     <value>Microsoft Sans Serif, 9pt, style=Italic</value>
@@ -1412,6 +1417,27 @@
   </data>
   <data name="toolStripStatusLabel4.Text" xml:space="preserve">
     <value>Column:</value>
+  </data>
+  <data name="textBox1.Location" type="System.Drawing.Point, System.Drawing">
+    <value>0, 0</value>
+  </data>
+  <data name="textBox1.Size" type="System.Drawing.Size, System.Drawing">
+    <value>100, 21</value>
+  </data>
+  <data name="textBox1.TabIndex" type="System.Int32, mscorlib">
+    <value>3</value>
+  </data>
+  <data name="&gt;&gt;textBox1.Name" xml:space="preserve">
+    <value>textBox1</value>
+  </data>
+  <data name="&gt;&gt;textBox1.Type" xml:space="preserve">
+    <value>System.Windows.Forms.TextBox, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;textBox1.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;textBox1.ZOrder" xml:space="preserve">
+    <value>0</value>
   </data>
   <metadata name="$this.Localizable" type="System.Boolean, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
@@ -1474,7 +1500,13 @@
     <value>lineNumber</value>
   </data>
   <data name="&gt;&gt;lineNumber.Type" xml:space="preserve">
-    <value>System.Windows.Forms.ToolStripStatusLabel, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Windows.Forms.ToolStripSplitButton, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;lineNumberEntry.Name" xml:space="preserve">
+    <value>lineNumberEntry</value>
+  </data>
+  <data name="&gt;&gt;lineNumberEntry.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripTextBox, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;toolStripStatusLabel13.Name" xml:space="preserve">
     <value>toolStripStatusLabel13</value>
@@ -1834,6 +1866,6 @@
     <value>PyjamaForm</value>
   </data>
   <data name="&gt;&gt;$this.Type" xml:space="preserve">
-    <value>Pyjama.BaseForm, Pyjama, Version=1.0.3439.133, Culture=neutral, PublicKeyToken=null</value>
+    <value>Pyjama.BaseForm, Pyjama, Version=1.0.3440.22336, Culture=neutral, PublicKeyToken=null</value>
   </data>
 </root>

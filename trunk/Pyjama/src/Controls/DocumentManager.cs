@@ -80,7 +80,7 @@ namespace Pyjama
                 return null;
         }
 
-        private DocumentPage GetCurrentTab()
+        public DocumentPage GetCurrentTab()
         {
             if (tabControl.TabCount > 0)
                 return tabControl.SelectedTab as DocumentPage;

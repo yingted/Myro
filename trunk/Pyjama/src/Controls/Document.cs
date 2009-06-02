@@ -10,10 +10,13 @@ namespace Pyjama
     public class MyRichTextBox : RichTextBox
     {
         public bool lockUpdate = false;
+        
         protected override void WndProc(ref Message m) {
-          if (lockUpdate)
-            if (m.Msg == 15) 
-                return;
+            if (lockUpdate)
+            {
+                if (m.Msg == 15) // paint
+                    return;
+            }
           try
           {
             base.WndProc(ref m);
@@ -80,7 +83,7 @@ namespace Pyjama
     {
         public new event Document.TextChangedHandler TextChanged;
         private IMainForm MainForm;
-        private MyRichTextBox textBox;
+        public MyRichTextBox textBox;
         private Dictionary<string, Color> colors = new Dictionary<string, Color>();
         private Dictionary<string, Font> fonts = new Dictionary<string, Font>();
         public Dictionary<string, int> keywords;
@@ -186,13 +189,28 @@ namespace Pyjama
             for (int i = lineno; i < lineno + 30; i++)
             {
                 FormatLine(i);
+                if (mode == 0) break;
+            }
+            textBox.lockUpdate = false;
+        }
+
+        public void FormatAll()
+        {
+            last_mode = new int[10000]; // reset to zeros
+            textBox.lockUpdate = true;
+            mode = 0; // start out in no mode
+            // FIXME: need to format only the visible
+            for (int i = 0; i < 30; i++)
+            {
+                FormatLine(i);
             }
             textBox.lockUpdate = false;
         }
 
         public void FormatLine(int lineno) {
-            // FIXME: everything works, but I need to treat triple quote/double 
+            // FIXME: most works, but we need to treat triple quote/double 
             // as unique (because you can have single quotes in double quotes
+            // FIXME: would be nice if scroll didn't change as we move over lines
             if (lineno >= textBox.Lines.Length || lineno < 0)
                 return;
             String line = textBox.Lines[lineno] + '\0';

@@ -531,5 +531,11 @@ namespace Pyjama
         {
             _docManager.FocusActiveTab();
         }
+
+        private void lineNumber_Click(object sender, EventArgs e)
+        {
+            lineNumberEntry.Text = lineNumber.Text;
+            //lineNumber.Text;
+        }
     }
 }

@@ -495,9 +495,8 @@ namespace UIIronTextBox
                     Environment.GetFolderPath(System.Environment.SpecialFolder.DesktopDirectory) 
                         + @"\Myro\Pyjama\python",
                     @"C:\Python25\Lib",
-                    @"C:\Python25\site-packages",
-                    @"C:\Python24\Lib",
-                    @"C:\Python24\site-packages"});
+                    @"C:\Python25\site-packages"
+                    });
             }
             // Load mscorlib.dll:
             engine.Runtime.LoadAssembly(typeof(string).Assembly);
@@ -519,10 +518,11 @@ namespace UIIronTextBox
 
         public void DoFile(string filename)
         {
-	    if (backgroundThread != null && backgroundThread.IsAlive) {
-		DisplayError("Cannot run script; I'm processing...");
-		return;
-	    }
+            if (backgroundThread != null && backgroundThread.IsAlive)
+            {
+                DisplayError("Cannot run script; I'm processing...");
+                return;
+            }
             if (pyjamaModule == null)
             {
                 pyjamaModule = new PyjamaModule(this, true);
@@ -551,7 +551,8 @@ namespace UIIronTextBox
             //}
             if (pyjamaModule.Threaded)
             {
-                ThreadStart starter = delegate {
+                ThreadStart starter = delegate
+                {
                     Execute(filename, SourceCodeKind.File);
                 };
                 backgroundThread = new Thread(new ThreadStart(starter));
@@ -574,28 +575,29 @@ namespace UIIronTextBox
                             new object[] { text });
                 return;
             }
-            Pyjama.PyjamaForm pjform = (Pyjama.PyjamaForm) this.TopLevelControl;
+            Pyjama.PyjamaForm pjform = (Pyjama.PyjamaForm)this.TopLevelControl;
             pjform.runButton.Text = text;
         }
 
         internal void CancelCommand()
         {
             if (backgroundThread != null && backgroundThread.IsAlive)
-            { 
+            {
                 //engine.Runtime.Host.PlatformAdaptationLayer?;
-		backgroundThread.Abort();
-		backgroundThread.Join();
-		DisplayError("Script aborted!");
+                backgroundThread.Abort();
+                backgroundThread.Join();
+                DisplayError("Script aborted!");
             }
             SetRunButton("Run!");
         }
 
         public void DoCommand(string command)
         {
-	    if (backgroundThread != null && backgroundThread.IsAlive) {
-		DisplayError("Cannot evaluate script; I'm processing...");
-		return;
-	    }
+            if (backgroundThread != null && backgroundThread.IsAlive)
+            {
+                DisplayError("Cannot evaluate script; I'm processing...");
+                return;
+            }
             if (pyjamaModule == null)
             {
                 pyjamaModule = new PyjamaModule(this, true);
@@ -614,7 +616,7 @@ namespace UIIronTextBox
                     first = false;
                 }
                 this.consoleTextBox.AddcommandHistory(command);
-		// Interactive Meta Commands
+                // Interactive Meta Commands
                 if (command == "#clear")
                 {
                     this.Clear();
@@ -627,13 +629,13 @@ namespace UIIronTextBox
                 {
                     engine = environment.GetEngine("py");
                     Prompt = "---- Python Mode ----";
-		    WriteText(Prompt + "\n");
+                    WriteText(Prompt + "\n");
                 }
                 else if (command == "#ruby")
                 {
                     engine = environment.GetEngine("rb");
                     Prompt = "---- Ruby Mode ----";
-		    WriteText(Prompt + "\n");
+                    WriteText(Prompt + "\n");
                 }
                 else // Command
                 {
@@ -862,7 +864,7 @@ namespace UIIronTextBox
             // Put the mouse cursor back
             if (resultMessage != null)
                 consoleTextBox.printTextOnNewline(resultMessage);
-	    consoleTextBox.printTextOnNewline(">>> ");
+            consoleTextBox.printTextOnNewline(">>> ");
             this.TopLevelControl.Cursor = Cursors.Default;
             consoleTextBox.Select(consoleTextBox.TextLength, 0);
             consoleTextBox.SelectionStart = consoleTextBox.TextLength;
@@ -893,7 +895,7 @@ namespace UIIronTextBox
             //consoleTextBox.SelectionStart = consoleTextBox.TextLength;
             consoleTextBox.Select(consoleTextBox.TextLength, 0);
             consoleTextBox.SelectionColor = Color.White;
-	    consoleTextBox.printTextOnNewline(">>> ");
+            consoleTextBox.printTextOnNewline(">>> ");
         }
 
         /// <summary>
