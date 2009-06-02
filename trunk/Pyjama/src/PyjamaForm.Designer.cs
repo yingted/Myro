@@ -134,7 +134,6 @@ using System.Windows.Forms;
              this.languageName = new System.Windows.Forms.ToolStripStatusLabel();
              this.toolStripStatusLabel3 = new System.Windows.Forms.ToolStripStatusLabel();
              this.toolStripStatusLabel4 = new System.Windows.Forms.ToolStripStatusLabel();
-             this.textBox1 = new System.Windows.Forms.TextBox();
              this.mainContentSplit.Panel1.SuspendLayout();
              this.mainContentSplit.Panel2.SuspendLayout();
              this.mainContentSplit.SuspendLayout();
@@ -240,12 +239,14 @@ using System.Windows.Forms;
              this.lineNumber.Name = "lineNumber";
              this.lineNumber.Padding = new System.Windows.Forms.Padding(20, 0, 0, 0);
              resources.ApplyResources(this.lineNumber, "lineNumber");
-             this.lineNumber.Click += new System.EventHandler(this.lineNumber_Click);
+             this.lineNumber.ButtonClick += new System.EventHandler(this.lineNumber_Click);
              // 
              // lineNumberEntry
              // 
              this.lineNumberEntry.Name = "lineNumberEntry";
              resources.ApplyResources(this.lineNumberEntry, "lineNumberEntry");
+             this.lineNumberEntry.KeyUp += new System.Windows.Forms.KeyEventHandler(this.lineNumberEntry_KeyUp);
+             this.lineNumberEntry.Click += new System.EventHandler(this.lineNumberEntry_Click);
              // 
              // toolStripStatusLabel13
              // 
@@ -769,16 +770,10 @@ using System.Windows.Forms;
              resources.ApplyResources(this.toolStripStatusLabel4, "toolStripStatusLabel4");
              this.toolStripStatusLabel4.Name = "toolStripStatusLabel4";
              // 
-             // textBox1
-             // 
-             resources.ApplyResources(this.textBox1, "textBox1");
-             this.textBox1.Name = "textBox1";
-             // 
              // PyjamaForm
              // 
              resources.ApplyResources(this, "$this");
              this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-             this.Controls.Add(this.textBox1);
              this.Controls.Add(this.main);
              this.Controls.Add(this.menuStrip1);
              this.Name = "PyjamaForm";
@@ -897,7 +892,6 @@ using System.Windows.Forms;
          private ToolStripMenuItem newlineToolStripMenuItem;
          private ToolStripMenuItem previewMenuItem;
          private ToolStripMenuItem printScriptMenuItem;
-         private TextBox textBox1;
          private ToolStripSplitButton lineNumber;
          private ToolStripTextBox lineNumberEntry;
          private ToolStripStatusLabel columnNumber;

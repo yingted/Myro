@@ -280,7 +280,7 @@
     <value>_docManager</value>
   </data>
   <data name="&gt;&gt;_docManager.Type" xml:space="preserve">
-    <value>Pyjama.DocumentManager, Pyjama, Version=1.0.3440.22336, Culture=neutral, PublicKeyToken=null</value>
+    <value>Pyjama.DocumentManager, Pyjama, Version=1.0.3440.27299, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;_docManager.Parent" xml:space="preserve">
     <value>mainContentSplit.Panel1</value>
@@ -340,7 +340,7 @@
     <value>outputWindow</value>
   </data>
   <data name="&gt;&gt;outputWindow.Type" xml:space="preserve">
-    <value>Pyjama.Console, Pyjama, Version=1.0.3440.22336, Culture=neutral, PublicKeyToken=null</value>
+    <value>Pyjama.Console, Pyjama, Version=1.0.3440.27299, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;outputWindow.Parent" xml:space="preserve">
     <value>splitContainer1.Panel1</value>
@@ -391,7 +391,7 @@
     <value>commandTextBox</value>
   </data>
   <data name="&gt;&gt;commandTextBox.Type" xml:space="preserve">
-    <value>Pyjama.MyTextBox, Pyjama, Version=1.0.3440.22336, Culture=neutral, PublicKeyToken=null</value>
+    <value>Pyjama.MyTextBox, Pyjama, Version=1.0.3440.27299, Culture=neutral, PublicKeyToken=null</value>
   </data>
   <data name="&gt;&gt;commandTextBox.Parent" xml:space="preserve">
     <value>commandContainer.Panel1</value>
@@ -977,7 +977,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;main.ZOrder" xml:space="preserve">
-    <value>1</value>
+    <value>0</value>
   </data>
   <metadata name="menuStrip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>0, 0</value>
@@ -1365,7 +1365,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;menuStrip1.ZOrder" xml:space="preserve">
-    <value>2</value>
+    <value>1</value>
   </data>
   <data name="toolStripStatusLabel1.Font" type="System.Drawing.Font, System.Drawing">
     <value>Microsoft Sans Serif, 9pt, style=Italic</value>
@@ -1417,27 +1417,6 @@
   </data>
   <data name="toolStripStatusLabel4.Text" xml:space="preserve">
     <value>Column:</value>
-  </data>
-  <data name="textBox1.Location" type="System.Drawing.Point, System.Drawing">
-    <value>0, 0</value>
-  </data>
-  <data name="textBox1.Size" type="System.Drawing.Size, System.Drawing">
-    <value>100, 21</value>
-  </data>
-  <data name="textBox1.TabIndex" type="System.Int32, mscorlib">
-    <value>3</value>
-  </data>
-  <data name="&gt;&gt;textBox1.Name" xml:space="preserve">
-    <value>textBox1</value>
-  </data>
-  <data name="&gt;&gt;textBox1.Type" xml:space="preserve">
-    <value>System.Windows.Forms.TextBox, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="&gt;&gt;textBox1.Parent" xml:space="preserve">
-    <value>$this</value>
-  </data>
-  <data name="&gt;&gt;textBox1.ZOrder" xml:space="preserve">
-    <value>0</value>
   </data>
   <metadata name="$this.Localizable" type="System.Boolean, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>True</value>
@@ -1866,6 +1845,6 @@
     <value>PyjamaForm</value>
   </data>
   <data name="&gt;&gt;$this.Type" xml:space="preserve">
-    <value>Pyjama.BaseForm, Pyjama, Version=1.0.3440.22336, Culture=neutral, PublicKeyToken=null</value>
+    <value>Pyjama.BaseForm, Pyjama, Version=1.0.3440.27299, Culture=neutral, PublicKeyToken=null</value>
   </data>
 </root>

@@ -153,6 +153,11 @@ namespace Pyjama
             // FIXME: this can be wrong when selecting
             //System.Console.WriteLine("textBox_KeyUp: {0} {1} handled: {2}", 
             //	     e.KeyCode, e.Control, e.Handled);
+            UpdateGUI();
+        }
+
+        public void UpdateGUI()
+        {
             int col = (textBox.SelectionStart - textBox.GetFirstCharIndexOfCurrentLine() + 1);
             int line = (textBox.GetLineFromCharIndex(textBox.SelectionStart) + 1);
             MainForm.UpdateGUI(col, line);

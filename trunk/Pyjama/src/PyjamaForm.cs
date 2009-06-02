@@ -532,10 +532,40 @@ namespace Pyjama
             _docManager.FocusActiveTab();
         }
 
+        private void lineNumberEntry_Click(object sender, EventArgs e)
+        {
+            lineNumberEntry.Text = lineNumber.Text;
+        }
+
         private void lineNumber_Click(object sender, EventArgs e)
         {
             lineNumberEntry.Text = lineNumber.Text;
-            //lineNumber.Text;
+            // FIXME: not the proper way... need to call routine
+            // to put this in the right place.
+            lineNumber.DropDownItems[0].Owner.Visible = true;
         }
+        private void lineNumberEntry_KeyUp(object sender, System.Windows.Forms.KeyEventArgs e)
+        {
+            if (e.KeyCode != Keys.Return) return;
+            int lineno;
+            try
+            {
+                lineno = int.Parse(lineNumberEntry.Text) - 1;
+            }
+            catch
+            {
+                return;
+            }
+            MyRichTextBox rtb = _docManager.GetCurrentTab().textBox.textBox;
+            if (lineno < rtb.Lines.Length && lineno >= 0)
+            {
+                int pos = rtb.GetFirstCharIndexFromLine(lineno);
+                rtb.Select(pos, 0);
+                rtb.Focus();
+                _docManager.GetCurrentTab().textBox.UpdateGUI();
+                lineNumber.DropDownItems[0].Owner.Visible = false;
+            }
+        }
+
     }
 }
