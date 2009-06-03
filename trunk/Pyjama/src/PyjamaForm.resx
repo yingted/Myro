@@ -1277,6 +1277,15 @@
   <data name="shellToolStripMenuItem.Text" xml:space="preserve">
     <value>Select Shell</value>
   </data>
+  <data name="shellRestartToolStripMenuItem.ShortcutKeys" type="System.Windows.Forms.Keys, System.Windows.Forms">
+    <value>F8</value>
+  </data>
+  <data name="shellRestartToolStripMenuItem.Size" type="System.Drawing.Size, System.Drawing">
+    <value>178, 22</value>
+  </data>
+  <data name="shellRestartToolStripMenuItem.Text" xml:space="preserve">
+    <value>Restart Shell</value>
+  </data>
   <data name="evaluateToolStripMenuItem.ShortcutKeyDisplayString" xml:space="preserve">
     <value>Enter</value>
   </data>
@@ -1761,6 +1770,12 @@
     <value>shellToolStripMenuItem</value>
   </data>
   <data name="&gt;&gt;shellToolStripMenuItem.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;shellRestartToolStripMenuItem.Name" xml:space="preserve">
+    <value>shellRestartToolStripMenuItem</value>
+  </data>
+  <data name="&gt;&gt;shellRestartToolStripMenuItem.Type" xml:space="preserve">
     <value>System.Windows.Forms.ToolStripMenuItem, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="&gt;&gt;evaluateToolStripMenuItem.Name" xml:space="preserve">

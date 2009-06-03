@@ -388,6 +388,7 @@ namespace UIIronTextBox
 
     public class IronTextBoxControl : UserControl
     {
+	ScriptRuntimeSetup scriptRuntimeSetup = null;
         public ScriptRuntime environment;
         public ScriptEngine engine;
         public ScriptScope scope;
@@ -397,6 +398,42 @@ namespace UIIronTextBox
         public PyjamaModule pyjamaModule = null;
         public Thread backgroundThread = null;
         private string resultMessage = null;
+
+	public void RestartShell() {
+	    RestartShell(false);
+	}
+
+	public void RestartShell(bool displayRestart) {
+            environment = new ScriptRuntime(scriptRuntimeSetup);
+            scope = environment.CreateScope();
+            engine = environment.GetEngine("py");
+            if (System.Environment.OSVersion.Platform == System.PlatformID.Unix)
+            {
+                engine.SetSearchPaths(new string[] {
+                    "/home/dblank/Myro/Pyjama/python",
+                    "/usr/lib/python2.5",
+                    "/usr/lib/python2.5/site-packages"});
+            }
+            else
+            {
+                engine.SetSearchPaths(new string[] {
+                    Environment.GetFolderPath(System.Environment.SpecialFolder.DesktopDirectory) 
+                        + @"\Myro\Pyjama\python",
+                    @"C:\Python25\Lib",
+                    @"C:\Python25\site-packages"
+                    });
+            }
+            // Load mscorlib.dll:
+            engine.Runtime.LoadAssembly(typeof(string).Assembly);
+            // Load Languages so that Host System can find DLLs:
+            engine.Runtime.LoadAssembly(typeof(IronPython.Hosting.Python).Assembly);
+            engine.Runtime.LoadAssembly(typeof(IronRuby.Hosting.RubyCommandLine).Assembly);
+            engine.Runtime.LoadAssembly(typeof(IronRuby.StandardLibrary.BigDecimal.Fraction).Assembly);
+            //Load System.dll
+            engine.Runtime.LoadAssembly(typeof(System.Diagnostics.Debug).Assembly);
+	    if (displayRestart)
+		DisplayError("========= Restart =========");
+	}
 
         public StringBuilder defBuilder
         {
@@ -468,7 +505,7 @@ namespace UIIronTextBox
         public IronTextBoxControl()
         {
             InitializeComponent();
-            ScriptRuntimeSetup scriptRuntimeSetup = new ScriptRuntimeSetup();
+            scriptRuntimeSetup = new ScriptRuntimeSetup();
             scriptRuntimeSetup.LanguageSetups.Add(
                 new LanguageSetup("IronPython.Runtime.PythonContext, IronPython",
                     "IronPython",
@@ -479,33 +516,7 @@ namespace UIIronTextBox
                     "IronRupy",
                     new[] { "IronRuby", "Ruby", "rb" },
                     new[] { ".rb" }));
-            environment = new ScriptRuntime(scriptRuntimeSetup);
-            scope = environment.CreateScope();
-            engine = environment.GetEngine("py");
-            if (System.Environment.OSVersion.Platform == System.PlatformID.Unix)
-            {
-                engine.SetSearchPaths(new string[] {
-                    "/home/dblank/Myro/Pyjama/python",
-                    "/usr/lib/python2.5",
-                    "/usr/lib/python2.5/site-packages"});
-            }
-            else
-            {
-                engine.SetSearchPaths(new string[] {
-                    Environment.GetFolderPath(System.Environment.SpecialFolder.DesktopDirectory) 
-                        + @"\Myro\Pyjama\python",
-                    @"C:\Python25\Lib",
-                    @"C:\Python25\site-packages"
-                    });
-            }
-            // Load mscorlib.dll:
-            engine.Runtime.LoadAssembly(typeof(string).Assembly);
-            // Load Languages so that Host System can find DLLs:
-            engine.Runtime.LoadAssembly(typeof(IronPython.Hosting.Python).Assembly);
-            engine.Runtime.LoadAssembly(typeof(IronRuby.Hosting.RubyCommandLine).Assembly);
-            engine.Runtime.LoadAssembly(typeof(IronRuby.StandardLibrary.BigDecimal.Fraction).Assembly);
-            //Load System.dll
-            engine.Runtime.LoadAssembly(typeof(System.Diagnostics.Debug).Assembly);
+	    RestartShell();
             //IronTextBox's CommandEntered event
             CommandEntered += new UIIronTextBox.EventCommandEntered(irontextboxControl_CommandEntered);
         }

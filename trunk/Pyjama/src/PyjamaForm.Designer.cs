@@ -121,6 +121,7 @@ using System.Windows.Forms;
              this.languageToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
              this.executeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
              this.shellToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+             this.shellRestartToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
              this.evaluateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
              this.newlineToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
              this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -680,6 +681,7 @@ using System.Windows.Forms;
              this.languageToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.executeToolStripMenuItem,
             this.shellToolStripMenuItem,
+            this.shellRestartToolStripMenuItem,
             this.evaluateToolStripMenuItem,
             this.newlineToolStripMenuItem});
              this.languageToolStripMenuItem.Name = "languageToolStripMenuItem";
@@ -696,6 +698,12 @@ using System.Windows.Forms;
              this.shellToolStripMenuItem.Name = "shellToolStripMenuItem";
              resources.ApplyResources(this.shellToolStripMenuItem, "shellToolStripMenuItem");
              this.shellToolStripMenuItem.Click += new System.EventHandler(this.shellToolStripMenuItem_Click);
+             // 
+             // shellRestartToolStripMenuItem
+             // 
+             this.shellRestartToolStripMenuItem.Name = "shellRestartToolStripMenuItem";
+             resources.ApplyResources(this.shellRestartToolStripMenuItem, "shellRestartToolStripMenuItem");
+             this.shellRestartToolStripMenuItem.Click += new System.EventHandler(this.shellRestartToolStripMenuItem_Click);
              // 
              // evaluateToolStripMenuItem
              // 
@@ -891,6 +899,7 @@ using System.Windows.Forms;
          public Button runButton;
          private Label commandLabel;
          private ToolStripMenuItem shellToolStripMenuItem;
+         private ToolStripMenuItem shellRestartToolStripMenuItem;
          private ToolStripMenuItem evaluateToolStripMenuItem;
          private ToolStripSeparator toolStripSeparator8;
          private ToolStripMenuItem selectEditorToolStripMenuItem;

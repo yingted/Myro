@@ -479,6 +479,11 @@ namespace Pyjama
             this.SelectCommandShell();
         }
 
+	private void shellRestartToolStripMenuItem_Click(object sender, EventArgs e)
+	{
+	    outputWindow.textbox.RestartShell(true);
+	}
+
         private void newlineToolStripMenuItem_Click(object sender, EventArgs e)
         {
             // Emit <Ctrl+ENTER>

@@ -9,7 +9,7 @@ __REVISION__ = "$Revision$"
 __VERSION__  = "2.7.8"
 __AUTHOR__   = "Doug Blank <dblank@cs.brynmawr.edu>"
 
-import sys, atexit, time, random, pickle, threading, os, types, copy
+import sys, atexit, time, random, pickle, os, types, copy
 import StringIO, traceback
 import myro.globvars
 # FIXME
@@ -467,35 +467,6 @@ def _askConsole(data, title = "Information Request"):
             data[key] = retval
     return data
 
-class BackgroundThread(threading.Thread):
-    """
-    A thread class for running things in the background.
-    """
-    def __init__(self, function, pause = 0.01):
-        """
-        Constructor, setting initial variables
-        """
-        self.function = function
-        self._stopevent = threading.Event()
-        self._sleepperiod = pause
-        threading.Thread.__init__(self, name="MyroThread")
-        
-    def run(self):
-        """
-        overload of threading.thread.run()
-        main control loop
-        """
-        while not self._stopevent.isSet():
-            self.function()
-            #self._stopevent.wait(self._sleepperiod)
-
-    def join(self,timeout=None):
-        """
-        Stop the thread
-        """
-        self._stopevent.set()
-        threading.Thread.join(self, timeout)
-
 class Robot(object):
     _app = None
     _joy = None
@@ -504,7 +475,7 @@ class Robot(object):
         """
         Base robot class.
         """
-        self.lock = threading.Lock()
+        #self.lock = threading.Lock()
     
     def initializeRemoteControl(self, password):
         self.chat = Chat(self.getName(), password)
@@ -690,7 +661,7 @@ class Computer(Robot):
     def __init__(self):
         """ Constructs a computer object. """
         Robot.__init__(self)
-        self.lock = threading.Lock()
+        #self.lock = threading.Lock()
     def move(self, translate, rotate):
         """ Moves the robot translate, rotate velocities. """
         print "move(%f, %f)" % (translate, rotate)

@@ -2,7 +2,7 @@ try:
     import zipfile
 except:
     print "Missing zipfile"
-import tarfile, urllib
+#import tarfile, urllib
 import os, string, sys, time
 try:
     import serial
