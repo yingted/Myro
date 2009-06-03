@@ -537,6 +537,13 @@ namespace Pyjama
             _docManager.FocusActiveTab();
         }
 
+        private void lineNumber_ButtonClick(object sender, EventArgs e)
+        {
+            if (!lineNumber.DropDownItems[0].Owner.Visible)
+                lineNumberEntry.Text = lineNumber.Text;
+            this.lineNumber.ShowDropDown();
+        }
+
         private void lineNumberEntry_Click(object sender, EventArgs e)
         {
             if (!lineNumber.DropDownItems[0].Owner.Visible)
