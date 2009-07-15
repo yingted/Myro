@@ -632,9 +632,9 @@ class Robonova(Robot):
       ###self.us[i].enable(self.timeStep)
     
     # foot sensors
-    self.fsr = [[], []]
-    fsrNames = [['LFsrFL', 'LFsrFR', 'LFsrBR', 'LFsrBL'], \
-                 ['RFsrFL', 'RFsrFR', 'RFsrBR', 'RFsrBL']]
+    self.fsr = [[], []] # [left, right]
+    fsrNames = [['LFsrFL', 'LFsrFR', 'LFsrBR', 'LFsrBL'], # Left Sensors 
+                ['RFsrFL', 'RFsrFR', 'RFsrBR', 'RFsrBL']] # Right Sensors
     for i in range(0, len(fsrNames)):
       for j in range(0, len(fsrNames[0])):
         self.fsr[i].append(0) ## self.getTouchSensor(fsrNames[i][j]))
@@ -768,9 +768,9 @@ class Robonova(Robot):
   def getFsr(self):
     self.fsv = array([[],[]]) # force sensor values
     for i in range(0,len(self.fsr[0])):
-      self.fsv[0]= 0
+      self.fsv[0]= 1
       #self.fsr[0][i].getValue()
-      self.fsv[1]= 0
+      self.fsv[1]= 1
       #self.fsr[1][i].getValue()
       
       ####self.left[i] = 0
@@ -797,7 +797,6 @@ class Robonova(Robot):
     ###self.leds[6].set(rgb & 0xFF)
 
 controller = Robonova()
-
 
 while True:
   controller.run()
