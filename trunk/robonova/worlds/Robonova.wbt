@@ -7119,11 +7119,6 @@ DEF RN Robot {
                       emissiveColor 1 0.792157 0.0352941
                       specularColor 1 0.729412 0.0509804
                     }
-                    texture ImageTexture {
-                      url [
-                        "textures/khr-2hv.obj.jpg"
-                      ]
-                    }
                   }
                   geometry IndexedFaceSet {
                     coord Coordinate {
@@ -7392,11 +7387,6 @@ DEF RN Robot {
                           diffuseColor 0.65 0.65 0.65
                           shininess 0.8
                           specularColor 0.65 0.65 0.65
-                        }
-                        texture ImageTexture {
-                          url [
-                            "textures/khr-2hv.obj.jpg"
-                          ]
                         }
                       }
                       geometry IndexedFaceSet {
@@ -8528,11 +8518,6 @@ DEF RN Robot {
                       emissiveColor 0.788235 0.619608 0
                       specularColor 0.905882 0.647059 0
                     }
-                    texture ImageTexture {
-                      url [
-                        "textures/khr-2hv.obj.jpg"
-                      ]
-                    }
                   }
                   geometry IndexedFaceSet {
                     coord Coordinate {
@@ -9037,11 +9022,6 @@ DEF RN Robot {
                           diffuseColor 1 0.709804 0
                           emissiveColor 1 0.792157 0.0352941
                           specularColor 1 0.729412 0.0509804
-                        }
-                        texture ImageTexture {
-                          url [
-                            "textures/khr-2hv.obj.jpg"
-                          ]
                         }
                       }
                       geometry IndexedFaceSet {
