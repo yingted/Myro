@@ -96,11 +96,11 @@ class Robonova(Robot):
     self.qArms0 = (pi/180)*self.qArmsT2
     print "self.qArms0: "
     print self.qArms0
-    self.armsIndex1Start = 2
-    self.armsIndex1Stop = 6
+    self.armsIndex1Start = 0
+    self.armsIndex1Stop = 3
     
-    self.armsIndex2Start = 18 
-    self.armsIndex2Stop = 22
+    self.armsIndex2Start = 13 
+    self.armsIndex2Stop = 15
   
     self.hardnessArms = ones((8,1),float)*.2
 
@@ -364,12 +364,10 @@ class Robonova(Robot):
   def update(self):
     if self.idle:
       return
-    print "Update..."
-    
-    self.t = self.getTime()
-    self.dt = self.t - self.t0
-    self.t0 = self.t
-    self.tPhase = self.tPhase + self.dt
+    t = self.getTime()
+    dt = t - self.t0
+    self.t0 = t
+    self.tPhase = self.tPhase + dt
     if (self.tPhase > self.tStep):
       self.odometry = self.odometry + self.odometryScale*self.velOdometry
       # Start new step
@@ -402,7 +400,7 @@ class Robonova(Robot):
     self.uRight1 = self.uRight2
 
     self.duBodyTarget = self.targetScrew(self.velCurrent, 1.5)
-      
+    
     self.uBodyTarget = self.poseRelative(self.duBodyTarget, self.uBody1)
     if (self.stepSign > 0):
       self.uRight2 = self.poseRelative(self.uRight0, self.uBodyTarget)
@@ -422,7 +420,8 @@ class Robonova(Robot):
       self.velOdometry = self.uBody2-self.uBody1
 
       self.stepStart = False
-
+    
+      
 
     self.phBody = self.tPhase/self.tStep
     self.phSwing = (self.phBody-self.upPhase)/(self.downPhase-self.upPhase)
@@ -454,7 +453,7 @@ class Robonova(Robot):
       self.pLeft = [self.uLeft[0], self.uLeft[1], self.stepHeight*self.swingZ, 0, 0, self.uLeft[2]]
 
       self.uSupport = self.poseRelative([self.supportX, -self.supportY, 0], self.uRight)
- 
+
 
     self.uZmp = self.zmpCom(self.phBody, self.uBody1-self.uSupport, self.uBody2-self.uSupport, self.tZmp/self.tStep)
     self.uBody = self.uSupport + self.uZmp
@@ -470,16 +469,17 @@ class Robonova(Robot):
     else:
       self.setIkineLegs(self.qLegs, 6, 12,'RLeg', self.pRight, self.pBody)
       self.qLegs = self.setIkineLegs(self.qLegs, 0, 6,'LLeg', self.pLeft, self.pBody,self.qLegs[6])
-
-
-    #self.setLegs('joint',self.qLegs)      
-    #self.qArms = self.qArms0
-    #self.qArms[0] =  2*(self.qLegs[8]+ 97.4 *pi/180)
-    #self.qArms[3] = self.qArms0[3]  
-    #self.qArms[4] = 2*(self.qLegs[2] + 97.4*pi/180)
-    #self.qArms[7]  = self.qArms0[7]      
-    #self.setArms('joint',self.armsIndex1Start, self.armsIndex1Stop,self.qArms)
-    #self.setArms('joint',self.armsIndex2Start, self.armsIndex2Stop,self.qArms)
+    
+    
+    self.setLegs('joint',self.qLegs)  
+    self.qArms = self.qArms0
+    self.qArms[0] =  2*(self.qLegs[8]+ 97.4 *pi/180)
+    self.qArms[3] = self.qArms0[3]  
+    self.qArms[4] = 2*(self.qLegs[2] + 97.4*pi/180)
+    self.qArms[7]  = self.qArms0[7]      
+    self.setArms('joint',self.armsIndex1Start, self.armsIndex1Stop,self.qArms)
+    self.setArms('joint',self.armsIndex2Start, self.armsIndex2Stop,self.qArms)
+    raise KeyboardInterrupt
     
   def setIkineLegs(self, legs, startIndex, stopIndex, legName, pos, bod, *varArg):
     self.legsBefore = ikineLegs(legName, pos, bod, varArg)
@@ -520,45 +520,40 @@ class Robonova(Robot):
     self.velCommand = self.vCommand
     return self.velCommand
 
-  def getOdometry(self):
-    self.odometry = array([0., 0., 0.])
-    return self.odometry
-
   def poseRelative(self, du, u0):
-    g = u0.copy()
-    self.yaw = u0[2] 
-    self.cy = cos(self.yaw)
-    self.sy = sin(self.yaw)    
-    self.u1 = g
-    self.u1[0] = u0[0] + self.cy*du[0] - self.sy*du[1]
-    self.u1[1] = u0[1] + self.sy*du[0] + self.cy*du[1]
-    self.u1[2] = u0[2] + du[2]
-    return self.u1
+    """
+    Returns the relative delta du from position u0.
+    """
+    yaw = u0[2] 
+    cy = cos(yaw)
+    sy = sin(yaw)    
+    u1 = u0.copy()
+    u1[0] = u0[0] + cy*du[0] - sy*du[1]
+    u1[1] = u0[1] + sy*du[0] + cy*du[1]
+    u1[2] = u0[2] + du[2]
+    return u1
 
-  def targetScrew(self,v, n):
-    # Compute target pose after n steps of v using screw
-    self.A = n
-    self.B = 0
-    self.alpha = .5*v[2]
-    if abs(self.alpha) > self.f.eps:
-      self.A = .5*(sin((2*n-1)*self.alpha)/sin(self.alpha) + 1)
-      self.B = .5*(cos((2*n-1)*self.alpha) - cos(self.alpha))/sin(self.alpha)
+  def targetScrew(self, v, n):
+    """
+    Computes target pose after n steps of v using screw
+    """
+    A = n
+    B = 0
+    alpha = .5 * v[2]
+    if abs(alpha) > self.f.eps:
+      A = .5 * (sin((2 * n - 1) * alpha)/sin(alpha) + 1)
+      B = .5 * (cos((2 * n - 1) * alpha) - cos(alpha))/sin(alpha)
+    delX =  A * v[0] + B * v[1] 
+    delY = -B * v[0] + A * v[1] 
+    delTh = n * v[2]
+    return array([delX, delY, delTh])
 
-    self.delX = self.A*v[0] + self.B*v[1] 
-    self.delY = -self.B*v[0] + self.A*v[1] 
-    self.delTh = n*v[2]
-    self.uTarget = array([self.delX, self.delY, self.delTh])
-    return self.uTarget
-
-  def zmpCom(self,t, x0, x1, tau):
-
-    self.ph = t*1.0/tau 
-    self.x = x0*cosh(self.ph) + (x1-x0*cosh(1/tau))*sinh(self.ph)/sinh(1/tau)
-
-    return self.x
+  def zmpCom(self, t, x0, x1, tau):
+    ph = t * 1.0/tau 
+    x = x0 * cosh(ph) + (x1 - x0 * cosh(1/tau)) * sinh(ph)/sinh(1/tau)
+    return x
 
   def findAndEnableDevices(self):
-   
     # camera
     self.camera = self.getCamera('camera')
     self.camera.enable(4*self.timeStep)
@@ -730,10 +725,10 @@ class Robonova(Robot):
       self.joints[index2].setPosition(-position)  
   
   def setArms(self, joint, startIndex, endIndex, position):
-    if startIndex == 2:
+    if startIndex == 0:
       positionIndex = 0
     else:
-      positionIndex = 4
+      positionIndex = 3
     for index in range(startIndex, endIndex):
       position = position.flatten()
       self.joints[index].setPosition(position[positionIndex]) 
@@ -744,7 +739,7 @@ class Robonova(Robot):
     # input args: joint - name of joint; position - array of joint positions
      
     positionIndex = 0
-    for index in range(6, 18):
+    for index in range(2, 12):
       position = position.flatten()
       self.joints[index].setPosition(position[positionIndex]) 
       positionIndex += 1
@@ -766,20 +761,11 @@ class Robonova(Robot):
     ###return self.acc
 
   def getFsr(self):
-    self.fsv = array([[],[]]) # force sensor values
-    for i in range(0,len(self.fsr[0])):
-      self.fsv[0]= 1
-      #self.fsr[0][i].getValue()
-      self.fsv[1]= 1
-      #self.fsr[1][i].getValue()
-      
-      ####self.left[i] = 0
-      ###self.fsv[0].append(self.fsr[0][i].getValue())
-      ####self.right[i] = 0
-      ###self.fsv[1].append(self.fsr[1][i].getValue())
-    print "self.fsv: ", self.fsv
-      
-    return self.fsv
+    fsv = array([[],[]]) # force sensor values
+    for i in range(0, len(self.fsr[0])):
+      fsv[0]= 1 #fsr[0][i].getValue()
+      fsv[1]= 1 #fsr[1][i].getValue()
+    return fsv
 
   ###def getGps(self):
    ### self.gpsVal = self.gps.getValues()
