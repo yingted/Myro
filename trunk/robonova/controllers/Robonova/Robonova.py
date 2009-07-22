@@ -42,6 +42,7 @@ class Robonova(Robot):
     self.upPhase = 0.3
     self.downPhase = 0.8
 
+    # Nao details:
     self.bodyHeight = 0.28
     self.dHeight = 0.00
     self.tZmp = 0.17
@@ -52,8 +53,6 @@ class Robonova(Robot):
     self.supportX = 0.015
     self.supportY = 0
 
-    #self.velCurrent = array([0, 0, 0])
-    #self.velCommand = array([0, 0, 0.0])
     self.velCurrent = array([0., 0., 0.0]) 
     self.velCommand = array([0., 0., 0.]) 
     #self.setVelocity(array([1., 0, 0.]))
@@ -327,28 +326,18 @@ class Robonova(Robot):
     ###AshGavs Edit (comment out head movement)
     elif key == ord('P'):
       self.setJoint(array([0,1]), array([0, -10])*pi/180)
-
     elif key == ord('S'):
       self.setJoint(array([0,1]), array([45, -10])*pi/180)
-
-   
     elif key == ord('C'):
       self.setJoint(array([0,1]), array([-45, -10])*pi/180)
-
-   
     elif key == ord('D'):
       self.setJoint(array([0,1]), array([0, -35])*pi/180)
-
     elif key == ord('E'):
       elf.setJoint(array([0,1]), array([45, -35])*pi/180)
-
-     
     elif key == ord('M'):
       self.setJoint(array([0,1]), array([-45, -35])*pi/180)
-
     elif key == ord('N'):
       self.setJoint(array([0,1]), array([0, 20])*pi/180)
-
     elif key == ord('V'):
       self.setJoint(array([0,1]), array([45, 20])*pi/180)
 
@@ -374,7 +363,6 @@ class Robonova(Robot):
       self.tPhase = mod(self.tPhase, self.tStep)
       self.stepStart = True
  
-
     if self.stepStart:
      print "stepStart..."
      if self.stepStop:
@@ -465,13 +453,13 @@ class Robonova(Robot):
           
     if (self.stepSign > 0):
       self.setIkineLegs(self.qLegs, 0, 6,'LLeg', self.pLeft, self.pBody)      
-      self.qLegs = self.setIkineLegs(self.qLegs, 6, 12,'RLeg', self.pRight, self.pBody,self.qLegs[0])
+      self.setIkineLegs(self.qLegs, 6, 12,'RLeg', self.pRight, self.pBody,self.qLegs[0])
     else:
       self.setIkineLegs(self.qLegs, 6, 12,'RLeg', self.pRight, self.pBody)
-      self.qLegs = self.setIkineLegs(self.qLegs, 0, 6,'LLeg', self.pLeft, self.pBody,self.qLegs[6])
-    
-    
+      self.setIkineLegs(self.qLegs, 0, 6,'LLeg', self.pLeft, self.pBody,self.qLegs[6])
+  
     self.setLegs('joint',self.qLegs)  
+    raise KeyboardInterrupt
     self.qArms = self.qArms0
     self.qArms[0] =  2*(self.qLegs[8]+ 97.4 *pi/180)
     self.qArms[3] = self.qArms0[3]  
@@ -479,7 +467,6 @@ class Robonova(Robot):
     self.qArms[7]  = self.qArms0[7]      
     self.setArms('joint',self.armsIndex1Start, self.armsIndex1Stop,self.qArms)
     self.setArms('joint',self.armsIndex2Start, self.armsIndex2Stop,self.qArms)
-    raise KeyboardInterrupt
     
   def setIkineLegs(self, legs, startIndex, stopIndex, legName, pos, bod, *varArg):
     self.legsBefore = ikineLegs(legName, pos, bod, varArg)
@@ -492,7 +479,6 @@ class Robonova(Robot):
       for i in range(startIndex, stopIndex):
         legs[i] = self.legsBefore[i-6]
       return legs
-
 
   def start(self):
     self.idle = False
@@ -742,6 +728,7 @@ class Robonova(Robot):
     for index in range(2, 12):
       position = position.flatten()
       self.joints[index].setPosition(position[positionIndex]) 
+      self.jointNames.index(name1)
       positionIndex += 1
 
   def getJoint(self, index):  
