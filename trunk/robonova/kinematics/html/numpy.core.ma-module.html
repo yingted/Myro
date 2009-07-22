@@ -1,0 +1,3812 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>numpy.core.ma</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        Package&nbsp;numpy ::
+        Package&nbsp;core ::
+        Module&nbsp;ma
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
+    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="numpy.core.ma-module.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<!-- ==================== MODULE DESCRIPTION ==================== -->
+<h1 class="epydoc">Module ma</h1><span class="codelink"><a href="numpy.core.ma-pysrc.html">source&nbsp;code</a></span><br /><br />
+<p>MA: a facility for dealing with missing observations MA is generally 
+  used as a numpy.array look-alike. by Paul F. Dubois.</p>
+  Copyright 1999, 2000, 2001 Regents of the University of California. 
+  Released for unlimited redistribution. Adapted for numpy_core 2005 by 
+  Travis Oliphant and (mainly) Paul Dubois.<br /><br />
+
+<!-- ==================== CLASSES ==================== -->
+<a name="section-Classes"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Classes</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-Classes"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma.MAError-class.html" class="summary-name">MAError</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma.MaskedArray-class.html" class="summary-name">MaskedArray</a><br />
+      Arrays with possibly masked values.
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma._MaskedPrintOption-class.html" class="summary-name">_MaskedPrintOption</a><br />
+      One instance of this class, masked_print_option, is created.
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma._maximum_operation-class.html" class="summary-name">_maximum_operation</a><br />
+      Object to calculate maxima
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma._minimum_operation-class.html" class="summary-name">_minimum_operation</a><br />
+      Object to calculate minima
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma.MaskedArray-class.html" class="summary-name">array</a><br />
+      Arrays with possibly masked values.
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma.domain_check_interval-class.html" class="summary-name">domain_check_interval</a><br />
+      domain_check_interval(a,b)(x) = true where x &lt; a or y &gt; 
+        b
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma.domain_greater-class.html" class="summary-name">domain_greater</a><br />
+      domain_greater(v)(x) = true where x &lt;= v
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma.domain_greater_equal-class.html" class="summary-name">domain_greater_equal</a><br />
+      domain_greater_equal(v)(x) = true where x &lt; v
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma.domain_safe_divide-class.html" class="summary-name">domain_safe_divide</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma.domain_tan-class.html" class="summary-name">domain_tan</a><br />
+      domain_tan(eps) = true where abs(cos(x)) &lt; eps)
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma.domained_binary_operation-class.html" class="summary-name">domained_binary_operation</a><br />
+      Binary operations that have a domain, like divide.
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma.masked_binary_operation-class.html" class="summary-name">masked_binary_operation</a>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma.masked_unary_operation-class.html" class="summary-name">masked_unary_operation</a>
+    </td>
+  </tr>
+</table>
+<!-- ==================== FUNCTIONS ==================== -->
+<a name="section-Functions"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Functions</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-Functions"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="_clip"></a><span class="summary-sig-name">_clip</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">a_min</span>,
+        <span class="summary-sig-arg">a_max</span>,
+        <span class="summary-sig-arg">out</span>=<span class="summary-sig-default">None</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#_clip">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="_cumprod"></a><span class="summary-sig-name">_cumprod</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">axis</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">dtype</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">out</span>=<span class="summary-sig-default">None</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#_cumprod">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="_cumsum"></a><span class="summary-sig-name">_cumsum</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">axis</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">dtype</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">out</span>=<span class="summary-sig-default">None</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#_cumsum">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="_ptp"></a><span class="summary-sig-name">_ptp</span>(<span class="summary-sig-arg">a</span>,
+        <span class="summary-sig-arg">axis</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">out</span>=<span class="summary-sig-default">None</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#_ptp">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="_squeeze"></a><span class="summary-sig-name">_squeeze</span>(<span class="summary-sig-arg">self</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#_squeeze">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="_std"></a><span class="summary-sig-name">_std</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">axis</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">dtype</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">out</span>=<span class="summary-sig-default">None</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#_std">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="_swapaxes"></a><span class="summary-sig-name">_swapaxes</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">axis1</span>,
+        <span class="summary-sig-arg">axis2</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#_swapaxes">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="_var"></a><span class="summary-sig-name">_var</span>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">axis</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">dtype</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">out</span>=<span class="summary-sig-default">None</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#_var">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="numpy.core.ma-module.html#allclose" class="summary-sig-name">allclose</a>(<span class="summary-sig-arg">a</span>,
+        <span class="summary-sig-arg">b</span>,
+        <span class="summary-sig-arg">fill_value</span>=<span class="summary-sig-default">1</span>,
+        <span class="summary-sig-arg">rtol</span>=<span class="summary-sig-default">1e-05</span>,
+        <span class="summary-sig-arg">atol</span>=<span class="summary-sig-default">1e-08</span>)</span><br />
+      Returns true if all components of a and b are equal subject to 
+      given tolerances.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#allclose">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="allequal"></a><span class="summary-sig-name">allequal</span>(<span class="summary-sig-arg">a</span>,
+        <span class="summary-sig-arg">b</span>,
+        <span class="summary-sig-arg">fill_value</span>=<span class="summary-sig-default">1</span>)</span><br />
+      True if all entries of  a and b are equal, using fill_value as a 
+      truth value where either or both are masked.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#allequal">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="alltrue"></a><span class="summary-sig-name">alltrue</span>(<span class="summary-sig-arg">target</span>,
+        <span class="summary-sig-arg">axis</span>=<span class="summary-sig-default">0</span>,
+        <span class="summary-sig-arg">dtype</span>=<span class="summary-sig-default">None</span>)</span><br />
+      Reduce target along the given axis with this function.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#alltrue">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="arange"></a><span class="summary-sig-name">arange</span>(<span class="summary-sig-arg">start</span>,
+        <span class="summary-sig-arg">stop</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">step</span>=<span class="summary-sig-default">1</span>,
+        <span class="summary-sig-arg">dtype</span>=<span class="summary-sig-default">None</span>)</span><br />
+      Just like range() except it returns a array whose type can be 
+      specified by the keyword argument dtype.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#arange">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="numpy.core.ma-module.html#argmax" class="summary-sig-name">argmax</a>(<span class="summary-sig-arg">x</span>,
+        <span class="summary-sig-arg">axis</span>=<span class="summary-sig-default">-1</span>,
+        <span class="summary-sig-arg">out</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">fill_value</span>=<span class="summary-sig-default">None</span>)</span><br />
+      Treating masked values as if they have the value fill_value, 
+      return sort indices for maximum along given axis.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#argmax">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="numpy.core.ma-module.html#argmin" class="summary-sig-name">argmin</a>(<span class="summary-sig-arg">x</span>,
+        <span class="summary-sig-arg">axis</span>=<span class="summary-sig-default">-1</span>,
+        <span class="summary-sig-arg">out</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">fill_value</span>=<span class="summary-sig-default">None</span>)</span><br />
+      Treating masked values as if they have the value fill_value, 
+      return indices for minimum values along given axis.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#argmin">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="numpy.core.ma-module.html#argsort" class="summary-sig-name">argsort</a>(<span class="summary-sig-arg">x</span>,
+        <span class="summary-sig-arg">axis</span>=<span class="summary-sig-default">-1</span>,
+        <span class="summary-sig-arg">out</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">fill_value</span>=<span class="summary-sig-default">None</span>)</span><br />
+      Treating masked values as if they have the value fill_value, 
+      return sort indices for sorting along given axis.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#argsort">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="arrayrange"></a><span class="summary-sig-name">arrayrange</span>(<span class="summary-sig-arg">start</span>,
+        <span class="summary-sig-arg">stop</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">step</span>=<span class="summary-sig-default">1</span>,
+        <span class="summary-sig-arg">dtype</span>=<span class="summary-sig-default">None</span>)</span><br />
+      Just like range() except it returns a array whose type can be 
+      specified by the keyword argument dtype.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#arange">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="asarray"></a><span class="summary-sig-name">asarray</span>(<span class="summary-sig-arg">data</span>,
+        <span class="summary-sig-arg">dtype</span>=<span class="summary-sig-default">None</span>)</span><br />
+      asarray(data, dtype) = array(data, dtype, copy=0)</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#asarray">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="numpy.core.ma-module.html#average" class="summary-sig-name">average</a>(<span class="summary-sig-arg">a</span>,
+        <span class="summary-sig-arg">axis</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">weights</span>=<span class="summary-sig-default">None</span>)</span><br />
+      Computes average along indicated axis.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#average">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="choose"></a><span class="summary-sig-name">choose</span>(<span class="summary-sig-arg">indices</span>,
+        <span class="summary-sig-arg">t</span>,
+        <span class="summary-sig-arg">out</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">mode</span>=<span class="summary-sig-default"><code class="variable-quote">'</code><code class="variable-string">raise</code><code class="variable-quote">'</code></span>)</span><br />
+      Returns array shaped like indices with elements chosen from t</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#choose">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="common_fill_value"></a><span class="summary-sig-name">common_fill_value</span>(<span class="summary-sig-arg">a</span>,
+        <span class="summary-sig-arg">b</span>)</span><br />
+      The common fill_value of a and b, if there is one, or None</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#common_fill_value">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="numpy.core.ma-module.html#compress" class="summary-sig-name">compress</a>(<span class="summary-sig-arg">condition</span>,
+        <span class="summary-sig-arg">x</span>,
+        <span class="summary-sig-arg">dimension</span>=<span class="summary-sig-default">-1</span>,
+        <span class="summary-sig-arg">out</span>=<span class="summary-sig-default">None</span>)</span><br />
+      Select those parts of x for which condition is true.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#compress">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="concatenate"></a><span class="summary-sig-name">concatenate</span>(<span class="summary-sig-arg">arrays</span>,
+        <span class="summary-sig-arg">axis</span>=<span class="summary-sig-default">0</span>)</span><br />
+      Concatenate the arrays along the given axis</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#concatenate">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="count"></a><span class="summary-sig-name">count</span>(<span class="summary-sig-arg">a</span>,
+        <span class="summary-sig-arg">axis</span>=<span class="summary-sig-default">None</span>)</span><br />
+      Count of the non-masked elements in a, or along a certain 
+      axis.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#count">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="default_fill_value"></a><span class="summary-sig-name">default_fill_value</span>(<span class="summary-sig-arg">obj</span>)</span><br />
+      Function to calculate default fill value for an object.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#default_fill_value">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="diagonal"></a><span class="summary-sig-name">diagonal</span>(<span class="summary-sig-arg">a</span>,
+        <span class="summary-sig-arg">k</span>=<span class="summary-sig-default">0</span>,
+        <span class="summary-sig-arg">axis1</span>=<span class="summary-sig-default">0</span>,
+        <span class="summary-sig-arg">axis2</span>=<span class="summary-sig-default">1</span>)</span><br />
+      diagonal(a,k=0,axis1=0, axis2=1) = the k'th diagonal of a</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#diagonal">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="numpy.core.ma-module.html#dot" class="summary-sig-name">dot</a>(<span class="summary-sig-arg">a</span>,
+        <span class="summary-sig-arg">b</span>)</span><br />
+      dot(a,b) returns matrix-multiplication between a and b.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#dot">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="numpy.core.ma-module.html#filled" class="summary-sig-name">filled</a>(<span class="summary-sig-arg">a</span>,
+        <span class="summary-sig-arg">value</span>=<span class="summary-sig-default">None</span>)</span><br />
+      a as a contiguous numeric array with any masked areas replaced by 
+      value if value is None or the special element &quot;masked&quot;, 
+      get_fill_value(a) is used instead.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#filled">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="fromfunction"></a><span class="summary-sig-name">fromfunction</span>(<span class="summary-sig-arg">f</span>,
+        <span class="summary-sig-arg">s</span>)</span><br />
+      apply f to s to create array as in umath.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#fromfunction">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="numpy.core.ma-module.html#fromstring" class="summary-sig-name">fromstring</a>(<span class="summary-sig-arg">s</span>,
+        <span class="summary-sig-arg">t</span>)</span><br />
+      Construct a masked array from a string.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#fromstring">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="get_fill_value"></a><span class="summary-sig-name">get_fill_value</span>(<span class="summary-sig-arg">a</span>)</span><br />
+      The fill value of a, if it has one; otherwise, the default fill 
+      value for that type.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#get_fill_value">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="numpy.core.ma-module.html#getmask" class="summary-sig-name">getmask</a>(<span class="summary-sig-arg">a</span>)</span><br />
+      Mask of values in a; could be nomask.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#getmask">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="numpy.core.ma-module.html#getmaskarray" class="summary-sig-name">getmaskarray</a>(<span class="summary-sig-arg">a</span>)</span><br />
+      Mask of values in a; an array of zeros if mask is nomask or not a 
+      masked array, and is a byte-sized integer.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#getmaskarray">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="identity"></a><span class="summary-sig-name">identity</span>(<span class="summary-sig-arg">n</span>)</span><br />
+      identity(n) returns the identity matrix of shape n x n.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#identity">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="indices"></a><span class="summary-sig-name">indices</span>(<span class="summary-sig-arg">dimensions</span>,
+        <span class="summary-sig-arg">dtype</span>=<span class="summary-sig-default">None</span>)</span><br />
+      indices(dimensions,dtype=None) returns an array representing a 
+      grid of indices with row-only, and column-only variation.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#indices">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="numpy.core.ma-module.html#inner" class="summary-sig-name">inner</a>(<span class="summary-sig-arg">a</span>,
+        <span class="summary-sig-arg">b</span>)</span><br />
+      inner(a,b) returns the dot product of two arrays, which has shape 
+      a.shape[:-1] + b.shape[:-1] with elements computed by summing the 
+      product of the elements from the last dimensions of a and b.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#inner">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="numpy.core.ma-module.html#innerproduct" class="summary-sig-name">innerproduct</a>(<span class="summary-sig-arg">a</span>,
+        <span class="summary-sig-arg">b</span>)</span><br />
+      inner(a,b) returns the dot product of two arrays, which has shape 
+      a.shape[:-1] + b.shape[:-1] with elements computed by summing the 
+      product of the elements from the last dimensions of a and b.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#inner">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="isMA"></a><span class="summary-sig-name">isMA</span>(<span class="summary-sig-arg">x</span>)</span><br />
+      Is x a masked array, that is, an instance of MaskedArray?</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#isMaskedArray">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="isMaskedArray"></a><span class="summary-sig-name">isMaskedArray</span>(<span class="summary-sig-arg">x</span>)</span><br />
+      Is x a masked array, that is, an instance of MaskedArray?</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#isMaskedArray">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="is_mask"></a><span class="summary-sig-name">is_mask</span>(<span class="summary-sig-arg">m</span>)</span><br />
+      Is m a legal mask? Does not check contents, only type.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#is_mask">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="isarray"></a><span class="summary-sig-name">isarray</span>(<span class="summary-sig-arg">x</span>)</span><br />
+      Is x a masked array, that is, an instance of MaskedArray?</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#isMaskedArray">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="left_shift"></a><span class="summary-sig-name">left_shift</span>(<span class="summary-sig-arg">a</span>,
+        <span class="summary-sig-arg">n</span>)</span><br />
+      Left shift n bits</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#left_shift">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="numpy.core.ma-module.html#make_mask" class="summary-sig-name">make_mask</a>(<span class="summary-sig-arg">m</span>,
+        <span class="summary-sig-arg">copy</span>=<span class="summary-sig-default">0</span>,
+        <span class="summary-sig-arg">flag</span>=<span class="summary-sig-default">0</span>)</span><br />
+      return m as a mask, creating a copy if necessary or requested.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#make_mask">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="make_mask_none"></a><span class="summary-sig-name">make_mask_none</span>(<span class="summary-sig-arg">s</span>)</span><br />
+      Return a mask of all zeros of shape s.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#make_mask_none">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="numpy.core.ma-module.html#mask_or" class="summary-sig-name">mask_or</a>(<span class="summary-sig-arg">m1</span>,
+        <span class="summary-sig-arg">m2</span>)</span><br />
+      Logical or of the mask candidates m1 and m2, treating nomask as 
+      false.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#mask_or">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="masked_array"></a><span class="summary-sig-name">masked_array</span>(<span class="summary-sig-arg">a</span>,
+        <span class="summary-sig-arg">mask</span>=<span class="summary-sig-default">False</span>,
+        <span class="summary-sig-arg">fill_value</span>=<span class="summary-sig-default">None</span>)</span><br />
+      masked_array(a, mask=nomask) = array(a, mask=mask, copy=0, 
+      fill_value=fill_value)</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#masked_array">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="masked_equal"></a><span class="summary-sig-name">masked_equal</span>(<span class="summary-sig-arg">x</span>,
+        <span class="summary-sig-arg">value</span>,
+        <span class="summary-sig-arg">copy</span>=<span class="summary-sig-default">1</span>)</span><br />
+      masked_equal(x, value) = x masked where x == value For floating 
+      point consider masked_values(x, value) instead.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#masked_equal">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="masked_greater"></a><span class="summary-sig-name">masked_greater</span>(<span class="summary-sig-arg">x</span>,
+        <span class="summary-sig-arg">value</span>,
+        <span class="summary-sig-arg">copy</span>=<span class="summary-sig-default">1</span>)</span><br />
+      masked_greater(x, value) = x masked where x &gt; value</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#masked_greater">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="masked_greater_equal"></a><span class="summary-sig-name">masked_greater_equal</span>(<span class="summary-sig-arg">x</span>,
+        <span class="summary-sig-arg">value</span>,
+        <span class="summary-sig-arg">copy</span>=<span class="summary-sig-default">1</span>)</span><br />
+      masked_greater_equal(x, value) = x masked where x &gt;= value</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#masked_greater_equal">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="masked_inside"></a><span class="summary-sig-name">masked_inside</span>(<span class="summary-sig-arg">x</span>,
+        <span class="summary-sig-arg">v1</span>,
+        <span class="summary-sig-arg">v2</span>,
+        <span class="summary-sig-arg">copy</span>=<span class="summary-sig-default">1</span>)</span><br />
+      x with mask of all values of x that are inside [v1,v2] v1 and v2 
+      can be given in either order.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#masked_inside">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="masked_less"></a><span class="summary-sig-name">masked_less</span>(<span class="summary-sig-arg">x</span>,
+        <span class="summary-sig-arg">value</span>,
+        <span class="summary-sig-arg">copy</span>=<span class="summary-sig-default">1</span>)</span><br />
+      masked_less(x, value) = x masked where x &lt; value</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#masked_less">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="masked_less_equal"></a><span class="summary-sig-name">masked_less_equal</span>(<span class="summary-sig-arg">x</span>,
+        <span class="summary-sig-arg">value</span>,
+        <span class="summary-sig-arg">copy</span>=<span class="summary-sig-default">1</span>)</span><br />
+      masked_less_equal(x, value) = x masked where x &lt;= value</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#masked_less_equal">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="masked_not_equal"></a><span class="summary-sig-name">masked_not_equal</span>(<span class="summary-sig-arg">x</span>,
+        <span class="summary-sig-arg">value</span>,
+        <span class="summary-sig-arg">copy</span>=<span class="summary-sig-default">1</span>)</span><br />
+      masked_not_equal(x, value) = x masked where x != value</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#masked_not_equal">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="masked_object"></a><span class="summary-sig-name">masked_object</span>(<span class="summary-sig-arg">data</span>,
+        <span class="summary-sig-arg">value</span>,
+        <span class="summary-sig-arg">copy</span>=<span class="summary-sig-default">1</span>)</span><br />
+      Create array masked where exactly data equal to value</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#masked_object">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="masked_outside"></a><span class="summary-sig-name">masked_outside</span>(<span class="summary-sig-arg">x</span>,
+        <span class="summary-sig-arg">v1</span>,
+        <span class="summary-sig-arg">v2</span>,
+        <span class="summary-sig-arg">copy</span>=<span class="summary-sig-default">1</span>)</span><br />
+      x with mask of all values of x that are outside [v1,v2] v1 and v2 
+      can be given in either order.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#masked_outside">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="numpy.core.ma-module.html#masked_values" class="summary-sig-name">masked_values</a>(<span class="summary-sig-arg">data</span>,
+        <span class="summary-sig-arg">value</span>,
+        <span class="summary-sig-arg">rtol</span>=<span class="summary-sig-default">1.e-5</span>,
+        <span class="summary-sig-arg">atol</span>=<span class="summary-sig-default">1.e-8</span>)</span><br />
+      Create a masked array; mask is nomask if possible.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#masked_values">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="numpy.core.ma-module.html#masked_where" class="summary-sig-name">masked_where</a>(<span class="summary-sig-arg">condition</span>,
+        <span class="summary-sig-arg">x</span>,
+        <span class="summary-sig-arg">copy</span>=<span class="summary-sig-default">1</span>)</span><br />
+      Return x as an array masked where condition is true.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#masked_where">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="maximum_fill_value"></a><span class="summary-sig-name">maximum_fill_value</span>(<span class="summary-sig-arg">obj</span>)</span><br />
+      Function to calculate default fill value suitable for taking 
+      maxima.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#maximum_fill_value">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="minimum_fill_value"></a><span class="summary-sig-name">minimum_fill_value</span>(<span class="summary-sig-arg">obj</span>)</span><br />
+      Function to calculate default fill value suitable for taking 
+      minima.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#minimum_fill_value">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="nonzero"></a><span class="summary-sig-name">nonzero</span>(<span class="summary-sig-arg">a</span>)</span><br />
+      returns the indices of the elements of a which are not zero and 
+      not masked</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#nonzero">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="ones"></a><span class="summary-sig-name">ones</span>(<span class="summary-sig-arg">shape</span>,
+        <span class="summary-sig-arg">dtype</span>=<span class="summary-sig-default">&lt;type 'float'&gt;</span>)</span><br />
+      ones(n, dtype=float) = an array of all ones of the given length or
+      shape.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#ones">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="outer"></a><span class="summary-sig-name">outer</span>(<span class="summary-sig-arg">a</span>,
+        <span class="summary-sig-arg">b</span>)</span><br />
+      outer(a,b) = {a[i]*b[j]}, has shape (len(a),len(b))</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#outer">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="outerproduct"></a><span class="summary-sig-name">outerproduct</span>(<span class="summary-sig-arg">a</span>,
+        <span class="summary-sig-arg">b</span>)</span><br />
+      outer(a,b) = {a[i]*b[j]}, has shape (len(a),len(b))</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#outer">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="power"></a><span class="summary-sig-name">power</span>(<span class="summary-sig-arg">a</span>,
+        <span class="summary-sig-arg">b</span>,
+        <span class="summary-sig-arg">third</span>=<span class="summary-sig-default">None</span>)</span><br />
+      a**b</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#power">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="product"></a><span class="summary-sig-name">product</span>(<span class="summary-sig-arg">target</span>,
+        <span class="summary-sig-arg">axis</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">dtype</span>=<span class="summary-sig-default">None</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#product">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="numpy.core.ma-module.html#put" class="summary-sig-name">put</a>(<span class="summary-sig-arg">a</span>,
+        <span class="summary-sig-arg">indices</span>,
+        <span class="summary-sig-arg">values</span>,
+        <span class="summary-sig-arg">mode</span>=<span class="summary-sig-default"><code class="variable-quote">'</code><code class="variable-string">raise</code><code class="variable-quote">'</code></span>)</span><br />
+      sets storage-indexed locations to corresponding values.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#put">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="putmask"></a><span class="summary-sig-name">putmask</span>(<span class="summary-sig-arg">a</span>,
+        <span class="summary-sig-arg">mask</span>,
+        <span class="summary-sig-arg">values</span>)</span><br />
+      putmask(a, mask, values) sets a where mask is true.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#putmask">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="rank"></a><span class="summary-sig-name">rank</span>(<span class="summary-sig-arg">object</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#rank">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="ravel"></a><span class="summary-sig-name">ravel</span>(<span class="summary-sig-arg">a</span>)</span><br />
+      a as one-dimensional, may share data and mask</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#ravel">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="repeat"></a><span class="summary-sig-name">repeat</span>(<span class="summary-sig-arg">a</span>,
+        <span class="summary-sig-arg">repeats</span>,
+        <span class="summary-sig-arg">axis</span>=<span class="summary-sig-default">None</span>)</span><br />
+      repeat elements of a repeats times along axis repeats is a 
+      sequence of length a.shape[axis] telling how many times to repeat 
+      each element.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#repeat">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="reshape"></a><span class="summary-sig-name">reshape</span>(<span class="summary-sig-arg">a</span>,
+        <span class="summary-sig-arg">*newshape</span>)</span><br />
+      Copy of a with a new shape.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#reshape">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="numpy.core.ma-module.html#resize" class="summary-sig-name">resize</a>(<span class="summary-sig-arg">a</span>,
+        <span class="summary-sig-arg">new_shape</span>)</span><br />
+      resize(a, new_shape) returns a new array with the specified 
+      shape.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#resize">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="right_shift"></a><span class="summary-sig-name">right_shift</span>(<span class="summary-sig-arg">a</span>,
+        <span class="summary-sig-arg">n</span>)</span><br />
+      Right shift n bits</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#right_shift">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="set_fill_value"></a><span class="summary-sig-name">set_fill_value</span>(<span class="summary-sig-arg">a</span>,
+        <span class="summary-sig-arg">fill_value</span>)</span><br />
+      Set fill value of a if it is a masked array.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#set_fill_value">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="shape"></a><span class="summary-sig-name">shape</span>(<span class="summary-sig-arg">object</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#shape">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="size"></a><span class="summary-sig-name">size</span>(<span class="summary-sig-arg">object</span>,
+        <span class="summary-sig-arg">axis</span>=<span class="summary-sig-default">None</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#size">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="sometrue"></a><span class="summary-sig-name">sometrue</span>(<span class="summary-sig-arg">target</span>,
+        <span class="summary-sig-arg">axis</span>=<span class="summary-sig-default">0</span>,
+        <span class="summary-sig-arg">dtype</span>=<span class="summary-sig-default">None</span>)</span><br />
+      Reduce target along the given axis with this function.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#sometrue">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="numpy.core.ma-module.html#sort" class="summary-sig-name">sort</a>(<span class="summary-sig-arg">x</span>,
+        <span class="summary-sig-arg">axis</span>=<span class="summary-sig-default">-1</span>,
+        <span class="summary-sig-arg">fill_value</span>=<span class="summary-sig-default">None</span>)</span><br />
+      If x does not have a mask, return a masked array formed from the 
+      result of numeric.sort(x, axis).</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#sort">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="sum"></a><span class="summary-sig-name">sum</span>(<span class="summary-sig-arg">target</span>,
+        <span class="summary-sig-arg">axis</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">dtype</span>=<span class="summary-sig-default">None</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#sum">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="swapaxes"></a><span class="summary-sig-name">swapaxes</span>(<span class="summary-sig-arg">a</span>,
+        <span class="summary-sig-arg">axis1</span>,
+        <span class="summary-sig-arg">axis2</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#swapaxes">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="take"></a><span class="summary-sig-name">take</span>(<span class="summary-sig-arg">a</span>,
+        <span class="summary-sig-arg">indices</span>,
+        <span class="summary-sig-arg">axis</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">out</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">mode</span>=<span class="summary-sig-default"><code class="variable-quote">'</code><code class="variable-string">raise</code><code class="variable-quote">'</code></span>)</span><br />
+      returns selection of items from a.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#take">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="trace"></a><span class="summary-sig-name">trace</span>(<span class="summary-sig-arg">a</span>,
+        <span class="summary-sig-arg">offset</span>=<span class="summary-sig-default">0</span>,
+        <span class="summary-sig-arg">axis1</span>=<span class="summary-sig-default">0</span>,
+        <span class="summary-sig-arg">axis2</span>=<span class="summary-sig-default">1</span>,
+        <span class="summary-sig-arg">dtype</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">out</span>=<span class="summary-sig-default">None</span>)</span><br />
+      trace(a,offset=0, axis1=0, axis2=1) returns the sum along 
+      diagonals (defined by the last two dimenions) of the array.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#trace">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="transpose"></a><span class="summary-sig-name">transpose</span>(<span class="summary-sig-arg">a</span>,
+        <span class="summary-sig-arg">axes</span>=<span class="summary-sig-default">None</span>)</span><br />
+      reorder dimensions per tuple axes</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#transpose">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="numpy.core.ma-module.html#where" class="summary-sig-name">where</a>(<span class="summary-sig-arg">condition</span>,
+        <span class="summary-sig-arg">x</span>,
+        <span class="summary-sig-arg">y</span>)</span><br />
+      where(condition, x, y) is x where condition is nonzero, y 
+      otherwise.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#where">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="zeros"></a><span class="summary-sig-name">zeros</span>(<span class="summary-sig-arg">shape</span>,
+        <span class="summary-sig-arg">dtype</span>=<span class="summary-sig-default">&lt;type 'float'&gt;</span>)</span><br />
+      zeros(n, dtype=float) = an array of all zeros of the given length 
+      or shape.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="numpy.core.ma-pysrc.html#zeros">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+</table>
+<!-- ==================== VARIABLES ==================== -->
+<a name="section-Variables"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Variables</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-Variables"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma-module.html#absolute" class="summary-name">absolute</a> = <code title="&lt;numpy.core.ma.masked_unary_operation instance at 0x835fb4c&gt;">&lt;numpy.core.ma.masked_unary_operation instance at 0<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma-module.html#add" class="summary-name">add</a> = <code title="&lt;numpy.core.ma.masked_binary_operation instance at 0x835fdac&gt;">&lt;numpy.core.ma.masked_binary_operation instance at 0x835<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma-module.html#arccos" class="summary-name">arccos</a> = <code title="&lt;numpy.core.ma.masked_unary_operation instance at 0x835f7ec&gt;">&lt;numpy.core.ma.masked_unary_operation instance at 0x8<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma-module.html#arccosh" class="summary-name">arccosh</a> = <code title="&lt;numpy.core.ma.masked_unary_operation instance at 0x835f94c&gt;">&lt;numpy.core.ma.masked_unary_operation instance at 0x<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma-module.html#arcsin" class="summary-name">arcsin</a> = <code title="&lt;numpy.core.ma.masked_unary_operation instance at 0x835f76c&gt;">&lt;numpy.core.ma.masked_unary_operation instance at 0x8<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma-module.html#arcsinh" class="summary-name">arcsinh</a> = <code title="&lt;numpy.core.ma.masked_unary_operation instance at 0x835f8cc&gt;">&lt;numpy.core.ma.masked_unary_operation instance at 0x<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma-module.html#arctan" class="summary-name">arctan</a> = <code title="&lt;numpy.core.ma.masked_unary_operation instance at 0x835f86c&gt;">&lt;numpy.core.ma.masked_unary_operation instance at 0x8<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma-module.html#arctan2" class="summary-name">arctan2</a> = <code title="&lt;numpy.core.ma.masked_binary_operation instance at 0x836310c&gt;">&lt;numpy.core.ma.masked_binary_operation instance at 0<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma-module.html#arctanh" class="summary-name">arctanh</a> = <code title="&lt;numpy.core.ma.masked_unary_operation instance at 0x835f9ac&gt;">&lt;numpy.core.ma.masked_unary_operation instance at 0x<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma-module.html#around" class="summary-name">around</a> = <code title="&lt;numpy.core.ma.masked_unary_operation instance at 0x835fc6c&gt;">&lt;numpy.core.ma.masked_unary_operation instance at 0x8<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma-module.html#bitwise_and" class="summary-name">bitwise_and</a> = <code title="&lt;numpy.core.ma.masked_binary_operation instance at 0x83633ac&gt;">&lt;numpy.core.ma.masked_binary_operation instance <code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma-module.html#bitwise_or" class="summary-name">bitwise_or</a> = <code title="&lt;numpy.core.ma.masked_binary_operation instance at 0x83633ec&gt;">&lt;numpy.core.ma.masked_binary_operation instance a<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma-module.html#bitwise_xor" class="summary-name">bitwise_xor</a> = <code title="&lt;numpy.core.ma.masked_binary_operation instance at 0x836342c&gt;">&lt;numpy.core.ma.masked_binary_operation instance <code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma-module.html#ceil" class="summary-name">ceil</a> = <code title="&lt;numpy.core.ma.masked_unary_operation instance at 0x835fd0c&gt;">&lt;numpy.core.ma.masked_unary_operation instance at 0x835<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma-module.html#conjugate" class="summary-name">conjugate</a> = <code title="&lt;numpy.core.ma.masked_unary_operation instance at 0x835f5ec&gt;">&lt;numpy.core.ma.masked_unary_operation instance at <code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma-module.html#cos" class="summary-name">cos</a> = <code title="&lt;numpy.core.ma.masked_unary_operation instance at 0x835f68c&gt;">&lt;numpy.core.ma.masked_unary_operation instance at 0x835f<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma-module.html#cosh" class="summary-name">cosh</a> = <code title="&lt;numpy.core.ma.masked_unary_operation instance at 0x835fa8c&gt;">&lt;numpy.core.ma.masked_unary_operation instance at 0x835<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="default_character_fill_value"></a><span class="summary-name">default_character_fill_value</span> = <code title="'-'"><code class="variable-quote">'</code><code class="variable-string">-</code><code class="variable-quote">'</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="default_complex_fill_value"></a><span class="summary-name">default_complex_fill_value</span> = <code title="(1e+20+0j)">(1e+20+0j)</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="default_integer_fill_value"></a><span class="summary-name">default_integer_fill_value</span> = <code title="999999">999999</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="default_object_fill_value"></a><span class="summary-name">default_object_fill_value</span> = <code title="'?'"><code class="variable-quote">'</code><code class="variable-string">?</code><code class="variable-quote">'</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="default_real_fill_value"></a><span class="summary-name">default_real_fill_value</span> = <code title="1e+20">1e+20</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma-module.html#divide" class="summary-name">divide</a> = <code title="&lt;numpy.core.ma.domained_binary_operation instance at 0x835fe8c&gt;">&lt;numpy.core.ma.domained_binary_operation instance at <code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="divide_tolerance"></a><span class="summary-name">divide_tolerance</span> = <code title="1e-35">1e-35</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma-module.html#equal" class="summary-name">equal</a> = <code title="&lt;numpy.core.ma.masked_binary_operation instance at 0x836312c&gt;">&lt;numpy.core.ma.masked_binary_operation instance at 0x8<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma-module.html#exp" class="summary-name">exp</a> = <code title="&lt;numpy.core.ma.masked_unary_operation instance at 0x835f58c&gt;">&lt;numpy.core.ma.masked_unary_operation instance at 0x835f<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma-module.html#fabs" class="summary-name">fabs</a> = <code title="&lt;numpy.core.ma.masked_unary_operation instance at 0x835fbac&gt;">&lt;numpy.core.ma.masked_unary_operation instance at 0x835<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma-module.html#floor" class="summary-name">floor</a> = <code title="&lt;numpy.core.ma.masked_unary_operation instance at 0x835fcac&gt;">&lt;numpy.core.ma.masked_unary_operation instance at 0x83<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma-module.html#floor_divide" class="summary-name">floor_divide</a> = <code title="&lt;numpy.core.ma.domained_binary_operation instance at 0x835ff6c&gt;">&lt;numpy.core.ma.domained_binary_operation instan<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma-module.html#fmod" class="summary-name">fmod</a> = <code title="&lt;numpy.core.ma.domained_binary_operation instance at 0x836304c&gt;">&lt;numpy.core.ma.domained_binary_operation instance at 0x<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma-module.html#greater" class="summary-name">greater</a> = <code title="&lt;numpy.core.ma.masked_binary_operation instance at 0x836328c&gt;">&lt;numpy.core.ma.masked_binary_operation instance at 0<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma-module.html#greater_equal" class="summary-name">greater_equal</a> = <code title="&lt;numpy.core.ma.masked_binary_operation instance at 0x836320c&gt;">&lt;numpy.core.ma.masked_binary_operation instanc<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma-module.html#hypot" class="summary-name">hypot</a> = <code title="&lt;numpy.core.ma.masked_binary_operation instance at 0x83630ac&gt;">&lt;numpy.core.ma.masked_binary_operation instance at 0x8<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="inf"></a><span class="summary-name">inf</span> = <code title="inf">inf</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma-module.html#less" class="summary-name">less</a> = <code title="&lt;numpy.core.ma.masked_binary_operation instance at 0x836324c&gt;">&lt;numpy.core.ma.masked_binary_operation instance at 0x83<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma-module.html#less_equal" class="summary-name">less_equal</a> = <code title="&lt;numpy.core.ma.masked_binary_operation instance at 0x83631cc&gt;">&lt;numpy.core.ma.masked_binary_operation instance a<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma-module.html#log" class="summary-name">log</a> = <code title="&lt;numpy.core.ma.masked_unary_operation instance at 0x835f4ac&gt;">&lt;numpy.core.ma.masked_unary_operation instance at 0x835f<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma-module.html#log10" class="summary-name">log10</a> = <code title="&lt;numpy.core.ma.masked_unary_operation instance at 0x835f52c&gt;">&lt;numpy.core.ma.masked_unary_operation instance at 0x83<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma-module.html#logical_and" class="summary-name">logical_and</a> = <code title="&lt;numpy.core.ma.masked_binary_operation instance at 0x83632cc&gt;">&lt;numpy.core.ma.masked_binary_operation instance <code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma-module.html#logical_not" class="summary-name">logical_not</a> = <code title="&lt;numpy.core.ma.masked_unary_operation instance at 0x835fd6c&gt;">&lt;numpy.core.ma.masked_unary_operation instance a<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma-module.html#logical_or" class="summary-name">logical_or</a> = <code title="&lt;numpy.core.ma.masked_binary_operation instance at 0x836332c&gt;">&lt;numpy.core.ma.masked_binary_operation instance a<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma-module.html#logical_xor" class="summary-name">logical_xor</a> = <code title="&lt;numpy.core.ma.masked_binary_operation instance at 0x836336c&gt;">&lt;numpy.core.ma.masked_binary_operation instance <code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma-module.html#masked" class="summary-name">masked</a> = <code title="array(data =
+ 999999,
+      mask =
+ True,
+      fill_value=999999)
+">array(dat<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="masked_print_option"></a><span class="summary-name">masked_print_option</span> = <code title="--">--</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma-module.html#maximum" class="summary-name">maximum</a> = <code title="&lt;numpy.core.ma._maximum_operation instance at 0x8363a0c&gt;">&lt;numpy.core.ma._maximum_operation instance at 0x8363<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma-module.html#minimum" class="summary-name">minimum</a> = <code title="&lt;numpy.core.ma._minimum_operation instance at 0x83639ac&gt;">&lt;numpy.core.ma._minimum_operation instance at 0x8363<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma-module.html#multiply" class="summary-name">multiply</a> = <code title="&lt;numpy.core.ma.masked_binary_operation instance at 0x835fe4c&gt;">&lt;numpy.core.ma.masked_binary_operation instance at <code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma-module.html#negative" class="summary-name">negative</a> = <code title="&lt;numpy.core.ma.masked_unary_operation instance at 0x835fc0c&gt;">&lt;numpy.core.ma.masked_unary_operation instance at 0<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="newaxis"></a><span class="summary-name">newaxis</span> = <code title="None">None</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="nomask"></a><span class="summary-name">nomask</span> = <code title="False">False</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma-module.html#not_equal" class="summary-name">not_equal</a> = <code title="&lt;numpy.core.ma.masked_binary_operation instance at 0x836318c&gt;">&lt;numpy.core.ma.masked_binary_operation instance at<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma-module.html#remainder" class="summary-name">remainder</a> = <code title="&lt;numpy.core.ma.domained_binary_operation instance at 0x835ffcc&gt;">&lt;numpy.core.ma.domained_binary_operation instance <code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma-module.html#sin" class="summary-name">sin</a> = <code title="&lt;numpy.core.ma.masked_unary_operation instance at 0x835f62c&gt;">&lt;numpy.core.ma.masked_unary_operation instance at 0x835f<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma-module.html#sinh" class="summary-name">sinh</a> = <code title="&lt;numpy.core.ma.masked_unary_operation instance at 0x835fa2c&gt;">&lt;numpy.core.ma.masked_unary_operation instance at 0x835<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma-module.html#sqrt" class="summary-name">sqrt</a> = <code title="&lt;numpy.core.ma.masked_unary_operation instance at 0x835f42c&gt;">&lt;numpy.core.ma.masked_unary_operation instance at 0x835<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma-module.html#subtract" class="summary-name">subtract</a> = <code title="&lt;numpy.core.ma.masked_binary_operation instance at 0x835fe0c&gt;">&lt;numpy.core.ma.masked_binary_operation instance at <code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma-module.html#tan" class="summary-name">tan</a> = <code title="&lt;numpy.core.ma.masked_unary_operation instance at 0x835f70c&gt;">&lt;numpy.core.ma.masked_unary_operation instance at 0x835f<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma-module.html#tanh" class="summary-name">tanh</a> = <code title="&lt;numpy.core.ma.masked_unary_operation instance at 0x835faec&gt;">&lt;numpy.core.ma.masked_unary_operation instance at 0x835<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma-module.html#true_divide" class="summary-name">true_divide</a> = <code title="&lt;numpy.core.ma.domained_binary_operation instance at 0x835ff0c&gt;">&lt;numpy.core.ma.domained_binary_operation instanc<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma-module.html#typecodes" class="summary-name">typecodes</a> = <code title="{'All': '?bhilqpBHILQPfdgFDGSUVO',
+ 'AllFloat': 'fdgFDG',
+ 'AllInteger': 'bBhHiIlLqQpP',
+ 'Character': 'S1',
+ 'Complex': 'FDG',
+ 'Float': 'fdg',
+ 'Integer': 'bhilqp',
+ 'UnsignedInteger': 'BHILQP'}"><code class="variable-group">{</code><code class="variable-quote">'</code><code class="variable-string">All</code><code class="variable-quote">'</code><code class="variable-op">: </code><code class="variable-quote">'</code><code class="variable-string">?bhilqpBHILQPfdgFDGSUVO</code><code class="variable-quote">'</code><code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">AllFloat</code><code class="variable-quote">'</code><code class="variable-op">: </code><code class="variable-quote">'</code><code class="variable-string">fd</code><code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma-module.html#ufunc_domain" class="summary-name">ufunc_domain</a> = <code title="{&lt;function round_ at 0x82ff684&gt;: None,
+ &lt;ufunc 'arctan'&gt;: None,
+ &lt;ufunc 'tanh'&gt;: None,
+ &lt;ufunc 'true_divide'&gt;: &lt;numpy.core.ma.domain_safe_divide instance at \
+0x835feec&gt;,
+ &lt;ufunc 'subtract'&gt;: None,
+ &lt;ufunc 'tan'&gt;: &lt;numpy.core.ma.domain_tan instance at 0x835f6ec&gt;,
+ &lt;ufunc 'fmod'&gt;: &lt;numpy.core.ma.domain_safe_divide instance at 0x83630\
+..."><code class="variable-group">{</code>&lt;function round_ at 0x82ff684&gt;<code class="variable-op">: </code>None<code class="variable-op">, </code>&lt;ufunc '<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="numpy.core.ma-module.html#ufunc_fills" class="summary-name">ufunc_fills</a> = <code title="{&lt;function round_ at 0x82ff684&gt;: (0),
+ &lt;ufunc 'arctan'&gt;: (0),
+ &lt;ufunc 'tanh'&gt;: (0),
+ &lt;ufunc 'true_divide'&gt;: (0, 1),
+ &lt;ufunc 'subtract'&gt;: (0, 0),
+ &lt;ufunc 'tan'&gt;: (0.0),
+ &lt;ufunc 'fmod'&gt;: (0, 1),
+ &lt;ufunc 'arctanh'&gt;: (0.0),
+..."><code class="variable-group">{</code>&lt;function round_ at 0x82ff684&gt;<code class="variable-op">: </code><code class="variable-group">(</code>0<code class="variable-group">)</code><code class="variable-op">, </code>&lt;ufunc 'ar<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+</table>
+<!-- ==================== FUNCTION DETAILS ==================== -->
+<a name="section-FunctionDetails"></a>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Function Details</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-FunctionDetails"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+</table>
+<a name="allclose"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">allclose</span>(<span class="sig-arg">a</span>,
+        <span class="sig-arg">b</span>,
+        <span class="sig-arg">fill_value</span>=<span class="sig-default">1</span>,
+        <span class="sig-arg">rtol</span>=<span class="sig-default">1e-05</span>,
+        <span class="sig-arg">atol</span>=<span class="sig-default">1e-08</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="numpy.core.ma-pysrc.html#allclose">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  Returns true if all components of a and b are equal subject to given 
+  tolerances. If fill_value is 1, masked values considered equal. If 
+  fill_value is 0, masked values considered unequal. The relative error 
+  rtol should be positive and &lt;&lt; 1.0 The absolute error atol comes 
+  into play for those elements of b that are very small or zero; it says 
+  how small a must be also.
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="argmax"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">argmax</span>(<span class="sig-arg">x</span>,
+        <span class="sig-arg">axis</span>=<span class="sig-default">-1</span>,
+        <span class="sig-arg">out</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">fill_value</span>=<span class="sig-default">None</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="numpy.core.ma-pysrc.html#argmax">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  Treating masked values as if they have the value fill_value, return 
+  sort indices for maximum along given axis. if fill_value is None, use 
+  -get_fill_value(x) if it exists. Returns a numpy array if x has more than
+  one dimension. Otherwise, returns a scalar index.
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="argmin"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">argmin</span>(<span class="sig-arg">x</span>,
+        <span class="sig-arg">axis</span>=<span class="sig-default">-1</span>,
+        <span class="sig-arg">out</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">fill_value</span>=<span class="sig-default">None</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="numpy.core.ma-pysrc.html#argmin">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  Treating masked values as if they have the value fill_value, return 
+  indices for minimum values along given axis. if fill_value is None, use 
+  get_fill_value(x). Returns a numpy array if x has more than one 
+  dimension. Otherwise, returns a scalar index.
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="argsort"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">argsort</span>(<span class="sig-arg">x</span>,
+        <span class="sig-arg">axis</span>=<span class="sig-default">-1</span>,
+        <span class="sig-arg">out</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">fill_value</span>=<span class="sig-default">None</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="numpy.core.ma-pysrc.html#argsort">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  Treating masked values as if they have the value fill_value, return 
+  sort indices for sorting along given axis. if fill_value is None, use 
+  get_fill_value(x) Returns a numpy array.
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="average"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">average</span>(<span class="sig-arg">a</span>,
+        <span class="sig-arg">axis</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">weights</span>=<span class="sig-default">None</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="numpy.core.ma-pysrc.html#average">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  <p>Computes average along indicated axis. If axis is None, average over 
+  the entire array Inputs can be integer or floating types; result is of 
+  type float.</p>
+  <p>If weights are given, result is 
+  sum(a*weights,axis=0)/(sum(weights,axis=0)*1.0) weights must have a's 
+  shape or be the 1-d with length the size of a in the given axis.</p>
+  <p>If returned, return a tuple: the result and the sum of the weights or 
+  count of values. Results will have the same shape.</p>
+  masked values in the weights will be set to 0.0
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="compress"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">compress</span>(<span class="sig-arg">condition</span>,
+        <span class="sig-arg">x</span>,
+        <span class="sig-arg">dimension</span>=<span class="sig-default">-1</span>,
+        <span class="sig-arg">out</span>=<span class="sig-default">None</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="numpy.core.ma-pysrc.html#compress">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  Select those parts of x for which condition is true. Masked values in 
+  condition are considered false.
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="dot"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">dot</span>(<span class="sig-arg">a</span>,
+        <span class="sig-arg">b</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="numpy.core.ma-pysrc.html#dot">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  dot(a,b) returns matrix-multiplication between a and b.  The 
+  product-sum is over the last dimension of a and the second-to-last 
+  dimension of b. Masked values are replaced by zeros. See also 
+  innerproduct.
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="filled"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">filled</span>(<span class="sig-arg">a</span>,
+        <span class="sig-arg">value</span>=<span class="sig-default">None</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="numpy.core.ma-pysrc.html#filled">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  <p>a as a contiguous numeric array with any masked areas replaced by 
+  value if value is None or the special element &quot;masked&quot;, 
+  get_fill_value(a) is used instead.</p>
+  <p>If a is already a contiguous numeric array, a itself is returned.</p>
+  filled(a) can be used to be sure that the result is numeric when 
+  passing an object a to other software ignorant of MA, in particular to 
+  numeric itself.
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="fromstring"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">fromstring</span>(<span class="sig-arg">s</span>,
+        <span class="sig-arg">t</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="numpy.core.ma-pysrc.html#fromstring">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  Construct a masked array from a string. Result will have no mask.
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="getmask"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">getmask</span>(<span class="sig-arg">a</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="numpy.core.ma-pysrc.html#getmask">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  Mask of values in a; could be nomask. Returns nomask if a is not a 
+  masked array. To get an array for sure use getmaskarray.
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="getmaskarray"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">getmaskarray</span>(<span class="sig-arg">a</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="numpy.core.ma-pysrc.html#getmaskarray">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  Mask of values in a; an array of zeros if mask is nomask or not a 
+  masked array, and is a byte-sized integer. Do not try to add up entries, 
+  for example.
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="inner"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">inner</span>(<span class="sig-arg">a</span>,
+        <span class="sig-arg">b</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="numpy.core.ma-pysrc.html#inner">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  inner(a,b) returns the dot product of two arrays, which has shape 
+  a.shape[:-1] + b.shape[:-1] with elements computed by summing the product
+  of the elements from the last dimensions of a and b. Masked elements are 
+  replace by zeros.
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="innerproduct"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">innerproduct</span>(<span class="sig-arg">a</span>,
+        <span class="sig-arg">b</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="numpy.core.ma-pysrc.html#inner">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  inner(a,b) returns the dot product of two arrays, which has shape 
+  a.shape[:-1] + b.shape[:-1] with elements computed by summing the product
+  of the elements from the last dimensions of a and b. Masked elements are 
+  replace by zeros.
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="make_mask"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">make_mask</span>(<span class="sig-arg">m</span>,
+        <span class="sig-arg">copy</span>=<span class="sig-default">0</span>,
+        <span class="sig-arg">flag</span>=<span class="sig-default">0</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="numpy.core.ma-pysrc.html#make_mask">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  return m as a mask, creating a copy if necessary or requested. Can 
+  accept any sequence of integers or nomask. Does not check that contents 
+  must be 0s and 1s. if flag, return nomask if m contains no true 
+  elements.
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="mask_or"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">mask_or</span>(<span class="sig-arg">m1</span>,
+        <span class="sig-arg">m2</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="numpy.core.ma-pysrc.html#mask_or">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  Logical or of the mask candidates m1 and m2, treating nomask as false.
+  Result may equal m1 or m2 if the other is nomask.
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="masked_values"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">masked_values</span>(<span class="sig-arg">data</span>,
+        <span class="sig-arg">value</span>,
+        <span class="sig-arg">rtol</span>=<span class="sig-default">1.e-5</span>,
+        <span class="sig-arg">atol</span>=<span class="sig-default">1.e-8</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="numpy.core.ma-pysrc.html#masked_values">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  Create a masked array; mask is nomask if possible. If copy==0, and 
+  otherwise possible, result may share data values with original array. Let
+  d = filled(data, value). Returns d masked where abs(data-value)&lt;= atol
+  + rtol * abs(value) if d is of a floating point type. Otherwise returns 
+  masked_object(d, value, copy)
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="masked_where"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">masked_where</span>(<span class="sig-arg">condition</span>,
+        <span class="sig-arg">x</span>,
+        <span class="sig-arg">copy</span>=<span class="sig-default">1</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="numpy.core.ma-pysrc.html#masked_where">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  Return x as an array masked where condition is true. Also masked where
+  x or condition masked.
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="put"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">put</span>(<span class="sig-arg">a</span>,
+        <span class="sig-arg">indices</span>,
+        <span class="sig-arg">values</span>,
+        <span class="sig-arg">mode</span>=<span class="sig-default"><code class="variable-quote">'</code><code class="variable-string">raise</code><code class="variable-quote">'</code></span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="numpy.core.ma-pysrc.html#put">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  <p>sets storage-indexed locations to corresponding values.</p>
+  Values and indices are filled if necessary.
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="resize"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">resize</span>(<span class="sig-arg">a</span>,
+        <span class="sig-arg">new_shape</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="numpy.core.ma-pysrc.html#resize">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  resize(a, new_shape) returns a new array with the specified shape. The
+  original array's total size can be any size.
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="sort"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">sort</span>(<span class="sig-arg">x</span>,
+        <span class="sig-arg">axis</span>=<span class="sig-default">-1</span>,
+        <span class="sig-arg">fill_value</span>=<span class="sig-default">None</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="numpy.core.ma-pysrc.html#sort">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  <p>If x does not have a mask, return a masked array formed from the 
+  result of numeric.sort(x, axis). Otherwise, fill x with fill_value. Sort 
+  it. Set a mask where the result is equal to fill_value. Note that this 
+  may have unintended consequences if the data contains the fill value at a
+  non-masked site.</p>
+  If fill_value is not given the default fill value for x's type will be
+  used.
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="where"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">where</span>(<span class="sig-arg">condition</span>,
+        <span class="sig-arg">x</span>,
+        <span class="sig-arg">y</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="numpy.core.ma-pysrc.html#where">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  where(condition, x, y) is x where condition is nonzero, y otherwise. 
+  condition must be convertible to an integer array. Answer is always the 
+  shape of condition. The type depends on x and y. It is integer if both x 
+  and y are the value masked.
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<br />
+<!-- ==================== VARIABLES DETAILS ==================== -->
+<a name="section-VariablesDetails"></a>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Variables Details</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-VariablesDetails"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+</table>
+<a name="absolute"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">absolute</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&lt;numpy.core.ma.masked_unary_operation instance at 0x835fb4c&gt;
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="add"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">add</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&lt;numpy.core.ma.masked_binary_operation instance at 0x835fdac&gt;
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="arccos"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">arccos</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&lt;numpy.core.ma.masked_unary_operation instance at 0x835f7ec&gt;
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="arccosh"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">arccosh</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&lt;numpy.core.ma.masked_unary_operation instance at 0x835f94c&gt;
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="arcsin"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">arcsin</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&lt;numpy.core.ma.masked_unary_operation instance at 0x835f76c&gt;
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="arcsinh"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">arcsinh</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&lt;numpy.core.ma.masked_unary_operation instance at 0x835f8cc&gt;
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="arctan"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">arctan</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&lt;numpy.core.ma.masked_unary_operation instance at 0x835f86c&gt;
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="arctan2"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">arctan2</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&lt;numpy.core.ma.masked_binary_operation instance at 0x836310c&gt;
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="arctanh"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">arctanh</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&lt;numpy.core.ma.masked_unary_operation instance at 0x835f9ac&gt;
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="around"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">around</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&lt;numpy.core.ma.masked_unary_operation instance at 0x835fc6c&gt;
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="bitwise_and"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">bitwise_and</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&lt;numpy.core.ma.masked_binary_operation instance at 0x83633ac&gt;
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="bitwise_or"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">bitwise_or</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&lt;numpy.core.ma.masked_binary_operation instance at 0x83633ec&gt;
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="bitwise_xor"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">bitwise_xor</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&lt;numpy.core.ma.masked_binary_operation instance at 0x836342c&gt;
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="ceil"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">ceil</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&lt;numpy.core.ma.masked_unary_operation instance at 0x835fd0c&gt;
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="conjugate"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">conjugate</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&lt;numpy.core.ma.masked_unary_operation instance at 0x835f5ec&gt;
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="cos"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">cos</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&lt;numpy.core.ma.masked_unary_operation instance at 0x835f68c&gt;
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="cosh"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">cosh</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&lt;numpy.core.ma.masked_unary_operation instance at 0x835fa8c&gt;
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="divide"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">divide</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&lt;numpy.core.ma.domained_binary_operation instance at 0x835fe8c&gt;
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="equal"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">equal</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&lt;numpy.core.ma.masked_binary_operation instance at 0x836312c&gt;
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="exp"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">exp</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&lt;numpy.core.ma.masked_unary_operation instance at 0x835f58c&gt;
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="fabs"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">fabs</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&lt;numpy.core.ma.masked_unary_operation instance at 0x835fbac&gt;
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="floor"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">floor</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&lt;numpy.core.ma.masked_unary_operation instance at 0x835fcac&gt;
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="floor_divide"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">floor_divide</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&lt;numpy.core.ma.domained_binary_operation instance at 0x835ff6c&gt;
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="fmod"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">fmod</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&lt;numpy.core.ma.domained_binary_operation instance at 0x836304c&gt;
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="greater"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">greater</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&lt;numpy.core.ma.masked_binary_operation instance at 0x836328c&gt;
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="greater_equal"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">greater_equal</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&lt;numpy.core.ma.masked_binary_operation instance at 0x836320c&gt;
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="hypot"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">hypot</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&lt;numpy.core.ma.masked_binary_operation instance at 0x83630ac&gt;
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="less"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">less</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&lt;numpy.core.ma.masked_binary_operation instance at 0x836324c&gt;
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="less_equal"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">less_equal</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&lt;numpy.core.ma.masked_binary_operation instance at 0x83631cc&gt;
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="log"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">log</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&lt;numpy.core.ma.masked_unary_operation instance at 0x835f4ac&gt;
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="log10"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">log10</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&lt;numpy.core.ma.masked_unary_operation instance at 0x835f52c&gt;
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="logical_and"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">logical_and</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&lt;numpy.core.ma.masked_binary_operation instance at 0x83632cc&gt;
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="logical_not"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">logical_not</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&lt;numpy.core.ma.masked_unary_operation instance at 0x835fd6c&gt;
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="logical_or"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">logical_or</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&lt;numpy.core.ma.masked_binary_operation instance at 0x836332c&gt;
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="logical_xor"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">logical_xor</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&lt;numpy.core.ma.masked_binary_operation instance at 0x836336c&gt;
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="masked"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">masked</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+array(data =
+ 999999,
+      mask =
+ True,
+      fill_value=999999)
+
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="maximum"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">maximum</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&lt;numpy.core.ma._maximum_operation instance at 0x8363a0c&gt;
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="minimum"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">minimum</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&lt;numpy.core.ma._minimum_operation instance at 0x83639ac&gt;
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="multiply"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">multiply</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&lt;numpy.core.ma.masked_binary_operation instance at 0x835fe4c&gt;
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="negative"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">negative</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&lt;numpy.core.ma.masked_unary_operation instance at 0x835fc0c&gt;
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="not_equal"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">not_equal</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&lt;numpy.core.ma.masked_binary_operation instance at 0x836318c&gt;
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="remainder"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">remainder</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&lt;numpy.core.ma.domained_binary_operation instance at 0x835ffcc&gt;
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="sin"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">sin</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&lt;numpy.core.ma.masked_unary_operation instance at 0x835f62c&gt;
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="sinh"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">sinh</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&lt;numpy.core.ma.masked_unary_operation instance at 0x835fa2c&gt;
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="sqrt"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">sqrt</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&lt;numpy.core.ma.masked_unary_operation instance at 0x835f42c&gt;
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="subtract"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">subtract</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&lt;numpy.core.ma.masked_binary_operation instance at 0x835fe0c&gt;
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="tan"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">tan</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&lt;numpy.core.ma.masked_unary_operation instance at 0x835f70c&gt;
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="tanh"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">tanh</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&lt;numpy.core.ma.masked_unary_operation instance at 0x835faec&gt;
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="true_divide"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">true_divide</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&lt;numpy.core.ma.domained_binary_operation instance at 0x835ff0c&gt;
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="typecodes"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">typecodes</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+<code class="variable-group">{</code><code class="variable-quote">'</code><code class="variable-string">All</code><code class="variable-quote">'</code><code class="variable-op">: </code><code class="variable-quote">'</code><code class="variable-string">?bhilqpBHILQPfdgFDGSUVO</code><code class="variable-quote">'</code><code class="variable-op">,</code>
+ <code class="variable-quote">'</code><code class="variable-string">AllFloat</code><code class="variable-quote">'</code><code class="variable-op">: </code><code class="variable-quote">'</code><code class="variable-string">fdgFDG</code><code class="variable-quote">'</code><code class="variable-op">,</code>
+ <code class="variable-quote">'</code><code class="variable-string">AllInteger</code><code class="variable-quote">'</code><code class="variable-op">: </code><code class="variable-quote">'</code><code class="variable-string">bBhHiIlLqQpP</code><code class="variable-quote">'</code><code class="variable-op">,</code>
+ <code class="variable-quote">'</code><code class="variable-string">Character</code><code class="variable-quote">'</code><code class="variable-op">: </code><code class="variable-quote">'</code><code class="variable-string">S1</code><code class="variable-quote">'</code><code class="variable-op">,</code>
+ <code class="variable-quote">'</code><code class="variable-string">Complex</code><code class="variable-quote">'</code><code class="variable-op">: </code><code class="variable-quote">'</code><code class="variable-string">FDG</code><code class="variable-quote">'</code><code class="variable-op">,</code>
+ <code class="variable-quote">'</code><code class="variable-string">Float</code><code class="variable-quote">'</code><code class="variable-op">: </code><code class="variable-quote">'</code><code class="variable-string">fdg</code><code class="variable-quote">'</code><code class="variable-op">,</code>
+ <code class="variable-quote">'</code><code class="variable-string">Integer</code><code class="variable-quote">'</code><code class="variable-op">: </code><code class="variable-quote">'</code><code class="variable-string">bhilqp</code><code class="variable-quote">'</code><code class="variable-op">,</code>
+ <code class="variable-quote">'</code><code class="variable-string">UnsignedInteger</code><code class="variable-quote">'</code><code class="variable-op">: </code><code class="variable-quote">'</code><code class="variable-string">BHILQP</code><code class="variable-quote">'</code><code class="variable-group">}</code>
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="ufunc_domain"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">ufunc_domain</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+<code class="variable-group">{</code>&lt;function round_ at 0x82ff684&gt;<code class="variable-op">: </code>None<code class="variable-op">,</code>
+ &lt;ufunc 'arctan'&gt;<code class="variable-op">: </code>None<code class="variable-op">,</code>
+ &lt;ufunc 'tanh'&gt;<code class="variable-op">: </code>None<code class="variable-op">,</code>
+ &lt;ufunc 'true_divide'&gt;<code class="variable-op">: </code>&lt;numpy.core.ma.domain_safe_divide instance at <span class="variable-linewrap"><img src="crarr.png" alt="\" /></span>
+0x835feec&gt;<code class="variable-op">,</code>
+ &lt;ufunc 'subtract'&gt;<code class="variable-op">: </code>None<code class="variable-op">,</code>
+ &lt;ufunc 'tan'&gt;<code class="variable-op">: </code>&lt;numpy.core.ma.domain_tan instance at 0x835f6ec&gt;<code class="variable-op">,</code>
+ &lt;ufunc 'fmod'&gt;<code class="variable-op">: </code>&lt;numpy.core.ma.domain_safe_divide instance at 0x83630<span class="variable-linewrap"><img src="crarr.png" alt="\" /></span>
+<code class="variable-ellipsis">...</code>
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="ufunc_fills"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">ufunc_fills</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+<code class="variable-group">{</code>&lt;function round_ at 0x82ff684&gt;<code class="variable-op">: </code><code class="variable-group">(</code>0<code class="variable-group">)</code><code class="variable-op">,</code>
+ &lt;ufunc 'arctan'&gt;<code class="variable-op">: </code><code class="variable-group">(</code>0<code class="variable-group">)</code><code class="variable-op">,</code>
+ &lt;ufunc 'tanh'&gt;<code class="variable-op">: </code><code class="variable-group">(</code>0<code class="variable-group">)</code><code class="variable-op">,</code>
+ &lt;ufunc 'true_divide'&gt;<code class="variable-op">: </code><code class="variable-group">(</code>0<code class="variable-op">, </code>1<code class="variable-group">)</code><code class="variable-op">,</code>
+ &lt;ufunc 'subtract'&gt;<code class="variable-op">: </code><code class="variable-group">(</code>0<code class="variable-op">, </code>0<code class="variable-group">)</code><code class="variable-op">,</code>
+ &lt;ufunc 'tan'&gt;<code class="variable-op">: </code><code class="variable-group">(</code>0.0<code class="variable-group">)</code><code class="variable-op">,</code>
+ &lt;ufunc 'fmod'&gt;<code class="variable-op">: </code><code class="variable-group">(</code>0<code class="variable-op">, </code>1<code class="variable-group">)</code><code class="variable-op">,</code>
+ &lt;ufunc 'arctanh'&gt;<code class="variable-op">: </code><code class="variable-group">(</code>0.0<code class="variable-group">)</code><code class="variable-op">,</code>
+<code class="variable-ellipsis">...</code>
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">
+    Generated by Epydoc 3.0beta1 on Wed Apr  2 23:14:35 2008
+    </td>
+    <td align="right" class="footer">
+      <a href="http://epydoc.sourceforge.net">http://epydoc.sourceforge.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie()
+  // -->
+</script>
+  
+</body>
+</html>

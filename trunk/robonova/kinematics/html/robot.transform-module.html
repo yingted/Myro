@@ -1,0 +1,2633 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>robot.transform</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        Package&nbsp;robot ::
+        Module&nbsp;transform
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
+    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="robot.transform-module.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<!-- ==================== MODULE DESCRIPTION ==================== -->
+<h1 class="epydoc">Module transform</h1><span class="codelink"><a href="robot.transform-pysrc.html">source&nbsp;code</a></span><br /><br />
+Primitive operations for 3x3 orthonormal and 4x4 homogeneous 
+  matrices.<br /><br />
+
+<hr />
+<div class="fields">      <p><strong>Author:</strong>
+        Peter Corke
+      </p>
+      <p><strong>Copyright:</strong>
+        Peter Corke
+      </p>
+      <p><strong>Version:</strong>
+        1.0.3
+      </p>
+</div><!-- ==================== FUNCTIONS ==================== -->
+<a name="section-Functions"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Functions</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-Functions"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">3x3 orthonormal matrix</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="robot.transform-module.html#rotx" class="summary-sig-name">rotx</a>(<span class="summary-sig-arg">theta</span>)</span><br />
+      Rotation about X-axis</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="robot.transform-pysrc.html#rotx">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">3x3 orthonormal matrix</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="robot.transform-module.html#roty" class="summary-sig-name">roty</a>(<span class="summary-sig-arg">theta</span>)</span><br />
+      Rotation about Y-axis</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="robot.transform-pysrc.html#roty">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">3x3 orthonormal matrix</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="robot.transform-module.html#rotz" class="summary-sig-name">rotz</a>(<span class="summary-sig-arg">theta</span>)</span><br />
+      Rotation about Z-axis</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="robot.transform-pysrc.html#rotz">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">4x4 homogeneous matrix</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="robot.transform-module.html#trotx" class="summary-sig-name">trotx</a>(<span class="summary-sig-arg">theta</span>)</span><br />
+      Rotation about X-axis</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="robot.transform-pysrc.html#trotx">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">4x4 homogeneous matrix</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="robot.transform-module.html#troty" class="summary-sig-name">troty</a>(<span class="summary-sig-arg">theta</span>)</span><br />
+      Rotation about Y-axis</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="robot.transform-pysrc.html#troty">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">4x4 homogeneous matrix</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="robot.transform-module.html#trotz" class="summary-sig-name">trotz</a>(<span class="summary-sig-arg">theta</span>)</span><br />
+      Rotation about Z-axis</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="robot.transform-pysrc.html#trotz">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">1x3 matrix</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="robot.transform-module.html#tr2eul" class="summary-sig-name">tr2eul</a>(<span class="summary-sig-arg">m</span>)</span><br />
+      Extract Euler angles.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="robot.transform-pysrc.html#tr2eul">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">3x3 orthonormal matrix</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="robot.transform-module.html#eul2r" class="summary-sig-name">eul2r</a>(<span class="summary-sig-arg">phi</span>,
+        <span class="summary-sig-arg">theta</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">psi</span>=<span class="summary-sig-default">None</span>)</span><br />
+      Rotation from Euler angles.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="robot.transform-pysrc.html#eul2r">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">4x4 homogenous matrix</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="robot.transform-module.html#eul2tr" class="summary-sig-name">eul2tr</a>(<span class="summary-sig-arg">phi</span>,
+        <span class="summary-sig-arg">theta</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">psi</span>=<span class="summary-sig-default">None</span>)</span><br />
+      Rotation from Euler angles.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="robot.transform-pysrc.html#eul2tr">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">1x3 matrix</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="robot.transform-module.html#tr2rpy" class="summary-sig-name">tr2rpy</a>(<span class="summary-sig-arg">m</span>)</span><br />
+      Extract RPY angles.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="robot.transform-pysrc.html#tr2rpy">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">4x4 homogenous matrix</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="robot.transform-module.html#rpy2r" class="summary-sig-name">rpy2r</a>(<span class="summary-sig-arg">roll</span>,
+        <span class="summary-sig-arg">pitch</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">yaw</span>=<span class="summary-sig-default">None</span>)</span><br />
+      Rotation from RPY angles.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="robot.transform-pysrc.html#rpy2r">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">4x4 homogenous matrix</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="robot.transform-module.html#rpy2tr" class="summary-sig-name">rpy2tr</a>(<span class="summary-sig-arg">roll</span>,
+        <span class="summary-sig-arg">pitch</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">yaw</span>=<span class="summary-sig-default">None</span>)</span><br />
+      Rotation from RPY angles.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="robot.transform-pysrc.html#rpy2tr">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">3x3 orthonormal rotation matrix</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="robot.transform-module.html#oa2r" class="summary-sig-name">oa2r</a>(<span class="summary-sig-arg">o</span>,
+        <span class="summary-sig-arg">a</span>)</span><br />
+      Rotation from 2 vectors.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="robot.transform-pysrc.html#oa2r">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">4x4 homogeneous transformation matrix</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="robot.transform-module.html#oa2tr" class="summary-sig-name">oa2tr</a>(<span class="summary-sig-arg">o</span>,
+        <span class="summary-sig-arg">a</span>)</span><br />
+      otation from 2 vectors.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="robot.transform-pysrc.html#oa2tr">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">3x3 orthonormal matrix</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="robot.transform-module.html#rotvec2r" class="summary-sig-name">rotvec2r</a>(<span class="summary-sig-arg">theta</span>,
+        <span class="summary-sig-arg">v</span>)</span><br />
+      Rotation about arbitrary axis.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="robot.transform-pysrc.html#rotvec2r">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">4x4 homogeneous matrix</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="robot.transform-module.html#rotvec2tr" class="summary-sig-name">rotvec2tr</a>(<span class="summary-sig-arg">theta</span>,
+        <span class="summary-sig-arg">v</span>)</span><br />
+      Rotation about arbitrary axis.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="robot.transform-pysrc.html#rotvec2tr">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="robot.transform-module.html#transl" class="summary-sig-name">transl</a>(<span class="summary-sig-arg">x</span>,
+        <span class="summary-sig-arg">y</span>=<span class="summary-sig-default">None</span>,
+        <span class="summary-sig-arg">z</span>=<span class="summary-sig-default">None</span>)</span><br />
+      Create or decompose translational homogeneous transformations.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="robot.transform-pysrc.html#transl">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="robot.transform-module.html#skew" class="summary-sig-name">skew</a>(<span class="summary-sig-arg">*args</span>)</span><br />
+      Convert to/from skew-symmetric form.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="robot.transform-pysrc.html#skew">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">6-vector</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="robot.transform-module.html#tr2diff" class="summary-sig-name">tr2diff</a>(<span class="summary-sig-arg">t1</span>,
+        <span class="summary-sig-arg">t2</span>)</span><br />
+      Convert a transform difference to differential representation.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="robot.transform-pysrc.html#tr2diff">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">4x4 homogeneous transform</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="robot.transform-module.html#trinterp" class="summary-sig-name">trinterp</a>(<span class="summary-sig-arg">T0</span>,
+        <span class="summary-sig-arg">T1</span>,
+        <span class="summary-sig-arg">r</span>)</span><br />
+      Interpolate homogeneous transformations.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="robot.transform-pysrc.html#trinterp">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">3x3 orthonormal rotation matrix</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="robot.transform-module.html#trnorm" class="summary-sig-name">trnorm</a>(<span class="summary-sig-arg">t</span>)</span><br />
+      Normalize a homogeneous transformation.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="robot.transform-pysrc.html#trnorm">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">3x3 orthonormal rotation matrix</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="robot.transform-module.html#t2r" class="summary-sig-name">t2r</a>(<span class="summary-sig-arg">T</span>)</span><br />
+      Return rotational submatrix of a homogeneous transformation.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="robot.transform-pysrc.html#t2r">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">4x4 homogeneous matrix</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="robot.transform-module.html#r2t" class="summary-sig-name">r2t</a>(<span class="summary-sig-arg">R</span>)</span><br />
+      Convert a 3x3 orthonormal rotation matrix to a 4x4 homogeneous 
+      transformation:</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="robot.transform-pysrc.html#r2t">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+</table>
+<!-- ==================== VARIABLES ==================== -->
+<a name="section-Variables"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Variables</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-Variables"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="ALLOW_THREADS"></a><span class="summary-name">ALLOW_THREADS</span> = <code title="1">1</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="BUFSIZE"></a><span class="summary-name">BUFSIZE</span> = <code title="10000">10000</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="CLIP"></a><span class="summary-name">CLIP</span> = <code title="0">0</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="ERR_CALL"></a><span class="summary-name">ERR_CALL</span> = <code title="3">3</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="ERR_DEFAULT"></a><span class="summary-name">ERR_DEFAULT</span> = <code title="0">0</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="ERR_DEFAULT2"></a><span class="summary-name">ERR_DEFAULT2</span> = <code title="2084">2084</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="ERR_IGNORE"></a><span class="summary-name">ERR_IGNORE</span> = <code title="0">0</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="ERR_LOG"></a><span class="summary-name">ERR_LOG</span> = <code title="5">5</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="ERR_PRINT"></a><span class="summary-name">ERR_PRINT</span> = <code title="4">4</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="ERR_RAISE"></a><span class="summary-name">ERR_RAISE</span> = <code title="2">2</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="ERR_WARN"></a><span class="summary-name">ERR_WARN</span> = <code title="1">1</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FLOATING_POINT_SUPPORT"></a><span class="summary-name">FLOATING_POINT_SUPPORT</span> = <code title="1">1</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FPE_DIVIDEBYZERO"></a><span class="summary-name">FPE_DIVIDEBYZERO</span> = <code title="1">1</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FPE_INVALID"></a><span class="summary-name">FPE_INVALID</span> = <code title="8">8</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FPE_OVERFLOW"></a><span class="summary-name">FPE_OVERFLOW</span> = <code title="2">2</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="FPE_UNDERFLOW"></a><span class="summary-name">FPE_UNDERFLOW</span> = <code title="4">4</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="False_"></a><span class="summary-name">False_</span> = <code title="False">False</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="Inf"></a><span class="summary-name">Inf</span> = <code title="inf">inf</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="Infinity"></a><span class="summary-name">Infinity</span> = <code title="inf">inf</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="MAXDIMS"></a><span class="summary-name">MAXDIMS</span> = <code title="32">32</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="NAN"></a><span class="summary-name">NAN</span> = <code title="nan">nan</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="NINF"></a><span class="summary-name">NINF</span> = <code title="-inf">-inf</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="NZERO"></a><span class="summary-name">NZERO</span> = <code title="-0.0">-0.0</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="NaN"></a><span class="summary-name">NaN</span> = <code title="nan">nan</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="PINF"></a><span class="summary-name">PINF</span> = <code title="inf">inf</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="PZERO"></a><span class="summary-name">PZERO</span> = <code title="0.0">0.0</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="RAISE"></a><span class="summary-name">RAISE</span> = <code title="2">2</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="SHIFT_DIVIDEBYZERO"></a><span class="summary-name">SHIFT_DIVIDEBYZERO</span> = <code title="0">0</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="SHIFT_INVALID"></a><span class="summary-name">SHIFT_INVALID</span> = <code title="9">9</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="SHIFT_OVERFLOW"></a><span class="summary-name">SHIFT_OVERFLOW</span> = <code title="3">3</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="SHIFT_UNDERFLOW"></a><span class="summary-name">SHIFT_UNDERFLOW</span> = <code title="6">6</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="robot.transform-module.html#ScalarType" class="summary-name">ScalarType</a> = <code title="(&lt;type 'int'&gt;,
+ &lt;type 'float'&gt;,
+ &lt;type 'complex'&gt;,
+ &lt;type 'long'&gt;,
+ &lt;type 'bool'&gt;,
+ &lt;type 'str'&gt;,
+ &lt;type 'unicode'&gt;,
+ &lt;type 'buffer'&gt;,
+..."><code class="variable-group">(</code>&lt;type 'int'&gt;<code class="variable-op">, </code>&lt;type 'float'&gt;<code class="variable-op">, </code>&lt;type 'complex'&gt;<code class="variable-op">, </code><code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="True_"></a><span class="summary-name">True_</span> = <code title="True">True</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="UFUNC_BUFSIZE_DEFAULT"></a><span class="summary-name">UFUNC_BUFSIZE_DEFAULT</span> = <code title="10000">10000</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="UFUNC_PYVALS_NAME"></a><span class="summary-name">UFUNC_PYVALS_NAME</span> = <code title="'UFUNC_PYVALS'"><code class="variable-quote">'</code><code class="variable-string">UFUNC_PYVALS</code><code class="variable-quote">'</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="WRAP"></a><span class="summary-name">WRAP</span> = <code title="1">1</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="absolute"></a><span class="summary-name">absolute</span> = <code title="&lt;ufunc 'absolute'&gt;">&lt;ufunc 'absolute'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="add"></a><span class="summary-name">add</span> = <code title="&lt;ufunc 'add'&gt;">&lt;ufunc 'add'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="arccos"></a><span class="summary-name">arccos</span> = <code title="&lt;ufunc 'arccos'&gt;">&lt;ufunc 'arccos'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="arccosh"></a><span class="summary-name">arccosh</span> = <code title="&lt;ufunc 'arccosh'&gt;">&lt;ufunc 'arccosh'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="arcsin"></a><span class="summary-name">arcsin</span> = <code title="&lt;ufunc 'arcsin'&gt;">&lt;ufunc 'arcsin'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="arcsinh"></a><span class="summary-name">arcsinh</span> = <code title="&lt;ufunc 'arcsinh'&gt;">&lt;ufunc 'arcsinh'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="arctan"></a><span class="summary-name">arctan</span> = <code title="&lt;ufunc 'arctan'&gt;">&lt;ufunc 'arctan'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="arctan2"></a><span class="summary-name">arctan2</span> = <code title="&lt;ufunc 'arctan2'&gt;">&lt;ufunc 'arctan2'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="arctanh"></a><span class="summary-name">arctanh</span> = <code title="&lt;ufunc 'arctanh'&gt;">&lt;ufunc 'arctanh'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="bitwise_and"></a><span class="summary-name">bitwise_and</span> = <code title="&lt;ufunc 'bitwise_and'&gt;">&lt;ufunc 'bitwise_and'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="bitwise_not"></a><span class="summary-name">bitwise_not</span> = <code title="&lt;ufunc 'invert'&gt;">&lt;ufunc 'invert'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="bitwise_or"></a><span class="summary-name">bitwise_or</span> = <code title="&lt;ufunc 'bitwise_or'&gt;">&lt;ufunc 'bitwise_or'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="bitwise_xor"></a><span class="summary-name">bitwise_xor</span> = <code title="&lt;ufunc 'bitwise_xor'&gt;">&lt;ufunc 'bitwise_xor'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="c_"></a><span class="summary-name">c_</span> = <code title="&lt;numpy.lib.index_tricks.c_class object at 0x839f22c&gt;">&lt;numpy.lib.index_tricks.c_class object at 0x839f22c&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="robot.transform-module.html#cast" class="summary-name">cast</a> = <code title="{&lt;type 'numpy.int64'&gt;: &lt;function &lt;lambda&gt; at 0x82e5bc4&gt;, &lt;type 'numpy.\
+int16'&gt;: &lt;function &lt;lambda&gt; at 0x82e5bfc&gt;, &lt;type 'numpy.void'&gt;: &lt;funct\
+ion &lt;lambda&gt; at 0x82e5c34&gt;, &lt;type 'numpy.unicode_'&gt;: &lt;function &lt;lambda\
+&gt; at 0x82ee02c&gt;, &lt;type 'numpy.complex128'&gt;: &lt;function &lt;lambda&gt; at 0x82\
+e5c6c&gt;, &lt;type 'numpy.uint64'&gt;: &lt;function &lt;lambda&gt; at 0x82e5ca4&gt;, &lt;type\
+ 'numpy.uint32'&gt;: &lt;function &lt;lambda&gt; at 0x82e5cdc&gt;, &lt;type 'numpy.compl\
+ex192'&gt;: &lt;function &lt;lambda&gt; at 0x82e5d14&gt;, &lt;type 'numpy.float32'&gt;: &lt;fu\
+nction &lt;lambda&gt; at 0x82e5d4c&gt;, &lt;type 'numpy.bool_'&gt;: &lt;function &lt;lambda\
+...">{&lt;type 'numpy.int64'&gt;: &lt;function &lt;lambda&gt; at 0x82e5bc4&gt;<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="ceil"></a><span class="summary-name">ceil</span> = <code title="&lt;ufunc 'ceil'&gt;">&lt;ufunc 'ceil'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="conj"></a><span class="summary-name">conj</span> = <code title="&lt;ufunc 'conjugate'&gt;">&lt;ufunc 'conjugate'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="conjugate"></a><span class="summary-name">conjugate</span> = <code title="&lt;ufunc 'conjugate'&gt;">&lt;ufunc 'conjugate'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="cos"></a><span class="summary-name">cos</span> = <code title="&lt;ufunc 'cos'&gt;">&lt;ufunc 'cos'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="cosh"></a><span class="summary-name">cosh</span> = <code title="&lt;ufunc 'cosh'&gt;">&lt;ufunc 'cosh'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="divide"></a><span class="summary-name">divide</span> = <code title="&lt;ufunc 'divide'&gt;">&lt;ufunc 'divide'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="e"></a><span class="summary-name">e</span> = <code title="2.71828182846">2.71828182846</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="equal"></a><span class="summary-name">equal</span> = <code title="&lt;ufunc 'equal'&gt;">&lt;ufunc 'equal'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="exp"></a><span class="summary-name">exp</span> = <code title="&lt;ufunc 'exp'&gt;">&lt;ufunc 'exp'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="expm1"></a><span class="summary-name">expm1</span> = <code title="&lt;ufunc 'expm1'&gt;">&lt;ufunc 'expm1'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="fabs"></a><span class="summary-name">fabs</span> = <code title="&lt;ufunc 'fabs'&gt;">&lt;ufunc 'fabs'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="floor"></a><span class="summary-name">floor</span> = <code title="&lt;ufunc 'floor'&gt;">&lt;ufunc 'floor'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="floor_divide"></a><span class="summary-name">floor_divide</span> = <code title="&lt;ufunc 'floor_divide'&gt;">&lt;ufunc 'floor_divide'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="fmod"></a><span class="summary-name">fmod</span> = <code title="&lt;ufunc 'fmod'&gt;">&lt;ufunc 'fmod'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="frexp"></a><span class="summary-name">frexp</span> = <code title="&lt;ufunc 'frexp'&gt;">&lt;ufunc 'frexp'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="greater"></a><span class="summary-name">greater</span> = <code title="&lt;ufunc 'greater'&gt;">&lt;ufunc 'greater'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="greater_equal"></a><span class="summary-name">greater_equal</span> = <code title="&lt;ufunc 'greater_equal'&gt;">&lt;ufunc 'greater_equal'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="hypot"></a><span class="summary-name">hypot</span> = <code title="&lt;ufunc 'hypot'&gt;">&lt;ufunc 'hypot'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="robot.transform-module.html#index_exp" class="summary-name">index_exp</a> = <code title="&lt;numpy.lib.index_tricks._index_expression_class object at 0x839f3cc&gt;">&lt;numpy.lib.index_tricks._index_expression_class ob<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="inf"></a><span class="summary-name">inf</span> = <code title="inf">inf</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="infty"></a><span class="summary-name">infty</span> = <code title="inf">inf</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="invert"></a><span class="summary-name">invert</span> = <code title="&lt;ufunc 'invert'&gt;">&lt;ufunc 'invert'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="isfinite"></a><span class="summary-name">isfinite</span> = <code title="&lt;ufunc 'isfinite'&gt;">&lt;ufunc 'isfinite'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="isinf"></a><span class="summary-name">isinf</span> = <code title="&lt;ufunc 'isinf'&gt;">&lt;ufunc 'isinf'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="isnan"></a><span class="summary-name">isnan</span> = <code title="&lt;ufunc 'isnan'&gt;">&lt;ufunc 'isnan'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="ldexp"></a><span class="summary-name">ldexp</span> = <code title="&lt;ufunc 'ldexp'&gt;">&lt;ufunc 'ldexp'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="left_shift"></a><span class="summary-name">left_shift</span> = <code title="&lt;ufunc 'left_shift'&gt;">&lt;ufunc 'left_shift'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="less"></a><span class="summary-name">less</span> = <code title="&lt;ufunc 'less'&gt;">&lt;ufunc 'less'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="less_equal"></a><span class="summary-name">less_equal</span> = <code title="&lt;ufunc 'less_equal'&gt;">&lt;ufunc 'less_equal'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="little_endian"></a><span class="summary-name">little_endian</span> = <code title="True">True</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="log"></a><span class="summary-name">log</span> = <code title="&lt;ufunc 'log'&gt;">&lt;ufunc 'log'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="log10"></a><span class="summary-name">log10</span> = <code title="&lt;ufunc 'log10'&gt;">&lt;ufunc 'log10'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="log1p"></a><span class="summary-name">log1p</span> = <code title="&lt;ufunc 'log1p'&gt;">&lt;ufunc 'log1p'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="logical_and"></a><span class="summary-name">logical_and</span> = <code title="&lt;ufunc 'logical_and'&gt;">&lt;ufunc 'logical_and'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="logical_not"></a><span class="summary-name">logical_not</span> = <code title="&lt;ufunc 'logical_not'&gt;">&lt;ufunc 'logical_not'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="logical_or"></a><span class="summary-name">logical_or</span> = <code title="&lt;ufunc 'logical_or'&gt;">&lt;ufunc 'logical_or'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="logical_xor"></a><span class="summary-name">logical_xor</span> = <code title="&lt;ufunc 'logical_xor'&gt;">&lt;ufunc 'logical_xor'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="maximum"></a><span class="summary-name">maximum</span> = <code title="&lt;ufunc 'maximum'&gt;">&lt;ufunc 'maximum'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="mgrid"></a><span class="summary-name">mgrid</span> = <code title="&lt;numpy.lib.index_tricks.nd_grid object at 0x839f12c&gt;">&lt;numpy.lib.index_tricks.nd_grid object at 0x839f12c&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="minimum"></a><span class="summary-name">minimum</span> = <code title="&lt;ufunc 'minimum'&gt;">&lt;ufunc 'minimum'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="mod"></a><span class="summary-name">mod</span> = <code title="&lt;ufunc 'remainder'&gt;">&lt;ufunc 'remainder'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="modf"></a><span class="summary-name">modf</span> = <code title="&lt;ufunc 'modf'&gt;">&lt;ufunc 'modf'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="multiply"></a><span class="summary-name">multiply</span> = <code title="&lt;ufunc 'multiply'&gt;">&lt;ufunc 'multiply'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="nan"></a><span class="summary-name">nan</span> = <code title="nan">nan</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="robot.transform-module.html#nbytes" class="summary-name">nbytes</a> = <code title="{&lt;type 'numpy.int64'&gt;: 8, &lt;type 'numpy.int16'&gt;: 2, &lt;type 'numpy.void'&gt;\
+: 0, &lt;type 'numpy.complex128'&gt;: 16, &lt;type 'numpy.uint64'&gt;: 8, &lt;type 'n\
+umpy.uint32'&gt;: 4, &lt;type 'numpy.complex192'&gt;: 24, &lt;type 'numpy.float32'\
+&gt;: 4, &lt;type 'numpy.bool_'&gt;: 1, &lt;type 'numpy.uint8'&gt;: 1, &lt;type 'numpy.o\
+bject_'&gt;: 4, &lt;type 'numpy.int32'&gt;: 4, &lt;type 'numpy.float64'&gt;: 8, &lt;type\
+ 'numpy.int32'&gt;: 4, &lt;type 'numpy.uint16'&gt;: 2, &lt;type 'numpy.string_'&gt;: \
+0, &lt;type 'numpy.int8'&gt;: 1, &lt;type 'numpy.float96'&gt;: 12, &lt;type 'numpy.ui\
+nt32'&gt;: 4, &lt;type 'numpy.unicode_'&gt;: 0, &lt;type 'numpy.complex64'&gt;: 8}">{&lt;type 'numpy.int64'&gt;: 8, &lt;type 'numpy.int16'&gt;: 2, &lt;t<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="negative"></a><span class="summary-name">negative</span> = <code title="&lt;ufunc 'negative'&gt;">&lt;ufunc 'negative'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="newaxis"></a><span class="summary-name">newaxis</span> = <code title="None">None</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="not_equal"></a><span class="summary-name">not_equal</span> = <code title="&lt;ufunc 'not_equal'&gt;">&lt;ufunc 'not_equal'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="ogrid"></a><span class="summary-name">ogrid</span> = <code title="&lt;numpy.lib.index_tricks.nd_grid object at 0x839f14c&gt;">&lt;numpy.lib.index_tricks.nd_grid object at 0x839f14c&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="ones_like"></a><span class="summary-name">ones_like</span> = <code title="&lt;ufunc 'ones_like'&gt;">&lt;ufunc 'ones_like'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="pi"></a><span class="summary-name">pi</span> = <code title="3.14159265359">3.14159265359</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="power"></a><span class="summary-name">power</span> = <code title="&lt;ufunc 'power'&gt;">&lt;ufunc 'power'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="r_"></a><span class="summary-name">r_</span> = <code title="&lt;numpy.lib.index_tricks.r_class object at 0x839f1ac&gt;">&lt;numpy.lib.index_tricks.r_class object at 0x839f1ac&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="reciprocal"></a><span class="summary-name">reciprocal</span> = <code title="&lt;ufunc 'reciprocal'&gt;">&lt;ufunc 'reciprocal'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="remainder"></a><span class="summary-name">remainder</span> = <code title="&lt;ufunc 'remainder'&gt;">&lt;ufunc 'remainder'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="right_shift"></a><span class="summary-name">right_shift</span> = <code title="&lt;ufunc 'right_shift'&gt;">&lt;ufunc 'right_shift'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="rint"></a><span class="summary-name">rint</span> = <code title="&lt;ufunc 'rint'&gt;">&lt;ufunc 'rint'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="robot.transform-module.html#s_" class="summary-name">s_</a> = <code title="&lt;numpy.lib.index_tricks._index_expression_class object at 0x839f40c&gt;">&lt;numpy.lib.index_tricks._index_expression_class object at<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="robot.transform-module.html#sctypeDict" class="summary-name">sctypeDict</a> = <code title="{0: &lt;type 'numpy.bool_'&gt;,
+ 1: &lt;type 'numpy.int8'&gt;,
+ 2: &lt;type 'numpy.uint8'&gt;,
+ 3: &lt;type 'numpy.int16'&gt;,
+ 4: &lt;type 'numpy.uint16'&gt;,
+ 5: &lt;type 'numpy.int32'&gt;,
+ 6: &lt;type 'numpy.uint32'&gt;,
+ 7: &lt;type 'numpy.int32'&gt;,
+..."><code class="variable-group">{</code>0<code class="variable-op">: </code>&lt;type 'numpy.bool_'&gt;<code class="variable-op">, </code>1<code class="variable-op">: </code>&lt;type 'numpy.int8'&gt;<code class="variable-op">,</code><code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="robot.transform-module.html#sctypeNA" class="summary-name">sctypeNA</a> = <code title="{'?': 'Bool',
+ 'B': 'UInt8',
+ 'Bool': &lt;type 'numpy.bool_'&gt;,
+ 'Complex32': &lt;type 'numpy.complex64'&gt;,
+ 'Complex64': &lt;type 'numpy.complex128'&gt;,
+ 'Complex96': &lt;type 'numpy.complex192'&gt;,
+ 'D': 'Complex64',
+ 'F': 'Complex32',
+..."><code class="variable-group">{</code><code class="variable-quote">'</code><code class="variable-string">?</code><code class="variable-quote">'</code><code class="variable-op">: </code><code class="variable-quote">'</code><code class="variable-string">Bool</code><code class="variable-quote">'</code><code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">B</code><code class="variable-quote">'</code><code class="variable-op">: </code><code class="variable-quote">'</code><code class="variable-string">UInt8</code><code class="variable-quote">'</code><code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">Bool</code><code class="variable-quote">'</code><code class="variable-op">: </code>&lt;type 'numpy.bo<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="robot.transform-module.html#sctypes" class="summary-name">sctypes</a> = <code title="{'complex': [&lt;type 'numpy.complex64'&gt;,
+             &lt;type 'numpy.complex128'&gt;,
+             &lt;type 'numpy.complex192'&gt;],
+ 'float': [&lt;type 'numpy.float32'&gt;,
+           &lt;type 'numpy.float64'&gt;,
+           &lt;type 'numpy.float96'&gt;],
+ 'int': [&lt;type 'numpy.int8'&gt;,
+         &lt;type 'numpy.int16'&gt;,
+..."><code class="variable-group">{</code><code class="variable-quote">'</code><code class="variable-string">complex</code><code class="variable-quote">'</code><code class="variable-op">: </code><code class="variable-group">[</code>&lt;type 'numpy.complex64'&gt;<code class="variable-op">, </code>&lt;type 'numpy.<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="sign"></a><span class="summary-name">sign</span> = <code title="&lt;ufunc 'sign'&gt;">&lt;ufunc 'sign'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="signbit"></a><span class="summary-name">signbit</span> = <code title="&lt;ufunc 'signbit'&gt;">&lt;ufunc 'signbit'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="sin"></a><span class="summary-name">sin</span> = <code title="&lt;ufunc 'sin'&gt;">&lt;ufunc 'sin'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="sinh"></a><span class="summary-name">sinh</span> = <code title="&lt;ufunc 'sinh'&gt;">&lt;ufunc 'sinh'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="sqrt"></a><span class="summary-name">sqrt</span> = <code title="&lt;ufunc 'sqrt'&gt;">&lt;ufunc 'sqrt'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="square"></a><span class="summary-name">square</span> = <code title="&lt;ufunc 'square'&gt;">&lt;ufunc 'square'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="subtract"></a><span class="summary-name">subtract</span> = <code title="&lt;ufunc 'subtract'&gt;">&lt;ufunc 'subtract'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="tan"></a><span class="summary-name">tan</span> = <code title="&lt;ufunc 'tan'&gt;">&lt;ufunc 'tan'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="tanh"></a><span class="summary-name">tanh</span> = <code title="&lt;ufunc 'tanh'&gt;">&lt;ufunc 'tanh'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="true_divide"></a><span class="summary-name">true_divide</span> = <code title="&lt;ufunc 'true_divide'&gt;">&lt;ufunc 'true_divide'&gt;</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="robot.transform-module.html#typeDict" class="summary-name">typeDict</a> = <code title="{0: &lt;type 'numpy.bool_'&gt;,
+ 1: &lt;type 'numpy.int8'&gt;,
+ 2: &lt;type 'numpy.uint8'&gt;,
+ 3: &lt;type 'numpy.int16'&gt;,
+ 4: &lt;type 'numpy.uint16'&gt;,
+ 5: &lt;type 'numpy.int32'&gt;,
+ 6: &lt;type 'numpy.uint32'&gt;,
+ 7: &lt;type 'numpy.int32'&gt;,
+..."><code class="variable-group">{</code>0<code class="variable-op">: </code>&lt;type 'numpy.bool_'&gt;<code class="variable-op">, </code>1<code class="variable-op">: </code>&lt;type 'numpy.int8'&gt;<code class="variable-op">, </code>2<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="robot.transform-module.html#typeNA" class="summary-name">typeNA</a> = <code title="{'?': 'Bool',
+ 'B': 'UInt8',
+ 'Bool': &lt;type 'numpy.bool_'&gt;,
+ 'Complex32': &lt;type 'numpy.complex64'&gt;,
+ 'Complex64': &lt;type 'numpy.complex128'&gt;,
+ 'Complex96': &lt;type 'numpy.complex192'&gt;,
+ 'D': 'Complex64',
+ 'F': 'Complex32',
+..."><code class="variable-group">{</code><code class="variable-quote">'</code><code class="variable-string">?</code><code class="variable-quote">'</code><code class="variable-op">: </code><code class="variable-quote">'</code><code class="variable-string">Bool</code><code class="variable-quote">'</code><code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">B</code><code class="variable-quote">'</code><code class="variable-op">: </code><code class="variable-quote">'</code><code class="variable-string">UInt8</code><code class="variable-quote">'</code><code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">Bool</code><code class="variable-quote">'</code><code class="variable-op">: </code>&lt;type 'numpy.bool<code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="robot.transform-module.html#typecodes" class="summary-name">typecodes</a> = <code title="{'All': '?bhilqpBHILQPfdgFDGSUVO',
+ 'AllFloat': 'fdgFDG',
+ 'AllInteger': 'bBhHiIlLqQpP',
+ 'Character': 'S1',
+ 'Complex': 'FDG',
+ 'Float': 'fdg',
+ 'Integer': 'bhilqp',
+ 'UnsignedInteger': 'BHILQP'}"><code class="variable-group">{</code><code class="variable-quote">'</code><code class="variable-string">All</code><code class="variable-quote">'</code><code class="variable-op">: </code><code class="variable-quote">'</code><code class="variable-string">?bhilqpBHILQPfdgFDGSUVO</code><code class="variable-quote">'</code><code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">AllFloat</code><code class="variable-quote">'</code><code class="variable-op">: </code><code class="variable-quote">'</code><code class="variable-string">fd</code><code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+</table>
+<!-- ==================== FUNCTION DETAILS ==================== -->
+<a name="section-FunctionDetails"></a>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Function Details</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-FunctionDetails"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+</table>
+<a name="rotx"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">rotx</span>(<span class="sig-arg">theta</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="robot.transform-pysrc.html#rotx">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  Rotation about X-axis
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>theta</code></strong> (number) - the rotation angle</li>
+    </ul></dd>
+    <dt>Returns: 3x3 orthonormal matrix</dt>
+        <dd>rotation about X-axis</dd>
+  </dl>
+<div class="fields">      <p><strong>See Also:</strong>
+        <a href="robot.transform-module.html#roty" 
+        class="link">roty</a>, <a href="robot.transform-module.html#rotz" 
+        class="link">rotz</a>, <code class="link">rotvec</code>
+      </p>
+</div></td></tr></table>
+</div>
+<a name="roty"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">roty</span>(<span class="sig-arg">theta</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="robot.transform-pysrc.html#roty">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  Rotation about Y-axis
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>theta</code></strong> (number) - the rotation angle</li>
+    </ul></dd>
+    <dt>Returns: 3x3 orthonormal matrix</dt>
+        <dd>rotation about Y-axis</dd>
+  </dl>
+<div class="fields">      <p><strong>See Also:</strong>
+        <a href="robot.transform-module.html#rotx" 
+        class="link">rotx</a>, <a href="robot.transform-module.html#rotz" 
+        class="link">rotz</a>, <code class="link">rotvec</code>
+      </p>
+</div></td></tr></table>
+</div>
+<a name="rotz"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">rotz</span>(<span class="sig-arg">theta</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="robot.transform-pysrc.html#rotz">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  Rotation about Z-axis
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>theta</code></strong> (number) - the rotation angle</li>
+    </ul></dd>
+    <dt>Returns: 3x3 orthonormal matrix</dt>
+        <dd>rotation about Z-axis</dd>
+  </dl>
+<div class="fields">      <p><strong>See Also:</strong>
+        <a href="robot.transform-module.html#rotx" 
+        class="link">rotx</a>, <a href="robot.transform-module.html#roty" 
+        class="link">roty</a>, <code class="link">rotvec</code>
+      </p>
+</div></td></tr></table>
+</div>
+<a name="trotx"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">trotx</span>(<span class="sig-arg">theta</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="robot.transform-pysrc.html#trotx">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  Rotation about X-axis
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>theta</code></strong> (number) - the rotation angle</li>
+    </ul></dd>
+    <dt>Returns: 4x4 homogeneous matrix</dt>
+        <dd>rotation about X-axis</dd>
+  </dl>
+<div class="fields">      <p><strong>See Also:</strong>
+        <a href="robot.transform-module.html#troty" 
+        class="link">troty</a>, <a href="robot.transform-module.html#trotz"
+        class="link">trotz</a>, <a href="robot.transform-module.html#rotx" 
+        class="link">rotx</a>
+      </p>
+</div></td></tr></table>
+</div>
+<a name="troty"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">troty</span>(<span class="sig-arg">theta</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="robot.transform-pysrc.html#troty">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  Rotation about Y-axis
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>theta</code></strong> (number) - the rotation angle</li>
+    </ul></dd>
+    <dt>Returns: 4x4 homogeneous matrix</dt>
+        <dd>rotation about Y-axis</dd>
+  </dl>
+<div class="fields">      <p><strong>See Also:</strong>
+        <a href="robot.transform-module.html#troty" 
+        class="link">troty</a>, <a href="robot.transform-module.html#trotz"
+        class="link">trotz</a>, <a href="robot.transform-module.html#roty" 
+        class="link">roty</a>
+      </p>
+</div></td></tr></table>
+</div>
+<a name="trotz"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">trotz</span>(<span class="sig-arg">theta</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="robot.transform-pysrc.html#trotz">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  Rotation about Z-axis
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>theta</code></strong> (number) - the rotation angle</li>
+    </ul></dd>
+    <dt>Returns: 4x4 homogeneous matrix</dt>
+        <dd>rotation about Z-axis</dd>
+  </dl>
+<div class="fields">      <p><strong>See Also:</strong>
+        <a href="robot.transform-module.html#trotx" 
+        class="link">trotx</a>, <a href="robot.transform-module.html#troty"
+        class="link">troty</a>, <a href="robot.transform-module.html#rotz" 
+        class="link">rotz</a>
+      </p>
+</div></td></tr></table>
+</div>
+<a name="tr2eul"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">tr2eul</span>(<span class="sig-arg">m</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="robot.transform-pysrc.html#tr2eul">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  Extract Euler angles. Returns a vector of Euler angles corresponding 
+  to the rotational part of the homogeneous transform.  The 3 angles 
+  correspond to rotations about the Z, Y and Z axes respectively.
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>m</code></strong> (3x3 or 4x4 matrix) - the rotation matrix</li>
+    </ul></dd>
+    <dt>Returns: 1x3 matrix</dt>
+        <dd>Euler angles [&theta; &phi; &psi;]</dd>
+  </dl>
+<div class="fields">      <p><strong>See Also:</strong>
+        <a href="robot.transform-module.html#eul2tr" 
+        class="link">eul2tr</a>, <a 
+        href="robot.transform-module.html#tr2rpy" 
+        class="link">tr2rpy</a>
+      </p>
+</div></td></tr></table>
+</div>
+<a name="eul2r"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">eul2r</span>(<span class="sig-arg">phi</span>,
+        <span class="sig-arg">theta</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">psi</span>=<span class="sig-default">None</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="robot.transform-pysrc.html#eul2r">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  <p>Rotation from Euler angles.</p>
+  Two call forms:
+  <ul>
+    <li>
+      R = eul2r(&theta;, &phi;, &psi;)
+    </li>
+    <li>
+      R = eul2r([&theta;, &phi;, &psi;])
+    </li>
+  </ul>
+  These correspond to rotations about the Z, Y, Z axes respectively.
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>phi</code></strong> (number or list/array/matrix of angles) - the first Euler angle, or a list/array/matrix of angles</li>
+        <li><strong class="pname"><code>theta</code></strong> (number) - the second Euler angle</li>
+        <li><strong class="pname"><code>psi</code></strong> (number) - the third Euler angle</li>
+    </ul></dd>
+    <dt>Returns: 3x3 orthonormal matrix</dt>
+        <dd>R([&theta; &phi; &psi;])</dd>
+  </dl>
+<div class="fields">      <p><strong>See Also:</strong>
+        <a href="robot.transform-module.html#tr2eul" 
+        class="link">tr2eul</a>, <a 
+        href="robot.transform-module.html#eul2tr" class="link">eul2tr</a>, 
+        <a href="robot.transform-module.html#tr2rpy" 
+        class="link">tr2rpy</a>
+      </p>
+</div></td></tr></table>
+</div>
+<a name="eul2tr"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">eul2tr</span>(<span class="sig-arg">phi</span>,
+        <span class="sig-arg">theta</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">psi</span>=<span class="sig-default">None</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="robot.transform-pysrc.html#eul2tr">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  <p>Rotation from Euler angles.</p>
+  Two call forms:
+  <ul>
+    <li>
+      R = eul2tr(&theta;, &phi;, &psi;)
+    </li>
+    <li>
+      R = eul2tr([&theta;, &phi;, &psi;])
+    </li>
+  </ul>
+  These correspond to rotations about the Z, Y, Z axes respectively.
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>phi</code></strong> (number or list/array/matrix of angles) - the first Euler angle, or a list/array/matrix of angles</li>
+        <li><strong class="pname"><code>theta</code></strong> (number) - the second Euler angle</li>
+        <li><strong class="pname"><code>psi</code></strong> (number) - the third Euler angle</li>
+    </ul></dd>
+    <dt>Returns: 4x4 homogenous matrix</dt>
+        <dd>R([&theta; &phi; &psi;])</dd>
+  </dl>
+<div class="fields">      <p><strong>See Also:</strong>
+        <a href="robot.transform-module.html#tr2eul" 
+        class="link">tr2eul</a>, <a 
+        href="robot.transform-module.html#eul2r" class="link">eul2r</a>, <a
+        href="robot.transform-module.html#tr2rpy" 
+        class="link">tr2rpy</a>
+      </p>
+</div></td></tr></table>
+</div>
+<a name="tr2rpy"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">tr2rpy</span>(<span class="sig-arg">m</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="robot.transform-pysrc.html#tr2rpy">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  Extract RPY angles. Returns a vector of RPY angles corresponding to 
+  the rotational part of the homogeneous transform.  The 3 angles 
+  correspond to rotations about the Z, Y and X axes respectively.
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>m</code></strong> (3x3 or 4x4 matrix) - the rotation matrix</li>
+    </ul></dd>
+    <dt>Returns: 1x3 matrix</dt>
+        <dd>RPY angles [&theta; &phi; &psi;]</dd>
+  </dl>
+<div class="fields">      <p><strong>See Also:</strong>
+        <a href="robot.transform-module.html#rpy2tr" 
+        class="link">rpy2tr</a>, <a 
+        href="robot.transform-module.html#tr2eul" 
+        class="link">tr2eul</a>
+      </p>
+</div></td></tr></table>
+</div>
+<a name="rpy2r"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">rpy2r</span>(<span class="sig-arg">roll</span>,
+        <span class="sig-arg">pitch</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">yaw</span>=<span class="sig-default">None</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="robot.transform-pysrc.html#rpy2r">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  <p>Rotation from RPY angles.</p>
+  Two call forms:
+  <ul>
+    <li>
+      R = rpy2r(&theta;, &phi;, &psi;)
+    </li>
+    <li>
+      R = rpy2r([&theta;, &phi;, &psi;])
+    </li>
+  </ul>
+  These correspond to rotations about the Z, Y, X axes respectively.
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>roll</code></strong> (number or list/array/matrix of angles) - roll angle, or a list/array/matrix of angles</li>
+        <li><strong class="pname"><code>pitch</code></strong> (number) - pitch angle</li>
+        <li><strong class="pname"><code>yaw</code></strong> (number) - yaw angle</li>
+    </ul></dd>
+    <dt>Returns: 4x4 homogenous matrix</dt>
+        <dd>R([&theta; &phi; &psi;])</dd>
+  </dl>
+<div class="fields">      <p><strong>See Also:</strong>
+        <a href="robot.transform-module.html#tr2rpy" 
+        class="link">tr2rpy</a>, <a 
+        href="robot.transform-module.html#rpy2r" class="link">rpy2r</a>, <a
+        href="robot.transform-module.html#tr2eul" 
+        class="link">tr2eul</a>
+      </p>
+</div></td></tr></table>
+</div>
+<a name="rpy2tr"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">rpy2tr</span>(<span class="sig-arg">roll</span>,
+        <span class="sig-arg">pitch</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">yaw</span>=<span class="sig-default">None</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="robot.transform-pysrc.html#rpy2tr">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  <p>Rotation from RPY angles.</p>
+  Two call forms:
+  <ul>
+    <li>
+      R = rpy2tr(r, p, y)
+    </li>
+    <li>
+      R = rpy2tr([r, p, y])
+    </li>
+  </ul>
+  These correspond to rotations about the Z, Y, X axes respectively.
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>roll</code></strong> (number or list/array/matrix of angles) - roll angle, or a list/array/matrix of angles</li>
+        <li><strong class="pname"><code>pitch</code></strong> (number) - pitch angle</li>
+        <li><strong class="pname"><code>yaw</code></strong> (number) - yaw angle</li>
+    </ul></dd>
+    <dt>Returns: 4x4 homogenous matrix</dt>
+        <dd>R([&theta; &phi; &psi;])</dd>
+  </dl>
+<div class="fields">      <p><strong>See Also:</strong>
+        <a href="robot.transform-module.html#tr2rpy" 
+        class="link">tr2rpy</a>, <a 
+        href="robot.transform-module.html#rpy2r" class="link">rpy2r</a>, <a
+        href="robot.transform-module.html#tr2eul" 
+        class="link">tr2eul</a>
+      </p>
+</div></td></tr></table>
+</div>
+<a name="oa2r"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">oa2r</span>(<span class="sig-arg">o</span>,
+        <span class="sig-arg">a</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="robot.transform-pysrc.html#oa2r">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  Rotation from 2 vectors. The matrix is formed from 3 vectors such 
+  that:
+<pre class="literalblock">
+   R = [N O A] and N = O x A.  
+</pre>
+  <p>In robotics A is the approach vector, along the direction of the 
+  robot's gripper, and O is the orientation vector in the direction between
+  the fingertips.</p>
+  The submatrix is guaranteed to be orthonormal so long as O and A are 
+  not parallel.
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>o</code></strong> (3-vector) - The orientation vector.</li>
+        <li><strong class="pname"><code>a</code></strong> (3-vector) - The approach vector</li>
+    </ul></dd>
+    <dt>Returns: 3x3 orthonormal rotation matrix</dt>
+        <dd>Rotatation matrix</dd>
+  </dl>
+<div class="fields">      <p><strong>See Also:</strong>
+        <a href="robot.transform-module.html#rpy2r" 
+        class="link">rpy2r</a>, <a href="robot.transform-module.html#eul2r"
+        class="link">eul2r</a>
+      </p>
+</div></td></tr></table>
+</div>
+<a name="oa2tr"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">oa2tr</span>(<span class="sig-arg">o</span>,
+        <span class="sig-arg">a</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="robot.transform-pysrc.html#oa2tr">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  otation from 2 vectors. The rotation submatrix is formed from 3 
+  vectors such that:
+<pre class="literalblock">
+   R = [N O A] and N = O x A.  
+</pre>
+  <p>In robotics A is the approach vector, along the direction of the 
+  robot's gripper, and O is the orientation vector in the direction between
+  the fingertips.</p>
+  The submatrix is guaranteed to be orthonormal so long as O and A are 
+  not parallel.
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>o</code></strong> (3-vector) - The orientation vector.</li>
+        <li><strong class="pname"><code>a</code></strong> (3-vector) - The approach vector</li>
+    </ul></dd>
+    <dt>Returns: 4x4 homogeneous transformation matrix</dt>
+        <dd>Transformation matrix</dd>
+  </dl>
+<div class="fields">      <p><strong>See Also:</strong>
+        <a href="robot.transform-module.html#rpy2tr" 
+        class="link">rpy2tr</a>, <a 
+        href="robot.transform-module.html#eul2tr" 
+        class="link">eul2tr</a>
+      </p>
+</div></td></tr></table>
+</div>
+<a name="rotvec2r"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">rotvec2r</span>(<span class="sig-arg">theta</span>,
+        <span class="sig-arg">v</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="robot.transform-pysrc.html#rotvec2r">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  Rotation about arbitrary axis.  Compute a rotation matrix representing
+  a rotation of <code>theta</code> about the vector <code>v</code>.
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>v</code></strong> (3-vector) - rotation vector</li>
+        <li><strong class="pname"><code>theta</code></strong> (number) - the rotation angle</li>
+    </ul></dd>
+    <dt>Returns: 3x3 orthonormal matrix</dt>
+        <dd>rotation</dd>
+  </dl>
+<div class="fields">      <p><strong>See Also:</strong>
+        <a href="robot.transform-module.html#rotx" 
+        class="link">rotx</a>, <a href="robot.transform-module.html#roty" 
+        class="link">roty</a>, <a href="robot.transform-module.html#rotz" 
+        class="link">rotz</a>
+      </p>
+</div></td></tr></table>
+</div>
+<a name="rotvec2tr"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">rotvec2tr</span>(<span class="sig-arg">theta</span>,
+        <span class="sig-arg">v</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="robot.transform-pysrc.html#rotvec2tr">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  Rotation about arbitrary axis.  Compute a rotation matrix representing
+  a rotation of <code>theta</code> about the vector <code>v</code>.
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>v</code></strong> (3-vector) - rotation vector</li>
+        <li><strong class="pname"><code>theta</code></strong> (number) - the rotation angle</li>
+    </ul></dd>
+    <dt>Returns: 4x4 homogeneous matrix</dt>
+        <dd>rotation</dd>
+  </dl>
+<div class="fields">      <p><strong>See Also:</strong>
+        <a href="robot.transform-module.html#trotx" 
+        class="link">trotx</a>, <a href="robot.transform-module.html#troty"
+        class="link">troty</a>, <a href="robot.transform-module.html#trotz"
+        class="link">trotz</a>
+      </p>
+</div></td></tr></table>
+</div>
+<a name="transl"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">transl</span>(<span class="sig-arg">x</span>,
+        <span class="sig-arg">y</span>=<span class="sig-default">None</span>,
+        <span class="sig-arg">z</span>=<span class="sig-default">None</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="robot.transform-pysrc.html#transl">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  Create or decompose translational homogeneous transformations.
+  <h1 class="heading">Create a homogeneous transformation</h1>
+    <ul>
+      <li>
+        T = transl(v)
+      </li>
+      <li>
+        <p>T = transl(vx, vy, vz)</p>
+        The transformation is created with a unit rotation submatrix. 
+        The translational elements are set from elements of v which is a 
+        list, array or matrix, or from separate passed elements.
+      </li>
+    </ul>
+  <h1 class="heading">Decompose a homogeneous transformation</h1>
+    <ul>
+      <li>
+        <p>v = transl(T)</p>
+        Return the translation vector
+      </li>
+    </ul>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="skew"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">skew</span>(<span class="sig-arg">*args</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="robot.transform-pysrc.html#skew">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  <pre class="literalblock">
+
+Convert to/from skew-symmetric form.  A skew symmetric matrix is a matrix
+such that M = -M'
+
+Two call forms
+
+    -ss = skew(v)
+    -v = skew(ss)
+    
+The first form builds a 3x3 skew-symmetric from a 3-element vector v.
+The second form takes a 3x3 skew-symmetric matrix and returns the 3 unique
+elements that it contains.
+
+</pre>
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="tr2diff"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">tr2diff</span>(<span class="sig-arg">t1</span>,
+        <span class="sig-arg">t2</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="robot.transform-pysrc.html#tr2diff">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  Convert a transform difference to differential representation. Returns
+  the 6-element differential motion required to move from T1 to T2 in base 
+  coordinates.
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>t1</code></strong> (4x4 homogeneous transform) - Initial value</li>
+        <li><strong class="pname"><code>t2</code></strong> (4x4 homogeneous transform) - Final value</li>
+    </ul></dd>
+    <dt>Returns: 6-vector</dt>
+        <dd>Differential motion [dx dy dz drx dry drz]</dd>
+  </dl>
+<div class="fields">      <p><strong>See Also:</strong>
+        <a href="robot.transform-module.html#skew" 
+        class="link">skew</a>
+      </p>
+</div></td></tr></table>
+</div>
+<a name="trinterp"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">trinterp</span>(<span class="sig-arg">T0</span>,
+        <span class="sig-arg">T1</span>,
+        <span class="sig-arg">r</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="robot.transform-pysrc.html#trinterp">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  Interpolate homogeneous transformations. Compute a homogeneous 
+  transform interpolation between <code>T0</code> and <code>T1</code> as 
+  <code>r</code> varies from 0 to 1 such that:
+<pre class="literalblock">
+   trinterp(T0, T1, 0) = T0
+   trinterp(T0, T1, 1) = T1
+</pre>
+  Rotation is interpolated using quaternion spherical linear 
+  interpolation.
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>T0</code></strong> (4x4 homogeneous transform) - Initial value</li>
+        <li><strong class="pname"><code>T1</code></strong> (4x4 homogeneous transform) - Final value</li>
+        <li><strong class="pname"><code>r</code></strong> (number) - Interpolation index, in the range 0 to 1 inclusive</li>
+    </ul></dd>
+    <dt>Returns: 4x4 homogeneous transform</dt>
+        <dd>Interpolated value</dd>
+  </dl>
+<div class="fields">      <p><strong>See Also:</strong>
+        <a href="robot.Quaternion.quaternion-class.html" 
+        class="link">quaternion</a>, <code class="link">ctraj</code>
+      </p>
+</div></td></tr></table>
+</div>
+<a name="trnorm"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">trnorm</span>(<span class="sig-arg">t</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="robot.transform-pysrc.html#trnorm">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  <p>Normalize a homogeneous transformation. Finite word length arithmetic 
+  can cause transforms to become `unnormalized', that is the rotation 
+  submatrix is no longer orthonormal (det(R) != 1).</p>
+  The rotation submatrix is re-orthogonalized such that the approach 
+  vector (third column) is unchanged in direction:
+<pre class="literalblock">
+   N = O x A
+   O = A x N
+</pre>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>t</code></strong> (4x4 homogeneous transformation) - the transform matrix to convert</li>
+    </ul></dd>
+    <dt>Returns: 3x3 orthonormal rotation matrix</dt>
+        <dd>rotation submatrix</dd>
+  </dl>
+<div class="fields">      <p><strong>See Also:</strong>
+        <a href="robot.transform-module.html#oa2tr" 
+        class="link">oa2tr</a>
+      </p>
+      <p><strong>Bug:</strong>
+        Should work for 3x3 matrix as well.
+      </p>
+</div></td></tr></table>
+</div>
+<a name="t2r"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">t2r</span>(<span class="sig-arg">T</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="robot.transform-pysrc.html#t2r">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  Return rotational submatrix of a homogeneous transformation.
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>T</code></strong> (4x4 homogeneous transformation) - the transform matrix to convert</li>
+    </ul></dd>
+    <dt>Returns: 3x3 orthonormal rotation matrix</dt>
+        <dd>rotation submatrix</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="r2t"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">r2t</span>(<span class="sig-arg">R</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="robot.transform-pysrc.html#r2t">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  Convert a 3x3 orthonormal rotation matrix to a 4x4 homogeneous 
+  transformation:
+<pre class="literalblock">
+   T = | R 0 |
+       | 0 1 |
+</pre>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>R</code></strong> (3x3 orthonormal rotation matrix) - the rotation matrix to convert</li>
+    </ul></dd>
+    <dt>Returns: 4x4 homogeneous matrix</dt>
+        <dd>homogeneous equivalent</dd>
+  </dl>
+</td></tr></table>
+</div>
+<br />
+<!-- ==================== VARIABLES DETAILS ==================== -->
+<a name="section-VariablesDetails"></a>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Variables Details</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-VariablesDetails"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+</table>
+<a name="ScalarType"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">ScalarType</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+<code class="variable-group">(</code>&lt;type 'int'&gt;<code class="variable-op">,</code>
+ &lt;type 'float'&gt;<code class="variable-op">,</code>
+ &lt;type 'complex'&gt;<code class="variable-op">,</code>
+ &lt;type 'long'&gt;<code class="variable-op">,</code>
+ &lt;type 'bool'&gt;<code class="variable-op">,</code>
+ &lt;type 'str'&gt;<code class="variable-op">,</code>
+ &lt;type 'unicode'&gt;<code class="variable-op">,</code>
+ &lt;type 'buffer'&gt;<code class="variable-op">,</code>
+<code class="variable-ellipsis">...</code>
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="cast"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">cast</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+{&lt;type 'numpy.int64'&gt;: &lt;function &lt;lambda&gt; at 0x82e5bc4&gt;, &lt;type 'numpy.<span class="variable-linewrap"><img src="crarr.png" alt="\" /></span>
+int16'&gt;: &lt;function &lt;lambda&gt; at 0x82e5bfc&gt;, &lt;type 'numpy.void'&gt;: &lt;funct<span class="variable-linewrap"><img src="crarr.png" alt="\" /></span>
+ion &lt;lambda&gt; at 0x82e5c34&gt;, &lt;type 'numpy.unicode_'&gt;: &lt;function &lt;lambda<span class="variable-linewrap"><img src="crarr.png" alt="\" /></span>
+&gt; at 0x82ee02c&gt;, &lt;type 'numpy.complex128'&gt;: &lt;function &lt;lambda&gt; at 0x82<span class="variable-linewrap"><img src="crarr.png" alt="\" /></span>
+e5c6c&gt;, &lt;type 'numpy.uint64'&gt;: &lt;function &lt;lambda&gt; at 0x82e5ca4&gt;, &lt;type<span class="variable-linewrap"><img src="crarr.png" alt="\" /></span>
+ 'numpy.uint32'&gt;: &lt;function &lt;lambda&gt; at 0x82e5cdc&gt;, &lt;type 'numpy.compl<span class="variable-linewrap"><img src="crarr.png" alt="\" /></span>
+ex192'&gt;: &lt;function &lt;lambda&gt; at 0x82e5d14&gt;, &lt;type 'numpy.float32'&gt;: &lt;fu<span class="variable-linewrap"><img src="crarr.png" alt="\" /></span>
+nction &lt;lambda&gt; at 0x82e5d4c&gt;, &lt;type 'numpy.bool_'&gt;: &lt;function &lt;lambda<span class="variable-linewrap"><img src="crarr.png" alt="\" /></span>
+<code class="variable-ellipsis">...</code>
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="index_exp"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">index_exp</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&lt;numpy.lib.index_tricks._index_expression_class object at 0x839f3cc&gt;
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="nbytes"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">nbytes</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+{&lt;type 'numpy.int64'&gt;: 8, &lt;type 'numpy.int16'&gt;: 2, &lt;type 'numpy.void'&gt;<span class="variable-linewrap"><img src="crarr.png" alt="\" /></span>
+: 0, &lt;type 'numpy.complex128'&gt;: 16, &lt;type 'numpy.uint64'&gt;: 8, &lt;type 'n<span class="variable-linewrap"><img src="crarr.png" alt="\" /></span>
+umpy.uint32'&gt;: 4, &lt;type 'numpy.complex192'&gt;: 24, &lt;type 'numpy.float32'<span class="variable-linewrap"><img src="crarr.png" alt="\" /></span>
+&gt;: 4, &lt;type 'numpy.bool_'&gt;: 1, &lt;type 'numpy.uint8'&gt;: 1, &lt;type 'numpy.o<span class="variable-linewrap"><img src="crarr.png" alt="\" /></span>
+bject_'&gt;: 4, &lt;type 'numpy.int32'&gt;: 4, &lt;type 'numpy.float64'&gt;: 8, &lt;type<span class="variable-linewrap"><img src="crarr.png" alt="\" /></span>
+ 'numpy.int32'&gt;: 4, &lt;type 'numpy.uint16'&gt;: 2, &lt;type 'numpy.string_'&gt;: <span class="variable-linewrap"><img src="crarr.png" alt="\" /></span>
+0, &lt;type 'numpy.int8'&gt;: 1, &lt;type 'numpy.float96'&gt;: 12, &lt;type 'numpy.ui<span class="variable-linewrap"><img src="crarr.png" alt="\" /></span>
+nt32'&gt;: 4, &lt;type 'numpy.unicode_'&gt;: 0, &lt;type 'numpy.complex64'&gt;: 8}
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="s_"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">s_</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+&lt;numpy.lib.index_tricks._index_expression_class object at 0x839f40c&gt;
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="sctypeDict"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">sctypeDict</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+<code class="variable-group">{</code>0<code class="variable-op">: </code>&lt;type 'numpy.bool_'&gt;<code class="variable-op">,</code>
+ 1<code class="variable-op">: </code>&lt;type 'numpy.int8'&gt;<code class="variable-op">,</code>
+ 2<code class="variable-op">: </code>&lt;type 'numpy.uint8'&gt;<code class="variable-op">,</code>
+ 3<code class="variable-op">: </code>&lt;type 'numpy.int16'&gt;<code class="variable-op">,</code>
+ 4<code class="variable-op">: </code>&lt;type 'numpy.uint16'&gt;<code class="variable-op">,</code>
+ 5<code class="variable-op">: </code>&lt;type 'numpy.int32'&gt;<code class="variable-op">,</code>
+ 6<code class="variable-op">: </code>&lt;type 'numpy.uint32'&gt;<code class="variable-op">,</code>
+ 7<code class="variable-op">: </code>&lt;type 'numpy.int32'&gt;<code class="variable-op">,</code>
+<code class="variable-ellipsis">...</code>
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="sctypeNA"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">sctypeNA</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+<code class="variable-group">{</code><code class="variable-quote">'</code><code class="variable-string">?</code><code class="variable-quote">'</code><code class="variable-op">: </code><code class="variable-quote">'</code><code class="variable-string">Bool</code><code class="variable-quote">'</code><code class="variable-op">,</code>
+ <code class="variable-quote">'</code><code class="variable-string">B</code><code class="variable-quote">'</code><code class="variable-op">: </code><code class="variable-quote">'</code><code class="variable-string">UInt8</code><code class="variable-quote">'</code><code class="variable-op">,</code>
+ <code class="variable-quote">'</code><code class="variable-string">Bool</code><code class="variable-quote">'</code><code class="variable-op">: </code>&lt;type 'numpy.bool_'&gt;<code class="variable-op">,</code>
+ <code class="variable-quote">'</code><code class="variable-string">Complex32</code><code class="variable-quote">'</code><code class="variable-op">: </code>&lt;type 'numpy.complex64'&gt;<code class="variable-op">,</code>
+ <code class="variable-quote">'</code><code class="variable-string">Complex64</code><code class="variable-quote">'</code><code class="variable-op">: </code>&lt;type 'numpy.complex128'&gt;<code class="variable-op">,</code>
+ <code class="variable-quote">'</code><code class="variable-string">Complex96</code><code class="variable-quote">'</code><code class="variable-op">: </code>&lt;type 'numpy.complex192'&gt;<code class="variable-op">,</code>
+ <code class="variable-quote">'</code><code class="variable-string">D</code><code class="variable-quote">'</code><code class="variable-op">: </code><code class="variable-quote">'</code><code class="variable-string">Complex64</code><code class="variable-quote">'</code><code class="variable-op">,</code>
+ <code class="variable-quote">'</code><code class="variable-string">F</code><code class="variable-quote">'</code><code class="variable-op">: </code><code class="variable-quote">'</code><code class="variable-string">Complex32</code><code class="variable-quote">'</code><code class="variable-op">,</code>
+<code class="variable-ellipsis">...</code>
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="sctypes"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">sctypes</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+<code class="variable-group">{</code><code class="variable-quote">'</code><code class="variable-string">complex</code><code class="variable-quote">'</code><code class="variable-op">: </code><code class="variable-group">[</code>&lt;type 'numpy.complex64'&gt;<code class="variable-op">,</code>
+             &lt;type 'numpy.complex128'&gt;<code class="variable-op">,</code>
+             &lt;type 'numpy.complex192'&gt;<code class="variable-group">]</code><code class="variable-op">,</code>
+ <code class="variable-quote">'</code><code class="variable-string">float</code><code class="variable-quote">'</code><code class="variable-op">: </code><code class="variable-group">[</code>&lt;type 'numpy.float32'&gt;<code class="variable-op">,</code>
+           &lt;type 'numpy.float64'&gt;<code class="variable-op">,</code>
+           &lt;type 'numpy.float96'&gt;<code class="variable-group">]</code><code class="variable-op">,</code>
+ <code class="variable-quote">'</code><code class="variable-string">int</code><code class="variable-quote">'</code><code class="variable-op">: </code><code class="variable-group">[</code>&lt;type 'numpy.int8'&gt;<code class="variable-op">,</code>
+         &lt;type 'numpy.int16'&gt;<code class="variable-op">,</code>
+<code class="variable-ellipsis">...</code>
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="typeDict"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">typeDict</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+<code class="variable-group">{</code>0<code class="variable-op">: </code>&lt;type 'numpy.bool_'&gt;<code class="variable-op">,</code>
+ 1<code class="variable-op">: </code>&lt;type 'numpy.int8'&gt;<code class="variable-op">,</code>
+ 2<code class="variable-op">: </code>&lt;type 'numpy.uint8'&gt;<code class="variable-op">,</code>
+ 3<code class="variable-op">: </code>&lt;type 'numpy.int16'&gt;<code class="variable-op">,</code>
+ 4<code class="variable-op">: </code>&lt;type 'numpy.uint16'&gt;<code class="variable-op">,</code>
+ 5<code class="variable-op">: </code>&lt;type 'numpy.int32'&gt;<code class="variable-op">,</code>
+ 6<code class="variable-op">: </code>&lt;type 'numpy.uint32'&gt;<code class="variable-op">,</code>
+ 7<code class="variable-op">: </code>&lt;type 'numpy.int32'&gt;<code class="variable-op">,</code>
+<code class="variable-ellipsis">...</code>
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="typeNA"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">typeNA</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+<code class="variable-group">{</code><code class="variable-quote">'</code><code class="variable-string">?</code><code class="variable-quote">'</code><code class="variable-op">: </code><code class="variable-quote">'</code><code class="variable-string">Bool</code><code class="variable-quote">'</code><code class="variable-op">,</code>
+ <code class="variable-quote">'</code><code class="variable-string">B</code><code class="variable-quote">'</code><code class="variable-op">: </code><code class="variable-quote">'</code><code class="variable-string">UInt8</code><code class="variable-quote">'</code><code class="variable-op">,</code>
+ <code class="variable-quote">'</code><code class="variable-string">Bool</code><code class="variable-quote">'</code><code class="variable-op">: </code>&lt;type 'numpy.bool_'&gt;<code class="variable-op">,</code>
+ <code class="variable-quote">'</code><code class="variable-string">Complex32</code><code class="variable-quote">'</code><code class="variable-op">: </code>&lt;type 'numpy.complex64'&gt;<code class="variable-op">,</code>
+ <code class="variable-quote">'</code><code class="variable-string">Complex64</code><code class="variable-quote">'</code><code class="variable-op">: </code>&lt;type 'numpy.complex128'&gt;<code class="variable-op">,</code>
+ <code class="variable-quote">'</code><code class="variable-string">Complex96</code><code class="variable-quote">'</code><code class="variable-op">: </code>&lt;type 'numpy.complex192'&gt;<code class="variable-op">,</code>
+ <code class="variable-quote">'</code><code class="variable-string">D</code><code class="variable-quote">'</code><code class="variable-op">: </code><code class="variable-quote">'</code><code class="variable-string">Complex64</code><code class="variable-quote">'</code><code class="variable-op">,</code>
+ <code class="variable-quote">'</code><code class="variable-string">F</code><code class="variable-quote">'</code><code class="variable-op">: </code><code class="variable-quote">'</code><code class="variable-string">Complex32</code><code class="variable-quote">'</code><code class="variable-op">,</code>
+<code class="variable-ellipsis">...</code>
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="typecodes"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">typecodes</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+<code class="variable-group">{</code><code class="variable-quote">'</code><code class="variable-string">All</code><code class="variable-quote">'</code><code class="variable-op">: </code><code class="variable-quote">'</code><code class="variable-string">?bhilqpBHILQPfdgFDGSUVO</code><code class="variable-quote">'</code><code class="variable-op">,</code>
+ <code class="variable-quote">'</code><code class="variable-string">AllFloat</code><code class="variable-quote">'</code><code class="variable-op">: </code><code class="variable-quote">'</code><code class="variable-string">fdgFDG</code><code class="variable-quote">'</code><code class="variable-op">,</code>
+ <code class="variable-quote">'</code><code class="variable-string">AllInteger</code><code class="variable-quote">'</code><code class="variable-op">: </code><code class="variable-quote">'</code><code class="variable-string">bBhHiIlLqQpP</code><code class="variable-quote">'</code><code class="variable-op">,</code>
+ <code class="variable-quote">'</code><code class="variable-string">Character</code><code class="variable-quote">'</code><code class="variable-op">: </code><code class="variable-quote">'</code><code class="variable-string">S1</code><code class="variable-quote">'</code><code class="variable-op">,</code>
+ <code class="variable-quote">'</code><code class="variable-string">Complex</code><code class="variable-quote">'</code><code class="variable-op">: </code><code class="variable-quote">'</code><code class="variable-string">FDG</code><code class="variable-quote">'</code><code class="variable-op">,</code>
+ <code class="variable-quote">'</code><code class="variable-string">Float</code><code class="variable-quote">'</code><code class="variable-op">: </code><code class="variable-quote">'</code><code class="variable-string">fdg</code><code class="variable-quote">'</code><code class="variable-op">,</code>
+ <code class="variable-quote">'</code><code class="variable-string">Integer</code><code class="variable-quote">'</code><code class="variable-op">: </code><code class="variable-quote">'</code><code class="variable-string">bhilqp</code><code class="variable-quote">'</code><code class="variable-op">,</code>
+ <code class="variable-quote">'</code><code class="variable-string">UnsignedInteger</code><code class="variable-quote">'</code><code class="variable-op">: </code><code class="variable-quote">'</code><code class="variable-string">BHILQP</code><code class="variable-quote">'</code><code class="variable-group">}</code>
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">
+    Generated by Epydoc 3.0beta1 on Wed Apr  2 23:14:39 2008
+    </td>
+    <td align="right" class="footer">
+      <a href="http://epydoc.sourceforge.net">http://epydoc.sourceforge.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie()
+  // -->
+</script>
+  
+</body>
+</html>

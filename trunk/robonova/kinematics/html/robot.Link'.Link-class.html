@@ -1,0 +1,724 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>robot.Link'.Link</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        Package&nbsp;robot ::
+        <a href="robot.Link%27-module.html">Module&nbsp;Link'</a> ::
+        Class&nbsp;Link
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
+    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="robot.Link%27.Link-class.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<!-- ==================== CLASS DESCRIPTION ==================== -->
+<h1 class="epydoc">Class Link</h1><span class="codelink"><a href="robot.Link%27-pysrc.html#Link">source&nbsp;code</a></span><br /><br />
+<p>LINK create a new LINK object</p>
+  A LINK object holds all information related to a robot link such as 
+  kinematics of the joint
+  <ul>
+    <li>
+      alpha; the link twist angle
+    </li>
+    <li>
+      an; the link length
+    </li>
+    <li>
+      theta; the link rotation angle
+    </li>
+    <li>
+      dn; the link offset
+    </li>
+    <li>
+      sigma; 0 for a revolute joint, non-zero for prismatic
+    </li>
+  </ul>
+  rigid-body inertial parameters
+  <ul>
+    <li>
+      I; 3x3 inertia matrix about link COG
+    </li>
+    <li>
+      m; link mass
+    </li>
+    <li>
+      r; link COG wrt link coordinate frame 3x1
+    </li>
+  </ul>
+  motor and transmission parameters
+  <ul>
+    <li>
+      B; link viscous friction (motor referred)
+    </li>
+    <li>
+      Tc; link Coulomb friction 1 element if symmetric, else 2
+    </li>
+    <li>
+      G; gear ratio
+    </li>
+    <li>
+      Jm; inertia (motor referred)
+    </li>
+  </ul>
+  and miscellaneous
+  <ul>
+    <li>
+      qlim; joint limit matrix [lower upper] 2 x 1
+    </li>
+    <li>
+      offset; joint coordinate offset
+    </li>
+  </ul>
+  <p>Handling the different kinematic conventions is now hidden within the 
+  LINK object.</p>
+  Conceivably all sorts of stuff could live in the LINK object such as 
+  graphical models of links and so on.<br /><br />
+
+<hr />
+<div class="fields">      <p><strong>See Also:</strong>
+        <code class="link">Robot</code>
+      </p>
+</div><!-- ==================== INSTANCE METHODS ==================== -->
+<a name="section-InstanceMethods"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Instance Methods</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-InstanceMethods"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="robot.Link%27.Link-class.html#__init__" class="summary-sig-name">__init__</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">alpha</span>=<span class="summary-sig-default">0</span>,
+        <span class="summary-sig-arg">A</span>=<span class="summary-sig-default">0</span>,
+        <span class="summary-sig-arg">theta</span>=<span class="summary-sig-default">0</span>,
+        <span class="summary-sig-arg">D</span>=<span class="summary-sig-default">0</span>,
+        <span class="summary-sig-arg">sigma</span>=<span class="summary-sig-default">0</span>,
+        <span class="summary-sig-arg">convention</span>=<span class="summary-sig-default">1</span>)</span><br />
+      L = LINK([alpha A theta D]) L =LINK([alpha A theta D sigma]) L 
+      =LINK([alpha A theta D sigma offset]) L =LINK([alpha A theta D], 
+      CONVENTION) L =LINK([alpha A theta D sigma], CONVENTION) L 
+      =LINK([alpha A theta D sigma offset], CONVENTION)</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="robot.Link%27-pysrc.html#Link.__init__">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="__repr__"></a><span class="summary-sig-name">__repr__</span>(<span class="summary-sig-arg">self</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="robot.Link%27-pysrc.html#Link.__repr__">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="robot.Link%27.Link-class.html#__setattr__" class="summary-sig-name">__setattr__</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">name</span>,
+        <span class="summary-sig-arg">value</span>)</span><br />
+      Set attributes of the Link object</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="robot.Link%27-pysrc.html#Link.__setattr__">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="__str__"></a><span class="summary-sig-name">__str__</span>(<span class="summary-sig-arg">self</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="robot.Link%27-pysrc.html#Link.__str__">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="copy"></a><span class="summary-sig-name">copy</span>(<span class="summary-sig-arg">self</span>)</span><br />
+      Return copy of this Link</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="robot.Link%27-pysrc.html#Link.copy">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="display"></a><span class="summary-sig-name">display</span>(<span class="summary-sig-arg">self</span>)</span></td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="robot.Link%27-pysrc.html#Link.display">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">number</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="robot.Link%27.Link-class.html#friction" class="summary-sig-name">friction</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">qd</span>)</span><br />
+      Compute friction torque for joint rate <code>qd</code>.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="robot.Link%27-pysrc.html#Link.friction">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">-1, 0, +1</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="robot.Link%27.Link-class.html#islimit" class="summary-sig-name">islimit</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">q</span>)</span><br />
+      Check if joint limits exceeded.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="robot.Link%27-pysrc.html#Link.islimit">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">Link</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="robot.Link%27.Link-class.html#nofriction" class="summary-sig-name">nofriction</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">all</span>=<span class="summary-sig-default">False</span>)</span><br />
+      Return a copy of the Link object with friction parameters set to 
+      zero.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="robot.Link%27-pysrc.html#Link.nofriction">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">homogeneous transformation</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="robot.Link%27.Link-class.html#tr" class="summary-sig-name">tr</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">q</span>)</span><br />
+      Compute the transformation matrix for this link.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="robot.Link%27-pysrc.html#Link.tr">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+</table>
+<!-- ==================== CLASS VARIABLES ==================== -->
+<a name="section-ClassVariables"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Class Variables</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-ClassVariables"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="LINK_DH"></a><span class="summary-name">LINK_DH</span> = <code title="1">1</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a name="LINK_MDH"></a><span class="summary-name">LINK_MDH</span> = <code title="2">2</code>
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+        <a href="robot.Link%27.Link-class.html#fields" class="summary-name">fields</a> = <code title="['alpha',
+ 'A',
+ 'theta',
+ 'D',
+ 'sigma',
+ 'offset',
+ 'm',
+ 'Jm',
+..."><code class="variable-group">[</code><code class="variable-quote">'</code><code class="variable-string">alpha</code><code class="variable-quote">'</code><code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">A</code><code class="variable-quote">'</code><code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">theta</code><code class="variable-quote">'</code><code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">D</code><code class="variable-quote">'</code><code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">sigma</code><code class="variable-quote">'</code><code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">offset</code><code class="variable-quote">'</code><code class="variable-op">, </code><code class="variable-quote">'</code><code class="variable-string">m</code><code class="variable-quote">'</code><code class="variable-op">, </code><code class="variable-ellipsis">...</code></code>
+    </td>
+  </tr>
+</table>
+<!-- ==================== METHOD DETAILS ==================== -->
+<a name="section-MethodDetails"></a>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Method Details</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-MethodDetails"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+</table>
+<a name="__init__"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">__init__</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">alpha</span>=<span class="sig-default">0</span>,
+        <span class="sig-arg">A</span>=<span class="sig-default">0</span>,
+        <span class="sig-arg">theta</span>=<span class="sig-default">0</span>,
+        <span class="sig-arg">D</span>=<span class="sig-default">0</span>,
+        <span class="sig-arg">sigma</span>=<span class="sig-default">0</span>,
+        <span class="sig-arg">convention</span>=<span class="sig-default">1</span>)</span>
+    <br /><em class="fname">(Constructor)</em>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="robot.Link%27-pysrc.html#Link.__init__">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  <p>L = LINK([alpha A theta D]) L =LINK([alpha A theta D sigma]) L 
+  =LINK([alpha A theta D sigma offset]) L =LINK([alpha A theta D], 
+  CONVENTION) L =LINK([alpha A theta D sigma], CONVENTION) L =LINK([alpha A
+  theta D sigma offset], CONVENTION)</p>
+  <p>If sigma or offset are not provided they default to zero.  Offset is a
+  constant amount added to the joint angle variable before forward 
+  kinematics and is useful if you want the robot to adopt a 'sensible' pose
+  for zero joint angle configuration.</p>
+  The optional CONVENTION argument is 'standard' for standard D&amp;H 
+  parameters or 'modified' for modified D&amp;H parameters.  If not 
+  specified the default 'standard'.
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="__setattr__"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">__setattr__</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">name</span>,
+        <span class="sig-arg">value</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="robot.Link%27-pysrc.html#Link.__setattr__">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  Set attributes of the Link object
+  <ul>
+    <li>
+      alpha; scalar
+    </li>
+    <li>
+      A; scalar
+    </li>
+    <li>
+      theta; scalar
+    </li>
+    <li>
+      D; scalar
+    </li>
+    <li>
+      sigma; scalar
+    </li>
+    <li>
+      offset; scalar
+    </li>
+    <li>
+      m; scalar
+    </li>
+    <li>
+      Jm; scalar
+    </li>
+    <li>
+      G; scalar
+    </li>
+    <li>
+      B; scalar
+    </li>
+    <li>
+      r; 3-vector
+    </li>
+    <li>
+      I; 3x3 matrix, 3-vector or 6-vector
+    </li>
+    <li>
+      Tc; scalar or 2-vector
+    </li>
+    <li>
+      qlim; 2-vector
+    </li>
+  </ul>
+  Inertia, I, can be specified as:
+  <ul>
+    <li>
+      3x3 inertia tensor
+    </li>
+    <li>
+      3-vector, the diagonal of the inertia tensor
+    </li>
+    <li>
+      6-vector, the unique elements of the inertia tensor [Ixx Iyy Izz 
+      Ixy Iyz Ixz]
+    </li>
+  </ul>
+  Coloumb friction, Tc, can be specifed as:
+  <ul>
+    <li>
+      scalar, for the symmetric case when Tc- = Tc+
+    </li>
+    <li>
+      2-vector, the assymetric case [Tc- Tc+]
+    </li>
+  </ul>
+  Joint angle limits, qlim, is a 2-vector giving the lower and upper 
+  limits of motion.
+  <dl class="fields">
+  </dl>
+</td></tr></table>
+</div>
+<a name="friction"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">friction</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">qd</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="robot.Link%27-pysrc.html#Link.friction">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  Compute friction torque for joint rate <code>qd</code>. Depending on 
+  fields in the Link object viscous and/or Coulomb friction are 
+  computed.
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>qd</code></strong> (number) - joint rate</li>
+    </ul></dd>
+    <dt>Returns: number</dt>
+        <dd>joint friction torque</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="islimit"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">islimit</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">q</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="robot.Link%27-pysrc.html#Link.islimit">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  Check if joint limits exceeded.  Returns
+  <ul>
+    <li>
+      -1 if <code>q</code> is less than the lower limit
+    </li>
+    <li>
+      0 if <code>q</code> is within the limits
+    </li>
+    <li>
+      +1 if <code>q</code> is greater than the high limit
+    </li>
+  </ul>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>q</code></strong> (number) - Joint coordinate</li>
+    </ul></dd>
+    <dt>Returns: -1, 0, +1</dt>
+        <dd>joint limit status</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="nofriction"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">nofriction</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">all</span>=<span class="sig-default">False</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="robot.Link%27-pysrc.html#Link.nofriction">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  Return a copy of the Link object with friction parameters set to 
+  zero.
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>all</code></strong> (boolean) - if True then also zero viscous friction</li>
+    </ul></dd>
+    <dt>Returns: Link</dt>
+        <dd>Copy of original Link object with zero friction</dd>
+  </dl>
+<div class="fields">      <p><strong>See Also:</strong>
+        <code class="link">robot.nofriction</code>
+      </p>
+</div></td></tr></table>
+</div>
+<a name="tr"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">tr</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">q</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="robot.Link%27-pysrc.html#Link.tr">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </table>
+  
+  Compute the transformation matrix for this link.  This is a function 
+  of kinematic parameters, the kinematic model (DH or MDH) and the joint 
+  coordinate <code>q</code>.
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>q</code></strong> (number) - joint coordinate</li>
+    </ul></dd>
+    <dt>Returns: homogeneous transformation</dt>
+        <dd>Link transform <i class="math">A(q)</i></dd>
+  </dl>
+</td></tr></table>
+</div>
+<br />
+<!-- ==================== CLASS VARIABLE DETAILS ==================== -->
+<a name="section-ClassVariableDetails"></a>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Class Variable Details</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-ClassVariableDetails"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+</table>
+<a name="fields"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <h3 class="epydoc">fields</h3>
+  
+  <dl class="fields">
+  </dl>
+  <dl class="fields">
+    <dt>Value:</dt>
+      <dd><table><tr><td><pre class="variable">
+<code class="variable-group">[</code><code class="variable-quote">'</code><code class="variable-string">alpha</code><code class="variable-quote">'</code><code class="variable-op">,</code>
+ <code class="variable-quote">'</code><code class="variable-string">A</code><code class="variable-quote">'</code><code class="variable-op">,</code>
+ <code class="variable-quote">'</code><code class="variable-string">theta</code><code class="variable-quote">'</code><code class="variable-op">,</code>
+ <code class="variable-quote">'</code><code class="variable-string">D</code><code class="variable-quote">'</code><code class="variable-op">,</code>
+ <code class="variable-quote">'</code><code class="variable-string">sigma</code><code class="variable-quote">'</code><code class="variable-op">,</code>
+ <code class="variable-quote">'</code><code class="variable-string">offset</code><code class="variable-quote">'</code><code class="variable-op">,</code>
+ <code class="variable-quote">'</code><code class="variable-string">m</code><code class="variable-quote">'</code><code class="variable-op">,</code>
+ <code class="variable-quote">'</code><code class="variable-string">Jm</code><code class="variable-quote">'</code><code class="variable-op">,</code>
+<code class="variable-ellipsis">...</code>
+</pre></td></tr></table>
+</dd>
+  </dl>
+</td></tr></table>
+</div>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">
+    Generated by Epydoc 3.0beta1 on Wed Apr  2 23:14:41 2008
+    </td>
+    <td align="right" class="footer">
+      <a href="http://epydoc.sourceforge.net">http://epydoc.sourceforge.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie()
+  // -->
+</script>
+  
+</body>
+</html>

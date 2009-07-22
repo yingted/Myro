@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>robot.manipulability'</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        Package&nbsp;robot ::
+        Module&nbsp;manipulability'
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
+    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="robot.manipulability%27-pysrc.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<h1 class="epydoc">Source Code for <a href="robot.manipulability%27-module.html">Module robot.manipulability'</a></h1>
+<pre class="py-src">
+<a name="L1"></a><tt class="py-lineno"> 1</tt>  <tt class="py-line"><tt class="py-docstring">"""</tt> </tt>
+<a name="L2"></a><tt class="py-lineno"> 2</tt>  <tt class="py-line"><tt class="py-docstring">Robot manipulability operations.</tt> </tt>
+<a name="L3"></a><tt class="py-lineno"> 3</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L4"></a><tt class="py-lineno"> 4</tt>  <tt class="py-line"><tt class="py-docstring">@author: Peter Corke</tt> </tt>
+<a name="L5"></a><tt class="py-lineno"> 5</tt>  <tt class="py-line"><tt class="py-docstring">@copyright: Peter Corke</tt> </tt>
+<a name="L6"></a><tt class="py-lineno"> 6</tt>  <tt class="py-line"><tt class="py-docstring">"""</tt> </tt>
+<a name="L7"></a><tt class="py-lineno"> 7</tt>  <tt class="py-line"> </tt>
+<a name="L8"></a><tt class="py-lineno"> 8</tt>  <tt class="py-line"> </tt>
+<a name="L9"></a><tt class="py-lineno"> 9</tt>  <tt class="py-line"> </tt>
+<a name="L10"></a><tt class="py-lineno">10</tt>  <tt class="py-line"><tt class="py-keyword">from</tt> <tt class="py-name">numpy</tt> <tt class="py-keyword">import</tt> <tt class="py-op">*</tt> </tt>
+<a name="L11"></a><tt class="py-lineno">11</tt>  <tt class="py-line"><tt class="py-keyword">from</tt> <tt class="py-name">robot</tt><tt class="py-op">.</tt><tt id="link-0" class="py-name" targets="Module robot.jacobian=robot.jacobian-module.html"><a title="robot.jacobian" class="py-name" href="#" onclick="return doclink('link-0', 'jacobian', 'link-0');">jacobian</a></tt> <tt class="py-keyword">import</tt> <tt id="link-1" class="py-name" targets="Function robot.jacobian.jacob0()=robot.jacobian-module.html#jacob0"><a title="robot.jacobian.jacob0" class="py-name" href="#" onclick="return doclink('link-1', 'jacob0', 'link-1');">jacob0</a></tt> </tt>
+<a name="L12"></a><tt class="py-lineno">12</tt>  <tt class="py-line"><tt class="py-keyword">from</tt> <tt class="py-name">robot</tt><tt class="py-op">.</tt><tt id="link-2" class="py-name" targets="Module robot.dynamics=robot.dynamics-module.html"><a title="robot.dynamics" class="py-name" href="#" onclick="return doclink('link-2', 'dynamics', 'link-2');">dynamics</a></tt> <tt class="py-keyword">import</tt> <tt id="link-3" class="py-name" targets="Function robot.dynamics.inertia()=robot.dynamics-module.html#inertia"><a title="robot.dynamics.inertia" class="py-name" href="#" onclick="return doclink('link-3', 'inertia', 'link-3');">inertia</a></tt> </tt>
+<a name="L13"></a><tt class="py-lineno">13</tt>  <tt class="py-line"><tt class="py-keyword">from</tt> <tt class="py-name">numpy</tt><tt class="py-op">.</tt><tt id="link-4" class="py-name" targets="Package numpy.linalg=numpy.linalg-module.html"><a title="numpy.linalg" class="py-name" href="#" onclick="return doclink('link-4', 'linalg', 'link-4');">linalg</a></tt> <tt class="py-keyword">import</tt> <tt id="link-5" class="py-name" targets="Method robot.Quaternion.quaternion.inv()=robot.Quaternion.quaternion-class.html#inv"><a title="robot.Quaternion.quaternion.inv" class="py-name" href="#" onclick="return doclink('link-5', 'inv', 'link-5');">inv</a></tt><tt class="py-op">,</tt><tt class="py-name">eig</tt><tt class="py-op">,</tt><tt class="py-name">det</tt><tt class="py-op">,</tt><tt class="py-name">svd</tt> </tt>
+<a name="L14"></a><tt class="py-lineno">14</tt>  <tt class="py-line"><tt class="py-keyword">from</tt> <tt class="py-name">robot</tt><tt class="py-op">.</tt><tt id="link-6" class="py-name" targets="Module robot.utility=robot.utility-module.html"><a title="robot.utility" class="py-name" href="#" onclick="return doclink('link-6', 'utility', 'link-6');">utility</a></tt> <tt class="py-keyword">import</tt> <tt class="py-op">*</tt> </tt>
+<a name="L15"></a><tt class="py-lineno">15</tt>  <tt class="py-line"> </tt>
+<a name="manipulability"></a><div id="manipulability-def"><a name="L16"></a><tt class="py-lineno">16</tt> <a class="py-toggle" href="#" id="manipulability-toggle" onclick="return toggle('manipulability');">-</a><tt class="py-line"><tt class="py-keyword">def</tt> <a class="py-def-name" href="robot.manipulability'-module.html#manipulability">manipulability</a><tt class="py-op">(</tt><tt class="py-param">robot</tt><tt class="py-op">,</tt> <tt class="py-param">q</tt><tt class="py-op">,</tt> <tt class="py-param">which</tt> <tt class="py-op">=</tt> <tt class="py-string">'yoshikawa'</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="manipulability-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="manipulability-expanded"><a name="L17"></a><tt class="py-lineno">17</tt>  <tt class="py-line">    <tt class="py-docstring">'''</tt> </tt>
+<a name="L18"></a><tt class="py-lineno">18</tt>  <tt class="py-line"><tt class="py-docstring">    MANIPLTY Manipulability measure</tt> </tt>
+<a name="L19"></a><tt class="py-lineno">19</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L20"></a><tt class="py-lineno">20</tt>  <tt class="py-line"><tt class="py-docstring">        - M = MANIPLTY(ROBOT, Q)</tt> </tt>
+<a name="L21"></a><tt class="py-lineno">21</tt>  <tt class="py-line"><tt class="py-docstring">        - M = MANIPLTY(ROBOT, Q, WHICH)</tt> </tt>
+<a name="L22"></a><tt class="py-lineno">22</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L23"></a><tt class="py-lineno">23</tt>  <tt class="py-line"><tt class="py-docstring">    Computes the manipulability index for the manipulator at the given pose.</tt> </tt>
+<a name="L24"></a><tt class="py-lineno">24</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L25"></a><tt class="py-lineno">25</tt>  <tt class="py-line"><tt class="py-docstring">    For an n-axis manipulator Q may be an n-element vector, or an m x n</tt> </tt>
+<a name="L26"></a><tt class="py-lineno">26</tt>  <tt class="py-line"><tt class="py-docstring">    joint space trajectory.</tt> </tt>
+<a name="L27"></a><tt class="py-lineno">27</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L28"></a><tt class="py-lineno">28</tt>  <tt class="py-line"><tt class="py-docstring">    If Q is a vector MANIPLTY returns a scalar manipulability index.</tt> </tt>
+<a name="L29"></a><tt class="py-lineno">29</tt>  <tt class="py-line"><tt class="py-docstring">    If Q is a matrix MANIPLTY returns a column vector of  manipulability </tt> </tt>
+<a name="L30"></a><tt class="py-lineno">30</tt>  <tt class="py-line"><tt class="py-docstring">    indices for each pose specified by Q.</tt> </tt>
+<a name="L31"></a><tt class="py-lineno">31</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L32"></a><tt class="py-lineno">32</tt>  <tt class="py-line"><tt class="py-docstring">    The argument WHICH can be either 'yoshikawa' (default) or 'asada' and</tt> </tt>
+<a name="L33"></a><tt class="py-lineno">33</tt>  <tt class="py-line"><tt class="py-docstring">    selects one of two manipulability measures.</tt> </tt>
+<a name="L34"></a><tt class="py-lineno">34</tt>  <tt class="py-line"><tt class="py-docstring">    Yoshikawa's manipulability measure gives an indication of how far </tt> </tt>
+<a name="L35"></a><tt class="py-lineno">35</tt>  <tt class="py-line"><tt class="py-docstring">    the manipulator is from singularities and thus able to move and </tt> </tt>
+<a name="L36"></a><tt class="py-lineno">36</tt>  <tt class="py-line"><tt class="py-docstring">    exert forces uniformly in all directions.</tt> </tt>
+<a name="L37"></a><tt class="py-lineno">37</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L38"></a><tt class="py-lineno">38</tt>  <tt class="py-line"><tt class="py-docstring">    Asada's manipulability measure is based on the manipulator's</tt> </tt>
+<a name="L39"></a><tt class="py-lineno">39</tt>  <tt class="py-line"><tt class="py-docstring">    Cartesian inertia matrix.  An n-dimensional inertia ellipsoid</tt> </tt>
+<a name="L40"></a><tt class="py-lineno">40</tt>  <tt class="py-line"><tt class="py-docstring">        X' M(q) X = 1</tt> </tt>
+<a name="L41"></a><tt class="py-lineno">41</tt>  <tt class="py-line"><tt class="py-docstring">    gives an indication of how well the manipulator can accelerate</tt> </tt>
+<a name="L42"></a><tt class="py-lineno">42</tt>  <tt class="py-line"><tt class="py-docstring">    in each of the Cartesian directions.  The scalar measure computed</tt> </tt>
+<a name="L43"></a><tt class="py-lineno">43</tt>  <tt class="py-line"><tt class="py-docstring">    here is the ratio of the smallest/largest ellipsoid axis.  Ideally</tt> </tt>
+<a name="L44"></a><tt class="py-lineno">44</tt>  <tt class="py-line"><tt class="py-docstring">    the ellipsoid would be spherical, giving a ratio of 1, but in</tt> </tt>
+<a name="L45"></a><tt class="py-lineno">45</tt>  <tt class="py-line"><tt class="py-docstring">    practice will be less than 1.</tt> </tt>
+<a name="L46"></a><tt class="py-lineno">46</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L47"></a><tt class="py-lineno">47</tt>  <tt class="py-line"><tt class="py-docstring">    @see: inertia, jacob0</tt> </tt>
+<a name="L48"></a><tt class="py-lineno">48</tt>  <tt class="py-line"><tt class="py-docstring">    '''</tt>         </tt>
+<a name="L49"></a><tt class="py-lineno">49</tt>  <tt class="py-line">    <tt class="py-name">n</tt> <tt class="py-op">=</tt> <tt class="py-name">robot</tt><tt class="py-op">.</tt><tt class="py-name">n</tt> </tt>
+<a name="L50"></a><tt class="py-lineno">50</tt>  <tt class="py-line">    <tt class="py-name">q</tt> <tt class="py-op">=</tt> <tt class="py-name">mat</tt><tt class="py-op">(</tt><tt class="py-name">q</tt><tt class="py-op">)</tt> </tt>
+<a name="L51"></a><tt class="py-lineno">51</tt>  <tt class="py-line">    <tt class="py-name">w</tt> <tt class="py-op">=</tt> <tt class="py-name">array</tt><tt class="py-op">(</tt><tt class="py-op">[</tt><tt class="py-op">]</tt><tt class="py-op">)</tt> </tt>
+<a name="L52"></a><tt class="py-lineno">52</tt>  <tt class="py-line">    <tt class="py-keyword">if</tt> <tt class="py-string">'yoshikawa'</tt><tt class="py-op">.</tt><tt class="py-name">startswith</tt><tt class="py-op">(</tt><tt class="py-name">which</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L53"></a><tt class="py-lineno">53</tt>  <tt class="py-line">            <tt class="py-keyword">if</tt> <tt id="link-7" class="py-name" targets="Function robot.utility.numrows()=robot.utility-module.html#numrows"><a title="robot.utility.numrows" class="py-name" href="#" onclick="return doclink('link-7', 'numrows', 'link-7');">numrows</a></tt><tt class="py-op">(</tt><tt class="py-name">q</tt><tt class="py-op">)</tt><tt class="py-op">==</tt><tt class="py-number">1</tt><tt class="py-op">:</tt> </tt>
+<a name="L54"></a><tt class="py-lineno">54</tt>  <tt class="py-line">                    <tt class="py-keyword">return</tt> <tt id="link-8" class="py-name" targets="Function robot.manipulability'.yoshi()=robot.manipulability%27-module.html#yoshi"><a title="robot.manipulability'.yoshi" class="py-name" href="#" onclick="return doclink('link-8', 'yoshi', 'link-8');">yoshi</a></tt><tt class="py-op">(</tt><tt class="py-name">robot</tt><tt class="py-op">,</tt><tt class="py-name">q</tt><tt class="py-op">)</tt> </tt>
+<a name="L55"></a><tt class="py-lineno">55</tt>  <tt class="py-line">            <tt class="py-keyword">for</tt> <tt class="py-name">Q</tt> <tt class="py-keyword">in</tt> <tt class="py-name">q</tt><tt class="py-op">:</tt> </tt>
+<a name="L56"></a><tt class="py-lineno">56</tt>  <tt class="py-line">                    <tt class="py-name">w</tt> <tt class="py-op">=</tt> <tt class="py-name">concatenate</tt><tt class="py-op">(</tt><tt class="py-op">(</tt><tt class="py-name">w</tt><tt class="py-op">,</tt><tt class="py-name">array</tt><tt class="py-op">(</tt><tt class="py-op">[</tt><tt id="link-9" class="py-name"><a title="robot.manipulability'.yoshi" class="py-name" href="#" onclick="return doclink('link-9', 'yoshi', 'link-8');">yoshi</a></tt><tt class="py-op">(</tt><tt class="py-name">robot</tt><tt class="py-op">,</tt><tt class="py-name">Q</tt><tt class="py-op">)</tt><tt class="py-op">]</tt><tt class="py-op">)</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L57"></a><tt class="py-lineno">57</tt>  <tt class="py-line">    <tt class="py-keyword">elif</tt> <tt class="py-string">'asada'</tt><tt class="py-op">.</tt><tt class="py-name">startswith</tt><tt class="py-op">(</tt><tt class="py-name">which</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L58"></a><tt class="py-lineno">58</tt>  <tt class="py-line">            <tt class="py-keyword">if</tt> <tt id="link-10" class="py-name"><a title="robot.utility.numrows" class="py-name" href="#" onclick="return doclink('link-10', 'numrows', 'link-7');">numrows</a></tt><tt class="py-op">(</tt><tt class="py-name">q</tt><tt class="py-op">)</tt><tt class="py-op">==</tt><tt class="py-number">1</tt><tt class="py-op">:</tt> </tt>
+<a name="L59"></a><tt class="py-lineno">59</tt>  <tt class="py-line">                    <tt class="py-keyword">return</tt> <tt id="link-11" class="py-name" targets="Function robot.manipulability'.asada()=robot.manipulability%27-module.html#asada"><a title="robot.manipulability'.asada" class="py-name" href="#" onclick="return doclink('link-11', 'asada', 'link-11');">asada</a></tt><tt class="py-op">(</tt><tt class="py-name">robot</tt><tt class="py-op">,</tt><tt class="py-name">q</tt><tt class="py-op">)</tt> </tt>
+<a name="L60"></a><tt class="py-lineno">60</tt>  <tt class="py-line">            <tt class="py-keyword">for</tt> <tt class="py-name">Q</tt> <tt class="py-keyword">in</tt> <tt class="py-name">q</tt><tt class="py-op">:</tt> </tt>
+<a name="L61"></a><tt class="py-lineno">61</tt>  <tt class="py-line">                    <tt class="py-name">w</tt> <tt class="py-op">=</tt> <tt class="py-name">concatenate</tt><tt class="py-op">(</tt><tt class="py-op">(</tt><tt class="py-name">w</tt><tt class="py-op">,</tt><tt class="py-name">array</tt><tt class="py-op">(</tt><tt class="py-op">[</tt><tt id="link-12" class="py-name"><a title="robot.manipulability'.asada" class="py-name" href="#" onclick="return doclink('link-12', 'asada', 'link-11');">asada</a></tt><tt class="py-op">(</tt><tt class="py-name">robot</tt><tt class="py-op">,</tt><tt class="py-name">Q</tt><tt class="py-op">)</tt><tt class="py-op">]</tt><tt class="py-op">)</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L62"></a><tt class="py-lineno">62</tt>  <tt class="py-line">    <tt class="py-keyword">return</tt> <tt class="py-name">mat</tt><tt class="py-op">(</tt><tt class="py-name">w</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L63"></a><tt class="py-lineno">63</tt>  <tt class="py-line"> </tt>
+<a name="yoshi"></a><div id="yoshi-def"><a name="L64"></a><tt class="py-lineno">64</tt> <a class="py-toggle" href="#" id="yoshi-toggle" onclick="return toggle('yoshi');">-</a><tt class="py-line"><tt class="py-keyword">def</tt> <a class="py-def-name" href="robot.manipulability'-module.html#yoshi">yoshi</a><tt class="py-op">(</tt><tt class="py-param">robot</tt><tt class="py-op">,</tt><tt class="py-param">q</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="yoshi-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="yoshi-expanded"><a name="L65"></a><tt class="py-lineno">65</tt>  <tt class="py-line">        <tt class="py-name">J</tt> <tt class="py-op">=</tt> <tt id="link-13" class="py-name"><a title="robot.jacobian.jacob0" class="py-name" href="#" onclick="return doclink('link-13', 'jacob0', 'link-1');">jacob0</a></tt><tt class="py-op">(</tt><tt class="py-name">robot</tt><tt class="py-op">,</tt><tt class="py-name">q</tt><tt class="py-op">)</tt> </tt>
+<a name="L66"></a><tt class="py-lineno">66</tt>  <tt class="py-line">        <tt class="py-keyword">return</tt> <tt id="link-14" class="py-name" targets="Variable numpy.core.ma.sqrt=numpy.core.ma-module.html#sqrt,Variable robot.Link'.sqrt=robot.Link%27-module.html#sqrt,Variable robot.Quaternion.sqrt=robot.Quaternion-module.html#sqrt,Variable robot.Robot'.sqrt=robot.Robot%27-module.html#sqrt,Variable robot.dynamics.sqrt=robot.dynamics-module.html#sqrt,Variable robot.manipulability'.sqrt=robot.manipulability%27-module.html#sqrt,Variable robot.puma560.sqrt=robot.puma560-module.html#sqrt,Variable robot.puma560akb.sqrt=robot.puma560akb-module.html#sqrt,Variable robot.trajectory.sqrt=robot.trajectory-module.html#sqrt,Variable robot.transform.sqrt=robot.transform-module.html#sqrt,Variable robot.utility.sqrt=robot.utility-module.html#sqrt"><a title="numpy.core.ma.sqrt
+robot.Link'.sqrt
+robot.Quaternion.sqrt
+robot.Robot'.sqrt
+robot.dynamics.sqrt
+robot.manipulability'.sqrt
+robot.puma560.sqrt
+robot.puma560akb.sqrt
+robot.trajectory.sqrt
+robot.transform.sqrt
+robot.utility.sqrt" class="py-name" href="#" onclick="return doclink('link-14', 'sqrt', 'link-14');">sqrt</a></tt><tt class="py-op">(</tt><tt class="py-name">det</tt><tt class="py-op">(</tt><tt class="py-name">J</tt><tt class="py-op">*</tt><tt class="py-name">J</tt><tt class="py-op">.</tt><tt class="py-name">T</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L67"></a><tt class="py-lineno">67</tt>  <tt class="py-line"> </tt>
+<a name="asada"></a><div id="asada-def"><a name="L68"></a><tt class="py-lineno">68</tt> <a class="py-toggle" href="#" id="asada-toggle" onclick="return toggle('asada');">-</a><tt class="py-line"><tt class="py-keyword">def</tt> <a class="py-def-name" href="robot.manipulability'-module.html#asada">asada</a><tt class="py-op">(</tt><tt class="py-param">robot</tt><tt class="py-op">,</tt><tt class="py-param">q</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="asada-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="asada-expanded"><a name="L69"></a><tt class="py-lineno">69</tt>  <tt class="py-line">        <tt class="py-name">J</tt> <tt class="py-op">=</tt> <tt id="link-15" class="py-name"><a title="robot.jacobian.jacob0" class="py-name" href="#" onclick="return doclink('link-15', 'jacob0', 'link-1');">jacob0</a></tt><tt class="py-op">(</tt><tt class="py-name">robot</tt><tt class="py-op">,</tt><tt class="py-name">q</tt><tt class="py-op">)</tt> </tt>
+<a name="L70"></a><tt class="py-lineno">70</tt>  <tt class="py-line">        <tt class="py-name">Ji</tt> <tt class="py-op">=</tt> <tt id="link-16" class="py-name"><a title="robot.Quaternion.quaternion.inv" class="py-name" href="#" onclick="return doclink('link-16', 'inv', 'link-5');">inv</a></tt><tt class="py-op">(</tt><tt class="py-name">J</tt><tt class="py-op">)</tt> </tt>
+<a name="L71"></a><tt class="py-lineno">71</tt>  <tt class="py-line">        <tt class="py-name">M</tt> <tt class="py-op">=</tt> <tt id="link-17" class="py-name"><a title="robot.dynamics.inertia" class="py-name" href="#" onclick="return doclink('link-17', 'inertia', 'link-3');">inertia</a></tt><tt class="py-op">(</tt><tt class="py-name">robot</tt><tt class="py-op">,</tt><tt class="py-name">q</tt><tt class="py-op">)</tt> </tt>
+<a name="L72"></a><tt class="py-lineno">72</tt>  <tt class="py-line">        <tt class="py-name">Mx</tt> <tt class="py-op">=</tt> <tt class="py-name">Ji</tt><tt class="py-op">.</tt><tt class="py-name">T</tt><tt class="py-op">*</tt><tt class="py-name">M</tt><tt class="py-op">*</tt><tt class="py-name">Ji</tt> </tt>
+<a name="L73"></a><tt class="py-lineno">73</tt>  <tt class="py-line">        <tt id="link-18" class="py-name" targets="Variable math.e=math-module.html#e,Variable robot.Link'.e=robot.Link%27-module.html#e,Variable robot.Quaternion.e=robot.Quaternion-module.html#e,Variable robot.Robot'.e=robot.Robot%27-module.html#e,Variable robot.dynamics.e=robot.dynamics-module.html#e,Variable robot.jacobian.e=robot.jacobian-module.html#e,Variable robot.kinematics.e=robot.kinematics-module.html#e,Variable robot.manipulability'.e=robot.manipulability%27-module.html#e,Variable robot.puma560.e=robot.puma560-module.html#e,Variable robot.puma560akb.e=robot.puma560akb-module.html#e,Variable robot.trajectory.e=robot.trajectory-module.html#e,Variable robot.transform.e=robot.transform-module.html#e,Variable robot.utility.e=robot.utility-module.html#e"><a title="math.e
+robot.Link'.e
+robot.Quaternion.e
+robot.Robot'.e
+robot.dynamics.e
+robot.jacobian.e
+robot.kinematics.e
+robot.manipulability'.e
+robot.puma560.e
+robot.puma560akb.e
+robot.trajectory.e
+robot.transform.e
+robot.utility.e" class="py-name" href="#" onclick="return doclink('link-18', 'e', 'link-18');">e</a></tt> <tt class="py-op">=</tt> <tt class="py-name">eig</tt><tt class="py-op">(</tt><tt class="py-name">Mx</tt><tt class="py-op">)</tt><tt class="py-op">[</tt><tt class="py-number">0</tt><tt class="py-op">]</tt> </tt>
+<a name="L74"></a><tt class="py-lineno">74</tt>  <tt class="py-line"> </tt>
+<a name="L75"></a><tt class="py-lineno">75</tt>  <tt class="py-line">        <tt class="py-keyword">return</tt> <tt class="py-name">real</tt><tt class="py-op">(</tt> <tt id="link-19" class="py-name"><a title="math.e
+robot.Link'.e
+robot.Quaternion.e
+robot.Robot'.e
+robot.dynamics.e
+robot.jacobian.e
+robot.kinematics.e
+robot.manipulability'.e
+robot.puma560.e
+robot.puma560akb.e
+robot.trajectory.e
+robot.transform.e
+robot.utility.e" class="py-name" href="#" onclick="return doclink('link-19', 'e', 'link-18');">e</a></tt><tt class="py-op">.</tt><tt class="py-name">min</tt><tt class="py-op">(</tt><tt class="py-number">0</tt><tt class="py-op">)</tt><tt class="py-op">/</tt><tt id="link-20" class="py-name"><a title="math.e
+robot.Link'.e
+robot.Quaternion.e
+robot.Robot'.e
+robot.dynamics.e
+robot.jacobian.e
+robot.kinematics.e
+robot.manipulability'.e
+robot.puma560.e
+robot.puma560akb.e
+robot.trajectory.e
+robot.transform.e
+robot.utility.e" class="py-name" href="#" onclick="return doclink('link-20', 'e', 'link-18');">e</a></tt><tt class="py-op">.</tt><tt class="py-name">max</tt><tt class="py-op">(</tt><tt class="py-number">0</tt><tt class="py-op">)</tt> <tt class="py-op">)</tt> </tt>
+</div><a name="L76"></a><tt class="py-lineno">76</tt>  <tt class="py-line"> </tt><script type="text/javascript">
+<!--
+expandto(location.href);
+// -->
+</script>
+</pre>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">
+    Generated by Epydoc 3.0beta1 on Wed Apr  2 23:14:48 2008
+    </td>
+    <td align="right" class="footer">
+      <a href="http://epydoc.sourceforge.net">http://epydoc.sourceforge.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie()
+  // -->
+</script>
+  
+</body>
+</html>

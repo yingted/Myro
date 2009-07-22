@@ -1,0 +1,6 @@
+http://groups.google.com/group/robotics-tool-box/web/robotics-toolbox-for-python
+
+export PYTHONPATH=.../kinematics
+
+python test/kinematics.py
+

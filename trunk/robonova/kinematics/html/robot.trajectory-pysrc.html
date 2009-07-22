@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>robot.trajectory</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        Package&nbsp;robot ::
+        Module&nbsp;trajectory
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
+    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="robot.trajectory-pysrc.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<h1 class="epydoc">Source Code for <a href="robot.trajectory-module.html">Module robot.trajectory</a></h1>
+<pre class="py-src">
+<a name="L1"></a><tt class="py-lineno">  1</tt>  <tt class="py-line"> </tt>
+<a name="L2"></a><tt class="py-lineno">  2</tt>  <tt class="py-line"><tt class="py-docstring">"""</tt> </tt>
+<a name="L3"></a><tt class="py-lineno">  3</tt>  <tt class="py-line"><tt class="py-docstring">Trajectory primitives.</tt> </tt>
+<a name="L4"></a><tt class="py-lineno">  4</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L5"></a><tt class="py-lineno">  5</tt>  <tt class="py-line"><tt class="py-docstring">@author: Peter Corke</tt> </tt>
+<a name="L6"></a><tt class="py-lineno">  6</tt>  <tt class="py-line"><tt class="py-docstring">@copyright: Peter Corke</tt> </tt>
+<a name="L7"></a><tt class="py-lineno">  7</tt>  <tt class="py-line"><tt class="py-docstring">"""</tt> </tt>
+<a name="L8"></a><tt class="py-lineno">  8</tt>  <tt class="py-line"> </tt>
+<a name="L9"></a><tt class="py-lineno">  9</tt>  <tt class="py-line"><tt class="py-keyword">from</tt> <tt class="py-name">numpy</tt> <tt class="py-keyword">import</tt> <tt class="py-op">*</tt> </tt>
+<a name="L10"></a><tt class="py-lineno"> 10</tt>  <tt class="py-line"><tt class="py-keyword">from</tt> <tt id="link-0" class="py-name" targets="Module robot.utility=robot.utility-module.html"><a title="robot.utility" class="py-name" href="#" onclick="return doclink('link-0', 'utility', 'link-0');">utility</a></tt> <tt class="py-keyword">import</tt> <tt class="py-op">*</tt> </tt>
+<a name="L11"></a><tt class="py-lineno"> 11</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt id="link-1" class="py-name" targets="Module robot.transform=robot.transform-module.html"><a title="robot.transform" class="py-name" href="#" onclick="return doclink('link-1', 'transform', 'link-1');">transform</a></tt> <tt class="py-keyword">as</tt> <tt class="py-name">T</tt> </tt>
+<a name="L12"></a><tt class="py-lineno"> 12</tt>  <tt class="py-line"> </tt>
+<a name="jtraj"></a><div id="jtraj-def"><a name="L13"></a><tt class="py-lineno"> 13</tt> <a class="py-toggle" href="#" id="jtraj-toggle" onclick="return toggle('jtraj');">-</a><tt class="py-line"><tt class="py-keyword">def</tt> <a class="py-def-name" href="robot.trajectory-module.html#jtraj">jtraj</a><tt class="py-op">(</tt><tt class="py-param">q0</tt><tt class="py-op">,</tt> <tt class="py-param">q1</tt><tt class="py-op">,</tt> <tt class="py-param">tv</tt><tt class="py-op">,</tt> <tt class="py-param">qd0</tt><tt class="py-op">=</tt><tt class="py-name">None</tt><tt class="py-op">,</tt> <tt class="py-param">qd1</tt><tt class="py-op">=</tt><tt class="py-name">None</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="jtraj-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="jtraj-expanded"><a name="L14"></a><tt class="py-lineno"> 14</tt>  <tt class="py-line">    <tt class="py-docstring">"""</tt> </tt>
+<a name="L15"></a><tt class="py-lineno"> 15</tt>  <tt class="py-line"><tt class="py-docstring">    Compute a joint space trajectory between points C{q0} and C{q1}.</tt> </tt>
+<a name="L16"></a><tt class="py-lineno"> 16</tt>  <tt class="py-line"><tt class="py-docstring">    The number of points is the length of the given time vector C{tv}.  If</tt> </tt>
+<a name="L17"></a><tt class="py-lineno"> 17</tt>  <tt class="py-line"><tt class="py-docstring">    {tv} is a scalar it is taken as the number of points.</tt> </tt>
+<a name="L18"></a><tt class="py-lineno"> 18</tt>  <tt class="py-line"><tt class="py-docstring">    </tt> </tt>
+<a name="L19"></a><tt class="py-lineno"> 19</tt>  <tt class="py-line"><tt class="py-docstring">    A 7th order polynomial is used with default zero boundary conditions for</tt> </tt>
+<a name="L20"></a><tt class="py-lineno"> 20</tt>  <tt class="py-line"><tt class="py-docstring">    velocity and acceleration.  Non-zero boundary velocities can be</tt> </tt>
+<a name="L21"></a><tt class="py-lineno"> 21</tt>  <tt class="py-line"><tt class="py-docstring">    optionally specified as C{qd0} and C{qd1}.</tt> </tt>
+<a name="L22"></a><tt class="py-lineno"> 22</tt>  <tt class="py-line"><tt class="py-docstring">    </tt> </tt>
+<a name="L23"></a><tt class="py-lineno"> 23</tt>  <tt class="py-line"><tt class="py-docstring">    As well as the trajectory, M{q{t}}, its first and second derivatives</tt> </tt>
+<a name="L24"></a><tt class="py-lineno"> 24</tt>  <tt class="py-line"><tt class="py-docstring">    M{qd(t)} and M{qdd(t)} are also computed.  All three are returned as a tuple.</tt> </tt>
+<a name="L25"></a><tt class="py-lineno"> 25</tt>  <tt class="py-line"><tt class="py-docstring">    Each of these is an M{m x n} matrix, with one row per time step, and</tt> </tt>
+<a name="L26"></a><tt class="py-lineno"> 26</tt>  <tt class="py-line"><tt class="py-docstring">    one column per joint parameter.</tt> </tt>
+<a name="L27"></a><tt class="py-lineno"> 27</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L28"></a><tt class="py-lineno"> 28</tt>  <tt class="py-line"><tt class="py-docstring">    @type q0: m-vector</tt> </tt>
+<a name="L29"></a><tt class="py-lineno"> 29</tt>  <tt class="py-line"><tt class="py-docstring">    @param q0: initial state</tt> </tt>
+<a name="L30"></a><tt class="py-lineno"> 30</tt>  <tt class="py-line"><tt class="py-docstring">    @type q1: m-vector</tt> </tt>
+<a name="L31"></a><tt class="py-lineno"> 31</tt>  <tt class="py-line"><tt class="py-docstring">    @param q1: final state</tt> </tt>
+<a name="L32"></a><tt class="py-lineno"> 32</tt>  <tt class="py-line"><tt class="py-docstring">    @type tv: n-vector or scalar</tt> </tt>
+<a name="L33"></a><tt class="py-lineno"> 33</tt>  <tt class="py-line"><tt class="py-docstring">    @param tv: time step vector or number of steps</tt> </tt>
+<a name="L34"></a><tt class="py-lineno"> 34</tt>  <tt class="py-line"><tt class="py-docstring">    @type qd0: m-vector</tt> </tt>
+<a name="L35"></a><tt class="py-lineno"> 35</tt>  <tt class="py-line"><tt class="py-docstring">    @param qd0: initial velocity (default 0)</tt> </tt>
+<a name="L36"></a><tt class="py-lineno"> 36</tt>  <tt class="py-line"><tt class="py-docstring">    @type qd1: m-vector</tt> </tt>
+<a name="L37"></a><tt class="py-lineno"> 37</tt>  <tt class="py-line"><tt class="py-docstring">    @param qd1: final velocity (default 0)</tt> </tt>
+<a name="L38"></a><tt class="py-lineno"> 38</tt>  <tt class="py-line"><tt class="py-docstring">    @rtype: tuple</tt> </tt>
+<a name="L39"></a><tt class="py-lineno"> 39</tt>  <tt class="py-line"><tt class="py-docstring">    @return: (q, qd, qdd), a tuple of M{m x n} matrices</tt> </tt>
+<a name="L40"></a><tt class="py-lineno"> 40</tt>  <tt class="py-line"><tt class="py-docstring">    @see: L{ctraj}</tt> </tt>
+<a name="L41"></a><tt class="py-lineno"> 41</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L42"></a><tt class="py-lineno"> 42</tt>  <tt class="py-line"><tt class="py-docstring">    """</tt> </tt>
+<a name="L43"></a><tt class="py-lineno"> 43</tt>  <tt class="py-line"> </tt>
+<a name="L44"></a><tt class="py-lineno"> 44</tt>  <tt class="py-line">    <tt class="py-keyword">if</tt> <tt class="py-name">isinstance</tt><tt class="py-op">(</tt><tt class="py-name">tv</tt><tt class="py-op">,</tt><tt class="py-op">(</tt><tt class="py-name">int</tt><tt class="py-op">,</tt><tt id="link-2" class="py-name" targets="Class numpy.int32=numpy.int32-class.html"><a title="numpy.int32" class="py-name" href="#" onclick="return doclink('link-2', 'int32', 'link-2');">int32</a></tt><tt class="py-op">,</tt><tt class="py-name">float</tt><tt class="py-op">,</tt><tt id="link-3" class="py-name" targets="Class numpy.float64=numpy.float64-class.html"><a title="numpy.float64" class="py-name" href="#" onclick="return doclink('link-3', 'float64', 'link-3');">float64</a></tt><tt class="py-op">)</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L45"></a><tt class="py-lineno"> 45</tt>  <tt class="py-line">        <tt class="py-name">tscal</tt> <tt class="py-op">=</tt> <tt class="py-name">float</tt><tt class="py-op">(</tt><tt class="py-number">1</tt><tt class="py-op">)</tt> </tt>
+<a name="L46"></a><tt class="py-lineno"> 46</tt>  <tt class="py-line">        <tt class="py-name">t</tt> <tt class="py-op">=</tt> <tt class="py-name">mat</tt><tt class="py-op">(</tt><tt class="py-name">range</tt><tt class="py-op">(</tt><tt class="py-number">0</tt><tt class="py-op">,</tt><tt class="py-name">tv</tt><tt class="py-op">)</tt><tt class="py-op">)</tt><tt class="py-op">.</tt><tt class="py-name">T</tt><tt class="py-op">/</tt><tt class="py-op">(</tt><tt class="py-name">tv</tt><tt class="py-op">-</tt><tt class="py-number">1.</tt><tt class="py-op">)</tt> <tt class="py-comment"># Normalized time from 0 -&gt; 1</tt> </tt>
+<a name="L47"></a><tt class="py-lineno"> 47</tt>  <tt class="py-line">    <tt class="py-keyword">else</tt><tt class="py-op">:</tt> </tt>
+<a name="L48"></a><tt class="py-lineno"> 48</tt>  <tt class="py-line">        <tt class="py-name">tv</tt> <tt class="py-op">=</tt> <tt id="link-4" class="py-name" targets="Function robot.utility.arg2array()=robot.utility-module.html#arg2array"><a title="robot.utility.arg2array" class="py-name" href="#" onclick="return doclink('link-4', 'arg2array', 'link-4');">arg2array</a></tt><tt class="py-op">(</tt><tt class="py-name">tv</tt><tt class="py-op">)</tt><tt class="py-op">;</tt> </tt>
+<a name="L49"></a><tt class="py-lineno"> 49</tt>  <tt class="py-line">        <tt class="py-name">tscal</tt> <tt class="py-op">=</tt> <tt class="py-name">float</tt><tt class="py-op">(</tt><tt class="py-name">max</tt><tt class="py-op">(</tt><tt class="py-name">tv</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L50"></a><tt class="py-lineno"> 50</tt>  <tt class="py-line">        <tt class="py-name">t</tt> <tt class="py-op">=</tt> <tt class="py-name">mat</tt><tt class="py-op">(</tt><tt class="py-name">tv</tt><tt class="py-op">)</tt><tt class="py-op">.</tt><tt class="py-name">T</tt> <tt class="py-op">/</tt> <tt class="py-name">tscal</tt> </tt>
+<a name="L51"></a><tt class="py-lineno"> 51</tt>  <tt class="py-line">     </tt>
+<a name="L52"></a><tt class="py-lineno"> 52</tt>  <tt class="py-line">    <tt class="py-name">q0</tt> <tt class="py-op">=</tt> <tt id="link-5" class="py-name"><a title="robot.utility.arg2array" class="py-name" href="#" onclick="return doclink('link-5', 'arg2array', 'link-4');">arg2array</a></tt><tt class="py-op">(</tt><tt class="py-name">q0</tt><tt class="py-op">)</tt> </tt>
+<a name="L53"></a><tt class="py-lineno"> 53</tt>  <tt class="py-line">    <tt class="py-name">q1</tt> <tt class="py-op">=</tt> <tt id="link-6" class="py-name"><a title="robot.utility.arg2array" class="py-name" href="#" onclick="return doclink('link-6', 'arg2array', 'link-4');">arg2array</a></tt><tt class="py-op">(</tt><tt class="py-name">q1</tt><tt class="py-op">)</tt> </tt>
+<a name="L54"></a><tt class="py-lineno"> 54</tt>  <tt class="py-line">     </tt>
+<a name="L55"></a><tt class="py-lineno"> 55</tt>  <tt class="py-line">    <tt class="py-keyword">if</tt> <tt class="py-name">qd0</tt> <tt class="py-op">==</tt> <tt class="py-name">None</tt><tt class="py-op">:</tt> </tt>
+<a name="L56"></a><tt class="py-lineno"> 56</tt>  <tt class="py-line">        <tt class="py-name">qd0</tt> <tt class="py-op">=</tt> <tt class="py-name">zeros</tt><tt class="py-op">(</tt><tt class="py-op">(</tt><tt class="py-name">shape</tt><tt class="py-op">(</tt><tt class="py-name">q0</tt><tt class="py-op">)</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L57"></a><tt class="py-lineno"> 57</tt>  <tt class="py-line">    <tt class="py-keyword">else</tt><tt class="py-op">:</tt> </tt>
+<a name="L58"></a><tt class="py-lineno"> 58</tt>  <tt class="py-line">        <tt class="py-name">qd0</tt> <tt class="py-op">=</tt> <tt id="link-7" class="py-name"><a title="robot.utility.arg2array" class="py-name" href="#" onclick="return doclink('link-7', 'arg2array', 'link-4');">arg2array</a></tt><tt class="py-op">(</tt><tt class="py-name">qd0</tt><tt class="py-op">)</tt><tt class="py-op">;</tt> </tt>
+<a name="L59"></a><tt class="py-lineno"> 59</tt>  <tt class="py-line">    <tt class="py-keyword">if</tt> <tt class="py-name">qd1</tt> <tt class="py-op">==</tt> <tt class="py-name">None</tt><tt class="py-op">:</tt> </tt>
+<a name="L60"></a><tt class="py-lineno"> 60</tt>  <tt class="py-line">        <tt class="py-name">qd1</tt> <tt class="py-op">=</tt> <tt class="py-name">zeros</tt><tt class="py-op">(</tt><tt class="py-op">(</tt><tt class="py-name">shape</tt><tt class="py-op">(</tt><tt class="py-name">q1</tt><tt class="py-op">)</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L61"></a><tt class="py-lineno"> 61</tt>  <tt class="py-line">    <tt class="py-keyword">else</tt><tt class="py-op">:</tt> </tt>
+<a name="L62"></a><tt class="py-lineno"> 62</tt>  <tt class="py-line">        <tt class="py-name">qd1</tt> <tt class="py-op">=</tt> <tt id="link-8" class="py-name"><a title="robot.utility.arg2array" class="py-name" href="#" onclick="return doclink('link-8', 'arg2array', 'link-4');">arg2array</a></tt><tt class="py-op">(</tt><tt class="py-name">qd1</tt><tt class="py-op">)</tt> </tt>
+<a name="L63"></a><tt class="py-lineno"> 63</tt>  <tt class="py-line"> </tt>
+<a name="L64"></a><tt class="py-lineno"> 64</tt>  <tt class="py-line">    <tt class="py-keyword">print</tt> <tt class="py-name">qd0</tt> </tt>
+<a name="L65"></a><tt class="py-lineno"> 65</tt>  <tt class="py-line">    <tt class="py-keyword">print</tt> <tt class="py-name">qd1</tt> </tt>
+<a name="L66"></a><tt class="py-lineno"> 66</tt>  <tt class="py-line">     </tt>
+<a name="L67"></a><tt class="py-lineno"> 67</tt>  <tt class="py-line">    <tt class="py-comment"># compute the polynomial coefficients</tt> </tt>
+<a name="L68"></a><tt class="py-lineno"> 68</tt>  <tt class="py-line"><tt class="py-comment"></tt>    <tt class="py-name">A</tt> <tt class="py-op">=</tt> <tt class="py-number">6</tt><tt class="py-op">*</tt><tt class="py-op">(</tt><tt class="py-name">q1</tt> <tt class="py-op">-</tt> <tt class="py-name">q0</tt><tt class="py-op">)</tt> <tt class="py-op">-</tt> <tt class="py-number">3</tt><tt class="py-op">*</tt><tt class="py-op">(</tt><tt class="py-name">qd1</tt> <tt class="py-op">+</tt> <tt class="py-name">qd0</tt><tt class="py-op">)</tt><tt class="py-op">*</tt><tt class="py-name">tscal</tt> </tt>
+<a name="L69"></a><tt class="py-lineno"> 69</tt>  <tt class="py-line">    <tt class="py-name">B</tt> <tt class="py-op">=</tt> <tt class="py-op">-</tt><tt class="py-number">15</tt><tt class="py-op">*</tt><tt class="py-op">(</tt><tt class="py-name">q1</tt> <tt class="py-op">-</tt> <tt class="py-name">q0</tt><tt class="py-op">)</tt> <tt class="py-op">+</tt> <tt class="py-op">(</tt><tt class="py-number">8</tt><tt class="py-op">*</tt><tt class="py-name">qd0</tt> <tt class="py-op">+</tt> <tt class="py-number">7</tt><tt class="py-op">*</tt><tt class="py-name">qd1</tt><tt class="py-op">)</tt><tt class="py-op">*</tt><tt class="py-name">tscal</tt> </tt>
+<a name="L70"></a><tt class="py-lineno"> 70</tt>  <tt class="py-line">    <tt class="py-name">C</tt> <tt class="py-op">=</tt> <tt class="py-number">10</tt><tt class="py-op">*</tt><tt class="py-op">(</tt><tt class="py-name">q1</tt> <tt class="py-op">-</tt> <tt class="py-name">q0</tt><tt class="py-op">)</tt> <tt class="py-op">-</tt> <tt class="py-op">(</tt><tt class="py-number">6</tt><tt class="py-op">*</tt><tt class="py-name">qd0</tt> <tt class="py-op">+</tt> <tt class="py-number">4</tt><tt class="py-op">*</tt><tt class="py-name">qd1</tt><tt class="py-op">)</tt><tt class="py-op">*</tt><tt class="py-name">tscal</tt> </tt>
+<a name="L71"></a><tt class="py-lineno"> 71</tt>  <tt class="py-line">    <tt class="py-name">E</tt> <tt class="py-op">=</tt> <tt class="py-name">qd0</tt><tt class="py-op">*</tt><tt class="py-name">tscal</tt> <tt class="py-comment"># as the t vector has been normalized</tt> </tt>
+<a name="L72"></a><tt class="py-lineno"> 72</tt>  <tt class="py-line">    <tt class="py-name">F</tt> <tt class="py-op">=</tt> <tt class="py-name">q0</tt> </tt>
+<a name="L73"></a><tt class="py-lineno"> 73</tt>  <tt class="py-line"> </tt>
+<a name="L74"></a><tt class="py-lineno"> 74</tt>  <tt class="py-line">    <tt class="py-name">tt</tt> <tt class="py-op">=</tt> <tt class="py-name">concatenate</tt><tt class="py-op">(</tt><tt class="py-op">(</tt><tt id="link-9" class="py-name" targets="Variable robot.Link'.power=robot.Link%27-module.html#power,Variable robot.Quaternion.power=robot.Quaternion-module.html#power,Variable robot.Robot'.power=robot.Robot%27-module.html#power,Variable robot.dynamics.power=robot.dynamics-module.html#power,Variable robot.jacobian.power=robot.jacobian-module.html#power,Variable robot.kinematics.power=robot.kinematics-module.html#power,Variable robot.manipulability'.power=robot.manipulability%27-module.html#power,Variable robot.puma560.power=robot.puma560-module.html#power,Variable robot.puma560akb.power=robot.puma560akb-module.html#power,Variable robot.trajectory.power=robot.trajectory-module.html#power,Variable robot.transform.power=robot.transform-module.html#power,Variable robot.utility.power=robot.utility-module.html#power"><a title="robot.Link'.power
+robot.Quaternion.power
+robot.Robot'.power
+robot.dynamics.power
+robot.jacobian.power
+robot.kinematics.power
+robot.manipulability'.power
+robot.puma560.power
+robot.puma560akb.power
+robot.trajectory.power
+robot.transform.power
+robot.utility.power" class="py-name" href="#" onclick="return doclink('link-9', 'power', 'link-9');">power</a></tt><tt class="py-op">(</tt><tt class="py-name">t</tt><tt class="py-op">,</tt><tt class="py-number">5</tt><tt class="py-op">)</tt><tt class="py-op">,</tt><tt id="link-10" class="py-name"><a title="robot.Link'.power
+robot.Quaternion.power
+robot.Robot'.power
+robot.dynamics.power
+robot.jacobian.power
+robot.kinematics.power
+robot.manipulability'.power
+robot.puma560.power
+robot.puma560akb.power
+robot.trajectory.power
+robot.transform.power
+robot.utility.power" class="py-name" href="#" onclick="return doclink('link-10', 'power', 'link-9');">power</a></tt><tt class="py-op">(</tt><tt class="py-name">t</tt><tt class="py-op">,</tt><tt class="py-number">4</tt><tt class="py-op">)</tt><tt class="py-op">,</tt><tt id="link-11" class="py-name"><a title="robot.Link'.power
+robot.Quaternion.power
+robot.Robot'.power
+robot.dynamics.power
+robot.jacobian.power
+robot.kinematics.power
+robot.manipulability'.power
+robot.puma560.power
+robot.puma560akb.power
+robot.trajectory.power
+robot.transform.power
+robot.utility.power" class="py-name" href="#" onclick="return doclink('link-11', 'power', 'link-9');">power</a></tt><tt class="py-op">(</tt><tt class="py-name">t</tt><tt class="py-op">,</tt><tt class="py-number">3</tt><tt class="py-op">)</tt><tt class="py-op">,</tt><tt id="link-12" class="py-name"><a title="robot.Link'.power
+robot.Quaternion.power
+robot.Robot'.power
+robot.dynamics.power
+robot.jacobian.power
+robot.kinematics.power
+robot.manipulability'.power
+robot.puma560.power
+robot.puma560akb.power
+robot.trajectory.power
+robot.transform.power
+robot.utility.power" class="py-name" href="#" onclick="return doclink('link-12', 'power', 'link-9');">power</a></tt><tt class="py-op">(</tt><tt class="py-name">t</tt><tt class="py-op">,</tt><tt class="py-number">2</tt><tt class="py-op">)</tt><tt class="py-op">,</tt><tt class="py-name">t</tt><tt class="py-op">,</tt><tt class="py-name">ones</tt><tt class="py-op">(</tt><tt class="py-name">shape</tt><tt class="py-op">(</tt><tt class="py-name">t</tt><tt class="py-op">)</tt><tt class="py-op">)</tt><tt class="py-op">)</tt><tt class="py-op">,</tt><tt class="py-number">1</tt><tt class="py-op">)</tt> </tt>
+<a name="L75"></a><tt class="py-lineno"> 75</tt>  <tt class="py-line">    <tt class="py-name">c</tt> <tt class="py-op">=</tt> <tt class="py-name">vstack</tt><tt class="py-op">(</tt><tt class="py-op">(</tt><tt class="py-name">A</tt><tt class="py-op">,</tt> <tt class="py-name">B</tt><tt class="py-op">,</tt> <tt class="py-name">C</tt><tt class="py-op">,</tt> <tt class="py-name">zeros</tt><tt class="py-op">(</tt><tt class="py-name">shape</tt><tt class="py-op">(</tt><tt class="py-name">A</tt><tt class="py-op">)</tt><tt class="py-op">)</tt><tt class="py-op">,</tt> <tt class="py-name">E</tt><tt class="py-op">,</tt> <tt class="py-name">F</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L76"></a><tt class="py-lineno"> 76</tt>  <tt class="py-line">    <tt class="py-name">qt</tt> <tt class="py-op">=</tt> <tt class="py-name">tt</tt> <tt class="py-op">*</tt> <tt class="py-name">c</tt> </tt>
+<a name="L77"></a><tt class="py-lineno"> 77</tt>  <tt class="py-line"> </tt>
+<a name="L78"></a><tt class="py-lineno"> 78</tt>  <tt class="py-line">    <tt class="py-comment"># compute velocity</tt> </tt>
+<a name="L79"></a><tt class="py-lineno"> 79</tt>  <tt class="py-line"><tt class="py-comment"></tt>    <tt class="py-name">c</tt> <tt class="py-op">=</tt> <tt class="py-name">vstack</tt><tt class="py-op">(</tt><tt class="py-op">(</tt><tt class="py-name">zeros</tt><tt class="py-op">(</tt><tt class="py-name">shape</tt><tt class="py-op">(</tt><tt class="py-name">A</tt><tt class="py-op">)</tt><tt class="py-op">)</tt><tt class="py-op">,</tt><tt class="py-number">5</tt><tt class="py-op">*</tt><tt class="py-name">A</tt><tt class="py-op">,</tt><tt class="py-number">4</tt><tt class="py-op">*</tt><tt class="py-name">B</tt><tt class="py-op">,</tt><tt class="py-number">3</tt><tt class="py-op">*</tt><tt class="py-name">C</tt><tt class="py-op">,</tt><tt class="py-name">zeros</tt><tt class="py-op">(</tt><tt class="py-name">shape</tt><tt class="py-op">(</tt><tt class="py-name">A</tt><tt class="py-op">)</tt><tt class="py-op">)</tt><tt class="py-op">,</tt><tt class="py-name">E</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L80"></a><tt class="py-lineno"> 80</tt>  <tt class="py-line">    <tt class="py-name">qdt</tt> <tt class="py-op">=</tt> <tt class="py-name">tt</tt> <tt class="py-op">*</tt> <tt class="py-name">c</tt> <tt class="py-op">/</tt> <tt class="py-name">tscal</tt> </tt>
+<a name="L81"></a><tt class="py-lineno"> 81</tt>  <tt class="py-line"> </tt>
+<a name="L82"></a><tt class="py-lineno"> 82</tt>  <tt class="py-line"> </tt>
+<a name="L83"></a><tt class="py-lineno"> 83</tt>  <tt class="py-line">    <tt class="py-comment"># compute acceleration</tt> </tt>
+<a name="L84"></a><tt class="py-lineno"> 84</tt>  <tt class="py-line"><tt class="py-comment"></tt>    <tt class="py-name">c</tt> <tt class="py-op">=</tt> <tt class="py-name">vstack</tt><tt class="py-op">(</tt><tt class="py-op">(</tt><tt class="py-name">zeros</tt><tt class="py-op">(</tt><tt class="py-name">shape</tt><tt class="py-op">(</tt><tt class="py-name">A</tt><tt class="py-op">)</tt><tt class="py-op">)</tt><tt class="py-op">,</tt><tt class="py-name">zeros</tt><tt class="py-op">(</tt><tt class="py-name">shape</tt><tt class="py-op">(</tt><tt class="py-name">A</tt><tt class="py-op">)</tt><tt class="py-op">)</tt><tt class="py-op">,</tt><tt class="py-number">20</tt><tt class="py-op">*</tt><tt class="py-name">A</tt><tt class="py-op">,</tt><tt class="py-number">12</tt><tt class="py-op">*</tt><tt class="py-name">B</tt><tt class="py-op">,</tt><tt class="py-number">6</tt><tt class="py-op">*</tt><tt class="py-name">C</tt><tt class="py-op">,</tt><tt class="py-name">zeros</tt><tt class="py-op">(</tt><tt class="py-name">shape</tt><tt class="py-op">(</tt><tt class="py-name">A</tt><tt class="py-op">)</tt><tt class="py-op">)</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L85"></a><tt class="py-lineno"> 85</tt>  <tt class="py-line">    <tt class="py-name">qddt</tt> <tt class="py-op">=</tt> <tt class="py-name">tt</tt> <tt class="py-op">*</tt> <tt class="py-name">c</tt> <tt class="py-op">/</tt> <tt class="py-op">(</tt><tt class="py-name">tscal</tt><tt class="py-op">**</tt><tt class="py-number">2</tt><tt class="py-op">)</tt> </tt>
+<a name="L86"></a><tt class="py-lineno"> 86</tt>  <tt class="py-line"> </tt>
+<a name="L87"></a><tt class="py-lineno"> 87</tt>  <tt class="py-line">    <tt class="py-keyword">return</tt> <tt class="py-name">qt</tt><tt class="py-op">,</tt><tt class="py-name">qdt</tt><tt class="py-op">,</tt><tt class="py-name">qddt</tt> </tt>
+</div><a name="L88"></a><tt class="py-lineno"> 88</tt>  <tt class="py-line"> </tt>
+<a name="L89"></a><tt class="py-lineno"> 89</tt>  <tt class="py-line"> </tt>
+<a name="ctraj"></a><div id="ctraj-def"><a name="L90"></a><tt class="py-lineno"> 90</tt> <a class="py-toggle" href="#" id="ctraj-toggle" onclick="return toggle('ctraj');">-</a><tt class="py-line"><tt class="py-keyword">def</tt> <a class="py-def-name" href="robot.trajectory-module.html#ctraj">ctraj</a><tt class="py-op">(</tt><tt class="py-param">t0</tt><tt class="py-op">,</tt> <tt class="py-param">t1</tt><tt class="py-op">,</tt> <tt class="py-param">r</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="ctraj-collapsed" style="display:none;" pad="+++" indent="++++"></div><div id="ctraj-expanded"><a name="L91"></a><tt class="py-lineno"> 91</tt>  <tt class="py-line">    <tt class="py-docstring">"""</tt> </tt>
+<a name="L92"></a><tt class="py-lineno"> 92</tt>  <tt class="py-line"><tt class="py-docstring">    Compute a Cartesian trajectory between poses C{t0} and C{t1}.</tt> </tt>
+<a name="L93"></a><tt class="py-lineno"> 93</tt>  <tt class="py-line"><tt class="py-docstring">    The number of points is the length of the path distance vector C{r}.</tt> </tt>
+<a name="L94"></a><tt class="py-lineno"> 94</tt>  <tt class="py-line"><tt class="py-docstring">    Each element of C{r} gives the distance along the path, and the </tt> </tt>
+<a name="L95"></a><tt class="py-lineno"> 95</tt>  <tt class="py-line"><tt class="py-docstring">    must be in the range [0 1].</tt> </tt>
+<a name="L96"></a><tt class="py-lineno"> 96</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L97"></a><tt class="py-lineno"> 97</tt>  <tt class="py-line"><tt class="py-docstring">    If {r} is a scalar it is taken as the number of points, and the points </tt> </tt>
+<a name="L98"></a><tt class="py-lineno"> 98</tt>  <tt class="py-line"><tt class="py-docstring">    are equally spaced between C{t0} and C{t1}.</tt> </tt>
+<a name="L99"></a><tt class="py-lineno"> 99</tt>  <tt class="py-line"><tt class="py-docstring"></tt> </tt>
+<a name="L100"></a><tt class="py-lineno">100</tt>  <tt class="py-line"><tt class="py-docstring">    The trajectory is a list of transform matrices.</tt> </tt>
+<a name="L101"></a><tt class="py-lineno">101</tt>  <tt class="py-line"><tt class="py-docstring">    </tt> </tt>
+<a name="L102"></a><tt class="py-lineno">102</tt>  <tt class="py-line"><tt class="py-docstring">    @type t0: homogeneous transform</tt> </tt>
+<a name="L103"></a><tt class="py-lineno">103</tt>  <tt class="py-line"><tt class="py-docstring">    @param t0: initial pose</tt> </tt>
+<a name="L104"></a><tt class="py-lineno">104</tt>  <tt class="py-line"><tt class="py-docstring">    @rtype: list of M{4x4} matrices</tt> </tt>
+<a name="L105"></a><tt class="py-lineno">105</tt>  <tt class="py-line"><tt class="py-docstring">    @return: Cartesian trajectory</tt> </tt>
+<a name="L106"></a><tt class="py-lineno">106</tt>  <tt class="py-line"><tt class="py-docstring">    @see: L{trinterp}, L{jtraj}</tt> </tt>
+<a name="L107"></a><tt class="py-lineno">107</tt>  <tt class="py-line"><tt class="py-docstring">    """</tt> </tt>
+<a name="L108"></a><tt class="py-lineno">108</tt>  <tt class="py-line"> </tt>
+<a name="L109"></a><tt class="py-lineno">109</tt>  <tt class="py-line">    <tt class="py-keyword">if</tt> <tt class="py-name">isinstance</tt><tt class="py-op">(</tt><tt id="link-13" class="py-name" targets="Method robot.Quaternion.quaternion.r()=robot.Quaternion.quaternion-class.html#r"><a title="robot.Quaternion.quaternion.r" class="py-name" href="#" onclick="return doclink('link-13', 'r', 'link-13');">r</a></tt><tt class="py-op">,</tt><tt class="py-op">(</tt><tt class="py-name">int</tt><tt class="py-op">,</tt><tt id="link-14" class="py-name"><a title="numpy.int32" class="py-name" href="#" onclick="return doclink('link-14', 'int32', 'link-2');">int32</a></tt><tt class="py-op">,</tt><tt class="py-name">float</tt><tt class="py-op">,</tt><tt id="link-15" class="py-name"><a title="numpy.float64" class="py-name" href="#" onclick="return doclink('link-15', 'float64', 'link-3');">float64</a></tt><tt class="py-op">)</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L110"></a><tt class="py-lineno">110</tt>  <tt class="py-line">        <tt class="py-name">i</tt> <tt class="py-op">=</tt> <tt class="py-name">mat</tt><tt class="py-op">(</tt><tt class="py-name">range</tt><tt class="py-op">(</tt><tt class="py-number">1</tt><tt class="py-op">,</tt><tt id="link-16" class="py-name"><a title="robot.Quaternion.quaternion.r" class="py-name" href="#" onclick="return doclink('link-16', 'r', 'link-13');">r</a></tt><tt class="py-op">+</tt><tt class="py-number">1</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> </tt>
+<a name="L111"></a><tt class="py-lineno">111</tt>  <tt class="py-line">        <tt id="link-17" class="py-name"><a title="robot.Quaternion.quaternion.r" class="py-name" href="#" onclick="return doclink('link-17', 'r', 'link-13');">r</a></tt> <tt class="py-op">=</tt> <tt class="py-op">(</tt><tt class="py-name">i</tt><tt class="py-op">-</tt><tt class="py-number">1.</tt><tt class="py-op">)</tt><tt class="py-op">/</tt><tt class="py-op">(</tt><tt id="link-18" class="py-name"><a title="robot.Quaternion.quaternion.r" class="py-name" href="#" onclick="return doclink('link-18', 'r', 'link-13');">r</a></tt><tt class="py-op">-</tt><tt class="py-number">1</tt><tt class="py-op">)</tt> </tt>
+<a name="L112"></a><tt class="py-lineno">112</tt>  <tt class="py-line">    <tt class="py-keyword">else</tt><tt class="py-op">:</tt> </tt>
+<a name="L113"></a><tt class="py-lineno">113</tt>  <tt class="py-line">        <tt id="link-19" class="py-name"><a title="robot.Quaternion.quaternion.r" class="py-name" href="#" onclick="return doclink('link-19', 'r', 'link-13');">r</a></tt> <tt class="py-op">=</tt> <tt id="link-20" class="py-name"><a title="robot.utility.arg2array" class="py-name" href="#" onclick="return doclink('link-20', 'arg2array', 'link-4');">arg2array</a></tt><tt class="py-op">(</tt><tt id="link-21" class="py-name"><a title="robot.Quaternion.quaternion.r" class="py-name" href="#" onclick="return doclink('link-21', 'r', 'link-13');">r</a></tt><tt class="py-op">)</tt><tt class="py-op">;</tt> </tt>
+<a name="L114"></a><tt class="py-lineno">114</tt>  <tt class="py-line"> </tt>
+<a name="L115"></a><tt class="py-lineno">115</tt>  <tt class="py-line">    <tt class="py-keyword">if</tt> <tt class="py-name">any</tt><tt class="py-op">(</tt><tt id="link-22" class="py-name"><a title="robot.Quaternion.quaternion.r" class="py-name" href="#" onclick="return doclink('link-22', 'r', 'link-13');">r</a></tt><tt class="py-op">&gt;</tt><tt class="py-number">1</tt><tt class="py-op">)</tt> <tt class="py-keyword">or</tt> <tt class="py-name">any</tt><tt class="py-op">(</tt><tt id="link-23" class="py-name"><a title="robot.Quaternion.quaternion.r" class="py-name" href="#" onclick="return doclink('link-23', 'r', 'link-13');">r</a></tt><tt class="py-op">&lt;</tt><tt class="py-number">0</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L116"></a><tt class="py-lineno">116</tt>  <tt class="py-line">        <tt class="py-keyword">raise</tt> <tt class="py-string">'path position values (R) must 0&lt;=R&lt;=1'</tt> </tt>
+<a name="L117"></a><tt class="py-lineno">117</tt>  <tt class="py-line">    <tt class="py-name">traj</tt> <tt class="py-op">=</tt> <tt class="py-op">[</tt><tt class="py-op">]</tt> </tt>
+<a name="L118"></a><tt class="py-lineno">118</tt>  <tt class="py-line">    <tt class="py-keyword">for</tt> <tt class="py-name">s</tt> <tt class="py-keyword">in</tt> <tt id="link-24" class="py-name"><a title="robot.Quaternion.quaternion.r" class="py-name" href="#" onclick="return doclink('link-24', 'r', 'link-13');">r</a></tt><tt class="py-op">.</tt><tt class="py-name">T</tt><tt class="py-op">:</tt> </tt>
+<a name="L119"></a><tt class="py-lineno">119</tt>  <tt class="py-line">        <tt class="py-name">traj</tt><tt class="py-op">.</tt><tt class="py-name">append</tt><tt class="py-op">(</tt> <tt class="py-name">T</tt><tt class="py-op">.</tt><tt id="link-25" class="py-name" targets="Function robot.transform.trinterp()=robot.transform-module.html#trinterp"><a title="robot.transform.trinterp" class="py-name" href="#" onclick="return doclink('link-25', 'trinterp', 'link-25');">trinterp</a></tt><tt class="py-op">(</tt><tt class="py-name">t0</tt><tt class="py-op">,</tt> <tt class="py-name">t1</tt><tt class="py-op">,</tt> <tt class="py-name">float</tt><tt class="py-op">(</tt><tt class="py-name">s</tt><tt class="py-op">)</tt><tt class="py-op">)</tt> <tt class="py-op">)</tt> </tt>
+<a name="L120"></a><tt class="py-lineno">120</tt>  <tt class="py-line">    <tt class="py-keyword">return</tt> <tt class="py-name">traj</tt> </tt>
+</div><a name="L121"></a><tt class="py-lineno">121</tt>  <tt class="py-line"> </tt><script type="text/javascript">
+<!--
+expandto(location.href);
+// -->
+</script>
+</pre>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">
+    Generated by Epydoc 3.0beta1 on Wed Apr  2 23:14:50 2008
+    </td>
+    <td align="right" class="footer">
+      <a href="http://epydoc.sourceforge.net">http://epydoc.sourceforge.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie()
+  // -->
+</script>
+  
+</body>
+</html>

@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>numpy.lib.scimath</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        Package&nbsp;numpy ::
+        Package&nbsp;lib ::
+        Module&nbsp;scimath
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
+    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="numpy.lib.scimath-pysrc.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<h1 class="epydoc">Source Code for <a href="numpy.lib.scimath-module.html">Module numpy.lib.scimath</a></h1>
+<pre class="py-src">
+<a name="L1"></a><tt class="py-lineno"> 1</tt>  <tt class="py-line"><tt class="py-docstring">"""</tt> </tt>
+<a name="L2"></a><tt class="py-lineno"> 2</tt>  <tt class="py-line"><tt class="py-docstring">Wrapper functions to more user-friendly calling of certain math functions</tt> </tt>
+<a name="L3"></a><tt class="py-lineno"> 3</tt>  <tt class="py-line"><tt class="py-docstring">whose output data-type is different than the input data-type in certain</tt> </tt>
+<a name="L4"></a><tt class="py-lineno"> 4</tt>  <tt class="py-line"><tt class="py-docstring">domains of the input.</tt> </tt>
+<a name="L5"></a><tt class="py-lineno"> 5</tt>  <tt class="py-line"><tt class="py-docstring">"""</tt> </tt>
+<a name="L6"></a><tt class="py-lineno"> 6</tt>  <tt class="py-line"> </tt>
+<a name="L7"></a><tt class="py-lineno"> 7</tt>  <tt class="py-line"><tt class="py-name">__all__</tt> <tt class="py-op">=</tt> <tt class="py-op">[</tt><tt class="py-string">'sqrt'</tt><tt class="py-op">,</tt> <tt class="py-string">'log'</tt><tt class="py-op">,</tt> <tt class="py-string">'log2'</tt><tt class="py-op">,</tt> <tt class="py-string">'logn'</tt><tt class="py-op">,</tt><tt class="py-string">'log10'</tt><tt class="py-op">,</tt> <tt class="py-string">'power'</tt><tt class="py-op">,</tt> <tt class="py-string">'arccos'</tt><tt class="py-op">,</tt> </tt>
+<a name="L8"></a><tt class="py-lineno"> 8</tt>  <tt class="py-line">           <tt class="py-string">'arcsin'</tt><tt class="py-op">,</tt> <tt class="py-string">'arctanh'</tt><tt class="py-op">]</tt> </tt>
+<a name="L9"></a><tt class="py-lineno"> 9</tt>  <tt class="py-line"> </tt>
+<a name="L10"></a><tt class="py-lineno">10</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt class="py-name">numpy</tt><tt class="py-op">.</tt><tt class="py-name">core</tt><tt class="py-op">.</tt><tt class="py-name">numeric</tt> <tt class="py-keyword">as</tt> <tt class="py-name">nx</tt> </tt>
+<a name="L11"></a><tt class="py-lineno">11</tt>  <tt class="py-line"><tt class="py-keyword">import</tt> <tt class="py-name">numpy</tt><tt class="py-op">.</tt><tt class="py-name">core</tt><tt class="py-op">.</tt><tt class="py-name">numerictypes</tt> <tt class="py-keyword">as</tt> <tt class="py-name">nt</tt> </tt>
+<a name="L12"></a><tt class="py-lineno">12</tt>  <tt class="py-line"><tt class="py-keyword">from</tt> <tt class="py-name">numpy</tt><tt class="py-op">.</tt><tt class="py-name">core</tt><tt class="py-op">.</tt><tt class="py-name">numeric</tt> <tt class="py-keyword">import</tt> <tt class="py-name">asarray</tt><tt class="py-op">,</tt> <tt class="py-name">any</tt> </tt>
+<a name="L13"></a><tt class="py-lineno">13</tt>  <tt class="py-line"><tt class="py-keyword">from</tt> <tt class="py-name">numpy</tt><tt class="py-op">.</tt><tt class="py-name">lib</tt><tt class="py-op">.</tt><tt class="py-name">type_check</tt> <tt class="py-keyword">import</tt> <tt class="py-name">isreal</tt> </tt>
+<a name="L14"></a><tt class="py-lineno">14</tt>  <tt class="py-line"> </tt>
+<a name="L15"></a><tt class="py-lineno">15</tt>  <tt class="py-line"> </tt>
+<a name="L16"></a><tt class="py-lineno">16</tt>  <tt class="py-line"><tt class="py-comment">#__all__.extend([key for key in dir(nx.umath)</tt> </tt>
+<a name="L17"></a><tt class="py-lineno">17</tt>  <tt class="py-line"><tt class="py-comment"></tt><tt class="py-comment">#                if key[0] != '_' and key not in __all__])</tt> </tt>
+<a name="L18"></a><tt class="py-lineno">18</tt>  <tt class="py-line"><tt class="py-comment"></tt> </tt>
+<a name="L19"></a><tt class="py-lineno">19</tt>  <tt class="py-line"><tt id="link-0" class="py-name" targets="Variable numpy.lib.scimath._ln2=numpy.lib.scimath-module.html#_ln2"><a title="numpy.lib.scimath._ln2" class="py-name" href="#" onclick="return doclink('link-0', '_ln2', 'link-0');">_ln2</a></tt> <tt class="py-op">=</tt> <tt class="py-name">nx</tt><tt class="py-op">.</tt><tt id="link-1" class="py-name" targets="Variable numpy.core.ma.log=numpy.core.ma-module.html#log,Variable robot.Link'.log=robot.Link%27-module.html#log,Variable robot.Quaternion.log=robot.Quaternion-module.html#log,Variable robot.Robot'.log=robot.Robot%27-module.html#log,Variable robot.dynamics.log=robot.dynamics-module.html#log,Variable robot.manipulability'.log=robot.manipulability%27-module.html#log,Variable robot.puma560.log=robot.puma560-module.html#log,Variable robot.puma560akb.log=robot.puma560akb-module.html#log,Variable robot.trajectory.log=robot.trajectory-module.html#log,Variable robot.transform.log=robot.transform-module.html#log,Variable robot.utility.log=robot.utility-module.html#log"><a title="numpy.core.ma.log
+robot.Link'.log
+robot.Quaternion.log
+robot.Robot'.log
+robot.dynamics.log
+robot.manipulability'.log
+robot.puma560.log
+robot.puma560akb.log
+robot.trajectory.log
+robot.transform.log
+robot.utility.log" class="py-name" href="#" onclick="return doclink('link-1', 'log', 'link-1');">log</a></tt><tt class="py-op">(</tt><tt class="py-number">2.0</tt><tt class="py-op">)</tt> </tt>
+<a name="L20"></a><tt class="py-lineno">20</tt>  <tt class="py-line"> </tt>
+<a name="_tocomplex"></a><div id="_tocomplex-def"><a name="L21"></a><tt class="py-lineno">21</tt> <a class="py-toggle" href="#" id="_tocomplex-toggle" onclick="return toggle('_tocomplex');">-</a><tt class="py-line"><tt class="py-keyword">def</tt> <a class="py-def-name" href="numpy.lib.scimath-module.html#_tocomplex">_tocomplex</a><tt class="py-op">(</tt><tt class="py-param">arr</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="_tocomplex-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="_tocomplex-expanded"><a name="L22"></a><tt class="py-lineno">22</tt>  <tt class="py-line">    <tt class="py-keyword">if</tt> <tt class="py-name">isinstance</tt><tt class="py-op">(</tt><tt class="py-name">arr</tt><tt class="py-op">.</tt><tt id="link-2" class="py-name" targets="Class numpy.dtype=numpy.dtype-class.html"><a title="numpy.dtype" class="py-name" href="#" onclick="return doclink('link-2', 'dtype', 'link-2');">dtype</a></tt><tt class="py-op">,</tt> <tt class="py-op">(</tt><tt class="py-name">nt</tt><tt class="py-op">.</tt><tt class="py-name">single</tt><tt class="py-op">,</tt> <tt class="py-name">nt</tt><tt class="py-op">.</tt><tt class="py-name">byte</tt><tt class="py-op">,</tt> <tt class="py-name">nt</tt><tt class="py-op">.</tt><tt class="py-name">short</tt><tt class="py-op">,</tt> <tt class="py-name">nt</tt><tt class="py-op">.</tt><tt class="py-name">ubyte</tt><tt class="py-op">,</tt> </tt>
+<a name="L23"></a><tt class="py-lineno">23</tt>  <tt class="py-line">                              <tt class="py-name">nt</tt><tt class="py-op">.</tt><tt class="py-name">ushort</tt><tt class="py-op">)</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L24"></a><tt class="py-lineno">24</tt>  <tt class="py-line">        <tt class="py-keyword">return</tt> <tt class="py-name">arr</tt><tt class="py-op">.</tt><tt class="py-name">astype</tt><tt class="py-op">(</tt><tt class="py-name">nt</tt><tt class="py-op">.</tt><tt class="py-name">csingle</tt><tt class="py-op">)</tt> </tt>
+<a name="L25"></a><tt class="py-lineno">25</tt>  <tt class="py-line">    <tt class="py-keyword">else</tt><tt class="py-op">:</tt> </tt>
+<a name="L26"></a><tt class="py-lineno">26</tt>  <tt class="py-line">        <tt class="py-keyword">return</tt> <tt class="py-name">arr</tt><tt class="py-op">.</tt><tt class="py-name">astype</tt><tt class="py-op">(</tt><tt class="py-name">nt</tt><tt class="py-op">.</tt><tt class="py-name">cdouble</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L27"></a><tt class="py-lineno">27</tt>  <tt class="py-line"> </tt>
+<a name="_fix_real_lt_zero"></a><div id="_fix_real_lt_zero-def"><a name="L28"></a><tt class="py-lineno">28</tt> <a class="py-toggle" href="#" id="_fix_real_lt_zero-toggle" onclick="return toggle('_fix_real_lt_zero');">-</a><tt class="py-line"><tt class="py-keyword">def</tt> <a class="py-def-name" href="numpy.lib.scimath-module.html#_fix_real_lt_zero">_fix_real_lt_zero</a><tt class="py-op">(</tt><tt class="py-param">x</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="_fix_real_lt_zero-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="_fix_real_lt_zero-expanded"><a name="L29"></a><tt class="py-lineno">29</tt>  <tt class="py-line">    <tt class="py-name">x</tt> <tt class="py-op">=</tt> <tt class="py-name">asarray</tt><tt class="py-op">(</tt><tt class="py-name">x</tt><tt class="py-op">)</tt> </tt>
+<a name="L30"></a><tt class="py-lineno">30</tt>  <tt class="py-line">    <tt class="py-keyword">if</tt> <tt class="py-name">any</tt><tt class="py-op">(</tt><tt class="py-name">isreal</tt><tt class="py-op">(</tt><tt class="py-name">x</tt><tt class="py-op">)</tt> <tt class="py-op">&amp;</tt> <tt class="py-op">(</tt><tt class="py-name">x</tt><tt class="py-op">&lt;</tt><tt class="py-number">0</tt><tt class="py-op">)</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L31"></a><tt class="py-lineno">31</tt>  <tt class="py-line">        <tt class="py-name">x</tt> <tt class="py-op">=</tt> <tt class="py-name">_tocomplex</tt><tt class="py-op">(</tt><tt class="py-name">x</tt><tt class="py-op">)</tt> </tt>
+<a name="L32"></a><tt class="py-lineno">32</tt>  <tt class="py-line">    <tt class="py-keyword">return</tt> <tt class="py-name">x</tt> </tt>
+</div><a name="L33"></a><tt class="py-lineno">33</tt>  <tt class="py-line"> </tt>
+<a name="_fix_int_lt_zero"></a><div id="_fix_int_lt_zero-def"><a name="L34"></a><tt class="py-lineno">34</tt> <a class="py-toggle" href="#" id="_fix_int_lt_zero-toggle" onclick="return toggle('_fix_int_lt_zero');">-</a><tt class="py-line"><tt class="py-keyword">def</tt> <a class="py-def-name" href="numpy.lib.scimath-module.html#_fix_int_lt_zero">_fix_int_lt_zero</a><tt class="py-op">(</tt><tt class="py-param">x</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="_fix_int_lt_zero-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="_fix_int_lt_zero-expanded"><a name="L35"></a><tt class="py-lineno">35</tt>  <tt class="py-line">    <tt class="py-name">x</tt> <tt class="py-op">=</tt> <tt class="py-name">asarray</tt><tt class="py-op">(</tt><tt class="py-name">x</tt><tt class="py-op">)</tt> </tt>
+<a name="L36"></a><tt class="py-lineno">36</tt>  <tt class="py-line">    <tt class="py-keyword">if</tt> <tt class="py-name">any</tt><tt class="py-op">(</tt><tt class="py-name">isreal</tt><tt class="py-op">(</tt><tt class="py-name">x</tt><tt class="py-op">)</tt> <tt class="py-op">&amp;</tt> <tt class="py-op">(</tt><tt class="py-name">x</tt> <tt class="py-op">&lt;</tt> <tt class="py-number">0</tt><tt class="py-op">)</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L37"></a><tt class="py-lineno">37</tt>  <tt class="py-line">        <tt class="py-name">x</tt> <tt class="py-op">=</tt> <tt class="py-name">x</tt> <tt class="py-op">*</tt> <tt class="py-number">1.0</tt> </tt>
+<a name="L38"></a><tt class="py-lineno">38</tt>  <tt class="py-line">    <tt class="py-keyword">return</tt> <tt class="py-name">x</tt> </tt>
+</div><a name="L39"></a><tt class="py-lineno">39</tt>  <tt class="py-line"> </tt>
+<a name="_fix_real_abs_gt_1"></a><div id="_fix_real_abs_gt_1-def"><a name="L40"></a><tt class="py-lineno">40</tt> <a class="py-toggle" href="#" id="_fix_real_abs_gt_1-toggle" onclick="return toggle('_fix_real_abs_gt_1');">-</a><tt class="py-line"><tt class="py-keyword">def</tt> <a class="py-def-name" href="numpy.lib.scimath-module.html#_fix_real_abs_gt_1">_fix_real_abs_gt_1</a><tt class="py-op">(</tt><tt class="py-param">x</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="_fix_real_abs_gt_1-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="_fix_real_abs_gt_1-expanded"><a name="L41"></a><tt class="py-lineno">41</tt>  <tt class="py-line">    <tt class="py-name">x</tt> <tt class="py-op">=</tt> <tt class="py-name">asarray</tt><tt class="py-op">(</tt><tt class="py-name">x</tt><tt class="py-op">)</tt> </tt>
+<a name="L42"></a><tt class="py-lineno">42</tt>  <tt class="py-line">    <tt class="py-keyword">if</tt> <tt class="py-name">any</tt><tt class="py-op">(</tt><tt class="py-name">isreal</tt><tt class="py-op">(</tt><tt class="py-name">x</tt><tt class="py-op">)</tt> <tt class="py-op">&amp;</tt> <tt class="py-op">(</tt><tt class="py-name">abs</tt><tt class="py-op">(</tt><tt class="py-name">x</tt><tt class="py-op">)</tt><tt class="py-op">&gt;</tt><tt class="py-number">1</tt><tt class="py-op">)</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+<a name="L43"></a><tt class="py-lineno">43</tt>  <tt class="py-line">        <tt class="py-name">x</tt> <tt class="py-op">=</tt> <tt class="py-name">_tocomplex</tt><tt class="py-op">(</tt><tt class="py-name">x</tt><tt class="py-op">)</tt> </tt>
+<a name="L44"></a><tt class="py-lineno">44</tt>  <tt class="py-line">    <tt class="py-keyword">return</tt> <tt class="py-name">x</tt> </tt>
+</div><a name="L45"></a><tt class="py-lineno">45</tt>  <tt class="py-line"> </tt>
+<a name="sqrt"></a><div id="sqrt-def"><a name="L46"></a><tt class="py-lineno">46</tt> <a class="py-toggle" href="#" id="sqrt-toggle" onclick="return toggle('sqrt');">-</a><tt class="py-line"><tt class="py-keyword">def</tt> <a class="py-def-name" href="numpy.lib.scimath-module.html#sqrt">sqrt</a><tt class="py-op">(</tt><tt class="py-param">x</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="sqrt-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="sqrt-expanded"><a name="L47"></a><tt class="py-lineno">47</tt>  <tt class="py-line">    <tt class="py-name">x</tt> <tt class="py-op">=</tt> <tt class="py-name">_fix_real_lt_zero</tt><tt class="py-op">(</tt><tt class="py-name">x</tt><tt class="py-op">)</tt> </tt>
+<a name="L48"></a><tt class="py-lineno">48</tt>  <tt class="py-line">    <tt class="py-keyword">return</tt> <tt class="py-name">nx</tt><tt class="py-op">.</tt><tt id="link-3" class="py-name" targets="Variable numpy.core.ma.sqrt=numpy.core.ma-module.html#sqrt,Variable robot.Link'.sqrt=robot.Link%27-module.html#sqrt,Variable robot.Quaternion.sqrt=robot.Quaternion-module.html#sqrt,Variable robot.Robot'.sqrt=robot.Robot%27-module.html#sqrt,Variable robot.dynamics.sqrt=robot.dynamics-module.html#sqrt,Variable robot.manipulability'.sqrt=robot.manipulability%27-module.html#sqrt,Variable robot.puma560.sqrt=robot.puma560-module.html#sqrt,Variable robot.puma560akb.sqrt=robot.puma560akb-module.html#sqrt,Variable robot.trajectory.sqrt=robot.trajectory-module.html#sqrt,Variable robot.transform.sqrt=robot.transform-module.html#sqrt,Variable robot.utility.sqrt=robot.utility-module.html#sqrt"><a title="numpy.core.ma.sqrt
+robot.Link'.sqrt
+robot.Quaternion.sqrt
+robot.Robot'.sqrt
+robot.dynamics.sqrt
+robot.manipulability'.sqrt
+robot.puma560.sqrt
+robot.puma560akb.sqrt
+robot.trajectory.sqrt
+robot.transform.sqrt
+robot.utility.sqrt" class="py-name" href="#" onclick="return doclink('link-3', 'sqrt', 'link-3');">sqrt</a></tt><tt class="py-op">(</tt><tt class="py-name">x</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L49"></a><tt class="py-lineno">49</tt>  <tt class="py-line"> </tt>
+<a name="log"></a><div id="log-def"><a name="L50"></a><tt class="py-lineno">50</tt> <a class="py-toggle" href="#" id="log-toggle" onclick="return toggle('log');">-</a><tt class="py-line"><tt class="py-keyword">def</tt> <a class="py-def-name" href="numpy.lib.scimath-module.html#log">log</a><tt class="py-op">(</tt><tt class="py-param">x</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="log-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="log-expanded"><a name="L51"></a><tt class="py-lineno">51</tt>  <tt class="py-line">    <tt class="py-name">x</tt> <tt class="py-op">=</tt> <tt class="py-name">_fix_real_lt_zero</tt><tt class="py-op">(</tt><tt class="py-name">x</tt><tt class="py-op">)</tt> </tt>
+<a name="L52"></a><tt class="py-lineno">52</tt>  <tt class="py-line">    <tt class="py-keyword">return</tt> <tt class="py-name">nx</tt><tt class="py-op">.</tt><tt id="link-4" class="py-name"><a title="numpy.core.ma.log
+robot.Link'.log
+robot.Quaternion.log
+robot.Robot'.log
+robot.dynamics.log
+robot.manipulability'.log
+robot.puma560.log
+robot.puma560akb.log
+robot.trajectory.log
+robot.transform.log
+robot.utility.log" class="py-name" href="#" onclick="return doclink('link-4', 'log', 'link-1');">log</a></tt><tt class="py-op">(</tt><tt class="py-name">x</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L53"></a><tt class="py-lineno">53</tt>  <tt class="py-line"> </tt>
+<a name="log10"></a><div id="log10-def"><a name="L54"></a><tt class="py-lineno">54</tt> <a class="py-toggle" href="#" id="log10-toggle" onclick="return toggle('log10');">-</a><tt class="py-line"><tt class="py-keyword">def</tt> <a class="py-def-name" href="numpy.lib.scimath-module.html#log10">log10</a><tt class="py-op">(</tt><tt class="py-param">x</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="log10-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="log10-expanded"><a name="L55"></a><tt class="py-lineno">55</tt>  <tt class="py-line">    <tt class="py-name">x</tt> <tt class="py-op">=</tt> <tt class="py-name">_fix_real_lt_zero</tt><tt class="py-op">(</tt><tt class="py-name">x</tt><tt class="py-op">)</tt> </tt>
+<a name="L56"></a><tt class="py-lineno">56</tt>  <tt class="py-line">    <tt class="py-keyword">return</tt> <tt class="py-name">nx</tt><tt class="py-op">.</tt><tt id="link-5" class="py-name" targets="Variable numpy.core.ma.log10=numpy.core.ma-module.html#log10,Variable robot.Link'.log10=robot.Link%27-module.html#log10,Variable robot.Quaternion.log10=robot.Quaternion-module.html#log10,Variable robot.Robot'.log10=robot.Robot%27-module.html#log10,Variable robot.dynamics.log10=robot.dynamics-module.html#log10,Variable robot.manipulability'.log10=robot.manipulability%27-module.html#log10,Variable robot.puma560.log10=robot.puma560-module.html#log10,Variable robot.puma560akb.log10=robot.puma560akb-module.html#log10,Variable robot.trajectory.log10=robot.trajectory-module.html#log10,Variable robot.transform.log10=robot.transform-module.html#log10,Variable robot.utility.log10=robot.utility-module.html#log10"><a title="numpy.core.ma.log10
+robot.Link'.log10
+robot.Quaternion.log10
+robot.Robot'.log10
+robot.dynamics.log10
+robot.manipulability'.log10
+robot.puma560.log10
+robot.puma560akb.log10
+robot.trajectory.log10
+robot.transform.log10
+robot.utility.log10" class="py-name" href="#" onclick="return doclink('link-5', 'log10', 'link-5');">log10</a></tt><tt class="py-op">(</tt><tt class="py-name">x</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L57"></a><tt class="py-lineno">57</tt>  <tt class="py-line"> </tt>
+<a name="logn"></a><div id="logn-def"><a name="L58"></a><tt class="py-lineno">58</tt> <a class="py-toggle" href="#" id="logn-toggle" onclick="return toggle('logn');">-</a><tt class="py-line"><tt class="py-keyword">def</tt> <a class="py-def-name" href="numpy.lib.scimath-module.html#logn">logn</a><tt class="py-op">(</tt><tt class="py-param">n</tt><tt class="py-op">,</tt> <tt class="py-param">x</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="logn-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="logn-expanded"><a name="L59"></a><tt class="py-lineno">59</tt>  <tt class="py-line">    <tt class="py-docstring">""" Take log base n of x.</tt> </tt>
+<a name="L60"></a><tt class="py-lineno">60</tt>  <tt class="py-line"><tt class="py-docstring">    """</tt> </tt>
+<a name="L61"></a><tt class="py-lineno">61</tt>  <tt class="py-line">    <tt class="py-name">x</tt> <tt class="py-op">=</tt> <tt class="py-name">_fix_real_lt_zero</tt><tt class="py-op">(</tt><tt class="py-name">x</tt><tt class="py-op">)</tt> </tt>
+<a name="L62"></a><tt class="py-lineno">62</tt>  <tt class="py-line">    <tt class="py-name">n</tt> <tt class="py-op">=</tt> <tt class="py-name">_fix_real_lt_zero</tt><tt class="py-op">(</tt><tt class="py-name">n</tt><tt class="py-op">)</tt> </tt>
+<a name="L63"></a><tt class="py-lineno">63</tt>  <tt class="py-line">    <tt class="py-keyword">return</tt> <tt class="py-name">nx</tt><tt class="py-op">.</tt><tt id="link-6" class="py-name"><a title="numpy.core.ma.log
+robot.Link'.log
+robot.Quaternion.log
+robot.Robot'.log
+robot.dynamics.log
+robot.manipulability'.log
+robot.puma560.log
+robot.puma560akb.log
+robot.trajectory.log
+robot.transform.log
+robot.utility.log" class="py-name" href="#" onclick="return doclink('link-6', 'log', 'link-1');">log</a></tt><tt class="py-op">(</tt><tt class="py-name">x</tt><tt class="py-op">)</tt><tt class="py-op">/</tt><tt class="py-name">nx</tt><tt class="py-op">.</tt><tt id="link-7" class="py-name"><a title="numpy.core.ma.log
+robot.Link'.log
+robot.Quaternion.log
+robot.Robot'.log
+robot.dynamics.log
+robot.manipulability'.log
+robot.puma560.log
+robot.puma560akb.log
+robot.trajectory.log
+robot.transform.log
+robot.utility.log" class="py-name" href="#" onclick="return doclink('link-7', 'log', 'link-1');">log</a></tt><tt class="py-op">(</tt><tt class="py-name">n</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L64"></a><tt class="py-lineno">64</tt>  <tt class="py-line"> </tt>
+<a name="log2"></a><div id="log2-def"><a name="L65"></a><tt class="py-lineno">65</tt> <a class="py-toggle" href="#" id="log2-toggle" onclick="return toggle('log2');">-</a><tt class="py-line"><tt class="py-keyword">def</tt> <a class="py-def-name" href="numpy.lib.scimath-module.html#log2">log2</a><tt class="py-op">(</tt><tt class="py-param">x</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="log2-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="log2-expanded"><a name="L66"></a><tt class="py-lineno">66</tt>  <tt class="py-line">    <tt class="py-docstring">""" Take log base 2 of x.</tt> </tt>
+<a name="L67"></a><tt class="py-lineno">67</tt>  <tt class="py-line"><tt class="py-docstring">    """</tt> </tt>
+<a name="L68"></a><tt class="py-lineno">68</tt>  <tt class="py-line">    <tt class="py-name">x</tt> <tt class="py-op">=</tt> <tt class="py-name">_fix_real_lt_zero</tt><tt class="py-op">(</tt><tt class="py-name">x</tt><tt class="py-op">)</tt> </tt>
+<a name="L69"></a><tt class="py-lineno">69</tt>  <tt class="py-line">    <tt class="py-keyword">return</tt> <tt class="py-name">nx</tt><tt class="py-op">.</tt><tt id="link-8" class="py-name"><a title="numpy.core.ma.log
+robot.Link'.log
+robot.Quaternion.log
+robot.Robot'.log
+robot.dynamics.log
+robot.manipulability'.log
+robot.puma560.log
+robot.puma560akb.log
+robot.trajectory.log
+robot.transform.log
+robot.utility.log" class="py-name" href="#" onclick="return doclink('link-8', 'log', 'link-1');">log</a></tt><tt class="py-op">(</tt><tt class="py-name">x</tt><tt class="py-op">)</tt><tt class="py-op">/</tt><tt id="link-9" class="py-name"><a title="numpy.lib.scimath._ln2" class="py-name" href="#" onclick="return doclink('link-9', '_ln2', 'link-0');">_ln2</a></tt> </tt>
+</div><a name="L70"></a><tt class="py-lineno">70</tt>  <tt class="py-line"> </tt>
+<a name="power"></a><div id="power-def"><a name="L71"></a><tt class="py-lineno">71</tt> <a class="py-toggle" href="#" id="power-toggle" onclick="return toggle('power');">-</a><tt class="py-line"><tt class="py-keyword">def</tt> <a class="py-def-name" href="numpy.lib.scimath-module.html#power">power</a><tt class="py-op">(</tt><tt class="py-param">x</tt><tt class="py-op">,</tt> <tt class="py-param">p</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="power-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="power-expanded"><a name="L72"></a><tt class="py-lineno">72</tt>  <tt class="py-line">    <tt class="py-name">x</tt> <tt class="py-op">=</tt> <tt class="py-name">_fix_real_lt_zero</tt><tt class="py-op">(</tt><tt class="py-name">x</tt><tt class="py-op">)</tt> </tt>
+<a name="L73"></a><tt class="py-lineno">73</tt>  <tt class="py-line">    <tt class="py-name">p</tt> <tt class="py-op">=</tt> <tt class="py-name">_fix_int_lt_zero</tt><tt class="py-op">(</tt><tt class="py-name">p</tt><tt class="py-op">)</tt> </tt>
+<a name="L74"></a><tt class="py-lineno">74</tt>  <tt class="py-line">    <tt class="py-keyword">return</tt> <tt class="py-name">nx</tt><tt class="py-op">.</tt><tt id="link-10" class="py-name" targets="Variable robot.Link'.power=robot.Link%27-module.html#power,Variable robot.Quaternion.power=robot.Quaternion-module.html#power,Variable robot.Robot'.power=robot.Robot%27-module.html#power,Variable robot.dynamics.power=robot.dynamics-module.html#power,Variable robot.jacobian.power=robot.jacobian-module.html#power,Variable robot.kinematics.power=robot.kinematics-module.html#power,Variable robot.manipulability'.power=robot.manipulability%27-module.html#power,Variable robot.puma560.power=robot.puma560-module.html#power,Variable robot.puma560akb.power=robot.puma560akb-module.html#power,Variable robot.trajectory.power=robot.trajectory-module.html#power,Variable robot.transform.power=robot.transform-module.html#power,Variable robot.utility.power=robot.utility-module.html#power"><a title="robot.Link'.power
+robot.Quaternion.power
+robot.Robot'.power
+robot.dynamics.power
+robot.jacobian.power
+robot.kinematics.power
+robot.manipulability'.power
+robot.puma560.power
+robot.puma560akb.power
+robot.trajectory.power
+robot.transform.power
+robot.utility.power" class="py-name" href="#" onclick="return doclink('link-10', 'power', 'link-10');">power</a></tt><tt class="py-op">(</tt><tt class="py-name">x</tt><tt class="py-op">,</tt> <tt class="py-name">p</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L75"></a><tt class="py-lineno">75</tt>  <tt class="py-line"> </tt>
+<a name="arccos"></a><div id="arccos-def"><a name="L76"></a><tt class="py-lineno">76</tt> <a class="py-toggle" href="#" id="arccos-toggle" onclick="return toggle('arccos');">-</a><tt class="py-line"><tt class="py-keyword">def</tt> <a class="py-def-name" href="numpy.lib.scimath-module.html#arccos">arccos</a><tt class="py-op">(</tt><tt class="py-param">x</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="arccos-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="arccos-expanded"><a name="L77"></a><tt class="py-lineno">77</tt>  <tt class="py-line">    <tt class="py-name">x</tt> <tt class="py-op">=</tt> <tt class="py-name">_fix_real_abs_gt_1</tt><tt class="py-op">(</tt><tt class="py-name">x</tt><tt class="py-op">)</tt> </tt>
+<a name="L78"></a><tt class="py-lineno">78</tt>  <tt class="py-line">    <tt class="py-keyword">return</tt> <tt class="py-name">nx</tt><tt class="py-op">.</tt><tt id="link-11" class="py-name" targets="Variable numpy.core.ma.arccos=numpy.core.ma-module.html#arccos,Variable robot.Link'.arccos=robot.Link%27-module.html#arccos,Variable robot.Quaternion.arccos=robot.Quaternion-module.html#arccos,Variable robot.Robot'.arccos=robot.Robot%27-module.html#arccos,Variable robot.dynamics.arccos=robot.dynamics-module.html#arccos,Variable robot.jacobian.arccos=robot.jacobian-module.html#arccos,Variable robot.kinematics.arccos=robot.kinematics-module.html#arccos,Variable robot.manipulability'.arccos=robot.manipulability%27-module.html#arccos,Variable robot.puma560.arccos=robot.puma560-module.html#arccos,Variable robot.puma560akb.arccos=robot.puma560akb-module.html#arccos,Variable robot.trajectory.arccos=robot.trajectory-module.html#arccos,Variable robot.transform.arccos=robot.transform-module.html#arccos,Variable robot.utility.arccos=robot.utility-module.html#arccos"><a title="numpy.core.ma.arccos
+robot.Link'.arccos
+robot.Quaternion.arccos
+robot.Robot'.arccos
+robot.dynamics.arccos
+robot.jacobian.arccos
+robot.kinematics.arccos
+robot.manipulability'.arccos
+robot.puma560.arccos
+robot.puma560akb.arccos
+robot.trajectory.arccos
+robot.transform.arccos
+robot.utility.arccos" class="py-name" href="#" onclick="return doclink('link-11', 'arccos', 'link-11');">arccos</a></tt><tt class="py-op">(</tt><tt class="py-name">x</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L79"></a><tt class="py-lineno">79</tt>  <tt class="py-line"> </tt>
+<a name="arcsin"></a><div id="arcsin-def"><a name="L80"></a><tt class="py-lineno">80</tt> <a class="py-toggle" href="#" id="arcsin-toggle" onclick="return toggle('arcsin');">-</a><tt class="py-line"><tt class="py-keyword">def</tt> <a class="py-def-name" href="numpy.lib.scimath-module.html#arcsin">arcsin</a><tt class="py-op">(</tt><tt class="py-param">x</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="arcsin-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="arcsin-expanded"><a name="L81"></a><tt class="py-lineno">81</tt>  <tt class="py-line">    <tt class="py-name">x</tt> <tt class="py-op">=</tt> <tt class="py-name">_fix_real_abs_gt_1</tt><tt class="py-op">(</tt><tt class="py-name">x</tt><tt class="py-op">)</tt> </tt>
+<a name="L82"></a><tt class="py-lineno">82</tt>  <tt class="py-line">    <tt class="py-keyword">return</tt> <tt class="py-name">nx</tt><tt class="py-op">.</tt><tt id="link-12" class="py-name" targets="Variable numpy.core.ma.arcsin=numpy.core.ma-module.html#arcsin,Variable robot.Link'.arcsin=robot.Link%27-module.html#arcsin,Variable robot.Quaternion.arcsin=robot.Quaternion-module.html#arcsin,Variable robot.Robot'.arcsin=robot.Robot%27-module.html#arcsin,Variable robot.dynamics.arcsin=robot.dynamics-module.html#arcsin,Variable robot.jacobian.arcsin=robot.jacobian-module.html#arcsin,Variable robot.kinematics.arcsin=robot.kinematics-module.html#arcsin,Variable robot.manipulability'.arcsin=robot.manipulability%27-module.html#arcsin,Variable robot.puma560.arcsin=robot.puma560-module.html#arcsin,Variable robot.puma560akb.arcsin=robot.puma560akb-module.html#arcsin,Variable robot.trajectory.arcsin=robot.trajectory-module.html#arcsin,Variable robot.transform.arcsin=robot.transform-module.html#arcsin,Variable robot.utility.arcsin=robot.utility-module.html#arcsin"><a title="numpy.core.ma.arcsin
+robot.Link'.arcsin
+robot.Quaternion.arcsin
+robot.Robot'.arcsin
+robot.dynamics.arcsin
+robot.jacobian.arcsin
+robot.kinematics.arcsin
+robot.manipulability'.arcsin
+robot.puma560.arcsin
+robot.puma560akb.arcsin
+robot.trajectory.arcsin
+robot.transform.arcsin
+robot.utility.arcsin" class="py-name" href="#" onclick="return doclink('link-12', 'arcsin', 'link-12');">arcsin</a></tt><tt class="py-op">(</tt><tt class="py-name">x</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L83"></a><tt class="py-lineno">83</tt>  <tt class="py-line"> </tt>
+<a name="arctanh"></a><div id="arctanh-def"><a name="L84"></a><tt class="py-lineno">84</tt> <a class="py-toggle" href="#" id="arctanh-toggle" onclick="return toggle('arctanh');">-</a><tt class="py-line"><tt class="py-keyword">def</tt> <a class="py-def-name" href="numpy.lib.scimath-module.html#arctanh">arctanh</a><tt class="py-op">(</tt><tt class="py-param">x</tt><tt class="py-op">)</tt><tt class="py-op">:</tt> </tt>
+</div><div id="arctanh-collapsed" style="display:none;" pad="++" indent="++++"></div><div id="arctanh-expanded"><a name="L85"></a><tt class="py-lineno">85</tt>  <tt class="py-line">    <tt class="py-name">x</tt> <tt class="py-op">=</tt> <tt class="py-name">_fix_real_abs_gt_1</tt><tt class="py-op">(</tt><tt class="py-name">x</tt><tt class="py-op">)</tt> </tt>
+<a name="L86"></a><tt class="py-lineno">86</tt>  <tt class="py-line">    <tt class="py-keyword">return</tt> <tt class="py-name">nx</tt><tt class="py-op">.</tt><tt id="link-13" class="py-name" targets="Variable numpy.core.ma.arctanh=numpy.core.ma-module.html#arctanh,Variable robot.Link'.arctanh=robot.Link%27-module.html#arctanh,Variable robot.Quaternion.arctanh=robot.Quaternion-module.html#arctanh,Variable robot.Robot'.arctanh=robot.Robot%27-module.html#arctanh,Variable robot.dynamics.arctanh=robot.dynamics-module.html#arctanh,Variable robot.jacobian.arctanh=robot.jacobian-module.html#arctanh,Variable robot.kinematics.arctanh=robot.kinematics-module.html#arctanh,Variable robot.manipulability'.arctanh=robot.manipulability%27-module.html#arctanh,Variable robot.puma560.arctanh=robot.puma560-module.html#arctanh,Variable robot.puma560akb.arctanh=robot.puma560akb-module.html#arctanh,Variable robot.trajectory.arctanh=robot.trajectory-module.html#arctanh,Variable robot.transform.arctanh=robot.transform-module.html#arctanh,Variable robot.utility.arctanh=robot.utility-module.html#arctanh"><a title="numpy.core.ma.arctanh
+robot.Link'.arctanh
+robot.Quaternion.arctanh
+robot.Robot'.arctanh
+robot.dynamics.arctanh
+robot.jacobian.arctanh
+robot.kinematics.arctanh
+robot.manipulability'.arctanh
+robot.puma560.arctanh
+robot.puma560akb.arctanh
+robot.trajectory.arctanh
+robot.transform.arctanh
+robot.utility.arctanh" class="py-name" href="#" onclick="return doclink('link-13', 'arctanh', 'link-13');">arctanh</a></tt><tt class="py-op">(</tt><tt class="py-name">x</tt><tt class="py-op">)</tt> </tt>
+</div><a name="L87"></a><tt class="py-lineno">87</tt>  <tt class="py-line"> </tt><script type="text/javascript">
+<!--
+expandto(location.href);
+// -->
+</script>
+</pre>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+      <th class="navbar" width="100%"></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">
+    Generated by Epydoc 3.0beta1 on Wed Apr  2 23:14:42 2008
+    </td>
+    <td align="right" class="footer">
+      <a href="http://epydoc.sourceforge.net">http://epydoc.sourceforge.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie()
+  // -->
+</script>
+  
+</body>
+</html>
