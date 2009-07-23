@@ -50,5 +50,5 @@ L[1].G = 1
 
 qz = [0,0]
 
-tl = Robot(links=L,name='Simple two link')
+tl = Robot(L,name='Simple two link')
 

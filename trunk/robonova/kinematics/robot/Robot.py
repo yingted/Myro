@@ -65,10 +65,16 @@ class Robot(object):
 
         if manuf:
             self.manuf = manuf
+        else:
+            self.manuf = "Unknown Manufacturer"
         if comment:
             self.comment = comment
+        else:
+            self.comment = ""
         if name:
             self.name = name
+        else:
+            self.name = "Unknown name"
 
         #self.handle = [];
         #self.q = [];
