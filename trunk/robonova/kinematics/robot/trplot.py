@@ -1,6 +1,6 @@
 #import matplotlib.axes3d as p3
 from numpy import * # for outer and arange
-import pylab as p   # for figure
+#import pylab as p   # for figure
 from robot.Quaternion import *
 
 def trplot(r, name=''):
