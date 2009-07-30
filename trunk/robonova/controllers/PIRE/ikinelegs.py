@@ -61,6 +61,7 @@ def trPosition6D(p):
   return tr
 
 
+
 def ikineLegs(*args):
 
   # ikineLegs(chain, pChain, pBody, hipYawPitch)
@@ -97,7 +98,7 @@ def ikineLegs(*args):
   else:
     left = 0
 
-  #print "Begin", chain, pChain, pBody, #hipYawPitch
+ 
 
   hipOffsetY = .050
   hipOffsetZ = .085
@@ -167,9 +168,9 @@ def ikineLegs(*args):
   if type(hipYawPitch) == ndarray:
     hipYawPitch = hipYawPitch[0]
   qT = array([hipYawPitch, hipRoll, hipPitch, kneePitch, anklePitch, ankleRoll])
+  print "AFTER: ",qT
   q = qT.transpose()
 
-  #print "End", q
 
   return q
 

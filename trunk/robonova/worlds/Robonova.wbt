@@ -85,12 +85,12 @@ DEF Pyro Solid {
   }
 }
 DEF RN Robot {
-  translation 4.15076e-05 0.208897 -0.00646091
-  rotation -1 -0.000919173 -0.000294194 1.5708
+  translation 6.12331e-05 0.208877 -0.0064213
+  rotation -0.999999 -0.00118284 -0.000920769 1.57047
   children [
     DEF Body_p_0 Solid {
-      translation -2.34379e-06 -3.3847e-05 -3.4132e-08
-      rotation 1 0.00070159 0.000481013 -0.000810619
+      translation -2.34165e-06 -3.69034e-05 -2.63616e-08
+      rotation 1 0.000701753 0.000480986 -0.00089955
       children [
         DEF Chest Transform {
           translation 0 0 0.07
@@ -174,8 +174,8 @@ DEF RN Robot {
       }
     }
     DEF Head Solid {
-      translation 5.26873e-11 -1.07753e-09 0.125
-      rotation -1 -0.00070159 -0.000481013 0.000810619
+      translation 4.26953e-11 5.87735e-10 0.125
+      rotation -1 -0.000701753 -0.000480986 0.00089955
       children [
         Shape {
           appearance Appearance {
@@ -3012,7 +3012,7 @@ DEF RN Robot {
                       }
                       maxVelocity 7.48
                       maxForce 2
-                      position 0.00054884
+                      position 0.00076859
                     }
                   ]
                   name "LAnklePitch"
@@ -3080,6 +3080,7 @@ DEF RN Robot {
                   }
                   maxVelocity 7.48
                   maxForce 2
+                  position -0.00032479
                 }
               ]
               name "LKneePitch"
@@ -3107,6 +3108,7 @@ DEF RN Robot {
               }
               maxVelocity 7.48
               maxForce 2
+              position -0.000666621
             }
           ]
           name "LHipPitch"
@@ -3164,7 +3166,7 @@ DEF RN Robot {
           }
           maxVelocity 7.48
           maxForce 2
-          position -0.000315893
+          position -0.000265184
         }
       ]
       name "LHipRoll"
@@ -3242,7 +3244,7 @@ DEF RN Robot {
       }
       maxVelocity 7.48
       maxForce 2
-      position 0.00036524
+      position 0.00042067
     }
     DEF Right_Hip_s_0 Servo {
       translation -0.023 0 0.014
@@ -6200,7 +6202,7 @@ DEF RN Robot {
                       }
                       maxVelocity 7.48
                       maxForce 2
-                      position 0.000523549
+                      position 0.0008536
                     }
                   ]
                   name "RAnklePitch"
@@ -6268,6 +6270,7 @@ DEF RN Robot {
                   }
                   maxVelocity 7.48
                   maxForce 2
+                  position -0.000364598
                 }
               ]
               name "RKneePitch"
@@ -6295,7 +6298,7 @@ DEF RN Robot {
               }
               maxVelocity 7.48
               maxForce 2
-              position -0.000979598
+              position -0.00096259
             }
           ]
           name "RHipPitch"
@@ -6353,7 +6356,7 @@ DEF RN Robot {
           }
           maxVelocity 7.48
           maxForce 2
-          position 0.000315893
+          position 0.000265184
         }
       ]
       name "RHipRoll"
@@ -6431,7 +6434,7 @@ DEF RN Robot {
       }
       maxVelocity 7.48
       maxForce 2
-      position 0.00036524
+      position 0.00042067
     }
     DEF Left_Shoulder_s_0 Servo {
       translation 0.0606 0 0.08
@@ -7722,7 +7725,6 @@ DEF RN Robot {
               }
               maxVelocity 7.48
               maxForce 2
-              position 0.000540262
               minPosition -1.75
               maxPosition 1.75
             }
@@ -7782,7 +7784,7 @@ DEF RN Robot {
           }
           maxVelocity 7.48
           maxForce 2
-          position -0.00055103
+          position -0.000416609
         }
       ]
       name "LShoulderPitch"
@@ -7830,7 +7832,7 @@ DEF RN Robot {
       }
       maxVelocity 7.48
       maxForce 2
-      position -0.000365201
+      position -0.000420645
       minPosition -1.75
       maxPosition 1.75
     }
@@ -9360,7 +9362,7 @@ DEF RN Robot {
               }
               maxVelocity 7.48
               maxForce 2
-              position -8.06097e-05
+              position -0.000217594
               minPosition -1.75
               maxPosition 1.75
             }
@@ -9420,7 +9422,7 @@ DEF RN Robot {
           }
           maxVelocity 7.48
           maxForce 2
-          position -0.00055103
+          position -0.000416609
         }
       ]
       name "RShoulderPitch"
@@ -9468,7 +9470,7 @@ DEF RN Robot {
       }
       maxVelocity 7.48
       maxForce 2
-      position 0.000365201
+      position 0.000420645
       minPosition -1.75
       maxPosition 1.75
     }
@@ -9635,5 +9637,5 @@ DEF RN Robot {
     forceDependentSlip 0.005
     centerOfMass 7e-06 -0.002944 0.038
   }
-  controller "Robonova"
+  controller "PIRE"
 }

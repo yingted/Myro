@@ -13,25 +13,23 @@ from controller import Robot, Accelerometer, Camera, DistanceSensor, \
 from math import *
 from numpy import *
 from numpy.linalg import *
-
-
+import sys
+sys.path.append("/home/compsci/Desktop/webots/projects/robots/robonova/kinematics/")
+from kinelib import *
 from ikinelegs import *
 
 class WebotController(Robot):
 
   def __init__(self):
     Robot.__init__(self)
-    
-    #Choose Humanoid Robot
-    self.bot = Nao(self)
-  
-    #Time Step in MS
+
+    #timestep info
     self.timeStep = 40
     self.f = finfo(float) 
-  
-    #Enable the Bot Devices
-    self.bot.findAndEnableDevices()
 
+    #Choose Humanoid Robot
+    self.bot = Nao(self, self.timeStep)
+  
     #Keep track of starting and stopping of walk cycle
     self.idle = True
     self.stepStop = True
@@ -42,9 +40,6 @@ class WebotController(Robot):
     self.tStep = 0.5
     self.upPhase = 0.3
     self.downPhase = 0.8
-
-    #Initialize Chosen Robot
-    self.bot.initializeBody()
     
     self.t0 = self.getTime()
     self.t = 0
@@ -56,10 +51,11 @@ class WebotController(Robot):
     # define the motion which is currently playing
     self.currentlyPlaying = None
     self.start()  
-    
+   
+  
     #Print Menu
     self.bot.printHelp()
-    self.walkDiagonallyForward()
+    self.walkForward()
 
     while not self.key:
       self.key = self.keyboardGetKey()      
@@ -101,9 +97,11 @@ class WebotController(Robot):
     self.pRight = array([self.bot.uRight[0], self.bot.uRight[1], 0, 0, 0, self.bot.uRight[2]])
     self.pBody = array([self.bot.uBody[0], self.bot.uBody[1], self.bot.bodyHeight, 0, 0, self.bot.uBody[2]])
     pos = ikineLegs('LLeg',self.pLeft,self.pBody,())
+    ###############################################
     for p in range(6):
       self.bot.qLegs[p] = pos[p]
     pos = ikineLegs('RLeg',self.pRight,self.pBody,())
+    #################################################
     for p in range(6):
       self.bot.qLegs[6 + p] = pos[p]
     self.setLegs('joint',self.bot.qLegs)
@@ -112,7 +110,10 @@ class WebotController(Robot):
     
 
   def setIkineLegs(self, legs, startIndex, stopIndex, legName, pos, bod, *varArg):
-    self.legsBefore = ikineLegs(legName, pos, bod, varArg)
+    #self.legsBefore = ikineLegs(legName, pos, bod, varArg)
+    posMatrix = trPosition6D(pos)
+    oldLegs = ikine(self.bot.legChain, posMatrix, m=[1,1,1,1,1,0])
+    self.legsBefore = [0.0, oldLegs[0,0], oldLegs[0,1], oldLegs[0,2], oldLegs[0,3], oldLegs[0,4]]
     if startIndex == 0:
       for i in range(startIndex, stopIndex):      
         legs[i] = self.legsBefore[i]
@@ -187,7 +188,6 @@ class WebotController(Robot):
     self.stepStop = True
   
   def simulationStep(self):
-    # simulationStep changed to simulationStep
     if self.step(self.timeStep) == -1:
       self.terminate()    
 
@@ -206,13 +206,6 @@ class WebotController(Robot):
       self.bot.joints[index].setPosition(position[positionIndex]) 
       positionIndex += 1
 
-  def setArms2(self, joint, position):
-    print self.bot.joints
-    #for index in range(len(self.bot.armJoints)):
-     # position = position.flatten()
-      # self.bot.armJoints[index].setPosition(position[positionIndex])
-      # positionIndex+=1
-      
 
   def setLegs(self, joint, position):
     positionIndex = 0
@@ -272,9 +265,12 @@ class FootSensorArray:
 
 
 class Nao:
-  def __init__(self, webot):
+  def __init__(self, webot, timeStep):
+    self.timeStep = timeStep
     self.webot = webot
     self.joints = []
+    self.findAndEnableDevices()
+    self.initializeBody()
 
   def initializeBody(self):
     self.bodyHeight = 0.28
@@ -323,13 +319,21 @@ class Nao:
     
     self.armsIndex2Start = 18 
     self.armsIndex2Stop = 22
+
+    #Alternate Inverse Kinematics System
+    L = []
+    L.append(Link(A=0.0)) #Hip Roll
+    L.append(Link(A=0.1001)) #Hip Pitch
+    L.append(Link(A=0.1027)) #Knee Pitch
+    L.append(Link(A=0.0)) #Ankle Pitch
+    L.append(Link(A=0.0)) #Ankle Roll
+    self.legChain = Chain(L,name='Leg')
      
 
   #Update the walk Cycle
   def update(self):
     if self.webot.idle:
-      return
-    
+      return    
     self.webot.t = self.webot.getTime()
     self.webot.dt = self.webot.t - self.webot.t0
     self.webot.t0 = self.webot.t
@@ -371,7 +375,6 @@ class Nao:
       self.uLegsAve = .5*(self.uLeft2+self.uRight2)
 
       self.uBody2 = self.webot.poseRelative(-.5*(self.uLeft0+self.uRight0), self.uLegsAve)
-
       self.Odometry = self.uBody2-self.uBody1
 
       self.webot.stepStart = False
@@ -417,12 +420,12 @@ class Nao:
 
     if (self.webot.stepSign > 0):
       self.webot.setIkineLegs(self.qLegs, 0, 6,'LLeg', self.pLeft, self.pBody)      
-      #self.qLegs = 
+      #######################
       self.webot.setIkineLegs(self.qLegs, 6, 12,'RLeg', self.pRight, self.pBody)
 
     else:
       self.webot.setIkineLegs(self.qLegs, 6, 12,'RLeg', self.pRight, self.pBody)
-      #self.qLegs = 
+      #######################
       self.webot.setIkineLegs(self.qLegs, 0, 6,'LLeg', self.pLeft, self.pBody)
 
 
@@ -434,13 +437,11 @@ class Nao:
     self.qArms[7]  = self.qArms0[7]      
     self.webot.setArms('joint',self.armsIndex1Start, self.armsIndex1Stop,self.qArms)
     self.webot.setArms('joint',self.armsIndex2Start, self.armsIndex2Stop,self.qArms)
-    #self.webot.setArms2('joint',self.qArms)
-    #self.webot.setArms2('joint',self.qArms)
 
   def findAndEnableDevices(self): 
     # camera
     self.camera = self.webot.getCamera('camera')
-    self.camera.enable(4*self.webot.timeStep)
+    self.camera.enable(4*self.timeStep)
     
     # camera selection (high/low)
     self.cameraSelect = self.webot.getServo('CameraSelect')
@@ -455,11 +456,11 @@ class Nao:
   
     # accelerometer
     self.accelerometer = self.webot.getAccelerometer('accelerometer')
-    self.accelerometer.enable(self.webot.timeStep)
+    self.accelerometer.enable(self.timeStep)
     
     # gyro
     self.gyro = self.webot.getGyro('gyro')
-    self.gyro.enable(self.webot.timeStep)
+    self.gyro.enable(self.timeStep)
 
     self.jointNames = ['HeadYaw', #1
                       'HeadPitch', #2
@@ -496,24 +497,24 @@ class Nao:
                         
     for i in range(0, len(self.jointNames)):
       self.joints.append(self.webot.getServo(self.jointNames[i]))
-      self.joints[i].enablePosition(self.webot.timeStep)
+      self.joints[i].enablePosition(self.timeStep)
                         
     # ultrasound sensors
     self.us = []
     usNames = ['US/TopRight','US/BottomRight','US/TopLeft','US/BottomLeft']
     for i in range(0, len(usNames)):
       self.us.append(self.webot.getDistanceSensor(usNames[i]))
-      self.us[i].enable(self.webot.timeStep)
+      self.us[i].enable(self.timeStep)
     
     # foot bumpers
     self.lfootlbumper = self.webot.getTouchSensor('LFoot/Bumper/Left')
     self.lfootrbumper = self.webot.getTouchSensor('LFoot/Bumper/Right')
     self.rfootlbumper = self.webot.getTouchSensor('RFoot/Bumper/Left')
     self.rfootrbumper = self.webot.getTouchSensor('RFoot/Bumper/Right')
-    self.lfootlbumper.enable(self.webot.timeStep)
-    self.lfootrbumper.enable(self.webot.timeStep)
-    self.rfootlbumper.enable(self.webot.timeStep)
-    self.rfootrbumper.enable(self.webot.timeStep)
+    self.lfootlbumper.enable(self.timeStep)
+    self.lfootrbumper.enable(self.timeStep)
+    self.rfootlbumper.enable(self.timeStep)
+    self.rfootrbumper.enable(self.timeStep)
     
     # There are 7 controlable LED groups in Webots
     self.leds = []
@@ -528,13 +529,13 @@ class Nao:
     # emitter & receiver
     self.emitter = self.webot.getEmitter('emitter')
     self.receiver = self.webot.getReceiver('receiver')
-    self.receiver.enable(self.webot.timeStep)
+    self.receiver.enable(self.timeStep)
     
     # for sending 'move' request to Supervisor
     self.superEmitter = self.webot.getEmitter('super_emitter')
     
     # keyboard
-    self.webot.keyboardEnable(10*self.webot.timeStep)
+    self.webot.keyboardEnable(10*self.timeStep)
 
         
   def printHelp(self):
@@ -740,6 +741,136 @@ class Nao:
     # and take values between 0 - 255
     self.webot.leds[5].set(rgb & 0xFF)
     self.webot.leds[6].set(rgb & 0xFF)
+
+class Robonova:
+  def __init__(self, webot, timeStep):
+    self.webot = webot
+    self.timeStep = timeStep
+    self.joints = []
+    self.findAndEnableDevices()
+    self.initializeBody()
+
+  def initializeBody(self):
+    self.bodyHeight = 0
+    self.dHeight = 0
+    self.tZmp = 0
+    self.stepHeight = 0
+    self.bodyRoll = 0
+    self.bodyTilt = 0
+
+    self.supportX = 0
+    self.supportY = 0
+    
+    self.velCurrent = array([0., 0., 0.0]) 
+    self.velCommand = array([0., 0., 0.]) 
+    self.velMax = 0
+    self.velScale = array([0, 0, 0])
+    self.velChange = 0
+
+    self.odometry = array([0., 0., 0.])
+    self.odometryScale = 0
+
+    self.footX = -self.supportX
+    self.footY = 0
+
+    self.uLeft0 = array([self.footX, self.footY, 0.])
+    self.uLeft = self.uLeft0
+    self.uLeft1 = self.uLeft
+    self.uLeft2 = self.uLeft
+
+    self.uRight0 = array([self.footX, -self.footY, 0.])
+    self.uRight = self.uRight0
+    self.uRight1 = self.uRight
+    self.uRight2 = self.uRight
+
+    self.uBody = array([0., 0., 0.])
+    self.uBody1 = self.uBody
+    self.uBody2 = self.uBody
+
+    self.qLegs = zeros((12,1),float) #not real
+    self.qArms = zeros((8,1),float) #not real
+    self.qArmsT = array([0,0,0,0])
+    self.qArmsT2 = self.qArmsT.transpose() 
+    self.qArms0 = 0
+    self.armsIndex1Start = 0
+    self.armsIndex1Stop = 2
+    self.armsIndex2Start = 13 
+    self.armsIndex2Stop = 15
+     
+
+  #Update the walk Cycle
+  def update(self):
+    #TOO BE MADE
+    print "noUpdate"
+
+  def findAndEnableDevices(self): 
+    # camera
+    self.camera = self.webot.getCamera('camera')
+    self.camera.enable(4*self.timeStep)
+    
+    # move arms along the body
+    self.leftShoulderPitch = self.webot.getServo("LShoulderPitch")
+    self.rightShoulderPitch = self.webot.getServo("RShoulderPitch")
+  
+
+    self.jointNames = ['LShoulderPitch',
+                      'LShoulderRoll',  
+                      'LElbowRoll',
+                      'LHipRoll',  
+                      'LHipPitch', 
+                      'LKneePitch', 
+                      'LAnklePitch',
+                      'LAnkleRoll',  
+                      'RHipRoll',
+                      'RHipPitch',
+                      'RKneePitch',
+                      'RAnklePitch',
+                      'RAnkleRoll', 
+                      'RShoulderPitch',  
+                      'RShoulderRoll', 
+                      'RElbowRoll']
+
+    for i in range(0, len(self.jointNames)):
+      self.joints.append(self.webot.getServo(self.jointNames[i]))
+      self.joints[i].enablePosition(self.timeStep)
+                        
+  #keyboard
+    self.webot.keyboardEnable(10*self.timeStep) 
+  def printHelp(self):
+    print "noHelp"
+    #TO BE MADE
+
+
+  def printCameraImage(self):
+    scaled = 2 # defines by which factor the image is subsampled
+    width = self.camera.getWidth()
+    height = self.camera.getHeight()
+    
+    # read rgb pixel values from the camera
+    image = self.camera.getImageArray()
+    
+    print
+    print '----------camera image (grey levels)---------'
+    print 'original resolution: ' + str(width) + ' x ' + \
+           str(height) + ', scaled to ' + str(width/scaled) + \
+           ' x ' + str(height/scaled)
+    for x in range(0, width/scaled):
+      line = ''
+      for y in range(0, height/scaled):
+        grey = image[x*scaled][y*scaled][0] + \
+               image[x*scaled][y*scaled][1] + \
+               image[x*scaled][y*scaled][2]
+        grey = grey / 3
+        grey = grey * 9 / 255 # between 0 and  instead of 0 and 255
+        line = line + str(int(grey))
+      print line
+    print '----------camera image----------'
+
+  
+  #Nao commands and helpers
+  def runCommand(self, key):
+  #TO BE MADE
+    print "noCommands"
 
 controller = WebotController()
 
