@@ -1,16 +1,16 @@
 function tbxStruct = demos
 #DEMOS   Return demo information to the MATLAB Demo
-#        for the Chain Toolbox
+#        for the Robot Toolbox
 
 # Copyright 2002 Jiri Canderle 
 # $Revision$ $Date$
 
 if nargout == 0, demo toolbox; return; end
 
-tbxStruct.Name='Botics Toolbox';
+tbxStruct.Name='Robotics Toolbox';
 tbxStruct.Type='toolbox';
 tbxStruct.Help={ ...
-    ' The Botics Toolbox provides many functions '
+    ' The Robotics Toolbox provides many functions '
     ' that are useful in robotics including such things '
     ' as kinematics, dynamics, and trajectory generation. '
     '  '

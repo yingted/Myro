@@ -1,5 +1,5 @@
 """
-Robot object.
+Chain object.
 
 @author: Peter Corke
 @copyright: Peter Corke
@@ -11,20 +11,20 @@ from transform import *
 import copy
 from Link import *
 
-class Robot(object):
-    """Robot object.
+class Chain(object):
+    """Chain object.
     Instances of this class represent a robot manipulator
     within the toolbox.
     """
         
     def __init__(self, arg=None, gravity=None, base=None, tool=None, name='', comment='', manuf=''):
         """
-        Robot object constructor.  Create a robot from a sequence of Link objects.
+        Chain object constructor.  Create a robot from a sequence of Link objects.
         
         Several basic forms exist:
-            - Robot()        create a null robot
-            - Robot(robot)   create a clone of the robot object
-            - Robot(links)   create a robot based on the passed links
+            - Chain()        create a null robot
+            - Chain(robot)   create a clone of the robot object
+            - Chain(links)   create a robot based on the passed links
             
         Various options can be set using named arguments:
         
@@ -36,7 +36,7 @@ class Robot(object):
             - manuf
         """
 
-        if isinstance(arg, Robot):
+        if isinstance(arg, Chain):
             for k,v in arg.__dict__.items():
                 if k == "links":
                     self.__dict__[k] = copy.copy(v);           
@@ -45,7 +45,7 @@ class Robot(object):
         elif len(arg) > 1 and isinstance(arg[0], Link):
             self.links = arg;
         else:
-            raise AttributeError;
+            raise AttributeError("robot needs a list of Links of length > 1")
 
         # fill in default base and gravity direction
         if gravity != None:
@@ -102,14 +102,14 @@ class Robot(object):
         return s;   
 
     def __mul__(self, r2):
-        r = Robot(self);        # clone the robot
+        r = Chain(self);        # clone the robot
         print r
         r.links += r2.links;
         return r;
 
     def copy(self):
         """
-        Return a copy of the Robot object
+        Return a copy of the Chain object
         """
         return copy.copy(self);
                
@@ -133,14 +133,14 @@ class Robot(object):
 
     def nofriction(self, all=False):
         """
-        Return a Robot object where all friction parameters are zero.
+        Return a Chain object where all friction parameters are zero.
         Useful to speed up the performance of forward dynamics calculations.
         
         @type all: boolean
         @param all: if True then also zero viscous friction
         @see: L{Link.nofriction}
         """
-        r = Robot(self);
+        r = Chain(self);
         r.name += "-nf";
         newlinks = [];
         for oldlink in self.links:

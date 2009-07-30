@@ -44,7 +44,7 @@
 
 from numpy import *
 from Link import *
-from Chain import *
+from Robot import *
 
 
 #print "in puma560"
@@ -118,4 +118,4 @@ qs = [0, 0, -pi/2, 0, 0, 0]
 qn=[0, pi/4, pi, 0, pi/4,  0]
 
 
-p560 = Chain(L, name='Puma 560', manuf='Unimation', comment='params of 8/95')
+p560 = Robot(L, name='Puma 560', manuf='Unimation', comment='params of 8/95')

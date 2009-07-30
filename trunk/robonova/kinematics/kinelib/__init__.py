@@ -1,5 +1,5 @@
 __doc__ = """
-The Botics Toolbox for Python
+The Robotics Toolbox for Python
 Based on the Matlab version
 Peter Corke 2007
 """
@@ -13,8 +13,8 @@ from numpy import *
 # Import Link Constructor section
 from Link import *
 
-# Import Chain Constructor section
-from Chain import *
+# Import Robot Constructor section
+from Robot import *
 
 # utility
 from utility import *

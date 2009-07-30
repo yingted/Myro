@@ -25,7 +25,7 @@
 # Copyright (C) 2000-2002, by Peter I. Corke
 
 from numpy import *
-from Chain import *
+from Robot import *
 from Link import *
 
 L = []
@@ -50,5 +50,5 @@ L[1].G = 1
 
 qz = [0,0]
 
-tl = Chain(L,name='Simple two link')
+tl = Robot(L,name='Simple two link')
 

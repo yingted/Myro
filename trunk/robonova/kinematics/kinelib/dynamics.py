@@ -1,5 +1,5 @@
 """
-Chain dynamics operations.
+Robot dynamics operations.
 
 @author: Peter Corke
 @copyright: Peter Corke
@@ -23,7 +23,7 @@ def accel(robot, *args):
     This form is useful for simulation of manipulator dynamics, in
     conjunction with a numerical integration function.
     
-    @type robot: Chain object, n-axes
+    @type robot: Robot object, n-axes
     @param robot: The robot
     @rtype: n-vector
     @return: Joint coordinate acceleration
@@ -74,7 +74,7 @@ def coriolis(robot, q, qd):
     @type q: Joint coordinate
     @type qd: M{m x n} matrix
     @type qd: Joint coordinate velocity
-    @type robot: Chain object, n-axes
+    @type robot: Robot object, n-axes
     @param robot: The robot
     @rtype: M{m x n} matrix
     @return: Joint coordinate acceleration
@@ -96,7 +96,7 @@ def inertia(robot, q):
 
     @type q: M{m x n} matrix
     @type q: Joint coordinate
-    @type robot: Chain object, n-axes
+    @type robot: Robot object, n-axes
     @param robot: The robot
     @rtype: m-list of M{n x n} matrices
     @return: List of inertia matrices
@@ -124,7 +124,7 @@ def cinertia(robot, q):
 
     @type q: n-vector
     @type q: Joint coordinate
-    @type robot: Chain object, n-axes
+    @type robot: Robot object, n-axes
     @param robot: The robot
     @rtype: M{6 x 6} matrix
     @return: Cartesian inertia matrix
@@ -158,7 +158,7 @@ def gravload(robot, q, gravity=None):
     @type q: Joint coordinate
     @type grav: 3-vector
     @type grav: Gravitation acceleration, overrides C{robot} (optional)
-    @type robot: Chain object, n-axes
+    @type robot: Robot object, n-axes
     @param robot: The robot
     @rtype: M{m x n} matrix
     @return: Gravity torque

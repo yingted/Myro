@@ -27,7 +27,7 @@
 
 from numpy import *
 from Link import *
-from Chain import *
+from Robot import *
 
 L = []
 
@@ -89,4 +89,4 @@ qz = [0,0,0,0,0,0]; # zero angles, L shaped pose
 qr = [0,-pi/2,pi/2,0,0,0]; # ready pose, arm up
 qstretch = [0,0,pi/2,0,0,0]; # horizontal along x-axis
 
-p560m = Chain(L, name='Puma560-AKB', manuf='Unimation', comment='AK&B')
+p560m = Robot(L, name='Puma560-AKB', manuf='Unimation', comment='AK&B')

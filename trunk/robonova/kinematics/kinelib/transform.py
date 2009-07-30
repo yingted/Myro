@@ -6,9 +6,9 @@ Primitive operations for 3x3 orthonormal and 4x4 homogeneous matrices.
 """
 
 from numpy import *
-from kinelib.utility import *
+from robot.utility import *
 from numpy.linalg import norm
-import kinelib.Quaternion as Q
+import robot.Quaternion as Q
 
 #print "in transform"
 

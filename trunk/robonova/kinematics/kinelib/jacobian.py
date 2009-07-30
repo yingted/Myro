@@ -6,9 +6,9 @@ Jacobian matrix operations.
 """
 
 from numpy import *
-from kinelib.utility import *
-from kinelib.transform import *
-from kinelib.kinematics import *
+from robot.utility import *
+from robot.transform import *
+from robot.kinematics import *
 from numpy.linalg import norm
 
 def jacob0(robot, q):
@@ -20,7 +20,7 @@ def jacob0(robot, q):
 
     M{dX = J dQ}
 
-    @type robot: Chain
+    @type robot: Robot
     @type q: vector M{n x 1}
     @param q: joint coordinate
     @rtype: matrix M{6 x n}
@@ -54,7 +54,7 @@ def jacobn(robot, q):
     IEEE SMC 11(6) 1981
     pp. 456-460
 
-    @type robot: Chain
+    @type robot: Robot
     @type q: vector M{n x 1}
     @param q: joint coordinate
     @rtype: matrix M{6 x n}

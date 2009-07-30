@@ -149,7 +149,7 @@ def error(s):
     Common error handler.  Display the error string, execute a traceback then raise
     an execption to return to the interactive prompt.
     """
-    print 'Botics toolbox error:', s
+    print 'Robotics toolbox error:', s
 
     #traceback.print_exc();
     raise ValueError
