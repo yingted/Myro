@@ -1,13 +1,13 @@
 """
-Robot kinematic operations.
+Chain kinematic operations.
 
 @author: Peter Corke
 @copyright: Peter Corke
 """
 
 from numpy import *
-from robot.utility import *
-from robot.transform import *
+from kinelib.utility import *
+from kinelib.transform import *
 import jacobian as Jac
 from numpy.linalg import norm
 from numpy.linalg import pinv
@@ -35,11 +35,11 @@ def fkine(robot, q):
     The robot's base or tool transform, if present, are incorporated into the
     result.
     
-    @type robot: Robot instance
+    @type robot: Chain instance
     @param robot: The robot
     @type q: vector
     @param q: joint coordinate
-    @see: L{Link}, L{Robot}, L{ikine}
+    @see: L{Link}, L{Chain}, L{ikine}
     """
 
     q = mat(q)
@@ -112,7 +112,7 @@ def ikine(robot, tr, q=None, m=None):
     rotation about the wrist axis, that is, M = [1 1 1 1 1 0].
 
 
-    @type robot: Robot instance
+    @type robot: Chain instance
     @param robot: The robot
     @type tr: homgeneous transformation
     @param tr: End-effector pose
@@ -130,6 +130,7 @@ def ikine(robot, tr, q=None, m=None):
     ilimit = 1000
     stol = 1e-12
     n = robot.n
+    prevVal = []
     
     if q == None:
         q = mat(zeros((n,1)))
@@ -159,6 +160,12 @@ def ikine(robot, tr, q=None, m=None):
                 q += dq
                 nm = norm(dq)
                 count += 1
+                if [x for x in prevVal if (x == q).all()] != []:
+                    qt = vstack((qt,q.T))
+                    return qt
+                else:
+                    prevVal.append(q)
+                    print "in"
                 if count > ilimit:
                     print 'i=',i,'   nm=',nm
                     error("Solution wouldn't converge")
@@ -174,13 +181,29 @@ def ikine(robot, tr, q=None, m=None):
             q += dq;
             nm = norm(dq)
             count += 1
+            prevVal.append(q.copy())
             if count > ilimit:
+                minDist = 100000000
+                for x in prevVal:
+                    dist = distance( xyz(fkine(robot, x.T)), xyz(tr))
+                    if dist < minDist:
+                        minDist = dist
+                        minQ = x
+                print "Found minimum dist %f of %d items!" % (minDist, len(prevVal))
+                return minQ.T
+                #qt = q.T
+                #return qt
                 error("Solution wouldn't converge")
         qt = q.T
         return qt
     else:
         error('tr must be 4*4 matrix')
 
+def xyz(tr, pos=3):
+    return [tr[0,pos], tr[1,pos], tr[2,pos]]
+
+def distance(p1, p2):
+    return sqrt((p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2 + (p1[2] - p2[2]) ** 2)
 
 def ikine560(robot, T, configuration=''):
     """
@@ -198,12 +221,12 @@ def ikine560(robot, T, configuration=''):
     =========
 
     Inverse kinematics for a PUMA 560 based on the equations by Paul and Zhang
-    From The International Journal of Robotics Research
+    From The International Journal of Botics Research
     Vol. 5, No. 2, Summer 1986, p. 32-44.
 
     @author: Robert Biro (gt2231a@prism.gatech.edu) with Gary Von McMurray, GTRI/ATRP/IIMB, Georgia Institute of Technology, 2/13/95.
 
-    @type robot: Robot instance
+    @type robot: Chain instance
     @param robot: The robot
     @type T: homgeneous transformation
     @param T: End-effector pose

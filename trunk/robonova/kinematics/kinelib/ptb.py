@@ -1,6 +1,6 @@
 class ptb:
     '''
-# Robotics Toolbox.
+# Botics Toolbox.
 # Version 7  April-2002
 #
 # What's new.

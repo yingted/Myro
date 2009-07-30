@@ -43,7 +43,7 @@ class Link:
     Conceivably all sorts of stuff could live in the LINK object such as
     graphical models of links and so on.
 
-    @see: L{Robot}
+    @see: L{Chain}
     """
     
     LINK_DH = 1

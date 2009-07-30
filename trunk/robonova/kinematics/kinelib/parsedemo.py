@@ -1,5 +1,5 @@
 from numpy import *
-from robot import *
+from kinelib import *
 import textwrap;
 import sys;
 import re;

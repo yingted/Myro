@@ -1,7 +1,7 @@
 #import matplotlib.axes3d as p3
 from numpy import * # for outer and arange
 #import pylab as p   # for figure
-from robot.Quaternion import *
+from kinelib.Quaternion import *
 
 def trplot(r, name=''):
     '''
@@ -29,5 +29,5 @@ def trplot(r, name=''):
     p.show()
 
 if __name__ == "__main__":
-    from robot.transform import *
+    from kinelib.transform import *
     trplot( rotx(0.2) );

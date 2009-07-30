@@ -1,5 +1,5 @@
 """
-Robot manipulability operations.
+Chain manipulability operations.
 
 @author: Peter Corke
 @copyright: Peter Corke
@@ -8,10 +8,10 @@ Robot manipulability operations.
 
 
 from numpy import *
-from robot.jacobian import jacob0
-from robot.dynamics import inertia
+from kinelib.jacobian import jacob0
+from kinelib.dynamics import inertia
 from numpy.linalg import inv,eig,det,svd
-from robot.utility import *
+from kinelib.utility import *
 
 def manipulability(robot, q, which = 'yoshikawa'):
     '''
