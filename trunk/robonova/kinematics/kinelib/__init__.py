@@ -1,5 +1,5 @@
 __doc__ = """
-The Botics Toolbox for Python
+The Robotics Toolbox for Python
 Based on the Matlab version
 Peter Corke 2007
 """

@@ -221,7 +221,7 @@ def ikine560(robot, T, configuration=''):
     =========
 
     Inverse kinematics for a PUMA 560 based on the equations by Paul and Zhang
-    From The International Journal of Botics Research
+    From The International Journal of Robotics Research
     Vol. 5, No. 2, Summer 1986, p. 32-44.
 
     @author: Robert Biro (gt2231a@prism.gatech.edu) with Gary Von McMurray, GTRI/ATRP/IIMB, Georgia Institute of Technology, 2/13/95.
