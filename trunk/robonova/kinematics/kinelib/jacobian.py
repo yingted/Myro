@@ -6,9 +6,9 @@ Jacobian matrix operations.
 """
 
 from numpy import *
-from robot.utility import *
-from robot.transform import *
-from robot.kinematics import *
+from kinelib.utility import *
+from kinelib.transform import *
+from kinelib.kinematics import *
 from numpy.linalg import norm
 
 def jacob0(robot, q):
