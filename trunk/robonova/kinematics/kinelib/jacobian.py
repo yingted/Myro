@@ -20,7 +20,7 @@ def jacob0(robot, q):
 
     M{dX = J dQ}
 
-    @type robot: Robot
+    @type robot: Chain
     @type q: vector M{n x 1}
     @param q: joint coordinate
     @rtype: matrix M{6 x n}
@@ -54,7 +54,7 @@ def jacobn(robot, q):
     IEEE SMC 11(6) 1981
     pp. 456-460
 
-    @type robot: Robot
+    @type robot: Chain
     @type q: vector M{n x 1}
     @param q: joint coordinate
     @rtype: matrix M{6 x n}

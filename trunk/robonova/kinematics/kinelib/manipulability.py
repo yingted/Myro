@@ -1,5 +1,5 @@
 """
-Robot manipulability operations.
+Chain manipulability operations.
 
 @author: Peter Corke
 @copyright: Peter Corke

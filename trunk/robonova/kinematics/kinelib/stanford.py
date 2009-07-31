@@ -5,7 +5,7 @@
 #
 # Kinematic data from "Modelling, Trajectory calculation and Servoing of 
 # a computer controlled arm".  Stanford AIM-177.  Figure 2.3
-# Dynamic data from "Robot manipulators: mathematics, programming and control"
+# Dynamic data from "Chain manipulators: mathematics, programming and control"
 # Paul 1981, Tables 6.4, 6.6
 # 
 # Note: gear ratios not currently known, though reflected armature inertia 
@@ -26,7 +26,7 @@
 
 from numpy import *
 from Link import *
-from Robot import *
+from Chain import *
 
 L = []
 L.append(Link(alpha=-pi/2, A=0, theta=0, D=0.412, sigma=0))
@@ -73,4 +73,4 @@ L[5].G = 1
 
 qz = [0,0,0,0,0,0]
 
-stanf = Robot(L, name='Stanford arm')
+stanf = Chain(L, name='Stanford arm')
