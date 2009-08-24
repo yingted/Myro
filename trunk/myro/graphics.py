@@ -1189,7 +1189,11 @@ class Color(object):
         """
         self.alpha = 255
         if len(rgb) == 1:
-            self.rgb = rgb[0]
+	   #Accept a string in the hext fromat made by color_rgb func.
+	    if isinstance(rgb[0],str):
+               self.rgb = rgb_color(rgb[0])
+	    else:
+               self.rgb=rgb[0]
         elif len(rgb) == 3:
             self.rgb = rgb
         elif len(rgb) == 4:
@@ -1396,6 +1400,21 @@ def color_rgb(r,g,b):
     """r,g,b are intensities of red, green, and blue in range(256)
     Returns color specifier string for the resulting color"""
     return "#%02x%02x%02x" % (r,g,b)
+
+#Used by the Color object so that it can accept "colors" produced by
+# the color_rgb() method <above> so that pixels and object graphics
+# can use the same colors.
+ 
+def rgb_color( color ):
+   """ Returns (r,g,b), input '#rrggbb' or 'rrggbb' """
+   color = color.strip()
+   if color[0] == '#':
+      color=color[1:]
+   if len(color) != 6:
+      raise ValueError, "#%s incorrect format use #rrggbb" % color
+   r, g, b = color[:2], color[2:4], color[4:]
+   r, g, b = [int(n, 16) for n in (r, g, b)]
+   return (r, g, b)
 
 black     = Color(  0,   0,   0)
 white     = Color(255, 255, 255)
