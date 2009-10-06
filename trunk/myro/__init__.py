@@ -404,7 +404,7 @@ def getGamepadNow(*what):
         what = ["init", "name", "axis", "ball", "button", "hat"]
     for item in what:
         if item == "count":
-            retval["count"] = myro.globvars.pygame.joystick.get_count()
+            retval["count"] = pygame.joystick.get_count()
         elif js != None:
             if item == "init":
                 retval["init"] = js.get_init()
