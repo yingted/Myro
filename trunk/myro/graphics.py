@@ -824,6 +824,10 @@ class Polygon(GraphicsObject):
         if len(points) == 1 and type(points[0] == type([])):
             points = points[0]
         self.points = map(Point.clone, points)
+        self.p1 = Point(min([p.x for p in self.points]),
+                        min([p.y for p in self.points]))
+        self.p2 = Point(max([p.x for p in self.points]),
+                        max([p.y for p in self.points]))
         GraphicsObject.__init__(self, ["outline", "width", "fill"])
         
     def clone(self):
@@ -837,6 +841,8 @@ class Polygon(GraphicsObject):
     def _move(self, dx, dy):
         for p in self.points:
             p.move(dx,dy)
+        self.p1.move(dx,dy)
+        self.p2.move(dx,dy)
    
     def _draw(self, canvas, options):
         args = [canvas]
