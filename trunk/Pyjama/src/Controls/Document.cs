@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
+using System.Configuration;
 
 namespace Pyjama
 {
@@ -86,7 +87,7 @@ namespace Pyjama
         public MyRichTextBox textBox;
         private Dictionary<string, Color> colors = new Dictionary<string, Color>();
         private Dictionary<string, Font> fonts = new Dictionary<string, Font>();
-        public Dictionary<string, int> keywords;
+        public Dictionary<string, int> keywords = new Dictionary<string, int>();
 
         public delegate void TextChangedHandler(object sender, EventArgs e);
         int mode = 0; // used in parsing richtext
@@ -121,6 +122,7 @@ namespace Pyjama
             fonts.Add("quote", new Font("Courier New", 10, FontStyle.Regular));
             colors.Add("doublequote", Color.DarkGreen);
             fonts.Add("doublequote", new Font("Courier New", 10, FontStyle.Regular));
+            
             keywords = new Dictionary<string, int> {{ "and", 1}, {"del", 1}, {"for", 1}, 
                                                     {"is", 1}, {"raise", 1},
                                                     {"assert",1}, {"elif",1}, {"from",1}, 
@@ -271,6 +273,7 @@ namespace Pyjama
                                 textBox.SelectionLength = token.Length;
                                 textBox.SelectionColor = colors["keyword"];
                                 textBox.SelectionFont = fonts["keyword"];
+                                
                             }
                             else if (colorCode == 2)
                             {
