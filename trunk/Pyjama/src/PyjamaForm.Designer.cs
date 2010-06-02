@@ -291,6 +291,7 @@ using System.Windows.Forms;
              this.outputWindow.Cursor = System.Windows.Forms.Cursors.Default;
              this.outputWindow.ForeColor = System.Drawing.SystemColors.HighlightText;
              this.outputWindow.Name = "outputWindow";
+             this.outputWindow.Load += new System.EventHandler(this.outputWindow_Load);
              // 
              // commandContainer
              // 

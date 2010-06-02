@@ -29,7 +29,7 @@ namespace Pyjama
 
         internal void ExecuteInThread()
         {
-            // F5 Method.
+            // F5 Method.   
             // Get text to eval:
             // FIXME: check to see where focus is
             CodeBlock codeBlock = pyjamaForm.GetCodeBlock();
@@ -66,7 +66,7 @@ namespace Pyjama
         {
             OpenFileDialog open = new OpenFileDialog();
             open.Filter = "All Files (*.*)|*.*";
-
+            //open.Filter = "PY/RB/SS Files (*.py; *.rb; *.ss)|*.py;*.rb;*.ss";
             if (open.ShowDialog() == DialogResult.OK)
             {
                 ActiveCodeFile file = new ActiveCodeFile(open.FileName);

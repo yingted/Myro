@@ -300,50 +300,53 @@ namespace Pyjama
 
             return settings;
         }
-
-
         #endregion
 
-        private void shellLanguageSelect1_Click(object sender, EventArgs e)
+        private void shellLanguageSelect(string name)
         {
-            // FIXME: make general
-            shellLanguageButton.Text = "Python";
-            commandLabel.Text = "Python Mode";
-            outputWindow.textbox.Prompt = "---- Python Mode ----";
-            outputWindow.textbox.engine = outputWindow.textbox.environment.GetEngine("py");
+            switch (name)
+            {
+                case "Python":
+                    outputWindow.textbox.engine = outputWindow.textbox.environment.GetEngine("py");
+                    shellLanguageSelect1.Checked = true;
+                    shellLanguageSelect2.Checked = false;
+                    shellLanguageSelect1.Checked = false;
+                    break;
+                case "Ruby":
+                    outputWindow.textbox.engine = outputWindow.textbox.environment.GetEngine("rb");
+                    shellLanguageSelect1.Checked = false;
+                    shellLanguageSelect2.Checked = true;
+                    shellLanguageSelect1.Checked = false;
+                    break;
+                case "Scheme":
+                    //outputWindow.textbox.engine = outputWindow.textbox.environment.GetEngine("ss");
+                    shellLanguageSelect1.Checked = false;
+                    shellLanguageSelect2.Checked = false;
+                    shellLanguageSelect1.Checked = true;
+                    break;
+            }
+            shellLanguageButton.Text = name.ToString();
+            commandLabel.Text = name.ToString() + " Mode";
+            outputWindow.textbox.Prompt = "---- " + name.ToString() + " Mode ----";
             outputWindow.textbox.consoleTextBox.printPrompt();
             commandTextBox.Focus();
-            shellLanguageSelect1.Checked = true;
-            shellLanguageSelect2.Checked = false;
-            shellLanguageSelect1.Checked = false;
+        }
+        private void shellLanguageSelect1_Click(object sender, EventArgs e)
+        {
+            ToolStripMenuItem parent = (ToolStripMenuItem)sender;
+            shellLanguageSelect(parent.Text.ToString());
         }
 
         private void shellLanguageSelect2_Click(object sender, EventArgs e)
         {
-            // FIXME: make general
-            shellLanguageButton.Text = "Ruby";
-            commandLabel.Text = "Ruby Mode";
-            outputWindow.textbox.Prompt = "---- Ruby Mode ----";
-            outputWindow.textbox.engine = outputWindow.textbox.environment.GetEngine("rb");
-            outputWindow.textbox.consoleTextBox.printPrompt();
-            commandTextBox.Focus();
-            shellLanguageSelect1.Checked = false;
-            shellLanguageSelect2.Checked = true;
-            shellLanguageSelect1.Checked = false;
+            ToolStripMenuItem parent = (ToolStripMenuItem)sender;
+            shellLanguageSelect(parent.Text.ToString());
         }
 
         private void shellLanguageSelect3_Click(object sender, EventArgs e)
         {
-            // FIXME: make general
-            shellLanguageButton.Text = "Scheme";
-            commandLabel.Text = "Scheme Mode";
-            outputWindow.textbox.Prompt = "---- Scheme Mode ----";
-            //outputWindow.textbox.engine = outputWindow.textbox.environment.GetEngine("rb");
-            outputWindow.textbox.consoleTextBox.printPrompt();
-            commandTextBox.Focus();
-            shellLanguageSelect1.Checked = false;
-            shellLanguageSelect2.Checked = false;
-            shellLanguageSelect1.Checked = true;
+            ToolStripMenuItem parent = (ToolStripMenuItem)sender;
+            shellLanguageSelect(parent.Text.ToString());
         }
 
         private void runButton_Click(object sender, EventArgs e)
@@ -357,6 +360,14 @@ namespace Pyjama
             } else {
                 outputWindow.textbox.CancelCommand();
             }
+            /*
+            if (runButton.Text.Equals("Run!"))
+            {
+                outputWindow.textbox.Clear();
+            }
+            else
+                outputWindow.textbox.CancelCommand();
+             */
         }
 
         private void commandTextBox_KeyPress(object sender, KeyPressEventArgs e)
@@ -573,6 +584,11 @@ namespace Pyjama
                 lineNumber.DropDownItems[0].Owner.Visible = false;
                 e.Handled = true;
             }
+        }
+
+        private void outputWindow_Load(object sender, EventArgs e)
+        {
+
         }
 
     }
