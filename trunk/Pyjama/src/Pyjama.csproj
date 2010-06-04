@@ -262,7 +262,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Controls\Pyjama.exe.config" />
+    <None Include="Controls\Python.config" />
     <None Include="Properties\app.manifest" />
     <None Include="Resources\Start.png" />
     <None Include="Resources\FastRun.png" />

@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using System.Configuration;
 
+
 namespace Pyjama
 {
 
@@ -110,6 +111,7 @@ namespace Pyjama
             textBox.Font = new Font("Courier New", 10);
             textBox.WordWrap = false;
             // Resue fonts on formatting:
+            
             colors.Add("default", Color.Black);
             fonts.Add("default", new Font("Courier New", 10, FontStyle.Regular));
             colors.Add("syntax", Color.Red);
@@ -137,9 +139,21 @@ namespace Pyjama
                                                     {"as",1}, {"with",1},
                                                     {"self",2}, {"print",2}, {"None",2}, 
                                                     {"True",2}, {"False",2} };
-
+            
             // -----------------------------
             Controls.Add(textBox);
+
+            System.Configuration.Configuration config =
+                ConfigurationManager.OpenExeConfiguration(
+                ConfigurationUserLevel.None) as Configuration;
+
+            System.Collections.IDictionary sampleTable = (System.Collections.IDictionary)
+                //ConfigurationManager.GetSection("keyword");
+            config.GetSection("keyword");
+
+            //object title = new object();
+            //title = sampleTable["print"];
+
         }
 
         void textBox_MouseClick(object sender, MouseEventArgs e)
