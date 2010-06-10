@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Xml;
+using System.IO;
 
 namespace Pyjama
 {
@@ -111,7 +112,30 @@ namespace Pyjama
             textBox.Font = new Font("Courier New", 10);
             textBox.WordWrap = false;
             // Resue fonts on formatting:
-            
+
+            XmlDocument doc = new XmlDocument();
+
+            //FIXME: Need to find absolute path to file
+            string fileName = @"C:\Users\Vincent\Documents\Pyjama\src\Config\Python.config";
+            System.Console.WriteLine(fileName);
+            if (File.Exists(fileName))
+            {
+                XmlTextReader reader = new XmlTextReader(fileName);
+                do
+                {
+                    switch (reader.NodeType)
+                    {
+                        case XmlNodeType.Text:
+                            // Read into dictionary which key value pair 
+                            System.Console.WriteLine(reader.Value); //value of an element
+                            
+                            break;
+                    }
+                } while (reader.Read());
+            }
+            else
+                MessageBox.Show("The file " + fileName + " was not found");
+
             colors.Add("default", Color.Black);
             fonts.Add("default", new Font("Courier New", 10, FontStyle.Regular));
             colors.Add("syntax", Color.Red);
