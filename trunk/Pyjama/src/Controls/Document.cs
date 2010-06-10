@@ -4,7 +4,7 @@ using System.Windows.Forms;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using System.Configuration;
-
+using System.Xml;
 
 namespace Pyjama
 {
@@ -141,19 +141,7 @@ namespace Pyjama
                                                     {"True",2}, {"False",2} };
             
             // -----------------------------
-            Controls.Add(textBox);
-
-            System.Configuration.Configuration config =
-                ConfigurationManager.OpenExeConfiguration(
-                ConfigurationUserLevel.None) as Configuration;
-
-            System.Collections.IDictionary sampleTable = (System.Collections.IDictionary)
-                //ConfigurationManager.GetSection("keyword");
-            config.GetSection("keyword");
-
-            //object title = new object();
-            //title = sampleTable["print"];
-
+            Controls.Add(textBox);           
         }
 
         void textBox_MouseClick(object sender, MouseEventArgs e)
