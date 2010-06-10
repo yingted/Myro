@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Xml;
 using System.IO;
+using System.Reflection;
 
 namespace Pyjama
 {
@@ -91,6 +92,8 @@ namespace Pyjama
         private Dictionary<string, Font> fonts = new Dictionary<string, Font>();
         public Dictionary<string, int> keywords = new Dictionary<string, int>();
 
+        public Dictionary<string, Color> keyword = new Dictionary<string, Color>();
+            
         public delegate void TextChangedHandler(object sender, EventArgs e);
         int mode = 0; // used in parsing richtext
         int[] last_mode = new int[10000];
@@ -116,8 +119,18 @@ namespace Pyjama
             XmlDocument doc = new XmlDocument();
 
             //FIXME: Need to find absolute path to file
+            //Relative Path beneath Pyjama.exe 
+            //Looks like Pyton.config is not begin copied to bin folder
+            
+
             string fileName = @"C:\Users\Vincent\Documents\Pyjama\src\Config\Python.config";
-            System.Console.WriteLine(fileName);
+            //string fileName = GetFullFileNameFromApplication(@"..\Pyjama\src\Config\Python.config");
+            //string codeBase = Assembly.GetExecutingAssembly().CodeBase;
+            //UriBuilder uri = new UriBuilder(codeBase);
+            //string path = Uri.UnescapeDataString(uri.Path);
+            //string fileName = Path.GetDirectoryName(path);
+            //System.Console.WriteLine(fileName;)
+
             if (File.Exists(fileName))
             {
                 XmlTextReader reader = new XmlTextReader(fileName);
