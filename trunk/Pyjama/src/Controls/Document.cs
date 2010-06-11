@@ -7,6 +7,7 @@ using System.Configuration;
 using System.Xml;
 using System.IO;
 using System.Reflection;
+using System.Collections;
 
 namespace Pyjama
 {
@@ -90,10 +91,10 @@ namespace Pyjama
         public MyRichTextBox textBox;
         private Dictionary<string, Color> colors = new Dictionary<string, Color>();
         private Dictionary<string, Font> fonts = new Dictionary<string, Font>();
-        public Dictionary<string, int> keywords = new Dictionary<string, int>();
+        //public Dictionary<string, int> keywords = new Dictionary<string, int>();
+        public ArrayList keywords = new ArrayList();
+        public ArrayList booleans = new ArrayList();
 
-        public Dictionary<string, Color> keyword = new Dictionary<string, Color>();
-            
         public delegate void TextChangedHandler(object sender, EventArgs e);
         int mode = 0; // used in parsing richtext
         int[] last_mode = new int[10000];
@@ -128,63 +129,74 @@ namespace Pyjama
             XmlElement root = doc.DocumentElement;
             XmlNodeList list = root.ChildNodes;
 
-            //Console.WriteLine(root.Name); //default
-            //Console.WriteLine(root.HasAttributes); //True
-            //Console.WriteLine(root.GetAttribute("font"));   //Courier
-            //Console.WriteLine(root.GetAttribute("size"));   //10
-            //Console.WriteLine(root.GetAttribute("color"));  //black
+            //FixMe: Make more general
+            //Idea: If XML format does not change, the order of elements will always
+            //be color, font, size, and style
 
-            /*foreach (XmlNode child in list)
-            {
-                //Console.WriteLine(child.Name); //child elements
-                XmlAttributeCollection attr = child.Attributes; //attributes of children
-                foreach (XmlAttribute att in attr)
-                {
-                    //Console.WriteLine(att.Name);
-                    //Console.WriteLine(att.Value);
-                }
-                XmlNodeList nodelist = child.ChildNodes;
-                foreach (XmlNode node in nodelist)
-
-                    //Console.WriteLine(node.InnerXml);
-
-            }*/
-
-            colors.Add(root.Name.ToString(), Color.FromName(root.GetAttribute("color"))); //Black
+            /* Default Format */
+            colors.Add(root.Name.ToString(), Color.FromName(root.GetAttribute("color")));
             fonts.Add(root.Name.ToString(), new Font(root.GetAttribute("font"),
                 Convert.ToInt32(root.GetAttribute("size")),
                 (FontStyle)Enum.Parse(typeof(FontStyle), root.GetAttribute("style"))));
+ 
+            /* Syntax Format */
+            XmlNodeList syntaxList = doc.SelectNodes("default/syntax");
+            XmlNode syntaxNode = syntaxList[0];
+            XmlAttributeCollection syntaxCol = syntaxNode.Attributes;
 
-            //colors.Add("default", Color.Black);
-            //fonts.Add("default", new Font("Courier New", 10, FontStyle.Regular));
-            
+            colors.Add("syntax", Color.FromName(syntaxCol[0].Value.ToString()));
+            fonts.Add("syntax", new Font(syntaxCol[1].Value.ToString(), 
+                Convert.ToInt32(syntaxCol[2].Value.ToString()), 
+                (FontStyle)Enum.Parse(typeof(FontStyle), syntaxCol[3].Value.ToString())));
 
-            colors.Add("syntax", Color.Red);
-            fonts.Add("syntax", new Font("Courier New", 10, FontStyle.Regular));
-            colors.Add("comment", Color.DarkGreen);
-            fonts.Add("comment", new Font("Courier New", 10, FontStyle.Regular));
-            colors.Add("keyword", Color.Blue);
-            fonts.Add("keyword", new Font("Courier New", 10, FontStyle.Bold));
-            colors.Add("quote", Color.DarkBlue);
-            fonts.Add("quote", new Font("Courier New", 10, FontStyle.Regular));
-            colors.Add("doublequote", Color.DarkGreen);
-            fonts.Add("doublequote", new Font("Courier New", 10, FontStyle.Regular));
-            
-            keywords = new Dictionary<string, int> {{ "and", 1}, {"del", 1}, {"for", 1}, 
-                                                    {"is", 1}, {"raise", 1},
-                                                    {"assert",1}, {"elif",1}, {"from",1}, 
-                                                    {"lambda",1}, {"return",1},
-                                                    {"break",1}, {"else",1}, {"global",1}, 
-                                                    {"not",1}, {"try",1},
-                                                    {"class",1}, {"except",1}, {"if",1}, 
-                                                    {"or",1}, {"while",1},
-                                                    {"continue",1}, {"exec",1}, {"import",1}, 
-                                                    {"pass",1}, {"yield",1},
-                                                    {"def",1}, {"finally",1}, {"in",1},
-                                                    {"as",1}, {"with",1},
-                                                    {"self",2}, {"print",2}, {"None",2}, 
-                                                    {"True",2}, {"False",2} };
-            
+            /* Comment Format */
+            XmlNodeList commentList = doc.SelectNodes("default/comment");
+            XmlNode commentNode = commentList[0];
+            XmlAttributeCollection commentCol = commentNode.Attributes;
+
+            colors.Add("comment", Color.FromName(commentCol[0].Value.ToString()));
+            fonts.Add("comment", new Font(commentCol[1].Value.ToString(),
+                Convert.ToInt32(commentCol[2].Value.ToString()),
+                (FontStyle)Enum.Parse(typeof(FontStyle), commentCol[3].Value.ToString())));
+
+            /* Quote Format */
+            XmlNodeList quoteList = doc.SelectNodes("default/quote");
+            XmlNode quoteNode = quoteList[0];
+            XmlAttributeCollection quoteCol = quoteNode.Attributes;
+
+            colors.Add("quote", Color.FromName(quoteCol[0].Value.ToString()));
+            fonts.Add("quote", new Font(quoteCol[1].Value.ToString(),
+                Convert.ToInt32(quoteCol[2].Value.ToString()),
+                (FontStyle)Enum.Parse(typeof(FontStyle), quoteCol[3].Value.ToString())));
+
+            /* Keyword */
+            XmlNodeList keywordList = doc.SelectNodes("default/keyword");
+            XmlNode keywordNode = keywordList[0];
+            XmlAttributeCollection keywordCol = keywordNode.Attributes;
+
+            colors.Add("keyword", Color.FromName(keywordCol[0].Value.ToString()));
+            fonts.Add("keyword", new Font(keywordCol[1].Value.ToString(), 
+                Convert.ToInt32(keywordCol[2].Value.ToString()),
+                (FontStyle)Enum.Parse(typeof(FontStyle), keywordCol[3].Value.ToString())));
+
+            XmlNodeList keyChilds = keywordNode.ChildNodes;
+            foreach (XmlNode child in keyChilds)
+                keywords.Add(child.InnerXml.ToString());
+
+            /* Booleans */
+            XmlNodeList boolList = doc.SelectNodes("default/boolean");
+            XmlNode boolNode = boolList[0];
+            XmlAttributeCollection boolCol = boolNode.Attributes;
+
+            colors.Add("boolean", Color.FromName(boolCol[0].Value.ToString()));
+            fonts.Add("boolean", new Font(boolCol[1].Value.ToString(),
+                Convert.ToInt32(boolCol[2].Value.ToString()),
+                (FontStyle)Enum.Parse(typeof(FontStyle), boolCol[3].Value.ToString())));
+
+            XmlNodeList boolChilds = boolNode.ChildNodes;
+            foreach (XmlNode bChild in boolChilds)
+                booleans.Add(bChild.InnerXml.ToString());                  
+           
             // -----------------------------
             Controls.Add(textBox);           
         }
@@ -287,6 +299,8 @@ namespace Pyjama
                     if (c == '"') {
                         mode = 2;
                         tokenStart = index;
+                        textBox.SelectionColor = colors["quote"];
+                        textBox.SelectionFont = fonts["quote"];
                     } else if (c == '\'') {
                         mode = 3;
                         tokenStart = index;
@@ -310,25 +324,25 @@ namespace Pyjama
                     if (EndSymbol(c)) // end of token
                     {
                         token = textBox.Text.Substring(tokenStart, index - tokenStart);
-                        if (keywords.ContainsKey(token))
+                        
+                        //if (keywords.ContainsKey(token))
+                        if (keywords.Contains(token))
+                        {
+                            System.Console.WriteLine("Found Token!" + token);
+                            mode = 0;
+                            textBox.SelectionStart = tokenStart;
+                            textBox.SelectionLength = token.Length;
+                            System.Console.WriteLine("Color = " + colors["keyword"].ToString());
+                            textBox.SelectionColor = colors["keyword"];
+                            textBox.SelectionFont = fonts["keyword"];
+                        }
+                        else if (booleans.Contains(token))
                         {
                             mode = 0;
-                            int colorCode = keywords[token];
-                            if (colorCode == 1)
-                            {
-                                textBox.SelectionStart = tokenStart;
-                                textBox.SelectionLength = token.Length;
-                                textBox.SelectionColor = colors["keyword"];
-                                textBox.SelectionFont = fonts["keyword"];
-                                
-                            }
-                            else if (colorCode == 2)
-                            {
-                                textBox.SelectionStart = tokenStart;
-                                textBox.SelectionLength = token.Length;
-                                textBox.SelectionColor = colors["syntax"];
-                                textBox.SelectionFont = fonts["syntax"];
-                            }
+                            textBox.SelectionStart = tokenStart;
+                            textBox.SelectionLength = token.Length;
+                            textBox.SelectionColor = colors["boolean"];
+                            textBox.SelectionFont = fonts["boolean"];
                         }
                         else
                         {
@@ -355,8 +369,8 @@ namespace Pyjama
                         }
                         textBox.SelectionStart = tokenStart;
                         textBox.SelectionLength = token.Length;
-                        textBox.SelectionColor = colors["doublequote"];
-                        textBox.SelectionFont = fonts["doublequote"];
+                        textBox.SelectionColor = colors["quote"];
+                        textBox.SelectionFont = fonts["quote"];
                     } // else still in double quote
                 }
                 else if (mode == 3) // in quote
