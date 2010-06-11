@@ -116,41 +116,49 @@ namespace Pyjama
             textBox.WordWrap = false;
             // Resue fonts on formatting:
 
-            XmlDocument doc = new XmlDocument();
-
             //FIXME: Need to find absolute path to file
             //Relative Path beneath Pyjama.exe 
             //Looks like Pyton.config is not begin copied to bin folder
             
 
             string fileName = @"C:\Users\Vincent\Documents\Pyjama\src\Config\Python.config";
-            //string fileName = GetFullFileNameFromApplication(@"..\Pyjama\src\Config\Python.config");
-            //string codeBase = Assembly.GetExecutingAssembly().CodeBase;
-            //UriBuilder uri = new UriBuilder(codeBase);
-            //string path = Uri.UnescapeDataString(uri.Path);
-            //string fileName = Path.GetDirectoryName(path);
-            //System.Console.WriteLine(fileName;)
 
-            if (File.Exists(fileName))
+            XmlDocument doc = new XmlDocument();
+            doc.Load(fileName);
+            XmlElement root = doc.DocumentElement;
+            XmlNodeList list = root.ChildNodes;
+
+            //Console.WriteLine(root.Name); //default
+            //Console.WriteLine(root.HasAttributes); //True
+            //Console.WriteLine(root.GetAttribute("font"));   //Courier
+            //Console.WriteLine(root.GetAttribute("size"));   //10
+            //Console.WriteLine(root.GetAttribute("color"));  //black
+
+            /*foreach (XmlNode child in list)
             {
-                XmlTextReader reader = new XmlTextReader(fileName);
-                do
+                //Console.WriteLine(child.Name); //child elements
+                XmlAttributeCollection attr = child.Attributes; //attributes of children
+                foreach (XmlAttribute att in attr)
                 {
-                    switch (reader.NodeType)
-                    {
-                        case XmlNodeType.Text:
-                            // Read into dictionary which key value pair 
-                            System.Console.WriteLine(reader.Value); //value of an element
-                            
-                            break;
-                    }
-                } while (reader.Read());
-            }
-            else
-                MessageBox.Show("The file " + fileName + " was not found");
+                    //Console.WriteLine(att.Name);
+                    //Console.WriteLine(att.Value);
+                }
+                XmlNodeList nodelist = child.ChildNodes;
+                foreach (XmlNode node in nodelist)
 
-            colors.Add("default", Color.Black);
-            fonts.Add("default", new Font("Courier New", 10, FontStyle.Regular));
+                    //Console.WriteLine(node.InnerXml);
+
+            }*/
+
+            colors.Add(root.Name.ToString(), Color.FromName(root.GetAttribute("color"))); //Black
+            fonts.Add(root.Name.ToString(), new Font(root.GetAttribute("font"),
+                Convert.ToInt32(root.GetAttribute("size")),
+                (FontStyle)Enum.Parse(typeof(FontStyle), root.GetAttribute("style"))));
+
+            //colors.Add("default", Color.Black);
+            //fonts.Add("default", new Font("Courier New", 10, FontStyle.Regular));
+            
+
             colors.Add("syntax", Color.Red);
             fonts.Add("syntax", new Font("Courier New", 10, FontStyle.Regular));
             colors.Add("comment", Color.DarkGreen);
