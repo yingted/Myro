@@ -21,4 +21,4 @@ C:\Users\Vincent\Documents\Pyjama\src\obj\Debug\Pyjama.Dialogs.OptionsDialog.res
 C:\Users\Vincent\Documents\Pyjama\src\obj\Debug\Pyjama.csproj.GenerateResource.Cache
 C:\Users\Vincent\Documents\Pyjama\src\obj\Debug\Pyjama.exe
 C:\Users\Vincent\Documents\Pyjama\src\obj\Debug\Pyjama.pdb
-C:\Users\Vincent\Documents\bin\Debug\Config\Python.config
+C:\Users\Vincent\Documents\bin\Debug\Config\Python.xml

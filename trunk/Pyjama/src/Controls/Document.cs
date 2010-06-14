@@ -120,12 +120,12 @@ namespace Pyjama
             //FIXME: Need to find absolute path to file
             //Relative Path beneath Pyjama.exe 
             //Looks like Pyton.config is not begin copied to bin folder
+
             
-
-            string fileName = @"C:\Users\Vincent\Documents\Pyjama\src\Config\Python.config";
-
+            string fileName = @"Config\Python.xml";
+            string fullPath = Path.GetFullPath(fileName);
             XmlDocument doc = new XmlDocument();
-            doc.Load(fileName);
+            doc.Load(fullPath);
             XmlElement root = doc.DocumentElement;
             XmlNodeList list = root.ChildNodes;
 
