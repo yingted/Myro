@@ -116,18 +116,13 @@ namespace Pyjama
             textBox.Font = new Font("Courier New", 10);
             textBox.WordWrap = false;
             // Resue fonts on formatting:
-
-            //FIXME: Need to find absolute path to file
-            //Relative Path beneath Pyjama.exe 
-            //Looks like Pyton.config is not begin copied to bin folder
-
             
             string fileName = @"Config/Python.xml";
             string fullPath = Path.GetFullPath(fileName);
             XmlDocument doc = new XmlDocument();
             doc.Load(fullPath);
             XmlElement root = doc.DocumentElement;
-            XmlNodeList list = root.ChildNodes;
+            //XmlNodeList list = root.ChildNodes;
 
             //FixMe: Make more general
             //Idea: If XML format does not change, the order of elements will always
@@ -328,11 +323,9 @@ namespace Pyjama
                         //if (keywords.ContainsKey(token))
                         if (keywords.Contains(token))
                         {
-                            System.Console.WriteLine("Found Token!" + token);
                             mode = 0;
                             textBox.SelectionStart = tokenStart;
                             textBox.SelectionLength = token.Length;
-                            System.Console.WriteLine("Color = " + colors["keyword"].ToString());
                             textBox.SelectionColor = colors["keyword"];
                             textBox.SelectionFont = fonts["keyword"];
                         }
