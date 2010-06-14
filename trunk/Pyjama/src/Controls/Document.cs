@@ -122,7 +122,7 @@ namespace Pyjama
             //Looks like Pyton.config is not begin copied to bin folder
 
             
-            string fileName = @"Config\Python.xml";
+            string fileName = @"Config/Python.xml";
             string fullPath = Path.GetFullPath(fileName);
             XmlDocument doc = new XmlDocument();
             doc.Load(fullPath);
