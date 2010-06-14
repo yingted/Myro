@@ -1,6 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 
-
 <default color="Black" font="Courier New" size="10" style="Regular">
 
   <keyword color="Orange" font="Courier New" size="10" style="Bold" >
@@ -50,10 +49,18 @@
 
   </boolean>
 
-  <quote color="Green" font="Courier New" size="10" style="Regular"></quote>
+  <quote color="Green" font="Courier New" size="10" style="Regular">
+    <EOF>"""</EOF>
+    <EOF>"</EOF>
+    <EOF>'</EOF>
+  </quote>
 
-  <comment color="Red" font="Courier New" size="10" style="Regular"></comment>
+  <comment color="Red" font="Courier New" size="10" style="Regular">
+    <word>#</word>
+  </comment>
 
-  <syntax color="Red" font="Courier New" size="10" style="Regular"></syntax>
+  <syntax color="Red" font="Courier New" size="10" style="Regular">
+    
+  </syntax>
 
 </default>

@@ -22,3 +22,4 @@ C:\Users\Vincent\Documents\Pyjama\src\obj\Debug\Pyjama.csproj.GenerateResource.C
 C:\Users\Vincent\Documents\Pyjama\src\obj\Debug\Pyjama.exe
 C:\Users\Vincent\Documents\Pyjama\src\obj\Debug\Pyjama.pdb
 C:\Users\Vincent\Documents\bin\Debug\Config\Python.xml
+C:\Users\Vincent\Documents\bin\Debug\Config\Ruby.xml

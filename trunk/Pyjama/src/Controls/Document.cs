@@ -91,9 +91,9 @@ namespace Pyjama
         public MyRichTextBox textBox;
         private Dictionary<string, Color> colors = new Dictionary<string, Color>();
         private Dictionary<string, Font> fonts = new Dictionary<string, Font>();
-        //public Dictionary<string, int> keywords = new Dictionary<string, int>();
         public ArrayList keywords = new ArrayList();
         public ArrayList booleans = new ArrayList();
+        public ArrayList syntax = new ArrayList();
 
         public delegate void TextChangedHandler(object sender, EventArgs e);
         int mode = 0; // used in parsing richtext
@@ -134,16 +134,6 @@ namespace Pyjama
                 Convert.ToInt32(root.GetAttribute("size")),
                 (FontStyle)Enum.Parse(typeof(FontStyle), root.GetAttribute("style"))));
  
-            /* Syntax Format */
-            XmlNodeList syntaxList = doc.SelectNodes("default/syntax");
-            XmlNode syntaxNode = syntaxList[0];
-            XmlAttributeCollection syntaxCol = syntaxNode.Attributes;
-
-            colors.Add("syntax", Color.FromName(syntaxCol[0].Value.ToString()));
-            fonts.Add("syntax", new Font(syntaxCol[1].Value.ToString(), 
-                Convert.ToInt32(syntaxCol[2].Value.ToString()), 
-                (FontStyle)Enum.Parse(typeof(FontStyle), syntaxCol[3].Value.ToString())));
-
             /* Comment Format */
             XmlNodeList commentList = doc.SelectNodes("default/comment");
             XmlNode commentNode = commentList[0];
@@ -175,8 +165,22 @@ namespace Pyjama
                 (FontStyle)Enum.Parse(typeof(FontStyle), keywordCol[3].Value.ToString())));
 
             XmlNodeList keyChilds = keywordNode.ChildNodes;
-            foreach (XmlNode child in keyChilds)
-                keywords.Add(child.InnerXml.ToString());
+            foreach (XmlNode kChild in keyChilds)
+                keywords.Add(kChild.InnerXml.ToString());
+
+            /* Syntax Format */
+            XmlNodeList syntaxList = doc.SelectNodes("default/syntax");
+            XmlNode syntaxNode = syntaxList[0];
+            XmlAttributeCollection syntaxCol = syntaxNode.Attributes;
+
+            colors.Add("syntax", Color.FromName(syntaxCol[0].Value.ToString()));
+            fonts.Add("syntax", new Font(syntaxCol[1].Value.ToString(),
+                Convert.ToInt32(syntaxCol[2].Value.ToString()),
+                (FontStyle)Enum.Parse(typeof(FontStyle), syntaxCol[3].Value.ToString())));
+
+            XmlNodeList syntaxChilds = syntaxNode.ChildNodes;
+            foreach (XmlNode sChild in syntaxChilds)
+                syntax.Add(sChild.InnerXml.ToString());
 
             /* Booleans */
             XmlNodeList boolList = doc.SelectNodes("default/boolean");
@@ -261,11 +265,59 @@ namespace Pyjama
             textBox.lockUpdate = true;
             mode = 0; // start out in no mode
             // FIXME: need to format only the visible
-            for (int i = 0; i < 30; i++)
+            for (int i = 0; i < 60; i++)
             {
                 FormatLine(i);
             }
             textBox.lockUpdate = false;
+        }
+
+        // Going to see if I can write a parser using the RegEx class
+        public void ParseAll()
+        {
+            textBox.lockUpdate = true;
+            Regex r = new Regex("\\n");
+            String[] lines = r.Split(textBox.Text.ToString());
+            foreach (string l in lines)
+            {
+                ParseLine(l);
+            }
+            textBox.lockUpdate = false;
+        }
+
+        public void ParseLine(string line)
+        {
+            string pattern;
+            pattern = @"\s+[:]\t$";
+            Regex r = new Regex(pattern);
+            String[] tokens = r.Split(line);
+            foreach (string token in tokens)
+            {
+                System.Console.WriteLine("string = ", token);
+                textBox.SelectionColor = colors["default"];
+                textBox.SelectionFont = fonts["default"];
+
+                if (keywords.Contains(token))
+                {
+                    textBox.SelectionColor = colors["keyword"];
+                    textBox.SelectionFont = fonts["keyword"];
+                    break;
+                }
+                else if (booleans.Contains(token))
+                {
+                    textBox.SelectionColor = colors["boolean"];
+                    textBox.SelectionFont = fonts["boolean"];
+                    break;
+                }
+                else if (syntax.Contains(token))
+                {
+                    textBox.SelectionColor = colors["comment"];
+                    textBox.SelectionFont = fonts["comment"];
+                    break;
+                }
+                textBox.SelectedText = token;
+            }
+            textBox.SelectedText = "\n";
         }
 
         public void FormatLine(int lineno) {
@@ -320,7 +372,6 @@ namespace Pyjama
                     {
                         token = textBox.Text.Substring(tokenStart, index - tokenStart);
                         
-                        //if (keywords.ContainsKey(token))
                         if (keywords.Contains(token))
                         {
                             mode = 0;
@@ -336,6 +387,14 @@ namespace Pyjama
                             textBox.SelectionLength = token.Length;
                             textBox.SelectionColor = colors["boolean"];
                             textBox.SelectionFont = fonts["boolean"];
+                        }
+                        else if (syntax.Contains(token))
+                        {
+                            mode = 0;
+                            textBox.SelectionStart = tokenStart;
+                            textBox.SelectionLength = token.Length;
+                            textBox.SelectionColor = colors["syntax"];
+                            textBox.SelectionFont = fonts["syntax"];
                         }
                         else
                         {
