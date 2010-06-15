@@ -262,10 +262,10 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Config\Python.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    <Content Include="Config\CSharpConfig.xml" />
+    <Content Include="Config\PythonConfig.xml">
     </Content>
-    <Content Include="Config\Ruby.xml">
+    <Content Include="Config\RubyConfig.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <None Include="Properties\app.manifest" />

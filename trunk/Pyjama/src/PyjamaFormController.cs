@@ -45,8 +45,8 @@ namespace Pyjama
                 Save();
                 ActiveCodeFile activeFile = pyjamaForm.GetCurrentActiveFile();
                 if (!activeFile.Unsaved) {
-                    string filename = pyjamaForm.GetCurrentActiveFile().Location;
-                    pyjamaForm.ExecuteFile(filename); // FIXME: pass in language
+                    string filename = pyjamaForm.GetCurrentActiveFile().Location;                    
+                    pyjamaForm.ExecuteFile(filename); // FIXME: pass in language is Fixed!   
                 }
             }
         }
@@ -66,7 +66,6 @@ namespace Pyjama
         {
             OpenFileDialog open = new OpenFileDialog();
             open.Filter = "All Files (*.*)|*.*";
-            //open.Filter = "PY/RB/SS Files (*.py; *.rb; *.ss)|*.py;*.rb;*.ss";
             if (open.ShowDialog() == DialogResult.OK)
             {
                 ActiveCodeFile file = new ActiveCodeFile(open.FileName);
@@ -110,7 +109,7 @@ namespace Pyjama
 
         private ActiveCodeFile CreateDefaultActiveFile(string language)
         {
-	  // FIXME: connect to loaded languages in Shell
+	        // FIXME: connect to loaded languages in Shell
             string usedFileExt = ApplicationOptions.DefaultExtension;
             string file = Path.GetFileNameWithoutExtension(Path.GetRandomFileName()) + usedFileExt;
             string path = Path.Combine(Path.GetTempPath(), file);

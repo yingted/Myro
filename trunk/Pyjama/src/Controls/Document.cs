@@ -8,6 +8,7 @@ using System.Xml;
 using System.IO;
 using System.Reflection;
 using System.Collections;
+using System.Runtime.InteropServices;
 
 namespace Pyjama
 {
@@ -117,16 +118,18 @@ namespace Pyjama
             textBox.WordWrap = false;
             // Resue fonts on formatting:
             
-            string fileName = @"Config/Python.xml";
-            string fullPath = Path.GetFullPath(fileName);
+            // Need to make general
+            //string fileName = @"Config/PythonConfig.xml";
+            //string fullPath = Path.GetFullPath(fileName);
+            string fullPath = @"C:\Users\Vincent\Documents\Pyjama\src\Config\PythonConfig.xml";
             XmlDocument doc = new XmlDocument();
             doc.Load(fullPath);
             XmlElement root = doc.DocumentElement;
-            //XmlNodeList list = root.ChildNodes;
 
             //FixMe: Make more general
             //Idea: If XML format does not change, the order of elements will always
             //be color, font, size, and style
+            //But right now, too specific and can crash easily if *.xml config file is altered 
 
             /* Default Format */
             colors.Add(root.Name.ToString(), Color.FromName(root.GetAttribute("color")));
@@ -243,6 +246,7 @@ namespace Pyjama
         void textbox_TextChanged(object sender, EventArgs e)
         {
             // Modify signal, for "*" and mark dirty:
+            
             if (TextChanged != null)
                 TextChanged(this, e);
             int lineno = textBox.GetLineFromCharIndex(textBox.GetFirstCharIndexOfCurrentLine());
@@ -257,6 +261,42 @@ namespace Pyjama
                 if (mode == 0) break;
             }
             textBox.lockUpdate = false;
+             
+            /* Method will highlight within words too
+            try
+            {
+                if (TextChanged != null)
+                    TextChanged(this, e);
+
+                textBox.lockUpdate = true;
+                string pattern = "";
+                foreach (string key in keywords)
+                {
+                    pattern += key;
+                    pattern += "|";
+                }
+                //System.Console.WriteLine(pattern);
+                Regex keyWords = new Regex(pattern);
+
+                int selPos = textBox.SelectionStart;
+                foreach (Match keyWordMatch in keyWords.Matches(textBox.Text))
+                {
+                    textBox.Select(keyWordMatch.Index, keyWordMatch.Length);
+                    textBox.SelectionColor = colors["keyword"];
+                    textBox.SelectionFont = fonts["keyword"];
+
+                    textBox.SelectionStart = selPos;
+                    //textBox.Select(selPos, 0);
+                    textBox.SelectionColor = colors["default"];
+                    textBox.SelectionFont = fonts["default"];
+
+                }
+            }
+            finally
+            {
+                textBox.lockUpdate = false;
+            }
+             */
         }
 
         public void FormatAll()
@@ -265,7 +305,9 @@ namespace Pyjama
             textBox.lockUpdate = true;
             mode = 0; // start out in no mode
             // FIXME: need to format only the visible
-            for (int i = 0; i < 60; i++)
+            //for (int i = 0; i < 60; i++)
+            
+            for (int i = 0; i < textBox.Lines.Length; i++)
             {
                 FormatLine(i);
             }
@@ -287,13 +329,12 @@ namespace Pyjama
 
         public void ParseLine(string line)
         {
-            string pattern;
-            pattern = @"\s+[:]\t$";
+            string pattern = "([ \\t{}():;])";
             Regex r = new Regex(pattern);
             String[] tokens = r.Split(line);
             foreach (string token in tokens)
             {
-                System.Console.WriteLine("string = ", token);
+                //System.Console.WriteLine("string = ", token);
                 textBox.SelectionColor = colors["default"];
                 textBox.SelectionFont = fonts["default"];
 

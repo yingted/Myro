@@ -24,6 +24,7 @@ namespace Pyjama
 	    InitializeComponent();
             MainForm = main_form;
             Text = "NewFile";
+            //System.Console.WriteLine("File Extension = ", fileExtension);
             CreateTextBox(fileExtension);
             //this.ImageIndex = 0;
         }
@@ -40,6 +41,7 @@ namespace Pyjama
         private void CreateTextBox(string fileExtension)
         {
             //if (MonoEnvironment.IsRunningOnMono())
+            //System.Console.WriteLine("FileExtension = ", fileExtension.ToString());
             textBox = new Document(MainForm);
             //else
             //textBox = new CodeEditorIDETextBox(fileExtension);
@@ -76,8 +78,8 @@ namespace Pyjama
         public void SetInitialText(string text)
         {
             Input.Text = text;
-            //textBox.FormatAll();
-            textBox.ParseAll();
+            textBox.FormatAll();
+            //textBox.ParseAll();
             RemoveSaveStatus();
         }
 

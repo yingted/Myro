@@ -30,6 +30,7 @@ namespace Pyjama
             foreach (string filename in args)
             {
                 string fullFilename = Path.GetFullPath(filename);
+                System.Console.WriteLine("FullFilename = {0}", fullFilename);
                 // FIXME: if file exists, or allow create, if dir exists?
                 OpenFile(fullFilename);
                 opened++;
@@ -152,8 +153,32 @@ namespace Pyjama
 
         public void ExecuteFile(string filename) // FIXME: take language
         {
+            System.Console.WriteLine("Just checking");
+            //
+            ExecuteEnvironment(filename);
             outputWindow.textbox.DoFile(filename);
             commandTextBox.Focus();
+        }
+
+        public void ExecuteEnvironment(string filename)
+        {
+            string extension = Path.GetExtension(filename);
+
+            switch (extension)
+            {
+                case ".py":
+                    shellLanguageSelect("Python");
+                    editorLanguageSelect("Python");
+                    break;
+                case ".rb":
+                    shellLanguageSelect("Ruby");
+                    editorLanguageSelect("Ruby");
+                    break;
+                case ".ss":
+                    shellLanguageSelect("Scheme");
+                    editorLanguageSelect("Scheme");
+                    break;
+            }
         }
 
         public void SelectCommandShell()
@@ -302,7 +327,7 @@ namespace Pyjama
         }
         #endregion
 
-        private void shellLanguageSelect(string name)
+        public void shellLanguageSelect(string name)
         {
             switch (name)
             {
@@ -334,19 +359,66 @@ namespace Pyjama
         private void shellLanguageSelect1_Click(object sender, EventArgs e)
         {
             ToolStripMenuItem parent = (ToolStripMenuItem)sender;
+            editorLanguageSelect(parent.Text.ToString());
             shellLanguageSelect(parent.Text.ToString());
         }
 
         private void shellLanguageSelect2_Click(object sender, EventArgs e)
         {
             ToolStripMenuItem parent = (ToolStripMenuItem)sender;
+            editorLanguageSelect(parent.Text.ToString());
             shellLanguageSelect(parent.Text.ToString());
         }
 
         private void shellLanguageSelect3_Click(object sender, EventArgs e)
         {
             ToolStripMenuItem parent = (ToolStripMenuItem)sender;
+            editorLanguageSelect(parent.Text.ToString());
             shellLanguageSelect(parent.Text.ToString());
+        }
+
+        private void pythonToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            ToolStripMenuItem parent = (ToolStripMenuItem)sender;
+            editorLanguageSelect(parent.Text.ToString());
+            shellLanguageSelect(parent.Text.ToString());
+        }
+
+        private void rubyToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            ToolStripMenuItem parent = (ToolStripMenuItem)sender;
+            editorLanguageSelect(parent.Text.ToString());
+            shellLanguageSelect(parent.Text.ToString());
+        }
+
+        private void schemeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ToolStripMenuItem parent = (ToolStripMenuItem)sender;
+            editorLanguageSelect(parent.Text.ToString());
+            shellLanguageSelect(parent.Text.ToString());
+        }
+
+        public void editorLanguageSelect(string name)
+        {
+            switch (name)
+            {
+                case "Python":
+                    pythonToolStripMenuItem1.Checked = true;
+                    rubyToolStripMenuItem1.Checked = false;
+                    schemeToolStripMenuItem.Checked = false;                    
+                    break;
+                case "Ruby":
+                    pythonToolStripMenuItem1.Checked = false;
+                    rubyToolStripMenuItem1.Checked = true;
+                    schemeToolStripMenuItem.Checked = false; 
+                    break;
+                case "Scheme":
+                    pythonToolStripMenuItem1.Checked = false;
+                    rubyToolStripMenuItem1.Checked = false;
+                    schemeToolStripMenuItem.Checked = true; 
+                    break;
+            }
+            editorLanguageButton.Text = name.ToString();
         }
 
         private void runButton_Click(object sender, EventArgs e)
@@ -591,5 +663,9 @@ namespace Pyjama
 
         }
 
+        private void shellLanguageButton_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }

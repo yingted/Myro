@@ -55,7 +55,7 @@ using System.Windows.Forms;
              this.statusStrip1 = new System.Windows.Forms.StatusStrip();
              this.toolStripStatusLabel8 = new System.Windows.Forms.ToolStripStatusLabel();
              this.toolStripStatusLabel9 = new System.Windows.Forms.ToolStripStatusLabel();
-             this.toolStripStatusLabel10 = new System.Windows.Forms.ToolStripDropDownButton();
+             this.editorLanguageButton = new System.Windows.Forms.ToolStripDropDownButton();
              this.pythonToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
              this.rubyToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
              this.schemeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -181,7 +181,7 @@ using System.Windows.Forms;
              this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripStatusLabel8,
             this.toolStripStatusLabel9,
-            this.toolStripStatusLabel10,
+            this.editorLanguageButton,
             this.toolStripStatusLabel11,
             this.lineNumber,
             this.toolStripStatusLabel13,
@@ -201,15 +201,16 @@ using System.Windows.Forms;
              resources.ApplyResources(this.toolStripStatusLabel9, "toolStripStatusLabel9");
              this.toolStripStatusLabel9.Name = "toolStripStatusLabel9";
              // 
-             // toolStripStatusLabel10
+             // editorLanguageButton
              // 
-             this.toolStripStatusLabel10.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+             this.editorLanguageButton.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.pythonToolStripMenuItem1,
             this.rubyToolStripMenuItem1,
             this.schemeToolStripMenuItem});
-             this.toolStripStatusLabel10.Name = "toolStripStatusLabel10";
-             this.toolStripStatusLabel10.Padding = new System.Windows.Forms.Padding(35, 0, 0, 0);
-             resources.ApplyResources(this.toolStripStatusLabel10, "toolStripStatusLabel10");
+             this.editorLanguageButton.Name = "editorLanguageButton";
+             this.editorLanguageButton.Padding = new System.Windows.Forms.Padding(35, 0, 0, 0);
+             resources.ApplyResources(this.editorLanguageButton, "editorLanguageButton");
+             //this.editorLanguageButton.Click += new System.EventHandler(this.editorLanguageButton_Click);
              // 
              // pythonToolStripMenuItem1
              // 
@@ -217,16 +218,19 @@ using System.Windows.Forms;
              this.pythonToolStripMenuItem1.CheckState = System.Windows.Forms.CheckState.Checked;
              this.pythonToolStripMenuItem1.Name = "pythonToolStripMenuItem1";
              resources.ApplyResources(this.pythonToolStripMenuItem1, "pythonToolStripMenuItem1");
+             this.pythonToolStripMenuItem1.Click += new System.EventHandler(this.pythonToolStripMenuItem1_Click);
              // 
              // rubyToolStripMenuItem1
              // 
              this.rubyToolStripMenuItem1.Name = "rubyToolStripMenuItem1";
              resources.ApplyResources(this.rubyToolStripMenuItem1, "rubyToolStripMenuItem1");
+             this.rubyToolStripMenuItem1.Click += new System.EventHandler(this.rubyToolStripMenuItem1_Click);
              // 
              // schemeToolStripMenuItem
              // 
              this.schemeToolStripMenuItem.Name = "schemeToolStripMenuItem";
              resources.ApplyResources(this.schemeToolStripMenuItem, "schemeToolStripMenuItem");
+             this.schemeToolStripMenuItem.Click += new System.EventHandler(this.schemeToolStripMenuItem_Click);
              // 
              // toolStripStatusLabel11
              // 
@@ -371,6 +375,7 @@ using System.Windows.Forms;
              resources.ApplyResources(this.shellLanguageButton, "shellLanguageButton");
              this.shellLanguageButton.Name = "shellLanguageButton";
              this.shellLanguageButton.Padding = new System.Windows.Forms.Padding(35, 0, 0, 0);
+             this.shellLanguageButton.Click += new System.EventHandler(this.shellLanguageButton_Click);
              // 
              // shellLanguageSelect1
              // 
@@ -876,7 +881,7 @@ using System.Windows.Forms;
          private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel9;
          private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel11;
          private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel13;
-         private System.Windows.Forms.ToolStripDropDownButton toolStripStatusLabel10;
+         private System.Windows.Forms.ToolStripDropDownButton editorLanguageButton;
          private System.Windows.Forms.ToolStripMenuItem pythonToolStripMenuItem1;
          private System.Windows.Forms.ToolStripMenuItem rubyToolStripMenuItem1;
          private System.Windows.Forms.ToolStripMenuItem schemeToolStripMenuItem;
