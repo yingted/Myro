@@ -262,12 +262,15 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Config\CSharpConfig.xml" />
-    <Content Include="Config\PythonConfig.xml">
-    </Content>
-    <Content Include="Config\RubyConfig.xml">
+    <EmbeddedResource Include="Config\CSharpConfig.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Config\PythonConfig.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Config\RubyConfig.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
     <None Include="Properties\app.manifest" />
     <None Include="Resources\Start.png" />
     <None Include="Resources\FastRun.png" />

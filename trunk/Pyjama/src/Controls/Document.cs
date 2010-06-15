@@ -119,9 +119,9 @@ namespace Pyjama
             // Resue fonts on formatting:
             
             // Need to make general
-            //string fileName = @"Config/PythonConfig.xml";
-            //string fullPath = Path.GetFullPath(fileName);
-            string fullPath = @"C:\Users\Vincent\Documents\Pyjama\src\Config\PythonConfig.xml";
+            string fileName = @"Config/PythonConfig.xml";
+            string fullPath = Path.GetFullPath(fileName);
+
             XmlDocument doc = new XmlDocument();
             doc.Load(fullPath);
             XmlElement root = doc.DocumentElement;

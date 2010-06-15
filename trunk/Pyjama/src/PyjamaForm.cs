@@ -356,6 +356,7 @@ namespace Pyjama
             outputWindow.textbox.consoleTextBox.printPrompt();
             commandTextBox.Focus();
         }
+
         private void shellLanguageSelect1_Click(object sender, EventArgs e)
         {
             ToolStripMenuItem parent = (ToolStripMenuItem)sender;

@@ -406,6 +406,7 @@ namespace UIIronTextBox
 	public void RestartShell(bool displayRestart) {
             environment = new ScriptRuntime(scriptRuntimeSetup);
             scope = environment.CreateScope();
+            
             engine = environment.GetEngine("py");
             if (System.Environment.OSVersion.Platform == System.PlatformID.Unix)
             {
