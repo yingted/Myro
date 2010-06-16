@@ -32,7 +32,7 @@ namespace Pyjama
 			int oldSelectionStart = SelectionStart;
 			int oldSelectionLength = SelectionLength;
 			Clear();
-			Rtf = oldRtf;
+			Rtf = oldRtf; // debug this 
 			SelectionStart = oldSelectionStart;
 			SelectionLength = oldSelectionLength;
 		  }
@@ -95,6 +95,8 @@ namespace Pyjama
         public ArrayList keywords = new ArrayList();
         public ArrayList booleans = new ArrayList();
         public ArrayList syntax = new ArrayList();
+        public ArrayList comments = new ArrayList();
+        public ArrayList quotes = new ArrayList();
 
         public delegate void TextChangedHandler(object sender, EventArgs e);
         int mode = 0; // used in parsing richtext
@@ -178,23 +180,28 @@ namespace Pyjama
             /* Comment Format */
             ReadConfigFile(doc, "comment");
             System.Console.WriteLine("Comments read in!");
-            
+            System.Console.WriteLine("Comments = {0}", comments.Count);
+
             /* Quote Format */
             ReadConfigFile(doc, "quote");
             System.Console.WriteLine("Quotes are done!");
-            
+            System.Console.WriteLine("Quotes = {0}", quotes.Count);
+
             /* Keyword */
             ReadConfigFile(doc, "keyword");
-            System.Console.WriteLine("Keywords are done!");        
+            System.Console.WriteLine("Keywords are done!");
+            System.Console.WriteLine("Keywords = {0}", keywords.Count);
 
             /* Syntax Format */
             ReadConfigFile(doc, "syntax");
             System.Console.WriteLine("Syntax read in!");
-           
+            System.Console.WriteLine("Syntax = {0}", syntax.Count);
+
             /* Booleans */
             ReadConfigFile(doc, "boolean");
             System.Console.WriteLine("Bools read in!");
-            
+            System.Console.WriteLine("Bools = {0}", booleans.Count);
+
             // -----------------------------
             Controls.Add(textBox);           
         }
@@ -222,11 +229,35 @@ namespace Pyjama
                     {
                         XmlNodeList elementChilds = elementNode.ChildNodes;
                         foreach (XmlNode eChild in elementChilds)
-                            keywords.Add(eChild.InnerXml.ToString());
+                        {
+                            switch (element)
+                            {
+                                case "keyword":
+                                    keywords.Add(eChild.InnerXml.ToString());
+                                    break;
+
+                                case "boolean":
+                                    booleans.Add(eChild.InnerXml.ToString());
+                                    break;
+                                
+                                case "syntax":
+                                    syntax.Add(eChild.InnerXml.ToString());
+                                    break;
+
+                                case "comment":
+                                    comments.Add(eChild.InnerXml.ToString());
+                                    break;
+
+                                case "quote":
+                                    quotes.Add(eChild.InnerXml.ToString());
+                                    break;
+                            }
+                        }
                     }
                 }
             }
         }
+
         void textBox_MouseClick(object sender, MouseEventArgs e)
         {
             int col = (textBox.SelectionStart - textBox.GetFirstCharIndexOfCurrentLine() + 1);
@@ -408,7 +439,8 @@ namespace Pyjama
             {
                 if (mode == 0)
                 {
-                    if (c == '"') {
+                    //if (c == '"') {
+                    if (quotes.Contains(c)) {
                         mode = 2;
                         tokenStart = index;
                         textBox.SelectionColor = colors["quote"];
@@ -416,7 +448,7 @@ namespace Pyjama
                     } else if (c == '\'') {
                         mode = 3;
                         tokenStart = index;
-                    } else if (c == '#')
+                    } else if (comments.Contains(c)) //else if (c == '#')               
                     {
                         mode = 0;
                         textBox.SelectionStart = index;
@@ -473,7 +505,7 @@ namespace Pyjama
                 }
                 else if (mode == 2) // in double quote
                 {
-                    if (c == '"' || c == '\0') // end of double quote
+                    if (quotes.Contains(c)) //if (c == '"' || c == '\0') // end of double quote
                     {
                         if (c == '"')
                         {

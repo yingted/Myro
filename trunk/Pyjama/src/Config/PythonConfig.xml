@@ -53,6 +53,7 @@
     <EOF>"""</EOF>
     <EOF>"</EOF>
     <EOF>'</EOF>
+    <EOF>\0</EOF>
   </quote>
 
   <comment color="Red" font="Courier New" size="10" style="Regular">
