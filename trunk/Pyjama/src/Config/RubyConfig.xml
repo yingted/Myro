@@ -53,9 +53,16 @@
 
   </boolean>
 
-  <quote color="Green" font="Courier New" size="10" style="Regular"></quote>
+  <quote color="Green" font="Courier New" size="10" style="Regular">
+    <word>%Q</word>
+    <word>%q</word>
+  </quote>
 
-  <comment color="Red" font="Courier New" size="10" style="Regular"></comment>
+  <comment color="Red" font="Courier New" size="10" style="Regular">
+    <word>#</word>
+    <word>=begin</word>
+    <word>=end</word>
+  </comment>
 
   <syntax color="Red" font="Courier New" size="10" style="Regular">
     <word>puts</word>

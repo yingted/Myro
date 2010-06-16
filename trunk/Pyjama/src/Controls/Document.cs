@@ -144,7 +144,9 @@ namespace Pyjama
             textBox.WordWrap = false;
             // Resue fonts on formatting:
             
-            // Need to make general
+            /* Error checking for Configuration file loading */
+            /* Check /bin/Debug/ folder or /Pyjama/ folder */
+
             string config = GetConfigFile(filename);
             string fullPath = Path.GetFullPath(config);
 
@@ -167,122 +169,64 @@ namespace Pyjama
  
             XmlElement root = doc.DocumentElement;
 
-            //FixMe: Make more general
-            //Idea: If XML format does not change, the order of elements will always
-            //be color, font, size, and style
-            //But right now, too specific and can crash easily if *.xml config file is altered 
-
             /* Default Format */
             colors.Add(root.Name.ToString(), Color.FromName(root.GetAttribute("color")));
             fonts.Add(root.Name.ToString(), new Font(root.GetAttribute("font"),
                 Convert.ToInt32(root.GetAttribute("size")),
                 (FontStyle)Enum.Parse(typeof(FontStyle), root.GetAttribute("style"))));
- 
+            
             /* Comment Format */
-            if (doc.SelectNodes("default/comment").Count != 0)
-            {
-                XmlNodeList commentList = doc.SelectNodes("default/comment");
-                if (commentList.Count != 0)
-                {
-                    XmlNode commentNode = commentList[0];
-                    XmlAttributeCollection commentCol = commentNode.Attributes;
-
-                    colors.Add("comment", Color.FromName(commentCol[0].Value.ToString()));
-                    fonts.Add("comment", new Font(commentCol[1].Value.ToString(),
-                        Convert.ToInt32(commentCol[2].Value.ToString()),
-                        (FontStyle)Enum.Parse(typeof(FontStyle), commentCol[3].Value.ToString())));
-                }
-            }
-
+            ReadConfigFile(doc, "comment");
+            System.Console.WriteLine("Comments read in!");
+            
             /* Quote Format */
-            if (doc.SelectNodes("default/quote").Count != 0)
-            {
-                XmlNodeList quoteList = doc.SelectNodes("default/quote");
-                if (quoteList.Count != 0)
-                {
-                    XmlNode quoteNode = quoteList[0];
-                    XmlAttributeCollection quoteCol = quoteNode.Attributes;
-
-                    colors.Add("quote", Color.FromName(quoteCol[0].Value.ToString()));
-                    fonts.Add("quote", new Font(quoteCol[1].Value.ToString(),
-                        Convert.ToInt32(quoteCol[2].Value.ToString()),
-                        (FontStyle)Enum.Parse(typeof(FontStyle), quoteCol[3].Value.ToString())));
-                }
-            }
-
+            ReadConfigFile(doc, "quote");
+            System.Console.WriteLine("Quotes are done!");
+            
             /* Keyword */
-            if (doc.SelectNodes("default/keyword").Count != 0)
-            {
-                XmlNodeList keywordList = doc.SelectNodes("default/keyword");
-                if (keywordList.Count != 0)
-                {
-                    XmlNode keywordNode = keywordList[0];
-                    XmlAttributeCollection keywordCol = keywordNode.Attributes;
-
-                    colors.Add("keyword", Color.FromName(keywordCol[0].Value.ToString()));
-                    fonts.Add("keyword", new Font(keywordCol[1].Value.ToString(),
-                        Convert.ToInt32(keywordCol[2].Value.ToString()),
-                        (FontStyle)Enum.Parse(typeof(FontStyle), keywordCol[3].Value.ToString())));
-
-                    if (keywordNode.ChildNodes.Count != 0)
-                    {
-                        XmlNodeList keyChilds = keywordNode.ChildNodes;
-                        foreach (XmlNode kChild in keyChilds)
-                            keywords.Add(kChild.InnerXml.ToString());
-                    }
-                }
-            }
+            ReadConfigFile(doc, "keyword");
+            System.Console.WriteLine("Keywords are done!");        
 
             /* Syntax Format */
-            if (doc.SelectNodes("default/syntax").Count != 0)
-            {
-                XmlNodeList syntaxList = doc.SelectNodes("default/syntax");
-                if (syntaxList.Count != 0)
-                {
-                    XmlNode syntaxNode = syntaxList[0];
-                    
-                    XmlAttributeCollection syntaxCol = syntaxNode.Attributes;
-                    colors.Add("syntax", Color.FromName(syntaxCol[0].Value.ToString()));
-                    fonts.Add("syntax", new Font(syntaxCol[1].Value.ToString(),
-                        Convert.ToInt32(syntaxCol[2].Value.ToString()),
-                        (FontStyle)Enum.Parse(typeof(FontStyle), syntaxCol[3].Value.ToString())));
-      
-                    if (syntaxNode.ChildNodes.Count != 0)
-                    {
-                        XmlNodeList syntaxChilds = syntaxNode.ChildNodes;
-                        foreach (XmlNode sChild in syntaxChilds)
-                            syntax.Add(sChild.InnerXml.ToString());
-                    }
-                }
-            }
-
+            ReadConfigFile(doc, "syntax");
+            System.Console.WriteLine("Syntax read in!");
+           
             /* Booleans */
-            if (doc.SelectNodes("default/boolean").Count != 0)
-            {
-                XmlNodeList boolList = doc.SelectNodes("default/boolean");
-                if (boolList.Count != 0)
-                {
-                    XmlNode boolNode = boolList[0];
-                    XmlAttributeCollection boolCol = boolNode.Attributes;
-
-                    colors.Add("boolean", Color.FromName(boolCol[0].Value.ToString()));
-                    fonts.Add("boolean", new Font(boolCol[1].Value.ToString(),
-                        Convert.ToInt32(boolCol[2].Value.ToString()),
-                        (FontStyle)Enum.Parse(typeof(FontStyle), boolCol[3].Value.ToString())));
-
-                    if (boolNode.ChildNodes.Count != 0)
-                    {
-                        XmlNodeList boolChilds = boolNode.ChildNodes;
-                        foreach (XmlNode bChild in boolChilds)
-                            booleans.Add(bChild.InnerXml.ToString());
-                    }
-                }
-            }
-
+            ReadConfigFile(doc, "boolean");
+            System.Console.WriteLine("Bools read in!");
+            
             // -----------------------------
             Controls.Add(textBox);           
         }
 
+        //FixMe: Make more general
+        //Idea: If XML format does not change, the order of elements will always
+        //be color, font, size, and style
+        //But right now, too specific and can crash easily if *.xml config file is altered 
+        void ReadConfigFile(XmlDocument doc, string element)
+        {
+            if (doc.SelectNodes("default/" + element).Count != 0)
+            {
+                XmlNodeList elementList = doc.SelectNodes("default/" + element);
+                if (elementList.Count != 0)
+                {
+                    XmlNode elementNode = elementList[0];
+                    XmlAttributeCollection elementCol = elementNode.Attributes;
+
+                    colors.Add(element, Color.FromName(elementCol[0].Value.ToString()));
+                    fonts.Add(element, new Font(elementCol[1].Value.ToString(),
+                        Convert.ToInt32(elementCol[2].Value.ToString()),
+                        (FontStyle)Enum.Parse(typeof(FontStyle), elementCol[3].Value.ToString())));
+
+                    if (elementNode.ChildNodes.Count != 0)
+                    {
+                        XmlNodeList elementChilds = elementNode.ChildNodes;
+                        foreach (XmlNode eChild in elementChilds)
+                            keywords.Add(eChild.InnerXml.ToString());
+                    }
+                }
+            }
+        }
         void textBox_MouseClick(object sender, MouseEventArgs e)
         {
             int col = (textBox.SelectionStart - textBox.GetFirstCharIndexOfCurrentLine() + 1);
