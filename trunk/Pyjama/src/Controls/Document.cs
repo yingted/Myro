@@ -100,9 +100,35 @@ namespace Pyjama
         int mode = 0; // used in parsing richtext
         int[] last_mode = new int[10000];
 
-        public Document(IMainForm main_form)
+        public string GetConfigFile(string filename)
+        {
+            string fileExt = Path.GetExtension(filename);
+            string config;
+            switch (fileExt)
+            {
+                case ".py":
+                    config = "Config//PythonConfig.xml";
+                    break;
+                case ".rb":
+                    config = "Config//RubyConfig.xml";
+                    break;
+                case ".ss":
+                    config = "Config//SchemeConfig.xml";
+                    break;
+                case ".cs":
+                    config = "Config//CSharpConfig.xml";
+                    break;
+                default:
+                    config = "Config//PythonConfig.xml";
+                    break;
+            }
+            return config;
+        }
+
+        public Document(IMainForm main_form, string filename)
         {
             MainForm = main_form;
+            
             InitializeComponent();
             this.Dock = DockStyle.Fill;
             textBox = new MyRichTextBox();
@@ -119,8 +145,8 @@ namespace Pyjama
             // Resue fonts on formatting:
             
             // Need to make general
-            string fileName = @"Config/CSharpConfig.xml";
-            string fullPath = Path.GetFullPath(fileName);
+            string config = GetConfigFile(filename);
+            string fullPath = Path.GetFullPath(config);
 
             XmlDocument doc = new XmlDocument();
             doc.Load(fullPath);

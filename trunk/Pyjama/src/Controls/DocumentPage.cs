@@ -11,7 +11,7 @@ namespace Pyjama
         public IMainForm MainForm;
 
         public DocumentPage(IMainForm main_form, ActiveCodeFile file)
-            : this(main_form, file.FileExtension)
+            : this(main_form, file.FileName) //file.FileExtension)
         {
 	    InitializeComponent();
             UpdateFileName(file);
@@ -34,7 +34,7 @@ namespace Pyjama
 	    InitializeComponent();
             MainForm = main_form;
             Text = "NewFile";
-            CreateTextBox(string.Empty);
+            CreateTextBox(string.Empty); //File ext needs to be passed here
             //this.ImageIndex = 0;
         }
 
@@ -42,7 +42,8 @@ namespace Pyjama
         {
             //if (MonoEnvironment.IsRunningOnMono())
             //System.Console.WriteLine("FileExtension = ", fileExtension.ToString());
-            textBox = new Document(MainForm);
+            //textBox = new Document(MainForm); //pass in file extension
+            textBox = new Document(MainForm, fileExtension);
             //else
             //textBox = new CodeEditorIDETextBox(fileExtension);
 

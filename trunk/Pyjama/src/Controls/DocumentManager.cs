@@ -51,7 +51,8 @@ namespace Pyjama
             DocumentPage tab = new DocumentPage(main_form, file);
             if (FontToUse != null)
                 tab.Input.Font = FontToUse;
-            tab.SetInitialText(File.ReadAllText(file.Location));
+            tab.SetInitialText(File.ReadAllText(file.Location)); 
+            
             tabControl.TabPages.Add(tab);
             tabControl.SelectedTab = tab;
         }
