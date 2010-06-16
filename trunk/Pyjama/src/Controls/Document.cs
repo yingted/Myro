@@ -119,7 +119,7 @@ namespace Pyjama
             // Resue fonts on formatting:
             
             // Need to make general
-            string fileName = @"Config/PythonConfig.xml";
+            string fileName = @"Config/CSharpConfig.xml";
             string fullPath = Path.GetFullPath(fileName);
 
             XmlDocument doc = new XmlDocument();
@@ -138,67 +138,106 @@ namespace Pyjama
                 (FontStyle)Enum.Parse(typeof(FontStyle), root.GetAttribute("style"))));
  
             /* Comment Format */
-            XmlNodeList commentList = doc.SelectNodes("default/comment");
-            XmlNode commentNode = commentList[0];
-            XmlAttributeCollection commentCol = commentNode.Attributes;
+            if (doc.SelectNodes("default/comment").Count != 0)
+            {
+                XmlNodeList commentList = doc.SelectNodes("default/comment");
+                if (commentList.Count != 0)
+                {
+                    XmlNode commentNode = commentList[0];
+                    XmlAttributeCollection commentCol = commentNode.Attributes;
 
-            colors.Add("comment", Color.FromName(commentCol[0].Value.ToString()));
-            fonts.Add("comment", new Font(commentCol[1].Value.ToString(),
-                Convert.ToInt32(commentCol[2].Value.ToString()),
-                (FontStyle)Enum.Parse(typeof(FontStyle), commentCol[3].Value.ToString())));
+                    colors.Add("comment", Color.FromName(commentCol[0].Value.ToString()));
+                    fonts.Add("comment", new Font(commentCol[1].Value.ToString(),
+                        Convert.ToInt32(commentCol[2].Value.ToString()),
+                        (FontStyle)Enum.Parse(typeof(FontStyle), commentCol[3].Value.ToString())));
+                }
+            }
 
             /* Quote Format */
-            XmlNodeList quoteList = doc.SelectNodes("default/quote");
-            XmlNode quoteNode = quoteList[0];
-            XmlAttributeCollection quoteCol = quoteNode.Attributes;
+            if (doc.SelectNodes("default/quote").Count != 0)
+            {
+                XmlNodeList quoteList = doc.SelectNodes("default/quote");
+                if (quoteList.Count != 0)
+                {
+                    XmlNode quoteNode = quoteList[0];
+                    XmlAttributeCollection quoteCol = quoteNode.Attributes;
 
-            colors.Add("quote", Color.FromName(quoteCol[0].Value.ToString()));
-            fonts.Add("quote", new Font(quoteCol[1].Value.ToString(),
-                Convert.ToInt32(quoteCol[2].Value.ToString()),
-                (FontStyle)Enum.Parse(typeof(FontStyle), quoteCol[3].Value.ToString())));
+                    colors.Add("quote", Color.FromName(quoteCol[0].Value.ToString()));
+                    fonts.Add("quote", new Font(quoteCol[1].Value.ToString(),
+                        Convert.ToInt32(quoteCol[2].Value.ToString()),
+                        (FontStyle)Enum.Parse(typeof(FontStyle), quoteCol[3].Value.ToString())));
+                }
+            }
 
             /* Keyword */
-            XmlNodeList keywordList = doc.SelectNodes("default/keyword");
-            XmlNode keywordNode = keywordList[0];
-            XmlAttributeCollection keywordCol = keywordNode.Attributes;
+            if (doc.SelectNodes("default/keyword").Count != 0)
+            {
+                XmlNodeList keywordList = doc.SelectNodes("default/keyword");
+                if (keywordList.Count != 0)
+                {
+                    XmlNode keywordNode = keywordList[0];
+                    XmlAttributeCollection keywordCol = keywordNode.Attributes;
 
-            colors.Add("keyword", Color.FromName(keywordCol[0].Value.ToString()));
-            fonts.Add("keyword", new Font(keywordCol[1].Value.ToString(), 
-                Convert.ToInt32(keywordCol[2].Value.ToString()),
-                (FontStyle)Enum.Parse(typeof(FontStyle), keywordCol[3].Value.ToString())));
+                    colors.Add("keyword", Color.FromName(keywordCol[0].Value.ToString()));
+                    fonts.Add("keyword", new Font(keywordCol[1].Value.ToString(),
+                        Convert.ToInt32(keywordCol[2].Value.ToString()),
+                        (FontStyle)Enum.Parse(typeof(FontStyle), keywordCol[3].Value.ToString())));
 
-            XmlNodeList keyChilds = keywordNode.ChildNodes;
-            foreach (XmlNode kChild in keyChilds)
-                keywords.Add(kChild.InnerXml.ToString());
+                    if (keywordNode.ChildNodes.Count != 0)
+                    {
+                        XmlNodeList keyChilds = keywordNode.ChildNodes;
+                        foreach (XmlNode kChild in keyChilds)
+                            keywords.Add(kChild.InnerXml.ToString());
+                    }
+                }
+            }
 
             /* Syntax Format */
-            XmlNodeList syntaxList = doc.SelectNodes("default/syntax");
-            XmlNode syntaxNode = syntaxList[0];
-            XmlAttributeCollection syntaxCol = syntaxNode.Attributes;
-
-            colors.Add("syntax", Color.FromName(syntaxCol[0].Value.ToString()));
-            fonts.Add("syntax", new Font(syntaxCol[1].Value.ToString(),
-                Convert.ToInt32(syntaxCol[2].Value.ToString()),
-                (FontStyle)Enum.Parse(typeof(FontStyle), syntaxCol[3].Value.ToString())));
-
-            XmlNodeList syntaxChilds = syntaxNode.ChildNodes;
-            foreach (XmlNode sChild in syntaxChilds)
-                syntax.Add(sChild.InnerXml.ToString());
+            if (doc.SelectNodes("default/syntax").Count != 0)
+            {
+                XmlNodeList syntaxList = doc.SelectNodes("default/syntax");
+                if (syntaxList.Count != 0)
+                {
+                    XmlNode syntaxNode = syntaxList[0];
+                    
+                    XmlAttributeCollection syntaxCol = syntaxNode.Attributes;
+                    colors.Add("syntax", Color.FromName(syntaxCol[0].Value.ToString()));
+                    fonts.Add("syntax", new Font(syntaxCol[1].Value.ToString(),
+                        Convert.ToInt32(syntaxCol[2].Value.ToString()),
+                        (FontStyle)Enum.Parse(typeof(FontStyle), syntaxCol[3].Value.ToString())));
+      
+                    if (syntaxNode.ChildNodes.Count != 0)
+                    {
+                        XmlNodeList syntaxChilds = syntaxNode.ChildNodes;
+                        foreach (XmlNode sChild in syntaxChilds)
+                            syntax.Add(sChild.InnerXml.ToString());
+                    }
+                }
+            }
 
             /* Booleans */
-            XmlNodeList boolList = doc.SelectNodes("default/boolean");
-            XmlNode boolNode = boolList[0];
-            XmlAttributeCollection boolCol = boolNode.Attributes;
+            if (doc.SelectNodes("default/boolean").Count != 0)
+            {
+                XmlNodeList boolList = doc.SelectNodes("default/boolean");
+                if (boolList.Count != 0)
+                {
+                    XmlNode boolNode = boolList[0];
+                    XmlAttributeCollection boolCol = boolNode.Attributes;
 
-            colors.Add("boolean", Color.FromName(boolCol[0].Value.ToString()));
-            fonts.Add("boolean", new Font(boolCol[1].Value.ToString(),
-                Convert.ToInt32(boolCol[2].Value.ToString()),
-                (FontStyle)Enum.Parse(typeof(FontStyle), boolCol[3].Value.ToString())));
+                    colors.Add("boolean", Color.FromName(boolCol[0].Value.ToString()));
+                    fonts.Add("boolean", new Font(boolCol[1].Value.ToString(),
+                        Convert.ToInt32(boolCol[2].Value.ToString()),
+                        (FontStyle)Enum.Parse(typeof(FontStyle), boolCol[3].Value.ToString())));
 
-            XmlNodeList boolChilds = boolNode.ChildNodes;
-            foreach (XmlNode bChild in boolChilds)
-                booleans.Add(bChild.InnerXml.ToString());                  
-           
+                    if (boolNode.ChildNodes.Count != 0)
+                    {
+                        XmlNodeList boolChilds = boolNode.ChildNodes;
+                        foreach (XmlNode bChild in boolChilds)
+                            booleans.Add(bChild.InnerXml.ToString());
+                    }
+                }
+            }
+
             // -----------------------------
             Controls.Add(textBox);           
         }
