@@ -149,7 +149,22 @@ namespace Pyjama
             string fullPath = Path.GetFullPath(config);
 
             XmlDocument doc = new XmlDocument();
-            doc.Load(fullPath);
+
+            if (File.Exists(fullPath))
+            {
+                doc.Load(fullPath);
+            }
+            else
+            {
+                string new_config = "src/" + config;
+                string new_Path = Path.GetFullPath(new_config);
+
+                if (File.Exists(new_Path))
+                    doc.Load(new_Path);
+                else
+                    System.Console.WriteLine("Configuration file {0} does not exist!", new_Path);    
+            }
+ 
             XmlElement root = doc.DocumentElement;
 
             //FixMe: Make more general

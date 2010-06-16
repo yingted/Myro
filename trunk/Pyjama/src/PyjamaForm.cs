@@ -151,9 +151,8 @@ namespace Pyjama
             //SelectionStart = this.TextLength;
         }
 
-        public void ExecuteFile(string filename) // FIXME: take language
+        public void ExecuteFile(string filename) 
         {
-            System.Console.WriteLine("Just checking");
             //
             ExecuteEnvironment(filename);
             outputWindow.textbox.DoFile(filename);
