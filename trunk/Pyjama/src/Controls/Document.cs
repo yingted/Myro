@@ -179,28 +179,18 @@ namespace Pyjama
             
             /* Comment Format */
             ReadConfigFile(doc, "comment");
-            System.Console.WriteLine("Comments read in!");
-            System.Console.WriteLine("Comments = {0}", comments.Count);
 
             /* Quote Format */
             ReadConfigFile(doc, "quote");
-            System.Console.WriteLine("Quotes are done!");
-            System.Console.WriteLine("Quotes = {0}", quotes.Count);
 
             /* Keyword */
             ReadConfigFile(doc, "keyword");
-            System.Console.WriteLine("Keywords are done!");
-            System.Console.WriteLine("Keywords = {0}", keywords.Count);
 
             /* Syntax Format */
             ReadConfigFile(doc, "syntax");
-            System.Console.WriteLine("Syntax read in!");
-            System.Console.WriteLine("Syntax = {0}", syntax.Count);
 
             /* Booleans */
             ReadConfigFile(doc, "boolean");
-            System.Console.WriteLine("Bools read in!");
-            System.Console.WriteLine("Bools = {0}", booleans.Count);
 
             // -----------------------------
             Controls.Add(textBox);           
@@ -316,42 +306,6 @@ namespace Pyjama
                 if (mode == 0) break;
             }
             textBox.lockUpdate = false;
-             
-            /* Method will highlight within words too
-            try
-            {
-                if (TextChanged != null)
-                    TextChanged(this, e);
-
-                textBox.lockUpdate = true;
-                string pattern = "";
-                foreach (string key in keywords)
-                {
-                    pattern += key;
-                    pattern += "|";
-                }
-                //System.Console.WriteLine(pattern);
-                Regex keyWords = new Regex(pattern);
-
-                int selPos = textBox.SelectionStart;
-                foreach (Match keyWordMatch in keyWords.Matches(textBox.Text))
-                {
-                    textBox.Select(keyWordMatch.Index, keyWordMatch.Length);
-                    textBox.SelectionColor = colors["keyword"];
-                    textBox.SelectionFont = fonts["keyword"];
-
-                    textBox.SelectionStart = selPos;
-                    //textBox.Select(selPos, 0);
-                    textBox.SelectionColor = colors["default"];
-                    textBox.SelectionFont = fonts["default"];
-
-                }
-            }
-            finally
-            {
-                textBox.lockUpdate = false;
-            }
-             */
         }
 
         public void FormatAll()
@@ -377,8 +331,10 @@ namespace Pyjama
             String[] lines = r.Split(textBox.Text.ToString());
             foreach (string l in lines)
             {
-                ParseLine(l);
+                Highlight(l);
+                //ParseLine(l);
             }
+            //Highlight(textBox.Text.ToString());
             textBox.lockUpdate = false;
         }
 
@@ -416,6 +372,52 @@ namespace Pyjama
             textBox.SelectedText = "\n";
         }
 
+        public void Highlight(string code)
+        {
+            System.Text.StringBuilder patterns = new System.Text.StringBuilder();
+            
+            // Regular expression for single line comments
+            string singleQuote = @"(/(?!//)/[^ ]*)|";
+
+            // Regular expression for formal documentation comments
+            //patterns.Append(@"(///[^ ]*)|");
+
+            // Regular expression for matching multi-line comments
+            //patterns.Append(@"(/*.*?*/)|");
+            string multiQuote = @"(/*.*?/)|";
+
+            // Regular expression for matching double quote string
+            string doubleQuote = @" ""[^""]*"" ";
+            
+            /* "[^"]*" */
+
+            // Regular expression for matching single quote string
+            //patterns.Append(@"('[^ ]*?(?<!\)')|");
+            patterns.Append(@"('[^ ]*?')|");
+
+            // Regular expression for matching keywords
+            patterns.Append(GetKeywords());
+
+            Regex all = new Regex(patterns.ToString(), RegexOptions.Singleline);
+            
+            Regex line = new Regex(@"^.*?$", RegexOptions.Multiline);
+
+            // Break Multi-line comments into lines properly
+            Regex mlcToLines = new Regex(@"/*.*?/", RegexOptions.Singleline);            
+        }
+
+        private string GetKeywords()
+        {
+            string pattern = "";
+            foreach (string key in keywords)
+            {
+                pattern += key;
+                pattern += "|";
+            }
+            System.Text.StringBuilder kwds = new System.Text.StringBuilder(@"b(" + pattern + "b)");
+            return kwds.ToString();
+        }
+
         public void FormatLine(int lineno) {
             // FIXME: most works, but we need to treat triple quote/double 
             // as unique (because you can have single quotes in double quotes
@@ -439,8 +441,7 @@ namespace Pyjama
             {
                 if (mode == 0)
                 {
-                    //if (c == '"') {
-                    if (quotes.Contains(c)) {
+                    if (c == '"') {
                         mode = 2;
                         tokenStart = index;
                         textBox.SelectionColor = colors["quote"];
@@ -448,7 +449,7 @@ namespace Pyjama
                     } else if (c == '\'') {
                         mode = 3;
                         tokenStart = index;
-                    } else if (comments.Contains(c)) //else if (c == '#')               
+                    } else if (c == '#')               
                     {
                         mode = 0;
                         textBox.SelectionStart = index;
@@ -505,7 +506,7 @@ namespace Pyjama
                 }
                 else if (mode == 2) // in double quote
                 {
-                    if (quotes.Contains(c)) //if (c == '"' || c == '\0') // end of double quote
+                    if (c == '"' || c == '\0') // end of double quote
                     {
                         if (c == '"')
                         {
