@@ -80,7 +80,6 @@ namespace Pyjama
         {
             Input.Text = text;
             textBox.FormatAll();
-            //textBox.ParseAll();
             RemoveSaveStatus();
         }
 

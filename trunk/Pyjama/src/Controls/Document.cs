@@ -97,7 +97,6 @@ namespace Pyjama
         public ArrayList syntax = new ArrayList();
         public ArrayList comments = new ArrayList();
         public ArrayList quotes = new ArrayList();
-
         public delegate void TextChangedHandler(object sender, EventArgs e);
         int mode = 0; // used in parsing richtext
         int[] last_mode = new int[10000];
@@ -323,101 +322,6 @@ namespace Pyjama
             textBox.lockUpdate = false;
         }
 
-        // Going to see if I can write a parser using the RegEx class
-        public void ParseAll()
-        {
-            textBox.lockUpdate = true;
-            Regex r = new Regex("\\n");
-            String[] lines = r.Split(textBox.Text.ToString());
-            foreach (string l in lines)
-            {
-                Highlight(l);
-                //ParseLine(l);
-            }
-            //Highlight(textBox.Text.ToString());
-            textBox.lockUpdate = false;
-        }
-
-        public void ParseLine(string line)
-        {
-            string pattern = "([ \\t{}():;])";
-            Regex r = new Regex(pattern);
-            String[] tokens = r.Split(line);
-            foreach (string token in tokens)
-            {
-                //System.Console.WriteLine("string = ", token);
-                textBox.SelectionColor = colors["default"];
-                textBox.SelectionFont = fonts["default"];
-
-                if (keywords.Contains(token))
-                {
-                    textBox.SelectionColor = colors["keyword"];
-                    textBox.SelectionFont = fonts["keyword"];
-                    break;
-                }
-                else if (booleans.Contains(token))
-                {
-                    textBox.SelectionColor = colors["boolean"];
-                    textBox.SelectionFont = fonts["boolean"];
-                    break;
-                }
-                else if (syntax.Contains(token))
-                {
-                    textBox.SelectionColor = colors["comment"];
-                    textBox.SelectionFont = fonts["comment"];
-                    break;
-                }
-                textBox.SelectedText = token;
-            }
-            textBox.SelectedText = "\n";
-        }
-
-        public void Highlight(string code)
-        {
-            System.Text.StringBuilder patterns = new System.Text.StringBuilder();
-            
-            // Regular expression for single line comments
-            string singleQuote = @"(/(?!//)/[^ ]*)|";
-
-            // Regular expression for formal documentation comments
-            //patterns.Append(@"(///[^ ]*)|");
-
-            // Regular expression for matching multi-line comments
-            //patterns.Append(@"(/*.*?*/)|");
-            string multiQuote = @"(/*.*?/)|";
-
-            // Regular expression for matching double quote string
-            string doubleQuote = @" ""[^""]*"" ";
-            
-            /* "[^"]*" */
-
-            // Regular expression for matching single quote string
-            //patterns.Append(@"('[^ ]*?(?<!\)')|");
-            patterns.Append(@"('[^ ]*?')|");
-
-            // Regular expression for matching keywords
-            patterns.Append(GetKeywords());
-
-            Regex all = new Regex(patterns.ToString(), RegexOptions.Singleline);
-            
-            Regex line = new Regex(@"^.*?$", RegexOptions.Multiline);
-
-            // Break Multi-line comments into lines properly
-            Regex mlcToLines = new Regex(@"/*.*?/", RegexOptions.Singleline);            
-        }
-
-        private string GetKeywords()
-        {
-            string pattern = "";
-            foreach (string key in keywords)
-            {
-                pattern += key;
-                pattern += "|";
-            }
-            System.Text.StringBuilder kwds = new System.Text.StringBuilder(@"b(" + pattern + "b)");
-            return kwds.ToString();
-        }
-
         public void FormatLine(int lineno) {
             // FIXME: most works, but we need to treat triple quote/double 
             // as unique (because you can have single quotes in double quotes
@@ -449,7 +353,7 @@ namespace Pyjama
                     } else if (c == '\'') {
                         mode = 3;
                         tokenStart = index;
-                    } else if (c == '#')               
+                    } else if (c == '#' || c =='\\')               
                     {
                         mode = 0;
                         textBox.SelectionStart = index;
