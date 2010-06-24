@@ -1,0 +1,5 @@
+C:\Users\Vincent\AppData\Local\Temporary Projects\graphics\bin\Debug\graphics.dll
+C:\Users\Vincent\AppData\Local\Temporary Projects\graphics\bin\Debug\graphics.pdb
+C:\Users\Vincent\AppData\Local\Temporary Projects\graphics\obj\Debug\ResolveAssemblyReference.cache
+C:\Users\Vincent\AppData\Local\Temporary Projects\graphics\obj\Debug\graphics.dll
+C:\Users\Vincent\AppData\Local\Temporary Projects\graphics\obj\Debug\graphics.pdb
