@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+
+<default color="Black" font="Courier New" size="10" style="Regular">
+
+  <tags color="Blue" font="Courier New" size="10" style="Regular" >
+    <word> &lt; </word>
+    <word> &gt; </word>
+    <word> &apos; </word>
+    <word> = </word>
+    <word> &quot; </word>
+    <word> &lt;!-- </word>
+    <word> --&gt; </word>
+    <word> / </word>
+    <word> </word>
+  </tags>
+
+  <delim color="Red">
+    <del> : </del>
+    <del> = </del>
+  </delim>
+
+  <quote color="Green" font="Courier New" size="10" style="Regular">
+
+  </quote>
+
+  <comment color="Red" font="Courier New" size="10" style="Regular">
+
+  </comment>
+
+  <syntax color="Red" font="Courier New" size="10" style="Regular">
+
+  </syntax>
+
+</default>
+
