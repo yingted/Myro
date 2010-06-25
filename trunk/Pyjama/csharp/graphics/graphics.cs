@@ -1,39 +1,163 @@
 ﻿using System;
+using System.Windows.Forms;
+using System.Drawing;
+using System.Collections;
 
-namespace Graphics
+namespace graphics
 {
-    public class Window
+    public class Graphics
     {
-        public string Title;
-        public int Width;
-        public int Height;
-        
-        public Window()
+        class Window : Form
         {
-            Title = "Graphics Window";
-            Width = 200;
-            Height = 200;
-        }
-        
-        public Window(string title)
-        {
-            Title = title;
-            Width = 200;
-            Height = 200;
-        }
-        
-        public Window(string title, int height)
-        {
-            Title = title;
-            Height = height;
-            Width = 200;
-        }
-        
-        public Window(string title, int height, int width)
-        {
-            Title = title;
-            Height = height;
-            Width = width;
+            string _title;
+            int _height;
+            int _width;
+            bool _autoflush;
+            bool _smooth;
+            bool _closed;
+            ArrayList _items;
+            //int mouseX;
+            //int mouseY;
+            bool mouseCallBack;
+
+            public int height
+            {
+                get { return _height; }
+            }
+
+            public int width
+            {
+                get { return _width; }
+            }
+
+            public string title
+            {
+                get { return _title; }
+            }
+             
+            // Default Constructor
+            public Window()
+            {  
+                this._title = "My Graphics Window";
+                this._height = 400;
+                this._width = 400;
+                this._items = new ArrayList();
+                Form win = new Form();
+                win.Text = this._title;
+
+                // Add to the size of the window to account for borders
+                int dwidth = this._width - this.ClientSize.Width;
+                int dheight = this._height - this.ClientSize.Height;
+                
+                //this.Size = System.Drawing.Size(this._width + dwidth, this._height + dheight);
+                this.TopMost = true;
+                
+                win.Height = this._height;
+                win.Width = this._width;
+                this._closed = false;
+
+                //this.mouseX = (int)MouseButtons.None;
+                //this.mouseY = (int)MouseButtons.None;
+                //this.mouseCallBack = false;
+
+                win.Paint += this._onPaint;
+                //win.Click += this._onClick;
+                win.FormClosing += this._onFormClosing;
+
+                win.BackColor = System.Drawing.Color.FromArgb(255, 236, 233, 216);
+                win.Show();
+                
+            }
+
+           /* public Window(string title)
+            {
+                _title = title;
+                _height = 200;
+                _width = 200;
+                //CreateWindow();
+            }
+
+            public Window(string title, int height)
+            {
+                _title = title;
+                if (height <= 0)
+                    throw new ArgumentException("Height must be greater than 0");
+                _height = height;
+                _width = 200;
+                //CreateWindow();
+            }
+
+            public Window(string title, int height, int width)
+            {
+                _title = title;
+                if (height <= 0)
+                    throw new ArgumentException("Height must be greater than 0");
+                _height = height;
+
+                if (width <= 0)
+                    throw new ArgumentException("Width must be greater than 0");
+                _width = width;
+                //CreateWindow();
+            }
+            */
+
+           /* private void CreateWindow()
+            {
+                Form win = new Form();
+                win.Text = _title; 
+                win.Height = _height;
+                win.Width = _width;
+                win.BackColor = System.Drawing.Color.FromArgb(255, 236, 233, 216);
+                win.Show();    
+            }
+            */
+
+            private void _onPaint(object sender, EventArgs e)
+            {
+                foreach (object s in this._items)
+                {
+                    
+                }
+            }
+
+            private void _onClick(object sender, MouseEventArgs e)
+            {
+                // Save the location of mouse clicks
+                //this.mouseX = e.X;
+                //this.mouseY = e.Y;
+                
+                
+            }
+            private void _onFormClosing(object sender, EventArgs e)
+            {
+                this.Close();
+            }
+
+            private void _checkOpen()
+            {
+                if (this._closed)
+                    throw new ArgumentException("Window is closed");
+
+            }
+
+            private void append(object itm)
+            {
+                this._items.Add(itm);
+            }
+
+            private void remove(object itm)
+            {
+                this._items.Remove(itm);
+            }
+
+            private void setBackground(Color color)
+            {
+                this._checkOpen();
+
+            }
+
+
+
         }
     }
 }
