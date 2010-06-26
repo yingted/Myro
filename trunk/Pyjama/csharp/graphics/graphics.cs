@@ -155,9 +155,37 @@ namespace graphics
                 this._checkOpen();
 
             }
+        }
 
+        class Transform : Object
+        {
+            int xbase;
+            int ybase;
+            float xscale;
+            float yscale;
 
+            public Transform(int w, int h, int xlow, int ylow, int xhigh, int yhigh)
+            {
+                int xspan = (xhigh - xlow);
+                int yspan = (yhigh - ylow);
+                this.xbase = xlow;
+                this.ybase = ylow;
+                this.xscale = xspan / (w - 1);
+                this.yscale = yspan / (h - 1);
+            }
 
+            private void screen(int x, int y)
+            {
+                float xs = (x - this.xbase) / this.xscale;
+                float ys = (y - this.ybase) / this.yscale;
+                // How to return two objects in function call?
+            }
+
+            private void world(int xs, int ys)
+            {
+                float x = xs * this.xscale + this.xbase;
+                float y = ys * this.yscale + this.ybase;
+            }
         }
     }
 }
