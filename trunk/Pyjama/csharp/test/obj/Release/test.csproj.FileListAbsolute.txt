@@ -1,0 +1,5 @@
+C:\Users\Vincent\Documents\test\bin\Release\test.exe
+C:\Users\Vincent\Documents\test\bin\Release\test.pdb
+C:\Users\Vincent\Documents\test\obj\Release\ResolveAssemblyReference.cache
+C:\Users\Vincent\Documents\test\obj\Release\test.exe
+C:\Users\Vincent\Documents\test\obj\Release\test.pdb

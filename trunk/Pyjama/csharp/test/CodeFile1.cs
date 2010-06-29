@@ -166,7 +166,7 @@ namespace Graphics
 
         }
 
-        /*[STAThread]
+        [STAThread]
         static void Main()
         {
             Application.Run(new Window());
@@ -175,7 +175,7 @@ namespace Graphics
         private void Window_Load(object sender, System.EventArgs e)
         {
 
-        }*/
+        }
     }
 
     class Transform : Object
@@ -230,7 +230,7 @@ namespace Graphics
 
         private void setFill(Color clr)
         {
-
+            
         }
 
         private void setOutline(Color clr)
