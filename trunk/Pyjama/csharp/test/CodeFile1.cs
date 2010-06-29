@@ -12,18 +12,16 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 
-namespace Graphics
+namespace graphics
 {
     #region MapColors
     /// <summary>
     /// Map color strings to internal color objects.
     /// This can be extended with many additional colors.
     /// </summary>
-    public partial class MapColors
+    public class MapColors
     {
-        public MapColors()
-        {
-            Dictionary<string, Color> color_map = new Dictionary<string, Color>()
+        Dictionary<string, Color> _color_map = new Dictionary<string, Color>()
             {
                 {"black", Color.Black},
                 {"lightgray", Color.LightGray},
@@ -45,7 +43,7 @@ namespace Graphics
                 {"", Color.Transparent}
             };
 
-            Dictionary<string, string> font_face_map = new Dictionary<string, string>()
+        Dictionary<string, string> _font_face_map = new Dictionary<string, string>()
         {
             {"helvetica", "Helvetica"},
             {"arial", "Arial"},
@@ -53,7 +51,7 @@ namespace Graphics
             {"times roman", "Times New Roman"}
         };
 
-            Dictionary<string, FontStyle> font_style_map = new Dictionary<string, FontStyle>()
+        Dictionary<string, FontStyle> _font_style_map = new Dictionary<string, FontStyle>()
         {
             {"normal", FontStyle.Regular},
             {"bold", FontStyle.Bold},
@@ -63,8 +61,24 @@ namespace Graphics
             {"underline", FontStyle.Underline}
         };
 
+        public MapColors()
+        {
+
         }
 
+        public Dictionary<string, Color> color_map ()
+        {
+            return _color_map;
+        }
+
+        public Dictionary<string, string> font_face_map()
+        {
+            return _font_face_map;
+        }
+        public Dictionary<string, FontStyle> font_style_map()
+        {
+            return _font_style_map;
+        }
     }
     #endregion
 
@@ -72,19 +86,18 @@ namespace Graphics
     /// <summary>
     /// Generic error class for graphics module exceptions.
     /// </summary>
-    class GraphicsError : Exception
+    public class GraphicsError : Exception
     {
-        string OBJ_ALREADY_DRAWIN = "Object currently drawn";
-        string UNSUPPORTED_METHOD = "Object doesn't support operation";
         string BAD_OPTION = "Illegal option value";
+        string OBJ_ALREADY_DRAWN = "Object currently drawn";
+        string UNSUPPORTED_METHOD = "Object doesn't support operation";
         string DEAD_THREAD = "Graphics thread quit unexpectedly";
 
-        public GraphicsError()
+        GraphicsError(string error)
         {
-            return; 
+
         }
     }
-
     #endregion
 
     #region Window
@@ -121,7 +134,7 @@ namespace Graphics
             set { _title = value; }
         }
 
-        private bool autoflush
+        public bool autoflush
         {
             get { return _autoflush; }
         }
@@ -213,41 +226,98 @@ namespace Graphics
 
         private void _checkOpen()
         {
-            if (this._closed)
+            //if (this._closed)
                 //throw new ArgumentException("Window is closed");
-                throw new GraphicsError();
+                //throw new GraphicsError();
         }
 
-        private void append(object itm)
+        public void append(object itm)
         {
             this._items.Add(itm);
         }
 
-        private void remove(object itm)
+        public void remove(object itm)
         {
             this._items.Remove(itm);
         }
 
-        private void setBackground(Color color)
+        public void setBackground(string color)
         {
+            /// Set background color of window
             this._checkOpen();
-            
+            MapColors map = new MapColors();
+            this.BackColor = map.color_map()[color];
         }
 
         public void setCoords(int x1, int y1, int x2, int y2)
         {
+            /// Set coordinates of window to run from (x1, y1) in the
+            /// lower-left corner to (x2, y2) in the upper-right corner.
             trans = new Transform(this.width, this.height, x1, y1, x2, y2);
         }
 
-        private void plot(int x, int y, Color clr)
+        public void close()
         {
+            /// Close this GraphWin window
+            if (this._closed) return;
+            this._close_help();
+        }
+
+        public void _close_help()
+        {
+            /// Close the window
+            this._closed = true;
+            this.Close();
+        }
+
+        public bool isClosed()
+        {
+            /// Return True of this GraphWin is closed
+            return this._closed;
+        }
+
+        public void plot(int x, int y, string clr)
+        {
+            /// Set pixel (x, y) to the given color
             this._checkOpen();
+
 
         }
 
-        private void plotPixel(int x, int y, Color clr)
+        private void plotPixel(int x, int y, string clr)
         {
-           
+           /// Set pixel raw (independent of window coordinates)
+           /// pixel (x, y) to color
+            Point pt = new Point(x, y);
+            
+        }
+
+        public int getHeight()
+        {
+            return this.height;
+        }
+
+        public int getWidth()
+        {
+            return this.width;
+        }
+
+        public int[] toScreen(int x, int y)
+        {
+            /// Convert x,y to screen coordinates
+            int[] val = new int[2];
+            val[0] = x;
+            val[1] = y;
+            return val;
+        }
+
+        public float[] toWorld(int x, int y)
+        {
+            /// Convert x,y to world coordinates
+            float[] val = new float[2];
+            val[0] = (float)x;
+            val[1] = (float)y;
+            return val;
         }
 
         [STAThread]
@@ -305,12 +375,30 @@ namespace Graphics
     /// </summary>
     public class GraphicsObject : Object
     {
-        Color fill_color;
-        Color outline_color;
+        string fill_color;
+        string outline_color;
         int outline_width = 1;
-        Brush brush;
-        Pen pen;
-        Window canvas;
+        Brush _brush;
+        Pen _pen;
+        Window _canvas;
+
+        public Pen pen
+        {
+            get { return _pen; }
+            set { _pen = value; }
+        }
+
+        public Brush brush
+        {
+            get { return _brush; }
+            set { _brush = value; }
+        }
+
+        public Window canvas
+        {
+            get { return _canvas; }
+            set { _canvas = value; }
+        }
 
         public GraphicsObject()
         {
@@ -319,47 +407,86 @@ namespace Graphics
 
         private void InitializeComponent()
         {
+            // When an object is drawn, canvas is set to the GraphWin (canvas)
+            // object where it is drawn.
+            this.canvas = null;
+            this._pen = null;
+            this._brush = null;
 
+            // Keep copies of properties
+            this.fill_color = null;
+            this.outline_color = null;
+            this.outline_width = 1;
+
+            this.setOutline("black");
+            this.setFill("transparent");
         }
 
-        private void setFill(Color clr)
+        public void setFill(string clr)
         {
+            /// Set interior color to color
+            if (this.fill_color == clr) return;
+            MapColors map_colors = new MapColors();
+            this._brush = new SolidBrush(map_colors.color_map()[clr]);
+            this.fill_color = clr;
+        }
+
+        public void setOutline(string clr)
+        {
+            /// Set outline color to color
+            if (this.outline_color == clr) return;
+            MapColors map_colors = new MapColors();
+            Color color = map_colors.color_map()[clr];
+            this._pen = new Pen(color, this.outline_width);
+            this.outline_color = clr;
+        }
+
+        public void setWidth(int width)
+        {
+            /// Set line weight to width
+            if (this.outline_width == width) return;
+            MapColors map_colors = new MapColors();
+            Color clr = map_colors.color_map()[this.outline_color];
+            this._pen = new Pen(clr, width);
+        }
+
+        public void draw(Window graphWin)
+        {
+            /// Draw the object in graphwin, which should be GraphWin
+            /// object. A GraphicsObject may only be drawn into one 
+            /// window. Raise an error if attempt made to draw an object that 
+            /// is all ready visible.
+            //if (this.canvas.isClosed())
+                
+            this.canvas = graphWin;
+            this.canvas.append(this);
             
         }
 
-        private void setOutline(Color clr)
+        public void undraw()
         {
+            /// Undraw the object (i.e. hide it). Returns silently if
+            /// the object is not currently drawn.
+            if (!this.canvas.isClosed())
+                this.canvas.remove(this);
 
         }
 
-        private void setWidth(int width)
+        public void move(int dx, int dy)
         {
-
-        }
-
-        private void draw(Window graphWin)
-        {
-
-        }
-
-        private void undraw()
-        {
-
-        }
-
-        private void move(int dx, int dy)
-        {
-
+            /// Move object dx units in x direction and dy units 
+            /// in y direction
+            this._move(dx, dy);
         }
 
         public void _draw(object canvas)
         {
-
+            return;
         }
 
         private void _move(int dx, int dy)
         {
-            // pass
+            return;
         }
     }
     #endregion
@@ -370,7 +497,66 @@ namespace Graphics
     /// </summary>
     class Point : GraphicsObject
     {
-       
+        float _x;
+        float _y;
+
+        public float x
+        {
+            get { return _x; }
+            set { _x = value; }
+        }
+
+        public float y
+        {
+            get { return _y; }
+            set { _y = value; }
+        }
+
+        public Point(float x, float y)
+        /// Create a point on a canvas
+        {
+            this.setOutline("black");
+            this._x = x;
+            this._y = y;
+        }
+
+        public override string ToString()
+        {
+            return (String.Format("<Point at ({0},{1})>", this._x, this._y));
+        }
+
+        public void _draw(Graphics g)
+        {
+            /// Use a rectangle fill to draw points
+            int[] coords = this.canvas.toScreen((int)this._x, (int)this._y);
+            g.FillRectangle(this.brush, coords[0], coords[1], 1, 1);
+        }
+
+        public void _move(int dx, int dy)
+        {
+            this._x += dx;
+            this._y += dy;
+        }
+
+        public Point clone()
+        {
+            Point other = new Point(this._x, this._y);
+            other.pen = (Pen)this.pen.Clone();
+            other.brush = (Brush)this.brush.Clone();
+            return other;
+        }
+        
+        float getX()
+        {
+            return this._x;
+        }
+
+        float getY()
+        {
+            return this._y;
+        }
+
+
     }
     #endregion
 
@@ -382,6 +568,43 @@ namespace Graphics
     /// </summary>
     class _BBox : GraphicsObject
     {
+        Point _p1;
+        Point _p2;
+
+        public Point p1
+        {
+            get { return _p1; }
+            set { _p1 = value; }
+        }
+
+        public Point p2 
+        {
+            get { return _p2; }
+            set { _p1 = value; }
+        }
+
+        public void _move(float dx, float dy)
+        {
+            this.p1.x += dx;
+            this.p1.y += dy;
+            this.p2.x += dx;
+            this.p2.y += dy;
+        }
+
+        public Point getP1()
+        {
+            return this.p1.clone(); 
+        }
+
+        public Point getP2()
+        {
+            return this.p2.clone();
+        }
+
+        public Point getCenter()
+        {
+            return new Point((float)(p1.x+p2.x)/2, (float) (p1.y+p2.y)/2);
+        }
     }
     #endregion
 
@@ -391,6 +614,28 @@ namespace Graphics
     /// </summary>
     class Rectangle : _BBox
     {
+        public Rectangle(Point p1, Point p2)
+        {
+        }
+
+        public void _draw(Graphics g)
+        {
+            int[] c1 = this.canvas.toScreen((int) p1.x, (int) p1.y);
+            int[] c2 = this.canvas.toScreen((int) p2.x, (int) p2.y);
+            // Need to write swap function here
+            int width = c1[1] - c1[0];
+            int height = c2[1] - c2[0];
+            g.DrawRectangle(this.pen, c1[0], c1[1], width, height);
+            g.FillRectangle(this.brush, c1[0], c1[1], width, height);
+        }
+
+        public Rectangle clone()
+        {
+            Rectangle other = new Rectangle(p1, p2);
+            other.pen = (Pen) this.pen.Clone();
+            other.brush = (Brush) this.brush.Clone();
+            return other;
+        }
     }
     #endregion
 
