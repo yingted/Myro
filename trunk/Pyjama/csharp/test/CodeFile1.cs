@@ -1,4 +1,11 @@
-﻿using System;
+﻿/* Graphics Module for IronPython/IronRuby
+ * Translated graphics module by Mark F. Russo and Doug Blank
+ * Translated by Michelle Beard 07/01/2010
+ * Inspired graphics module by John Zelle of Wartburg College
+ * http://mcsp.wartburg.edu/zelle/pythoh
+*/
+
+using System;
 using System.Windows.Forms;
 using System.Drawing;
 using System.Collections;
@@ -6,6 +13,10 @@ using System.Threading;
 
 namespace Graphics
 {
+    #region Window
+    /// <summary>
+    /// Window class
+    /// </summary>
     public class Window : Form
     {
         string _title;
@@ -108,9 +119,9 @@ namespace Graphics
             if (this.smooth)
                 e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
 
-            foreach (object s in this._items)
+            foreach (GraphicsObject s in this._items)
             {
-                // draw graphics
+                s._draw(e.Graphics);
             }
         }
 
@@ -119,7 +130,6 @@ namespace Graphics
             // Save the location of mouse clicks
             //this.mouseX = e.X;
             //this.mouseY = e.Y;
-
         }
 
         private void _onFormClosing(object sender, EventArgs e)
@@ -162,8 +172,7 @@ namespace Graphics
 
         private void plotPixel(int x, int y, Color clr)
         {
-            Point pt = new Point(x, y);
-
+           
         }
 
         [STAThread]
@@ -177,7 +186,12 @@ namespace Graphics
 
         }
     }
+#endregion
 
+    #region Transform
+    /// <summary>
+    /// Internal class for 2-D coordinate transformations
+    /// </summary>
     class Transform : Object
     {
         int xbase;
@@ -208,8 +222,13 @@ namespace Graphics
             float y = ys * this.yscale + this.ybase;
         }
     }
+    #endregion
 
-    class GraphicsObject : Object
+    #region GraphicsObject
+    /// <summary>
+    /// Generic base class for all the drawable objects
+    /// </summary>
+    public class GraphicsObject : Object
     {
         Color fill_color;
         Color outline_color;
@@ -218,7 +237,7 @@ namespace Graphics
         Pen pen;
         Window canvas;
 
-        private GraphicsObject()
+        public GraphicsObject()
         {
             InitializeComponent();
         }
@@ -258,7 +277,7 @@ namespace Graphics
 
         }
 
-        private void _draw(Window canvas, object options)
+        public void _draw(object canvas)
         {
 
         }
@@ -268,4 +287,99 @@ namespace Graphics
             // pass
         }
     }
+    #endregion
+
+    #region Point
+    /// <summary>
+    /// Point Class
+    /// </summary>
+    class Point : GraphicsObject
+    {
+
+    }
+    #endregion
+
+    #region BBox
+    /// <summary>
+    /// Internal base class for objects represented by
+    /// bounding box (opposite corners.
+    /// Line segement is a degenerate case.
+    /// </summary>
+    class _BBox : GraphicsObject
+    {
+    }
+    #endregion
+
+    #region Rectangle
+    /// <summary>
+    /// Rectangle class
+    /// </summary>
+    class Rectangle : _BBox
+    {
+    }
+    #endregion
+
+    #region Oval
+    /// <summary>
+    /// Oval class
+    /// </summary>
+    class Oval : _BBox
+    {
+    }
+    #endregion
+
+    #region Circle
+    /// <summary>
+    /// Circle class
+    /// </summary>
+    class Circle : Oval
+    {
+    }
+    #endregion
+
+    #region Line
+    /// <summary>
+    /// Line class
+    /// </summary>
+    class Line : _BBox
+    {
+    }
+    #endregion
+
+    #region Polygon
+    /// <summary>
+    /// Polygon class
+    /// </summary>
+    class Polygon : GraphicsObject
+    {
+    }
+    #endregion
+
+    #region Text
+    /// <summary>
+    /// Text class
+    /// </summary>
+    class Text : GraphicsObject
+    {
+    }
+    #endregion
+
+    #region Entry
+    /// <summary>
+    /// Entry class. 
+    /// </summary>
+    class Entry : GraphicsObject
+    {
+    }
+    #endregion
+
+    #region Image
+    /// <summary>
+    /// Image class
+    /// </summary>
+    class Image : GraphicsObject
+    {
+
+    }
+    #endregion
 }

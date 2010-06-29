@@ -3,3 +3,8 @@ C:\Users\Vincent\Documents\test\bin\Debug\test.exe
 C:\Users\Vincent\Documents\test\bin\Debug\test.pdb
 C:\Users\Vincent\Documents\test\obj\Debug\test.exe
 C:\Users\Vincent\Documents\test\obj\Debug\test.pdb
+C:\Users\Vincent\Documents\Pyjama\csharp\test\bin\Debug\test.exe
+C:\Users\Vincent\Documents\Pyjama\csharp\test\bin\Debug\test.pdb
+C:\Users\Vincent\Documents\Pyjama\csharp\test\obj\Debug\ResolveAssemblyReference.cache
+C:\Users\Vincent\Documents\Pyjama\csharp\test\obj\Debug\test.exe
+C:\Users\Vincent\Documents\Pyjama\csharp\test\obj\Debug\test.pdb
