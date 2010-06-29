@@ -1,0 +1,5 @@
+C:\Users\Vincent\Documents\Pyjama\csharp\graphics\bin\Release\graphics.dll
+C:\Users\Vincent\Documents\Pyjama\csharp\graphics\bin\Release\graphics.pdb
+C:\Users\Vincent\Documents\Pyjama\csharp\graphics\obj\Release\ResolveAssemblyReference.cache
+C:\Users\Vincent\Documents\Pyjama\csharp\graphics\obj\Release\graphics.dll
+C:\Users\Vincent\Documents\Pyjama\csharp\graphics\obj\Release\graphics.pdb
