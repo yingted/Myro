@@ -9,10 +9,84 @@ using System;
 using System.Windows.Forms;
 using System.Drawing;
 using System.Collections;
+using System.Collections.Generic;
 using System.Threading;
 
 namespace Graphics
 {
+    #region MapColors
+    /// <summary>
+    /// Map color strings to internal color objects.
+    /// This can be extended with many additional colors.
+    /// </summary>
+    public partial class MapColors
+    {
+        public MapColors()
+        {
+            Dictionary<string, Color> color_map = new Dictionary<string, Color>()
+            {
+                {"black", Color.Black},
+                {"lightgray", Color.LightGray},
+                {"gray", Color.Gray},
+                {"darkgray", Color.DarkGray},
+                {"darkgrey", Color.DarkGray},
+                {"slategray", Color.SlateGray},
+                {"white", Color.White},
+                {"red", Color.Red},
+                {"green", Color.Green},
+                {"green2", Color.FromArgb(255, 0, 238, 0)},
+                {"green3", Color.FromArgb(255, 0, 205, 0)},
+                {"blue", Color.Blue},
+                {"yellow", Color.Yellow},
+                {"yellow2", Color.FromArgb(255, 238, 238, 0)},
+                {"cyan", Color.Cyan},
+                {"peachpuff", Color.PeachPuff},
+                {"transparent", Color.Transparent},
+                {"", Color.Transparent}
+            };
+
+            Dictionary<string, string> font_face_map = new Dictionary<string, string>()
+        {
+            {"helvetica", "Helvetica"},
+            {"arial", "Arial"},
+            {"courier", "Courier"},
+            {"times roman", "Times New Roman"}
+        };
+
+            Dictionary<string, FontStyle> font_style_map = new Dictionary<string, FontStyle>()
+        {
+            {"normal", FontStyle.Regular},
+            {"bold", FontStyle.Bold},
+            {"italic", FontStyle.Italic},
+            {"bold italic", FontStyle.Bold | FontStyle.Italic},
+            {"strikeout", FontStyle.Strikeout},
+            {"underline", FontStyle.Underline}
+        };
+
+        }
+
+    }
+    #endregion
+
+    #region Graphics Error
+    /// <summary>
+    /// Generic error class for graphics module exceptions.
+    /// </summary>
+    class GraphicsError : Exception
+    {
+        string OBJ_ALREADY_DRAWIN = "Object currently drawn";
+        string UNSUPPORTED_METHOD = "Object doesn't support operation";
+        string BAD_OPTION = "Illegal option value";
+        string DEAD_THREAD = "Graphics thread quit unexpectedly";
+
+        public GraphicsError()
+        {
+            return; 
+        }
+    }
+
+    #endregion
+
     #region Window
     /// <summary>
     /// Window class
@@ -140,8 +214,8 @@ namespace Graphics
         private void _checkOpen()
         {
             if (this._closed)
-                throw new ArgumentException("Window is closed");
-
+                //throw new ArgumentException("Window is closed");
+                throw new GraphicsError();
         }
 
         private void append(object itm)
@@ -157,6 +231,7 @@ namespace Graphics
         private void setBackground(Color color)
         {
             this._checkOpen();
+            
         }
 
         public void setCoords(int x1, int y1, int x2, int y2)
@@ -295,7 +370,7 @@ namespace Graphics
     /// </summary>
     class Point : GraphicsObject
     {
-
+       
     }
     #endregion
 
