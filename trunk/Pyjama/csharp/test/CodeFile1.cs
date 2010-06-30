@@ -341,8 +341,8 @@ namespace graphics
     {
         int xbase;
         int ybase;
-        float xscale;
-        float yscale;
+        double xscale;
+        double yscale;
 
         public Transform(int w, int h, int xlow, int ylow, int xhigh, int yhigh)
         {
@@ -354,17 +354,20 @@ namespace graphics
             this.yscale = yspan / (h - 1);
         }
 
-        private void screen(int x, int y)
+        private int[] screen(int x, int y)
         {
-            float xs = (x - this.xbase) / this.xscale;
-            float ys = (y - this.ybase) / this.yscale;
-            // How to return two objects in function call?
+            double xs = (x - this.xbase) / this.xscale;
+            double ys = (y - this.ybase) / this.yscale;
+            int[] value = new int[2] { (int)(xs + 0.5), (int)(ys + 0.5) };
+            return value;
         }
 
-        private void world(int xs, int ys)
+        private double[] world(int xs, int ys)
         {
-            float x = xs * this.xscale + this.xbase;
-            float y = ys * this.yscale + this.ybase;
+            double x = xs * this.xscale + this.xbase;
+            double y = ys * this.yscale + this.ybase;
+            double[] value = new double[2] { x, y };
+            return value;
         }
     }
     #endregion
@@ -580,7 +583,7 @@ namespace graphics
         public Point p2 
         {
             get { return _p2; }
-            set { _p1 = value; }
+            set { _p2 = value; }
         }
 
         public void _move(float dx, float dy)
@@ -672,6 +675,49 @@ namespace graphics
     /// </summary>
     class Polygon : GraphicsObject
     {
+        Point[] Points; 
+
+        public Polygon(params Point[] points)
+        {
+            for (int i = 0; i < points.Length; i++)
+                this.Points[i] = points[i].clone();
+        }
+
+        public Polygon clone()
+        {
+            Polygon other = new Polygon(this.Points);
+            other.pen = (Pen)this.pen.Clone();
+            other.brush = (Brush)this.brush.Clone();
+            return other;
+        }
+
+        public Point[] getPoints()
+        {
+            Point[] pClones = new Point[this.Points.Length];
+            for (int i = 0; i < this.Points.Length; i++)
+                pClones[i] = this.Points[i].clone();
+            return pClones;
+        }
+
+        public void _move(int dx, int dy)
+        {
+            foreach (Point p in this.Points)
+                p.move(dx, dy);
+        }
+
+        public void _draw(Graphics g)
+        {
+            /// FIXME ME NOW!
+            int[] value;
+            System.Drawing.Point[] pts = new System.Drawing.Point[this.Points.Length];
+            for (int i = 0; i < this.Points.Length; i++)
+            {
+                value = canvas.toScreen( (int) Points[i].x, (int) Points[i].y);
+                pts[i] = new System.Drawing.Point((int)this.Points[i].x, (int)this.Points[i].y);
+            }
+            g.DrawPolygon(this.pen, pts);
+            g.FillPolygon(this.brush, pts);
+        }
     }
     #endregion
 
@@ -681,6 +727,117 @@ namespace graphics
     /// </summary>
     class Text : GraphicsObject
     {
+        Font font;
+        Point anchor;
+        string _text;
+        Point _p;
+
+        public Point p
+        {
+            get { return _p; }
+            set { _p = value; }
+        }
+
+        public Text(Point p, string text)
+        {
+            this.setFill("black");
+            this.setOutline("black");
+            this.font = new Font("Helvetica", 12);
+            this.anchor = p.clone();
+        }
+
+        private void InitializeComponent()
+        {
+        }
+
+        private void _draw(Graphics g)
+        {
+            this.p = this.anchor;
+            int[] coords = this.canvas.toScreen((int) p.x, (int) p.y);
+            // change to double
+            StringFormat frmt = new StringFormat();
+            frmt.Alignment = StringAlignment.Center;
+            frmt.LineAlignment = StringAlignment.Center;
+            g.DrawString(this._text, this.font, this.brush, coords[0], coords[1], frmt);
+        }
+
+        private void _move(int dx, int dy)
+        {
+            this.anchor.move(dx, dy);
+        }
+
+        public Text clone()
+        {
+            Text other = new Text(this.anchor, this._text); // fix me
+            other.pen = (Pen) this.pen.Clone();
+            this.brush = (Brush) this.brush.Clone();
+            this.font = (Font) this.font.Clone();
+            return other;
+        }
+        public void setText(string text)
+        {
+            this._text = text;
+        }
+
+        public string getText()
+        {
+            return this._text;
+        }
+        
+        public Point getAnchor()
+        {
+            return this.anchor.clone();
+        }
+
+        public void setFace(string face)
+        {
+            MapColors fap = new MapColors();
+            string fface;
+            try
+            {
+                fface = fap.font_face_map()[face];
+            }
+            catch
+            {
+                fface = "Courier";
+                throw;
+            }
+            int fsize = (int) this.font.Size;
+            FontStyle fstyle = this.font.Style;
+            this.font = new Font(fface, fsize, fstyle);
+        }
+
+        public void setSize(int size)
+        {
+            float fsize;
+            if ( 5 <= size & size <= 36 )
+                fsize = (float)size;
+            else
+                return;
+            FontFamily fface = this.font.FontFamily;
+            FontStyle fstyle = this.font.Style;
+            this.font = new Font(fface, fsize, fstyle);
+        }
+
+        public void setStyle(string style)
+        {
+            FontStyle fstyle;
+            MapColors fap = new MapColors();
+            try
+            {
+                fstyle = fap.font_style_map()[style];
+            }
+            catch { fstyle = FontStyle.Regular;  }
+            FontFamily fface = this.font.FontFamily;
+            float fsize = this.font.Size;
+            this.font.Dispose();
+            this.font = new Font(fface, fsize, fstyle);
+        }
+
+        public void setTextColor(string color)
+        {
+            this.setFill(color);
+        }
     }
     #endregion
 
