@@ -320,10 +320,10 @@ namespace graphics
             return val;
         }
 
-        [STAThread]
+       [STAThread]
         static void Main()
         {
-            Application.Run(new Window());
+            Application.Run(new Window().);
         }
 
         private void Window_Load(object sender, System.EventArgs e)

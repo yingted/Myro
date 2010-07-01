@@ -106,9 +106,9 @@ namespace graphics
     /// </summary>
     public class Window : Form
     {
-        string _title;
-        int _height;
-        int _width;
+        string _title = "Graphics Window";
+        int _height = 200;
+        int _width = 200;
         bool _autoflush;
         bool _smooth;
         bool _closed;
@@ -121,11 +121,13 @@ namespace graphics
         public int height
         {
             get { return _height; }
+            set { _height = value; }
         }
 
         public int width
         {
             get { return _width; }
+            set { _width = value; }
         }
 
         public string title
@@ -149,11 +151,29 @@ namespace graphics
             InitializeComponent();
         }
 
+        public Window(string title)
+        {
+            this._title = title;
+            InitializeComponent();
+        }
+
+        public Window(string title, int height)
+        {
+            this._title = title;
+            this._height = height;
+            InitializeComponent();
+        }
+
+        public Window(string title, int height, int width)
+        {
+            this._title = title;
+            this._height = height;
+            this._width = width;
+            InitializeComponent();
+        }
+
         private void InitializeComponent()
         {
-            this._title = "My Window";
-            this._height = 400;
-            this._width = 400;
             this._smooth = false;
             this._autoflush = true;
             this._items = new ArrayList();
@@ -184,7 +204,6 @@ namespace graphics
             this.Height = this._height;
             this.Width = this._width;
             this._closed = false;
-            this._autoflush = autoflush;
             this._smooth = smooth;
 
             //this.mouseX = (int)MouseButtons.None;
@@ -196,9 +215,9 @@ namespace graphics
             this.FormClosing += this._onFormClosing;
 
             this.BackColor = System.Drawing.Color.FromArgb(255, 236, 233, 216);
-
+            this.Show();
             // Refresh set to autoflush
-            if (autoflush) this.Invalidate();
+            if (_autoflush) this.Invalidate();
         }
 
         private void _onPaint(object sender, PaintEventArgs e)
@@ -231,12 +250,12 @@ namespace graphics
             //throw new GraphicsError();
         }
 
-        public void append(object itm)
+        public void append(GraphicsObject itm)
         {
             this._items.Add(itm);
         }
 
-        public void remove(object itm)
+        public void remove(GraphicsObject itm)
         {
             this._items.Remove(itm);
         }
@@ -280,7 +299,11 @@ namespace graphics
         {
             /// Set pixel (x, y) to the given color
             this._checkOpen();
-
+            double[] screen = this.toScreen(x, y);
+            Point pt = new Point(screen[0], screen[1]);
+            pt.setOutline(clr);
+            pt.draw(this);
+            this.__autoflush();
 
         }
 
@@ -289,7 +312,16 @@ namespace graphics
             /// Set pixel raw (independent of window coordinates)
             /// pixel (x, y) to color
             Point pt = new Point(x, y);
+            pt.setOutline(clr);
+            
+            pt.draw(this);
+            this.__autoflush();
+        }
 
+        private void __autoflush()
+        {
+            if (this._autoflush)
+                this.Invalidate();
         }
 
         public int getHeight()
@@ -302,12 +334,10 @@ namespace graphics
             return this.width;
         }
 
-        public int[] toScreen(int x, int y)
+        public double[] toScreen(double x, double y)
         {
             /// Convert x,y to screen coordinates
-            int[] val = new int[2];
-            val[0] = x;
-            val[1] = y;
+            double[] val = new double[] { x, y };
             return val;
         }
 
@@ -330,8 +360,8 @@ namespace graphics
     {
         int xbase;
         int ybase;
-        float xscale;
-        float yscale;
+        double xscale;
+        double yscale;
 
         public Transform(int w, int h, int xlow, int ylow, int xhigh, int yhigh)
         {
@@ -343,17 +373,20 @@ namespace graphics
             this.yscale = yspan / (h - 1);
         }
 
-        private void screen(int x, int y)
+        private int[] screen(int x, int y)
         {
-            float xs = (x - this.xbase) / this.xscale;
-            float ys = (y - this.ybase) / this.yscale;
-            // How to return two objects in function call?
+            double xs = (x - this.xbase) / this.xscale;
+            double ys = (y - this.ybase) / this.yscale;
+            int[] value = new int[2] { (int)(xs + 0.5), (int)(ys + 0.5) };
+            return value;
         }
 
-        private void world(int xs, int ys)
+        private double[] world(int xs, int ys)
         {
-            float x = xs * this.xscale + this.xbase;
-            float y = ys * this.yscale + this.ybase;
+            double x = xs * this.xscale + this.xbase;
+            double y = ys * this.yscale + this.ybase;
+            double[] value = new double[2] { x, y };
+            return value;
         }
     }
     #endregion
@@ -369,7 +402,7 @@ namespace graphics
         int outline_width = 1;
         Brush _brush;
         Pen _pen;
-        Window _canvas;
+        Window _canvas; //probably can't draw here for some reason
 
         public Pen pen
         {
@@ -449,7 +482,7 @@ namespace graphics
 
             this.canvas = graphWin;
             this.canvas.append(this);
-
+            this.canvas.Invalidate();
         }
 
         public void undraw()
@@ -468,12 +501,12 @@ namespace graphics
             this._move(dx, dy);
         }
 
-        internal void _draw(object canvas)
+        public void _draw(Graphics canvas)
         {
             return;
         }
 
-        private void _move(int dx, int dy)
+        public void _move(int dx, int dy)
         {
             return;
         }
@@ -486,22 +519,22 @@ namespace graphics
     /// </summary>
     public class Point : GraphicsObject
     {
-        float _x;
-        float _y;
+        double _x;
+        double _y;
 
-        public float x
+        public double x
         {
             get { return _x; }
             set { _x = value; }
         }
 
-        public float y
+        public double y
         {
             get { return _y; }
             set { _y = value; }
         }
 
-        public Point(float x, float y)
+        public Point(double x, double y)
         /// Create a point on a canvas
         {
             this.setOutline("black");
@@ -514,14 +547,15 @@ namespace graphics
             return (String.Format("<Point at ({0},{1})>", this._x, this._y));
         }
 
-        private void _draw(Graphics g)
+        public void _draw(Graphics g)
         {
             /// Use a rectangle fill to draw points
-            int[] coords = this.canvas.toScreen((int)this._x, (int)this._y);
-            g.FillRectangle(this.brush, coords[0], coords[1], 1, 1);
-        }
+            double[] coords = this.canvas.toScreen(this._x, this._y);
+            Console.WriteLine("Entered Point draw");
+            g.FillRectangle(this.brush, (int)coords[0], (int)coords[1], 1, 1);
+        }   
 
-        public void _move(int dx, int dy)
+        private void _move(double dx, double dy)
         {
             this._x += dx;
             this._y += dy;
@@ -535,17 +569,17 @@ namespace graphics
             return other;
         }
 
-        float getX()
+        /* Why do this when the user can just type p.x or p.y? 
+        public float getX()
         {
             return this._x;
         }
 
-        float getY()
+        public float getY()
         {
             return this._y;
         }
-
-
+        */
     }
     #endregion
 
@@ -570,6 +604,13 @@ namespace graphics
         {
             get { return _p2; }
             set { _p2 = value; }
+        }
+
+        public _BBox(Point p1, Point p2)
+        {
+            GraphicsObject g = new GraphicsObject();
+            this._p1 = p1.clone();
+            this._p2 = p2.clone();
         }
 
         public void _move(float dx, float dy)
@@ -597,25 +638,38 @@ namespace graphics
     }
     #endregion
 
-    #region Rectangle
+    /*#region Rectangle
     /// <summary>
     /// Rectangle class
     /// </summary>
     public class Rectangle : _BBox
     {
-        public Rectangle(Point p1, Point p2)
+        Point _p1;
+        Point _p2;
+        
+        public Point p1
         {
+            get { return _p1; }
+            set { _p1 = value; }
         }
 
-        private void _draw(Graphics g)
+        public Point p2
         {
-            int[] c1 = this.canvas.toScreen((int)p1.x, (int)p1.y);
-            int[] c2 = this.canvas.toScreen((int)p2.x, (int)p2.y);
+            get { return _p2; }
+            set { _p2 = value; }
+        }
+               
+        public void _draw(Graphics g)
+        {
+            p1 = this.p1;
+            p2 = this.p2;
+            double[] c1 = this.canvas.toScreen(p1.x, p1.y);
+            double[] c2 = this.canvas.toScreen(p2.x, p2.y);
             // Need to write swap function here
-            int width = c1[1] - c1[0];
-            int height = c2[1] - c2[0];
-            g.DrawRectangle(this.pen, c1[0], c1[1], width, height);
-            g.FillRectangle(this.brush, c1[0], c1[1], width, height);
+            int width = (int)c1[1] - (int)c1[0];
+            int height = (int)c2[1] - (int)c2[0];
+            g.DrawRectangle(this.pen, (int)c1[0], (int)c1[1], width, height);
+            g.FillRectangle(this.brush, (int)c1[0], (int)c1[1], width, height);
         }
 
         public Rectangle clone()
@@ -627,8 +681,9 @@ namespace graphics
         }
     }
     #endregion
+     */
 
-    #region Oval
+    /*#region Oval
     /// <summary>
     /// Oval class
     /// </summary>
@@ -636,8 +691,8 @@ namespace graphics
     {
     }
     #endregion
-
-    #region Circle
+    */
+    /*#region Circle
     /// <summary>
     /// Circle class
     /// </summary>
@@ -645,8 +700,8 @@ namespace graphics
     {
     }
     #endregion
-
-    #region Line
+    */
+    /*#region Line
     /// <summary>
     /// Line class
     /// </summary>
@@ -654,13 +709,62 @@ namespace graphics
     {
     }
     #endregion
-
+    */
     #region Polygon
     /// <summary>
     /// Polygon class
     /// </summary>
-    class Polygon : GraphicsObject
+    public class Polygon : GraphicsObject
     {
+        Point[] _Points;
+
+        public Point[] Points
+        {
+            get { return _Points; }
+            set { _Points = value; }
+        }
+
+        public Polygon(params Point[] points)
+        {
+            for (int i = 0; i < points.Length; i++)
+                this._Points[i] = points[i].clone();
+        }
+
+        public Polygon clone()
+        {
+            Polygon other = new Polygon(this._Points);
+            other.pen = (Pen)this.pen.Clone();
+            other.brush = (Brush)this.brush.Clone();
+            return other;
+        }
+
+        public Point[] getPoints()
+        {
+            Point[] pClones = new Point[this._Points.Length];
+            for (int i = 0; i < this._Points.Length; i++)
+                pClones[i] = this.Points[i].clone();
+            return pClones;
+        }
+
+        public void _move(int dx, int dy)
+        {
+            foreach (Point p in this._Points)
+                p.move(dx, dy);
+        }
+
+        public void _draw(Graphics g)
+        {
+            /// FIXME ME NOW!
+            double[] value;
+            System.Drawing.Point[] pts = new System.Drawing.Point[this._Points.Length];
+            for (int i = 0; i < this._Points.Length; i++)
+            {
+                value = canvas.toScreen((int)_Points[i].x, (int)_Points[i].y);
+                pts[i] = new System.Drawing.Point((int)this._Points[i].x, (int)this._Points[i].y);
+            }
+            g.DrawPolygon(this.pen, pts);
+            g.FillPolygon(this.brush, pts);
+        }
     }
     #endregion
 
@@ -670,6 +774,117 @@ namespace graphics
     /// </summary>
     class Text : GraphicsObject
     {
+        Font font;
+        Point anchor;
+        string _text;
+        Point _p;
+
+        public Point p
+        {
+            get { return _p; }
+            set { _p = value; }
+        }
+
+        public Text(Point p, string text)
+        {
+            this.setFill("black");
+            this.setOutline("black");
+            this.font = new Font("Helvetica", 12);
+            this.anchor = p.clone();
+        }
+
+        private void InitializeComponent()
+        {
+        }
+
+        private void _draw(Graphics g)
+        {
+            this.p = this.anchor;
+            double[] coords = this.canvas.toScreen((int)p.x, (int)p.y);
+            // change to double
+            StringFormat frmt = new StringFormat();
+            frmt.Alignment = StringAlignment.Center;
+            frmt.LineAlignment = StringAlignment.Center;
+            g.DrawString(this._text, this.font, this.brush, (float)coords[0], (float)coords[1], frmt);
+        }
+
+        private void _move(int dx, int dy)
+        {
+            this.anchor.move(dx, dy);
+        }
+
+        public Text clone()
+        {
+            Text other = new Text(this.anchor, this._text); // fix me
+            other.pen = (Pen)this.pen.Clone();
+            this.brush = (Brush)this.brush.Clone();
+            this.font = (Font)this.font.Clone();
+            return other;
+        }
+        public void setText(string text)
+        {
+            this._text = text;
+        }
+
+        public string getText()
+        {
+            return this._text;
+        }
+
+        public Point getAnchor()
+        {
+            return this.anchor.clone();
+        }
+
+        public void setFace(string face)
+        {
+            MapColors fap = new MapColors();
+            string fface;
+            try
+            {
+                fface = fap.font_face_map()[face];
+            }
+            catch
+            {
+                fface = "Courier";
+                throw;
+            }
+            int fsize = (int)this.font.Size;
+            FontStyle fstyle = this.font.Style;
+            this.font = new Font(fface, fsize, fstyle);
+        }
+
+        public void setSize(int size)
+        {
+            float fsize;
+            if (5 <= size & size <= 36)
+                fsize = (float)size;
+            else
+                return;
+            FontFamily fface = this.font.FontFamily;
+            FontStyle fstyle = this.font.Style;
+            this.font = new Font(fface, fsize, fstyle);
+        }
+
+        public void setStyle(string style)
+        {
+            FontStyle fstyle;
+            MapColors fap = new MapColors();
+            try
+            {
+                fstyle = fap.font_style_map()[style];
+            }
+            catch { fstyle = FontStyle.Regular; }
+            FontFamily fface = this.font.FontFamily;
+            float fsize = this.font.Size;
+            this.font.Dispose();
+            this.font = new Font(fface, fsize, fstyle);
+        }
+
+        public void setTextColor(string color)
+        {
+            this.setFill(color);
+        }
     }
     #endregion
 
