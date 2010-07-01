@@ -113,7 +113,7 @@ namespace graphics
         bool _smooth;
         bool _closed;
         object trans;
-        ArrayList _items;
+        ArrayList items;
         //int mouseX;
         //int mouseY;
         //bool mouseCallBack;
@@ -173,10 +173,11 @@ namespace graphics
         }
 
         private void InitializeComponent()
-        {
+        {   
+            
             this._smooth = false;
             this._autoflush = true;
-            this._items = new ArrayList();
+            this.items = new ArrayList();
             this.Text = this.title;
 
             // Add to the size of the window to account for borders
@@ -201,8 +202,8 @@ namespace graphics
                 MessageBox.Show("Mono bug: skipping double-buffer settings");
             }
 
-            this.Height = this._height;
-            this.Width = this._width;
+            //this.Height = this._height;
+            //this.Width = this._width;
             this._closed = false;
             this._smooth = smooth;
 
@@ -215,7 +216,8 @@ namespace graphics
             this.FormClosing += this._onFormClosing;
 
             this.BackColor = System.Drawing.Color.FromArgb(255, 236, 233, 216);
-            this.Show();
+            //this.Show();
+
             // Refresh set to autoflush
             if (_autoflush) this.Invalidate();
         }
@@ -225,7 +227,7 @@ namespace graphics
             if (this.smooth)
                 e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
 
-            foreach (GraphicsObject s in this._items)
+            foreach (GraphicsObject s in this.items)
             {
                 s._draw(e.Graphics);
             }
@@ -240,7 +242,7 @@ namespace graphics
 
         private void _onFormClosing(object sender, EventArgs e)
         {
-            this.Close();
+            this.close();
         }
 
         private void _checkOpen()
@@ -252,12 +254,12 @@ namespace graphics
 
         public void append(GraphicsObject itm)
         {
-            this._items.Add(itm);
+            this.items.Add(itm);
         }
 
         public void remove(GraphicsObject itm)
         {
-            this._items.Remove(itm);
+            this.items.Remove(itm);
         }
 
         public void setBackground(string color)
@@ -266,6 +268,7 @@ namespace graphics
             this._checkOpen();
             MapColors map = new MapColors();
             this.BackColor = map.color_map()[color];
+            this.__autoflush();
         }
 
         public void setCoords(int x1, int y1, int x2, int y2)
@@ -307,7 +310,7 @@ namespace graphics
 
         }
 
-        private void plotPixel(int x, int y, string clr)
+        public void plotPixel(int x, int y, string clr)
         {
             /// Set pixel raw (independent of window coordinates)
             /// pixel (x, y) to color
@@ -322,6 +325,7 @@ namespace graphics
         {
             if (this._autoflush)
                 this.Invalidate();
+            this.Invalidate();
         }
 
         public int getHeight()
@@ -501,14 +505,14 @@ namespace graphics
             this._move(dx, dy);
         }
 
-        public void _draw(Graphics canvas)
+        public virtual void _draw(Graphics canvas)
         {
-            return;
+            //
         }
 
-        public void _move(int dx, int dy)
+        public virtual void _move(int dx, int dy)
         {
-            return;
+            //
         }
     }
     #endregion
@@ -534,10 +538,10 @@ namespace graphics
             set { _y = value; }
         }
 
-        public Point(double x, double y)
+        public Point(double x, double y) : base()
         /// Create a point on a canvas
         {
-            this.setOutline("black");
+            this.setOutline("red");
             this._x = x;
             this._y = y;
         }
@@ -547,7 +551,7 @@ namespace graphics
             return (String.Format("<Point at ({0},{1})>", this._x, this._y));
         }
 
-        public void _draw(Graphics g)
+        public override void _draw(Graphics g)
         {
             /// Use a rectangle fill to draw points
             double[] coords = this.canvas.toScreen(this._x, this._y);
@@ -555,7 +559,7 @@ namespace graphics
             g.FillRectangle(this.brush, (int)coords[0], (int)coords[1], 1, 1);
         }   
 
-        private void _move(double dx, double dy)
+        public override void _move(int dx, int dy)
         {
             this._x += dx;
             this._y += dy;
@@ -613,7 +617,7 @@ namespace graphics
             this._p2 = p2.clone();
         }
 
-        public void _move(float dx, float dy)
+        public override void _move(int dx, int dy)
         {
             this.p1.x += dx;
             this.p1.y += dy;
@@ -638,69 +642,155 @@ namespace graphics
     }
     #endregion
 
-    /*#region Rectangle
+    #region Rectangle
     /// <summary>
     /// Rectangle class
     /// </summary>
     public class Rectangle : _BBox
     {
+        /*
         Point _p1;
         Point _p2;
         
-        public Point p1
+        public new Point p1
         {
             get { return _p1; }
             set { _p1 = value; }
         }
 
-        public Point p2
+        public new Point p2
         {
             get { return _p2; }
             set { _p2 = value; }
         }
+        */
+
+        public Rectangle(Point p1, Point p2) : base(p1, p2)
+        {
+
+        }
                
-        public void _draw(Graphics g)
+        public override void _draw(Graphics g)
         {
             p1 = this.p1;
+            //p1 = this.p1;
             p2 = this.p2;
             double[] c1 = this.canvas.toScreen(p1.x, p1.y);
             double[] c2 = this.canvas.toScreen(p2.x, p2.y);
             // Need to write swap function here
-            int width = (int)c1[1] - (int)c1[0];
-            int height = (int)c2[1] - (int)c2[0];
+            if (c1[0] > c2[0])
+            {
+                double temp = c2[0];
+                c2[0] = c1[0];
+                c1[0] = temp;
+            }
+
+            if (c1[1] > c2[1])
+            {
+                double temp = c2[1];
+                c2[1] = c1[1];
+                c1[1] = temp;
+            }
+
+            int width = (int)c2[0] - (int)c1[0];
+            int height = (int)c2[1] - (int)c1[0];
             g.DrawRectangle(this.pen, (int)c1[0], (int)c1[1], width, height);
             g.FillRectangle(this.brush, (int)c1[0], (int)c1[1], width, height);
         }
 
         public Rectangle clone()
         {
-            Rectangle other = new Rectangle(p1, p2);
+            Rectangle other = new Rectangle(this.p1, this.p2);
             other.pen = (Pen)this.pen.Clone();
             other.brush = (Brush)this.brush.Clone();
             return other;
         }
     }
     #endregion
-     */
 
-    /*#region Oval
+    #region Oval
     /// <summary>
     /// Oval class
     /// </summary>
-    class Oval : _BBox
+    public class Oval : _BBox
     {
+        public Oval(Point p1, Point p2)
+            : base(p1, p2)
+        {
+
+        }
+
+        public virtual Oval clone()
+        {
+            Oval other = new Oval(this.p1, this.p2);
+            other.pen = (Pen) this.pen.Clone();
+            other.brush = (Brush) this.brush.Clone();
+            return other;
+        }
+
+        public override void _draw(Graphics g)
+        {
+            p1 = this.p1;
+            p2 = this.p2;
+            double[] c1 = this.canvas.toScreen(p1.x, p1.y);
+            double[] c2 = this.canvas.toScreen(p2.x, p2.y);
+            if (c1[0] > c2[0])
+            {
+                double temp = c2[0];
+                c2[0] = c1[0];
+                c1[0] = temp;
+            }
+
+            if (c1[1] > c2[1])
+            {
+                double temp = c2[1];
+                c2[1] = c1[1];
+                c1[1] = temp;
+            }
+            
+            int width = (int)c2[0] - (int)c1[0];
+            int height = (int)c2[1] - (int)c1[0];
+            g.DrawEllipse(this.pen, (int)c1[0], (int)c1[1], width, height);
+            g.FillEllipse(this.brush, (int)c1[0], (int)c1[1], width, height);
+        }
     }
     #endregion
-    */
+   
     /*#region Circle
     /// <summary>
     /// Circle class
     /// </summary>
-    class Circle : Oval
+    public class Circle : Oval
     {
+        Point p1;
+        Point p2;
+        double _radius;
+
+        public Circle(Point center, double radius)
+        {
+            this._radius = radius;
+            this.p1 = new Point(center.x - radius, center.y - radius);
+            this.p2 = new Point(center.x + radius, center.y + radius);
+            
+
+        }
+
+        public override Circle clone()
+        {
+            Circle other = new Circle(this.getCenter(), this._radius);
+            other.pen = (Pen)this.pen.Clone();
+            other.brush = (Brush)this.brush.Clone();
+            return other;
+        }
+
+        public double getRadius()
+        {
+            return this._radius;
+        }
+
     }
-    #endregion
-    */
+    #endregion*/
+    
     /*#region Line
     /// <summary>
     /// Line class
@@ -726,6 +816,7 @@ namespace graphics
 
         public Polygon(params Point[] points)
         {
+            this._Points = points;
             for (int i = 0; i < points.Length; i++)
                 this._Points[i] = points[i].clone();
         }
@@ -746,15 +837,14 @@ namespace graphics
             return pClones;
         }
 
-        public void _move(int dx, int dy)
+        public override void _move(int dx, int dy)
         {
             foreach (Point p in this._Points)
                 p.move(dx, dy);
         }
 
-        public void _draw(Graphics g)
+        public override void _draw(Graphics g)
         {
-            /// FIXME ME NOW!
             double[] value;
             System.Drawing.Point[] pts = new System.Drawing.Point[this._Points.Length];
             for (int i = 0; i < this._Points.Length; i++)
@@ -785,7 +875,14 @@ namespace graphics
             set { _p = value; }
         }
 
-        public Text(Point p, string text)
+        public Text(Point p, string text) : base()
+        {
+            this._p = p;
+            this._text = text;
+            InitializeComponent();
+        }
+
+        private void InitializeComponent()
         {
             this.setFill("black");
             this.setOutline("black");
@@ -793,11 +890,7 @@ namespace graphics
             this.anchor = p.clone();
         }
 
-        private void InitializeComponent()
-        {
-        }
-
-        private void _draw(Graphics g)
+        public override void _draw(Graphics g)
         {
             this.p = this.anchor;
             double[] coords = this.canvas.toScreen((int)p.x, (int)p.y);
@@ -808,7 +901,7 @@ namespace graphics
             g.DrawString(this._text, this.font, this.brush, (float)coords[0], (float)coords[1], frmt);
         }
 
-        private void _move(int dx, int dy)
+        public override void _move(int dx, int dy)
         {
             this.anchor.move(dx, dy);
         }
@@ -905,5 +998,41 @@ namespace graphics
     {
 
     }
+    #endregion
+
+    #region Test
+    /// <summary>
+    /// Testing Graphics Library
+    /// </summary>
+   /* class Run
+    {
+
+        [STAThread]
+        static void Main()
+        {
+            Window win = new Window("My Window", 500, 500); //works
+            //win.setCoords(0, 0, 10, 10);
+            Text t = new Text(new Point(100, 300), "Centered Text");
+            t.draw(win);
+            //Polygon p = new Polygon(new Point(100, 100), new Point(250, 300), new Point(400, 350)); //works
+            //p.setFill("red"); //works!
+            //p.draw(win); //works!
+            //Rectangle r = new Rectangle(new Point(150, 150), new Point(300, 300));
+            //r.setFill("red");
+            //r.setOutline("black");
+            //r.draw(win);
+
+            Oval o = new Oval(new Point(150, 150), new Point(300, 300));
+            o.setFill("red");
+            o.setOutline("yellow");
+            o.draw(win);
+            Application.Run(win);
+        }
+
+        private void Window_Load(object sender, System.EventArgs e)
+        {
+
+        }
+    }*/
     #endregion
 }
