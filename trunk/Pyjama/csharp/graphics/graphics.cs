@@ -114,9 +114,9 @@ namespace graphics
         bool _closed;
         object trans;
         ArrayList items;
-        //int mouseX;
-        //int mouseY;
-        //bool mouseCallBack;
+        int? mouseX;
+        int? mouseY;
+        bool? _mouseCallBack;
 
         public int height
         {
@@ -207,19 +207,30 @@ namespace graphics
             this._closed = false;
             this._smooth = smooth;
 
-            //this.mouseX = (int)MouseButtons.None;
-            //this.mouseY = (int)MouseButtons.None;
-            //this.mouseCallBack = false;
+            this.mouseX = null;
+            this.mouseY = null;
+            this._mouseCallBack = null;
 
             this.Paint += this._onPaint;
             //this.Click += this._onClick;
+            this.MouseClick += new MouseEventHandler(Window_MouseClick);
             this.FormClosing += this._onFormClosing;
 
             this.BackColor = System.Drawing.Color.FromArgb(255, 236, 233, 216);
-            //this.Show();
+            this.Show();
 
             // Refresh set to autoflush
             if (_autoflush) this.Invalidate();
+        }
+
+        void Window_MouseClick(object sender, MouseEventArgs e)
+        {
+            /// Save the location of all mouse clicks.
+            /// Only called from remote thread.
+            this.mouseX = e.X;
+            this.mouseY = e.Y;
+            //if (this._mouseCallBack)
+              //  this._mouseCallBack(new Point(e.X, e.Y));
         }
 
         private void _onPaint(object sender, PaintEventArgs e)
@@ -231,13 +242,6 @@ namespace graphics
             {
                 s._draw(e.Graphics);
             }
-        }
-
-        private void _onClick(object sender, MouseEventArgs e)
-        {
-            // Save the location of mouse clicks
-            //this.mouseX = e.X;
-            //this.mouseY = e.Y;
         }
 
         private void _onFormClosing(object sender, EventArgs e)
@@ -320,12 +324,22 @@ namespace graphics
             pt.draw(this);
             this.__autoflush();
         }
-
+        
         private void __autoflush()
         {
             if (this._autoflush)
                 this.Invalidate();
             this.Invalidate();
+        }
+
+        public void flush()
+        {
+            this._checkOpen();
+        }
+
+        public void update()
+        {
+            this.flush();
         }
 
         public int getHeight()
@@ -338,6 +352,38 @@ namespace graphics
             return this.width;
         }
 
+        public Point getMouse()
+        {
+            /// Wait for mouse click and return Point object
+            /// representing the click
+            this.update();
+            while (this.mouseX == null || this.mouseY == null)
+            {
+                if (this.isClosed())
+                    Console.WriteLine("Graphics Error");
+                Thread.Sleep(100);
+            }
+            float[] coords = this.toWorld(this.mouseX, this.mouseY);
+            this.mouseX = null;
+            this.mouseY = null;
+            return new Point(coords[0], coords[1]);
+        }
+
+        public Point checkMouse()
+        {
+            if (this.isClosed())
+                Console.WriteLine("Check mouse in closed window");
+            if (this.mouseX != null & this.mouseY != null)
+            {
+                float[] coords = this.toWorld(this.mouseX, this.mouseY);
+                this.mouseX = null;
+                this.mouseY = null;
+                return new Point(coords[0], coords[1]);
+            }
+            else
+                return null;
+        }
+
         public double[] toScreen(double x, double y)
         {
             /// Convert x,y to screen coordinates
@@ -345,12 +391,10 @@ namespace graphics
             return val;
         }
 
-        public float[] toWorld(int x, int y)
+        public float[] toWorld(int? x, int? y)
         {
             /// Convert x,y to world coordinates
-            float[] val = new float[2];
-            val[0] = (float)x;
-            val[1] = (float)y;
+            float[] val = new float[2] { (float)x, (float)y };
             return val;
         }
     }
@@ -401,12 +445,19 @@ namespace graphics
     /// </summary>
     public class GraphicsObject : Object
     {
-        string fill_color;
+        string _fill_color;
         string outline_color;
         int outline_width = 1;
         Brush _brush;
         Pen _pen;
         Window _canvas; //probably can't draw here for some reason
+        Font _font;
+
+        public string fill_color
+        {
+            get { return _fill_color; }
+            set { _fill_color = value; }
+        }
 
         public Pen pen
         {
@@ -418,6 +469,12 @@ namespace graphics
         {
             get { return _brush; }
             set { _brush = value; }
+        }
+
+        public Font font
+        {
+            get { return _font; }
+            set { _font = value; }
         }
 
         public Window canvas
@@ -476,7 +533,7 @@ namespace graphics
             this._pen = new Pen(clr, width);
         }
 
-        public void draw(Window graphWin)
+        public virtual void draw(Window graphWin)
         {
             /// Draw the object in graphwin, which should be GraphWin
             /// object. A GraphicsObject may only be drawn into one 
@@ -791,15 +848,91 @@ namespace graphics
     }
     #endregion*/
     
-    /*#region Line
+    #region Line
     /// <summary>
     /// Line class
     /// </summary>
-    class Line : _BBox
+    public class Line : _BBox
     {
+        string _arrow;
+
+        public Line(Point p1, Point p2)
+            : base(p1, p2)
+        {
+            this._arrow = "none";
+            this.setFill("black");
+        }
+
+        public override string ToString()
+        {
+            return (String.Format("<Line at ({0},{1}), ({2}, {3})>", this.p1.x, this.p1.y, this.p2.x, this.p2.y));
+        }
+
+        public Line clone()
+        {
+            Line other = new Line(this.p1, this.p2);
+            this.pen = (Pen)this.pen.Clone();
+            this.brush = (Brush)this.brush.Clone();
+            return other;
+        }
+
+        public override void _draw(Graphics g)
+        {
+            p1 = this.p1;
+            p2 = this.p2;
+            double[] f = this.canvas.toScreen(p1.x, p1.y);
+            double[] s = this.canvas.toScreen(p2.x, p2.y);
+            g.DrawLine(this.pen, (float) f[0], (float) f[1], (float) s[0], (float) s[1]);
+
+            // Draw arrows
+            if (this._arrow == "first" || this._arrow == "both")
+                this._draw_arrowhead(g, (int)s[0], (int)s[1], (int)f[0], (int)f[1]);
+            if (this._arrow == "last" || this._arrow == "both")
+                this._draw_arrowhead(g, (int)f[0], (int)f[1], (int)s[0], (int)s[1]);
+        }
+
+        private void _draw_arrowhead(Graphics g, int x1, int y1, int x2, int y2)
+        {
+            // Set length of arrow
+            double arrlen = 10.0;
+            // Set the half-angle made by the arrow point
+            double angle = 0.4;
+            // Calculate unit vector
+            double xdiff = x2 - x1;
+            double ydiff = y2 - y1;
+            double arclen = Math.Sqrt(xdiff * xdiff + ydiff * ydiff);
+            double xunit = xdiff / arclen;
+            double yunit = ydiff / arclen;
+            // Rotate the scaled unit vecotr by a half-angle in both directions
+            double cospa = Math.Cos(angle);
+            // Translate back to the arrow head point
+            double sinpa = Math.Sign(angle);
+            double arrowx2 = arrlen * (xunit * cospa + yunit * sinpa) + x1;
+            double arrowy2 = arrlen * (yunit * cospa - xunit * sinpa) + y1;
+            double cosma = Math.Cos(-angle);
+            double sinma = Math.Sin(-angle);
+            double arrowx3 = arrlen * (xunit * cospa + yunit * sinma) + x1;
+            double arrowy3 = arrlen * (yunit * cosma - xunit * sinma) + y1;
+            // Draw the arrow head
+
+            System.Drawing.Point[] pts = new System.Drawing.Point[3] { new System.Drawing.Point(x1, y1), new System.Drawing.Point((int)arrowx2, (int)arrowy2), new System.Drawing.Point((int)arrowx3, (int)arrowy3) };
+            g.DrawPolygon(this.pen, pts);
+            g.FillPolygon(this.brush, pts);
+
+        }
+
+        private void setArrow(string option)
+        {
+            string[] options =  new string[4] {"first", "last", "both", "none" };
+            int retVal = Array.BinarySearch(options, option);
+            if (retVal == 0)
+                Console.WriteLine("Option not found!");
+            this._arrow = option;
+        }
+       
     }
     #endregion
-    */
+    
     #region Polygon
     /// <summary>
     /// Polygon class
@@ -985,8 +1118,147 @@ namespace graphics
     /// <summary>
     /// Entry class. 
     /// </summary>
-    class Entry : GraphicsObject
+    public class Entry : GraphicsObject
     {
+        TextBox tb;
+        TextBox entry;
+        Point _anchor;
+        int width;
+        string color;
+        Point _p;
+
+        public Point anchor
+        {
+            get { return _p; }
+            set { _p = value; }
+        }
+
+        public Entry(Point p, int width)
+        {
+            TextBox iar = invoke();
+            this.entry = iar;
+            this.font = new Font("Helvetica", 12);
+            this.anchor = p.clone();
+            this.width = width;
+            this.setFill("lightgray");
+            this.setTextColor("black");
+        }
+
+        private TextBox invoke()
+        {
+            tb = new TextBox();
+            tb.Visible = false;
+            return tb;
+        }
+
+        public override void draw(Window graphWin)
+        {
+            if (!this.canvas.isClosed())
+                Console.WriteLine("Object all ready drawn!");
+            if (graphWin.isClosed())
+                Console.WriteLine("Can't draw to closed window!");
+            this.canvas = graphWin;
+
+            // Add to controls and draw
+            this.canvas.append(this);
+            this.canvas.Controls.Add(this.entry);
+            if (this.canvas.autoflush)
+                this.canvas.Invalidate();
+        }
+
+        public override void _draw(Graphics g)
+        {
+            /// Set widget colors, font and size
+            this.setFill(this.fill_color);
+            this.entry.Font = this.font;
+            this.setTextColor(this.color);
+            string measure = new string('X', this.width);
+            SizeF sizef = g.MeasureString(measure, this.font);
+            this.entry.Size = Size.Round(sizef);
+            
+            /// Position the Widgit and make visible
+            p = this.anchor;
+            double[] c = this.canvas.toScreen(p.x, p.y);
+            c[0] = c[0] - 0.5 * sizef.Width;
+            c[1] = c[1] - 0.5 * sizef.Height;
+            this.entry.Visible = true;
+        }
+
+        public void undraw()
+        {
+            /// Undraw the Entry Widget. Returns silently if the 
+            /// object is not currently drawn.
+            if (!this.canvas.isClosed())
+            {
+                this.canvas.remove(this);
+                this.canvas.Controls.Remove(this.entry);
+                if (this.canvas.autoflush)
+                    this.canvas.Invalidate();
+            }
+            this.canvas = null;
+        }
+
+        public string getText()
+        {
+            return this.entry.Text;
+        }
+
+        public override void _move(int dx, int dy)
+        {
+            this.anchor.move(dx, dy);
+        }
+
+        public Point getAnchor()
+        {
+            return this.anchor.clone();
+        }
+
+        public Entry clone()
+        {
+            Entry other = new Entry(this.anchor, this.width);
+            other.entry.Text = this.entry.Text;
+            //other.setFill(this.fill);
+            return other;
+        }
+
+        public void setText(string text)
+        {
+            this.entry.Text = text;
+        }
+
+        public void setFill(string color)
+        {
+            /// Set interior color to color
+           
+        }
+
+        public void setFace(string face)
+        {
+            MapColors map = new MapColors();
+            string fface = map.font_face_map()[face];
+            float fsize = this.font.Size;
+            FontStyle fstyle = this.font.Style;
+            this.font.Dispose();
+            this.font = new Font(fface, fsize, fstyle);
+        }
+
+        public void setStyle(string style)
+        {
+            MapColors map = new MapColors();
+            FontStyle fstyle = map.font_style_map()[style];
+            FontFamily fface = this.font.FontFamily;
+            float fsize = this.font.Size;
+            this.font.Dispose();
+            this.font = new Font(fface, fsize, fstyle);
+        }
+
+        public void setTextColor(string color)
+        {
+            this.color = color;
+            MapColors map = new MapColors();
+            Color clr = map.color_map()[color];
+            this.entry.ForeColor = clr;
+        }
     }
     #endregion
 
@@ -1004,7 +1276,7 @@ namespace graphics
     /// <summary>
     /// Testing Graphics Library
     /// </summary>
-   /* class Run
+   class Run
     {
 
         [STAThread]
@@ -1033,6 +1305,6 @@ namespace graphics
         {
 
         }
-    }*/
+    }
     #endregion
 }
