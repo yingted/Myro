@@ -11,6 +11,7 @@ using System.Drawing;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
+using System.IO;
 
 namespace graphics
 {
@@ -505,7 +506,7 @@ namespace graphics
             this.setFill("transparent");
         }
 
-        public void setFill(string clr)
+        public virtual void setFill(string clr)
         {
             /// Set interior color to color
             if (this.fill_color == clr) return;
@@ -514,7 +515,7 @@ namespace graphics
             this.fill_color = clr;
         }
 
-        public void setOutline(string clr)
+        public virtual void setOutline(string clr)
         {
             /// Set outline color to color
             if (this.outline_color == clr) return;
@@ -524,7 +525,7 @@ namespace graphics
             this.outline_color = clr;
         }
 
-        public void setWidth(int width)
+        public virtual void setWidth(int width)
         {
             /// Set line weight to width
             if (this.outline_width == width) return;
@@ -546,7 +547,7 @@ namespace graphics
             this.canvas.Invalidate();
         }
 
-        public void undraw()
+        public virtual void undraw()
         {
             /// Undraw the object (i.e. hide it). Returns silently if
             /// the object is not currently drawn.
@@ -1122,12 +1123,12 @@ namespace graphics
     {
         TextBox tb;
         TextBox entry;
-        Point _anchor;
+        Point anchor;
         int width;
         string color;
         Point _p;
 
-        public Point anchor
+        public Point p
         {
             get { return _p; }
             set { _p = value; }
@@ -1184,7 +1185,7 @@ namespace graphics
             this.entry.Visible = true;
         }
 
-        public void undraw()
+        public override void undraw()
         {
             /// Undraw the Entry Widget. Returns silently if the 
             /// object is not currently drawn.
@@ -1226,7 +1227,7 @@ namespace graphics
             this.entry.Text = text;
         }
 
-        public void setFill(string color)
+        public override void setFill(string color)
         {
             /// Set interior color to color
            
@@ -1266,9 +1267,148 @@ namespace graphics
     /// <summary>
     /// Image class
     /// </summary>
-    class Image : GraphicsObject
+    public class Image : GraphicsObject
     {
+        Point anchor;
+        double w;
+        double h;
+        Bitmap img;
+        Type type1;
+        Type type2;
+        
+        public Image(Type arg1, Type arg2) : base()
+        {
+            this.type1 = arg1;
+            this.type2 = arg2;
 
+            // Image(Point, filepath)
+            if (type1 == Type.GetType("Point") && type2 == Type.GetType("string"))
+            {
+                this.img = new Bitmap(arg2.ToString(), true);
+                this.w = this.img.Width;
+                this.h = this.img.Height;
+
+            }
+            // Image(Point, ImageToClone)
+            else if (type1 == Type.GetType("Point") && type2 == Type.GetType("Image"))
+            {
+
+            }
+            // Image(filepath)
+            else if (type1 == Type.GetType("string") && type2 == Type.GetType("null"))
+            {
+                this.anchor = new Point(0, 0);
+                this.img = new Bitmap(arg1.ToString(), true);
+            }
+            // Image(width, height)
+            else if (type1 == Type.GetType("System.Int32") && type2 == Type.GetType("System.Int32"))
+            {
+                this.anchor = new Point(0, 0);
+                //this.img = new Bitmap(arg1.ToString(), arg2.ToString());
+            }
+            
+        }
+
+        public override void _draw(Graphics g)
+        {
+            canvas = this.canvas;
+            Point p = this.anchor;
+            double[] coords = this.canvas.toScreen(p.x, p.y);
+            g.DrawImage(this.img, new System.Drawing.Point((int)coords[0], (int)coords[1]));
+        }
+
+        public override void _move(int dx, int dy)
+        {
+            this.anchor.move(dx, dy);
+        }
+
+        public Point getAnchor()
+        {
+            return this.anchor.clone();
+        }
+
+        public void clone()
+        {
+            Image imgCopy = (Image)this.img.Clone();
+            
+            //Image other = new Image(this.anchor, imgCopy);
+            //return other;
+        }
+
+        public int getWidth()
+        {
+            /// Returns the width of the image in pixels
+            return this.img.Width;
+        }
+
+        public int getHeight()
+        {
+            /// Returns the height of the image in pixels
+            return this.img.Height;
+        }
+
+        public double[] getPixel(int x, int y)
+        {
+            Color clr = this.img.GetPixel(x, y);
+            double[] rgb = new double[3] { clr.R, clr.G, clr.B };
+            return rgb;
+        }
+
+        public void setPixel(int x, int y, int[] rgb)
+        {
+            /// Sets pixel (x,y) to the color given by RBG
+            /// values r, g, and b. 
+            /// r, g, b should be in range(256)
+            Color clr;
+            if (rgb.Length == 3)
+                clr = Color.FromArgb(255, rgb[0], rgb[1], rgb[2]);
+            else
+                clr = Color.FromArgb(255, Color.Black);
+        }
+
+        public void save(string filename)
+        {
+            /// Saves the pixmap image to filename.
+            /// The format for the save image is determined from the 
+            /// filename extension
+            string ext = Path.GetExtension(filename);
+            string NewExt = ext.ToLower();
+            System.Drawing.Imaging.ImageFormat frmt;
+            switch (NewExt)
+            {
+                case "emf":
+                    frmt = System.Drawing.Imaging.ImageFormat.Emf;
+                    break;
+                case "gif":
+                    frmt = System.Drawing.Imaging.ImageFormat.Gif;
+                    break;
+                case "ico":
+                    frmt = System.Drawing.Imaging.ImageFormat.Icon;
+                    break;
+                case "jpg":
+                    frmt = System.Drawing.Imaging.ImageFormat.Jpeg;
+                    break;
+                case "jpeg":
+                    frmt = System.Drawing.Imaging.ImageFormat.Jpeg;
+                    break;
+                case "png":
+                    frmt = System.Drawing.Imaging.ImageFormat.Png;
+                    break;
+                case "tiff":
+                    frmt = System.Drawing.Imaging.ImageFormat.Tiff;
+                    break;
+                case "tif":
+                    frmt = System.Drawing.Imaging.ImageFormat.Tiff;
+                    break;
+                case "wmf":
+                    frmt = System.Drawing.Imaging.ImageFormat.Wmf;
+                    break;
+                default:
+                    frmt = System.Drawing.Imaging.ImageFormat.Bmp;
+                    break;
+            }
+            this.img.Save(filename, frmt);
+        }
     }
     #endregion
 
