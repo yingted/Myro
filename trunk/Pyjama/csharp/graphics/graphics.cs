@@ -101,11 +101,11 @@ namespace graphics
     }
     #endregion
 
-    #region Window
+    #region GraphWin
     /// <summary>
     /// Window class
     /// </summary>
-    public class Window : Form
+    public class GraphWin : Form
     {
         string _title = "Graphics Window";
         int _height = 200;
@@ -147,25 +147,25 @@ namespace graphics
             get { return _smooth; }
         }
 
-        public Window()
+        public GraphWin()
         {
             InitializeComponent();
         }
 
-        public Window(string title)
+        public GraphWin(string title)
         {
             this._title = title;
             InitializeComponent();
         }
 
-        public Window(string title, int height)
+        public GraphWin(string title, int height)
         {
             this._title = title;
             this._height = height;
             InitializeComponent();
         }
 
-        public Window(string title, int height, int width)
+        public GraphWin(string title, int height, int width)
         {
             this._title = title;
             this._height = height;
@@ -451,7 +451,7 @@ namespace graphics
         int outline_width = 1;
         Brush _brush;
         Pen _pen;
-        Window _canvas; //probably can't draw here for some reason
+        GraphWin _canvas; //probably can't draw here for some reason
         Font _font;
 
         public string fill_color
@@ -478,7 +478,7 @@ namespace graphics
             set { _font = value; }
         }
 
-        public Window canvas
+        public GraphWin canvas
         {
             get { return _canvas; }
             set { _canvas = value; }
@@ -534,7 +534,7 @@ namespace graphics
             this._pen = new Pen(clr, width);
         }
 
-        public virtual void draw(Window graphWin)
+        public virtual void draw(GraphWin graphWin)
         {
             /// Draw the object in graphwin, which should be GraphWin
             /// object. A GraphicsObject may only be drawn into one 
@@ -668,7 +668,7 @@ namespace graphics
             set { _p2 = value; }
         }
 
-        public _BBox(Point p1, Point p2)
+        public _BBox(Point p1, Point p2) : base()
         {
             GraphicsObject g = new GraphicsObject();
             this._p1 = p1.clone();
@@ -778,7 +778,7 @@ namespace graphics
 
         }
 
-        public virtual Oval clone()
+        public Oval clone()
         {
             Oval other = new Oval(this.p1, this.p2);
             other.pen = (Pen) this.pen.Clone();
@@ -814,26 +814,25 @@ namespace graphics
     }
     #endregion
    
-    /*#region Circle
+    #region Circle
     /// <summary>
     /// Circle class
     /// </summary>
     public class Circle : Oval
     {
-        Point p1;
-        Point p2;
         double _radius;
 
-        public Circle(Point center, double radius)
-        {
-            this._radius = radius;
-            this.p1 = new Point(center.x - radius, center.y - radius);
-            this.p2 = new Point(center.x + radius, center.y + radius);
-            
+        public Circle(Point center, double radius) : 
+            base (
+            new Point(center.x - radius, center.y - radius), 
+            new Point(center.x + radius, center.y + radius)
+            )
 
+        {
+            this._radius = radius;        
         }
 
-        public override Circle clone()
+        public new Circle clone()
         {
             Circle other = new Circle(this.getCenter(), this._radius);
             other.pen = (Pen)this.pen.Clone();
@@ -847,7 +846,7 @@ namespace graphics
         }
 
     }
-    #endregion*/
+    #endregion
     
     #region Line
     /// <summary>
@@ -1152,8 +1151,12 @@ namespace graphics
             return tb;
         }
 
-        public override void draw(Window graphWin)
+        public override void draw(GraphWin graphWin)
         {
+            ///Draw the object in graphWin, which should be a GraphWin
+            ///object. A GraphicsObject may only be drawn into one window.
+            ///Raises an error if attempt made to draw an object that is allready
+            ///visible.
             if (!this.canvas.isClosed())
                 Console.WriteLine("Object all ready drawn!");
             if (graphWin.isClosed())
@@ -1163,6 +1166,7 @@ namespace graphics
             // Add to controls and draw
             this.canvas.append(this);
             this.canvas.Controls.Add(this.entry);
+            
             if (this.canvas.autoflush)
                 this.canvas.Invalidate();
         }
@@ -1218,7 +1222,7 @@ namespace graphics
         {
             Entry other = new Entry(this.anchor, this.width);
             other.entry.Text = this.entry.Text;
-            //other.setFill(this.fill);
+            
             return other;
         }
 
@@ -1230,6 +1234,14 @@ namespace graphics
         public override void setFill(string color)
         {
             /// Set interior color to color
+            if (this.fill_color == color)
+                return;
+            MapColors map = new MapColors();
+            Color clr = map.color_map()[color];
+            if (clr == Color.Transparent)
+                clr = Color.White;
+            this.entry.BackColor = clr;
+            this.fill_color = color;
            
         }
 
@@ -1273,40 +1285,50 @@ namespace graphics
         double w;
         double h;
         Bitmap img;
-        Type type1;
-        Type type2;
-        
-        public Image(Type arg1, Type arg2) : base()
+
+        /// <summary>
+        /// Image(Point, filepath)
+        /// </summary>
+        /// <param name="g"></param>
+
+        public Image(Point p, string filepath)
         {
-            this.type1 = arg1;
-            this.type2 = arg2;
+            this.img = new Bitmap(filepath, true);
+            this.w = this.img.Width;
+            this.h = this.img.Height;
+            this.anchor = new Point(p.x - this.w / 2, p.y - h / 2);
+        }
 
-            // Image(Point, filepath)
-            if (type1 == Type.GetType("Point") && type2 == Type.GetType("string"))
-            {
-                this.img = new Bitmap(arg2.ToString(), true);
-                this.w = this.img.Width;
-                this.h = this.img.Height;
+        /// <summary>
+        /// Image(Point, ImageToClone)
+        /// </summary>
+        /// <param name="g"></param>
+        public Image(Point p, Image arg2)
+        {
+            this.img = arg2.img;
+            this.w = this.img.Width;
+            this.h = this.img.Height;
+            this.anchor = new Point(p.x - this.w / 2, p.y - this.h / 2);
+        }
 
-            }
-            // Image(Point, ImageToClone)
-            else if (type1 == Type.GetType("Point") && type2 == Type.GetType("Image"))
-            {
+        /// <summary>
+        /// Image(filepath)
+        /// </summary>
+        /// <param name="filepath"></param>
+        public Image(string filepath)
+        {
+            this.anchor = new Point(0, 0);
+            this.img = new Bitmap(filepath, true);
+        }
 
-            }
-            // Image(filepath)
-            else if (type1 == Type.GetType("string") && type2 == Type.GetType("null"))
-            {
-                this.anchor = new Point(0, 0);
-                this.img = new Bitmap(arg1.ToString(), true);
-            }
-            // Image(width, height)
-            else if (type1 == Type.GetType("System.Int32") && type2 == Type.GetType("System.Int32"))
-            {
-                this.anchor = new Point(0, 0);
-                //this.img = new Bitmap(arg1.ToString(), arg2.ToString());
-            }
-            
+        /// <summary>
+        /// Image(width, height)
+        /// </summary>
+        /// <param name="g"></param>
+        public Image(int width, int height)
+        {
+            this.anchor = new Point(0, 0);
+            this.img = new Bitmap(width, height);
         }
 
         public override void _draw(Graphics g)
@@ -1327,12 +1349,11 @@ namespace graphics
             return this.anchor.clone();
         }
 
-        public void clone()
+        public Image clone()
         {
-            Image imgCopy = (Image)this.img.Clone();
-            
-            //Image other = new Image(this.anchor, imgCopy);
-            //return other;
+            Image imgCopy = (Image) this.img.Clone();
+            Image other = new Image(this.anchor, imgCopy);
+            return other;
         }
 
         public int getWidth()
@@ -1356,6 +1377,7 @@ namespace graphics
 
         public void setPixel(int x, int y, int[] rgb)
         {
+            
             /// Sets pixel (x,y) to the color given by RBG
             /// values r, g, and b. 
             /// r, g, b should be in range(256)
@@ -1416,28 +1438,37 @@ namespace graphics
     /// <summary>
     /// Testing Graphics Library
     /// </summary>
-   class Run
+   public class Run
     {
-
         [STAThread]
-        static void Main()
+        public static void Main()
         {
-            Window win = new Window("My Window", 500, 500); //works
+            GraphWin win = new GraphWin("My Window", 500, 500);
             //win.setCoords(0, 0, 10, 10);
-            Text t = new Text(new Point(100, 300), "Centered Text");
+            Text t = new Text(new Point(50, 50), "Centered Text");
             t.draw(win);
-            //Polygon p = new Polygon(new Point(100, 100), new Point(250, 300), new Point(400, 350)); //works
-            //p.setFill("red"); //works!
-            //p.draw(win); //works!
-            //Rectangle r = new Rectangle(new Point(150, 150), new Point(300, 300));
-            //r.setFill("red");
-            //r.setOutline("black");
-            //r.draw(win);
-
-            Oval o = new Oval(new Point(150, 150), new Point(300, 300));
-            o.setFill("red");
-            o.setOutline("yellow");
-            o.draw(win);
+            Polygon p = new Polygon(new Point(100, 100), new Point(5, 3), new Point(2, 7));
+            p.draw(win);
+            //Entry e = new Entry(new Point(5, 6), 10);
+            //e.draw(win);
+            //Console.WriteLine("GetMouse = {0}", win.getMouse());
+            
+            p.setFill("red");
+            p.setOutline("blue");
+            p.setWidth(2);
+            //t.setText(e.getText());
+            //e.setFill("green");
+            //e.setText("Spam!");
+            //e.move(2, 0);
+           // Console.WriteLine("GetMouse = {0}", win.getMouse());
+            p.move(2, 3);
+            p.undraw();
+            //e.undraw();
+            t.setStyle("bold");
+            t.setStyle("normal");
+            t.setSize(14);
+            t.setFace("arial");
+            t.setSize(20);
             Application.Run(win);
         }
 
