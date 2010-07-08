@@ -218,10 +218,12 @@ namespace graphics
             this.FormClosing += this._onFormClosing;
 
             this.BackColor = System.Drawing.Color.FromArgb(255, 236, 233, 216);
-            this.Show();
+
 
             // Refresh set to autoflush
             if (_autoflush) this.Invalidate();
+
+            this.Show();
         }
 
         void Window_MouseClick(object sender, MouseEventArgs e)
@@ -1289,8 +1291,6 @@ namespace graphics
         /// <summary>
         /// Image(Point, filepath)
         /// </summary>
-        /// <param name="g"></param>
-
         public Image(Point p, string filepath)
         {
             this.img = new Bitmap(filepath, true);
@@ -1302,7 +1302,6 @@ namespace graphics
         /// <summary>
         /// Image(Point, ImageToClone)
         /// </summary>
-        /// <param name="g"></param>
         public Image(Point p, Image arg2)
         {
             this.img = arg2.img;
@@ -1314,7 +1313,6 @@ namespace graphics
         /// <summary>
         /// Image(filepath)
         /// </summary>
-        /// <param name="filepath"></param>
         public Image(string filepath)
         {
             this.anchor = new Point(0, 0);
@@ -1324,7 +1322,6 @@ namespace graphics
         /// <summary>
         /// Image(width, height)
         /// </summary>
-        /// <param name="g"></param>
         public Image(int width, int height)
         {
             this.anchor = new Point(0, 0);
@@ -1445,9 +1442,9 @@ namespace graphics
         {
             GraphWin win = new GraphWin("My Window", 500, 500);
             //win.setCoords(0, 0, 10, 10);
-            Text t = new Text(new Point(50, 50), "Centered Text");
+            Text t = new Text(new Point(100, 100), "Centered Text");
             t.draw(win);
-            Polygon p = new Polygon(new Point(100, 100), new Point(5, 3), new Point(2, 7));
+            Polygon p = new Polygon(new Point(100, 100), new Point(50, 30), new Point(20, 70));
             p.draw(win);
             //Entry e = new Entry(new Point(5, 6), 10);
             //e.draw(win);
@@ -1461,7 +1458,7 @@ namespace graphics
             //e.setText("Spam!");
             //e.move(2, 0);
            // Console.WriteLine("GetMouse = {0}", win.getMouse());
-            p.move(2, 3);
+            p.move(20, 30);
             p.undraw();
             //e.undraw();
             t.setStyle("bold");
