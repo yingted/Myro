@@ -1137,12 +1137,11 @@ namespace graphics
 
         public Entry(Point p, int width)
         {
-            TextBox iar = invoke();
-            this.entry = iar;
+            this.entry = invoke();
             this.font = new Font("Helvetica", 12);
             this.anchor = p.clone();
             this.width = width;
-            this.setFill("lightgray");
+           //this.setFill("lightgray");
             this.setTextColor("black");
         }
 
@@ -1176,7 +1175,7 @@ namespace graphics
         public override void _draw(Graphics g)
         {
             /// Set widget colors, font and size
-            this.setFill(this.fill_color);
+            //this.setFill(this.fill_color);
             this.entry.Font = this.font;
             this.setTextColor(this.color);
             string measure = new string('X', this.width);
@@ -1233,19 +1232,22 @@ namespace graphics
             this.entry.Text = text;
         }
 
-        public override void setFill(string color)
+        /*public override void setFill(string color)
         {
             /// Set interior color to color
             if (this.fill_color == color)
                 return;
             MapColors map = new MapColors();
-            Color clr = map.color_map()[color];
-            if (clr == Color.Transparent)
-                clr = Color.White;
-            this.entry.BackColor = clr;
+            //Color clr = map.color_map()[color];
+            if (map.color_map()[color] == Color.Transparent)
+                this.entry.BackColor = Color.White;
+            this.entry.BackColor = map.color_map()[color];
+            //if (clr == Color.Transparent)
+            //    clr = Color.White;
+            //this.entry.BackColor = clr;
             this.fill_color = color;
            
-        }
+        }*/
 
         public void setFace(string face)
         {
@@ -1446,11 +1448,11 @@ namespace graphics
             t.draw(win);
             Polygon p = new Polygon(new Point(100, 100), new Point(50, 30), new Point(20, 70));
             p.draw(win);
-            //Entry e = new Entry(new Point(5, 6), 10);
-            //e.draw(win);
+            Entry e = new Entry(new Point(400, 60), 10);
+            e.draw(win);
             //Console.WriteLine("GetMouse = {0}", win.getMouse());
             
-            p.setFill("red");
+            /*p.setFill("red");
             p.setOutline("blue");
             p.setWidth(2);
             //t.setText(e.getText());
@@ -1465,7 +1467,7 @@ namespace graphics
             t.setStyle("normal");
             t.setSize(14);
             t.setFace("arial");
-            t.setSize(20);
+            t.setSize(20);*/
             Application.Run(win);
         }
 
