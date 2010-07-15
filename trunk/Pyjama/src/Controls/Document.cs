@@ -97,6 +97,7 @@ namespace Pyjama
         public ArrayList syntax = new ArrayList();
         public ArrayList comments = new ArrayList();
         public ArrayList quotes = new ArrayList();
+        public ArrayList endSymbol = new ArrayList();
         public delegate void TextChangedHandler(object sender, EventArgs e);
         int mode = 0; // used in parsing richtext
         int[] last_mode = new int[10000];
@@ -159,7 +160,7 @@ namespace Pyjama
             }
             else
             {
-                string new_config = "src/" + config;
+                string new_config = "Pyjama/src/" + config;
                 string new_Path = Path.GetFullPath(new_config);
 
                 if (File.Exists(new_Path))
@@ -190,6 +191,9 @@ namespace Pyjama
 
             /* Booleans */
             ReadConfigFile(doc, "boolean");
+
+            /* End Symbol */
+            ReadConfigFile(doc, "endSymbol");
 
             // -----------------------------
             Controls.Add(textBox);           
@@ -240,6 +244,10 @@ namespace Pyjama
                                 case "quote":
                                     quotes.Add(eChild.InnerXml.ToString());
                                     break;
+                                
+                                case "endSymbol":
+                                    endSymbol.Add(eChild.InnerXml.ToString());
+                                    break;
                             }
                         }
                     }
@@ -280,11 +288,18 @@ namespace Pyjama
 		  }
         }
 
-	    private static bool EndSymbol(char c)
+	    public bool EndSymbol(char c)
         {
-            return (c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == ',' ||
-                    c == '(' || c == ')' || c == '.' || c == '-' || c == '/' || c == '\0' ||
-                    c == ':' || c == '\\' || c == '*' || c == '@' || c == '%');
+
+            foreach (string key in endSymbol)
+            {
+                if (key == c.ToString())
+                    return true;
+            }
+            return false;
+            /*return (c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == ',' ||
+                  c == '(' || c == ')' || c == '.' || c == '-' || c == '/' || c == '\0' ||
+                  c == ':' || c == '\\' || c == '*' || c == '@' || c == '%');*/
         }
 
         void textbox_TextChanged(object sender, EventArgs e)
@@ -353,7 +368,7 @@ namespace Pyjama
                     } else if (c == '\'') {
                         mode = 3;
                         tokenStart = index;
-                    } else if (c == '#' || c =='\\')               
+                    } else if (c == '#' || c =='\\') // Python specific. Make more general              
                     {
                         mode = 0;
                         textBox.SelectionStart = index;

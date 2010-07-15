@@ -64,4 +64,23 @@
     
   </syntax>
 
+  <endSymbol color="Transparent" font="Couriner New" size="10" style="Regular">
+    <word> </word>
+    <word>\0</word>
+    <word>\t</word>
+    <word>\n</word>
+    <word>\r</word>
+    <word>,</word>
+    <word>(</word>
+    <word>)</word>
+    <word>.</word>
+    <word>-</word>
+    <word>/</word>
+    <word>:</word>
+    <word>\\</word>
+    <word>*</word>
+    <word>@</word>
+    <word>%</word>
+  </endSymbol>
+ 
 </default>
