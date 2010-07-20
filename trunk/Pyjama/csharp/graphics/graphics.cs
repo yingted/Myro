@@ -100,7 +100,7 @@ namespace graphics
         }
     }
     #endregion
-
+    
     #region GraphWin
     /// <summary>
     /// Window class
@@ -510,7 +510,7 @@ namespace graphics
 
         public virtual void setFill(string clr)
         {
-            /// Set interior color to color
+             /// Set interior color to color
             if (this.fill_color == clr) return;
             MapColors map_colors = new MapColors();
             this._brush = new SolidBrush(map_colors.color_map()[clr]);
@@ -601,7 +601,7 @@ namespace graphics
         public Point(double x, double y) : base()
         /// Create a point on a canvas
         {
-            this.setOutline("red");
+            this.setOutline("black");
             this._x = x;
             this._y = y;
         }
@@ -642,8 +642,7 @@ namespace graphics
         public float getY()
         {
             return this._y;
-        }
-        */
+        }*/
     }
     #endregion
 
@@ -708,7 +707,7 @@ namespace graphics
     /// </summary>
     public class Rectangle : _BBox
     {
-        /*
+        
         Point _p1;
         Point _p2;
         
@@ -723,7 +722,7 @@ namespace graphics
             get { return _p2; }
             set { _p2 = value; }
         }
-        */
+        //
 
         public Rectangle(Point p1, Point p2) : base(p1, p2)
         {
@@ -908,22 +907,21 @@ namespace graphics
             // Rotate the scaled unit vecotr by a half-angle in both directions
             double cospa = Math.Cos(angle);
             // Translate back to the arrow head point
-            double sinpa = Math.Sign(angle);
+            double sinpa = Math.Sin(angle);
             double arrowx2 = arrlen * (xunit * cospa + yunit * sinpa) + x1;
             double arrowy2 = arrlen * (yunit * cospa - xunit * sinpa) + y1;
             double cosma = Math.Cos(-angle);
             double sinma = Math.Sin(-angle);
             double arrowx3 = arrlen * (xunit * cospa + yunit * sinma) + x1;
             double arrowy3 = arrlen * (yunit * cosma - xunit * sinma) + y1;
+            
             // Draw the arrow head
-
             System.Drawing.Point[] pts = new System.Drawing.Point[3] { new System.Drawing.Point(x1, y1), new System.Drawing.Point((int)arrowx2, (int)arrowy2), new System.Drawing.Point((int)arrowx3, (int)arrowy3) };
             g.DrawPolygon(this.pen, pts);
             g.FillPolygon(this.brush, pts);
-
         }
 
-        private void setArrow(string option)
+        public void setArrow(string option)
         {
             string[] options =  new string[4] {"first", "last", "both", "none" };
             int retVal = Array.BinarySearch(options, option);
@@ -1122,7 +1120,6 @@ namespace graphics
     /// </summary>
     public class Entry : GraphicsObject
     {
-        TextBox tb;
         TextBox entry;
         Point anchor;
         int width;
@@ -1135,19 +1132,25 @@ namespace graphics
             set { _p = value; }
         }
 
-        public Entry(Point p, int width)
+        public Entry(Point p1, int width) : base()
+        {
+            this.p = p1.clone();
+            this.anchor = p1.clone();
+            this.width = width;
+            InitializeComponent();
+        }
+
+        private void InitializeComponent()
         {
             this.entry = invoke();
             this.font = new Font("Helvetica", 12);
-            this.anchor = p.clone();
-            this.width = width;
-           //this.setFill("lightgray");
+            this.setFill("lightgray");
             this.setTextColor("black");
         }
 
         private TextBox invoke()
         {
-            tb = new TextBox();
+            TextBox tb = new TextBox();
             tb.Visible = false;
             return tb;
         }
@@ -1158,7 +1161,7 @@ namespace graphics
             ///object. A GraphicsObject may only be drawn into one window.
             ///Raises an error if attempt made to draw an object that is allready
             ///visible.
-            if (!this.canvas.isClosed())
+            if (this.canvas !=null)
                 Console.WriteLine("Object all ready drawn!");
             if (graphWin.isClosed())
                 Console.WriteLine("Can't draw to closed window!");
@@ -1175,7 +1178,7 @@ namespace graphics
         public override void _draw(Graphics g)
         {
             /// Set widget colors, font and size
-            //this.setFill(this.fill_color);
+            this.setFill(this.fill_color);
             this.entry.Font = this.font;
             this.setTextColor(this.color);
             string measure = new string('X', this.width);
@@ -1232,22 +1235,21 @@ namespace graphics
             this.entry.Text = text;
         }
 
-        /*public override void setFill(string color)
+        public override void setFill(string color)
         {
             /// Set interior color to color
             if (this.fill_color == color)
                 return;
             MapColors map = new MapColors();
             //Color clr = map.color_map()[color];
-            if (map.color_map()[color] == Color.Transparent)
-                this.entry.BackColor = Color.White;
-            this.entry.BackColor = map.color_map()[color];
+            //if (map.color_map()[color] == Color.Transparent)
+              //  this.entry.BackColor = Color.White;
+            //this.entry.BackColor = map.color_map()[color];
             //if (clr == Color.Transparent)
             //    clr = Color.White;
             //this.entry.BackColor = clr;
-            this.fill_color = color;
-           
-        }*/
+            this.fill_color = color;   
+        }
 
         public void setFace(string face)
         {
@@ -1443,37 +1445,59 @@ namespace graphics
         public static void Main()
         {
             GraphWin win = new GraphWin("My Window", 500, 500);
+
+            Point p1 = new Point(200, 200);
+            Point p2 = new Point(100, 100);
+            Line l = new Line(p1, p2);
+            l.setArrow("none");
+            l.draw(win);
+
             //win.setCoords(0, 0, 10, 10);
-            Text t = new Text(new Point(100, 100), "Centered Text");
+            Text t = new Text(new Point(250, 250), "Centered Text");
             t.draw(win);
             Polygon p = new Polygon(new Point(100, 100), new Point(50, 30), new Point(20, 70));
             p.draw(win);
-            Entry e = new Entry(new Point(400, 60), 10);
-            e.draw(win);
+            //Entry e = new Entry(new Point(250, 60), 100);
+            //e.draw(win);
             //Console.WriteLine("GetMouse = {0}", win.getMouse());
-            
-            /*p.setFill("red");
+            p.setFill("red");
             p.setOutline("blue");
             p.setWidth(2);
-            //t.setText(e.getText());
+            p.move(20, 30);
+            Circle c = new Circle(new Point(300, 300), 50);
+            c.setFill("blue");
+            c.setOutline("yellow");
+
+            Image i = new Image(@"C:\Users\Vincent\Pictures\Family\kash_tongue.jpg");
+            //Image i = new Image(100, 100);
+            double[] pix = i.getPixel(50, 50);
+            foreach (double pi in pix)
+                Console.WriteLine("pix = {0}", pi);
+            i.draw(win);
+
+
+            //graphics.Rectangle rec = new graphics.Rectangle(p1, p2);
+           // rec.draw(win);
+
             //e.setFill("green");
             //e.setText("Spam!");
+            //t.setText(e.getText());
             //e.move(2, 0);
            // Console.WriteLine("GetMouse = {0}", win.getMouse());
-            p.move(20, 30);
-            p.undraw();
-            //e.undraw();
+            
+            /*p.undraw();
+            e.undraw();
             t.setStyle("bold");
             t.setStyle("normal");
             t.setSize(14);
             t.setFace("arial");
             t.setSize(20);*/
-            Application.Run(win);
+            Application.Run(win);            
         }
 
         private void Window_Load(object sender, System.EventArgs e)
         {
-
+            
         }
     }
     #endregion

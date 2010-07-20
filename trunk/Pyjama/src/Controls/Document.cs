@@ -211,13 +211,15 @@ namespace Pyjama
                 if (elementList.Count != 0)
                 {
                     XmlNode elementNode = elementList[0];
-                    XmlAttributeCollection elementCol = elementNode.Attributes;
+                    if (elementNode.Attributes.Count != 0)
+                    {
+                        XmlAttributeCollection elementCol = elementNode.Attributes;
 
-                    colors.Add(element, Color.FromName(elementCol[0].Value.ToString()));
-                    fonts.Add(element, new Font(elementCol[1].Value.ToString(),
-                        Convert.ToInt32(elementCol[2].Value.ToString()),
-                        (FontStyle)Enum.Parse(typeof(FontStyle), elementCol[3].Value.ToString())));
-
+                        colors.Add(element, Color.FromName(elementCol[0].Value.ToString()));
+                        fonts.Add(element, new Font(elementCol[1].Value.ToString(),
+                            Convert.ToInt32(elementCol[2].Value.ToString()),
+                            (FontStyle)Enum.Parse(typeof(FontStyle), elementCol[3].Value.ToString())));
+                    }
                     if (elementNode.ChildNodes.Count != 0)
                     {
                         XmlNodeList elementChilds = elementNode.ChildNodes;
@@ -290,13 +292,11 @@ namespace Pyjama
 
 	    public bool EndSymbol(char c)
         {
-
-            foreach (string key in endSymbol)
-            {
-                if (key == c.ToString())
-                    return true;
-            }
-            return false;
+            // Note that depending on programming language, end symbols will be different.
+            // Thus, we need to read in the symbols from the *.xml file
+            //System.Console.WriteLine("{0} = {1}", c.ToString(), char.IsWhiteSpace(c));
+            return (char.IsWhiteSpace(c) || endSymbol.Contains(c.ToString()) || char.IsControl(c));
+            //return endSymbol.Contains(c.ToString());
             /*return (c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == ',' ||
                   c == '(' || c == ')' || c == '.' || c == '-' || c == '/' || c == '\0' ||
                   c == ':' || c == '\\' || c == '*' || c == '@' || c == '%');*/
@@ -343,7 +343,7 @@ namespace Pyjama
             // FIXME: would be nice if scroll didn't change as we move over lines
             if (lineno >= textBox.Lines.Length || lineno < 0)
                 return;
-            String line = textBox.Lines[lineno] + '\0';
+            string line = textBox.Lines[lineno] + '\0';
             int start = textBox.GetFirstCharIndexFromLine(lineno);
             // Backup the users current selection point.
             int selectionStart = textBox.SelectionStart;
