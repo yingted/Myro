@@ -87,17 +87,12 @@ namespace graphics
     /// <summary>
     /// Generic error class for graphics module exceptions.
     /// </summary>
-    public class GraphicsError : Exception
+    class GraphicsError : System.Exception
     {
         string BAD_OPTION = "Illegal option value";
         string OBJ_ALREADY_DRAWN = "Object currently drawn";
         string UNSUPPORTED_METHOD = "Object doesn't support operation";
         string DEAD_THREAD = "Graphics thread quit unexpectedly";
-
-        GraphicsError(string error)
-        {
-
-        }
     }
     #endregion
     
@@ -254,9 +249,8 @@ namespace graphics
 
         private void _checkOpen()
         {
-            //if (this._closed)
-            //throw new ArgumentException("Window is closed");
-            //throw new GraphicsError();
+            if (this._closed)
+                throw new GraphicsError();
         }
 
         public void append(GraphicsObject itm)
@@ -292,14 +286,14 @@ namespace graphics
             this._close_help();
         }
 
-        public void _close_help()
+        private void _close_help()
         {
             /// Close the window
             this._closed = true;
             this.Close();
         }
 
-        public bool isClosed()
+        internal bool isClosed()
         {
             /// Return True of this GraphWin is closed
             return this._closed;
@@ -323,7 +317,6 @@ namespace graphics
             /// pixel (x, y) to color
             Point pt = new Point(x, y);
             pt.setOutline(clr);
-            
             pt.draw(this);
             this.__autoflush();
         }
@@ -335,12 +328,12 @@ namespace graphics
             this.Invalidate();
         }
 
-        public void flush()
+        internal void flush()
         {
             this._checkOpen();
         }
 
-        public void update()
+        internal void update()
         {
             this.flush();
         }
@@ -375,7 +368,8 @@ namespace graphics
         public Point checkMouse()
         {
             if (this.isClosed())
-                Console.WriteLine("Check mouse in closed window");
+                //Console.WriteLine("Check mouse in closed window");
+                throw new GraphicsError();
             if (this.mouseX != null & this.mouseY != null)
             {
                 float[] coords = this.toWorld(this.mouseX, this.mouseY);
@@ -387,14 +381,14 @@ namespace graphics
                 return null;
         }
 
-        public double[] toScreen(double x, double y)
+        internal double[] toScreen(double x, double y)
         {
             /// Convert x,y to screen coordinates
             double[] val = new double[] { x, y };
             return val;
         }
 
-        public float[] toWorld(int? x, int? y)
+        protected internal float[] toWorld(int? x, int? y)
         {
             /// Convert x,y to world coordinates
             float[] val = new float[2] { (float)x, (float)y };
@@ -583,8 +577,8 @@ namespace graphics
     /// </summary>
     public class Point : GraphicsObject
     {
-        double _x;
-        double _y;
+        private double _x;
+        private double _y;
 
         public double x
         {
@@ -633,16 +627,16 @@ namespace graphics
             return other;
         }
 
-        /* Why do this when the user can just type p.x or p.y? 
-        public float getX()
+        // Why do this when the user can just type p.x or p.y? 
+        public double getX()
         {
             return this._x;
         }
 
-        public float getY()
+        public double getY()
         {
             return this._y;
-        }*/
+        }
     }
     #endregion
 
@@ -1163,6 +1157,7 @@ namespace graphics
             ///visible.
             if (this.canvas !=null)
                 Console.WriteLine("Object all ready drawn!");
+                
             if (graphWin.isClosed())
                 Console.WriteLine("Can't draw to closed window!");
             this.canvas = graphWin;
@@ -1445,53 +1440,7 @@ namespace graphics
         public static void Main()
         {
             GraphWin win = new GraphWin("My Window", 500, 500);
-
-            Point p1 = new Point(200, 200);
-            Point p2 = new Point(100, 100);
-            Line l = new Line(p1, p2);
-            l.setArrow("none");
-            l.draw(win);
-
-            //win.setCoords(0, 0, 10, 10);
-            Text t = new Text(new Point(250, 250), "Centered Text");
-            t.draw(win);
-            Polygon p = new Polygon(new Point(100, 100), new Point(50, 30), new Point(20, 70));
-            p.draw(win);
-            //Entry e = new Entry(new Point(250, 60), 100);
-            //e.draw(win);
-            //Console.WriteLine("GetMouse = {0}", win.getMouse());
-            p.setFill("red");
-            p.setOutline("blue");
-            p.setWidth(2);
-            p.move(20, 30);
-            Circle c = new Circle(new Point(300, 300), 50);
-            c.setFill("blue");
-            c.setOutline("yellow");
-
-            Image i = new Image(@"C:\Users\Vincent\Pictures\Family\kash_tongue.jpg");
-            //Image i = new Image(100, 100);
-            double[] pix = i.getPixel(50, 50);
-            foreach (double pi in pix)
-                Console.WriteLine("pix = {0}", pi);
-            i.draw(win);
-
-
-            //graphics.Rectangle rec = new graphics.Rectangle(p1, p2);
-           // rec.draw(win);
-
-            //e.setFill("green");
-            //e.setText("Spam!");
-            //t.setText(e.getText());
-            //e.move(2, 0);
-           // Console.WriteLine("GetMouse = {0}", win.getMouse());
             
-            /*p.undraw();
-            e.undraw();
-            t.setStyle("bold");
-            t.setStyle("normal");
-            t.setSize(14);
-            t.setFace("arial");
-            t.setSize(20);*/
             Application.Run(win);            
         }
 
