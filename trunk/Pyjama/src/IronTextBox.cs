@@ -406,22 +406,34 @@ namespace UIIronTextBox
 	public void RestartShell(bool displayRestart) {
             environment = new ScriptRuntime(scriptRuntimeSetup);
             scope = environment.CreateScope();
+            if (engine != null)
+            {
+                // Determine what engine is running
+                if (engine.Setup.DisplayName == "IronPython")
+                    engine = environment.GetEngine("py");
+                if (engine.Setup.DisplayName == "IronRuby")
+                    engine = environment.GetEngine("rb");
+            }
+            else
+            {
+                engine = environment.GetEngine("py"); 
+            }
             
-            engine = environment.GetEngine("py");
-            if (System.Environment.OSVersion.Platform == System.PlatformID.Unix)
+            if (System.Environment.OSVersion.Platform == System.PlatformID.Unix) // for both UNIX and Mac
             {
                 engine.SetSearchPaths(new string[] {
-                    "/home/dblank/Myro/Pyjama/python",
+                    //"/home/dblank/Myro/Pyjama/python",
                     "/usr/lib/python2.5",
                     "/usr/lib/python2.5/site-packages"});
             }
             else
             {
                 engine.SetSearchPaths(new string[] {
-                    Environment.GetFolderPath(System.Environment.SpecialFolder.DesktopDirectory) 
+                    Environment.GetFolderPath(System.Environment.SpecialFolder.DesktopDirectory)
                         + @"\Myro\Pyjama\python",
                     @"C:\Python25\Lib",
-                    @"C:\Python25\site-packages"
+                    @"C:\Python25\site-packages",
+                    @"C:\Python26\Lib"
                     });
             }
             // Load mscorlib.dll:
@@ -514,7 +526,7 @@ namespace UIIronTextBox
                     new[] { ".py" }));
             scriptRuntimeSetup.LanguageSetups.Add(
                 new LanguageSetup("IronRuby.Runtime.RubyContext, IronRuby",
-                    "IronRupy",
+                    "IronRuby",
                     new[] { "IronRuby", "Ruby", "rb" },
                     new[] { ".rb" }));
 	    RestartShell();
