@@ -109,19 +109,19 @@ namespace Pyjama
             switch (fileExt)
             {
                 case ".py":
-                    config = "\\Config\\PythonConfig.xml";
+                    config = "PythonConfig.xml";
                     break;
                 case ".rb":
-                    config = "\\Config\\RubyConfig.xml";
+                    config = "RubyConfig.xml";
                     break;
                 case ".ss":
-                    config = "\\Config\\SchemeConfig.xml";
+                    config = "SchemeConfig.xml";
                     break;
                 case ".cs":
-                    config = "\\Config\\CSharpConfig.xml";
+                    config = "CSharpConfig.xml";
                     break;
                 default:
-                    config = "\\Config\\PythonConfig.xml";
+                    config = "PythonConfig.xml";
                     break;
             }
             return config;
@@ -148,11 +148,22 @@ namespace Pyjama
             
             /* Error checking for Configuration file loading */
             /* Check /bin/Debug/ folder or /Pyjama/ folder */
-            string dir = System.Environment.CurrentDirectory.ToString();
-            string config = GetConfigFile(filename);
-            
+            /* Also need to check which OS is running */
+
+            string dir = System.Environment.CurrentDirectory.ToString(); //works
+
+            string config = GetConfigFile(filename); //works
+
+            /* Retrieve full path of file */
+
+            string fullPath = "";
             //string fullPath = Path.GetFullPath(config);
-            string fullPath = dir + config;
+            if (System.Environment.OSVersion.Platform == System.PlatformID.Unix)
+                fullPath = dir + "/Config/" + config;
+            else fullPath = dir + "\\Config\\" + config;
+
+            System.Console.WriteLine("FullPath = {0}", fullPath);
+            //string fullPath = dir + config;
             XmlDocument doc = new XmlDocument();
 
             if (File.Exists(fullPath))
@@ -161,15 +172,15 @@ namespace Pyjama
             }
             else
             {
-                string new_config = "Pyjama/src/" + config;
+                /*string new_config = "Pyjama/src/" + config;
                 string new_Path = Path.GetFullPath(new_config);
 
                 if (File.Exists(new_Path))
                     doc.Load(new_Path);
-                else
-                    System.Console.WriteLine("Configuration file {0} does not exist!", new_Path);    
+                else*/
+                    System.Console.WriteLine("Configuration file {0} does not exist!", fullPath);    
             }
- 
+    
             XmlElement root = doc.DocumentElement;
 
             /* Default Format */
