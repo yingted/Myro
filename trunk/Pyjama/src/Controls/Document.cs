@@ -109,19 +109,19 @@ namespace Pyjama
             switch (fileExt)
             {
                 case ".py":
-                    config = "Config//PythonConfig.xml";
+                    config = "\\Config\\PythonConfig.xml";
                     break;
                 case ".rb":
-                    config = "Config//RubyConfig.xml";
+                    config = "\\Config\\RubyConfig.xml";
                     break;
                 case ".ss":
-                    config = "Config//SchemeConfig.xml";
+                    config = "\\Config\\SchemeConfig.xml";
                     break;
                 case ".cs":
-                    config = "Config//CSharpConfig.xml";
+                    config = "\\Config\\CSharpConfig.xml";
                     break;
                 default:
-                    config = "Config//PythonConfig.xml";
+                    config = "\\Config\\PythonConfig.xml";
                     break;
             }
             return config;
@@ -148,10 +148,11 @@ namespace Pyjama
             
             /* Error checking for Configuration file loading */
             /* Check /bin/Debug/ folder or /Pyjama/ folder */
-
+            string dir = System.Environment.CurrentDirectory.ToString();
             string config = GetConfigFile(filename);
-            string fullPath = Path.GetFullPath(config);
-
+            
+            //string fullPath = Path.GetFullPath(config);
+            string fullPath = dir + config;
             XmlDocument doc = new XmlDocument();
 
             if (File.Exists(fullPath))
