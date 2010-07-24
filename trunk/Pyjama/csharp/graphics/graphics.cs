@@ -144,6 +144,7 @@ namespace graphics
 
         public GraphWin()
         {
+            //new Thread(new ThreadStart(this.InitializeComponent)).Start();
             InitializeComponent();
         }
 
@@ -168,7 +169,7 @@ namespace graphics
             InitializeComponent();
         }
 
-        private void InitializeComponent()
+        protected void InitializeComponent()
         {   
             
             this._smooth = false;
@@ -217,7 +218,7 @@ namespace graphics
 
             // Refresh set to autoflush
             if (_autoflush) this.Invalidate();
-
+            
             this.Show();
         }
 
@@ -989,7 +990,7 @@ namespace graphics
     /// <summary>
     /// Text class
     /// </summary>
-    class Text : GraphicsObject
+    public class Text : GraphicsObject
     {
         Font font;
         Point anchor;
@@ -1114,7 +1115,7 @@ namespace graphics
     /// </summary>
     public class Entry : GraphicsObject
     {
-        TextBox entry;
+        TextBox entry = new TextBox();
         Point anchor;
         int width;
         string color;
@@ -1128,6 +1129,7 @@ namespace graphics
 
         public Entry(Point p1, int width) : base()
         {
+            //this.entry = new TextBox();
             this.p = p1.clone();
             this.anchor = p1.clone();
             this.width = width;
@@ -1136,7 +1138,7 @@ namespace graphics
 
         private void InitializeComponent()
         {
-            this.entry = invoke();
+            //this.entry = invoke();
             this.font = new Font("Helvetica", 12);
             this.setFill("lightgray");
             this.setTextColor("black");
@@ -1182,6 +1184,7 @@ namespace graphics
             
             /// Position the Widgit and make visible
             p = this.anchor;
+            this.entry.Location = new System.Drawing.Point((int) p.x, (int) p.y);
             double[] c = this.canvas.toScreen(p.x, p.y);
             c[0] = c[0] - 0.5 * sizef.Width;
             c[1] = c[1] - 0.5 * sizef.Height;
@@ -1221,7 +1224,6 @@ namespace graphics
         {
             Entry other = new Entry(this.anchor, this.width);
             other.entry.Text = this.entry.Text;
-            
             return other;
         }
 
@@ -1236,13 +1238,10 @@ namespace graphics
             if (this.fill_color == color)
                 return;
             MapColors map = new MapColors();
-            //Color clr = map.color_map()[color];
-            //if (map.color_map()[color] == Color.Transparent)
-              //  this.entry.BackColor = Color.White;
-            //this.entry.BackColor = map.color_map()[color];
-            //if (clr == Color.Transparent)
-            //    clr = Color.White;
-            //this.entry.BackColor = clr;
+            Color clr = map.color_map()[color];
+            if (clr == Color.Transparent)
+                this.entry.BackColor = Color.White;            
+            else this.entry.BackColor = clr;
             this.fill_color = color;   
         }
 
@@ -1440,8 +1439,14 @@ namespace graphics
         public static void Main()
         {
             GraphWin win = new GraphWin("My Window", 500, 500);
-            
-            Application.Run(win);            
+            Entry e = new Entry(new Point(250, 250), 10);
+            //e.setTextColor("yellow");
+            //e.setText("Hello World!");
+            //e.setFill("black");
+
+            //e.draw(win);
+            //e.undraw();
+                    
         }
 
         private void Window_Load(object sender, System.EventArgs e)

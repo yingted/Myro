@@ -745,6 +745,7 @@ namespace UIIronTextBox
             public override void Flush()
             {
                 // no op; nothing to do?
+                throw new NotImplementedException();
             }
 
             public override void Write(byte[] buffer, int offset, int count)
