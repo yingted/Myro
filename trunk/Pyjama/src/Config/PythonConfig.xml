@@ -75,7 +75,8 @@
     <word>*</word>
     <word>@</word>
     <word>%</word>
-    <word>|</word>  
+    <word>|</word>
+    <word>=</word>
   </endSymbol>
  
 </default>

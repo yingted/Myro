@@ -87,31 +87,40 @@
     <word>"</word>
     <word>'</word>
   </quote>
- 
+
+  <boolean color="Purple" font="Courier New" size="10" style="Regular" >
+
+    <bool>true</bool>
+    <bool>false</bool>
+
+  </boolean>
+  
   <comment color="Green" font="Courier New" size="10" style="Regular">
-    <word>//</word>
+    <word>/</word>
     <word>/*</word>
     <word>*/</word>
-    
   </comment>
+
+  <syntax color="Blue" font="Courier New" size="10" style="Regular">
+    <word>Console</word>
+  </syntax>
   
   <endSymbol>
-    <word>' '</word>
-    <word>'\t'</word>
-    <word>'\n'</word>
-    <word>'\r'</word>
-    <word>','</word>
-    <word>'('</word>
-    <word>')'</word>
-    <word>'.'</word>
-    <word>'-'</word>
-    <word>'/'</word>
-    <word>'\0'</word>
-    <word>':'</word>
-    <word>'\\'</word>
-    <word>'*'</word>
-    <word>'@'</word>
-    <word>'%'</word>
+    <word>,</word>
+    <word>(</word>
+    <word>)</word>
+    <word>[</word>
+    <word>]</word>
+    <word>.</word>
+    <word>-</word>
+    <word>/</word>
+    <word>:</word>
+    <word>;</word>
+    <word>*</word>
+    <word>@</word>
+    <word>%</word>
+    <word>|</word>
+    <word>=</word>
   </endSymbol>
   
 </default>

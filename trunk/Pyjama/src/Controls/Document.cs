@@ -9,6 +9,7 @@ using System.IO;
 using System.Reflection;
 using System.Collections;
 using System.Runtime.InteropServices;
+using System.Text;  
 
 namespace Pyjama
 {
@@ -27,7 +28,7 @@ namespace Pyjama
           {
             base.WndProc(ref m);
 		  } catch {
-			System.Console.WriteLine("Mono bug caught!");
+            System.Console.WriteLine("Mono bug caught!");
 			string oldRtf = Rtf;
 			int oldSelectionStart = SelectionStart;
 			int oldSelectionLength = SelectionLength;
@@ -326,9 +327,9 @@ namespace Pyjama
             textBox.lockUpdate = true;
             mode = 0; // start out in no mode
             // FIXME: need to format only the visible
-            //for (int i = 0; i < 60; i++)
-            
+            //System.Console.WriteLine("Length = {0}", textBox.Lines.Length);
             for (int i = 0; i < textBox.Lines.Length; i++)
+            //for (int i = 0; i < 30; i++)
             {
                 FormatLine(i);
             }
@@ -339,10 +340,13 @@ namespace Pyjama
             // FIXME: most works, but we need to treat triple quote/double 
             // as unique (because you can have single quotes in double quotes
             // FIXME: would be nice if scroll didn't change as we move over lines
+            
             if (lineno >= textBox.Lines.Length || lineno < 0)
                 return;
-            string line = textBox.Lines[lineno] + '\0';
+
+            string line = textBox.Lines[lineno] +'\0';
             int start = textBox.GetFirstCharIndexFromLine(lineno);
+            
             // Backup the users current selection point.
             int selectionStart = textBox.SelectionStart;
             int selectionLength = textBox.SelectionLength;
@@ -361,12 +365,12 @@ namespace Pyjama
                     if (c == '"') {
                         mode = 2;
                         tokenStart = index;
-                        textBox.SelectionColor = colors["quote"];
-                        textBox.SelectionFont = fonts["quote"];
+
                     } else if (c == '\'') {
                         mode = 3;
                         tokenStart = index;
-                    } else if (c == '#' || c =='\\') // Python specific. Make more general              
+                    }  
+                    else if (comments.Contains(c.ToString())) 
                     {
                         mode = 0;
                         textBox.SelectionStart = index;
@@ -423,16 +427,18 @@ namespace Pyjama
                 }
                 else if (mode == 2) // in double quote
                 {
-                    if (c == '"' || c == '\0') // end of double quote
+                    if (c == '"' || c == '\0' ) // end of double quote
                     {
-                        if (c == '"')
+                        if (c == '"' || comments.Contains(c.ToString()))
                         {
                             mode = 0;
                             token = textBox.Text.Substring(tokenStart, index - tokenStart + 1);
+                            System.Console.WriteLine("token = {0}", token);
                         }
                         else
                         {
                             token = textBox.Text.Substring(tokenStart, index - tokenStart);
+                            System.Console.WriteLine("N token = {0}", token);
                         }
                         textBox.SelectionStart = tokenStart;
                         textBox.SelectionLength = token.Length;
@@ -466,8 +472,6 @@ namespace Pyjama
             // Restore the users current selection point.    
             textBox.SelectionStart = selectionStart;
             textBox.SelectionLength = selectionLength;
-            textBox.SelectionColor = colors["default"];
-            textBox.SelectionFont = fonts["default"];
         }
 
         public int CurrentColumn
