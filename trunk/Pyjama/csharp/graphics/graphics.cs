@@ -603,40 +603,40 @@ namespace graphics
 
         public override string ToString()
         {
-            return (String.Format("<Point at ({0},{1})>", this._x, this._y));
+            return (String.Format("<Point at ({0},{1})>", this.x, this.y));
         }
 
         public override void _draw(Graphics g)
         {
             /// Use a rectangle fill to draw points
-            double[] coords = this.canvas.toScreen(this._x, this._y);
-            Console.WriteLine("Entered Point draw");
+            double[] coords = this.canvas.toScreen(this.x, this.y);
             g.FillRectangle(this.brush, (int)coords[0], (int)coords[1], 1, 1);
         }   
 
         public override void _move(int dx, int dy)
         {
-            this._x += dx;
-            this._y += dy;
+            this.x += dx;
+            this.y += dy;
         }
 
         public Point clone()
         {
-            Point other = new Point(this._x, this._y);
-            other.pen = (Pen)this.pen.Clone();
-            other.brush = (Brush)this.brush.Clone();
-            return other;
+            //Point other = new Point(this._x, this._y);
+            //other.pen = (Pen)this.pen.Clone();
+            //other.brush = (Brush)this.brush.Clone();
+            //return other;
+            return new Point(this.x, this.y);
         }
 
         // Why do this when the user can just type p.x or p.y? 
         public double getX()
         {
-            return this._x;
+            return this.x;
         }
 
         public double getY()
         {
-            return this._y;
+            return this.y;
         }
     }
     #endregion
@@ -750,6 +750,11 @@ namespace graphics
             int height = (int)c2[1] - (int)c1[0];
             g.DrawRectangle(this.pen, (int)c1[0], (int)c1[1], width, height);
             g.FillRectangle(this.brush, (int)c1[0], (int)c1[1], width, height);
+        }
+
+        public override string ToString()
+        {
+            return (String.Format("<Rectangle at ({0},{1})>", this.p1, this.p2));
         }
 
         public Rectangle clone()

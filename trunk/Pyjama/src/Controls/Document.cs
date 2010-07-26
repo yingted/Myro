@@ -438,7 +438,7 @@ namespace Pyjama
                         else
                         {
                             token = textBox.Text.Substring(tokenStart, index - tokenStart);
-                            System.Console.WriteLine("N token = {0}", token);
+                            //System.Console.WriteLine("N token = {0}", token);
                         }
                         textBox.SelectionStart = tokenStart;
                         textBox.SelectionLength = token.Length;
