@@ -96,6 +96,7 @@ namespace graphics
     }
     #endregion
     
+
     #region GraphWin
     /// <summary>
     /// Window class
@@ -135,6 +136,7 @@ namespace graphics
         public bool autoflush
         {
             get { return _autoflush; }
+            set { _autoflush = value; }
         }
 
         private bool smooth
@@ -673,25 +675,25 @@ namespace graphics
 
         public override void _move(int dx, int dy)
         {
-            this.p1.x += dx;
-            this.p1.y += dy;
-            this.p2.x += dx;
-            this.p2.y += dy;
+            this._p1.x += dx;
+            this._p1.y += dy;
+            this._p2.x += dx;
+            this._p2.y += dy;
         }
 
         public Point getP1()
         {
-            return this.p1.clone();
+            return this._p1.clone();
         }
 
         public Point getP2()
         {
-            return this.p2.clone();
+            return this._p2.clone();
         }
 
         public Point getCenter()
         {
-            return new Point((float)(p1.x + p2.x) / 2, (float)(p1.y + p2.y) / 2);
+            return new Point((float)(_p1.x + _p2.x) / 2, (float)(_p1.y + _p2.y) / 2);
         }
     }
     #endregion
@@ -703,34 +705,20 @@ namespace graphics
     public class Rectangle : _BBox
     {
         
-        Point _p1;
-        Point _p2;
-        
-        public new Point p1
+        public Rectangle(Point p1, Point p2) 
+            : base(p1, p2)
         {
-            get { return _p1; }
-            set { _p1 = value; }
-        }
-
-        public new Point p2
-        {
-            get { return _p2; }
-            set { _p2 = value; }
-        }
-        //
-
-        public Rectangle(Point p1, Point p2) : base(p1, p2)
-        {
-
+            this.p1 = p1;
+            this.p2 = p2;
         }
                
         public override void _draw(Graphics g)
         {
             p1 = this.p1;
-            //p1 = this.p1;
             p2 = this.p2;
             double[] c1 = this.canvas.toScreen(p1.x, p1.y);
             double[] c2 = this.canvas.toScreen(p2.x, p2.y);
+
             // Need to write swap function here
             if (c1[0] > c2[0])
             {
@@ -776,7 +764,8 @@ namespace graphics
         public Oval(Point p1, Point p2)
             : base(p1, p2)
         {
-
+            this.p1 = p1;
+            this.p2 = p2;
         }
 
         public Oval clone()
@@ -785,6 +774,11 @@ namespace graphics
             other.pen = (Pen) this.pen.Clone();
             other.brush = (Brush) this.brush.Clone();
             return other;
+        }
+
+        public override string ToString()
+        {
+            return String.Format("<Oval at ({0}, {1})>", this.p1, this.p2);
         }
 
         public override void _draw(Graphics g)
@@ -953,7 +947,7 @@ namespace graphics
             for (int i = 0; i < points.Length; i++)
                 this._Points[i] = points[i].clone();
         }
-
+   
         public Polygon clone()
         {
             Polygon other = new Polygon(this._Points);
@@ -1438,25 +1432,36 @@ namespace graphics
     /// <summary>
     /// Testing Graphics Library
     /// </summary>
-   public class Run
+    public class Run
     {
-        [STAThread]
+        //[STAThread]
         public static void Main()
         {
-            GraphWin win = new GraphWin("My Window", 500, 500);
-            Entry e = new Entry(new Point(250, 250), 10);
-            //e.setTextColor("yellow");
-            //e.setText("Hello World!");
-            //e.setFill("black");
-
-            //e.draw(win);
-            //e.undraw();
-                    
-        }
-
-        private void Window_Load(object sender, System.EventArgs e)
-        {
+            GraphWin win = new GraphWin("Starburst");
+            win.autoflush = false;
+            MapColors map = new MapColors();
+            Color[] clr = new Color[map.color_map().Count];
+            map.color_map().Values.CopyTo(clr, 0);
+            //= new string[5] { "blue", "red", "green", "yellow", "black" };
             
+            for (int radius = win.width/2; radius >=0; radius=radius-10)
+            {
+                Random r = new Random();
+                Color color = clr[r.Next(0, clr.Length)];
+                for (int i = 0; i < radius * 2; i++)
+                {
+                    Random rand = new Random();
+                    
+                    Point p = new Point(win.width / 2 - radius + rand.NextDouble() * 2 * radius, 
+                                        win.height / 2 - radius + rand.NextDouble() * 2 * radius);
+                    Line l = new Line(new Point(win.width / 2, win.height / 2), p);
+                    l.setOutline(color.Name);
+                    l.draw(win);
+                }
+            }
+            
+            win.update();
+            Application.Run(win);
         }
     }
     #endregion

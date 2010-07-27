@@ -431,9 +431,9 @@ namespace UIIronTextBox
                 engine.SetSearchPaths(new string[] {
                     Environment.GetFolderPath(System.Environment.SpecialFolder.DesktopDirectory)
                         + @"\Myro\Pyjama\python",
-                    @"C:\Python25\Lib",
-                    @"C:\Python25\site-packages",
-                    @"C:\Python26\Lib"
+                    //@"C:\Python25\Lib",
+                    //@"C:\Python25\site-packages",
+                    //@"C:\Python26\Lib"
                     });
             }
             // Load mscorlib.dll:
@@ -745,7 +745,8 @@ namespace UIIronTextBox
             public override void Flush()
             {
                 // no op; nothing to do?
-                throw new NotImplementedException();
+                //Flush();
+                //throw new NotImplementedException();
             }
 
             public override void Write(byte[] buffer, int offset, int count)
