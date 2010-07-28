@@ -1439,15 +1439,12 @@ namespace graphics
         {
             GraphWin win = new GraphWin("Starburst");
             win.autoflush = false;
-            MapColors map = new MapColors();
-            Color[] clr = new Color[map.color_map().Count];
-            map.color_map().Values.CopyTo(clr, 0);
-            //= new string[5] { "blue", "red", "green", "yellow", "black" };
+            string[] clr = new string[5] { "blue", "red", "green", "yellow", "black" };
             
-            for (int radius = win.width/2; radius >=0; radius=radius-10)
+            for (int radius = win.width/2; radius >0; radius=radius-10)
             {
                 Random r = new Random();
-                Color color = clr[r.Next(0, clr.Length)];
+                string color = clr[r.Next(0, clr.Length)];
                 for (int i = 0; i < radius * 2; i++)
                 {
                     Random rand = new Random();
@@ -1455,7 +1452,7 @@ namespace graphics
                     Point p = new Point(win.width / 2 - radius + rand.NextDouble() * 2 * radius, 
                                         win.height / 2 - radius + rand.NextDouble() * 2 * radius);
                     Line l = new Line(new Point(win.width / 2, win.height / 2), p);
-                    l.setOutline(color.Name);
+                    l.setOutline(color);
                     l.draw(win);
                 }
             }
