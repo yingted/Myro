@@ -562,15 +562,16 @@ namespace UIIronTextBox
             //ScriptScope sys = engine.GetSysModule(); // sys
             //sys.GetVariable("__file__");
             //? Microsoft.Scripting.SourceLocation;
-            /*
-            IronPython.Runtime.PythonDictionary dict = (IronPython.Runtime.PythonDictionary)sys.GetVariable("modules");
+            
+            /*IronPython.Runtime.PythonDictionary dict = (IronPython.Runtime.PythonDictionary)sys.GetVariable("modules");
             List list = dict.items();
+            
             foreach (PythonTuple name_module in list)
             {
                 string name = (string)name_module[0];
                 System.Console.WriteLine(name);
                 Microsoft.Scripting.Runtime.Scope modScope = (Microsoft.Scripting.Runtime.Scope) name_module[1];
-                System.Console.WriteLine("   File: {0}",  modScope.ContainsName(Symbol("__file__")));
+                //System.Console.WriteLine("   File: {0}",  modScope.ContainsName(Symbol("__file__")));
             }
             */
             //foreach (KeyValuePair<string, object> pair in sys.GetItems()) {
