@@ -1445,11 +1445,11 @@ namespace graphics
             e.setTextColor("blue");
             e.setText(win.title);
             e.draw(win);
-            //Polygon p = new Polygon(new Point(300, 300), new Point(200, 400), new Point(400, 400));
-            //p.setFill("yellow");
-            //p.draw(win);
-            Image i = new Image(@"C:\Users\Vincent\Documents\Pyjama\leroy.jpg");
-            i.draw(win);
+            Polygon p = new Polygon(new Point(300, 300), new Point(200, 400), new Point(400, 400));
+            p.setFill("yellow");
+            p.draw(win);
+            //Image i = new Image(@"C:\Users\Vincent\Documents\Pyjama\leroy.jpg");
+            //i.draw(win);
             Application.Run(win);
         }
     }
