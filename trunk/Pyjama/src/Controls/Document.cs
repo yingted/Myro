@@ -13,10 +13,9 @@ using System.Text;
 
 namespace Pyjama
 {
-
     public class MyRichTextBox : RichTextBox
     {
-        public bool lockUpdate = false;
+        public bool lockUpdate = false; 
         
         protected override void WndProc(ref Message m) {
             if (lockUpdate)
@@ -103,6 +102,7 @@ namespace Pyjama
         int mode = 0; // used in parsing richtext
         int[] last_mode = new int[10000];
         int counter = 0; //used to count number of read counts
+
         public string GetConfigFile(string filename)
         {
             string fileExt = Path.GetExtension(filename);
@@ -141,8 +141,8 @@ namespace Pyjama
             textBox.Dock = DockStyle.Fill;
             textBox.KeyPress += new KeyPressEventHandler(textBox_KeyPress);
             textBox.KeyUp += new KeyEventHandler(textBox_KeyUp);
-            
-            textBox.TextChanged += new EventHandler(textBox_TextChanged);
+       
+            //textBox.TextChanged += new EventHandler(textBox_TextChanged);
             textBox.MouseClick += new MouseEventHandler(textBox_MouseClick);
             textBox.Font = new Font("Courier New", 10);
             textBox.WordWrap = false;
@@ -166,7 +166,7 @@ namespace Pyjama
             }
             else
             {
-                MessageBox.Show("Configuration file {0} does not exist!", fullPath);
+                throw new FileNotFoundException("Configuration file not found", fullPath);
             }
     
             XmlElement root = doc.DocumentElement;
@@ -303,21 +303,21 @@ namespace Pyjama
         void textBox_TextChanged(object sender, EventArgs e)
         {
             // Modify signal, for "*" and mark dirty:
-            
+            //System.Console.WriteLine("Textbox changed!");
             if (TextChanged != null)
                 TextChanged(this, e);
             int lineno = textBox.GetLineFromCharIndex(textBox.GetFirstCharIndexOfCurrentLine());
             textBox.lockUpdate = true;
+            
             if (lineno == 0)
                 mode = 0; // start out in no mode
             else
                 mode = last_mode[lineno - 1]; // else get last left off mode
             for (int i = lineno; i < lineno + 30; i++)
             {
-                //FormatLine(i);
+                FormatLine(i);
                 if (mode == 0) break;
-            }
-            
+            }            
             textBox.lockUpdate = false;
         }
 
@@ -326,18 +326,15 @@ namespace Pyjama
             last_mode = new int[10000]; // reset to zeros
             textBox.lockUpdate = true;
             mode = 0; // start out in no mode
-            // FIXME: need to format only the visible
-            DateTime startTime = DateTime.Now;
+            //DateTime startTime = DateTime.Now;
             for (int i = 0; i < textBox.Lines.Length; i++)
-            //for (int i = 0; i < 30; i++)
-            {
                 FormatLine(i);
-            }
-            DateTime stopTime = DateTime.Now;
-            TimeSpan duration = stopTime - startTime;
-            System.Console.WriteLine("Counter {0} vs. Lines {1}", counter, textBox.Lines.Length);
-            System.Console.WriteLine("Duration time = {0}", duration.TotalSeconds);
+            //DateTime stopTime = DateTime.Now;
+            //TimeSpan duration = stopTime - startTime;
+            //System.Console.WriteLine("Counter {0} vs. Lines {1}", counter, textBox.Lines.Length);
+            //System.Console.WriteLine("Duration time = {0}", duration.TotalSeconds);
             textBox.lockUpdate = false;
+            textBox.TextChanged += new EventHandler(textBox_TextChanged);
         }
 
         public void FormatLine(int lineno) {

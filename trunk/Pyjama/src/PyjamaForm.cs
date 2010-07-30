@@ -41,7 +41,7 @@ namespace Pyjama
             }
 
             this.ActiveControl = _docManager.GetCurrentTabTextBox(); // tab text gets cursor
-            // FIXME: make a general language changer
+            // FIXME: make a general language changer -- Fixed : Note default is Python
             this.languageName.Text = "Python";
             this.columnNumber.Text = "" + 1;
             this.lineNumber.Text = "" + 1;

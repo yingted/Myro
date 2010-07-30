@@ -4,7 +4,7 @@ namespace Pyjama
 {
     public class DocumentPage : TabPage
     {
-    
+        public bool status = false;
         public DocumentInput Input { get; set; }
         public ActiveCodeFile ActiveFile { get; set; }
         public Document textBox;
@@ -31,7 +31,7 @@ namespace Pyjama
 
         public DocumentPage(IMainForm main_form)
         {
-	    InitializeComponent();
+	        InitializeComponent();
             MainForm = main_form;
             Text = "NewFile";
             CreateTextBox(string.Empty); //File ext needs to be passed here
