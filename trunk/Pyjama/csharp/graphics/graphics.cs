@@ -102,15 +102,14 @@ namespace graphics
     /// <summary>
     /// Window class
     /// </summary>
-    public delegate void start();
-
     public class GraphWin : Form
     {
+
         string _title = "Graphics Window";
         int _height = 200;
         int _width = 200;
         bool _autoflush;
-        bool _smooth;
+        public bool _smooth;
         bool _closed;
         object trans;
         ArrayList items;
@@ -146,27 +145,24 @@ namespace graphics
         {
             get { return _smooth; }
         }
-
+        
         public GraphWin()
         {
-            //System.Console.WriteLine("GraphWin created!");
-            //new Thread(new ThreadStart(this.InitializeComponent)).Start();
-            //Func<object> start = () => InitializeComponent();
-            //this.TopLevelControl.Invoke(start);
-            //InitializeComponent();
+            InitializeComponent();
+
         }
 
         public GraphWin(string title)
         {
             this._title = title;
-            //InitializeComponent();
+            InitializeComponent();
         }
 
         public GraphWin(string title, int height)
         {
             this._title = title;
             this._height = height;
-            //InitializeComponent();
+            InitializeComponent();
         }
 
         public GraphWin(string title, int height, int width)
@@ -174,17 +170,18 @@ namespace graphics
             this._title = title;
             this._height = height;
             this._width = width;
-            System.Console.WriteLine("GraphWin created!");
-            //new Thread(new ThreadStart(this.InitializeComponent)).Start();
-            
-            Func<object> start = () => InitializeComponent();
-            this.TopLevelControl.Invoke(start);
-            //InitializeComponent();
+            InitializeComponent();
         }
 
-        public object InitializeComponent()
+        public GraphWin(int height, int width)
         {
-            System.Console.WriteLine("InitializeComponent()");
+            this._height = height;
+            this._width = width;
+            InitializeComponent();
+        }
+
+        public void InitializeComponent()
+        {
             this._smooth = false;
             this._autoflush = true;
             this.items = new ArrayList();
@@ -212,8 +209,6 @@ namespace graphics
                 MessageBox.Show("Mono bug: skipping double-buffer settings");
             }
 
-            //this.Height = this._height;
-            //this.Width = this._width;
             this._closed = false;
             this._smooth = smooth;
 
@@ -227,11 +222,9 @@ namespace graphics
             this.FormClosing += this._onFormClosing;
 
             this.BackColor = System.Drawing.Color.FromArgb(255, 236, 233, 216);
-          
             this.Show();
             // Refresh set to autoflush
             if (_autoflush) this.Invalidate();
-            return 0;
         }
 
         void Window_MouseClick(object sender, MouseEventArgs e)
@@ -1447,27 +1440,16 @@ namespace graphics
         //[STAThread]
         public static void Main()
         {
-            GraphWin win = new GraphWin("Starburst");
-            win.autoflush = false;
-            string[] clr = new string[5] { "blue", "red", "green", "yellow", "black" };
-            
-            for (int radius = win.width/2; radius >0; radius=radius-10)
-            {
-                Random r = new Random();
-                string color = clr[r.Next(0, clr.Length)];
-                for (int i = 0; i < radius * 2; i++)
-                {
-                    Random rand = new Random();
-                    
-                    Point p = new Point(win.width / 2 - radius + rand.NextDouble() * 2 * radius, 
-                                        win.height / 2 - radius + rand.NextDouble() * 2 * radius);
-                    Line l = new Line(new Point(win.width / 2, win.height / 2), p);
-                    l.setOutline(color);
-                    l.draw(win);
-                }
-            }
-            
-            win.update();
+            GraphWin win = new GraphWin("Hello World!", 500, 500);
+            Entry e = new Entry(new Point(250, 250), 10);
+            e.setTextColor("blue");
+            e.setText(win.title);
+            e.draw(win);
+            //Polygon p = new Polygon(new Point(300, 300), new Point(200, 400), new Point(400, 400));
+            //p.setFill("yellow");
+            //p.draw(win);
+            Image i = new Image(@"C:\Users\Vincent\Documents\Pyjama\leroy.jpg");
+            i.draw(win);
             Application.Run(win);
         }
     }

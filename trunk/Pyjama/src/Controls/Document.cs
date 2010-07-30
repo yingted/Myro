@@ -151,25 +151,38 @@ namespace Pyjama
             /* Error checking for Configuration file loading */
 
             string dir = System.Environment.CurrentDirectory.ToString();
-            //System.Console.WriteLine("SD = {0}", System.Environment.SystemDirectory);
             System.Console.WriteLine(dir);
             string config = GetConfigFile(filename); 
             string fullPath = "";
-            if (System.Environment.OSVersion.Platform == System.PlatformID.Unix)
-                fullPath = dir + "/Config/" + config;
-            else fullPath = dir + "\\Config\\" + config;
-
             XmlDocument doc = new XmlDocument();
 
-            try
+            // Config file can either be found in the bin/Debug or Pyjama/src folder
+            if (System.Environment.OSVersion.Platform == System.PlatformID.Unix)
             {
-                doc.Load(fullPath);
+                fullPath = dir + "/Config/" + config;
+                try
+                {
+                    doc.Load(fullPath);
+                }
+                catch (DirectoryNotFoundException)
+                {
+                    string newPath = dir + "/src/Config/" + config;
+                    doc.Load(newPath);
+                }
             }
-            catch
+            else
             {
-                throw new FileNotFoundException("Configuration file not found", fullPath);
+                fullPath = dir + "\\Config\\" + config;
+                try
+                {
+                    doc.Load(fullPath);
+                }
+                catch (DirectoryNotFoundException)
+                {
+                    string newPath = dir + "\\src\\Config\\" + config;
+                    doc.Load(newPath);
+                }
             }
-
             XmlElement root = doc.DocumentElement;
 
             /* Default Format */

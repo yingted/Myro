@@ -3,3 +3,5 @@ C:\Users\Vincent\Documents\Pyjama\csharp\graphics\obj\Debug\ResolveAssemblyRefer
 C:\Users\Vincent\Documents\Pyjama\csharp\graphics\obj\Debug\graphics.pdb
 C:\Users\Vincent\Documents\Pyjama\csharp\graphics\bin\Debug\graphics.dll
 C:\Users\Vincent\Documents\Pyjama\csharp\graphics\obj\Debug\graphics.dll
+C:\Users\Vincent\Documents\Pyjama\csharp\graphics\bin\Debug\Pyjama.exe
+C:\Users\Vincent\Documents\Pyjama\csharp\graphics\bin\Debug\Pyjama.pdb
