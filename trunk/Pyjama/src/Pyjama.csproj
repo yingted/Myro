@@ -302,6 +302,9 @@
     <Content Include="Config\IronPython.xml" />
     <Content Include="Config\IronRuby.xml">
     </Content>
+    <EmbeddedResource Include="Config\DefaultConfig.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
     <EmbeddedResource Include="Config\PythonConfig.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>

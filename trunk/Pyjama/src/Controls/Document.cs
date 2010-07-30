@@ -122,7 +122,7 @@ namespace Pyjama
                     config = "CSharpConfig.xml";
                     break;
                 default:
-                    config = "PythonConfig.xml";
+                    config = "DefaultConfig.xml";
                     break;
             }
             return config;

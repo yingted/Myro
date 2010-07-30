@@ -133,7 +133,7 @@ namespace Pyjama
                 if (activeFile.Unsaved)
                 {
                     string location = activeFile.Location;
-
+                    
                     if (string.IsNullOrEmpty(location) || activeFile.Untitled)
                         location = GetSaveLocation();
                     if (location != string.Empty)

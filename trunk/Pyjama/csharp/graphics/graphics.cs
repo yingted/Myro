@@ -145,11 +145,12 @@ namespace graphics
         {
             get { return _smooth; }
         }
-        
+       
         public GraphWin()
         {
-            InitializeComponent();
 
+            InitializeComponent();
+            //this.TopLevelControl.Invoke(null);
         }
 
         public GraphWin(string title)

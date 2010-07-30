@@ -91,6 +91,8 @@ namespace Pyjama
             {
                 Text = Text.Remove(Text.Length - 2, 2);                
             }
+            textBox.FormatAll();
+            System.Console.WriteLine("Active File = {0}", ActiveFile.FileName);
         }
 
         private void InitializeComponent()

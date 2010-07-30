@@ -24,3 +24,5 @@ C:\Users\Vincent\Documents\Pyjama\src\obj\Release\Pyjama.Dialogs.OptionsDialog.r
 C:\Users\Vincent\Documents\Pyjama\src\obj\Release\Pyjama.csproj.GenerateResource.Cache
 C:\Users\Vincent\Documents\Pyjama\src\obj\Release\Pyjama.exe
 C:\Users\Vincent\Documents\Pyjama\src\obj\Release\Pyjama.pdb
+C:\Users\Vincent\Documents\bin\Release\Config\DefaultConfig.xml
+C:\Users\Vincent\Documents\bin\Release\Config\XMLConfig.xml
