@@ -262,15 +262,6 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Config\CSharpConfig.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Config\PythonConfig.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Config\RubyConfig.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </EmbeddedResource>
     <None Include="Properties\app.manifest" />
     <None Include="Resources\Start.png" />
     <None Include="Resources\FastRun.png" />
@@ -304,7 +295,22 @@
   <ItemGroup>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Config\XMLConfig.xml" />
+    <Content Include="Config\CSharp.xml" />
+    <EmbeddedResource Include="Config\CSharpConfig.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <Content Include="Config\IronPython.xml" />
+    <Content Include="Config\IronRuby.xml">
+    </Content>
+    <EmbeddedResource Include="Config\PythonConfig.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Config\RubyConfig.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Config\XMLConfig.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

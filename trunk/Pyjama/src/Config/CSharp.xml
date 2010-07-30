@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageSettings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <!-- The engine has special hooks which understand C# and how it should be executed -->
+  <Language>C#</Language>
+  <FileExtensions>.cs</FileExtensions>
+</LanguageSettings>

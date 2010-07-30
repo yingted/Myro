@@ -151,7 +151,7 @@ namespace Pyjama
             /* Error checking for Configuration file loading */
 
             string dir = System.Environment.CurrentDirectory.ToString();
-            System.Console.WriteLine("SD = {0}", System.Environment.SystemDirectory);
+            //System.Console.WriteLine("SD = {0}", System.Environment.SystemDirectory);
             System.Console.WriteLine(dir);
             string config = GetConfigFile(filename); 
             string fullPath = "";

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageSettings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Language>IronPython</Language>
+  <BinDirectory>LanguageBinaries/IronPython/</BinDirectory>
+  <AssembliesToLoad>IronPython.dll;IronPython.Modules.dll</AssembliesToLoad>
+  <LanguageContextObject>IronPython.Runtime.PythonContext</LanguageContextObject>
+  <CommandLineApplication>ipy.exe</CommandLineApplication>
+  <FileExtensions>.py</FileExtensions>
+</LanguageSettings>

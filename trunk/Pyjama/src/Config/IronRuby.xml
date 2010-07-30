@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LanguageSettings xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Language>IronRuby</Language>
+  <BinDirectory>LanguageBinaries/IronRuby/</BinDirectory>
+  <AssembliesToLoad>IronRuby.dll;IronRuby.Libraries.dll</AssembliesToLoad>
+  <LanguageContextObject>Ruby.Runtime.RubyContext</LanguageContextObject>
+  <CommandLineApplication>ir.exe</CommandLineApplication>
+  <FileExtensions>.rb</FileExtensions>
+</LanguageSettings>
