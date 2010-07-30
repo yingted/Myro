@@ -102,7 +102,7 @@ namespace Pyjama
         public delegate void TextChangedHandler(object sender, EventArgs e);
         int mode = 0; // used in parsing richtext
         int[] last_mode = new int[10000];
-
+        int counter = 0; //used to count number of read counts
         public string GetConfigFile(string filename)
         {
             string fileExt = Path.GetExtension(filename);
@@ -141,7 +141,8 @@ namespace Pyjama
             textBox.Dock = DockStyle.Fill;
             textBox.KeyPress += new KeyPressEventHandler(textBox_KeyPress);
             textBox.KeyUp += new KeyEventHandler(textBox_KeyUp);
-            textBox.TextChanged += textbox_TextChanged;
+            
+            textBox.TextChanged += new EventHandler(textBox_TextChanged);
             textBox.MouseClick += new MouseEventHandler(textBox_MouseClick);
             textBox.Font = new Font("Courier New", 10);
             textBox.WordWrap = false;
@@ -198,7 +199,7 @@ namespace Pyjama
             Controls.Add(textBox);           
         }
 
-        //FixMe: Make more general
+        //FIXME: Make more general
         //Idea: If XML format does not change, the order of elements will always
         //be color, font, size, and style
         //But right now, too specific and can crash easily if *.xml config file is altered 
@@ -293,15 +294,13 @@ namespace Pyjama
         {
             // Note that depending on programming language, end symbols will be different.
             // Thus, we need to read in the symbols from the *.xml file
-            //System.Console.WriteLine("{0} = {1}", c.ToString(), char.IsWhiteSpace(c));
             return (char.IsWhiteSpace(c) || endSymbol.Contains(c.ToString()) || char.IsControl(c));
-            //return endSymbol.Contains(c.ToString());
             /*return (c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == ',' ||
                   c == '(' || c == ')' || c == '.' || c == '-' || c == '/' || c == '\0' ||
                   c == ':' || c == '\\' || c == '*' || c == '@' || c == '%');*/
         }
 
-        void textbox_TextChanged(object sender, EventArgs e)
+        void textBox_TextChanged(object sender, EventArgs e)
         {
             // Modify signal, for "*" and mark dirty:
             
@@ -311,13 +310,14 @@ namespace Pyjama
             textBox.lockUpdate = true;
             if (lineno == 0)
                 mode = 0; // start out in no mode
-            else 
+            else
                 mode = last_mode[lineno - 1]; // else get last left off mode
             for (int i = lineno; i < lineno + 30; i++)
             {
-                FormatLine(i);
+                //FormatLine(i);
                 if (mode == 0) break;
             }
+            
             textBox.lockUpdate = false;
         }
 
@@ -327,12 +327,16 @@ namespace Pyjama
             textBox.lockUpdate = true;
             mode = 0; // start out in no mode
             // FIXME: need to format only the visible
-            //System.Console.WriteLine("Length = {0}", textBox.Lines.Length);
+            DateTime startTime = DateTime.Now;
             for (int i = 0; i < textBox.Lines.Length; i++)
             //for (int i = 0; i < 30; i++)
             {
                 FormatLine(i);
             }
+            DateTime stopTime = DateTime.Now;
+            TimeSpan duration = stopTime - startTime;
+            System.Console.WriteLine("Counter {0} vs. Lines {1}", counter, textBox.Lines.Length);
+            System.Console.WriteLine("Duration time = {0}", duration.TotalSeconds);
             textBox.lockUpdate = false;
         }
 
@@ -340,7 +344,8 @@ namespace Pyjama
             // FIXME: most works, but we need to treat triple quote/double 
             // as unique (because you can have single quotes in double quotes
             // FIXME: would be nice if scroll didn't change as we move over lines
-            
+
+            counter++;
             if (lineno >= textBox.Lines.Length || lineno < 0)
                 return;
 
@@ -433,12 +438,10 @@ namespace Pyjama
                         {
                             mode = 0;
                             token = textBox.Text.Substring(tokenStart, index - tokenStart + 1);
-                            System.Console.WriteLine("token = {0}", token);
                         }
                         else
                         {
                             token = textBox.Text.Substring(tokenStart, index - tokenStart);
-                            //System.Console.WriteLine("N token = {0}", token);
                         }
                         textBox.SelectionStart = tokenStart;
                         textBox.SelectionLength = token.Length;

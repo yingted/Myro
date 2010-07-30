@@ -2,7 +2,7 @@
 
 <default color="Black" font="Courier New" size="10" style="Regular">
 
-  <keyword color="Orange" font="Courier New" size="10" style="Bold" >
+  <keyword color="Orange" font="Courier New" size="10" style="Regular" >
 
     <word>pass</word>
     <word>try</word>

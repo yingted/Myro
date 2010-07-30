@@ -15,6 +15,7 @@ using System.IO;
 
 namespace graphics
 {
+
     #region MapColors
     /// <summary>
     /// Map color strings to internal color objects.
@@ -76,6 +77,7 @@ namespace graphics
         {
             return _font_face_map;
         }
+
         public Dictionary<string, FontStyle> font_style_map()
         {
             return _font_style_map;
@@ -94,13 +96,14 @@ namespace graphics
         string UNSUPPORTED_METHOD = "Object doesn't support operation";
         string DEAD_THREAD = "Graphics thread quit unexpectedly";
     }
-    #endregion
-    
+    #endregion  
 
     #region GraphWin
     /// <summary>
     /// Window class
     /// </summary>
+    public delegate void start();
+
     public class GraphWin : Form
     {
         string _title = "Graphics Window";
@@ -114,7 +117,7 @@ namespace graphics
         int? mouseX;
         int? mouseY;
         bool? _mouseCallBack;
-
+        
         public int height
         {
             get { return _height; }
@@ -146,21 +149,24 @@ namespace graphics
 
         public GraphWin()
         {
+            //System.Console.WriteLine("GraphWin created!");
             //new Thread(new ThreadStart(this.InitializeComponent)).Start();
-            InitializeComponent();
+            //Func<object> start = () => InitializeComponent();
+            //this.TopLevelControl.Invoke(start);
+            //InitializeComponent();
         }
 
         public GraphWin(string title)
         {
             this._title = title;
-            InitializeComponent();
+            //InitializeComponent();
         }
 
         public GraphWin(string title, int height)
         {
             this._title = title;
             this._height = height;
-            InitializeComponent();
+            //InitializeComponent();
         }
 
         public GraphWin(string title, int height, int width)
@@ -168,12 +174,17 @@ namespace graphics
             this._title = title;
             this._height = height;
             this._width = width;
-            InitializeComponent();
+            System.Console.WriteLine("GraphWin created!");
+            //new Thread(new ThreadStart(this.InitializeComponent)).Start();
+            
+            Func<object> start = () => InitializeComponent();
+            this.TopLevelControl.Invoke(start);
+            //InitializeComponent();
         }
 
-        protected void InitializeComponent()
-        {   
-            
+        public object InitializeComponent()
+        {
+            System.Console.WriteLine("InitializeComponent()");
             this._smooth = false;
             this._autoflush = true;
             this.items = new ArrayList();
@@ -216,12 +227,11 @@ namespace graphics
             this.FormClosing += this._onFormClosing;
 
             this.BackColor = System.Drawing.Color.FromArgb(255, 236, 233, 216);
-
-
+          
+            this.Show();
             // Refresh set to autoflush
             if (_autoflush) this.Invalidate();
-            
-            this.Show();
+            return 0;
         }
 
         void Window_MouseClick(object sender, MouseEventArgs e)

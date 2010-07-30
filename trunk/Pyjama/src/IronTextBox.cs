@@ -357,7 +357,7 @@ namespace UIIronTextBox
         }
     }
 
-    public class PyjamaModule
+    public class PyjamaModule 
     {
         public Control CurrentControl = null; // Is there a GUI running? Handle for Invoke
         public bool Threaded = true;     // Is there a Thread running? 
@@ -418,22 +418,25 @@ namespace UIIronTextBox
             {
                 engine = environment.GetEngine("py"); 
             }
-            
+                
             if (System.Environment.OSVersion.Platform == System.PlatformID.Unix) // for both UNIX and Mac
             {
-                engine.SetSearchPaths(new string[] {
-                    //"/home/dblank/Myro/Pyjama/python",
+                engine.SetSearchPaths(new string[] {    
+                    "/home/dblank/Myro/Pyjama/python",
                     "/usr/lib/python2.5",
-                    "/usr/lib/python2.5/site-packages"});
+                    "/usr/lib/python2.5/site-packages",
+                    "/usr/lib/ruby/1.8"
+                    });
             }
             else
             {
                 engine.SetSearchPaths(new string[] {
                     Environment.GetFolderPath(System.Environment.SpecialFolder.DesktopDirectory)
                         + @"\Myro\Pyjama\python",
-                    //@"C:\Python25\Lib",
-                    //@"C:\Python25\site-packages",
-                    //@"C:\Python26\Lib"
+                    @"C:\Python25\Lib",
+                    @"C:\Python25\site-packages",
+                    //@"C:\Python26\Lib",
+                    @"C:\Ruby191\lib\ruby\1.9.1"
                     });
             }
             // Load mscorlib.dll:
@@ -792,6 +795,7 @@ namespace UIIronTextBox
                     //dir_array[dir_array.Length - 1] = directory;
                     engine.SetSearchPaths(dir_array);
                 }
+
                 System.Environment.CurrentDirectory = directory;
                 //engine.Runtime.Host.PlatformAdaptationLayer
                 //source = engine.CreateScriptSourceFromFile(command, Encoding.GetEncoding("utf-8"));

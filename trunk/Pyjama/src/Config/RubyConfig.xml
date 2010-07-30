@@ -2,7 +2,7 @@
 
 <default color="Black" font="Courier New" size="10" style="Regular">
 
-  <keyword color="Purple" font="Courier New" size="10" style="Bold" >
+  <keyword color="Purple" font="Courier New" size="10" style="Regular" >
 
     <word>alias</word>
     <word>and</word>

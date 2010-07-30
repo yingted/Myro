@@ -7,9 +7,6 @@ from graphics import *
 #from System.Windows.Forms import *
 #import time
 
-r = Run()
-r.Main()
-
 #i = Image("C:\Users\Vincent\Pictures\Family\kash_tongue.jpg")
 #for m in i.getPixel(50, 50):
 #    print m
