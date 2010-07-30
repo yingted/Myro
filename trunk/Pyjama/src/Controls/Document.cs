@@ -150,8 +150,9 @@ namespace Pyjama
             
             /* Error checking for Configuration file loading */
 
-            string dir = System.Environment.CurrentDirectory.ToString(); 
-
+            string dir = System.Environment.CurrentDirectory.ToString();
+            System.Console.WriteLine("SD = {0}", System.Environment.SystemDirectory);
+            System.Console.WriteLine(dir);
             string config = GetConfigFile(filename); 
             string fullPath = "";
             if (System.Environment.OSVersion.Platform == System.PlatformID.Unix)
@@ -160,15 +161,15 @@ namespace Pyjama
 
             XmlDocument doc = new XmlDocument();
 
-            if (File.Exists(fullPath))
+            try
             {
                 doc.Load(fullPath);
             }
-            else
+            catch
             {
                 throw new FileNotFoundException("Configuration file not found", fullPath);
             }
-    
+
             XmlElement root = doc.DocumentElement;
 
             /* Default Format */
@@ -302,12 +303,11 @@ namespace Pyjama
 
         void textBox_TextChanged(object sender, EventArgs e)
         {
-            // Modify signal, for "*" and mark dirty:
-            //System.Console.WriteLine("Textbox changed!");
+            // Modify signal, for "*" and mark dirty:            
             if (TextChanged != null)
                 TextChanged(this, e);
             int lineno = textBox.GetLineFromCharIndex(textBox.GetFirstCharIndexOfCurrentLine());
-            textBox.lockUpdate = true;
+            //textBox.lockUpdate = true;
             
             if (lineno == 0)
                 mode = 0; // start out in no mode

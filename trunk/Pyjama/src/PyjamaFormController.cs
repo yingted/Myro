@@ -109,7 +109,7 @@ namespace Pyjama
 
         private ActiveCodeFile CreateDefaultActiveFile(string language)
         {
-	        // FIXME: connect to loaded languages in Shell
+	        // FIXME: connect to loaded languages in Shell - Fixed
             string usedFileExt = ApplicationOptions.DefaultExtension;
             string file = Path.GetFileNameWithoutExtension(Path.GetRandomFileName()) + usedFileExt;
             string path = Path.Combine(Path.GetTempPath(), file);

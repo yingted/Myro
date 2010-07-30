@@ -47,7 +47,7 @@ namespace Pyjama
             //else
             //textBox = new CodeEditorIDETextBox(fileExtension);
             
-            //textBox.TextChanged += textBox_TextChanged;
+            textBox.TextChanged += textBox_TextChanged;
             
             Input = new DocumentInput(textBox);
             Controls.Add(textBox as Control);
