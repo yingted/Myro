@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 
 <default color="Black" font="Courier New" size="10" style="Regular">
 
@@ -73,22 +73,18 @@
   </syntax>
 
   <endSymbol>
-    <word>' '</word>
-    <word>'\t'</word>
-    <word>'\n'</word>
-    <word>'\r'</word>
-    <word>','</word>
-    <word>'('</word>
-    <word>')'</word>
-    <word>'.'</word>
-    <word>'-'</word>
-    <word>'/'</word>
-    <word>'\0'</word>
-    <word>':'</word>
-    <word>'\\'</word>
-    <word>'*'</word>
-    <word>'@'</word>
-    <word>'%'</word>
+    <word>,</word>
+    <word>(</word>
+    <word>)</word>
+    <word>.</word>
+    <word>-</word>
+    <word>/</word>
+    <word>:</word>
+    <word>\\</word>
+    <word>*</word>
+    <word>@</word>
+    <word>%</word>
+    <word>=</word>
   </endSymbol>
   
 </default>
