@@ -12,7 +12,6 @@ clr.AddReference("IronPython.dll")
 clr.AddReference("IronPython.Modules.dll")
 clr.AddReference("Microsoft.Scripting")
 clr.AddReference("glib-sharp")
-#clr.AddReference("MyTextView.dll")
 
 # Bring .NET References into IronPython scope:
 import Gtk
@@ -35,19 +34,33 @@ def handle_exception(e):
 from utils import _
 
 class PyjamaProject(object):
-    def __init__(self):
-        # make the shell first:
-        self.shell = ShellWindow(self)
-        #self.editor = EditorWindow(self)
+    def __init__(self, argv):
+        self.shell = None
+        self.editor = None
+        request_shell = False
+        request_editor = False
+        files = []
+        for arg in argv:
+            if arg == "--shell":
+                request_shell = True
+            elif arg == "--editor":
+                request_editor = True
+            else:
+                files.append(arg)
+                request_editor = True
+        if files == []:
+            request_shell = True
+        if request_editor:
+            self.editor = EditorWindow(self, files)
+        if request_shell:
+            self.shell = ShellWindow(self)
 
     def on_run(self, obj, event):
         doc = self.get_current_doc()
         if doc and doc.textview.HasFocus:
-            print "notebook has focus!"
             text = doc.textview.Buffer.Text
             doc.execute(text, "Loading file...")
         else:
-            print "give command focus"
             self.command_pane.textview.HasFocus = True
             text = self.command_pane.textview.Buffer.Text
             doc.execute(text)
@@ -56,7 +69,7 @@ class PyjamaProject(object):
 Gtk.Application.Init()
 #------------------------------
 try:
-    pw = PyjamaProject()
+    pw = PyjamaProject(sys.argv[1:])
 except:
     traceback.print_exc()
     sys.exit()

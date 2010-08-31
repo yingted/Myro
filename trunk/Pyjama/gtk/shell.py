@@ -117,6 +117,7 @@ class ShellWindow(Window):
         self.project = project
         self.window = Gtk.Window(_("Pyjama Shell"))
         self.window.SetDefaultSize(600, 550)
+        self.window.DeleteEvent += Gtk.DeleteEventHandler(self.on_quit)
         self.vbox = Gtk.VBox()
         # ---------------------
         # make menu:
@@ -280,7 +281,7 @@ class ShellWindow(Window):
         pass
 
     def on_quit(self, obj, event):
-        pass
+        Gtk.Application.Quit()
 
     def on_run(self, obj, event):
         pass

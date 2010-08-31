@@ -5,7 +5,7 @@ from utils import _
 from document import Document
 
 class EditorWindow(Window):
-    def __init__(self, project, **kwargs):
+    def __init__(self, project, files=None):
         self.project = project
         # create the parts
         self.window = Gtk.Window(_("Pyjama Editor"))
@@ -52,19 +52,23 @@ class EditorWindow(Window):
         self.window.ShowAll()
 
         # Open files on command line, or just a New Script:
-        for x in range(1):
-            page = Document(None, self, self.project.shell)
+        if files:
+            for file in files:
+                page = Document(file, self.project)
+                self.notebook.AppendPage(page.widget, page.tab)
+        else:
+            page = Document(None, self.project)
             self.notebook.AppendPage(page.widget, page.tab)
 
         self.window.DeleteEvent += Gtk.DeleteEventHandler(self.on_quit)
 
     def on_open_file(self, obj, event):
-        page = Document("Script-1.ppy", self, self.project.shell)
+        page = Document("Script-1.ppy", self.project)
         page_num = self.notebook.AppendPage(page.widget, page.tab)
         self.notebook.CurrentPage = page_num
 
     def on_new_file(self, obj, event):
-        page = Document(None, self, self.project.shell)
+        page = Document(None, self.project)
         page_num = self.notebook.AppendPage(page.widget, page.tab)
         self.notebook.CurrentPage = page_num
 

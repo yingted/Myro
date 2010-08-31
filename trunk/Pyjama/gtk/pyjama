@@ -1,0 +1,10 @@
+#!/bin/sh
+if [ "$1" = "--debug" ]; then
+        MONO_OPTIONS="--debug"
+        shift
+fi
+
+IRONPYTHONPATH=$IRONPYTHONPATH:/usr/lib/python2.6
+export IRONPYTHONPATH
+                
+/usr/bin/mono $MONO_OPTIONS /usr/lib/ironpython/ipy.exe pyjama.py "$@"
