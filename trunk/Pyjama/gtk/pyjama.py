@@ -1,7 +1,6 @@
 # Setup environment:
 import sys, os
-directory, filename = os.path.split(__file__)
-lib_directory = os.path.join(directory, "lib")
+lib_directory = os.path.abspath("lib")
 sys.path.insert(0, lib_directory)
 
 # Load the necessary Mono libraries:
@@ -10,6 +9,8 @@ clr.AddReference("gtk-sharp")
 clr.AddReference("pango-sharp")
 clr.AddReference("IronPython.dll")
 clr.AddReference("IronPython.Modules.dll")
+clr.AddReference("IronRuby.dll")
+clr.AddReference("IronRuby.Libraries.dll")
 clr.AddReference("Microsoft.Scripting")
 clr.AddReference("glib-sharp")
 

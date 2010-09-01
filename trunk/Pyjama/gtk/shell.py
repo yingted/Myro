@@ -3,6 +3,7 @@ import Gtk, Pango
 import System
 import IronPython
 import IronPython.Hosting
+import IronRuby
 import Microsoft
 import Microsoft.Scripting
 import Microsoft.Scripting.Hosting
@@ -11,7 +12,7 @@ from window import Window
 from utils import _
 
 import traceback
-import sys
+import sys, os
 
 def prefix(text):
     retval = ""
@@ -27,25 +28,25 @@ class History(object):
         self.position = None
 
     def up(self):
-        print "up", self.position, self.history
+        #print "up", self.position, self.history
         if self.position is not None and 0 <= self.position - 1 < len(self.history):
             self.position -= 1
-            print "ok"
+            #print "ok"
             return self.history[self.position]
         return None
 
     def down(self):
-        print "down", self.position, self.history
+        #print "down", self.position, self.history
         if self.position is not None and 0 <= self.position + 1 < len(self.history):
             self.position += 1
-            print "ok"
+            #print "ok"
             return self.history[self.position]
         return None
 
     def add(self, text):
         self.history.append(text)
         self.position = len(self.history)
-        print "add", self.position, self.history
+        #print "add", self.position, self.history
 
 class CustomStream(System.IO.Stream):
     def __init__(self, textview, tag=None):
@@ -58,6 +59,9 @@ class CustomStream(System.IO.Stream):
     def write(self, text):
         end = self.textview.Buffer.EndIter
         self.textview.Buffer.InsertWithTagsByName(end, text, "red")
+        self.goto_end()
+
+    def goto_end(self):
         end = self.textview.Buffer.EndIter
         insert_mark = self.textview.Buffer.InsertMark 
         self.textview.Buffer.PlaceCursor(end)
@@ -74,10 +78,7 @@ class CustomStream(System.IO.Stream):
             self.textview.Buffer.InsertWithTagsByName(end, text, self.tag)
         else:
             self.textview.Buffer.InsertAtCursor(text)
-        end = self.textview.Buffer.EndIter
-        insert_mark = self.textview.Buffer.InsertMark 
-        self.textview.Buffer.PlaceCursor(end)
-        self.textview.ScrollToMark(insert_mark, 0.0, True, 0, 1.0)
+        self.goto_end()
 
     @property
     def CanRead(self):
@@ -191,11 +192,11 @@ class ShellWindow(Window):
                                                       "IronPython",
                                                       ["IronPython", "Python", "py"],
                                                       [".py"]));
-        # self.scriptRuntimeSetup.LanguageSetups.Add(
-        #     Microsoft.Scripting.Hosting.LanguageSetup("IronRuby.Runtime.RubyContext, IronRuby",
-        #                                               "IronRuby",
-        #                                               ["IronRuby", "Ruby", "rb"],
-        #                                               [".rb"]))
+        self.scriptRuntimeSetup.LanguageSetups.Add(
+             Microsoft.Scripting.Hosting.LanguageSetup("IronRuby.Runtime.RubyContext, IronRuby",
+                                                       "IronRuby",
+                                                       ["IronRuby", "Ruby", "rb"],
+                                                       [".rb"]))
 
         self.environment = Microsoft.Scripting.Hosting.ScriptRuntime(
             self.scriptRuntimeSetup)
@@ -214,11 +215,11 @@ class ShellWindow(Window):
         # Load Languages so that Host System can find DLLs:
         engine.Runtime.LoadAssembly(
             System.Type.GetType(IronPython.Hosting.Python).Assembly)
-#        engine.Runtime.LoadAssembly(
-#            System.Type.GetType(IronRuby.Hosting.RubyCommandLine).Assembly)
-#        engine.Runtime.LoadAssembly(
-#            System.Type.GetType(
-#             IronRuby.StandardLibrary.BigDecimal.Fraction).Assembly)
+        engine.Runtime.LoadAssembly(
+            System.Type.GetType(IronRuby.Hosting.RubyCommandLine).Assembly)
+        engine.Runtime.LoadAssembly(
+            System.Type.GetType(
+             IronRuby.StandardLibrary.BigDecimal.Fraction).Assembly)
         # Load System.dll
         engine.Runtime.LoadAssembly(System.Type.GetType(
                 System.Diagnostics.Debug).Assembly)
@@ -229,8 +230,23 @@ class ShellWindow(Window):
                                                            "red"), 
                                               System.Text.Encoding.UTF8)
         paths = self.engine.GetSearchPaths()
+        # Let users find Python standard library:
         paths.Add("/usr/lib/python2.6")
+        # Let users find Pyjama modules:
+        paths.Add(os.path.abspath("modules"))
         self.engine.SetSearchPaths(paths)
+
+        # Start up, in Python: ------------------
+        script = """
+import clr
+clr.AddReference("myro.dll")
+del clr
+"""
+	scope = self.engine.Runtime.CreateScope()
+	source = self.engine.CreateScriptSourceFromString(script)
+        source.Compile().Execute(scope)
+        # ---------------------------------------
+
         sys.stderr = CustomStream(self.history_textview, "red")
 
     def on_key_press(self, obj, event):
@@ -258,7 +274,7 @@ class ShellWindow(Window):
             mark = self.textview.Buffer.InsertMark
             itermark = self.textview.Buffer.GetIterAtMark(mark)
             line = itermark.Line
-            print "line:", line
+            #print "line:", line
             if line == 0:
                 text = self.history.up()
                 if text:
