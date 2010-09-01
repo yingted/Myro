@@ -205,7 +205,7 @@ class ShellWindow(Window):
         #if (engine.Setup.DisplayName == "IronPython"):
         engine = self.environment.GetEngine("py")
         #elif (engine.Setup.DisplayName == "IronRuby"):
-        #    engine = self.environment.GetEngine("rb")
+        #engine = self.environment.GetEngine("rb")
         #else:
         #    engine = self.environment.GetEngine("py")
 

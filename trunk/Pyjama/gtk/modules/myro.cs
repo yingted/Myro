@@ -16,6 +16,9 @@ public class myro {
 	public void forward(float power, float time) {
 	}
 
+	public void backward(float power, float time) {
+	}
+
 	public string read() {
 	    byte tmpByte;
 	    string rxString = "";
@@ -36,11 +39,11 @@ public class myro {
     public static Scribbler robot;
     
     public static void forward(float power, float time) {
-	_robot.forward(power, time);
+	robot.forward(power, time);
     }
     
     public static void backward(float power, float time) {
-	_robot.backward(power, time);
+	robot.backward(power, time);
     }
     
     
