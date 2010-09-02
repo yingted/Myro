@@ -1,6 +1,6 @@
 # Setup environment:
 import sys, os
-lib_directory = os.path.abspath("lib")
+lib_directory = os.path.abspath("IronPython/ipy2")
 sys.path.insert(0, lib_directory)
 
 # Load the necessary Mono libraries:
@@ -9,8 +9,8 @@ clr.AddReference("gtk-sharp")
 clr.AddReference("pango-sharp")
 clr.AddReference("IronPython.dll")
 clr.AddReference("IronPython.Modules.dll")
-clr.AddReference("IronRuby.dll")
-clr.AddReference("IronRuby.Libraries.dll")
+#clr.AddReference("IronRuby.dll")
+#clr.AddReference("IronRuby.Libraries.dll")
 clr.AddReference("Microsoft.Scripting")
 clr.AddReference("glib-sharp")
 
@@ -20,10 +20,6 @@ import GLib
 
 # Import pure-Python modules:
 import traceback
-
-# Pyjama modules:
-from editor import EditorWindow
-from shell import ShellWindow
 
 # Setup Runtime environment:
 def handle_exception(e):
@@ -52,8 +48,10 @@ class PyjamaProject(object):
         if files == []:
             request_shell = True
         if request_editor:
+            from editor import EditorWindow
             self.editor = EditorWindow(self, files)
         if request_shell:
+            from shell import ShellWindow
             self.shell = ShellWindow(self)
 
     def on_run(self, obj, event):

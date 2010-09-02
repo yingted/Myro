@@ -2,11 +2,10 @@
 import Gtk, Pango
 import System
 import IronPython
-import IronPython.Hosting
-import IronRuby
-import Microsoft
+from IronPython.Hosting import PythonEngine
+#import IronRuby
 import Microsoft.Scripting
-import Microsoft.Scripting.Hosting
+#from Microsoft.Scripting import ScriptDomainManager
 
 from window import Window
 from utils import _
@@ -183,48 +182,52 @@ class ShellWindow(Window):
         self.window.ShowAll()
 
         # DLR hosting:
-        self.scriptRuntimeSetup = Microsoft.Scripting.Hosting.ScriptRuntimeSetup()
-        self.scriptRuntimeSetup.LanguageSetups.Add(
-            Microsoft.Scripting.Hosting.LanguageSetup(
-                "IronPython.Runtime.PythonContext, IronPython",
-                "IronPython",
-                ["IronPython", "Python", "python", "py"],
-                [".py"]));
-        self.scriptRuntimeSetup.LanguageSetups.Add(
-             Microsoft.Scripting.Hosting.LanguageSetup(
-                "IronRuby.Runtime.RubyContext, IronRuby",
-                "IronRuby",
-                ["IronRuby", "Ruby", "ruby", "rb"],
-                [".rb"]))
+        #self.scriptRuntimeSetup = Microsoft.Scripting.Hosting.ScriptRuntimeSetup()
+        #self.scriptRuntimeSetup.LanguageSetups.Add(
+        #    Microsoft.Scripting.Hosting.LanguageSetup(
+        #        "IronPython.Runtime.PythonContext, IronPython",
+        #        "IronPython",
+        #        ["IronPython", "Python", "python", "py"],
+        #        [".py"]));
+        #self.scriptRuntimeSetup.LanguageSetups.Add(
+        #     Microsoft.Scripting.Hosting.LanguageSetup(
+        #        "IronRuby.Runtime.RubyContext, IronRuby",
+        #        "IronRuby",
+        #        ["IronRuby", "Ruby", "ruby", "rb"],
+        #        [".rb"]))
 
-        self.environment = Microsoft.Scripting.Hosting.ScriptRuntime(
-            self.scriptRuntimeSetup)
-        self.scope = self.environment.CreateScope()
+        #self.environment = Microsoft.Scripting.Hosting.ScriptRuntime(
+        #    self.scriptRuntimeSetup)
+        #self.scope = self.environment.CreateScope()
         # Determine what engine is running
         #if (engine.Setup.DisplayName == "IronPython"):
-        engine = self.environment.GetEngine("py")
+        #engine = self.environment.GetEngine("py")
         #elif (engine.Setup.DisplayName == "IronRuby"):
         #engine = self.environment.GetEngine("rb")
+        # FIXME: add debug to engine:
+        #Dictionary<string, object> options = new Dictionary<string, object>();
+        #options["Debug"] = true;
+        #Python.CreateEngine(options);
         #else:
         #    engine = self.environment.GetEngine("py")
-
+        engine = PythonEngine.CurrentEngine
         # Load mscorlib.dll:
         engine.Runtime.LoadAssembly(
             System.Type.GetType(System.String).Assembly);
         # Load Languages so that Host System can find DLLs:
         engine.Runtime.LoadAssembly(
             System.Type.GetType(IronPython.Hosting.Python).Assembly)
-        engine.Runtime.LoadAssembly(
-            System.Type.GetType(IronRuby.Hosting.RubyCommandLine).Assembly)
-        engine.Runtime.LoadAssembly(
-            System.Type.GetType(
-             IronRuby.StandardLibrary.BigDecimal.Fraction).Assembly)
+        #engine.Runtime.LoadAssembly(
+        #    System.Type.GetType(IronRuby.Hosting.RubyCommandLine).Assembly)
+        #engine.Runtime.LoadAssembly(
+        #    System.Type.GetType(
+        #     IronRuby.StandardLibrary.BigDecimal.Fraction).Assembly)
         # Load System.dll
         engine.Runtime.LoadAssembly(System.Type.GetType(
                 System.Diagnostics.Debug).Assembly)
         self.engine = {
-            "python": engine,
-            "ruby": self.environment.GetEngine("rb"),
+            "python": PythonEngine.CurrentEngine
+            #"ruby": self.environment.GetEngine("rb"),
             }
         self.engine["python"].Runtime.IO.SetOutput(CustomStream(self.history_textview), 
                                          System.Text.Encoding.UTF8)
@@ -233,8 +236,8 @@ class ShellWindow(Window):
                                               System.Text.Encoding.UTF8)
         paths = self.engine["python"].GetSearchPaths()
         # Let users find Python standard library:
-        paths.Add("/usr/lib/python2.6")
-        # Let users find Pyjama modules:
+        paths.Add(os.path.abspath("IronPython/ipy2/"))
+        ## Let users find Pyjama modules:
         paths.Add(os.path.abspath("modules"))
         self.engine["python"].SetSearchPaths(paths)
 
