@@ -1,9 +1,17 @@
-using System.IO.Ports;
 using System;
+using System.IO.Ports;
 
 public class myro {
+    public class Robot {
+	public virtual void forward(float power, float? time) {
+	}
 
-    public class Scribbler {
+	public virtual void backward(float power, float? time) {
+	}
+    }
+
+    [Serializable()]
+    public class Scribbler: Robot {
 	
 	SerialPort _port;
 	
@@ -13,10 +21,12 @@ public class myro {
 	    robot = this;
 	}
 
-	public void forward(float power, float time) {
+	public override void forward(float power, float? time) {
+	    // deal with null time
 	}
 
-	public void backward(float power, float time) {
+	public override void backward(float power, float? time) {
+	    // deal with null time
 	}
 
 	public string read() {
@@ -35,17 +45,18 @@ public class myro {
 	    return true;		
 	}
     }
-    
+
     public static Scribbler robot;
     
-    public static void forward(float power, float time) {
+    public static void init(string port, int baud=38400) {
+	robot = new Scribbler(port, baud);
+    }
+    
+    public static void forward(float power=1, float? time=null) {
 	robot.forward(power, time);
     }
     
-    public static void backward(float power, float time) {
+    public static void backward(float power=1, float? time=null) {
 	robot.backward(power, time);
     }
-    
-    
 }
-

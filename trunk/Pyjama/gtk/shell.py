@@ -116,6 +116,7 @@ class MyTextView(Gtk.TextView):
 class ShellWindow(Window):
     def __init__(self, project):
         self.project = project
+        self.language = "python"
         self.window = Gtk.Window(_("Pyjama Shell"))
         self.window.SetDefaultSize(600, 550)
         self.window.DeleteEvent += Gtk.DeleteEventHandler(self.on_quit)
@@ -182,21 +183,19 @@ class ShellWindow(Window):
         self.window.ShowAll()
 
         # DLR hosting:
-        #using IronPython.Hosting;   //PythonEngine
-        #using IronRuby.Hosting;
-        #using Microsoft.Scripting;  //ScriptDomainManager
-        #using Microsoft.Scripting.Hosting;
         self.scriptRuntimeSetup = Microsoft.Scripting.Hosting.ScriptRuntimeSetup()
         self.scriptRuntimeSetup.LanguageSetups.Add(
-            Microsoft.Scripting.Hosting.LanguageSetup("IronPython.Runtime.PythonContext, IronPython",
-                                                      "IronPython",
-                                                      ["IronPython", "Python", "py"],
-                                                      [".py"]));
+            Microsoft.Scripting.Hosting.LanguageSetup(
+                "IronPython.Runtime.PythonContext, IronPython",
+                "IronPython",
+                ["IronPython", "Python", "python", "py"],
+                [".py"]));
         self.scriptRuntimeSetup.LanguageSetups.Add(
-             Microsoft.Scripting.Hosting.LanguageSetup("IronRuby.Runtime.RubyContext, IronRuby",
-                                                       "IronRuby",
-                                                       ["IronRuby", "Ruby", "rb"],
-                                                       [".rb"]))
+             Microsoft.Scripting.Hosting.LanguageSetup(
+                "IronRuby.Runtime.RubyContext, IronRuby",
+                "IronRuby",
+                ["IronRuby", "Ruby", "ruby", "rb"],
+                [".rb"]))
 
         self.environment = Microsoft.Scripting.Hosting.ScriptRuntime(
             self.scriptRuntimeSetup)
@@ -223,18 +222,21 @@ class ShellWindow(Window):
         # Load System.dll
         engine.Runtime.LoadAssembly(System.Type.GetType(
                 System.Diagnostics.Debug).Assembly)
-        self.engine = engine
-        self.engine.Runtime.IO.SetOutput(CustomStream(self.history_textview), 
+        self.engine = {
+            "python": engine,
+            "ruby": self.environment.GetEngine("rb"),
+            }
+        self.engine["python"].Runtime.IO.SetOutput(CustomStream(self.history_textview), 
                                          System.Text.Encoding.UTF8)
-        self.engine.Runtime.IO.SetErrorOutput(CustomStream(self.history_textview, 
+        self.engine["python"].Runtime.IO.SetErrorOutput(CustomStream(self.history_textview, 
                                                            "red"), 
                                               System.Text.Encoding.UTF8)
-        paths = self.engine.GetSearchPaths()
+        paths = self.engine["python"].GetSearchPaths()
         # Let users find Python standard library:
         paths.Add("/usr/lib/python2.6")
         # Let users find Pyjama modules:
         paths.Add(os.path.abspath("modules"))
-        self.engine.SetSearchPaths(paths)
+        self.engine["python"].SetSearchPaths(paths)
 
         # Start up, in Python: ------------------
         script = """
@@ -242,8 +244,8 @@ import clr
 clr.AddReference("myro.dll")
 del clr
 """
-	scope = self.engine.Runtime.CreateScope()
-	source = self.engine.CreateScriptSourceFromString(script)
+	scope = self.engine["python"].Runtime.CreateScope()
+	source = self.engine["python"].CreateScriptSourceFromString(script)
         source.Compile().Execute(scope)
         # ---------------------------------------
 
@@ -261,14 +263,14 @@ del clr
             text = text.rstrip()
             if text == "":
                 self.history.add(text)
-                self.execute(text)
+                self.execute(text, self.language)
             elif text[-1] == ":":
                 self.textview.Buffer.InsertAtCursor("\n    ")
             elif text[0] == " ":
                 self.textview.Buffer.InsertAtCursor("\n    ")
             else:
                 self.history.add(text)
-                self.execute(text)
+                self.execute(text, self.language)
             event.RetVal = True
         elif str(event.Event.Key) == "Up":
             mark = self.textview.Buffer.InsertMark
@@ -310,7 +312,7 @@ del clr
     def on_save_file(self, obj, event):
         pass
 
-    def execute(self, text, message=None):
+    def execute(self, text, language, message=None):
         self.textview.Buffer.Clear()
         if message:
             self.history_textview.Buffer.InsertAtCursor(message + "\n    ")
@@ -320,13 +322,25 @@ del clr
                                                               "%s\n" % text, 
                                                               "blue")
 
+        # pragma/meta commands, start with #;
+        if text == "":
+            return False
+        elif text and text[0:2] == "#;":
+            text = text[2:].strip()
+            command = text.lower()
+            if command in ["ruby", "python"]:
+                self.language = command
+                return True
+            else:
+                exec(text)
+                return True
         sctype = Microsoft.Scripting.SourceCodeKind.InteractiveCode
-        source = self.engine.CreateScriptSourceFromString(text, sctype)
+        source = self.engine[language].CreateScriptSourceFromString(text, sctype)
         try:
             source.Compile()
         except:
             sctype = Microsoft.Scripting.SourceCodeKind.Statements
-            source = self.engine.CreateScriptSourceFromString(text, sctype)
+            source = self.engine[language].CreateScriptSourceFromString(text, sctype)
             try:
                 source.Compile()
             except:
