@@ -236,7 +236,9 @@ class ShellWindow(Window):
                                               System.Text.Encoding.UTF8)
         paths = self.engine["python"].GetSearchPaths()
         # Let users find Python standard library:
-        paths.Add(os.path.abspath("IronPython/ipy2/"))
+        for path in ["IronPython/ipy2"]:
+            lib_directory = os.path.abspath(path)
+            paths.Add(lib_directory)
         ## Let users find Pyjama modules:
         paths.Add(os.path.abspath("modules"))
         self.engine["python"].SetSearchPaths(paths)

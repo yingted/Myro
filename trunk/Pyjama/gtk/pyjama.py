@@ -1,7 +1,8 @@
 # Setup environment:
 import sys, os
-lib_directory = os.path.abspath("IronPython/ipy2")
-sys.path.insert(0, lib_directory)
+for path in ["IronPython/ipy2"]:
+    lib_directory = os.path.abspath(path)
+    sys.path.insert(0, lib_directory)
 
 # Load the necessary Mono libraries:
 import clr
