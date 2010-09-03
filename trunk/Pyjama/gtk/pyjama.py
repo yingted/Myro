@@ -46,7 +46,7 @@ class PyjamaProject(object):
             else:
                 files.append(arg)
                 request_editor = True
-        if files == []:
+        if files == [] and not request_editor:
             request_shell = True
         if request_editor:
             from editor import EditorWindow

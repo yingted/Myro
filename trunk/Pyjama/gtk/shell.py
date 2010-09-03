@@ -210,31 +210,31 @@ class ShellWindow(Window):
         #Python.CreateEngine(options);
         #else:
         #    engine = self.environment.GetEngine("py")
-        engine = PythonEngine.CurrentEngine
+        #engine = PythonEngine.CurrentEngine
         # Load mscorlib.dll:
-        engine.Runtime.LoadAssembly(
-            System.Type.GetType(System.String).Assembly);
+        #engine.Runtime.LoadAssembly(
+        #    System.Type.GetType(System.String).Assembly);
         # Load Languages so that Host System can find DLLs:
-        engine.Runtime.LoadAssembly(
-            System.Type.GetType(IronPython.Hosting.Python).Assembly)
+        #engine.Runtime.LoadAssembly(
+        #    System.Type.GetType(IronPython.Hosting.Python).Assembly)
         #engine.Runtime.LoadAssembly(
         #    System.Type.GetType(IronRuby.Hosting.RubyCommandLine).Assembly)
         #engine.Runtime.LoadAssembly(
         #    System.Type.GetType(
         #     IronRuby.StandardLibrary.BigDecimal.Fraction).Assembly)
         # Load System.dll
-        engine.Runtime.LoadAssembly(System.Type.GetType(
-                System.Diagnostics.Debug).Assembly)
+        #engine.Runtime.LoadAssembly(System.Type.GetType(
+        #        System.Diagnostics.Debug).Assembly)
         self.engine = {
             "python": PythonEngine.CurrentEngine
             #"ruby": self.environment.GetEngine("rb"),
             }
-        self.engine["python"].Runtime.IO.SetOutput(CustomStream(self.history_textview), 
-                                         System.Text.Encoding.UTF8)
-        self.engine["python"].Runtime.IO.SetErrorOutput(CustomStream(self.history_textview, 
-                                                           "red"), 
-                                              System.Text.Encoding.UTF8)
-        paths = self.engine["python"].GetSearchPaths()
+        #self.engine["python"].Runtime.IO.SetOutput(CustomStream(self.history_textview), 
+        #                                 System.Text.Encoding.UTF8)
+        #self.engine["python"].Runtime.IO.SetErrorOutput(CustomStream(self.history_textview, 
+        #                                                   "red"), 
+        #                                      System.Text.Encoding.UTF8)
+        #paths = self.engine["python"].GetSearchPaths()
         # Let users find Python standard library:
         for path in ["IronPython/ipy2"]:
             lib_directory = os.path.abspath(path)
