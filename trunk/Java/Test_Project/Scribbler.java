@@ -2,7 +2,7 @@
 // Douglas Harms
 // First test of communication with the scribbler robot.  ASssume only a serial connection (i.e.,
 // no Fluke)
-// derived from SUN's examples in the javax.comm package
+
 import java.io.*;
 import java.util.*;
 
@@ -33,10 +33,11 @@ public class Scribbler  {
         String portNameLower = portName.toLowerCase();   // ignore case when searching for port
 
         boolean portFound=false;
-        // parse ports and if the default port is found, initialized the reader
+        // parse ports, looking for the specified port
         portList = CommPortIdentifier.getPortIdentifiers();
         while (portList.hasMoreElements()) {
             portId = (CommPortIdentifier) portList.nextElement();
+            //System.out.println(portId.getName());
             if (portId.getPortType() == CommPortIdentifier.PORT_SERIAL) {
                 if (portId.getName().toLowerCase().equals(portNameLower)) {
                     portFound = true;
@@ -78,10 +79,18 @@ public class Scribbler  {
             outputStream = serialPort.getOutputStream();
         } catch (IOException e) {System.out.println("IOException");}
 
-        //reset();
+        // flush any garbage left in input buffer
+        _flushInput();
+
+        // make sure the robot is in a reset state
+        reset();
+
+        // Set _lastSensors to initial values
         getAll();
 
-        System.out.println(getName() + " is Ready!!");
+        // Print information messages
+        System.out.println( getName() + " is Ready!!" );
+        System.out.println( getInfo() );
 
     }
 
@@ -186,6 +195,18 @@ public class Scribbler  {
         int[] data = _get( GET_LINE_ALL, 2 );
         retVal[0] = data[0] == 1;
         retVal[1] = data[1] == 1;
+        return retVal;
+    }
+
+    public String getInfo()
+    {
+        int[] info = _getLine( GET_INFO );
+
+        // create String from the data, using a temp byte array
+        byte[] temp = new byte[ info.length ];
+        for( int i=0;i<info.length; i++ )
+            temp[i] = (byte)info[i];
+        String retVal = new String(temp);
         return retVal;
     }
 
@@ -408,6 +429,8 @@ public class Scribbler  {
     private static final int GET_LINE_ALL           = 76;
     private static final int GET_NAME1              = 78;
     private static final int GET_NAME2              = 64;
+    private static final int GET_STALL              = 79;
+    private static final int GET_INFO               = 80;
 
     private static final int SET_ECHO_MODE          = 98;
     private static final int SET_MOTORS_OFF         = 108;
@@ -476,6 +499,61 @@ public class Scribbler  {
         return retVal;
     }
 
+    private int[] _readLine( )
+    {
+        final int arrSize = 1000;   // assume no more than this many characters in response
+        byte[] readBuffer = new byte[arrSize];
+        int numBytesRead = 0;
+        final byte newline = 10;  // linefeed
+        boolean finished = false;
+
+        //         System.out.println("_read, numBytes=" + numBytes);
+        try {
+
+            while( !finished )
+            {
+                if (inputStream.available() > 0)
+                {
+                    //System.out.println(":");
+                    numBytesRead += inputStream.read(readBuffer,numBytesRead,arrSize-numBytesRead);
+                    if( readBuffer[numBytesRead-1] == newline )
+                        finished = true;
+                }
+                else
+                {
+                    Thread.yield();
+                    //System.out.print(".");
+                }
+            }
+
+        } catch (IOException e) {System.out.println("IO Exception Raised");}
+
+        // create a int array and move the bytes there.  (Do not include newline)
+        int[] retVal = new int[numBytesRead-1];
+        for( int i=0; i<numBytesRead-1; i++ )
+            retVal[i] = (int)( (int)readBuffer[i]  & 0xff);
+
+        //         System.out.print("Read " + (numBytesRead-1) + ": ");
+        //         for( int i=0; i<numBytesRead-1; i++ )
+        //             System.out.print(readBuffer[i] + " ");
+        //         System.out.println();
+
+        return retVal;
+    }
+
+    private void _flushInput()
+    {
+        final int arrSize = 1000;   // assume no more than this many characters in response
+        byte[] readBuffer = new byte[arrSize];
+
+        try
+        {
+            if( inputStream.available() > 0 )
+                inputStream.read( readBuffer );
+        } catch (IOException e) {System.out.println("IO Exception Raised");}
+
+    }
+
     private void _adjustSpeed(double translate, double rotate )
     {
         _lastTranslate = translate;
@@ -512,6 +590,7 @@ public class Scribbler  {
         // send it, then get echo and response
         _write( message );
         int[] echo = _read( 9 );
+        _checkEcho( message, echo );
         _lastSensors = _read( 11 );
     }
 
@@ -521,9 +600,67 @@ public class Scribbler  {
         int[] message = new int[] { command };
         _write( message );
         int[] echo = _read( 9 );
+        _checkEcho( message, echo );
         if( numResponseBytes > 0 )
             retVal = _read( numResponseBytes );
         return retVal;
+    }
+
+    private synchronized int[] _getLine( int command )
+    {
+        int[] retVal = null;
+        int[] message = new int[] { command };
+        _write( message );
+        int[] echo = _read( 9 );
+        _checkEcho( message, echo );
+        retVal = _readLine();
+        return retVal;
+    }
+
+    private boolean _checkEcho( int[] message, int[]echo )
+    {
+        // returns true iff message == echo
+        boolean echoOK = true;
+
+        // echo should have 9 values
+        if( echo.length != 9 )
+            echoOK = false;
+
+        // the first bytes should be the same
+        int i = 0;
+        while( echoOK && (i < message.length) )
+        {
+            if( message[i] != echo[i] )
+                echoOK = false;
+            i++;
+        }
+
+        // the rest of echo should all be 0's
+        while( echoOK && (i < 9) )
+        {
+            if( echo[i] != 0 )
+                echoOK = false;
+            i++;
+        }
+
+        // print message if there are problems
+        if( !echoOK )
+        {
+            System.out.println("There seems to be problems with the echo :-(");
+            System.out.print("Expected:" );
+            for(int k=0; k< 9; k++ )
+                if( k < message.length )
+                    System.out.print( message[k] + " ");
+                else
+                    System.out.print( "0 ");
+            System.out.println();
+            System.out.print("Received:");
+            for( int k=0; k<echo.length; k++ )
+                System.out.print(echo[k] + " ");
+            System.out.println();
+        }
+
+        return echoOK;
     }
 
     private class sensesThread implements Runnable 
@@ -554,63 +691,91 @@ public class Scribbler  {
 
             frameContentPane.setFont(new Font("SansSerif", Font.PLAIN, 14));
 
-            c.fill = GridBagConstraints.BOTH;
+            c.fill = GridBagConstraints.HORIZONTAL;
+
             c.weightx = 1.0;
+            c.gridx = 0;
+            c.gridy = 0;
+            c.gridwidth = 1;
             temp = makeLabel("Stall", border);
             gridbag.setConstraints( temp, c );
             frameContentPane.add( temp );
 
             stallValue = makeLabel("false", border);
-            c.gridwidth = GridBagConstraints.REMAINDER;
-            c.weightx = 3.0;
+            c.gridx = 1;
+            c.gridy = 0;
+            c.gridwidth = 6;
             gridbag.setConstraints( stallValue, c );
             frameContentPane.add( stallValue );
 
             c.weightx = 0.0;                //reset to the default
+
+            c.gridx = 0;
+            c.gridy = 1;
             c.gridwidth = 1;
             temp = makeLabel("IR", border);
             gridbag.setConstraints( temp, c );
             frameContentPane.add( temp );
 
-            c.weightx = 1.5;
+            c.gridx = 1;
+            c.gridy = 1;
+            c.gridwidth = 3;
             IRLeftValue = makeLabel("false", border);
             gridbag.setConstraints( IRLeftValue, c );
             frameContentPane.add( IRLeftValue );
 
-            c.gridwidth = GridBagConstraints.REMAINDER;
+            c.gridx = 4;
+            c.gridy = 1;
+            c.gridwidth = 3;
             IRRightValue = makeLabel("false", border);
             gridbag.setConstraints( IRRightValue, c );
             frameContentPane.add( IRRightValue );
 
-            c.weightx = 1.0;
+            c.gridx = 0;
+            c.gridy = 2;
             c.gridwidth = 1;
             temp = makeLabel("Line", border);
             gridbag.setConstraints( temp, c );
             frameContentPane.add( temp );
 
+            c.gridx = 1;
+            c.gridy = 2;
+            c.gridwidth = 3;
             LineLeftValue = makeLabel("false", border);
             gridbag.setConstraints( LineLeftValue, c );
             frameContentPane.add( LineLeftValue );
 
-            c.gridwidth = GridBagConstraints.REMAINDER;
+            c.gridx = 4;
+            c.gridy = 2;
+            c.gridwidth = 3;
             LineRightValue = makeLabel("false", border);
             gridbag.setConstraints( LineRightValue, c );
             frameContentPane.add( LineRightValue );
 
+            c.gridx = 0;
+            c.gridy = 3;
             c.gridwidth = 1;
             temp = makeLabel("Light", border);
             gridbag.setConstraints( temp, c );
             frameContentPane.add( temp );
 
+            c.gridx = 1;
+            c.gridy = 3;
+            c.gridwidth = 2;
             LightLeftValue = makeLabel("0", border);
             gridbag.setConstraints( LightLeftValue, c );
             frameContentPane.add( LightLeftValue );
 
+            c.gridx = 3;
+            c.gridy = 3;
+            c.gridwidth = 2;
             LightCenterValue = makeLabel("0", border);
             gridbag.setConstraints( LightCenterValue, c );
             frameContentPane.add( LightCenterValue );
 
-            c.gridwidth = GridBagConstraints.REMAINDER;
+            c.gridx = 5;
+            c.gridy = 3;
+            c.gridwidth = 2;
             LightRightValue = makeLabel("0", border);
             gridbag.setConstraints( LightRightValue, c );
             frameContentPane.add( LightRightValue );
