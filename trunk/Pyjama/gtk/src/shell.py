@@ -2,24 +2,15 @@
 import Gtk, Pango
 import System
 import IronPython
-from IronPython.Hosting import PythonEngine
-#import IronRuby
+import IronPython.Hosting
+import IronRuby
 import Microsoft.Scripting
-#from Microsoft.Scripting import ScriptDomainManager
 
 from window import Window
 from utils import _
 
 import traceback
 import sys, os
-
-def prefix(text):
-    retval = ""
-    prompt = ">>> "
-    for line in text.split("\n"):
-        retval += "%s%s\n" % (prompt, line)
-        prompt = "... "
-    return retval 
 
 class History(object):
     def __init__(self):
@@ -118,32 +109,49 @@ class ShellWindow(Window):
         self.language = "python"
         self.window = Gtk.Window(_("Pyjama Shell"))
         self.window.SetDefaultSize(600, 550)
-        self.window.DeleteEvent += Gtk.DeleteEventHandler(self.on_quit)
+        self.window.DeleteEvent += Gtk.DeleteEventHandler(self.on_close)
         self.vbox = Gtk.VBox()
         # ---------------------
         # make menu:
         menu = [("_File", 
-                 [("Save as...", Gtk.Stock.SaveAs,
-                   None, self.on_save_file_as),
+                 [("Open Script...", Gtk.Stock.Open,
+                   None, self.on_open_file),
+                  ("New Script", Gtk.Stock.New,
+                   None, self.on_new_file),
                   None,
+                  ("Close", Gtk.Stock.Close,
+                   None, self.on_close),
                   ("Quit", Gtk.Stock.Quit,
                    None, self.on_quit),
                   ]),
                 ("_Edit", []),
                 ("She_ll", [("Run", Gtk.Stock.Apply,
-                            "F5", self.on_run)]),
+                            "F5", self.on_run),
+                            ("Change to Python", None, "<control>p", 
+                             self.change_to_python), 
+                            ("Change to Ruby", None, "<control>r", 
+                             self.change_to_ruby), 
+                            ]),
+                ("Windows", [
+                    ("Editor", None, "F6", self.project.setup_editor),
+                    ("Shell", None, "F7", self.project.setup_shell),
+                    ]),
                 ("O_ptions", []),
                 ("_Help", []),
                 ]
-        self.make_gui(menu)
-
+        toolbar = [(Gtk.Stock.New, self.on_new_file),
+                   (Gtk.Stock.Open, self.on_open_file),
+                   (Gtk.Stock.Save, self.on_save_file), 
+                   (Gtk.Stock.Quit, self.on_quit),]
+        self.make_gui(menu, toolbar)
         self.history = History()
         self.statusbar = Gtk.Statusbar()
         self.statusbar.Show()
-        self.statusbar.Push(0, "Language: Python")
+        self.statusbar.Push(1, "Language: Python")
         self.command_area = Gtk.HBox()
         alignment = Gtk.Alignment( 0.5, 0.0, 0, 0)
-        alignment.Add(Gtk.Label(">>>"))
+        self.prompt = Gtk.Label("python>")
+        alignment.Add(self.prompt)
         self.command_area.PackStart(alignment, False, False, 0)
         self.scrolled_window = Gtk.ScrolledWindow()
         self.command_area.PackStart(self.scrolled_window, True, True, 0)
@@ -164,6 +172,10 @@ class ShellWindow(Window):
         tag.Weight = Pango.Weight.Bold
         tag.Foreground = "blue" # Pango.Color.Red
         self.history_textview.Buffer.TagTable.Add(tag)
+        tag = Gtk.TextTag("black")
+        tag.Weight = Pango.Weight.Bold
+        tag.Foreground = "black" # Pango.Color.Red
+        self.history_textview.Buffer.TagTable.Add(tag)
         self.history_textview.ModifyFont(Pango.FontDescription.FromString("Courier 10"))
 
         self.history_textview.WrapMode = Gtk.WrapMode.Word
@@ -182,63 +194,56 @@ class ShellWindow(Window):
         self.window.ShowAll()
 
         # DLR hosting:
-        #self.scriptRuntimeSetup = Microsoft.Scripting.Hosting.ScriptRuntimeSetup()
-        #self.scriptRuntimeSetup.LanguageSetups.Add(
-        #    Microsoft.Scripting.Hosting.LanguageSetup(
-        #        "IronPython.Runtime.PythonContext, IronPython",
-        #        "IronPython",
-        #        ["IronPython", "Python", "python", "py"],
-        #        [".py"]));
-        #self.scriptRuntimeSetup.LanguageSetups.Add(
-        #     Microsoft.Scripting.Hosting.LanguageSetup(
-        #        "IronRuby.Runtime.RubyContext, IronRuby",
-        #        "IronRuby",
-        #        ["IronRuby", "Ruby", "ruby", "rb"],
-        #        [".rb"]))
+        self.scriptRuntimeSetup = Microsoft.Scripting.Hosting.ScriptRuntimeSetup()
+        self.scriptRuntimeSetup.LanguageSetups.Add(
+            Microsoft.Scripting.Hosting.LanguageSetup(
+                "IronPython.Runtime.PythonContext, IronPython",
+                "IronPython",
+                ["IronPython", "Python", "python", "py"],
+                [".py"]));
+        self.scriptRuntimeSetup.LanguageSetups.Add(
+             Microsoft.Scripting.Hosting.LanguageSetup(
+                "IronRuby.Runtime.RubyContext, IronRuby",
+                "IronRuby",
+                ["IronRuby", "Ruby", "ruby", "rb"],
+                [".rb"]))
 
-        #self.environment = Microsoft.Scripting.Hosting.ScriptRuntime(
-        #    self.scriptRuntimeSetup)
-        #self.scope = self.environment.CreateScope()
-        # Determine what engine is running
-        #if (engine.Setup.DisplayName == "IronPython"):
-        #engine = self.environment.GetEngine("py")
-        #elif (engine.Setup.DisplayName == "IronRuby"):
-        #engine = self.environment.GetEngine("rb")
+        self.environment = Microsoft.Scripting.Hosting.ScriptRuntime(
+            self.scriptRuntimeSetup)
+        self.scope = self.environment.CreateScope()
+        self.engine = {
+            "python": self.environment.GetEngine("py"),
+            "ruby": self.environment.GetEngine("rb"),
+            }
+        engine = self.engine["python"]
         # FIXME: add debug to engine:
         #Dictionary<string, object> options = new Dictionary<string, object>();
         #options["Debug"] = true;
         #Python.CreateEngine(options);
-        #else:
-        #    engine = self.environment.GetEngine("py")
-        #engine = PythonEngine.CurrentEngine
         # Load mscorlib.dll:
-        #engine.Runtime.LoadAssembly(
-        #    System.Type.GetType(System.String).Assembly);
+        engine.Runtime.LoadAssembly(
+            System.Type.GetType(System.String).Assembly);
         # Load Languages so that Host System can find DLLs:
-        #engine.Runtime.LoadAssembly(
-        #    System.Type.GetType(IronPython.Hosting.Python).Assembly)
-        #engine.Runtime.LoadAssembly(
-        #    System.Type.GetType(IronRuby.Hosting.RubyCommandLine).Assembly)
-        #engine.Runtime.LoadAssembly(
-        #    System.Type.GetType(
-        #     IronRuby.StandardLibrary.BigDecimal.Fraction).Assembly)
+        engine.Runtime.LoadAssembly(
+            System.Type.GetType(IronPython.Hosting.Python).Assembly)
+        engine.Runtime.LoadAssembly(
+            System.Type.GetType(IronRuby.Hosting.RubyCommandLine).Assembly)
+        engine.Runtime.LoadAssembly(
+            System.Type.GetType(
+             IronRuby.StandardLibrary.BigDecimal.Fraction).Assembly)
         # Load System.dll
-        #engine.Runtime.LoadAssembly(System.Type.GetType(
-        #        System.Diagnostics.Debug).Assembly)
-        self.engine = {
-            "python": PythonEngine.CurrentEngine
-            #"ruby": self.environment.GetEngine("rb"),
-            }
-        #self.engine["python"].Runtime.IO.SetOutput(CustomStream(self.history_textview), 
-        #                                 System.Text.Encoding.UTF8)
-        #self.engine["python"].Runtime.IO.SetErrorOutput(CustomStream(self.history_textview, 
-        #                                                   "red"), 
-        #                                      System.Text.Encoding.UTF8)
-        #paths = self.engine["python"].GetSearchPaths()
+        engine.Runtime.LoadAssembly(System.Type.GetType(
+                System.Diagnostics.Debug).Assembly)
+        engine.Runtime.IO.SetOutput(CustomStream(self.history_textview), 
+                                    System.Text.Encoding.UTF8)
+        engine.Runtime.IO.SetErrorOutput(CustomStream(self.history_textview, 
+                                                      "red"), 
+                                         System.Text.Encoding.UTF8)
+        paths = engine.GetSearchPaths()
         # Let users find Python standard library:
-        for path in ["IronPython/ipy2"]:
-            lib_directory = os.path.abspath(path)
-            paths.Add(lib_directory)
+        #for path in ["IronPython/ipy2"]:
+        #    lib_directory = os.path.abspath(path)
+        #    paths.Add(lib_directory)
         ## Let users find Pyjama modules:
         paths.Add(os.path.abspath("modules"))
         self.engine["python"].SetSearchPaths(paths)
@@ -255,6 +260,13 @@ del clr
         # ---------------------------------------
 
         sys.stderr = CustomStream(self.history_textview, "red")
+        self.update_gui()
+
+    def update_gui(self):
+        self.window.Title = _("%s - Pyjama Shell") % self.language.title()
+        self.prompt.Text = "%-6s>" % self.language
+        self.statusbar.Pop(0)
+        self.statusbar.Push(0, _("Language: %s") % self.language.title())
 
     def on_key_press(self, obj, event):
         if event.RetVal: return # already handled
@@ -300,11 +312,22 @@ del clr
             event.RetVal = Gtk.TextView.OnKeyPressEvent(self.textview, 
                                                         event.Event)
 
+    def change_to_ruby(self, obj, event):
+        self.language = "ruby"
+        self.update_gui()
+
+    def change_to_python(self, obj, event):
+        self.language = "python"
+        self.update_gui()
+
     def on_save_file_as(self, obj, event):
         pass
 
     def on_quit(self, obj, event):
         Gtk.Application.Quit()
+
+    def on_close(self, obj, event):
+        self.project.on_close("shell")
 
     def on_run(self, obj, event):
         pass
@@ -318,14 +341,21 @@ del clr
         pass
 
     def execute(self, text, language, message=None):
-        self.textview.Buffer.Clear()
         if message:
             self.history_textview.Buffer.InsertAtCursor(message + "\n    ")
         else:
-            end = self.history_textview.Buffer.EndIter
-            self.history_textview.Buffer.InsertWithTagsByName(end, 
-                                                              "%s\n" % text, 
-                                                              "blue")
+            self.textview.Buffer.Clear()
+            prompt = "%-6s> " % language
+            for line in text.split("\n"):
+                end = self.history_textview.Buffer.EndIter
+                self.history_textview.Buffer.InsertWithTagsByName(end, 
+                                 "%s" % prompt,
+                                 "black")
+                end = self.history_textview.Buffer.EndIter
+                self.history_textview.Buffer.InsertWithTagsByName(end, 
+                                 "%s\n" % line,
+                                 "blue")
+                prompt = "......>"
 
         # pragma/meta commands, start with #;
         if text == "":
@@ -335,10 +365,13 @@ del clr
             command = text.lower()
             if command in ["ruby", "python"]:
                 self.language = command
+                self.update_gui()
                 return True
             else:
                 exec(text)
                 return True
+        self.language = language
+        self.update_gui()
         sctype = Microsoft.Scripting.SourceCodeKind.InteractiveCode
         source = self.engine[language].CreateScriptSourceFromString(text, sctype)
         try:

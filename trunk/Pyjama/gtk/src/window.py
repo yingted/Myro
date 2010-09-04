@@ -1,7 +1,7 @@
 import Gtk
 
 class Window(object):
-    def make_gui(self, menu):
+    def make_gui(self, menu, toolbar):
         self.menubar = Gtk.MenuBar()
         for text, items in menu:
             submenu = Gtk.Menu()
@@ -27,23 +27,14 @@ class Window(object):
             menuitem.Submenu = submenu
             self.menubar.Append(menuitem)
         # ---------------------
-
         self.toolbar = Gtk.Toolbar()
         self.toolbar.ToolbarStyle = Gtk.ToolbarStyle.Icons
-
-        newtb = Gtk.ToolButton(Gtk.Stock.New)
-        newtb.Clicked += self.on_new_file
-        opentb = Gtk.ToolButton(Gtk.Stock.Open)
-        opentb.Clicked += self.on_open_file
-        savetb = Gtk.ToolButton(Gtk.Stock.Save)
-        savetb.Clicked += self.on_save_file
-        sep = Gtk.SeparatorToolItem()
-        quittb = Gtk.ToolButton(Gtk.Stock.Quit)
-        quittb.Clicked += self.on_quit
-
-        self.toolbar.Insert(newtb, 0)
-        self.toolbar.Insert(opentb, 1)
-        self.toolbar.Insert(savetb, 2)
-        self.toolbar.Insert(sep, 3)
-        self.toolbar.Insert(quittb, 4)
-
+        i = 0
+        for (img, funtion) in toolbar:
+            if img is None:
+                tool_item = Gtk.SeparatorToolItem()
+            else:
+                tool_item = Gtk.ToolButton(img)
+                tool_item.Clicked += function
+            self.toolbar.Insert(tool_item, i)
+            i += 1

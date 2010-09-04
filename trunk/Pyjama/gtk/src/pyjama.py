@@ -1,8 +1,8 @@
 # Setup environment:
 import sys, os
-for path in ["IronPython/ipy2"]:
-    lib_directory = os.path.abspath(path)
-    sys.path.insert(0, lib_directory)
+#for path in ["IronPython/ipy2"]:
+#    lib_directory = os.path.abspath(path)
+#    sys.path.insert(0, lib_directory)
 
 # Load the necessary Mono libraries:
 import clr
@@ -10,8 +10,8 @@ clr.AddReference("gtk-sharp")
 clr.AddReference("pango-sharp")
 clr.AddReference("IronPython.dll")
 clr.AddReference("IronPython.Modules.dll")
-#clr.AddReference("IronRuby.dll")
-#clr.AddReference("IronRuby.Libraries.dll")
+clr.AddReference("IronRuby.dll")
+clr.AddReference("IronRuby.Libraries.dll")
 clr.AddReference("Microsoft.Scripting")
 clr.AddReference("glib-sharp")
 
@@ -58,12 +58,34 @@ class PyjamaProject(object):
     def on_run(self, obj, event):
         doc = self.get_current_doc()
         if doc and doc.textview.HasFocus:
-            text = doc.textview.Buffer.Text
+            text = str(doc.textview.Buffer.Text)
             doc.execute(text, "Loading file...")
         else:
             self.command_pane.textview.HasFocus = True
-            text = self.command_pane.textview.Buffer.Text
+            text = str(self.command_pane.textview.Buffer.Text)
             doc.execute(text)
+
+    def on_close(self, what):
+        if what == "shell":
+            if self.shell:
+                self.shell.window.Destroy()
+                self.shell = None
+        elif what == "editor":
+            if self.editor:
+                self.editor.window.Destroy()
+                self.editor = None
+        if self.editor is None and self.shell is None:
+            Gtk.Application.Quit()
+
+    def setup_shell(self, *args, **kwargs):
+        if self.shell is None:
+            from shell import ShellWindow
+            self.shell = ShellWindow(self)
+
+    def setup_editor(self, *args, **kwargs):
+        if self.editor is None:
+            from editor import EditorWindow
+            self.editor = EditorWindow(self)
 
 # Let's start!
 Gtk.Application.Init()

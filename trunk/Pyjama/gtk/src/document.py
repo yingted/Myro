@@ -51,3 +51,5 @@ class Document(object):
         # if found:
         #     self.textview.Buffer.SelectRange(mstart, mend)
         
+    def get_text(self):
+        return self.textview.Buffer.Text

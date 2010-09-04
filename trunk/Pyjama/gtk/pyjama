@@ -4,4 +4,4 @@ if [ "$1" = "--debug" ]; then
         shift
 fi
 
-/usr/bin/env mono $MONO_OPTIONS IronPython/ipy2/ipy.exe pyjama.py "$@"
+/usr/bin/env mono $MONO_OPTIONS bin/ipy.exe src/pyjama.py "$@"
