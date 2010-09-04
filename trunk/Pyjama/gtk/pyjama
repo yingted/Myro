@@ -3,5 +3,5 @@ if [ "$1" = "--debug" ]; then
         MONO_OPTIONS="--debug"
         shift
 fi
-
+# -X:FullFrames -X:ShowClrExceptions -X:Debug -X:ExceptionDetail
 /usr/bin/env mono $MONO_OPTIONS bin/ipy.exe src/pyjama.py "$@"

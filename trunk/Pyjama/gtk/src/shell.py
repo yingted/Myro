@@ -164,18 +164,11 @@ class ShellWindow(Window):
         self.scrolled_window.AddWithViewport(self.textview)
         self.results = Gtk.ScrolledWindow()
         self.history_textview = Gtk.TextView()
-        tag = Gtk.TextTag("red")
-        tag.Weight = Pango.Weight.Bold
-        tag.Foreground = "red" # Pango.Color.Red
-        self.history_textview.Buffer.TagTable.Add(tag)
-        tag = Gtk.TextTag("blue")
-        tag.Weight = Pango.Weight.Bold
-        tag.Foreground = "blue" # Pango.Color.Red
-        self.history_textview.Buffer.TagTable.Add(tag)
-        tag = Gtk.TextTag("black")
-        tag.Weight = Pango.Weight.Bold
-        tag.Foreground = "black" # Pango.Color.Red
-        self.history_textview.Buffer.TagTable.Add(tag)
+        for color in ["red", "blue", "green", "black"]:
+            tag = Gtk.TextTag(color)
+            tag.Weight = Pango.Weight.Bold
+            tag.Foreground = color 
+            self.history_textview.Buffer.TagTable.Add(tag)
         self.history_textview.ModifyFont(Pango.FontDescription.FromString("Courier 10"))
 
         self.history_textview.WrapMode = Gtk.WrapMode.Word
@@ -208,12 +201,13 @@ class ShellWindow(Window):
                 ["IronRuby", "Ruby", "ruby", "rb"],
                 [".rb"]))
 
-        self.environment = Microsoft.Scripting.Hosting.ScriptRuntime(
+        self.runtime = Microsoft.Scripting.Hosting.ScriptRuntime(
             self.scriptRuntimeSetup)
-        self.scope = self.environment.CreateScope()
+        self.scope = self.runtime.CreateScope()
+        self.scope.SetVariable("pyjama", self.project)
         self.engine = {
-            "python": self.environment.GetEngine("py"),
-            "ruby": self.environment.GetEngine("rb"),
+            "python": self.runtime.GetEngine("py"),
+            "ruby": self.runtime.GetEngine("rb"),
             }
         engine = self.engine["python"]
         # FIXME: add debug to engine:
@@ -254,7 +248,8 @@ import clr
 clr.AddReference("myro.dll")
 del clr
 """
-	scope = self.engine["python"].Runtime.CreateScope()
+        # We could do this in a different scope, but still have the effect
+        scope = self.runtime.CreateScope()
 	source = self.engine["python"].CreateScriptSourceFromString(script)
         source.Compile().Execute(scope)
         # ---------------------------------------
@@ -328,6 +323,7 @@ del clr
 
     def on_close(self, obj, event):
         self.project.on_close("shell")
+        event.RetVal = True
 
     def on_run(self, obj, event):
         pass
@@ -340,22 +336,35 @@ del clr
     def on_save_file(self, obj, event):
         pass
 
-    def execute(self, text, language, message=None):
-        if message:
-            self.history_textview.Buffer.InsertAtCursor(message + "\n    ")
-        else:
-            self.textview.Buffer.Clear()
-            prompt = "%-6s> " % language
-            for line in text.split("\n"):
-                end = self.history_textview.Buffer.EndIter
-                self.history_textview.Buffer.InsertWithTagsByName(end, 
-                                 "%s" % prompt,
-                                 "black")
-                end = self.history_textview.Buffer.EndIter
-                self.history_textview.Buffer.InsertWithTagsByName(end, 
-                                 "%s\n" % line,
-                                 "blue")
-                prompt = "......>"
+    def message(self, message, tag="green"):
+        end = self.history_textview.Buffer.EndIter
+        self.history_textview.Buffer.InsertWithTagsByName(end, message, tag)
+
+    def execute_file(self, filename, language):
+        source = self.engine[language].CreateScriptSourceFromFile(filename)
+        try:
+            source.Compile()
+        except:
+            traceback.print_exc()
+            return False
+        try:
+            source.Execute(self.scope)
+        except:
+            traceback.print_exc()
+
+    def execute(self, text, language):
+        self.textview.Buffer.Clear()
+        prompt = "%-6s> " % language
+        for line in text.split("\n"):
+            end = self.history_textview.Buffer.EndIter
+            self.history_textview.Buffer.InsertWithTagsByName(end, 
+                             "%s" % prompt,
+                             "black")
+            end = self.history_textview.Buffer.EndIter
+            self.history_textview.Buffer.InsertWithTagsByName(end, 
+                             "%s\n" % line,
+                             "blue")
+            prompt = "......>"
 
         # pragma/meta commands, start with #;
         if text == "":
@@ -373,12 +382,14 @@ del clr
         self.language = language
         self.update_gui()
         sctype = Microsoft.Scripting.SourceCodeKind.InteractiveCode
-        source = self.engine[language].CreateScriptSourceFromString(text, sctype)
+        source = self.engine[language].CreateScriptSourceFromString(text, 
+                                                                    sctype)
         try:
             source.Compile()
         except:
             sctype = Microsoft.Scripting.SourceCodeKind.Statements
-            source = self.engine[language].CreateScriptSourceFromString(text, sctype)
+            source = self.engine[language].CreateScriptSourceFromString(text, 
+                                                                        sctype)
             try:
                 source.Compile()
             except:

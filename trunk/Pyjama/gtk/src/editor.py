@@ -71,9 +71,19 @@ class EditorWindow(Window):
             self.notebook.AppendPage(page.widget, page.tab)
 
     def on_open_file(self, obj, event):
-        page = Document("Script-1.ppy", self.project)
-        page_num = self.notebook.AppendPage(page.widget, page.tab)
-        self.notebook.CurrentPage = page_num
+        retval = False
+        fc = Gtk.FileChooserDialog("Select the file to open",
+                                   self.window,
+                                   Gtk.FileChooserAction.Open,
+                                   "Cancel", Gtk.ResponseType.Cancel,
+                                   "Open", Gtk.ResponseType.Accept)
+        if (fc.Run() == int(Gtk.ResponseType.Accept)):
+            page = Document(fc.Filename, self.project)
+            page_num = self.notebook.AppendPage(page.widget, page.tab)
+            self.notebook.CurrentPage = page_num
+            retval = True
+        fc.Destroy()
+        return retval
 
     def on_close_tab(self, page):
         page_num = self.notebook.PageNum(page)
@@ -85,10 +95,14 @@ class EditorWindow(Window):
         self.notebook.CurrentPage = page_num
 
     def on_save_file(self, obj, event):
-        print "save file", obj
+        doc = self.get_current_doc()
+        if doc:
+            doc.save()
 
     def on_save_file_as(self, obj, event):
-        print "save file as", obj
+        doc = self.get_current_doc()
+        if doc:
+            doc.save_as()
 
     def get_current_doc(self):
         if self.notebook.CurrentPage >= 0:
@@ -100,11 +114,14 @@ class EditorWindow(Window):
         self.project.setup_shell()
         doc = self.get_current_doc()
         if doc:
-            text = doc.get_text()
-        self.project.shell.execute(text, "python", "Loading file...")
+            if doc.save():
+                self.project.shell.message("Loading file...\n")
+                self.project.shell.execute_file(doc.filename, "python")
+                self.project.shell.message("Done loading!\n")
 
     def on_close(self, obj, event):
         self.project.on_close("editor")
+        event.RetVal = True
 
     def on_quit(self, obj, event):
         Gtk.Application.Quit()

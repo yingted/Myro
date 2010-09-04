@@ -26,7 +26,7 @@ import traceback
 def handle_exception(e):
     print e.__class__.__name__
 
-#GLib.ExceptionManager.UnhandledException += handle_exception
+GLib.ExceptionManager.UnhandledException += handle_exception
 
 # Define local functions and classes
 from utils import _
@@ -68,24 +68,29 @@ class PyjamaProject(object):
     def on_close(self, what):
         if what == "shell":
             if self.shell:
-                self.shell.window.Destroy()
-                self.shell = None
+                self.shell.window.Hide()
         elif what == "editor":
             if self.editor:
-                self.editor.window.Destroy()
-                self.editor = None
-        if self.editor is None and self.shell is None:
+                self.editor.window.Hide()
+        if (((self.editor.window is None) or 
+             (not self.editor.window.Visible)) and 
+            ((self.shell is None) or 
+             (not self.shell.window.Visible))):
             Gtk.Application.Quit()
 
     def setup_shell(self, *args, **kwargs):
         if self.shell is None:
             from shell import ShellWindow
             self.shell = ShellWindow(self)
+        else:
+            self.shell.window.Show()
 
     def setup_editor(self, *args, **kwargs):
         if self.editor is None:
             from editor import EditorWindow
             self.editor = EditorWindow(self)
+        else:
+            self.editor.window.Show()
 
 # Let's start!
 Gtk.Application.Init()

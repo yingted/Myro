@@ -19,11 +19,11 @@ class Document(object):
             self.title = "New Script"
             self.language = "python"
         self.tab = Gtk.HBox()
-        label = Gtk.Label(self.title)
+        self.label = Gtk.Label(self.title)
         #self.tab.WidthRequest = 150
         #label.Ellipsize = Pango.EllipsizeMode.End
-        label.Show()
-        self.tab.PackStart(label)
+        self.label.Show()
+        self.tab.PackStart(self.label)
         button = Gtk.Button()
         button.Relief = Gtk.ReliefStyle.None
         img = Gtk.Image(Gtk.Stock.Close, Gtk.IconSize.Menu)
@@ -43,7 +43,7 @@ class Document(object):
         self.textview.Show()
         self.widget.Show()
         if self.filename and os.path.exists(self.filename):
-            self.textview.Buffer.Text = "".join(file(self.filename).readlines())
+            self.open()
         # start = self.textview.Buffer.StartIter
         # end = self.textview.Buffer.EndIter
         # (found,  mstart, mend) = start.ForwardSearch("def ", 
@@ -53,3 +53,35 @@ class Document(object):
         
     def get_text(self):
         return self.textview.Buffer.Text
+
+    def open(self):
+        self.textview.Buffer.Text = "".join(file(self.filename).readlines())
+
+    def save(self):
+        """
+        """
+        if not self.filename:
+            self.save_as()
+        if self.filename:
+            fp = open(self.filename, "w")
+            fp.write(self.get_text())
+            fp.close()
+            return True
+        return False
+
+    def save_as(self):
+        retval = False
+        fc = Gtk.FileChooserDialog("Enter the file to save",
+                                   self.project.editor.window,
+                                   Gtk.FileChooserAction.Save,
+                                   "Cancel", Gtk.ResponseType.Cancel,
+                                   "Save", Gtk.ResponseType.Accept)
+        if (fc.Run() == int(Gtk.ResponseType.Accept)):
+            self.filename = fc.Filename
+            self.title = os.path.basename(self.filename)
+            self.label.Text = self.title
+            self.language = "python"
+            retval = True
+        fc.Destroy()
+        return retval
+        
