@@ -1,12 +1,12 @@
-import Gtk
+import Gtk, Pango
 import os
 
-class ScrolledWindow(Gtk.ScrolledWindow):
+class MyScrolledWindow(Gtk.ScrolledWindow):
     """
     Wrapper so that we can keep track of additional items.
     """
 
-class Document(object):
+class PlainDocument(object):
     def __init__(self, filename, project):
         if filename:
             filename = os.path.abspath(filename)
@@ -18,6 +18,21 @@ class Document(object):
         else:
             self.title = "New Script"
             self.language = "python"
+        self.make_tab()
+        self.make_widget()
+        if self.filename and os.path.exists(self.filename):
+            self.open()
+
+    def search(self):
+        pass
+        # start = self.textview.Buffer.StartIter
+        # end = self.textview.Buffer.EndIter
+        # (found,  mstart, mend) = start.ForwardSearch("def ", 
+        #    Gtk.TextSearchFlags.TextOnly, end)
+        # if found:
+        #     self.textview.Buffer.SelectRange(mstart, mend)
+        
+    def make_tab(self):
         self.tab = Gtk.HBox()
         self.label = Gtk.Label(self.title)
         #self.tab.WidthRequest = 150
@@ -33,24 +48,20 @@ class Document(object):
         button.Clicked += lambda obj, event: \
             self.project.editor.on_close_tab(self.widget)
         self.tab.PackEnd(button)
-        self.widget = ScrolledWindow()
+
+    def make_widget(self):
+        self.widget = MyScrolledWindow()
         self.widget.document = self
         self.textview = Gtk.TextView()
+        self.textview.ModifyFont(
+            Pango.FontDescription.FromString("Courier 10"))
         self.widget.Add(self.textview)
         self.textview.Editable = True
         self.textview.WrapMode = Gtk.WrapMode.Word
         self.textview.AcceptsTab = True
         self.textview.Show()
         self.widget.Show()
-        if self.filename and os.path.exists(self.filename):
-            self.open()
-        # start = self.textview.Buffer.StartIter
-        # end = self.textview.Buffer.EndIter
-        # (found,  mstart, mend) = start.ForwardSearch("def ", 
-        #    Gtk.TextSearchFlags.TextOnly, end)
-        # if found:
-        #     self.textview.Buffer.SelectRange(mstart, mend)
-        
+
     def get_text(self):
         return self.textview.Buffer.Text
 
@@ -84,4 +95,27 @@ class Document(object):
             retval = True
         fc.Destroy()
         return retval
-        
+
+try:
+    import clr
+    clr.AddReference("gtksourceview2-sharp")
+    import GtkSourceView
+    class Document(PlainDocument):
+        def make_widget(self):
+            self.widget = MyScrolledWindow()
+            self.widget.document = self
+            self.lang_manager = GtkSourceView.SourceLanguageManager()
+            self.textview = GtkSourceView.SourceView()
+            self.textview.ShowLineNumbers =True
+            self.textview.ModifyFont(
+                Pango.FontDescription.FromString("Courier 10"))
+            self.textview.Buffer.Language = self.lang_manager.GetLanguage(
+                self.language)
+            self.widget.Add(self.textview)
+            self.textview.Editable = True
+            self.textview.WrapMode = Gtk.WrapMode.Word
+            self.textview.AcceptsTab = True
+            self.textview.Show()
+            self.widget.Show()
+except:
+    Document = PlainDocument

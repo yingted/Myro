@@ -33,8 +33,8 @@ class EditorWindow(Window):
                 ("She_ll", [("Run", Gtk.Stock.Apply,
                             "F5", self.on_run)]),
                 ("Windows", [
-                    ("Editor", None, None, self.project.setup_editor),
-                    ("Shell", None, None, self.project.setup_shell),
+                    ("Editor", None, "F6", self.project.setup_editor),
+                    ("Shell", None, "F7", self.project.setup_shell),
                     ]),
                 ("O_ptions", []),
                 ("_Help", []),

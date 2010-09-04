@@ -1,10 +1,7 @@
 # Setup environment:
 import sys, os
-#for path in ["IronPython/ipy2"]:
-#    lib_directory = os.path.abspath(path)
-#    sys.path.insert(0, lib_directory)
 
-# Load the necessary Mono libraries:
+# Bring in DLLs to import from:
 import clr
 clr.AddReference("gtk-sharp")
 clr.AddReference("pango-sharp")
@@ -26,6 +23,7 @@ import traceback
 def handle_exception(e):
     print e.__class__.__name__
 
+# Turn on Unhandled Exception Handled:
 GLib.ExceptionManager.UnhandledException += handle_exception
 
 # Define local functions and classes

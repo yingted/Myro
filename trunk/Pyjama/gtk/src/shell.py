@@ -92,22 +92,20 @@ class CustomStream(System.IO.Stream):
     def Position(self):
         return 0
 
-# FIXME: work-around for not being able to handle
-# method before
-# 1) override textview so that OnKeyPressEvent doesn't do anything
-# (can't override protected KeyPressEvent)
-# 2) add a KeyPressEvent to handle the keypress
-# 3) call the original keypress handler if not handled
+class MyWindow(Gtk.Window):
+    def set_on_key_press(self, on_key_press):
+        self.on_key_press = on_key_press
 
-class MyTextView(Gtk.TextView):
-    def OnKeyPressEvent(self, gdk_eventkey):
-        pass
+    def OnKeyPressEvent(self, eventkey):
+        return (self.on_key_press(eventkey) or 
+                Gtk.Window.OnKeyPressEvent(self, eventkey))
 
 class ShellWindow(Window):
     def __init__(self, project):
         self.project = project
         self.language = "python"
-        self.window = Gtk.Window(_("Pyjama Shell"))
+        self.window = MyWindow(_("Pyjama Shell"))
+        self.window.set_on_key_press(self.on_key_press)
         self.window.SetDefaultSize(600, 550)
         self.window.DeleteEvent += Gtk.DeleteEventHandler(self.on_close)
         self.vbox = Gtk.VBox()
@@ -157,8 +155,8 @@ class ShellWindow(Window):
         self.command_area.PackStart(self.scrolled_window, True, True, 0)
         self.scrolled_window.ShadowType = Gtk.ShadowType.Out
         self.scrolled_window.HeightRequest = 20
-        self.textview = MyTextView()
-        self.textview.KeyPressEvent += self.on_key_press
+        self.textview = Gtk.TextView()
+        #self.textview.KeyPressEvent += self.on_key_press
         self.textview.Show()
         self.textview.ModifyFont(Pango.FontDescription.FromString("Courier 10"))
         self.scrolled_window.AddWithViewport(self.textview)
@@ -263,9 +261,8 @@ del clr
         self.statusbar.Pop(0)
         self.statusbar.Push(0, _("Language: %s") % self.language.title())
 
-    def on_key_press(self, obj, event):
-        if event.RetVal: return # already handled
-        if str(event.Event.Key) == "Return":
+    def on_key_press(self, event):
+        if str(event.Key) == "Return":
             mark = self.textview.Buffer.InsertMark
             itermark = self.textview.Buffer.GetIterAtMark(mark)
             line = itermark.Line - 1
@@ -283,8 +280,8 @@ del clr
             else:
                 self.history.add(text)
                 self.execute(text, self.language)
-            event.RetVal = True
-        elif str(event.Event.Key) == "Up":
+            return True
+        elif str(event.Key) == "Up":
             mark = self.textview.Buffer.InsertMark
             itermark = self.textview.Buffer.GetIterAtMark(mark)
             line = itermark.Line
@@ -293,8 +290,8 @@ del clr
                 text = self.history.up()
                 if text:
                     self.textview.Buffer.Text = text
-                    event.RetVal = True
-        elif str(event.Event.Key) == "Down":
+                    return True
+        elif str(event.Key) == "Down":
             mark = self.textview.Buffer.InsertMark
             itermark = self.textview.Buffer.GetIterAtMark(mark)
             line = itermark.Line
@@ -302,10 +299,8 @@ del clr
                 text = self.history.down()
                 if text:
                     self.textview.Buffer.Text = text
-                    event.RetVal = True
-        if not event.RetVal:
-            event.RetVal = Gtk.TextView.OnKeyPressEvent(self.textview, 
-                                                        event.Event)
+                    return True
+        return False
 
     def change_to_ruby(self, obj, event):
         self.language = "ruby"
