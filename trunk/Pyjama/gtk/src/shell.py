@@ -1,13 +1,10 @@
 # Bring .NET References into IronPython scope:
 import Gtk, Pango
 import System
-import IronPython
-import IronPython.Hosting
-import IronRuby
-import Microsoft.Scripting
 
 from window import Window
-from utils import _
+from engine import EngineManager, RubyEngine, PythonEngine
+from utils import _, CustomStream
 
 import traceback
 import sys, os
@@ -37,60 +34,6 @@ class History(object):
         self.history.append(text)
         self.position = len(self.history)
         #print "add", self.position, self.history
-
-class CustomStream(System.IO.Stream):
-    def __init__(self, textview, tag=None):
-        self.textview = textview
-        self.tag = tag
-
-    def set_output(self, textview):
-        self.textview = textview
-
-    def write(self, text):
-        end = self.textview.Buffer.EndIter
-        self.textview.Buffer.InsertWithTagsByName(end, text, "red")
-        self.goto_end()
-
-    def goto_end(self):
-        end = self.textview.Buffer.EndIter
-        insert_mark = self.textview.Buffer.InsertMark 
-        self.textview.Buffer.PlaceCursor(end)
-        self.textview.ScrollToMark(insert_mark, 0.0, True, 0, 1.0)
-
-    def Write(self, bytes, offset, count):
-        # Turn the byte-array back into a string
-        text = System.Text.Encoding.UTF8.GetString(bytes, offset, count)
-        #print "write: %s" % repr(text)
-        #if not text.endswith("\n"):
-        #    text += "\n"
-        if self.tag:
-            end = self.textview.Buffer.EndIter
-            self.textview.Buffer.InsertWithTagsByName(end, text, self.tag)
-        else:
-            self.textview.Buffer.InsertAtCursor(text)
-        self.goto_end()
-
-    @property
-    def CanRead(self):
-        return False
-
-    @property
-    def CanSeek(self):
-        return False
-
-    @property
-    def CanWrite(self):
-        return True
-
-    def Flush(self):
-        pass
-
-    def Close(self):
-        pass
-
-    @property
-    def Position(self):
-        return 0
 
 class MyWindow(Gtk.Window):
     def set_on_key_press(self, on_key_press):
@@ -125,10 +68,12 @@ class ShellWindow(Window):
                 ("_Edit", []),
                 ("She_ll", [("Run", Gtk.Stock.Apply,
                             "F5", self.on_run),
-                            ("Change to Python", None, "<control>p", 
+                            ("Change to Python", None, "<control>1", 
                              self.change_to_python), 
-                            ("Change to Ruby", None, "<control>r", 
+                            ("Change to Ruby", None, "<control>2", 
                              self.change_to_ruby), 
+                            ("Reset Shell", None, "<control>r", 
+                             self.reset_shell),
                             ]),
                 ("Windows", [
                     ("Editor", None, "F6", self.project.setup_editor),
@@ -158,7 +103,7 @@ class ShellWindow(Window):
         self.textview = Gtk.TextView()
         #self.textview.KeyPressEvent += self.on_key_press
         self.textview.Show()
-        self.textview.ModifyFont(Pango.FontDescription.FromString("Courier 10"))
+        self.textview.ModifyFont(Pango.FontDescription.FromString("Monospace 10"))
         self.scrolled_window.AddWithViewport(self.textview)
         self.results = Gtk.ScrolledWindow()
         self.history_textview = Gtk.TextView()
@@ -167,7 +112,7 @@ class ShellWindow(Window):
             tag.Weight = Pango.Weight.Bold
             tag.Foreground = color 
             self.history_textview.Buffer.TagTable.Add(tag)
-        self.history_textview.ModifyFont(Pango.FontDescription.FromString("Courier 10"))
+        self.history_textview.ModifyFont(Pango.FontDescription.FromString("Monospace 10"))
 
         self.history_textview.WrapMode = Gtk.WrapMode.Word
         self.history_textview.Editable = False
@@ -183,75 +128,11 @@ class ShellWindow(Window):
         self.vbox.PackStart(self.vpane, True, True, 0)
         self.vbox.PackEnd(self.statusbar, False, False, 0)
         self.window.ShowAll()
-
-        # DLR hosting:
-        self.scriptRuntimeSetup = Microsoft.Scripting.Hosting.ScriptRuntimeSetup()
-        self.scriptRuntimeSetup.LanguageSetups.Add(
-            Microsoft.Scripting.Hosting.LanguageSetup(
-                "IronPython.Runtime.PythonContext, IronPython",
-                "IronPython",
-                ["IronPython", "Python", "python", "py"],
-                [".py"]));
-        self.scriptRuntimeSetup.LanguageSetups.Add(
-             Microsoft.Scripting.Hosting.LanguageSetup(
-                "IronRuby.Runtime.RubyContext, IronRuby",
-                "IronRuby",
-                ["IronRuby", "Ruby", "ruby", "rb"],
-                [".rb"]))
-
-        self.runtime = Microsoft.Scripting.Hosting.ScriptRuntime(
-            self.scriptRuntimeSetup)
-        self.scope = self.runtime.CreateScope()
-        self.scope.SetVariable("pyjama", self.project)
-        self.engine = {
-            "python": self.runtime.GetEngine("py"),
-            "ruby": self.runtime.GetEngine("rb"),
-            }
-        engine = self.engine["python"]
-        # FIXME: add debug to engine:
-        #Dictionary<string, object> options = new Dictionary<string, object>();
-        #options["Debug"] = true;
-        #Python.CreateEngine(options);
-        # Load mscorlib.dll:
-        engine.Runtime.LoadAssembly(
-            System.Type.GetType(System.String).Assembly);
-        # Load Languages so that Host System can find DLLs:
-        engine.Runtime.LoadAssembly(
-            System.Type.GetType(IronPython.Hosting.Python).Assembly)
-        engine.Runtime.LoadAssembly(
-            System.Type.GetType(IronRuby.Hosting.RubyCommandLine).Assembly)
-        engine.Runtime.LoadAssembly(
-            System.Type.GetType(
-             IronRuby.StandardLibrary.BigDecimal.Fraction).Assembly)
-        # Load System.dll
-        engine.Runtime.LoadAssembly(System.Type.GetType(
-                System.Diagnostics.Debug).Assembly)
-        engine.Runtime.IO.SetOutput(CustomStream(self.history_textview), 
-                                    System.Text.Encoding.UTF8)
-        engine.Runtime.IO.SetErrorOutput(CustomStream(self.history_textview, 
-                                                      "red"), 
-                                         System.Text.Encoding.UTF8)
-        paths = engine.GetSearchPaths()
-        # Let users find Python standard library:
-        #for path in ["IronPython/ipy2"]:
-        #    lib_directory = os.path.abspath(path)
-        #    paths.Add(lib_directory)
-        ## Let users find Pyjama modules:
-        paths.Add(os.path.abspath("modules"))
-        self.engine["python"].SetSearchPaths(paths)
-
-        # Start up, in Python: ------------------
-        script = """
-import clr
-clr.AddReference("myro.dll")
-del clr
-"""
-        # We could do this in a different scope, but still have the effect
-        scope = self.runtime.CreateScope()
-	source = self.engine["python"].CreateScriptSourceFromString(script)
-        source.Compile().Execute(scope)
-        # ---------------------------------------
-
+	self.engine = EngineManager(self.project)
+        self.engine.register(RubyEngine)
+        self.engine.register(PythonEngine)
+        self.engine.start(self.history_textview, self.history_textview, None)
+        # Set this Python's stderr:
         sys.stderr = CustomStream(self.history_textview, "red")
         self.update_gui()
 
@@ -331,21 +212,18 @@ del clr
     def on_save_file(self, obj, event):
         pass
 
+    def reset_shell(self, obj, event):
+        self.engine.reset()
+        self.message("-----------\n")
+        self.message("Reset shell\n")
+        self.message("-----------\n")
+
     def message(self, message, tag="green"):
         end = self.history_textview.Buffer.EndIter
         self.history_textview.Buffer.InsertWithTagsByName(end, message, tag)
 
     def execute_file(self, filename, language):
-        source = self.engine[language].CreateScriptSourceFromFile(filename)
-        try:
-            source.Compile()
-        except:
-            traceback.print_exc()
-            return False
-        try:
-            source.Execute(self.scope)
-        except:
-            traceback.print_exc()
+        return self.engine[language].execute_file(filename)
 
     def execute(self, text, language):
         self.textview.Buffer.Clear()
@@ -376,22 +254,4 @@ del clr
                 return True
         self.language = language
         self.update_gui()
-        sctype = Microsoft.Scripting.SourceCodeKind.InteractiveCode
-        source = self.engine[language].CreateScriptSourceFromString(text, 
-                                                                    sctype)
-        try:
-            source.Compile()
-        except:
-            sctype = Microsoft.Scripting.SourceCodeKind.Statements
-            source = self.engine[language].CreateScriptSourceFromString(text, 
-                                                                        sctype)
-            try:
-                source.Compile()
-            except:
-                traceback.print_exc()
-                return False
-        try:
-            source.Execute(self.scope)
-        except:
-            traceback.print_exc()
-        return True
+        return self.engine[self.language].execute(text)

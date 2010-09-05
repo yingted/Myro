@@ -16,7 +16,7 @@ class PlainDocument(object):
             self.title = os.path.basename(self.filename)
             self.language = "python"
         else:
-            self.title = "New Script"
+            self.title = "New Python Script"
             self.language = "python"
         self.make_tab()
         self.make_widget()
@@ -54,7 +54,7 @@ class PlainDocument(object):
         self.widget.document = self
         self.textview = Gtk.TextView()
         self.textview.ModifyFont(
-            Pango.FontDescription.FromString("Courier 10"))
+            Pango.FontDescription.FromString("Monospace 10"))
         self.widget.Add(self.textview)
         self.textview.Editable = True
         self.textview.WrapMode = Gtk.WrapMode.Word
@@ -108,7 +108,7 @@ try:
             self.textview = GtkSourceView.SourceView()
             self.textview.ShowLineNumbers =True
             self.textview.ModifyFont(
-                Pango.FontDescription.FromString("Courier 10"))
+                Pango.FontDescription.FromString("Monospace 10"))
             self.textview.Buffer.Language = self.lang_manager.GetLanguage(
                 self.language)
             self.widget.Add(self.textview)

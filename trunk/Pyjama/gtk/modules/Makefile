@@ -1,5 +1,7 @@
 
 
-myro.dll: myro.cs
-	gmcs -target:library myro.cs
+Myro.dll: Myro.cs
+	gmcs -target:library Myro.cs
 
+clean::
+	rm -rf Myro.dll *~

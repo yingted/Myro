@@ -1,7 +1,7 @@
 using System;
 using System.IO.Ports;
 
-public static class myro {
+public static class Myro {
   public static _Robot robot;
   
   public static void init(string port, int baud=38400) {
