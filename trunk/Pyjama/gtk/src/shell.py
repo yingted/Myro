@@ -3,7 +3,7 @@ import Gtk, Pango
 import System
 
 from window import Window
-from engine import EngineManager, RubyEngine, PythonEngine
+from engine import EngineManager, RubyEngine, PythonEngine, SchemeEngine
 from utils import _, CustomStream
 
 import traceback
@@ -51,6 +51,12 @@ class ShellWindow(Window):
         self.window.set_on_key_press(self.on_key_press)
         self.window.SetDefaultSize(600, 550)
         self.window.DeleteEvent += Gtk.DeleteEventHandler(self.on_close)
+	self.engine = EngineManager(self.project)
+        self.engine.register(RubyEngine)
+        self.engine.register(PythonEngine)
+        self.engine.register(SchemeEngine)
+        self.history_textview = Gtk.TextView()
+        self.engine.start(self.history_textview, self.history_textview, None)
         self.vbox = Gtk.VBox()
         # ---------------------
         # make menu:
@@ -66,15 +72,7 @@ class ShellWindow(Window):
                    None, self.on_quit),
                   ]),
                 ("_Edit", []),
-                ("She_ll", [("Run", Gtk.Stock.Apply,
-                            "F5", self.on_run),
-                            ("Change to Python", None, "<control>1", 
-                             self.change_to_python), 
-                            ("Change to Ruby", None, "<control>2", 
-                             self.change_to_ruby), 
-                            ("Reset Shell", None, "<control>r", 
-                             self.reset_shell),
-                            ]),
+                ("She_ll", self.make_language_menu()),
                 ("Windows", [
                     ("Editor", None, "F6", self.project.setup_editor),
                     ("Shell", None, "F7", self.project.setup_shell),
@@ -106,7 +104,6 @@ class ShellWindow(Window):
         self.textview.ModifyFont(Pango.FontDescription.FromString("Monospace 10"))
         self.scrolled_window.AddWithViewport(self.textview)
         self.results = Gtk.ScrolledWindow()
-        self.history_textview = Gtk.TextView()
         for color in ["red", "blue", "green", "black"]:
             tag = Gtk.TextTag(color)
             tag.Weight = Pango.Weight.Bold
@@ -128,13 +125,19 @@ class ShellWindow(Window):
         self.vbox.PackStart(self.vpane, True, True, 0)
         self.vbox.PackEnd(self.statusbar, False, False, 0)
         self.window.ShowAll()
-	self.engine = EngineManager(self.project)
-        self.engine.register(RubyEngine)
-        self.engine.register(PythonEngine)
-        self.engine.start(self.history_textview, self.history_textview, None)
         # Set this Python's stderr:
         sys.stderr = CustomStream(self.history_textview, "red")
         self.update_gui()
+
+    def make_language_menu(self):
+        languages = []
+        for (num, lang) in enumerate(self.engine.get_languages()):
+            languages.append(["Change to %s" % lang.title(), 
+                    None, "<control>%d" % (num + 1), 
+                    lambda obj, event, lang=lang: self.change_to_lang(lang)])
+        return ([("Run", Gtk.Stock.Apply, "F5", self.on_run)] + 
+                languages +
+                [("Reset Shell", None, "<control>r", self.reset_shell)])
 
     def update_gui(self):
         self.window.Title = _("%s - Pyjama Shell") % self.language.title()
@@ -183,12 +186,8 @@ class ShellWindow(Window):
                     return True
         return False
 
-    def change_to_ruby(self, obj, event):
-        self.language = "ruby"
-        self.update_gui()
-
-    def change_to_python(self, obj, event):
-        self.language = "python"
+    def change_to_lang(self, language):
+        self.language = language
         self.update_gui()
 
     def on_save_file_as(self, obj, event):
@@ -245,7 +244,7 @@ class ShellWindow(Window):
         elif text and text[0:2] == "#;":
             text = text[2:].strip()
             command = text.lower()
-            if command in ["ruby", "python"]:
+            if command in self.engine.get_languages():
                 self.language = command
                 self.update_gui()
                 return True

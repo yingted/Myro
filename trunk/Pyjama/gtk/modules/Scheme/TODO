@@ -1,0 +1,88 @@
+
+Bugs
+====
+
+1. eq? and equal? and = should be different
+2. make pretty-print safer and useful
+3. exceptions/continuations allow fix and continue?
+4. (External '(func2) '(1234)) ;; static func, with args (wrong type = loop)
+
+scheme-to-csharp
+================
+
+1. add DLR flag and code
+
+
+External Libraries
+==================
+
+==> (using "External.dll")
+[adds External to environment]
+==> (External '(x) '()) ;; static field
+5
+==> (External '(func) '()) ;; static func, no args
+CALLED FUNC!
+42
+==> (External '(func2) '("kjhk dkjfhdsfkj")) ;; static func, with args
+CALLED FUNC2!
+"KJHK DKJFHDSFKJ"
+==> (define c (External '(Constructor) '(100 "betty"))) ;; nested constructor, with args
+==> c
+External
+==> (property c 'size) ;; access properties of newly cosntructed object
+100
+==> (property c 'name)
+"betty"
+==> (define e (External '() '(20 "duh"))) ;; top layer ctor
+==> (property e 'size)
+20
+
+Can we make external calls, and properties both use the same notation (and the same as module
+lookups)? That would be:
+
+==> (using "External.dll")
+==> (External.x) ;; static field
+5
+==> (External.func) ;; static func, no args
+CALLED FUNC!
+42
+==> (External.func2 "kjhk dkjfhdsfkj") ;; static func, with args
+CALLED FUNC2!
+"KJHK DKJFHDSFKJ"
+==> (define c (External.Constructor 100 "betty")) ;; nested constructor, with args
+==> c
+External
+==> (c.size) ;; access properties of newly cosntructed object
+100
+==> (c.name)
+"betty"
+==> (define e (External 20 "duh")) ;; top layer ctor
+==> (e.size)
+20
+
+Writing Nice External Libraries
+===============================
+
+* GetCustomMember – runs before normal .NET lookups
+* GetBoundMember – runs after normal .NET lookups
+* SetMember – runs before normal .NET member assignment
+* SetMemberAfter – runs after normal .NET member assignment
+* DeleteMember – runs before normal .NET operator access (there’s no .NET version – so its the only one)
+
+class TextExt {
+  Dictionary<string, object> dict = new Dictionary<string, object>();
+  [SpecialName]
+  public object GetBoundMember(string name)
+  {
+    if (dict.ContainsKey(name))
+	  return dict[name];
+    else
+	  return OperationFailed.Value;
+  }
+  
+  [SpecialName]
+  public void SetMemberAfter(string methodName, object o)
+  {
+    dict.Add(methodName, o);
+  }
+}

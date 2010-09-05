@@ -18,8 +18,11 @@ class EngineManager(object):
     def __getitem__(self, name):
         return self.engine[name]
 
-    def register(self, Engine):
-        engine = Engine(self)
+    def get_languages(self):
+        return self.engine.keys()
+
+    def register(self, EngineClass):
+        engine = EngineClass(self)
         self.engine[engine.language] = engine
 
     def start(self, stderr, stdout, stdin): # textviews
@@ -35,7 +38,8 @@ class EngineManager(object):
         self.start(self.stderr, self.stdout, self.stdin)
 
 class Engine(object):
-    def __init__(self, language):
+    def __init__(self, manager, language):
+        self.manager = manager
         self.language = language
 
     def execute(self, text):
@@ -43,6 +47,10 @@ class Engine(object):
 
     def execute_file(self, filename):
         raise NotImplemented
+
+    def start(self, stderr, stdout, stdin): # textviews
+        self.sterr = CustomStream(stderr)
+        self.stdout = CustomStream(stdout)
 
 class DLREngine(Engine):
     def start(self, stderr, stdout, stdin): # textviews
@@ -105,8 +113,7 @@ class DLREngine(Engine):
 
 class PythonEngine(DLREngine):
     def __init__(self, manager): 
-        super(PythonEngine, self).__init__("python")
-        self.manager = manager
+        super(PythonEngine, self).__init__(manager, "python")
         self.dlr_name = "py"
         self.manager.scriptRuntimeSetup.LanguageSetups.Add(
             Microsoft.Scripting.Hosting.LanguageSetup(
@@ -134,8 +141,7 @@ del clr
 
 class RubyEngine(DLREngine):
     def __init__(self, manager):
-        super(RubyEngine, self).__init__("ruby")
-        self.manager = manager
+        super(RubyEngine, self).__init__(manager, "ruby")
         self.dlr_name = "rb"
         self.manager.scriptRuntimeSetup.LanguageSetups.Add(
              Microsoft.Scripting.Hosting.LanguageSetup(
@@ -150,6 +156,15 @@ class RubyEngine(DLREngine):
         paths = list(self.engine.GetSearchPaths())
         paths.Add(os.path.abspath("modules"))
         self.engine.SetSearchPaths(System.Array[str](paths))
+
+class SchemeEngine(Engine):
+    def __init__(self, manager):
+        super(SchemeEngine, self).__init__(manager, "scheme")
+    def execute(self, text):
+        self.stdout.write("Run text!\n")
+    def execute_file(self, filename):
+        self.stdout.write("Run filename '%s'!\n" % filename)
+        
 
 if __name__ == "__main__":
     EngineMan = EngineManager(None) # singleton
