@@ -1959,6 +1959,14 @@
     ;; need this to start the computation after registers are set up
     (trampoline)))
 
+(define execute
+  (lambda (input-string)
+      (read-datum input-string init-handler
+	(lambda-cont2 (datum tokens-left)
+	  (parse datum init-handler
+	    (lambda-cont (exp)
+	      (m exp toplevel-env init-handler init-cont)))))
+      (trampoline)))
 (load "transformer-macros.ss")
 
 ;; Unification pattern-matcher

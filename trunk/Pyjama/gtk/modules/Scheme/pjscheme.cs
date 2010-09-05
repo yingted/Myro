@@ -1948,6 +1948,19 @@ public class PJScheme:Scheme
 		 Eq ((object) PJScheme.car ((object) temp_1),
 		     (object) symbol ("<cont-87>"))))
 	   {
+	      k_reg = init_cont;
+	      handler_reg = init_handler;
+	      env_reg = toplevel_env;
+	      exp_reg = value_reg;
+	      pc = (Function) m;
+
+	   }
+	 else
+	    if (true_q
+		(PJScheme.
+		 Eq ((object) PJScheme.car ((object) temp_1),
+		     (object) symbol ("<cont-88>"))))
+	   {
 	      object pattern = null;
 	      object var = null;
 	      object k = null;
@@ -1974,7 +1987,7 @@ public class PJScheme:Scheme
 	    if (true_q
 		(PJScheme.
 		 Eq ((object) PJScheme.car ((object) temp_1),
-		     (object) symbol ("<cont-88>"))))
+		     (object) symbol ("<cont-89>"))))
 	   {
 	      object p1 = null;
 	      object p2 = null;
@@ -2003,7 +2016,7 @@ public class PJScheme:Scheme
 	    if (true_q
 		(PJScheme.
 		 Eq ((object) PJScheme.car ((object) temp_1),
-		     (object) symbol ("<cont-89>"))))
+		     (object) symbol ("<cont-90>"))))
 	   {
 	      object s_car = null;
 	      object k = null;
@@ -2030,7 +2043,7 @@ public class PJScheme:Scheme
 	    if (true_q
 		(PJScheme.
 		 Eq ((object) PJScheme.car ((object) temp_1),
-		     (object) symbol ("<cont-90>"))))
+		     (object) symbol ("<cont-91>"))))
 	   {
 	      object new_cdr1 = null;
 	      object s_car = null;
@@ -2039,7 +2052,7 @@ public class PJScheme:Scheme
 	      s_car = PJScheme.list_ref ((object) temp_1, (object) 2);
 	      new_cdr1 = PJScheme.list_ref ((object) temp_1, (object) 1);
 	      k_reg =
-		 PJScheme.make_cont ((object) symbol ("<cont-89>"),
+		 PJScheme.make_cont ((object) symbol ("<cont-90>"),
 				     (object) s_car, (object) k);
 	      p2_reg = value_reg;
 	      p1_reg = new_cdr1;
@@ -2049,7 +2062,7 @@ public class PJScheme:Scheme
 	    if (true_q
 		(PJScheme.
 		 Eq ((object) PJScheme.car ((object) temp_1),
-		     (object) symbol ("<cont-91>"))))
+		     (object) symbol ("<cont-92>"))))
 	   {
 	      object pair2 = null;
 	      object s_car = null;
@@ -2058,7 +2071,7 @@ public class PJScheme:Scheme
 	      s_car = PJScheme.list_ref ((object) temp_1, (object) 2);
 	      pair2 = PJScheme.list_ref ((object) temp_1, (object) 1);
 	      k_reg =
-		 PJScheme.make_cont ((object) symbol ("<cont-90>"),
+		 PJScheme.make_cont ((object) symbol ("<cont-91>"),
 				     (object) value_reg, (object) s_car,
 				     (object) k);
 	      s_reg = s_car;
@@ -2069,7 +2082,7 @@ public class PJScheme:Scheme
 	    if (true_q
 		(PJScheme.
 		 Eq ((object) PJScheme.car ((object) temp_1),
-		     (object) symbol ("<cont-92>"))))
+		     (object) symbol ("<cont-93>"))))
 	   {
 	      object pair1 = null;
 	      object pair2 = null;
@@ -2087,7 +2100,7 @@ public class PJScheme:Scheme
 	      else
 		{
 		   k_reg =
-		      PJScheme.make_cont ((object) symbol ("<cont-91>"),
+		      PJScheme.make_cont ((object) symbol ("<cont-92>"),
 					  (object) pair2, (object) value_reg,
 					  (object) k);
 		   s_reg = value_reg;
@@ -2100,7 +2113,7 @@ public class PJScheme:Scheme
 	    if (true_q
 		(PJScheme.
 		 Eq ((object) PJScheme.car ((object) temp_1),
-		     (object) symbol ("<cont-93>"))))
+		     (object) symbol ("<cont-94>"))))
 	   {
 	      object pattern = null;
 	      object s = null;
@@ -2119,7 +2132,7 @@ public class PJScheme:Scheme
 	    if (true_q
 		(PJScheme.
 		 Eq ((object) PJScheme.car ((object) temp_1),
-		     (object) symbol ("<cont-94>"))))
+		     (object) symbol ("<cont-95>"))))
 	   {
 	      object s2 = null;
 	      object k = null;
@@ -2789,6 +2802,18 @@ public class PJScheme:Scheme
 	      handler_reg = handler;
 	      datum_reg = value1_reg;
 	      pc = (Function) parse;
+	   }
+	 else
+	    if (true_q
+		(PJScheme.
+		 Eq ((object) PJScheme.car ((object) temp_1),
+		     (object) symbol ("<cont2-25>"))))
+	   {
+	      k_reg = PJScheme.make_cont ((object) symbol ("<cont-87>"));
+	      handler_reg = init_handler;
+	      datum_reg = value1_reg;
+	      pc = (Function) parse;
+
 	   }
 	 else
 	    throw new
@@ -7583,6 +7608,15 @@ public class PJScheme:Scheme
       PJScheme.trampoline ();
    }
 
+   new public static object execute (string input_string)
+   {
+      k_reg = PJScheme.make_cont2 ((object) symbol ("<cont2-25>"));
+      handler_reg = init_handler;
+      input_reg = input_string;
+      pc = (Function) read_datum;
+      return ((object) PJScheme.trampoline ());
+   }
+
    new public static bool pattern_q (object x)
    {
       return ((bool)
@@ -7636,7 +7670,7 @@ public class PJScheme:Scheme
       else
 	{
 	   k_reg =
-	      PJScheme.make_cont ((object) symbol ("<cont-87>"),
+	      PJScheme.make_cont ((object) symbol ("<cont-88>"),
 				  (object) pattern_reg, (object) var_reg,
 				  (object) k_reg);
 	   pattern_reg = PJScheme.car ((object) pattern_reg);
@@ -7660,7 +7694,7 @@ public class PJScheme:Scheme
 	 else
 	   {
 	      k_reg =
-		 PJScheme.make_cont ((object) symbol ("<cont-88>"),
+		 PJScheme.make_cont ((object) symbol ("<cont-89>"),
 				     (object) p1_reg, (object) p2_reg,
 				     (object) k_reg);
 	      pattern_reg = p2_reg;
@@ -7710,7 +7744,7 @@ public class PJScheme:Scheme
    new public static void unify_pairs ()
    {
       k_reg =
-	 PJScheme.make_cont ((object) symbol ("<cont-92>"),
+	 PJScheme.make_cont ((object) symbol ("<cont-93>"),
 			     (object) pair1_reg, (object) pair2_reg,
 			     (object) k_reg);
       p2_reg = PJScheme.car ((object) pair2_reg);
@@ -7736,7 +7770,7 @@ public class PJScheme:Scheme
       else if (true_q (PJScheme.pair_q ((object) pattern_reg)))
 	{
 	   k_reg =
-	      PJScheme.make_cont ((object) symbol ("<cont-93>"),
+	      PJScheme.make_cont ((object) symbol ("<cont-94>"),
 				  (object) pattern_reg, (object) s_reg,
 				  (object) k_reg);
 	   pattern_reg = PJScheme.car ((object) pattern_reg);
@@ -7805,7 +7839,7 @@ public class PJScheme:Scheme
 	      s2 = PJScheme.list_ref ((object) temp_1, (object) 2);
 	      s1 = PJScheme.list_ref ((object) temp_1, (object) 1);
 	      k_reg =
-		 PJScheme.make_cont ((object) symbol ("<cont-94>"),
+		 PJScheme.make_cont ((object) symbol ("<cont-95>"),
 				     (object) s2, (object) k_reg);
 	      s_reg = s1;
 	      pc = (Function) apply_sub;

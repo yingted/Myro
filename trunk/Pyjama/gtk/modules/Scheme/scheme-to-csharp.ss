@@ -57,6 +57,7 @@
     (read-next-sexp "void" ("object")) 
     (pc "Function" ("null"))
     (Main "void" ("string []"))
+    (execute "object" ("string"))
     (make-toplevel-env "object" ())
     (make-macro-env "object" ())
     (make-empty-environment "object" ())

@@ -160,8 +160,11 @@ class RubyEngine(DLREngine):
 class SchemeEngine(Engine):
     def __init__(self, manager):
         super(SchemeEngine, self).__init__(manager, "scheme")
+        import PJScheme
+        self.engine = PJScheme
     def execute(self, text):
-        self.stdout.write("Run text!\n")
+        result = self.engine.execute(text)
+        self.stdout.write("%s\n" % result)
     def execute_file(self, filename):
         self.stdout.write("Run filename '%s'!\n" % filename)
         

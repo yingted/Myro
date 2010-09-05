@@ -1,7 +1,5 @@
 // Utility Functions for Running Scheme in CSharp
 
-using Mono.Terminal;
-
 using System;
 using System.IO; // File
 using System.Reflection; // Assembly
@@ -192,7 +190,7 @@ public class Rational {
 
 public class Scheme {
 
-  static LineEditor lineEditor = new LineEditor(null);
+    //static LineEditor lineEditor = new LineEditor(null);
   public static Config config = new Config();
 
   public static Symbol EmptyList = (Symbol) symbol("()");
@@ -844,9 +842,9 @@ public class Scheme {
 
   public static object read_line(object prompt) {
 	//return Console.ReadLine();
-	string s;
-	s = lineEditor.Edit(prompt.ToString(), "");
-	return s;
+	//string s;
+	//s = lineEditor.Edit(prompt.ToString(), "");
+	return "";
   }
 
   public static object file_exists_q(object path_filename) {

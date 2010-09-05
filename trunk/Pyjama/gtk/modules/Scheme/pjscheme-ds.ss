@@ -348,39 +348,40 @@
       (<cont-85> (filenames env handler k)
        (load-files (cdr filenames) env handler k))
       (<cont-86> (k) (apply-cont k (binding-docstring value)))
-      (<cont-87> (pattern var k)
+      (<cont-87> () (m value toplevel-env init-handler init-cont))
+      (<cont-88> (pattern var k)
        (if value (apply-cont k #t) (occurs? var (cdr pattern) k)))
-      (<cont-88> (p1 p2 k)
+      (<cont-89> (p1 p2 k)
        (if value
            (apply-cont k #f)
            (apply-cont k (make-sub 'unit p1 p2))))
-      (<cont-89> (s-car k)
+      (<cont-90> (s-car k)
        (if (not value)
            (apply-cont k #f)
            (apply-cont k (make-sub 'composite s-car value))))
-      (<cont-90> (new-cdr1 s-car k)
+      (<cont-91> (new-cdr1 s-car k)
        (unify-patterns
          new-cdr1
          value
-         (make-cont '<cont-89> s-car k)))
-      (<cont-91> (pair2 s-car k)
+         (make-cont '<cont-90> s-car k)))
+      (<cont-92> (pair2 s-car k)
        (instantiate
          (cdr pair2)
          s-car
-         (make-cont '<cont-90> value s-car k)))
-      (<cont-92> (pair1 pair2 k)
+         (make-cont '<cont-91> value s-car k)))
+      (<cont-93> (pair1 pair2 k)
        (if (not value)
            (apply-cont k #f)
            (instantiate
              (cdr pair1)
              value
-             (make-cont '<cont-91> pair2 value k))))
-      (<cont-93> (pattern s k)
+             (make-cont '<cont-92> pair2 value k))))
+      (<cont-94> (pattern s k)
        (instantiate
          (cdr pattern)
          s
          (make-cont '<cont-40> value k)))
-      (<cont-94> (s2 k) (instantiate value s2 k))
+      (<cont-95> (s2 k) (instantiate value s2 k))
       (else (error 'apply-cont "bad continuation: ~a" k)))))
 
 ;;----------------------------------------------------------------------
@@ -509,6 +510,8 @@
          value1
          handler
          (make-cont '<cont-84> value2 env handler k)))
+      (<cont2-25> ()
+       (parse value1 init-handler (make-cont '<cont-87>)))
       (else (error 'apply-cont2 "bad continuation2: ~a" k)))))
 
 ;;----------------------------------------------------------------------
@@ -2208,6 +2211,14 @@
     (load-files (list args) toplevel-env REP-handler REP-k)
     (trampoline)))
 
+(define execute
+  (lambda (input-string)
+    (read-datum
+      input-string
+      init-handler
+      (make-cont2 '<cont2-25>))
+    (trampoline)))
+
 (define pattern?
   (lambda (x)
     (or (null? x)
@@ -2236,7 +2247,7 @@
        (occurs?
          var
          (car pattern)
-         (make-cont '<cont-87> pattern var k))))))
+         (make-cont '<cont-88> pattern var k))))))
 
 (define*
   unify-patterns
@@ -2245,7 +2256,7 @@
       ((pattern-variable? p1)
        (if (pattern-variable? p2)
            (apply-cont k (make-sub 'unit p1 p2))
-           (occurs? p1 p2 (make-cont '<cont-88> p1 p2 k))))
+           (occurs? p1 p2 (make-cont '<cont-89> p1 p2 k))))
       ((pattern-variable? p2) (unify-patterns p2 p1 k))
       ((and (constant? p1) (constant? p2) (equal? p1 p2))
        (apply-cont k (make-sub 'empty)))
@@ -2258,7 +2269,7 @@
     (unify-patterns
       (car pair1)
       (car pair2)
-      (make-cont '<cont-92> pair1 pair2 k))))
+      (make-cont '<cont-93> pair1 pair2 k))))
 
 (define*
   instantiate
@@ -2270,7 +2281,7 @@
        (instantiate
          (car pattern)
          s
-         (make-cont '<cont-93> pattern s k)))
+         (make-cont '<cont-94> pattern s k)))
       (else (error 'instantiate "bad pattern: ~a" pattern)))))
 
 (define make-sub (lambda args (cons 'substitution args)))
@@ -2285,7 +2296,7 @@
            (apply-cont k new-pattern)
            (apply-cont k var)))
       (composite (s1 s2)
-       (apply-sub s1 var (make-cont '<cont-94> s2 k)))
+       (apply-sub s1 var (make-cont '<cont-95> s2 k)))
       (else (error 'apply-sub "bad substitution: ~a" s)))))
 
 (define chars-to-scan 'undefined)

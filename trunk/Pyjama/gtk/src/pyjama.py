@@ -1,5 +1,6 @@
 # Setup environment:
 import sys, os
+sys.path.append(os.path.abspath("modules"))
 
 # Bring in DLLs to import from:
 import clr
@@ -11,6 +12,8 @@ clr.AddReference("IronRuby.dll")
 clr.AddReference("IronRuby.Libraries.dll")
 clr.AddReference("Microsoft.Scripting")
 clr.AddReference("glib-sharp")
+
+clr.AddReference("PJScheme.dll")
 
 # Bring .NET References into IronPython scope:
 import Gtk
