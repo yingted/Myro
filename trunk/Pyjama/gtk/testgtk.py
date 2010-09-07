@@ -5,6 +5,7 @@ Graphics.init()
 win = Graphics.GraphWin("Title")
 print win.Title
 win.Title = "New Title"
-button = Graphics.Button("Press Me!")
-win.Add(button)
-Graphics.Show(button)
+#button = Graphics.Button("Press Me!")
+#win.Add(button)
+#Graphics.Show(button)
+win.ShowAll()

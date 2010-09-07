@@ -460,3 +460,6 @@ try:
             self.textview.GrabFocus()
 except:
     Document = PlainDocument
+
+# How to list relevant items out of a reference:
+# [getattr(clr.References[2], x) for x in dir(clr.References[2]) if type(getattr(clr.References[2], x)) is type]

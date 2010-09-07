@@ -185,7 +185,7 @@ public class PJGraphics
             if (InvokeRequired)
             {
                 // We're not in the UI thread, so we need to call BeginInvoke
-                BeginInvoke(new NoParameterDelegate(InitializeComponent));
+			  BeginInvoke(delegate {InitializeComponent();} );
 //                new object[] { text });
                 return;
             }
