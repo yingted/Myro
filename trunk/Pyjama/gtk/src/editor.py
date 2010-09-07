@@ -2,7 +2,7 @@ import Gtk
 
 from window import Window
 from utils import _
-from document import Document
+from document import Document, DinahDocument
 
 class EditorWindow(Window):
     def __init__(self, project, files=None):
@@ -17,8 +17,17 @@ class EditorWindow(Window):
         menu = [("_File", 
                  [("Open Script...", Gtk.Stock.Open, 
                    None, self.on_open_file),
-                  ("New Script", Gtk.Stock.New, 
+                  None,
+                  # FIXME: get these from engines:
+                  ("New Python Script", None, 
                    None, self.on_new_file),
+                  ("New Scheme Script", None, 
+                   None, self.on_new_file),
+                  ("New Ruby Script", None, 
+                   None, self.on_new_file),
+                  ("New Dinah Script", None, 
+                   None, self.on_new_dinah),
+                  None,
                   ("Save...", Gtk.Stock.Save, 
                    None, self.on_save_file),
                   ("Save as...", Gtk.Stock.SaveAs,
@@ -51,7 +60,7 @@ class EditorWindow(Window):
         self.notebook.TabVborder = 1
         self.statusbar = Gtk.Statusbar()
         self.statusbar.Push(0, "Language: Python   Column: 0 Row: 0")
-        self.statusbar.HasResizeGrip = False
+        self.statusbar.HasResizeGrip = True
         self.statusbar.Show()
         # initialize
         self.window.Add(self.vbox)
@@ -64,10 +73,10 @@ class EditorWindow(Window):
         # Open files on command line, or just a New Script:
         if files:
             for file in files:
-                page = Document(file, self.project)
+                page = self.make_document(file)
                 self.notebook.AppendPage(page.widget, page.tab)
         else:
-            page = Document(None, self.project)
+            page = self.make_document(None)
             self.notebook.AppendPage(page.widget, page.tab)
 
     def on_open_file(self, obj, event):
@@ -78,7 +87,7 @@ class EditorWindow(Window):
                                    "Cancel", Gtk.ResponseType.Cancel,
                                    "Open", Gtk.ResponseType.Accept)
         if (fc.Run() == int(Gtk.ResponseType.Accept)):
-            page = Document(fc.Filename, self.project)
+
             page_num = self.notebook.AppendPage(page.widget, page.tab)
             self.notebook.CurrentPage = page_num
             retval = True
@@ -90,9 +99,23 @@ class EditorWindow(Window):
         self.notebook.RemovePage(page_num)
 
     def on_new_file(self, obj, event):
-        page = Document(None, self.project)
+        page = self.make_document(None)
         page_num = self.notebook.AppendPage(page.widget, page.tab)
         self.notebook.CurrentPage = page_num
+
+    def on_new_dinah(self, obj, event):
+        page = self.make_document("New Dinah Script.dnh")
+        page_num = self.notebook.AppendPage(page.widget, page.tab)
+        self.notebook.CurrentPage = page_num
+
+    def make_document(self, filename):
+        # FIXME: handle default here too (option?)
+        # FIXME: get documents from registered engines
+        if filename and filename.endswith(".dnh"):
+            page = DinahDocument(filename, self.project)
+        else:
+            page = Document(filename, self.project)
+        return page
 
     def on_save_file(self, obj, event):
         doc = self.get_current_doc()
@@ -121,7 +144,7 @@ class EditorWindow(Window):
 
     def on_close(self, obj, event):
         self.project.on_close("editor")
-        event.RetVal = True
+        return True
 
     def on_quit(self, obj, event):
         Gtk.Application.Quit()

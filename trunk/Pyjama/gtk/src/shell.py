@@ -39,9 +39,9 @@ class MyWindow(Gtk.Window):
     def set_on_key_press(self, on_key_press):
         self.on_key_press = on_key_press
 
-    def OnKeyPressEvent(self, eventkey):
-        return (self.on_key_press(eventkey) or 
-                Gtk.Window.OnKeyPressEvent(self, eventkey))
+    def OnKeyPressEvent(self, event):
+        return (self.on_key_press(event) or 
+                Gtk.Window.OnKeyPressEvent(self, event))
 
 class ShellWindow(Window):
     def __init__(self, project):
@@ -198,7 +198,7 @@ class ShellWindow(Window):
 
     def on_close(self, obj, event):
         self.project.on_close("shell")
-        event.RetVal = True
+        return True
 
     def on_run(self, obj, event):
         pass
