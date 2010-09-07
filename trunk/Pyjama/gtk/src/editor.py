@@ -87,7 +87,7 @@ class EditorWindow(Window):
                                    "Cancel", Gtk.ResponseType.Cancel,
                                    "Open", Gtk.ResponseType.Accept)
         if (fc.Run() == int(Gtk.ResponseType.Accept)):
-
+            page = self.make_document(fc.Filename)
             page_num = self.notebook.AppendPage(page.widget, page.tab)
             self.notebook.CurrentPage = page_num
             retval = True

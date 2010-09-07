@@ -9,6 +9,18 @@ from utils import _, CustomStream
 import traceback
 import sys, os
 
+import System.Threading
+from System.Threading import ManualResetEvent
+
+## FIXME: how do you kill this:
+def BGThread(fun):  
+    def argUnpacker(args):  
+        fun(*args) 
+    def wrapper(*args):  
+        System.Threading.ThreadPool.QueueUserWorkItem(
+            System.Threading.WaitCallback(argUnpacker), args) 
+    return wrapper 
+
 class History(object):
     def __init__(self):
         self.history = []
@@ -218,9 +230,15 @@ class ShellWindow(Window):
         self.message("-----------\n")
 
     def message(self, message, tag="green"):
-        end = self.history_textview.Buffer.EndIter
-        self.history_textview.Buffer.InsertWithTagsByName(end, message, tag)
+        #ev = ManualResetEvent(False)
+        def invoke(sender, args):
+            end = self.history_textview.Buffer.EndIter
+            self.history_textview.Buffer.InsertWithTagsByName(end, message, tag)
+        #    ev.Set()
+        Gtk.Application.Invoke(invoke)
+        #ev.WaitOne()
 
+    @BGThread
     def execute_file(self, filename, language):
         return self.engine[language].execute_file(filename)
 
@@ -253,4 +271,8 @@ class ShellWindow(Window):
                 return True
         self.language = language
         self.update_gui()
-        return self.engine[self.language].execute(text)
+        self.execute_in_background(text)
+
+    @BGThread
+    def execute_in_background(self, text):
+        self.engine[self.language].execute(text)

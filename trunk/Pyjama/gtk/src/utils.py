@@ -1,4 +1,6 @@
+import Gtk
 import System
+from System.Threading import ManualResetEvent
 
 def _(text): return text
 
@@ -16,9 +18,14 @@ class CustomStream(System.IO.Stream):
         self.textview = textview
 
     def write(self, text):
-        end = self.textview.Buffer.EndIter
-        self.textview.Buffer.InsertWithTagsByName(end, text, "red")
-        self.goto_end()
+        ev = ManualResetEvent(False)
+        def invoke(sender, args):
+            end = self.textview.Buffer.EndIter
+            self.textview.Buffer.InsertWithTagsByName(end, text, "red")
+            self.goto_end()
+            ev.Set()
+        Gtk.Application.Invoke(invoke)
+        ev.WaitOne()
 
     def goto_end(self):
         end = self.textview.Buffer.EndIter
@@ -27,17 +34,18 @@ class CustomStream(System.IO.Stream):
         self.textview.ScrollToMark(insert_mark, 0.0, True, 0, 1.0)
 
     def Write(self, bytes, offset, count):
-        # Turn the byte-array back into a string
-        text = System.Text.Encoding.UTF8.GetString(bytes, offset, count)
-        #print "write: %s" % repr(text)
-        #if not text.endswith("\n"):
-        #    text += "\n"
-        if self.tag:
-            end = self.textview.Buffer.EndIter
-            self.textview.Buffer.InsertWithTagsByName(end, text, self.tag)
-        else:
-            self.textview.Buffer.InsertAtCursor(text)
-        self.goto_end()
+        ev = ManualResetEvent(False)
+        def invoke(sender, args):
+            text = System.Text.Encoding.UTF8.GetString(bytes, offset, count)
+            if self.tag:
+                end = self.textview.Buffer.EndIter
+                self.textview.Buffer.InsertWithTagsByName(end, text, self.tag)
+            else:
+                self.textview.Buffer.InsertAtCursor(text)
+            self.goto_end()
+            ev.Set()
+        Gtk.Application.Invoke(invoke)
+        ev.WaitOne()
 
     @property
     def CanRead(self):

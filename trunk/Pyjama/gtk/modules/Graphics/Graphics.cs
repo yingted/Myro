@@ -13,8 +13,41 @@ using System.Collections.Generic;
 using System.Threading;
 using System.IO;
 
-namespace graphics
+public class PJGraphics
 {
+    private static AutoResetEvent _are = null;
+    private static Form _tlc = null;
+
+    public static void _ip_thread() {
+	try {
+	    if (_tlc == null) {
+		// Create the dummy control, and show then hide it to get
+		// Windows Forms to initialize it.
+		_tlc = new Form(); //new System.Drawing.Size(0,0));
+		_tlc.Show();
+		_tlc.Hide();
+	    }
+	    // Signal that the thread running _ip_thread is ready for
+	    // the main thread to send input to it.
+	    _are.Set();
+	    Application.Run();
+	} catch (Exception e) {
+	    System.Console.WriteLine("Cannot start pjgraphics thread");
+	}
+    }
+
+    public static void init() {
+	_are = new AutoResetEvent(false);
+	Thread thread = new Thread(new ThreadStart(_ip_thread));
+	thread.ApartmentState = ApartmentState.STA;
+	thread.IsBackground = true;
+	thread.Start();
+	
+	_are.WaitOne();
+	//_ip_thread();
+	// Interpeter exit should clean up and terminate thread.
+	//sys.exitfunc = _ip_shutdown;
+    }
 
     #region MapColors
     /// <summary>
@@ -150,7 +183,7 @@ namespace graphics
         {
 
             InitializeComponent();
-            //this.TopLevelControl.Invoke(null);
+            _tlc.Invoke(null);
         }
 
         public GraphWin(string title)
@@ -1455,4 +1488,5 @@ namespace graphics
         }
     }
     #endregion
+
 }
