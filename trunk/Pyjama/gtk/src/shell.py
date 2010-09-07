@@ -140,6 +140,7 @@ class ShellWindow(Window):
         # Set this Python's stderr:
         sys.stderr = CustomStream(self.history_textview, "red")
         self.update_gui()
+        self.textview.GrabFocus()
 
     def make_language_menu(self):
         languages = []

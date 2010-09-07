@@ -224,6 +224,9 @@ class PlainDocument(object):
         if self.filename and os.path.exists(self.filename):
             self.open()
 
+    def grab_focus(self):
+        self.textview.GrabFocus()
+
     def search(self):
         pass
         # start = self.textview.Buffer.StartIter
@@ -272,12 +275,14 @@ class PlainDocument(object):
         self.textview.AcceptsTab = True
         self.textview.Show()
         self.widget.Show()
+        self.textview.GrabFocus()
 
     def get_text(self):
         return self.textview.Buffer.Text
 
     def open(self):
         self.textview.Buffer.Text = "".join(file(self.filename).readlines())
+        self.textview.GrabFocus()
 
     def save(self):
         """
@@ -314,6 +319,7 @@ class DinahDocument(PlainDocument):
         self.widget.document = self
         self.hpaned = Gtk.HPaned()
         self.treeview = Gtk.TreeView()
+        self.treeview.GrabFocus()
         self.treeview.Model = self.make_store()
 
         column = Gtk.TreeViewColumn()
@@ -395,6 +401,9 @@ class DinahDocument(PlainDocument):
         self.layout.Show()
         self.widget.ShowAll()
 
+    def grab_focus(self):
+        self.treeview.GrabFocus()
+
     def make_store(self):
         store = Gtk.TreeStore(str)
         module = store.AppendValues("Control")
@@ -448,5 +457,6 @@ try:
             self.textview.AcceptsTab = True
             self.textview.Show()
             self.widget.Show()
+            self.textview.GrabFocus()
 except:
     Document = PlainDocument

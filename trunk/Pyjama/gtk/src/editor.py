@@ -78,6 +78,9 @@ class EditorWindow(Window):
         else:
             page = self.make_document(None)
             self.notebook.AppendPage(page.widget, page.tab)
+        doc = self.get_current_doc()
+        if doc:
+            doc.grab_focus()
 
     def on_open_file(self, obj, event):
         retval = False
