@@ -65,9 +65,11 @@
       (<cont-7> (variable env handler k)
        (if value
            (lookup-variable-components value "" env handler k)
-           (apply-handler
-             handler
-             (format "unbound variable ~a" variable))))
+           (if (dlr-env-contains variable)
+               (apply-cont k (dlr-env-lookup variable))
+               (apply-handler
+                 handler
+                 (format "unbound variable ~a" variable)))))
       (<cont-8> (components path var handler k)
        (if (null? (cdr components))
            (apply-cont k value)
@@ -1421,6 +1423,10 @@
           (split-variable
             variable
             (make-cont '<cont-7> variable env handler k))))))
+
+(define dlr-env-contains (lambda (variable) #t))
+
+(define dlr-env-lookup (lambda (variable) (binding 42)))
 
 (define*
   lookup-binding-in-first-frame

@@ -4,6 +4,7 @@ using System;
 using System.IO; // File
 using System.Reflection; // Assembly
 using Microsoft.Scripting.Math;
+using Microsoft.Scripting.Hosting;
 using System.Collections; // Hashtable
 using System.Collections.Generic; // List
 using Microsoft.VisualBasic.CompilerServices;
@@ -189,6 +190,8 @@ public class Rational {
 }
 
 public class Scheme {
+
+  private static ScriptScope _dlr_scope;
 
     //static LineEditor lineEditor = new LineEditor(null);
   public static Config config = new Config();
@@ -385,6 +388,8 @@ public class Scheme {
   public static Proc append_proc = new Proc("append", (Procedure1) append, -1, 1);
   public static Proc make_binding_proc = new Proc("make-binding",(Procedure2)make_binding, 2, 1);
   public static Proc printf_prim_proc = new Proc("printf",(Procedure1)printf_prim, -1, 1);
+  public static Proc dlr_env_contains_proc = new Proc("dlr-env-contains",(Procedure1Bool)dlr_env_contains, 1, 2);
+  public static Proc dlr_env_lookup_proc = new Proc("dlr-env-lookup",(Procedure1)dlr_env_lookup, 1, 1);
 
   public static char TILDE = '~';
   public static char NULL = '\0';
@@ -1152,6 +1157,14 @@ public class Scheme {
 	if (s.Substring(len - 1, 1) != "\n") 
 	  config.NEED_NEWLINE = true;
 	Console.Write(s);
+  }
+
+  public static bool dlr_env_contains(object variable) {
+    return _dlr_scope.ContainsVariable(variable.ToString());
+  }
+
+  public static object dlr_env_lookup(object variable) {
+    return make_binding("dlr", _dlr_scope.GetVariable(variable.ToString()));
   }
 
   public static object printf_prim(object args) {
@@ -2329,6 +2342,10 @@ public class Vector {
   public static BigInteger bigfact(BigInteger n) {
 	if (n == 1) return n;
 	return n * bigfact(n - 1);
+  }
+
+  public static void set_dlr_env(ScriptScope scope) {
+    _dlr_scope = scope;
   }
 
 }

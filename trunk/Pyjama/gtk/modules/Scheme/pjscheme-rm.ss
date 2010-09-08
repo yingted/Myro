@@ -153,10 +153,15 @@
                                           (set! path_reg "")
                                           (set! components_reg value_reg)
                                           (set! pc lookup-variable-components))
-                                        (begin
-                                          (set! exception_reg (format "unbound variable ~a" variable))
-                                          (set! handler_reg handler)
-                                          (set! pc apply-handler))))
+                                        (if (dlr-env-contains variable)
+                                            (begin
+                                              (set! value_reg (dlr-env-lookup variable))
+                                              (set! k_reg k)
+                                              (set! pc apply-cont))
+                                            (begin
+                                              (set! exception_reg (format "unbound variable ~a" variable))
+                                              (set! handler_reg handler)
+                                              (set! pc apply-handler)))))
                                   (if (eq? (car temp_1) '<cont-8>)
                                       (let ((components 'undefined)
                                             (path 'undefined)
@@ -3014,6 +3019,11 @@
               (make-cont '<cont-7> variable_reg env_reg handler_reg
                 k_reg))
             (set! pc split-variable))))))
+
+(define dlr-env-contains (lambda (variable) (return* #t)))
+
+(define dlr-env-lookup
+  (lambda (variable) (return* (binding 42))))
 
 (define*
   lookup-binding-in-first-frame

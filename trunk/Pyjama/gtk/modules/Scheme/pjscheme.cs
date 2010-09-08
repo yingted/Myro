@@ -262,6 +262,13 @@ public class PJScheme:Scheme
 		   pc = (Function) lookup_variable_components;
 
 		}
+	      else if (true_q (PJScheme.dlr_env_contains ((object) variable)))
+		{
+		   value_reg = PJScheme.dlr_env_lookup ((object) variable);
+		   k_reg = k;
+		   pc = (Function) apply_cont;
+
+		}
 	      else
 		{
 		   exception_reg =

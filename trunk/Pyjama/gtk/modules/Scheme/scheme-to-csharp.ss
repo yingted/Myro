@@ -31,6 +31,8 @@
 			     make-proc
                              make-vector
 			     make-binding
+                             dlr-env-lookup
+                             dlr-env-contains
 			     ))
 (define *function-signatures* '())
 
