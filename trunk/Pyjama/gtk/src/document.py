@@ -406,16 +406,16 @@ class DinahDocument(PlainDocument):
 
     def make_store(self):
         store = Gtk.TreeStore(str)
-        module = store.AppendValues("Control")
+        module = store.AppendValues("<b>Control</b>")
         for x in ["Do number of times:", "Do for each:", "Do in order:",
                   "Do together:", "Do while:", "If:"]:
             store.AppendValues(module, '<span bgcolor="%s">%s</span>' % 
                                (color_code(block_color), x))
-        module = store.AppendValues("Myro")
+        module = store.AppendValues("<b>Myro</b>")
         for x in ["forward", "backward", "init", "beep"]:
             store.AppendValues(module, '<span bgcolor="%s">.%s()</span>' % 
                                (color_code(statement_color), x))
-        module = store.AppendValues("Dinah")
+        module = store.AppendValues("<b>Dinah</b>")
         for x in ["wait", "beep", "random", "ask"]:
             store.AppendValues(module, '<span bgcolor="%s">.%s()</span>' % 
                                (color_code(statement_color), x))

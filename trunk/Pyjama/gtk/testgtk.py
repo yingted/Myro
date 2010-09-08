@@ -3,7 +3,7 @@ import clr
 clr.AddReference("Graphics.dll")
 from Graphics import *
 init()
-#print "crash!"
+print "crash?"
 win = GraphWin("Turtles!")
 turtle = Arrow(Point(50,50))
 turtle.draw(win)
