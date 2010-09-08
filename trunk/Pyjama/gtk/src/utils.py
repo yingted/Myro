@@ -2,6 +2,8 @@ import Gtk
 import System
 from System.Threading import ManualResetEvent
 
+DEBUG = False
+
 def _(text): return text
 
 def Array(*list):
@@ -18,6 +20,10 @@ class CustomStream(System.IO.Stream):
         self.textview = textview
 
     def write(self, text):
+        if DEBUG:
+            print text,
+            return
+
         ev = ManualResetEvent(False)
         def invoke(sender, args):
             end = self.textview.Buffer.EndIter
@@ -34,6 +40,11 @@ class CustomStream(System.IO.Stream):
         self.textview.ScrollToMark(insert_mark, 0.0, True, 0, 1.0)
 
     def Write(self, bytes, offset, count):
+        if DEBUG:
+            text = System.Text.Encoding.UTF8.GetString(bytes, offset, count)
+            print text,
+            return
+
         ev = ManualResetEvent(False)
         def invoke(sender, args):
             text = System.Text.Encoding.UTF8.GetString(bytes, offset, count)

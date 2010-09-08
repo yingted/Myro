@@ -1,11 +1,13 @@
+import time
 import clr
 clr.AddReference("Graphics.dll")
-import Graphics
-Graphics.init()
-win = Graphics.GraphWin("Title")
-print win.Title
-win.Title = "New Title"
-#button = Graphics.Button("Press Me!")
-#win.Add(button)
-#Graphics.Show(button)
+from Graphics import *
+init()
+#print "crash!"
+win = GraphWin("Turtles!")
+turtle = Arrow(Point(50,50))
+turtle.draw(win)
 win.ShowAll()
+for x in range(10):
+    turtle.move(2, 0)
+    time.sleep(.2)

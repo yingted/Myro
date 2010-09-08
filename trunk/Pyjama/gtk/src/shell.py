@@ -12,14 +12,20 @@ import sys, os
 import System.Threading
 from System.Threading import ManualResetEvent
 
+DEBUG = False
+
 ## FIXME: how do you kill this:
-def BGThread(fun):  
-    def argUnpacker(args):  
-        fun(*args) 
-    def wrapper(*args):  
-        System.Threading.ThreadPool.QueueUserWorkItem(
-            System.Threading.WaitCallback(argUnpacker), args) 
-    return wrapper 
+if DEBUG:
+    def BGThread(fun):
+        return fun
+else:
+    def BGThread(fun):  
+        def argUnpacker(args):  
+            fun(*args) 
+        def wrapper(*args):  
+            System.Threading.ThreadPool.QueueUserWorkItem(
+                System.Threading.WaitCallback(argUnpacker), args) 
+        return wrapper 
 
 class History(object):
     def __init__(self):
