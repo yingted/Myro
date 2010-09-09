@@ -27,6 +27,7 @@ class PythonEngine(DLREngine):
         script = """
 import clr
 clr.AddReference("Myro.dll")
+clr.AddReference("Graphics.dll")
 del clr
 """
         temp_scope = self.manager.runtime.CreateScope()
