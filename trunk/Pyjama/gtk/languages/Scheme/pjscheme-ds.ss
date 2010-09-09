@@ -63,12 +63,10 @@
        (print-unparsed-sexps value init-handler init-cont))
       (<cont-6> (k) (apply-cont k (binding-value value)))
       (<cont-7> (variable env handler k)
-       (if value
-           (if (dlr-env-contains variable)
-               (apply-cont k (dlr-env-lookup variable))
-               (lookup-variable-components value "" env handler k))
-           (if (dlr-env-contains variable)
-               (apply-cont k (dlr-env-lookup variable))
+       (if (dlr-env-contains variable)
+           (apply-cont k (dlr-env-lookup variable))
+           (if value
+               (lookup-variable-components value "" env handler k)
                (apply-handler
                  handler
                  (format "unbound variable ~a" variable)))))

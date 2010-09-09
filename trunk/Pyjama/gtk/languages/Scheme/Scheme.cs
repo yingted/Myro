@@ -704,6 +704,8 @@ public class Scheme {
 				moduleName = type.FullName;
 			  String className = type.FullName;
 			  //classname_parts = get_parts(className, "+");
+              System.Console.WriteLine("Adding module.class name {0}.{1} ", 
+                  moduleName, className);
 			  set_env_b(env, symbol(moduleName), new Proc("make-external", 
 					  (Procedure2)make_instance_proc(className), 2, 1));
 			}
@@ -1209,14 +1211,40 @@ public class Scheme {
   public static bool dlr_env_contains(object variable) {
       trace(1, "contains?: {0}\n", variable); 
       // could be "object.item"
-    return _dlr_env.ContainsVariable(variable.ToString());
+	  string [] parts = variable.ToString().Split('.');
+	  ScriptScope env = _dlr_env;
+	  bool result = true;
+	  foreach (string part in parts) {
+		if (env.ContainsVariable(part)) {
+		  result = true;
+          object value = env.GetVariable(part);
+		  Console.WriteLine("Result: contains({0}) => {1}", part, env.GetVariable(part));
+          //if (value as System.MonoType) {
+          //  env = (result as System.MonoType).scope;
+		} else {
+		  result = false;
+		  break;
+		}
+	  }
+	  return result;
   }
 
   public static object dlr_env_lookup(object variable) {
       trace(1, "lookup: {0}\n", variable);
       // could be "object.item"
-      return make_binding("dlr", 
-			  _dlr_env.GetVariable(variable.ToString()));
+	  string [] parts = variable.ToString().Split();
+	  ScriptScope env = _dlr_env;
+	  object result = null;
+	  foreach (string part in parts) {
+		if (env.ContainsVariable(part)) {
+		  result = env.GetVariable(part);
+		  // if (result is Module)
+		  // env = (result as Module).scope
+		} else {
+		  break;
+		}
+	  }
+	  return make_binding("dlr", result);
   }
 
   public static object printf_prim(object args) {

@@ -145,24 +145,19 @@
                                     (set! handler (list-ref temp_1 3))
                                     (set! env (list-ref temp_1 2))
                                     (set! variable (list-ref temp_1 1))
-                                    (if value_reg
-                                        (if (dlr-env-contains variable)
-                                            (begin
-                                              (set! value_reg (dlr-env-lookup variable))
-                                              (set! k_reg k)
-                                              (set! pc apply-cont))
+                                    (if (dlr-env-contains variable)
+                                        (begin
+                                          (set! value_reg (dlr-env-lookup variable))
+                                          (set! k_reg k)
+                                          (set! pc apply-cont))
+                                        (if value_reg
                                             (begin
                                               (set! k_reg k)
                                               (set! handler_reg handler)
                                               (set! env_reg env)
                                               (set! path_reg "")
                                               (set! components_reg value_reg)
-                                              (set! pc lookup-variable-components)))
-                                        (if (dlr-env-contains variable)
-                                            (begin
-                                              (set! value_reg (dlr-env-lookup variable))
-                                              (set! k_reg k)
-                                              (set! pc apply-cont))
+                                              (set! pc lookup-variable-components))
                                             (begin
                                               (set! exception_reg (format "unbound variable ~a" variable))
                                               (set! handler_reg handler)

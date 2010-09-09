@@ -114,11 +114,11 @@
 	(k binding)
 	(split-variable variable
 	  (lambda-cont (components)
-	    (if components
-		(if (dlr-env-contains variable)
-		    (k (dlr-env-lookup variable))
-		    (lookup-variable-components components "" env handler k))
-		(handler (format "unbound variable ~a" variable)))))))))
+            (if (dlr-env-contains variable)
+                (k (dlr-env-lookup variable))
+                (if components
+		    (lookup-variable-components components "" env handler k)
+                    (handler (format "unbound variable ~a" variable))))))))))
 
 (define dlr-env-contains
   (lambda (variable)
