@@ -254,13 +254,15 @@
        (if (not (eq? value '<void>)) (pretty-print-prim value))
        (if *need-newline* (newline))
        (read-eval-print))
-      (<cont-58> (proc env handler k)
-       (apply-proc proc value env handler k))
-      (<cont-59> (operands env handler k)
-       (m* operands
-           env
-           handler
-           (make-cont '<cont-58> value env handler k)))
+      (<cont-58> (args env handler k)
+       (if (dlr-exp? value)
+           (apply-cont k (dlr-apply value args))
+           (apply-proc value args env handler k)))
+      (<cont-59> (operator env handler k)
+       (m operator
+          env
+          handler
+          (make-cont '<cont-58> value env handler k)))
       (<cont-60> (handler) (apply-handler handler value))
       (<cont-61> (v k) (apply-cont k v))
       (<cont-62> (fexps env handler k)
@@ -317,73 +319,87 @@
       (<cont-75> (list1 proc env handler k)
        (map1 proc (cdr list1) env handler
          (make-cont '<cont-47> value k)))
-      (<cont-76> (list1 list2 proc env handler k)
+      (<cont-76> (list1 proc k)
+       (apply-cont
+         k
+         (cons (dlr-apply proc (list (car list1))) value)))
+      (<cont-77> (list1 list2 proc env handler k)
        (map2 proc (cdr list1) (cdr list2) env handler
          (make-cont '<cont-47> value k)))
-      (<cont-77> (lists proc env handler k)
+      (<cont-78> (list1 list2 proc k)
+       (apply-cont
+         k
+         (cons
+           (dlr-apply proc (list (car list1) (car list2)))
+           value)))
+      (<cont-79> (lists proc env handler k)
        (mapN proc (map cdr lists) env handler
          (make-cont '<cont-47> value k)))
-      (<cont-78> (arg-list proc env handler k)
+      (<cont-80> (lists proc k)
+       (apply-cont
+         k
+         (cons (dlr-apply proc (map car lists)) value)))
+      (<cont-81> (arg-list proc env handler k)
        (for-each-prim proc (map cdr arg-list) env handler k))
-      (<cont-79> (args sym handler k)
+      (<cont-82> (args sym handler k)
        (cond
          ((null? (cdr args)) (apply-cont k value))
          ((not (environment? value))
           (apply-handler handler (format "~a is not a module" sym)))
          (else (get-primitive (cdr args) value handler k))))
-      (<cont-80> (filename env handler k)
+      (<cont-83> (filename env handler k)
        (let ((module (extend env '() '())))
          (set-binding-value! value module)
          (load-file filename module handler k)))
-      (<cont-81> (k)
+      (<cont-84> (k)
        (set! load-stack (cdr load-stack))
        (apply-cont k value))
-      (<cont-82> (env handler k)
-       (load-loop value env handler (make-cont '<cont-81> k)))
-      (<cont-83> (tokens-left env handler k)
+      (<cont-85> (env handler k)
+       (load-loop value env handler (make-cont '<cont-84> k)))
+      (<cont-86> (tokens-left env handler k)
        (load-loop tokens-left env handler k))
-      (<cont-84> (tokens-left env handler k)
+      (<cont-87> (tokens-left env handler k)
        (m value
           env
           handler
-          (make-cont '<cont-83> tokens-left env handler k)))
-      (<cont-85> (filenames env handler k)
+          (make-cont '<cont-86> tokens-left env handler k)))
+      (<cont-88> (filenames env handler k)
        (load-files (cdr filenames) env handler k))
-      (<cont-86> (k) (apply-cont k (binding-docstring value)))
-      (<cont-87> () (m value toplevel-env init-handler init-cont))
-      (<cont-88> (pattern var k)
+      (<cont-89> (k) (apply-cont k (binding-docstring value)))
+      (<cont-90> () (m value toplevel-env init-handler init-cont))
+      (<cont-91> (pattern var k)
        (if value (apply-cont k #t) (occurs? var (cdr pattern) k)))
-      (<cont-89> (p1 p2 k)
+      (<cont-92> (p1 p2 k)
        (if value
            (apply-cont k #f)
            (apply-cont k (make-sub 'unit p1 p2))))
-      (<cont-90> (s-car k)
+      (<cont-93> (s-car k)
        (if (not value)
            (apply-cont k #f)
            (apply-cont k (make-sub 'composite s-car value))))
-      (<cont-91> (new-cdr1 s-car k)
+      (<cont-94> (new-cdr1 s-car k)
        (unify-patterns
          new-cdr1
          value
-         (make-cont '<cont-90> s-car k)))
-      (<cont-92> (pair2 s-car k)
+         (make-cont '<cont-93> s-car k)))
+      (<cont-95> (pair2 s-car k)
        (instantiate
          (cdr pair2)
          s-car
-         (make-cont '<cont-91> value s-car k)))
-      (<cont-93> (pair1 pair2 k)
+         (make-cont '<cont-94> value s-car k)))
+      (<cont-96> (pair1 pair2 k)
        (if (not value)
            (apply-cont k #f)
            (instantiate
              (cdr pair1)
              value
-             (make-cont '<cont-92> pair2 value k))))
-      (<cont-94> (pattern s k)
+             (make-cont '<cont-95> pair2 value k))))
+      (<cont-97> (pattern s k)
        (instantiate
          (cdr pattern)
          s
          (make-cont '<cont-40> value k)))
-      (<cont-95> (s2 k) (instantiate value s2 k))
+      (<cont-98> (s2 k) (instantiate value s2 k))
       (else (error 'apply-cont "bad continuation: ~a" k)))))
 
 ;;----------------------------------------------------------------------
@@ -511,9 +527,9 @@
        (parse
          value1
          handler
-         (make-cont '<cont-84> value2 env handler k)))
+         (make-cont '<cont-87> value2 env handler k)))
       (<cont2-25> ()
-       (parse value1 init-handler (make-cont '<cont-87>)))
+       (parse value1 init-handler (make-cont '<cont-90>)))
       (else (error 'apply-cont2 "bad continuation2: ~a" k)))))
 
 ;;----------------------------------------------------------------------
@@ -1940,10 +1956,10 @@
       (dict-exp (pairs) (apply-cont k (list 'dict pairs)))
       (app-exp
         (operator operands)
-        (m operator
-           env
-           handler
-           (make-cont '<cont-59> operands env handler k)))
+        (m* operands
+            env
+            handler
+            (make-cont '<cont-59> operator env handler k)))
       (else (error 'm "bad abstract syntax: ~a" exp)))))
 
 (define try-catch-handler
@@ -2056,24 +2072,33 @@
   (lambda (proc list1 env handler k)
     (if (null? list1)
         (apply-cont k '())
-        (apply-proc proc (list (car list1)) env handler
-          (make-cont '<cont-75> list1 proc env handler k)))))
+        (if (dlr-exp? proc)
+            (map1 proc (cdr list1) env handler
+              (make-cont '<cont-76> list1 proc k))
+            (apply-proc proc (list (car list1)) env handler
+              (make-cont '<cont-75> list1 proc env handler k))))))
 
 (define*
   map2
   (lambda (proc list1 list2 env handler k)
     (if (null? list1)
         (apply-cont k '())
-        (apply-proc proc (list (car list1) (car list2)) env handler
-          (make-cont '<cont-76> list1 list2 proc env handler k)))))
+        (if (dlr-exp? proc)
+            (map2 proc (cdr list1) (cdr list2) env handler
+              (make-cont '<cont-78> list1 list2 proc k))
+            (apply-proc proc (list (car list1) (car list2)) env handler
+              (make-cont '<cont-77> list1 list2 proc env handler k))))))
 
 (define*
   mapN
   (lambda (proc lists env handler k)
     (if (null? (car lists))
         (apply-cont k '())
-        (apply-proc proc (map car lists) env handler
-          (make-cont '<cont-77> lists proc env handler k)))))
+        (if (dlr-exp? proc)
+            (mapN proc (map cdr lists) env handler
+              (make-cont '<cont-80> lists proc k))
+            (apply-proc proc (map car lists) env handler
+              (make-cont '<cont-79> lists proc env handler k))))))
 
 (define*
   for-each-prim
@@ -2081,8 +2106,12 @@
     (let ((arg-list (listify lists)))
       (if (null? (car arg-list))
           (apply-cont k '<void>)
-          (apply-proc proc (map car arg-list) env handler
-            (make-cont '<cont-78> arg-list proc env handler k))))))
+          (if (dlr-exp? proc)
+              (begin
+                (dlr-apply proc (map car arg-list))
+                (for-each-prim proc (map cdr arg-list) env handler k))
+              (apply-proc proc (map car arg-list) env handler
+                (make-cont '<cont-81> arg-list proc env handler k)))))))
 
 (define get-current-time
   (lambda ()
@@ -2098,7 +2127,7 @@
         sym
         env
         handler
-        (make-cont '<cont-79> args sym handler k)))))
+        (make-cont '<cont-82> args sym handler k)))))
 
 (define*
   import-primitive
@@ -2111,13 +2140,15 @@
               module-name
               env
               handler
-              (make-cont '<cont-80> filename env handler k)))))))
+              (make-cont '<cont-83> filename env handler k)))))))
 
 (define*
   call/cc-primitive
   (lambda (proc env handler k)
     (let ((fake-k (make-proc '<proc-50> k)))
-      (apply-proc proc (list fake-k) env handler k))))
+      (if (dlr-exp? proc)
+          (apply-cont k (dlr-apply proc (list fake-k)))
+          (apply-proc proc (list fake-k) env handler k)))))
 
 (define flatten
   (lambda (lists)
@@ -2167,7 +2198,7 @@
        (scan-input
          (read-content filename)
          handler
-         (make-cont '<cont-82> env handler k))))))
+         (make-cont '<cont-85> env handler k))))))
 
 (define*
   load-loop
@@ -2188,12 +2219,12 @@
           (car filenames)
           env
           handler
-          (make-cont '<cont-85> filenames env handler k)))))
+          (make-cont '<cont-88> filenames env handler k)))))
 
 (define*
   help-prim
   (lambda (var env handler k)
-    (lookup-binding var env handler (make-cont '<cont-86> k))))
+    (lookup-binding var env handler (make-cont '<cont-89> k))))
 
 (define range
   (lambda args
@@ -2253,7 +2284,7 @@
        (occurs?
          var
          (car pattern)
-         (make-cont '<cont-88> pattern var k))))))
+         (make-cont '<cont-91> pattern var k))))))
 
 (define*
   unify-patterns
@@ -2262,7 +2293,7 @@
       ((pattern-variable? p1)
        (if (pattern-variable? p2)
            (apply-cont k (make-sub 'unit p1 p2))
-           (occurs? p1 p2 (make-cont '<cont-89> p1 p2 k))))
+           (occurs? p1 p2 (make-cont '<cont-92> p1 p2 k))))
       ((pattern-variable? p2) (unify-patterns p2 p1 k))
       ((and (constant? p1) (constant? p2) (equal? p1 p2))
        (apply-cont k (make-sub 'empty)))
@@ -2275,7 +2306,7 @@
     (unify-patterns
       (car pair1)
       (car pair2)
-      (make-cont '<cont-93> pair1 pair2 k))))
+      (make-cont '<cont-96> pair1 pair2 k))))
 
 (define*
   instantiate
@@ -2287,7 +2318,7 @@
        (instantiate
          (car pattern)
          s
-         (make-cont '<cont-94> pattern s k)))
+         (make-cont '<cont-97> pattern s k)))
       (else (error 'instantiate "bad pattern: ~a" pattern)))))
 
 (define make-sub (lambda args (cons 'substitution args)))
@@ -2302,7 +2333,7 @@
            (apply-cont k new-pattern)
            (apply-cont k var)))
       (composite (s1 s2)
-       (apply-sub s1 var (make-cont '<cont-95> s2 k)))
+       (apply-sub s1 var (make-cont '<cont-98> s2 k)))
       (else (error 'apply-sub "bad substitution: ~a" s)))))
 
 (define chars-to-scan 'undefined)

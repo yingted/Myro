@@ -145,11 +145,13 @@
       (dict-exp (pairs)
 	(k (list 'dict pairs)))
       (app-exp (operator operands)
-	(m operator env handler
-	  (lambda-cont (proc)
-	    (m* operands env handler
-	      (lambda-cont (args)
-		(proc args env handler k))))))
+	 (m* operands env handler
+            (lambda-cont (args)
+	       (m operator env handler
+	           (lambda-cont (proc)
+		      (if (dlr-exp? proc)
+			  (k (dlr-apply proc args))
+			  (proc args env handler k)))))))
       (else (error 'm "bad abstract syntax: ~a" exp)))))
 
 (define try-catch-handler
@@ -391,41 +393,59 @@
   (lambda (proc list1 env handler k)
     (if (null? list1)
       (k '())
-      (proc (list (car list1)) env handler
-	(lambda-cont (v1)
+      (if (dlr-exp? proc)
 	  (map1 proc (cdr list1) env handler
-	    (lambda-cont (v2)
-	      (k (cons v1 v2)))))))))
+		(lambda-cont (v2)
+			     (k (cons (dlr-apply proc (list (car list1)))
+				      v2))))
+	  (proc (list (car list1)) env handler
+		(lambda-cont (v1)
+			     (map1 proc (cdr list1) env handler
+				   (lambda-cont (v2)
+						(k (cons v1 v2))))))))))
 
 ;; for improved efficiency
 (define* map2
   (lambda (proc list1 list2 env handler k)
     (if (null? list1)
       (k '())
-      (proc (list (car list1) (car list2)) env handler
-	(lambda-cont (v1)
+      (if (dlr-exp? proc)
 	  (map2 proc (cdr list1) (cdr list2) env handler
-	    (lambda-cont (v2)
-	      (k (cons v1 v2)))))))))
+		(lambda-cont (v2)
+			     (k (cons (dlr-apply proc (list (car list1) (car list2)))
+				      v2))))
+	  (proc (list (car list1) (car list2)) env handler
+		(lambda-cont (v1)
+			     (map2 proc (cdr list1) (cdr list2) env handler
+				   (lambda-cont (v2)
+						(k (cons v1 v2))))))))))
 
 (define* mapN
   (lambda (proc lists env handler k)
     (if (null? (car lists))
       (k '())
-      (proc (map car lists) env handler
-	(lambda-cont (v1)
+      (if (dlr-exp? proc)
 	  (mapN proc (map cdr lists) env handler
-	    (lambda-cont (v2)
-	      (k (cons v1 v2)))))))))
+		(lambda-cont (v2)
+		    (k (cons (dlr-apply proc (map car lists)) v2))))
+	  (proc (map car lists) env handler
+		(lambda-cont (v1)
+			     (mapN proc (map cdr lists) env handler
+				   (lambda-cont (v2)
+						(k (cons v1 v2))))))))))
 
 (define* for-each-prim
   (lambda (proc lists env handler k)
     (let ((arg-list (listify lists)))
       (if (null? (car arg-list))
 	  (k '<void>)
-	  (proc (map car arg-list) env handler
-             (lambda-cont (v1)
-		(for-each-prim proc (map cdr arg-list) env handler k)))))))
+	  (if (dlr-exp? proc) 
+	      (begin 
+		(dlr-apply proc (map car arg-list))
+		(for-each-prim proc (map cdr arg-list) env handler k))
+	      (proc (map car arg-list) env handler
+		    (lambda-cont (v1)
+				 (for-each-prim proc (map cdr arg-list) env handler k))))))))
 
 (define get-current-time
   (lambda ()
@@ -463,7 +483,9 @@
 (define* call/cc-primitive
   (lambda (proc env handler k)
     (let ((fake-k (lambda-proc (args env2 handler k2) (k (car args)))))
-      (proc (list fake-k) env handler k))))
+      (if (dlr-exp? proc)
+	  (k (dlr-apply proc (list fake-k)))
+	  (proc (list fake-k) env handler k)))))
 
 (define flatten
   (lambda (lists)

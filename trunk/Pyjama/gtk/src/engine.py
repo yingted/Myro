@@ -169,7 +169,7 @@ class SchemeEngine(Engine):
         self.stdout.write("Run filename '%s'!\n" % filename)
     def start(self, stderr, stdout, stdin):
         super(SchemeEngine, self).start(stderr, stdout, stdin)
-        self.engine.set_dlr_env(self.manager.scope)
+        self.engine.set_dlr(self.manager.scope, self.manager.runtime)
 
 if __name__ == "__main__":
     EngineMan = EngineManager(None) # singleton

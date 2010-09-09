@@ -191,7 +191,8 @@ public class Rational {
 
 public class Scheme {
 
-  private static ScriptScope _dlr_scope;
+  private static ScriptScope _dlr_env;
+  private static ScriptRuntime _dlr_runtime;
 
     //static LineEditor lineEditor = new LineEditor(null);
   public static Config config = new Config();
@@ -217,6 +218,14 @@ public class Scheme {
   public delegate object Procedure3(object args1, object args2, object args3);
   public delegate void Procedure3Void(object args1, object args2, object args3);
   public delegate bool Procedure3Bool(object args1, object args2, object args3);
+
+    public delegate object Procedure4(object a0, object a1, object a2, object a3);
+    public delegate object Procedure5(object a0, object a1, object a2, object a3, object a4);
+    public delegate object Procedure6(object a0, object a1, object a2, object a3, object a4, object a5);
+    public delegate object Procedure7(object a0, object a1, object a2, object a3, object a4, object a5, object a6);
+    public delegate object Procedure8(object a0, object a1, object a2, object a3, object a4, object a5, object a6, object a7);
+    public delegate object Procedure9(object a0, object a1, object a2, object a3, object a4, object a5, object a6, object a7, object a8);
+    public delegate object Procedure10(object a0, object a1, object a2, object a3, object a4, object a5, object a6, object a7, object a8, object a9);
 
   public static object symbol(object symbol) {
 	return config.symbol(symbol.ToString());
@@ -879,15 +888,53 @@ public class Scheme {
 	}
   }
 
+    public static object dlr_exp_q(object rator) {
+	trace(1, "called: dlr_exp_q({0})\n", rator);
+	return (! pair_q(rator));
+    }
+    
+    public static object dlr_apply(object proc, object args) {
+	trace(1, "called: dlr_apply({0}, {1})\n", proc, args);
+	int len = (int) length(args);
+
+	if (len == 0) {
+	    return _dlr_runtime.Operations.Invoke(proc);
+	} else if (len == 1)
+	    return _dlr_runtime.Operations.Invoke(proc, list_ref(args, 0));
+	else if (len == 2)
+	    return _dlr_runtime.Operations.Invoke(proc, list_ref(args, 0), list_ref(args, 1));
+	// FIXME: how to properly call proc from DLR or reflection?
+	// http://dlr.codeplex.com/discussions
+	// else if (len == 3)
+	//     return _dlr_runtime.Operations.Invoke(proc, new object [] {list_ref(args, 0), list_ref(args, 1), list_ref(args, 2)});
+	// else if (len == 4)
+	//     return ((Procedure4)proc)(list_ref(args, 0), list_ref(args, 1), list_ref(args, 2), list_ref(args, 3));
+	// else if (len == 5)
+	//     return ((Procedure5)proc)(list_ref(args, 0), list_ref(args, 1), list_ref(args, 2), list_ref(args, 3), list_ref(args, 4));
+	// else if (len == 6)
+	//     return ((Procedure6)proc)(list_ref(args, 0), list_ref(args, 1), list_ref(args, 2), list_ref(args, 3), list_ref(args, 4), list_ref(args, 5));
+	// else if (len == 7)
+	//     return ((Procedure7)proc)(list_ref(args, 0), list_ref(args, 1), list_ref(args, 2), list_ref(args, 3), list_ref(args, 4), list_ref(args, 5), list_ref(args, 6));
+	// else if (len == 8)
+	//     return ((Procedure8)proc)(list_ref(args, 0), list_ref(args, 1), list_ref(args, 2), list_ref(args, 3), list_ref(args, 4), list_ref(args, 5), list_ref(args, 6), list_ref(args, 7));
+	// else if (len == 9)
+	//     return ((Procedure9)proc)(list_ref(args, 0), list_ref(args, 1), list_ref(args, 2), list_ref(args, 3), list_ref(args, 4), list_ref(args, 5), list_ref(args, 6), list_ref(args, 7), list_ref(args, 8));
+	// else if (len == 10)
+	//     return ((Procedure10)proc)(list_ref(args, 0), list_ref(args, 1), list_ref(args, 2), list_ref(args, 3), list_ref(args, 4), list_ref(args, 5), list_ref(args, 6), list_ref(args, 7), list_ref(args, 8), list_ref(args, 9));
+	else 
+	    throw new Exception(string.Format("too many parameters needed for proc: {0}", proc));
+    }
+
   public static object apply(object proc, object args) {
 	trace(1, "called: apply({0}, {1})\n", proc, args);
 	if (proc is Proc)
 	  return ((Proc)proc).Call(args);
 	else {
-	  if (procedure_q(proc) && Eq(cadr(proc), symbol("<extension>")))
+	    if (procedure_q(proc) && Eq(cadr(proc), symbol("<extension>"))) {
 		return ((Proc)caddr(proc)).Call(args);
-	  else
+	    } else {
 		throw new Exception(string.Format("invalid procedure: {0}", proc));
+	    }
 	}
   }
 
@@ -1160,11 +1207,12 @@ public class Scheme {
   }
 
   public static bool dlr_env_contains(object variable) {
-    return _dlr_scope.ContainsVariable(variable.ToString());
+    return _dlr_env.ContainsVariable(variable.ToString());
   }
 
   public static object dlr_env_lookup(object variable) {
-    return make_binding("dlr", _dlr_scope.GetVariable(variable.ToString()));
+      return make_binding("dlr", 
+			  _dlr_env.GetVariable(variable.ToString()));
   }
 
   public static object printf_prim(object args) {
@@ -2344,8 +2392,9 @@ public class Vector {
 	return n * bigfact(n - 1);
   }
 
-  public static void set_dlr_env(ScriptScope scope) {
-    _dlr_scope = scope;
+  public static void set_dlr(ScriptScope scope, ScriptRuntime runtime) {
+    _dlr_env = scope;
+    _dlr_runtime = runtime;
   }
 
 }
