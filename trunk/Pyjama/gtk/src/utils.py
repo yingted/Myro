@@ -11,6 +11,10 @@ def Array(*list):
     dimensions = [len(list)]
     return System.Array.CreateInstance(Type, *dimensions)
 
+class Language(object):
+    def __init__(self, language):
+        self.language = language
+
 class CustomStream(System.IO.Stream):
     def __init__(self, textview, tag=None):
         self.textview = textview

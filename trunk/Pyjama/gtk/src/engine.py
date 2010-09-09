@@ -1,13 +1,10 @@
-import IronPython
-import IronPython.Hosting
-import IronRuby
+import traceback
+import os
+
 import Microsoft.Scripting
 import System
 
 from utils import CustomStream
-
-import traceback
-import os
 
 class EngineManager(object):
     def __init__(self, project):
@@ -111,68 +108,3 @@ class DLREngine(Engine):
         except:
             traceback.print_exc()
 
-class PythonEngine(DLREngine):
-    def __init__(self, manager): 
-        super(PythonEngine, self).__init__(manager, "python")
-        self.dlr_name = "py"
-        self.manager.scriptRuntimeSetup.LanguageSetups.Add(
-            Microsoft.Scripting.Hosting.LanguageSetup(
-                "IronPython.Runtime.PythonContext, IronPython",
-                "IronPython",
-                ["IronPython", "Python", "python", "py"],
-                [".py"]))
-
-    def start(self, stderr, stdout, stdin):
-        super(PythonEngine, self).start(stderr, stdout, stdin)
-        paths = self.engine.GetSearchPaths()
-        ## Let users find Pyjama modules:
-        paths.Add(os.path.abspath("modules"))
-        self.engine.SetSearchPaths(paths)
-        # Start up, in Python: ------------------
-        script = """
-import clr
-clr.AddReference("Myro.dll")
-del clr
-"""
-        temp_scope = self.manager.runtime.CreateScope()
-	source = self.engine.CreateScriptSourceFromString(script)
-        source.Compile().Execute(temp_scope)
-        # ---------------------------------------
-
-class RubyEngine(DLREngine):
-    def __init__(self, manager):
-        super(RubyEngine, self).__init__(manager, "ruby")
-        self.dlr_name = "rb"
-        self.manager.scriptRuntimeSetup.LanguageSetups.Add(
-             Microsoft.Scripting.Hosting.LanguageSetup(
-                "IronRuby.Runtime.RubyContext, IronRuby",
-                "IronRuby",
-                ["IronRuby", "Ruby", "ruby", "rb"],
-                [".rb"]))
-
-    def start(self, stderr, stdout, stdin):
-        super(RubyEngine, self).start(stderr, stdout, stdin)
-        # FIXME: IronRuby bug: returns Array, doesn't take list
-        paths = list(self.engine.GetSearchPaths())
-        paths.Add(os.path.abspath("modules"))
-        self.engine.SetSearchPaths(System.Array[str](paths))
-
-class SchemeEngine(Engine):
-    def __init__(self, manager):
-        super(SchemeEngine, self).__init__(manager, "scheme")
-        import PJScheme
-        self.engine = PJScheme
-    def execute(self, text):
-        result = self.engine.execute(text)
-        self.stdout.write("%s\n" % result)
-    def execute_file(self, filename):
-        self.stdout.write("Run filename '%s'!\n" % filename)
-    def start(self, stderr, stdout, stdin):
-        super(SchemeEngine, self).start(stderr, stdout, stdin)
-        self.engine.set_dlr(self.manager.scope, self.manager.runtime)
-
-if __name__ == "__main__":
-    EngineMan = EngineManager(None) # singleton
-    EngineMan.register(RubyEngine)
-    EngineMan.register(PythonEngine)
-    EngineMan.start(None, None, None)

@@ -6,14 +6,8 @@ sys.path.append(os.path.abspath("modules"))
 import clr
 clr.AddReference("gtk-sharp")
 clr.AddReference("pango-sharp")
-clr.AddReference("IronPython.dll")
-clr.AddReference("IronPython.Modules.dll")
-clr.AddReference("IronRuby.dll")
-clr.AddReference("IronRuby.Libraries.dll")
 clr.AddReference("Microsoft.Scripting")
 clr.AddReference("glib-sharp")
-
-clr.AddReference("PJScheme.dll")
 
 # Bring .NET References into IronPython scope:
 import Gtk
@@ -32,10 +26,14 @@ GLib.ExceptionManager.UnhandledException += handle_exception
 # Define local functions and classes
 from utils import _
 
+def get_registered_languages():
+    pass
+
 class PyjamaProject(object):
     def __init__(self, argv):
         self.shell = None
         self.editor = None
+        self.languages = get_registered_languages()
         request_shell = False
         request_editor = False
         files = []
