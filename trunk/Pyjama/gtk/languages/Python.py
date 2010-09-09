@@ -4,6 +4,7 @@ import Microsoft.Scripting
 from document import Document
 from engine import DLREngine
 from utils import Language
+import os
 
 class PythonEngine(DLREngine):
     def __init__(self, manager): 

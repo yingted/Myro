@@ -1,7 +1,9 @@
 import clr
-clr.AddReference("Scheme.dll")
+import sys
+clr.AddReference("PJScheme.dll")
 import PJScheme
 from document import Document
+from engine import Engine
 from utils import Language
 
 class SchemeEngine(Engine):

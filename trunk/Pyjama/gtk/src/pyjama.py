@@ -21,13 +21,27 @@ def handle_exception(e):
     print e.__class__.__name__
 
 # Turn on Unhandled Exception Handled:
-GLib.ExceptionManager.UnhandledException += handle_exception
+#GLib.ExceptionManager.UnhandledException += handle_exception
 
 # Define local functions and classes
 from utils import _
 
 def get_registered_languages():
-    pass
+    sys.path.append(os.path.abspath("languages"))
+    results = {}
+    import Python as LanguageModule
+    lang = LanguageModule.register_language()
+    results[lang.language] = lang
+    import Ruby as LanguageModule
+    lang = LanguageModule.register_language()
+    results[lang.language] = lang
+    import Dinah as LanguageModule
+    lang = LanguageModule.register_language()
+    results[lang.language] = lang
+    import Scheme as LanguageModule
+    lang = LanguageModule.register_language()
+    results[lang.language] = lang
+    return results
 
 class PyjamaProject(object):
     def __init__(self, argv):

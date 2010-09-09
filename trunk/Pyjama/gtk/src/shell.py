@@ -3,7 +3,7 @@ import Gtk, Pango
 import System
 
 from window import Window
-from engine import EngineManager, RubyEngine, PythonEngine, SchemeEngine
+from engine import EngineManager
 from utils import _, CustomStream
 
 import traceback
@@ -70,9 +70,11 @@ class ShellWindow(Window):
         self.window.SetDefaultSize(600, 550)
         self.window.DeleteEvent += Gtk.DeleteEventHandler(self.on_close)
 	self.engine = EngineManager(self.project)
-        self.engine.register(RubyEngine)
-        self.engine.register(PythonEngine)
-        self.engine.register(SchemeEngine)
+        for lang in self.project.languages:
+            language = self.project.languages[lang]
+            lclass = language.get_engine_class()
+            if lclass:
+                self.engine.register(lclass)
         self.history_textview = Gtk.TextView()
         self.engine.start(self.history_textview, self.history_textview, None)
         self.vbox = Gtk.VBox()

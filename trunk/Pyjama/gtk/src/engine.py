@@ -6,6 +6,15 @@ import System
 
 from utils import CustomStream
 
+### FIXME: remove, if possible:
+import clr
+clr.AddReference("IronPython")
+clr.AddReference("IronPython.Modules")
+import IronPython
+clr.AddReference("IronRuby")
+clr.AddReference("IronRuby.Libraries")
+import IronRuby
+
 class EngineManager(object):
     def __init__(self, project):
         self.project = project

@@ -2,7 +2,6 @@ import Gtk
 
 from window import Window
 from utils import _
-from document import Document, DinahDocument
 
 class EditorWindow(Window):
     def __init__(self, project, files=None):
@@ -20,13 +19,13 @@ class EditorWindow(Window):
                   None,
                   # FIXME: get these from engines:
                   ("New Python Script", None, 
-                   None, self.on_new_file),
+                   None, lambda o, e: self.on_new_file(o, e, "python")),
                   ("New Scheme Script", None, 
-                   None, self.on_new_file),
+                   None, lambda o, e: self.on_new_file(o, e, "scheme")),
                   ("New Ruby Script", None, 
-                   None, self.on_new_file),
+                   None, lambda o, e: self.on_new_file(o, e, "ruby")),
                   ("New Dinah Script", None, 
-                   None, self.on_new_dinah),
+                   None, lambda o, e: self.on_new_file(o, e, "dinah")),
                   None,
                   ("Save...", Gtk.Stock.Save, 
                    None, self.on_save_file),
@@ -101,13 +100,8 @@ class EditorWindow(Window):
         page_num = self.notebook.PageNum(page)
         self.notebook.RemovePage(page_num)
 
-    def on_new_file(self, obj, event):
-        page = self.make_document(None)
-        page_num = self.notebook.AppendPage(page.widget, page.tab)
-        self.notebook.CurrentPage = page_num
-
-    def on_new_dinah(self, obj, event):
-        page = self.make_document("New Dinah Script.dnh")
+    def on_new_file(self, obj, event, language="python"):
+        page = self.project.languages[language].get_document_class()(None, self.project)
         page_num = self.notebook.AppendPage(page.widget, page.tab)
         self.notebook.CurrentPage = page_num
 
@@ -115,9 +109,17 @@ class EditorWindow(Window):
         # FIXME: handle default here too (option?)
         # FIXME: get documents from registered engines
         if filename and filename.endswith(".dnh"):
-            page = DinahDocument(filename, self.project)
-        else:
-            page = Document(filename, self.project)
+            page = self.project.languages["dinah"].get_document_class()(filename, self.project)
+        elif filename and filename.endswith(".py"):
+            page = self.project.languages["python"].get_document_class()(filename, self.project)
+        
+        elif filename and filename.endswith(".rb"):
+            page = self.project.languages["ruby"].get_document_class()(filename, self.project)
+        
+        elif filename and filename.endswith(".ss"):
+            page = self.project.languages["scheme"].get_document_class()(filename, self.project)
+        else: # DEFAULT:
+            page = self.project.languages["python"].get_document_class()(filename, self.project)
         return page
 
     def on_save_file(self, obj, event):

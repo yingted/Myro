@@ -5,7 +5,7 @@ import Gdk
 import Pango
 import System
 from utils import Language
-from document import PlainDocument
+from document import PlainDocument, MyScrolledWindow
 
 blue = Gdk.Color(70, 227, 207)
 purple = Gdk.Color(227, 70, 207)
