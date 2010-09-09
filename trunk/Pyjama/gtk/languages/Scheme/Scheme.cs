@@ -1207,10 +1207,14 @@ public class Scheme {
   }
 
   public static bool dlr_env_contains(object variable) {
+      trace(1, "contains?: {0}\n", variable); 
+      // could be "object.item"
     return _dlr_env.ContainsVariable(variable.ToString());
   }
 
   public static object dlr_env_lookup(object variable) {
+      trace(1, "lookup: {0}\n", variable);
+      // could be "object.item"
       return make_binding("dlr", 
 			  _dlr_env.GetVariable(variable.ToString()));
   }

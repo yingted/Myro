@@ -64,7 +64,9 @@
       (<cont-6> (k) (apply-cont k (binding-value value)))
       (<cont-7> (variable env handler k)
        (if value
-           (lookup-variable-components value "" env handler k)
+           (if (dlr-env-contains variable)
+               (apply-cont k (dlr-env-lookup variable))
+               (lookup-variable-components value "" env handler k))
            (if (dlr-env-contains variable)
                (apply-cont k (dlr-env-lookup variable))
                (apply-handler

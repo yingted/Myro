@@ -253,15 +253,23 @@ public class PJScheme:Scheme
 	      env = PJScheme.list_ref ((object) temp_1, (object) 2);
 	      variable = PJScheme.list_ref ((object) temp_1, (object) 1);
 	      if (true_q (value_reg))
-		{
-		   k_reg = k;
-		   handler_reg = handler;
-		   env_reg = env;
-		   path_reg = "";
-		   components_reg = value_reg;
-		   pc = (Function) lookup_variable_components;
+		 if (true_q (PJScheme.dlr_env_contains ((object) variable)))
+		   {
+		      value_reg = PJScheme.dlr_env_lookup ((object) variable);
+		      k_reg = k;
+		      pc = (Function) apply_cont;
 
-		}
+		   }
+		 else
+		   {
+		      k_reg = k;
+		      handler_reg = handler;
+		      env_reg = env;
+		      path_reg = "";
+		      components_reg = value_reg;
+		      pc = (Function) lookup_variable_components;
+
+		   }
 	      else if (true_q (PJScheme.dlr_env_contains ((object) variable)))
 		{
 		   value_reg = PJScheme.dlr_env_lookup ((object) variable);
