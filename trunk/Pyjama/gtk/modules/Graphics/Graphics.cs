@@ -212,6 +212,33 @@ public static class Graphics {
 	    */
 	}
 
+	public bool hit(Point p) {
+	    int counter = 0;
+	    double xinters;
+	    Point p1, p2;
+	    if (points != null) {
+		p1 = points[0];
+		for (int i=1; i<=points.Length; i++) {
+		    p2 = points[i % points.Length];
+		    if (p.y > Math.Min(p1.y, p2.y)) {
+			if (p.y <= Math.Max(p1.y, p2.y)) {
+			    if (p.x <= Math.Max(p1.x, p2.x)) {
+				if (p1.y != p2.y) {
+				    xinters = (p.y - p1.y) * (p2.x - p1.x)/(p2.y - p1.y) + p1.x;
+				    if (p1.x == p2.x || p.x <= xinters)
+					counter++;
+				}
+			    }
+			}
+		    }
+		    p1 = p2;
+		}
+		return (counter % 2 == 0); // hit?
+	    } else {
+		return false;
+	    }
+	}
+
 	public Shape(bool has_pen=true) {
 	    center = new Point(0,0);
 	    this.has_pen = has_pen;
@@ -224,20 +251,22 @@ public static class Graphics {
 	}
 
 	public void render(Cairo.Context g) {
-	    g.LineWidth = width;
-	    g.MoveTo(center.x + points[0].x + points_center.x, 
-		     center.y + points[0].y + points_center.y);
-	    for (int p = 1; p < points.Length; p++) {
-		g.LineTo(center.x + points[p].x + points_center.x, 
-			 center.y + points[p].y + points_center.y);
+	    if (points != null) {
+		g.LineWidth = width;
+		g.MoveTo(center.x + points[0].x + points_center.x, 
+			 center.y + points[0].y + points_center.y);
+		for (int p = 1; p < points.Length; p++) {
+		    g.LineTo(center.x + points[p].x + points_center.x, 
+			     center.y + points[p].y + points_center.y);
+		}
+		g.ClosePath();
+		g.Color = fill_color;
+		g.FillPreserve();
+		g.Color = outline_color;
+		g.Stroke();
+		if (has_pen)
+		    pen.render(g);
 	    }
-	    g.ClosePath();
-	    g.Color = fill_color;
-	    g.FillPreserve();
-	    g.Color = outline_color;
-	    g.Stroke();
-	    if (has_pen)
-		pen.render(g);
 	}
 	
 	public int width {
