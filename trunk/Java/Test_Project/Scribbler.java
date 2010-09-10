@@ -227,7 +227,7 @@ public class Scribbler  {
     /**
      * resets the Scribbler.
      * <p><p>
-     * Precondition: isConnected()
+     * <b>Precondition:</b> isConnected()
      */
     public  void reset()
     {
@@ -246,7 +246,7 @@ public class Scribbler  {
     /**
      * Returns whether the Scribbler has stalled (i.e., stopped moving).  Returns true iff the Scribbler has stalled.
      * <p><p>
-     * Precondition: isConnected()
+     * <b>Precondition:</b> isConnected()
      */
     public  boolean getStall()
     {
@@ -258,7 +258,7 @@ public class Scribbler  {
     /**
      * Returns the state of one of the Scribbler's light sensors.  whichLight specifies the light sensor to query.
      * <p><p>
-     * Precondition: isConnected() and whichLight is {@link #SENSOR_LIGHT_LEFT SENSOR_LIGHT_LEFT} (or 0), 
+     * <b>Precondition:</b> isConnected() and whichLight is {@link #SENSOR_LIGHT_LEFT SENSOR_LIGHT_LEFT} (or 0), 
      * {@link #SENSOR_LIGHT_CENTER SENSOR_LIGHT_CENTER} (or 1), or {@link #SENSOR_LIGHT_RIGHT SENSOR_LIGHT_RIGHT} (or 2).
      * 
      * @param whichLight Specifies the light sensor to query.  Should be {@link #SENSOR_LIGHT_LEFT SENSOR_LIGHT_LEFT} (or 0), 
@@ -289,7 +289,7 @@ public class Scribbler  {
     /**
      * Returns the state of all three Scribbler light sensors.
      * <p><p>
-     * Precondition: isConnected()
+     * <b>Precondition:</b> isConnected()
      * 
      * @return A three element array.  element 0 contains the value of the left sensor, element 1 contains the value
      * of the center sensor, and element 2 contains the value of the right sensor.  All values are non-negative,
@@ -310,7 +310,7 @@ public class Scribbler  {
     /**
      * Returns the state of one of the Scribbler's IR sensors.  whichIR specifies the IR sensor to query.
      * <p><p>
-     * Precondition: isConnected() and whichIR is {@link #SENSOR_IR_LEFT SENSOR_IR_LEFT} (or 0)
+     * <b>Precondition:</b> isConnected() and whichIR is {@link #SENSOR_IR_LEFT SENSOR_IR_LEFT} (or 0)
      *  or {@link #SENSOR_IR_RIGHT SENSOR_IR_RIGHT} (or 1).
      * 
      * @param whichIR Specifies the IR sensor to query.  Should be {@link #SENSOR_IR_LEFT SENSOR_IR_LEFT} (or 0)
@@ -337,7 +337,7 @@ public class Scribbler  {
     /**
      * Returns the state of both of the Scribbler's IR sensors.
      * <p><p>
-     * Precondition: isConnected()
+     * <b>Precondition:</b> isConnected()
      * 
      * @return A two element boolean array containing the values of the IR sensort. True means that an obstacle is
      * NOT detected by the selected IR sensor, and false means that an obstacle IS detected by the sensor.
@@ -356,7 +356,7 @@ public class Scribbler  {
     /**
      * Returns the state of one of the Scribbler's line sensors.  whichSensor specifies the line sensor to query.
      * <p><p>
-     * Precondition: isConnected() and whichSensor is {@link #SENSOR_LINE_LEFT SENSOR_LINE_LEFT} (or 0)
+     * <b>Precondition:</b> isConnected() and whichSensor is {@link #SENSOR_LINE_LEFT SENSOR_LINE_LEFT} (or 0)
      *  or {@link #SENSOR_LINE_RIGHT SENSOR_LINE_RIGHT} (or 1).
      * 
      * @param whichSensor Specifies the line sensor to query.  Should be {@link #SENSOR_LINE_LEFT SENSOR_LINE_LEFT} (or 0)
@@ -383,10 +383,10 @@ public class Scribbler  {
     /**
      * Returns the state of both of the Scribbler's line sensors.
      * <p><p>
-     * Precondition: isConnected()
+     * <b>Precondition:</b> isConnected()
      * 
-     * @return A two element boolean array containing the values of the line sensort. True means that a (dark) line is detected by the selected
-     * line sensor, and false means that a (dark) line is not detected by the sensor.
+     * @return A two element boolean array containing the values of the line sensort. True means that a (dark) line
+     * is detected by the selected line sensor, and false means that a (dark) line is not detected by the sensor.
      */
     public  boolean[] getLine()
     {
@@ -403,7 +403,7 @@ public class Scribbler  {
      * Returns the info string provided by the Scribbler.  The specific information contains such things as the 
      * firmware version, the type of robot (i.e., Scribbler) and the communication mode (e.g., Serial).
      * <p><p>
-     * Precondition: isConnected()
+     * <b>Precondition:</b> isConnected()
      * 
      * @return A String containing information about the connected robot, such as robot type (e.g., Scribbler),
      * firmware version number, and communication mode (e.g., Serial).
@@ -423,16 +423,16 @@ public class Scribbler  {
     }
 
     /**
-     * Returns the four "fudge factors" used to tweak the motors.  Each value is between 0.0 (inclusive) and 2.0 (inclusive). 
-     * A value of 1.0
-     * indicates no tweaking, values between 0.0 and 1.0 indicate a leftward adjustment, and values between 1.0 and 2.0
-     * indicate a rightward adjustment.  The further a value is away from 1.0, the larger the adjustment.
+     * Returns the four "fudge factors" used to tweak the motors.  Each value is between 0.0 (inclusive) and 2.0
+     * (inclusive). A value of 1.0 indicates no tweaking, values between 0.0 and 1.0 indicate a leftward adjustment,
+     * and values between 1.0 and 2.0 indicate a rightward adjustment.  The further a value is away from 1.0, the
+     * larger the adjustment.
      * <p><p>
-     * Precondition: isConnected()
+     * <b>Precondition:</b> isConnected()
      * 
-     * @return A four element array.  Element 0 is the adjustment for high forward speeds (i.e., > 0.5), element 1 is the
-     * adjustment for slow forward speeds (i.e., &lt;= 0.5), element 2 is the adjustment for high backward speeds, element 3
-     * is the adjustment for slow backward speeds.
+     * @return A four element array.  Element 0 is the adjustment for high forward speeds (i.e., > 0.5), element 1
+     * is the adjustment for slow forward speeds (i.e., &lt;= 0.5), element 2 is the adjustment for high backward
+     * speeds, element 3 is the adjustment for slow backward speeds.
      */
     public double[] getFudge()
     {
@@ -454,12 +454,12 @@ public class Scribbler  {
     }
 
     /**
-     * Sets the four "fudge factors" for tweaking the motors.  Each value is between 0.0 (inclusive) and 2.0 (inclusive). 
-     * A value of 1.0
-     * indicates no tweaking, values between 0.0 and 1.0 indicate a leftward adjustment, and values between 1.0 and 2.0
-     * indicate a rightward adjustment.  The further a value is away from 1.0, the larger the adjustment.
+     * Sets the four "fudge factors" for tweaking the motors.  Each value is between 0.0 (inclusive) and 2.0
+     * (inclusive). A value of 1.0 indicates no tweaking, values between 0.0 and 1.0 indicate a leftward adjustment,
+     * and values between 1.0 and 2.0 indicate a rightward adjustment.  The further a value is away from 1.0, the
+     * larger the adjustment.
      * <p><p>
-     * Precondition: isConnected and all four parameters between 0.0 (inclusive) and 2.0 (inclusive)
+     * <b>Precondition:</b> isConnected and all four parameters between 0.0 (inclusive) and 2.0 (inclusive)
      * 
      * @param fastForward Tweak value for fast forward speeds (i.e., speed > 0.5 )
      * @param slowForward Tweak value for slow forward speeds (i.e., speed &lt;= 0.5 )
@@ -483,7 +483,7 @@ public class Scribbler  {
     /**
      * Returns the name of the Scribbler.  The name is set with {@link #setName setName}.
      * <p><p>
-     * Precondition: isConnected
+     * <b>Precondition:</b> isConnected
      * 
      * @return The name of the Scribbler.
      */
@@ -509,7 +509,7 @@ public class Scribbler  {
     /**
      * Sets the name of the Scribbler.
      * <p><p>
-     * Precondition: isConnected
+     * <b>Precondition:</b> isConnected
      * 
      * @param newName String containing the new name of the Scribbler.  Only the first 16 characters of newName are
      * used.
@@ -537,7 +537,7 @@ public class Scribbler  {
     /**
      * Causes the Scribbler to emit a melodic single frequency tone.
      * <p><p>
-     * Precondition: isConnected
+     * <b>Precondition:</b> isConnected
      * 
      * @param duration The length of the tone to be emitted, in seconds.
      * @param frequency The frequency of the tone to emit.
@@ -558,7 +558,7 @@ public class Scribbler  {
     /**
      * Causes the Scribbler to emit a melodic dual frequency tone.
      * <p><p>
-     * Precondition: isConnected
+     * <b>Precondition:</b> isConnected
      * 
      * @param duration The length of the tone to be emitted, in seconds.
      * @param frequency1 The frequency of one of the tones to emit.
@@ -584,16 +584,16 @@ public class Scribbler  {
      * Opens a window that continually displays the Scribbler's sensor values.  The values are updated every .25
      * seconds.
      * <p><p>
-     * Only one senses window is permitted to be opened for a particular Scribbler; no action occurs if
-     * this method is invoked when a senses window is already opened.  The window will stay opened until the user closes
-     * it (by clicking the window's close icon) or the {@link #close close} method is invoked.
+     * Only one senses window is permitted to be opened for a particular Scribbler; no action occurs if this method
+     * is invoked when a senses window is already opened.  The window will stay opened until the user closes it
+     * (by clicking the window's close icon) or the {@link #close close} method is invoked.
      * <p><p>
-     * Precondition: isConnected
+     * <b>Precondition:</b> isConnected
      */
     public  void senses()
     {
         assert isConnected() : "Scribbler not connected";
-        
+
         // can only have one senses window open for this robot
         if( currentSensesThread != null && currentSensesThread.isAlive() )
         {
@@ -611,21 +611,21 @@ public class Scribbler  {
      * movement.
      * <p><p>
      * Only one joystick window is permitted to be opened for a particular Scribbler; no action occurs if
-     * this method is invoked when a joystick window is already opened.  The window will stay opened until the user closes
-     * it (by clicking the window's close icon) or the {@link #close close} method is invoked.
+     * this method is invoked when a joystick window is already opened.  The window will stay opened until the user
+     * closes it (by clicking the window's close icon) or the {@link #close close} method is invoked.
      * <p><p>
-     * Precondition: isConnected
+     * <b>Precondition:</b> isConnected
      */
     public void joyStick()
     {
         assert isConnected() : "Scribbler not connected";
-        
+
         // can only have one joystick thread open for this robot
         if( currentJoyStickThread != null && currentJoyStickThread.isAlive() )
         {
             return;
         }
-        
+
         // create a thread for this joystick and start it
         currentJoyStickThread = new Thread( new joyStickThread(this) );
         currentJoyStickThread.start();
@@ -641,9 +641,9 @@ public class Scribbler  {
      * Starts the Scribbler moving in the specified direction. 
      * The Scribbler will continue to move until another movement method is invoked (e.g., {@link #stop stop}, 
      * {@link #move move}, {@link #forward forward}, {@link #backward backward}, {@link #turnLeft turnLeft}, 
-     * {@link #turnRight turnRight} ).
+     * {@link #turnRight turnRight}, {@link #motors motors}, {@link #translate translate}, {@link #rotate rotate} ).
      * <p><p>
-     * Precondition: isConnected, and translate and rotate are both between -1.0 (inclusive) and 1.0 (inclusive)
+     * <b>Precondition:</b> isConnected, and translate and rotate are both between -1.0 (inclusive) and 1.0 (inclusive)
      * 
      * @param translate Specifies the forward movement speed.  Values > 0 specify forward speed (with 1.0 specifying
      * full forward speed), values &lt; 0 specify backward speed (with -1.0 specifying full backward speed).  0
@@ -658,17 +658,16 @@ public class Scribbler  {
         assert isConnected() : "Scribbler not connected";
         assert -1.0 <= translate && translate <= 1.0 : "translate not between -1.0 and 1.0";
         assert -1.0 <= rotate && rotate <= 1.0 : "rotate not between -1.0 and 1.0";
-        
+
         _adjustSpeed( translate, rotate );
     }
 
     /**
-     * Moves the Scribbler in a forward direction at a specified speed with no rotational movement for a specified amount
-     * of time.  The Scribbler will stop moving
-     * at the end of the specified time period.  This method will not return until the specified time period has
-     * occurred.
+     * Moves the Scribbler in a forward direction at a specified speed with no rotational movement for a specified
+     * amount of time.  The Scribbler will stop moving at the end of the specified time period.  This method will
+     * not return until the specified time period has occurred.
      * <p><p>
-     * Precondition: isConnected, speed between -1.0 (inclusive) and 1.0 (inclusive), numSeconds > 0.0
+     * <b>Precondition:</b> isConnected, speed between -1.0 (inclusive) and 1.0 (inclusive), numSeconds > 0.0
      * 
      * @param speed Specifies the forward speed.  Positive values specify forward movement (1.0 is full forward speed),
      * negative values specify backward movement (-1.0 is full backward speed).
@@ -680,19 +679,19 @@ public class Scribbler  {
         assert isConnected() : "Scribbler not connected";
         assert -1.0 <= speed && speed <= 1.0 : "speed not between -1.0 and 1.0";
         assert numSeconds > 0.0 : "numSeconds not > 0.0";
-        
+
         move( speed, 0.0 );
         _wait( numSeconds );
         stop();
     }
 
     /**
-     * Starts the Scribbler moving forward at a specified speed with no rotational movement.  The Scribbler will continue
-     * to move until another
-     * movement method is invoked (e.g., {@link #stop stop}, {@link #move move}, {@link #forward forward}, 
-     * {@link #backward backward}, {@link #turnLeft turnLeft}, {@link #turnRight turnRight} ).
+     * Starts the Scribbler moving forward at a specified speed with no rotational movement.  The Scribbler will
+     * continue to move until another movement method is invoked (e.g., {@link #stop stop}, 
+     * {@link #move move}, {@link #forward forward}, {@link #backward backward}, {@link #turnLeft turnLeft}, 
+     * {@link #turnRight turnRight}, {@link #motors motors}, {@link #translate translate}, {@link #rotate rotate} ).
      * <p><p>
-     * Precondition: isConnected and speed between -1.0 (inclusive) and 1.0 (inclusive)
+     * <b>Precondition:</b> isConnected and speed between -1.0 (inclusive) and 1.0 (inclusive)
      * 
      * @param speed Specifies the speed.  Positive values specify forward movement (1.0 is full forward speed),
      * negative values specify backward movement (-1.0 is full backward speed).
@@ -702,35 +701,35 @@ public class Scribbler  {
     {
         assert isConnected() : "Scribbler not connected";
         assert -1.0 <= speed && speed <= 1.0 : "speed not between -1.0 and 1.0";
-        
+
         move( speed, 0.0 );
     }
 
     /**
      * Starts the Scribbler moving forward at full speed with no rotational movement.  The Scribbler will continue to
-     * move until another
-     * movement method is invoked (e.g., {@link #stop stop}, {@link #move move}, {@link #forward forward}, 
-     * {@link #backward backward}, {@link #turnLeft turnLeft}, {@link #turnRight turnRight} ).
+     * move until another movement method is invoked (e.g., {@link #stop stop}, {@link #move move},
+     * {@link #forward forward}, {@link #backward backward}, {@link #turnLeft turnLeft}, {@link #turnRight turnRight},
+     * {@link #motors motors}, {@link #translate translate}, {@link #rotate rotate} ).
      * <p><p>
-     * Precondition: isConnected
+     * <b>Precondition:</b> isConnected
      * 
      */
     public  void forward()
     {
         assert isConnected() : "Scribbler not connected";
-        
+
         forward( 1.0 );
     }
 
     /**
      * Causes the Scribbler to stop moving.
      * <p><p>
-     * Precondition: isConnected
+     * <b>Precondition:</b> isConnected
      */
     public  void stop()
     {
         assert isConnected() : "Scribbler not connected";
-        
+
         _lastRotate = 0.0;
         _lastTranslate = 0.0;
         _set( SET_MOTORS_OFF );
@@ -738,14 +737,13 @@ public class Scribbler  {
 
     /**
      * Moves the Scribbler in a backward direction at a specified speed with no rotational movement for a specified
-     * amount of time.  The Scribbler will stop moving
-     * at the end of the specified time period.  This method will not return until the specified time period has
-     * occurred.
+     * amount of time.  The Scribbler will stop moving at the end of the specified time period.  This method will
+     * not return until the specified time period has occurred.
      * <p><p>
-     * Precondition: isConnected, speed between -1.0 (inclusive) and 1.0 (inclusive), numSeconds > 0.0
+     * <b>Precondition:</b> isConnected, speed between -1.0 (inclusive) and 1.0 (inclusive), numSeconds > 0.0
      * 
-     * @param speed Specifies the backward speed.  Positive values specify backward movement (1.0 is full backward speed),
-     * negative values specify forward movement (-1.0 is full forward speed).
+     * @param speed Specifies the backward speed.  Positive values specify backward movement (1.0 is full backward
+     * speed), negative values specify forward movement (-1.0 is full forward speed).
      * 
      * @param numSeconds Specifies the length of time to move, in seconds.
      */
@@ -754,7 +752,7 @@ public class Scribbler  {
         assert isConnected() : "Scribbler not connected";
         assert -1.0 <= speed && speed <= 1.0 : "speed not between -1.0 and 1.0";
         assert numSeconds > 0.0 : "numSeconds not > 0.0";
-        
+
         move( -speed, 0.0 );
         _wait( numSeconds );
         stop();
@@ -762,11 +760,11 @@ public class Scribbler  {
 
     /**
      * Starts the Scribbler moving backward at a specified speed with no rotational movement.  The Scribbler will
-     * continue to move until another
-     * movement method is invoked (e.g., {@link #stop stop}, {@link #move move}, {@link #forward forward}, 
-     * {@link #backward backward}, {@link #turnLeft turnLeft}, {@link #turnRight turnRight} ).
+     * continue to move until another movement method is invoked (e.g., {@link #stop stop}, {@link #move move},
+     * {@link #forward forward}, {@link #backward backward}, {@link #turnLeft turnLeft}, 
+     * {@link #turnRight turnRight}, {@link #motors motors}, {@link #translate translate}, {@link #rotate rotate} ).
      * <p><p>
-     * Precondition: isConnected and speed between -1.0 (inclusive) and 1.0 (inclusive)
+     * <b>Precondition:</b> isConnected and speed between -1.0 (inclusive) and 1.0 (inclusive)
      * 
      * @param speed Specifies the speed.  Positive values specify backward movement (1.0 is full backward speed),
      * negative values specify forward movement (-1.0 is full forward speed).
@@ -776,33 +774,32 @@ public class Scribbler  {
     {
         assert isConnected() : "Scribbler not connected";
         assert -1.0 <= speed && speed <= 1.0 : "speed not between -1.0 and 1.0";
-        
+
         move( -speed, 0.0 );
     }
 
     /**
      * Starts the Scribbler moving backward at full speed with no rotational movement.  The Scribbler will continue to
-     * move until another
-     * movement method is invoked (e.g., {@link #stop stop}, {@link #move move}, {@link #forward forward}, 
-     * {@link #backward backward}, {@link #turnLeft turnLeft}, {@link #turnRight turnRight} ).
+     * move until another movement method is invoked (e.g., {@link #stop stop}, {@link #move move},
+     * {@link #forward forward}, {@link #backward backward}, {@link #turnLeft turnLeft}, 
+     * {@link #turnRight turnRight}, {@link #motors motors}, {@link #translate translate}, {@link #rotate rotate} ).
      * <p><p>
-     * Precondition: isConnected
+     * <b>Precondition:</b> isConnected
      * 
      */
     public  void backward()
     {
         assert isConnected() : "Scribbler not connected";
-        
+
         backward( 1.0 );
     }
 
     /**
      * Moves the Scribbler in a counterclockwise rotation at a specified speed with no forward or backward movement
-     * for a specified amount of time.  The Scribbler will stop moving
-     * at the end of the specified time period.  This method will not return until the specified time period has
-     * occurred.
+     * for a specified amount of time.  The Scribbler will stop moving at the end of the specified time period.  This
+     * method will not return until the specified time period has occurred.
      * <p><p>
-     * Precondition: isConnected, speed between -1.0 (inclusive) and 1.0 (inclusive), numSeconds > 0.0
+     * <b>Precondition:</b> isConnected, speed between -1.0 (inclusive) and 1.0 (inclusive), numSeconds > 0.0
      * 
      * @param speed Specifies the rotational speed.  Positive values specify counterclockwise rotation 
      * (1.0 is full counterclockwise speed),
@@ -815,7 +812,7 @@ public class Scribbler  {
         assert isConnected() : "Scribbler not connected";
         assert -1.0 <= speed && speed <= 1.0 : "speed not between -1.0 and 1.0";
         assert numSeconds > 0.0 : "numSeconds not > 0.0";
-        
+
         move( 0.0, speed );
         _wait( numSeconds );
         stop();
@@ -823,52 +820,49 @@ public class Scribbler  {
 
     /**
      * Moves the Scribbler in a counterclockwise rotation at a specified speed with no forward or backward movement.
-     * The Scribbler will continue to move until another
-     * movement method is invoked (e.g., {@link #stop stop}, {@link #move move}, {@link #forward forward}, 
-     * {@link #backward backward}, {@link #turnLeft turnLeft}, {@link #turnRight turnRight} ).
+     * The Scribbler will continue to move until another movement method is invoked (e.g., {@link #stop stop}, 
+     * {@link #move move}, {@link #forward forward}, {@link #backward backward}, {@link #turnLeft turnLeft}, 
+     * {@link #turnRight turnRight}, {@link #motors motors}, {@link #translate translate}, {@link #rotate rotate} ).
      * <p><p>
-     * Precondition: isConnected, speed between -1.0 (inclusive) and 1.0 (inclusive)
+     * <b>Precondition:</b> isConnected, speed between -1.0 (inclusive) and 1.0 (inclusive)
      * 
-     * @param speed Specifies the rotational speed.  Positive values specify counterclockwise rotation 
-     * (1.0 is full counterclockwise speed),
-     * negative values specify clockwise rotation (-1.0 is full clockwise speed).
+     * @param speed Specifies the rotational speed.  Positive values specify counterclockwise rotation (1.0 is full
+     * counterclockwise speed), negative values specify clockwise rotation (-1.0 is full clockwise speed).
      * 
      */
     public  void turnLeft( double speed )
     {
         assert isConnected() : "Scribbler not connected";
         assert -1.0 <= speed && speed <= 1.0 : "speed not between -1.0 and 1.0";
-        
+
         move (0.0, speed );
     }
 
     /**
      * Moves the Scribbler in a counterclockwise rotation at full speed with no forward or backward movement.
-     * The Scribbler will continue to move until another
-     * movement method is invoked (e.g., {@link #stop stop}, {@link #move move}, {@link #forward forward}, 
-     * {@link #backward backward}, {@link #turnLeft turnLeft}, {@link #turnRight turnRight} ).
+     * The Scribbler will continue to move until another movement method is invoked (e.g., {@link #stop stop}, 
+     * {@link #move move}, {@link #forward forward}, {@link #backward backward}, {@link #turnLeft turnLeft}, 
+     * {@link #turnRight turnRight}, {@link #motors motors}, {@link #translate translate}, {@link #rotate rotate} ).
      * <p><p>
-     * Precondition: isConnected
+     * <b>Precondition:</b> isConnected
      * 
      */
     public  void turnLeft()
     {
         assert isConnected() : "Scribbler not connected";
-        
+
         turnLeft( 1.0 );
     }
 
     /**
      * Moves the Scribbler in a clockwise rotation at a specified speed with no forward or backward movement
-     * for a specified amount of time.  The Scribbler will stop moving
-     * at the end of the specified time period.  This method will not return until the specified time period has
-     * occurred.
+     * for a specified amount of time.  The Scribbler will stop moving at the end of the specified time period.  This
+     * method will not return until the specified time period has occurred.
      * <p><p>
-     * Precondition: isConnected, speed between -1.0 (inclusive) and 1.0 (inclusive), numSeconds > 0.0
+     * <b>Precondition:</b> isConnected, speed between -1.0 (inclusive) and 1.0 (inclusive), numSeconds > 0.0
      * 
-     * @param speed Specifies the rotational speed.  Positive values specify clockwise rotation 
-     * (1.0 is full clockwise speed),
-     * negative values specify counterclockwise rotation (-1.0 is full counterclockwise speed).
+     * @param speed Specifies the rotational speed.  Positive values specify clockwise rotation (1.0 is full
+     * clockwise speed), negative values specify counterclockwise rotation (-1.0 is full counterclockwise speed).
      * 
      * @param numSeconds Specifies the length of time to move, in seconds.
      */
@@ -877,19 +871,19 @@ public class Scribbler  {
         assert isConnected() : "Scribbler not connected";
         assert -1.0 <= speed && speed <= 1.0 : "speed not between -1.0 and 1.0";
         assert numSeconds > 0.0 : "numSeconds not > 0.0";
-        
+
         move( 0.0, -speed );
         _wait( numSeconds );
         stop();
     }
 
     /**
-     * Moves the Scribbler in a clockwise rotation at a specified speed with no forward or backward movement.
-     * The Scribbler will continue to move until another
-     * movement method is invoked (e.g., {@link #stop stop}, {@link #move move}, {@link #forward forward}, 
-     * {@link #backward backward}, {@link #turnLeft turnLeft}, {@link #turnRight turnRight} ).
+     * Moves the Scribbler in a clockwise rotation at a specified speed with no forward or backward movement. The
+     * Scribbler will continue to move until another movement method is invoked (e.g., {@link #stop stop}, 
+     * {@link #move move}, {@link #forward forward}, {@link #backward backward}, {@link #turnLeft turnLeft}, 
+     * {@link #turnRight turnRight}, {@link #motors motors}, {@link #translate translate}, {@link #rotate rotate} ).
      * <p><p>
-     * Precondition: isConnected, speed between -1.0 (inclusive) and 1.0 (inclusive)
+     * <b>Precondition:</b> isConnected, speed between -1.0 (inclusive) and 1.0 (inclusive)
      * 
      * @param speed Specifies the rotational speed.  Positive values specify clockwise rotation 
      * (1.0 is full clockwise speed),
@@ -900,33 +894,33 @@ public class Scribbler  {
     {
         assert isConnected() : "Scribbler not connected";
         assert -1.0 <= speed && speed <= 1.0 : "speed not between -1.0 and 1.0";
-        
+
         move (0.0, -speed );
     }
 
     /**
-     * Moves the Scribbler in a clockwise rotation at full speed with no forward or backward movement.
-     * The Scribbler will continue to move until another
-     * movement method is invoked (e.g., {@link #stop stop}, {@link #move move}, {@link #forward forward}, 
-     * {@link #backward backward}, {@link #turnLeft turnLeft}, {@link #turnRight turnRight} ).
+     * Moves the Scribbler in a clockwise rotation at full speed with no forward or backward movement.  The Scribbler
+     * will continue to move until another movement method is invoked (e.g., {@link #stop stop}, 
+     * {@link #move move}, {@link #forward forward}, {@link #backward backward}, {@link #turnLeft turnLeft}, 
+     * {@link #turnRight turnRight}, {@link #motors motors}, {@link #translate translate}, {@link #rotate rotate} ).
      * <p><p>
-     * Precondition: isConnected
+     * <b>Precondition:</b> isConnected
      * 
      */
     public  void turnRight()
     {
         assert isConnected() : "Scribbler not connected";
-        
+
         turnRight( 1.0 );
     }
 
     /**
-     * Starts the Scribbler moving by specifying the amount of power going to each wheel. 
-     * The Scribbler will continue to move until another movement method is invoked (e.g., {@link #stop stop}, 
-     * {@link #move move}, {@link #forward forward}, {@link #backward backward}, {@link #turnLeft turnLeft}, 
-     * {@link #turnRight turnRight} ).
+     * Starts the Scribbler moving by specifying the amount of power going to each wheel. The Scribbler will continue
+     * to move until another movement method is invoked (e.g., {@link #stop stop}, {@link #move move},
+     * {@link #forward forward}, {@link #backward backward}, {@link #turnLeft turnLeft}, 
+     * {@link #turnRight turnRight}, {@link #motors motors}, {@link #translate translate}, {@link #rotate rotate} ).
      * <p><p>
-     * Precondition: isConnected, and left and right are both between -1.0 (inclusive) and 1.0 (inclusive)
+     * <b>Precondition:</b> isConnected, and left and right are both between -1.0 (inclusive) and 1.0 (inclusive)
      * 
      * @param left Specifies the speed of the left wheel.  Values > 0 specify forward speed (with 1.0 specifying
      * full forward speed), values &lt; 0 specify backward speed (with -1.0 specifying full backward speed).  0
@@ -941,7 +935,7 @@ public class Scribbler  {
         assert isConnected() : "Scribbler not connected";
         assert -1.0 <= left && left <= 1.0 : "left not between -1.0 and 1.0";
         assert -1.0 <= right && right <= 1.0 : "right not between -1.0 and 1.0";
-        
+
         double trans = (right + left) / 2.0;
         double rotate = (right - left) / 2.0;
         move( trans, rotate );
@@ -949,11 +943,12 @@ public class Scribbler  {
 
     /**
      * Starts the Scribbler moving forward or backward at a specified speed without changing the Scribbler's current 
-     * rotational movement.  The Scribbler will continue to move until another
-     * movement method is invoked (e.g., {@link #stop stop}, {@link #move move}, {@link #forward forward}, 
-     * {@link #backward backward}, {@link #turnLeft turnLeft}, {@link #turnRight turnRight} ).
+     * rotational movement.  The Scribbler will continue to move until another movement method is invoked
+     * (e.g., {@link #stop stop}, {@link #move move}, {@link #forward forward}, {@link #backward backward},
+     * {@link #turnLeft turnLeft}, {@link #turnRight turnRight}, {@link #motors motors}, {@link #translate translate},
+     * {@link #rotate rotate} ).
      * <p><p>
-     * Precondition: isConnected and speed between -1.0 (inclusive) and 1.0 (inclusive)
+     * <b>Precondition:</b> isConnected and speed between -1.0 (inclusive) and 1.0 (inclusive)
      * 
      * @param speed Specifies the speed.  Positive values specify forward movement (1.0 is full forward speed),
      * negative values specify backward movement (-1.0 is full backward speed).
@@ -963,28 +958,27 @@ public class Scribbler  {
     {
         assert isConnected() : "Scribbler not connected";
         assert -1.0 <= speed && speed <= 1.0 : "speed not between -1.0 and 1.0";
-        
+
         _adjustSpeed( speed, _lastRotate );
     }
 
     /**
      * Starts the Scribbler rotating at a specified speed without changing the Scribbler's current forward or backward
-     * movement.  The Scribbler will continue to move until another
-     * movement method is invoked (e.g., {@link #stop stop}, {@link #move move}, {@link #forward forward}, 
-     * {@link #backward backward}, {@link #turnLeft turnLeft}, {@link #turnRight turnRight} ).
+     * movement.  The Scribbler will continue to move until another movement method is invoked (e.g., {@link #stop stop}, 
+     * {@link #move move}, {@link #forward forward}, {@link #backward backward}, {@link #turnLeft turnLeft}, 
+     * {@link #turnRight turnRight}, {@link #motors motors}, {@link #translate translate}, {@link #rotate rotate} ).
      * <p><p>
-     * Precondition: isConnected and speed between -1.0 (inclusive) and 1.0 (inclusive)
+     * <b>Precondition:</b> isConnected and speed between -1.0 (inclusive) and 1.0 (inclusive)
      * 
      * @param speed Specifies the rotational speed.  Positive values specify counterclockwise rotation (1.0 is full
-     * counterclockwise speed),
-     * negative values specify clockwise rotation (-1.0 is full clockwise speed).
+     * counterclockwise speed), negative values specify clockwise rotation (-1.0 is full clockwise speed).
      * 
      */
     public  void rotate( double speed )
     {
         assert isConnected() : "Scribbler not connected";
         assert -1.0 <= speed && speed <= 1.0 : "speed not between -1.0 and 1.0";
-        
+
         _adjustSpeed( _lastTranslate, speed );
     }
 
@@ -1034,11 +1028,16 @@ public class Scribbler  {
     // robot state
     private double _lastTranslate = 0.0;
     private double _lastRotate = 0.0;
-    private int[] _lastSensors;
+    private int[] _lastSensors;     // Included because Myro-Pytyhon had this.  Not sure it's necessary
     private boolean isOpened;       // true=>robot is connected and can be accessed
     private Thread currentSensesThread;
     private Thread currentJoyStickThread;
 
+    /**
+     * Send the values contained in messageString to the Scribbler.  If the message has less than 9 values then
+     * it is padded with zeros so that a 9-byte message is sent.  It is assumed that the values in messageString
+     * are all between 0 and 255.
+     */
     private void _write(int[] messageString) {
         byte[] byteString = new byte[9];
         // copy messageString to byteString
@@ -1056,6 +1055,10 @@ public class Scribbler  {
         } catch (IOException e) {System.out.println("_write:IOException");}
     }
 
+    /**
+     * Read numBytes from the Scribbler and return an array containing these values.  The returned values will all
+     * be between 0 and 255.
+     */
     private int[] _read( int numBytes )
     {
         byte[] readBuffer = new byte[numBytes];
@@ -1093,6 +1096,11 @@ public class Scribbler  {
         return retVal;
     }
 
+    /**
+     * Read bytes from the Scribbler until an eol (ASCII 10, line feed) character is encountered.  The values
+     * read (not including the eol) will be returned in the array.  All values in the array will be between
+     * 0 and 255.
+     */
     private int[] _readLine( )
     {
         final int arrSize = 1000;   // assume no more than this many characters in response
@@ -1135,6 +1143,9 @@ public class Scribbler  {
         return retVal;
     }
 
+    /**
+     * Read any remaining data from the Scribbler and throw them out.
+     */
     private void _flushInput()
     {
         final int arrSize = 1000;   // assume no more than this many characters in response
@@ -1148,6 +1159,9 @@ public class Scribbler  {
 
     }
 
+    /**
+     * Set the Scribbler motors so the robot is moving in the specified direction.
+     */
     private void _adjustSpeed(double translate, double rotate )
     {
         _lastTranslate = translate;
@@ -1161,18 +1175,36 @@ public class Scribbler  {
 
     }
 
-    private void _set( int command )
+    /**
+     * Send one of the parameterless set commands to the Scribbler.  Parameter command contains the opcode.  The
+     * command echo from the Scribbler is read and a sanity check is performed on the echo.The 11 byte response is
+     * also read from the Scribbler and stored in instance field _lastSensors.  Only one thread can can communicate 
+     * with the Scribbler at a time.
+     */
+    private synchronized void _set( int command )
     {
         int[] data = new int[8];
         _set( command, data );
     }
 
-    private void _set( int command, int value1, int value2 )
+    /**
+     * Send one of the two parameter set commands to the Scribbler.  The command opcode and the two parameters
+     * are passed to this method.  The command echo is read from the Scribbler and a sanity check is performed on
+     * the echo.  The 11 byte response is also read from the Scribbler and stored in instance field _lastSensors.
+     * Only one thread can can communicate with the Scribbler at a time.
+     */
+    private synchronized void _set( int command, int value1, int value2 )
     {
         int[] data = new int[] { value1, value2 };
         _set( command, data );
     }
 
+    /**
+     * Send one of the set commands to the Scribbler.  The command opcode is passed to the method, and parameters to
+     * the command, if any, are contained in an array also passed to the method.  The command echo is read from the
+     * Scribbler and a sanity check is performed on the echo.  The 11 byte response is also read from the Scribbler
+     * and stored in instance field _lastSensors.  Only one thread can can communicate with the Scribbler at a time.
+     */
     private synchronized void _set( int command, int[] values )
     {
         // construct message to scribbler
@@ -1188,12 +1220,23 @@ public class Scribbler  {
         _lastSensors = _read( 11 );
     }
 
-    private int[] _getAll()
+    /**
+     * Send a get_all command to the Scribbler and store the data received in instance field _lastSensors.  Only one
+     * thread at a time can communicate with the Scribbler.
+     */
+    private synchronized int[] _getAll()
     {
         _lastSensors = _get( GET_ALL, 11 );
         return _lastSensors;
     }
 
+    /**
+     * Send a get command to the Scribbler that expects a fixed-size response.  The command opcode is passed to this
+     * method as well as the number of bytes expected in the Scribbler's response.  The command echo is read from the
+     * Scribbler and a sanity check is performed on the echo.  If there are response bytes expected they are read and
+     * stored in an array that is returned to the invoker.  Only one thread at a time can communicate with the
+     * Scribbler.
+     */
     private synchronized int[] _get( int command, int numResponseBytes )
     {
         int[] retVal = null;
@@ -1206,6 +1249,12 @@ public class Scribbler  {
         return retVal;
     }
 
+    /**
+     * Send a get command to the Scribbler that expects a response terminted by eol.  The command opcode is passed
+     * to this method.  The command echo is read from the Scribbler and a sanity check performed on the echo.  The
+     * eol-terminate response is read from the Scribbler and returned (without the eol) to the caller.  Only one
+     * thread at a time can communicate with the Scribbler.
+     */
     private synchronized int[] _getLine( int command )
     {
         int[] retVal = null;
@@ -1217,6 +1266,11 @@ public class Scribbler  {
         return retVal;
     }
 
+    /**
+     * Compare the echo with the original message.  If there are differences print a message.
+     * 
+     * @return true iff the original message and echo are the same.
+     */
     private boolean _checkEcho( int[] message, int[]echo )
     {
         // returns true iff message == echo
@@ -1263,6 +1317,12 @@ public class Scribbler  {
         return echoOK;
     }
 
+    /**
+     * Cause the current thread to sleep for numSeconds.  This method was originally a Myro method, but since the
+     * actions of this are implemented by the computer (as opposed to the Scribbler) I decided to make it a 
+     * private method used only by the implementation of myro.  Programmers should use java's Thread.sleep method
+     * directly.
+     */
     private  void _wait( double numSeconds )
     {
         try
@@ -1272,6 +1332,11 @@ public class Scribbler  {
 
     }
 
+    /**
+     * An instance of this class creates a senses window and a thread that queries the Scribbler every 0.25 seconds
+     * and displays the values of all sensors in the window.  The thread will be killed (and the window closed) when
+     * the user clicks the window's close icon or the Scribbler's close method is invoked.
+     */
     private class sensesThread implements Runnable 
     {
         private Scribbler robot;
@@ -1282,6 +1347,10 @@ public class Scribbler  {
         private boolean finished;
         private JFrame frame;
 
+        /**
+         * Construct a JFrame containing fields for the Scribbler's sensor values and set a windowListener that
+         * will respond to the window close event.
+         */
         public sensesThread(Scribbler _robot)
         {
             Container frameContentPane;
@@ -1392,10 +1461,14 @@ public class Scribbler  {
             frame.pack();
             frame.setVisible( true );
 
+            // create an event handler that will handle the window's close event
             frame.addWindowListener( new windowEventHandler() );
 
         }
 
+        /**
+         * Utility routine to make a label
+         */
         private JLabel makeLabel(String caption, Border border)
         {
             JLabel label = new JLabel();
@@ -1407,6 +1480,12 @@ public class Scribbler  {
             return label;
         }
 
+        /**
+         * Main method to execute in the senses thread.  Query the Scribbler every 0.25 seconds and set the fields
+         * in the window accordingly.  If the Sleep method is interrupted it means that the Scribbler's close
+         * method has been called; in this case we create a window close event which will be handled exacly as
+         * if the user closed the window.
+         */
         public void run()
         {
             int[] data;
@@ -1444,12 +1523,15 @@ public class Scribbler  {
                 } catch (InterruptedException e)
                 {
                     // We've been interrupted, so force an event as if the user closed the window
-                    //System.out.println("We've been interrupted");
                     frame.getToolkit().getSystemEventQueue().postEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING)); 
                 }
             }
         }
 
+        /**
+         * The user has closed the window so simply set finished to true, and the next time the loop executes in
+         * method run, the thread will terminate.
+         */
         private class windowEventHandler extends WindowAdapter
         {
             public void windowClosing(WindowEvent e) 
@@ -1460,6 +1542,11 @@ public class Scribbler  {
 
     }
 
+    /**
+     * An instance of this class creates a joystick window and a thread that uses mouse events to control the Scribbler.
+     * The thread will be killed (and the window closed) when the user clicks the window's close icon or the
+     * Scribbler's close method is invoked.
+     */
     private class joyStickThread implements Runnable
     {
         private Scribbler robot;
@@ -1471,6 +1558,10 @@ public class Scribbler  {
         boolean robotMoving;
         JFrame frame;
 
+        /**
+         * Create a window and set up a window listener (to handle the window close event), mouse listeners (to 
+         * handle mouse click and drag events), and a component listener (to handle window resize events).
+         */
         public joyStickThread( Scribbler _robot )
         {
             Container frameContentPane;
@@ -1493,21 +1584,25 @@ public class Scribbler  {
             panel.setBorder(  new LineBorder( Color.BLACK, 3) );
             panel.setPreferredSize(new Dimension(300, 300));
             frameContentPane.add( panel, BorderLayout.CENTER );
-            panel.addMouseListener (mouseEvent );
-            panel.addMouseMotionListener (mouseEvent );
+            // add mouse listener to handle mouse press and release events
+            panel.addMouseListener ( mouseEvent );
+            // add mouse motion listener to handle mouse drag events
+            panel.addMouseMotionListener ( mouseEvent );
+            // add a component listener to handle resize events
             panel.addComponentListener( new panelEventHandler() );
 
             frame.pack();
             frame.setVisible( true );
 
+            // add window listener to handle window close events
             frame.addWindowListener( new windowEventHandler() );
         }
 
-        public void windowClosing(WindowEvent e) 
-        {
-            finished = true;
-        }
-
+        /**
+         * Method executed in the joystick thread.  The listeners do all the work so all we do is sleep all day!
+         * If we're interrupted that means the Scribbler's close method has been called, so we force a window
+         * close event that will eventually close the window and tell us to stop.
+         */
         public void run()
         {
             // loop until the window is closed (which sets finished to true) or our parent thread interrupts us
@@ -1518,12 +1613,14 @@ public class Scribbler  {
                 } catch (InterruptedException e)
                 { 
                     // We've been interrupted, so handle this as if the user closed the window
-                    //System.out.println("JoyStick has been interrupted");
                     frame.getToolkit().getSystemEventQueue().postEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING)); 
             }
 
         }
 
+        /**
+         * Utility method to make a label.
+         */
         private JLabel makeLabel(String caption)
         {
             JLabel label = new JLabel();
@@ -1534,6 +1631,9 @@ public class Scribbler  {
             return label;
         }
 
+        /**
+         * Method to call everytime the joystick panel needs repainted.
+         */
         private class joyStickPanel extends JPanel
         {
             public void paintChildren( Graphics g )
@@ -1555,6 +1655,10 @@ public class Scribbler  {
             }
         }
 
+        /**
+         * Process window (actually panel) resize events, which simply means setting instance fields for the 
+         * panel dimensions that are used in the repaint method.
+         */
         private class panelEventHandler extends ComponentAdapter
         {
             public void componentResized( ComponentEvent e)
@@ -1567,6 +1671,10 @@ public class Scribbler  {
             }
         }
 
+        /**
+         * Handle window close events.  All we do is set instance field finished to true, and the run routine will
+         * then terminate the thread.
+         */
         private class windowEventHandler extends WindowAdapter
         {
             public void windowClosing(WindowEvent e) 
@@ -1575,15 +1683,20 @@ public class Scribbler  {
             }
         }
 
+        /**
+         * Handle mouse press, release, and drag events.
+         */
         private class mouseEventHandler extends MouseAdapter
         {
             public void mousePressed( MouseEvent e )
             {
-                //System.out.println("Press at (" + e.getX() + "," + e.getY() + ")");
-
+                // Move the Scribbler and draw a line in the window according to where the mouse was pressed
                 processMouseEvent( e );
+
+                // as far as we know the robot is on the move so a line will need to be drawn in the joystick window
                 robotMoving = true;
 
+                // repaint the joystick window to include the mouse press
                 panel.repaint();
 
             }
@@ -1596,19 +1709,23 @@ public class Scribbler  {
                 // nothing more to draw in joyStick panel
                 robotMoving = false;
 
+                // update the joystick window display
                 panel.repaint();
             }
 
             public void mouseDragged( MouseEvent e )
             {
-                //System.out.println("Dragged at (" + e.getX() + "," + e.getY() + ")");
-
+                // Move the scribbler and draw a line in the joystick window according to where the mouse is now
                 processMouseEvent( e );
 
+                // repaint the joystick window to show the current position
                 panel.repaint();
 
             }
 
+            /**
+             * Utility routine to move the mouse and calculate the position of the line in the joystick window.
+             */
             private void processMouseEvent( MouseEvent e )
             {
                 double translate, rotate;
@@ -1634,8 +1751,6 @@ public class Scribbler  {
 
                 // move the robot
                 robot.move( translate, -rotate );
-
-                //System.out.println("Translate=" + translate +", rotate="+rotate);
 
             }
 
