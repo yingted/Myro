@@ -907,6 +907,13 @@ public class Scheme {
 	    return _dlr_runtime.Operations.Invoke(proc, list_ref(args, 0), list_ref(args, 1));
 	// FIXME: how to properly call proc from DLR or reflection?
 	// http://dlr.codeplex.com/discussions
+	// Solution: Wait for DLR 1.0, or use this:
+	// public object Invoke(object obj, params object[] parameters) {
+	// return GetInvoker(parameters.Length)(this, _lc.CreateInvokeBinder(new CallInfo(parameters.Length)), obj, parameters);
+	//}
+	// See http://github.com/ironruby/ironruby/blob/master/Runtime/Microsoft.Scripting/Runtime/DynamicOperations.cs
+	// Even this ugly hack doesn't work in DLR 0.9, as Invoke only
+	// takes at most two arguments:
 	// else if (len == 3)
 	//     return _dlr_runtime.Operations.Invoke(proc, new object [] {list_ref(args, 0), list_ref(args, 1), list_ref(args, 2)});
 	// else if (len == 4)

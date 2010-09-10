@@ -1,11 +1,17 @@
 import clr
+clr.AddReference('gtk-sharp')
 clr.AddReference('gdk-sharp')
+clr.AddReference('pango-sharp')
+clr.AddReference('Myro.dll')
+clr.AddReference('Graphics.dll')
 import Gtk
 import Gdk
 import Pango
 import System
 from utils import Language
 from document import PlainDocument, MyScrolledWindow
+import Myro
+import Graphics
 
 blue = Gdk.Color(70, 227, 207)
 purple = Gdk.Color(227, 70, 207)
@@ -238,34 +244,7 @@ class DinahDocument(PlainDocument):
         block.DragDataReceived += Gtk.DragDataReceivedHandler(handleDragDataReceived)
         self.layout.PackStart(block, False, True, 0)
         
-        top_level = [Block("Do together:", 
-                           Statement("Myro", "forward", 1),
-                           Statement("Myro", "forward", 1, .5),
-                           parallel=True),
-                     Block("Do in order:", 
-                           Statement("Myro", "forward", 1, 1),
-                           Statement("Myro", "init", "COM1", 0),
-                           Statement("Myro", "backward", 1, 1),
-                           Statement("Myro", "backward", 1, 1),
-                           Block("Do together:",
-                                 Statement("Myro", "init", "COM1", 0),
-                                 Statement("Myro", "backward", 1),
-                                 Statement("Myro", "backward", 1, 1),
-                                 Statement("Myro", "init", "COM1", 0),
-                                 Statement("Myro", "backward", 1, 1),
-                                 Statement("Myro", "backward", 1, 1),
-                                 parallel=True
-                                 )
-                           ),
-                     Block("Do together:", 
-                           Statement("Myro", "backward", 1),
-                           Statement("Myro", "forward", 1, ),
-                           Statement("Myro", "backward", 1, ),
-                           Statement("Myro", "forward", 1, ),
-                           Statement("Myro", "backward", 1, ),
-                           Statement("Myro", "forward", 1, ),
-                           parallel=True),
-                     ]
+        top_level = [] # read and parse from file
         process_list(self.layout, top_level)
 
         print process_widgets(self.layout)
@@ -298,18 +277,23 @@ class DinahDocument(PlainDocument):
     def make_store(self):
         store = Gtk.TreeStore(str)
         module = store.AppendValues("<b>Control</b>")
-        for x in ["Do number of times:", "Do for each:", "Do in order:",
+        for x in ["Do times:", "Do for each:", "Do in order:",
                   "Do together:", "Do while:", "If:"]:
             store.AppendValues(module, '<span bgcolor="%s">%s</span>' % 
                                (color_code(block_color), x))
-        module = store.AppendValues("<b>Myro</b>")
-        for x in ["forward", "backward", "init", "beep"]:
-            store.AppendValues(module, '<span bgcolor="%s">.%s()</span>' % 
-                               (color_code(statement_color), x))
         module = store.AppendValues("<b>Dinah</b>")
         for x in ["wait", "beep", "random", "ask"]:
             store.AppendValues(module, '<span bgcolor="%s">.%s()</span>' % 
                                (color_code(statement_color), x))
+
+        
+        module = store.AppendValues("<b>Myro</b>")
+        for x in ["forward", "backward", "init", "beep"]:
+            store.AppendValues(module, '<span bgcolor="%s">.%s()</span>' % 
+                               (color_code(statement_color), x))
+
+
+
         return store
 
     def open(self):
@@ -323,6 +307,36 @@ class DinahDocument(PlainDocument):
 
     def save_as(self):
         pass
+
+        # top_level = [Block("Do together:", 
+        #                    Statement("Myro", "forward", 1),
+        #                    Statement("Myro", "forward", 1, .5),
+        #                    parallel=True),
+        #              Block("Do in order:", 
+        #                    Statement("Myro", "forward", 1, 1),
+        #                    Statement("Myro", "init", "COM1", 0),
+        #                    Statement("Myro", "backward", 1, 1),
+        #                    Statement("Myro", "backward", 1, 1),
+        #                    Block("Do together:",
+        #                          Statement("Myro", "init", "COM1", 0),
+        #                          Statement("Myro", "backward", 1),
+        #                          Statement("Myro", "backward", 1, 1),
+        #                          Statement("Myro", "init", "COM1", 0),
+        #                          Statement("Myro", "backward", 1, 1),
+        #                          Statement("Myro", "backward", 1, 1),
+        #                          parallel=True
+        #                          )
+        #                    ),
+        #              Block("Do together:", 
+        #                    Statement("Myro", "backward", 1),
+        #                    Statement("Myro", "forward", 1, ),
+        #                    Statement("Myro", "backward", 1, ),
+        #                    Statement("Myro", "forward", 1, ),
+        #                    Statement("Myro", "backward", 1, ),
+        #                    Statement("Myro", "forward", 1, ),
+        #                    parallel=True),
+        #              ]
+
 
 class Dinah(Language):
     def get_engine_class(self):
