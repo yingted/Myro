@@ -17,3 +17,4 @@ for x in range(10):
     for t in turtles:
         t.move(random.random() * 6 - 3, 
                random.random() * 6 - 3)
+    win.update()

@@ -22,6 +22,8 @@ public static class Graphics {
     public static void init() {
 	if (!initialize) {
 	    initialize = true;
+	    _color_map.Add("black", new Cairo.Color(0, 0, 0, 1));
+	    _color_map.Add("white", new Cairo.Color(255, 255, 255, 1));
 	    _color_map.Add("red", new Cairo.Color(255, 0, 0, 1));
 	    _color_map.Add("green", new Cairo.Color(0, 255, 0, 1));
 	    _color_map.Add("blue", new Cairo.Color(0, 0, 255, 1));
@@ -31,10 +33,29 @@ public static class Graphics {
     }
 
     public class GraphWin : Gtk.Window {
+	private Canvas _canvas;
+	
 	public GraphWin(string title) : base(title) {
-	    this.Add(new Canvas());
+	    if (! Graphics.initialize) 
+		Graphics.init();
+	    _canvas = new Canvas("draw");
+	    this.Add(_canvas);
 	    ShowAll();
 	}
+
+	public string mode {
+	    get {
+		return _canvas.mode;
+	    }
+	    set {
+		if (value == "animate" || value == "draw")
+		    _canvas.mode = value;
+		else
+		    throw new Exception("window mode must be 'animate' or 'draw'");
+		
+	    }
+	}
+
 	public new void Show() {
 	    Gtk.Application.Invoke(delegate { base.Show(); });
 	}
@@ -99,6 +120,24 @@ public static class Graphics {
 
 	// Shape.draw() will add them here:
 	public List<Shape> shapes = new List<Shape>();
+	private string _mode;
+
+	public string mode {
+	    get {
+		return _mode;
+	    }
+	    set {
+		if (value == "animate" || value == "draw")
+		    _mode = value;
+		else
+		    throw new Exception("canvas mode must be 'animate' or 'draw'");
+	    }
+	}
+
+	public Canvas(string mode) : base() {
+	    this.mode = mode;
+	    
+	}
 
 	protected override bool OnExposeEvent (Gdk.EventExpose args) {
 	    using (Cairo.Context g = Gdk.CairoHelper.Create(args.Window)) {
@@ -124,22 +163,60 @@ public static class Graphics {
 	public double direction; // radians
 
 	private Point [] points;
-	private Point points_center;
+	public Point points_center;
 	private Cairo.Color _fill_color;
 	private Cairo.Color _outline_color;
 	private int _line_width;
 
+	private Pen _pen;
+	private bool _has_pen;
+
+	public bool has_pen {
+	    get {
+		return _has_pen;
+	    }
+	    set {
+		_has_pen = value;
+	    }
+	}
+
+	public int line_width {
+	    get {
+		return _line_width;
+	    }
+	    set {
+		_line_width = value;
+	    }
+	}
+
+	public Pen pen {
+	    get {
+		return _pen;
+	    }
+	    set {
+		if (has_pen)
+		    _pen = new Pen("black", 1);
+		else
+		    throw new Exception("this shape cannot have a pen");
+	    }
+	}
+
 	public void QueueDraw() {
+	    /*
 	    if (window is GraphWin)
 		Gtk.Application.Invoke(delegate {
 			window.update();
 			while (Gtk.Application.EventsPending ())
 			    Gtk.Application.RunIteration ();			
 		    });
+	    */
 	}
 
-	public Shape() {
+	public Shape(bool has_pen=true) {
 	    center = new Point(0,0);
+	    this.has_pen = has_pen;
+	    if (this.has_pen) 
+		pen = new Pen("black", 1);
 	    points_center = new Point(0,0);
 	    fill_color = new Cairo.Color(0.0, 0.0, 0.0, 1);
 	    outline_color = new Cairo.Color(0.0, 0.0, 0.0, 1);
@@ -159,6 +236,8 @@ public static class Graphics {
 	    g.FillPreserve();
 	    g.Color = outline_color;
 	    g.Stroke();
+	    if (has_pen)
+		pen.render(g);
 	}
 	
 	public int width {
@@ -202,10 +281,18 @@ public static class Graphics {
 	    }
 	}
 
-	public Cairo.Color color {
+	public Cairo.Color ccolor {
 	    set {
 		_fill_color = value;
 		_outline_color = value;
+		QueueDraw();
+	    }
+	}
+
+	public string color {
+	    set {
+		_fill_color = Graphics.color_map(value);
+		_outline_color = Graphics.color_map(value);
 		QueueDraw();
 	    }
 	}
@@ -227,6 +314,10 @@ public static class Graphics {
 	}
 
 	public void move(double dx, double dy) {
+	    if (has_pen && pen.down)
+		pen.append_path(new Line(false, // no pen for this line
+					 new Point(center.x, center.y),
+					 new Point(center.x + dx, center.y + dy)));
 	    center.x += dx;
 	    center.y += dy;
 	    QueueDraw();
@@ -297,19 +388,77 @@ public static class Graphics {
      public class Line : Shape {
 	 public Line(Point p1, Point p2) {
 	     set_points(p1, p2);
+	     move_to(points_center.x, points_center.y);
+	 }
+	 public Line(bool has_pen, Point p1, Point p2) : base(has_pen) {
+	     set_points(p1, p2);
+	     move_to(points_center.x, points_center.y);
 	 }
      }
 
      public class Arrow : Shape {
+	 public Arrow(Point new_center) : this(new_center, 0) {
+
+	 }
+
 	 public Arrow(Point new_center, double degrees) {
 	     set_points(
+			new Point(  0,  0),
 			new Point( -5, -5), 
-			new Point(  0,  5),
-			new Point(  5, -5), 
-			new Point(  0,  0)
+			new Point(  5,  0),
+			new Point( -5,  5) 
 			);
 	     move_to(new_center.x, new_center.y);
 	     rotate(degrees);
 	 }
+     }
+
+     public class Pen : Shape {
+	 private bool _down;
+	 private List<Line> _path = new List<Line>();
+
+	 public void reset_path() {
+	     _path = new List<Line>();
+	 }
+
+	 public void append_path(Line line) {
+	     _path.Add(line);
+	 }
+
+	 public bool down {
+	    get {
+		return _down;
+	    }
+	    set {
+		_down = value;
+	    }
+	 }
+
+	 public List<Line> path {
+	    get {
+		return _path;
+	    }
+	 }
+
+	 public bool up {
+	    get {
+		return (! _down);
+	    }
+	    set {
+		_down = (! value);
+	    }
+	 }
+
+	 public Pen(string color, int width) : base(false) {
+	     down = false;
+	     this.color = color;
+	     this.line_width = width;
+	 }
+
+	public new void render(Cairo.Context g) {
+	    foreach (Line line in path) {
+		line.render(g);
+	    }
+	}
      }
 }
