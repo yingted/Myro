@@ -6,10 +6,10 @@ init()
 win = GraphWin("Turtles!")
 
 turtles = []
-for x in range(100):
+for x in range(1000):
     turtle = Arrow(Point(random.random() * 200,random.random() * 200), random.random() * 360)
     turtle.draw(win)
-    turtle.color = color_map(random.choice(["red", "green", "blue", "yellow"]))
+    turtle.color = random.choice(["red", "green", "blue", "yellow"])
     turtles.append(turtle)
 
 win.ShowAll()
