@@ -171,8 +171,11 @@ public class Scribbler  {
 
     /**
      * Close the connection between the computer and the Scribbler.  Any threads associated with this robot
-     * (e.g., senses, joystick) will be killed.  After calling close the Scribbler cannot be
-     * accessed again unless {@link #connect connect} is called to reestablish the connection.  
+     * (e.g., senses, joystick) will be killed.  After calling close the Scribbler cannot be accessed again unless
+     * {@link #connect connect} is called to reestablish the connection.
+     * <p><p>
+     * It is important to invoke this method at the end of the program.  Failure to do so may cause problems when
+     * connecting to the Scribbler in the future.
      */
     public  void close()
     {
@@ -988,57 +991,57 @@ public class Scribbler  {
     //
     //---------------------------------------------------------------------------------------------
 
-    private static CommPortIdentifier portId;
-    private static CommPortIdentifier saveportId;
-    private static Enumeration        portList;
-    private InputStream              inputStream;
-    private SerialPort               serialPort;
-    private OutputStream      outputStream;
+    protected static CommPortIdentifier portId;
+    protected static CommPortIdentifier saveportId;
+    protected static Enumeration        portList;
+    protected InputStream              inputStream;
+    protected SerialPort               serialPort;
+    protected OutputStream      outputStream;
 
     // bytecode constants
-    private static final int SOFT_RESET             = 33;
+    protected static final int SOFT_RESET             = 33;
 
-    private static final int GET_ALL                = 65;
-    private static final int GET_LIGHT_LEFT         = 67;
-    private static final int GET_LIGHT_CENTER       = 68;
-    private static final int GET_LIGHT_RIGHT        = 69;
-    private static final int GET_LIGHT_ALL          = 70;
-    private static final int GET_IR_LEFT            = 71;
-    private static final int GET_IR_RIGHT           = 72;
-    private static final int GET_IR_ALL             = 73;
-    private static final int GET_LINE_LEFT          = 74;
-    private static final int GET_LINE_RIGHT         = 75;
-    private static final int GET_LINE_ALL           = 76;
-    private static final int GET_NAME1              = 78;
-    private static final int GET_NAME2              = 64;
-    private static final int GET_STALL              = 79;
-    private static final int GET_INFO               = 80;
-    private static final int GET_DATA               = 81;
+    protected static final int GET_ALL                = 65;
+    protected static final int GET_LIGHT_LEFT         = 67;
+    protected static final int GET_LIGHT_CENTER       = 68;
+    protected static final int GET_LIGHT_RIGHT        = 69;
+    protected static final int GET_LIGHT_ALL          = 70;
+    protected static final int GET_IR_LEFT            = 71;
+    protected static final int GET_IR_RIGHT           = 72;
+    protected static final int GET_IR_ALL             = 73;
+    protected static final int GET_LINE_LEFT          = 74;
+    protected static final int GET_LINE_RIGHT         = 75;
+    protected static final int GET_LINE_ALL           = 76;
+    protected static final int GET_NAME1              = 78;
+    protected static final int GET_NAME2              = 64;
+    protected static final int GET_STALL              = 79;
+    protected static final int GET_INFO               = 80;
+    protected static final int GET_DATA               = 81;
 
-    private static final int SET_SINGLE_DATA        = 96;
-    private static final int SET_DATA               = 97;
-    private static final int SET_ECHO_MODE          = 98;
-    private static final int SET_MOTORS_OFF         = 108;
-    private static final int SET_MOTORS             = 109;
-    private static final int SET_NAME1              = 110;
-    private static final int SET_NAME2              = 119;
-    private static final int SET_SPEAKER            = 113;
-    private static final int SET_SPEAKER_2          = 114;
+    protected static final int SET_SINGLE_DATA        = 96;
+    protected static final int SET_DATA               = 97;
+    protected static final int SET_ECHO_MODE          = 98;
+    protected static final int SET_MOTORS_OFF         = 108;
+    protected static final int SET_MOTORS             = 109;
+    protected static final int SET_NAME1              = 110;
+    protected static final int SET_NAME2              = 119;
+    protected static final int SET_SPEAKER            = 113;
+    protected static final int SET_SPEAKER_2          = 114;
 
     // robot state
-    private double _lastTranslate = 0.0;
-    private double _lastRotate = 0.0;
-    private int[] _lastSensors;     // Included because Myro-Pytyhon had this.  Not sure it's necessary
-    private boolean isOpened;       // true=>robot is connected and can be accessed
-    private Thread currentSensesThread;
-    private Thread currentJoyStickThread;
+    protected double _lastTranslate = 0.0;
+    protected double _lastRotate = 0.0;
+    protected int[] _lastSensors;     // Included because Myro-Pytyhon had this.  Not sure it's necessary
+    protected boolean isOpened;       // true=>robot is connected and can be accessed
+    protected Thread currentSensesThread;
+    protected Thread currentJoyStickThread;
 
     /**
      * Send the values contained in messageString to the Scribbler.  If the message has less than 9 values then
      * it is padded with zeros so that a 9-byte message is sent.  It is assumed that the values in messageString
      * are all between 0 and 255.
      */
-    private void _write(int[] messageString) {
+    protected void _write(int[] messageString) {
         byte[] byteString = new byte[9];
         // copy messageString to byteString
         for( int i=0; i<messageString.length; i++ )
@@ -1059,7 +1062,7 @@ public class Scribbler  {
      * Read numBytes from the Scribbler and return an array containing these values.  The returned values will all
      * be between 0 and 255.
      */
-    private int[] _read( int numBytes )
+    protected int[] _read( int numBytes )
     {
         byte[] readBuffer = new byte[numBytes];
         int numBytesRead = 0;
@@ -1101,7 +1104,7 @@ public class Scribbler  {
      * read (not including the eol) will be returned in the array.  All values in the array will be between
      * 0 and 255.
      */
-    private int[] _readLine( )
+    protected int[] _readLine( )
     {
         final int arrSize = 1000;   // assume no more than this many characters in response
         byte[] readBuffer = new byte[arrSize];
@@ -1146,7 +1149,7 @@ public class Scribbler  {
     /**
      * Read any remaining data from the Scribbler and throw them out.
      */
-    private void _flushInput()
+    protected void _flushInput()
     {
         final int arrSize = 1000;   // assume no more than this many characters in response
         byte[] readBuffer = new byte[arrSize];
@@ -1162,7 +1165,7 @@ public class Scribbler  {
     /**
      * Set the Scribbler motors so the robot is moving in the specified direction.
      */
-    private void _adjustSpeed(double translate, double rotate )
+    protected void _adjustSpeed(double translate, double rotate )
     {
         _lastTranslate = translate;
         _lastRotate = rotate;
@@ -1181,7 +1184,7 @@ public class Scribbler  {
      * also read from the Scribbler and stored in instance field _lastSensors.  Only one thread can can communicate 
      * with the Scribbler at a time.
      */
-    private synchronized void _set( int command )
+    protected synchronized void _set( int command )
     {
         int[] data = new int[8];
         _set( command, data );
@@ -1193,7 +1196,7 @@ public class Scribbler  {
      * the echo.  The 11 byte response is also read from the Scribbler and stored in instance field _lastSensors.
      * Only one thread can can communicate with the Scribbler at a time.
      */
-    private synchronized void _set( int command, int value1, int value2 )
+    protected synchronized void _set( int command, int value1, int value2 )
     {
         int[] data = new int[] { value1, value2 };
         _set( command, data );
@@ -1205,7 +1208,7 @@ public class Scribbler  {
      * Scribbler and a sanity check is performed on the echo.  The 11 byte response is also read from the Scribbler
      * and stored in instance field _lastSensors.  Only one thread can can communicate with the Scribbler at a time.
      */
-    private synchronized void _set( int command, int[] values )
+    protected synchronized void _set( int command, int[] values )
     {
         // construct message to scribbler
         int[] message = new int[ values.length + 1];
@@ -1224,7 +1227,7 @@ public class Scribbler  {
      * Send a get_all command to the Scribbler and store the data received in instance field _lastSensors.  Only one
      * thread at a time can communicate with the Scribbler.
      */
-    private synchronized int[] _getAll()
+    protected synchronized int[] _getAll()
     {
         _lastSensors = _get( GET_ALL, 11 );
         return _lastSensors;
@@ -1237,7 +1240,7 @@ public class Scribbler  {
      * stored in an array that is returned to the invoker.  Only one thread at a time can communicate with the
      * Scribbler.
      */
-    private synchronized int[] _get( int command, int numResponseBytes )
+    protected synchronized int[] _get( int command, int numResponseBytes )
     {
         int[] retVal = null;
         int[] message = new int[] { command };
@@ -1255,7 +1258,7 @@ public class Scribbler  {
      * eol-terminate response is read from the Scribbler and returned (without the eol) to the caller.  Only one
      * thread at a time can communicate with the Scribbler.
      */
-    private synchronized int[] _getLine( int command )
+    protected synchronized int[] _getLine( int command )
     {
         int[] retVal = null;
         int[] message = new int[] { command };
@@ -1271,7 +1274,7 @@ public class Scribbler  {
      * 
      * @return true iff the original message and echo are the same.
      */
-    private boolean _checkEcho( int[] message, int[]echo )
+    protected boolean _checkEcho( int[] message, int[]echo )
     {
         // returns true iff message == echo
         boolean echoOK = true;
@@ -1323,7 +1326,7 @@ public class Scribbler  {
      * private method used only by the implementation of myro.  Programmers should use java's Thread.sleep method
      * directly.
      */
-    private  void _wait( double numSeconds )
+    protected  void _wait( double numSeconds )
     {
         try
         {
@@ -1337,7 +1340,7 @@ public class Scribbler  {
      * and displays the values of all sensors in the window.  The thread will be killed (and the window closed) when
      * the user clicks the window's close icon or the Scribbler's close method is invoked.
      */
-    private class sensesThread implements Runnable 
+    protected class sensesThread implements Runnable 
     {
         private Scribbler robot;
         private JLabel stallValue;
@@ -1547,7 +1550,7 @@ public class Scribbler  {
      * The thread will be killed (and the window closed) when the user clicks the window's close icon or the
      * Scribbler's close method is invoked.
      */
-    private class joyStickThread implements Runnable
+    protected class joyStickThread implements Runnable
     {
         private Scribbler robot;
         boolean finished;
