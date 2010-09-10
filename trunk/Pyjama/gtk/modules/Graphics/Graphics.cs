@@ -1,24 +1,31 @@
 using System.Collections.Generic;
-using PolygonIntersection;
+using System;
 
 public static class Graphics {
 
     public static bool initialize;
-
-    public static Dictionary<string, Cairo.Color> color_map = 
+    private static Dictionary<string, Cairo.Color> _color_map = 
 	new Dictionary<string, Cairo.Color>();
+
+    public static Cairo.Color color_map(string name) {
+	return _color_map[name];
+    }
 
     public static Cairo.Color color_rgb(int r, int g, int b) {
 	return new Cairo.Color(r/255.0, g/255.0, b/255.0, 1);
     }
 
+    public static List<string> color_names() {
+	return new List<string>(_color_map.Keys);
+    }
+
     public static void init() {
 	if (!initialize) {
 	    initialize = true;
-	    color_map.Add("red", new Cairo.Color(255, 0, 0, 1));
-	    color_map.Add("green", new Cairo.Color(0, 255, 0, 1));
-	    color_map.Add("blue", new Cairo.Color(0, 0, 255, 1));
-	    color_map.Add("yellow", new Cairo.Color(255, 255, 0, 1));
+	    _color_map.Add("red", new Cairo.Color(255, 0, 0, 1));
+	    _color_map.Add("green", new Cairo.Color(0, 255, 0, 1));
+	    _color_map.Add("blue", new Cairo.Color(0, 0, 255, 1));
+	    _color_map.Add("yellow", new Cairo.Color(255, 255, 0, 1));
 	    Gtk.Application.Init();
 	}
     }
@@ -60,8 +67,8 @@ public static class Graphics {
 
     public class Turtle {
 
-	  public int x;
-	  public int y;
+	  public double x;
+	  public double y;
 	  public GraphWin window;
 	  
 	  public Turtle() {
@@ -79,10 +86,10 @@ public static class Graphics {
     }
 
     public class Point {
-	public int x;
-	public int y;
+	public double x;
+	public double y;
 
-	public Point(int x, int y) {
+	public Point(double x, double y) {
 	    this.x = x;
 	    this.y = y;
 	}
@@ -95,20 +102,16 @@ public static class Graphics {
 
 	protected override bool OnExposeEvent (Gdk.EventExpose args) {
 	    using (Cairo.Context g = Gdk.CairoHelper.Create(args.Window)) {
-		Polygon p = new Polygon();
-		p.Points.Add(new Vector(args.Area.X, 
-					args.Area.Y));
-		p.Points.Add(new Vector(args.Area.X + args.Area.Width,
-					args.Area.Y));
-		p.Points.Add(new Vector(args.Area.X + args.Area.Width,
-					args.Area.Y + args.Area.Height));
-		p.Points.Add(new Vector(args.Area.X, 
-					args.Area.Y + args.Area.Height));
-		p.BuildEdges();
-		foreach (Shape shape in shapes) {
-		    if (Collision.PolygonCollision(p, shape.polygon)) {
+		// clip to the visible part
+		g.Rectangle(args.Area.X, args.Area.Y,
+			    args.Area.Width, args.Area.Height);
+		g.Clip();
+		try {
+		    foreach (Shape shape in shapes) {
 			shape.render(g);
 		    }
+		} catch {
+		    // updating the window while someone changed the objects
 		}
 	    }
 	    return true;
@@ -116,21 +119,28 @@ public static class Graphics {
     } 
 
     public class Shape {
-	public Point [] points;
 	public Point center;
-	public Polygon polygon;
+	public GraphWin window;
+	public double direction; // radians
+
+	private Point [] points;
+	private Point points_center;
 	private Cairo.Color _fill_color;
 	private Cairo.Color _outline_color;
-	private int _width;
-	public GraphWin window;
+	private int _line_width;
 
 	public void QueueDraw() {
 	    if (window is GraphWin)
-		Gtk.Application.Invoke(delegate {window.update();});
+		Gtk.Application.Invoke(delegate {
+			window.update();
+			while (Gtk.Application.EventsPending ())
+			    Gtk.Application.RunIteration ();			
+		    });
 	}
 
 	public Shape() {
 	    center = new Point(0,0);
+	    points_center = new Point(0,0);
 	    fill_color = new Cairo.Color(0.0, 0.0, 0.0, 1);
 	    outline_color = new Cairo.Color(0.0, 0.0, 0.0, 1);
 	    width = 1;
@@ -138,11 +148,11 @@ public static class Graphics {
 
 	public void render(Cairo.Context g) {
 	    g.LineWidth = width;
-	    g.MoveTo(center.x + points[0].x, 
-		     center.y + points[0].y);
+	    g.MoveTo(center.x + points[0].x + points_center.x, 
+		     center.y + points[0].y + points_center.y);
 	    for (int p = 1; p < points.Length; p++) {
-		g.LineTo(center.x + points[p].x, 
-			 center.y + points[p].y);
+		g.LineTo(center.x + points[p].x + points_center.x, 
+			 center.y + points[p].y + points_center.y);
 	    }
 	    g.ClosePath();
 	    g.Color = fill_color;
@@ -153,10 +163,10 @@ public static class Graphics {
 	
 	public int width {
 	    get {
-		return _width;
+		return _line_width;
 	    }
 	    set {
-		_width = value;
+		_line_width = value;
 		QueueDraw();
 	    }
 	}
@@ -192,6 +202,14 @@ public static class Graphics {
 	    }
 	}
 
+	public Cairo.Color color {
+	    set {
+		_fill_color = value;
+		_outline_color = value;
+		QueueDraw();
+	    }
+	}
+
 	public void set_points(params Point [] new_points) {
 	    points = new Point [new_points.Length];
 	    // copies
@@ -199,57 +217,66 @@ public static class Graphics {
 		points[p] = new Point(new_points[p].x, 
 				      new_points[p].y);
 	    }
-	    compute_center();
-	    move_to(0, 0);
+	    compute_points_center();
 	}
 
-	public void move_to(int x, int y) {
-	    int dx = x - center.x;
-	    int dy = y - center.y;
+	public void move_to(double x, double y) {
+	    double dx = x - center.x;
+	    double dy = y - center.y;
 	    move(dx, dy);
 	}
 
-	public void move(int dx, int dy) {
-	    // Bounding box:
-	    int min_x, min_y;
-	    int max_x, max_y;
-	    min_x = min_y =  10000;
-	    max_x = max_y = -10000;
-	    for (int p = 0; p < points.Length; p++) {
-		points[p].x += dx;
-		points[p].y += dy;
-		// p1 is min's; p2 is max's
-		min_x = points[p].x > min_x ? min_x : points[p].x;
-		min_y = points[p].y > min_y ? min_y : points[p].y;
-		max_x = points[p].x < max_x ? max_x : points[p].x;
-		max_y = points[p].y < max_y ? max_y : points[p].y;
-	    }
-	    polygon = new Polygon();
-	    polygon.Points.Add(new Vector(min_x, min_y));
-	    polygon.Points.Add(new Vector(max_x, min_y));
-	    polygon.Points.Add(new Vector(max_x, max_y));
-	    polygon.Points.Add(new Vector(min_x, max_y));
-	    polygon.BuildEdges();
+	public void move(double dx, double dy) {
 	    center.x += dx;
 	    center.y += dy;
 	    QueueDraw();
 	}
 
-	public void compute_center() {
-	    int sum_x = 0, sum_y = 0;
+	public void rotate(double degrees) {
+	    rotate_to(degrees, points_center);
+	}
+
+	public void forward(double distance) {
+	    double x = ((center.x + distance) * Math.Cos(direction) - 
+			(center.y) * Math.Sin(direction));
+	    double y = ((center.x - distance) * Math.Sin(direction) + 
+			(center.y) * Math.Cos(direction));
+	    center.x = x;
+	    center.y = y;
+	}
+
+	public void backward(double distance) {
+	    forward(-distance);
+	}
+
+	public void rotate_to(double degrees, Point rpoint) {
+	    direction = degrees * (2 * Math.PI) / 360.0;
+	    foreach (Point point in points) {
+		double x = ((point.x - rpoint.x) * Math.Cos(direction) - 
+			    (point.y - rpoint.y) * Math.Sin(direction));
+		double y = ((point.x - rpoint.x) * Math.Sin(direction) + 
+			    (point.y - rpoint.y) * Math.Cos(direction));
+		point.x = x + rpoint.x;
+		point.y = y + rpoint.y;
+	    }
+	    QueueDraw();
+	}
+
+	public void compute_points_center() {
+	    double sum_x = 0, sum_y = 0;
 	    if (points.Length == 0) {
-		center.x = 0;
-		center.y = 0;
+		points_center.x = 0;
+		points_center.y = 0;
 	    } else if (points.Length == 1) {
-		center.x = points[0].x;
-		center.y = points[0].y;
+		points_center.x = points[0].x;
+		points_center.y = points[0].y;
 	    } else if (points.Length > 1) {
 		for (int p = 0; p < points.Length; p++) {
 		    sum_x += points[p].x;
 		    sum_y += points[p].y;
 		}
-		center.x = sum_x/points.Length;
-		center.y = sum_y/points.Length;
+		points_center.x = sum_x/points.Length;
+		points_center.y = sum_y/points.Length;
 	    }
 	}
 	
@@ -274,7 +301,7 @@ public static class Graphics {
      }
 
      public class Arrow : Shape {
-	 public Arrow(Point new_center) {
+	 public Arrow(Point new_center, double degrees) {
 	     set_points(
 			new Point( -5, -5), 
 			new Point(  0,  5),
@@ -282,6 +309,7 @@ public static class Graphics {
 			new Point(  0,  0)
 			);
 	     move_to(new_center.x, new_center.y);
+	     rotate(degrees);
 	 }
      }
 }

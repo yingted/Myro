@@ -285,6 +285,50 @@ class DinahDocument(PlainDocument):
         for x in ["wait", "beep", "random", "ask"]:
             store.AppendValues(module, '<span bgcolor="%s">.%s()</span>' % 
                                (color_code(statement_color), x))
+        
+
+        # How to get References that have been added, by Name:
+        # >>> clr.References[2].ManifestModule.Name
+        # 'Myro.dll'
+        # How to find classes in DLL:
+        # >>> [x.Name for x in clr.References[2].ManifestModule.GetTypes()]
+        # ['Myro', '_Robot', '_Scribbler']
+        # How to find static fields in class:
+        # >>> clr.References[2].ManifestModule.GetTypes()[0].GetFields()[0].Name
+        # 'robot'
+        # How to get all of the items in a class:
+        # >>> [x.Name for x in clr.References[2].ManifestModule.GetTypes()[0].GetMembers()]
+        # ['init', 'forward', 'backward', 'Equals', 'GetHashCode', 'GetType', 'ToString', 'robot', '_Scribbler', '_Robot']
+        # What types are these members:
+        # >>> clr.References[2].ManifestModule.GetTypes()[0].GetMembers()[0].MemberType
+        # >>> [str(x.MemberType) for x in clr.References[2].ManifestModule.GetTypes()[0].GetMembers()]
+        # ['Method', 'Method', 'Method', 'Method', 'Method', 'Method', 'Method', 'Field', 'NestedType', 'NestedType']
+        # Which are the ones we are interested in?
+        # >>> [(x.Name, x.Attributes) for x in clr.References[2].ManifestModule.GetTypes()[0].GetMembers()]
+        # [('init', <enum System.Reflection.MethodAttributes: Public, Static, HideBySig>), 
+        #  ('forward', <enum System.Reflection.MethodAttributes: Public, Static, HideBySig>), 
+        #  ('backward', <enum System.Reflection.MethodAttributes: Public, Static, HideBySig>), 
+        #  ('Equals', <enum System.Reflection.MethodAttributes: Public, Virtual, HideBySig, VtableLayoutMask>), 
+        #  ('GetHashCode', <enum System.Reflection.MethodAttributes: Public, Virtual, HideBySig, VtableLayoutMask>), 
+        #  ('GetType', <enum System.Reflection.MethodAttributes: Public, HideBySig>), 
+        #  ('ToString', <enum System.Reflection.MethodAttributes: Public, Virtual, HideBySig, VtableLayoutMask>), 
+        #  ('robot', <enum System.Reflection.FieldAttributes: Public, Static>), 
+        #  ('_Scribbler', <enum System.Reflection.TypeAttributes: NestedPublic, Serializable, BeforeFieldInit>), 
+        #  ('_Robot', <enum System.Reflection.TypeAttributes: NestedPublic, BeforeFieldInit>)]
+        # How many params does each take? What is return value?
+        # repr(m)
+        # The following is about Myro.forward(), m:
+        # '<System.Reflection.MonoMethod object at 0x0000000000000066 [Void forward(Single, Nullable`1)]>'
+        # >>> m.GetParameters()
+        # Array[ParameterInfo]((<System.Reflection.ParameterInfo object at 0x000000000000006C [Single power]>, <System.Reflection.ParameterInfo object at 0x000000000000006D [System.Nullable`1[[System.Single, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]] time]>))
+        # >>> dir(m.GetParameters()[0])
+        # ['Attributes', 'AttrsImpl', 'ClassImpl', 'DefaultValue', 'DefaultValueImpl', 'Equals', 'Finalize', 'GetCustomAttributes', 'GetHashCode', 'GetIDsOfNames', 'GetOptionalCustomModifiers', 'GetRequiredCustomModifiers', 'GetType', 'GetTypeInfo', 'GetTypeInfoCount', 'Invoke', 'IsDefined', 'IsIn', 'IsLcid', 'IsOptional', 'IsOut', 'IsRetval', 'Member', 'MemberImpl', 'MemberwiseClone', 'MetadataToken', 'Name', 'NameImpl', 'ParameterType', 'Position', 'PositionImpl', 'RawDefaultValue',...]
+        # p is a parameter:
+        # p.Attributes
+        # <enum System.Reflection.ParameterAttributes: Optional, HasDefault>
+        # p.DefaultValue, p.ParameterType, 
+        # 1, System.Single, 
+        
 
         
         module = store.AppendValues("<b>Myro</b>")
