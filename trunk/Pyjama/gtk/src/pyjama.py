@@ -96,14 +96,14 @@ class PyjamaProject(object):
             from shell import ShellWindow
             self.shell = ShellWindow(self)
         else:
-            self.shell.window.Show()
+            self.shell.window.ShowAll()
 
     def setup_editor(self, *args, **kwargs):
         if self.editor is None:
             from editor import EditorWindow
             self.editor = EditorWindow(self)
         else:
-            self.editor.window.Show()
+            self.editor.window.ShowAll()
 
 # Let's start!
 Gtk.Application.Init()

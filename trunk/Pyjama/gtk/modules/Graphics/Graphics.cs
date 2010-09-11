@@ -40,7 +40,9 @@ public static class Graphics {
 	private bool _dirty = false;
 	private bool timer_running = false;
 	private DateTime last_update = new DateTime(2000,1,1);
-	private uint _update_interval = 100;
+	private uint _update_interval = 100; // how often, in ms, to auto update
+	public uint animate_step_time = 200; // how often, in ms, to
+										 // animate steps
 
 	public GraphWin(string title, 
 			int width=300, 
@@ -62,6 +64,19 @@ public static class Graphics {
 		_update_interval = value;
 	  }
 	}
+  
+	public void step() {
+	  if (mode == "animate") {
+		DateTime start = DateTime.Now;
+		DateTime now = DateTime.Now;
+		// diff is TimeSpan
+		while ((now - start).TotalMilliseconds < animate_step_time) {
+		  now = DateTime.Now;
+		}
+	  }
+	  update(); // used without timing in "draw" mode, but draw
+	            // issues QueueDraw's per object redraw
+	}
 
 	public string mode {
 	  get {
@@ -79,7 +94,7 @@ public static class Graphics {
 		_dirty = true;
 		DateTime now = DateTime.Now;
 		// diff is TimeSpan
-		if ((now - last_update).TotalMilliseconds < _update_interval) {
+		if ((now - last_update).TotalMilliseconds < update_interval) {
 		  // pass, too soon!
 		  // but we need to make sure that someone checks
 		  // in the future. 
@@ -89,8 +104,8 @@ public static class Graphics {
 		  } else {
 			// let's spawn one to check in 100 ms or so
 			timer_running = true;
-			GLib.Timeout.Add(_update_interval, 
-				new GLib.TimeoutHandler(redraw_now) );
+			GLib.Timeout.Add(update_interval, 
+				new GLib.TimeoutHandler(_redraw_now) );
 		  }
 		} else {
 		  last_update = now;
@@ -99,7 +114,7 @@ public static class Graphics {
 		}
 	}
 
-	public bool redraw_now() {
+	private bool _redraw_now() {
 		DateTime now = DateTime.Now;
 		if (_dirty) {
 		  last_update = now;
@@ -245,9 +260,11 @@ public static class Graphics {
 
 	public void QueueDraw() {
 	  if (window is GraphWin) {
-		Gtk.Application.Invoke(delegate {
-			  window.need_to_redraw();
-			});
+		  Gtk.Application.Invoke(delegate {
+				if (window.mode == "draw") { // else, we will issue an update, or step
+				  window.need_to_redraw();
+				}
+			  });
 	  }
 	}
 
@@ -289,26 +306,7 @@ public static class Graphics {
 	  outline_color = "black";
 	  width = 1;
 	}
-	  
-	  public void render(Cairo.Context g) {
-	    if (points != null) {
-		  g.LineWidth = width;
-		  g.MoveTo(center.x + points[0].x - points_center.x, 
-			       center.y + points[0].y - points_center.y);
-		  for (int p = 1; p < points.Length; p++) {
-		    g.LineTo(center.x + points[p].x - points_center.x, 
-				     center.y + points[p].y - points_center.y);
-		  }
-		  g.ClosePath();
-		  g.Color = _fill_color;
-		  g.FillPreserve();
-		  g.Color = _outline_color;
-		  g.Stroke();
-		  if (has_pen)
-		    pen.render(g);
-	    }
-	  }
-	  
+
 	  public int width {
 	    get {
 		  return _line_width;
@@ -407,10 +405,10 @@ public static class Graphics {
 	}
 
 	public void forward(double distance) {
-	    double x = ((center.x + distance) * Math.Cos(direction) - 
-			(center.y) * Math.Sin(direction));
-	    double y = ((center.x - distance) * Math.Sin(direction) + 
-			(center.y) * Math.Cos(direction));
+	    double x = ((center.x + distance) * Math.Cos(_direction) - 
+			(center.y) * Math.Sin(_direction));
+	    double y = ((center.x - distance) * Math.Sin(_direction) + 
+			(center.y) * Math.Cos(_direction));
 		if (has_pen && pen.down)
 		  pen.append_path(new Line(false, // no pen for this line
 				  new Point(center.x, center.y),
@@ -424,34 +422,50 @@ public static class Graphics {
 	    forward(-distance);
 	}
 
-	public void rotate(double degrees) {
-	  rotate(degrees, points_center);
-	}
-
-	public void rotate(double degrees, Point rpoint) {
-	    double new_direction = direction + degrees * (2 * Math.PI) / 360.0;
-		rotate_to(new_direction);
-	}
-
-	public void rotate_to(double degrees) {
-	    rotate_to(degrees, points_center);
-	}
-
-	public void rotate_to(double degrees, Point rpoint) {
-	  _direction = degrees * (2 * Math.PI) / 360.0;
-	  //_direction = direction % (2.0 * Math.PI);
-	  foreach (Point point in points) {
-		double x = ((point.x - rpoint.x) * Math.Cos(direction) - 
-			(point.y - rpoint.y) * Math.Sin(direction));
-		double y = ((point.x - rpoint.x) * Math.Sin(direction) + 
-			(point.y - rpoint.y) * Math.Cos(direction));
-		point.x = x + rpoint.x;
-		point.y = y + rpoint.y;
+	  public void render(Cairo.Context g) {
+		Point temp;
+	    if (points != null) {
+		  g.LineWidth = width;
+		  temp = screen_coord(points[0]);
+		  g.MoveTo(temp.x, temp.y);
+		  for (int p = 1; p < points.Length; p++) {
+			temp = screen_coord(points[p]);
+		    g.LineTo(temp.x, temp.y);
+		  }
+		  g.ClosePath();
+		  g.Color = _fill_color;
+		  g.FillPreserve();
+		  g.Color = _outline_color;
+		  g.Stroke();
+		  if (has_pen)
+		    pen.render(g);
+	    }
 	  }
-	  QueueDraw();
-	}
-	
-	public void compute_points_center() {
+
+	  public Point screen_coord(Point point) {
+		// first we rotate
+		double x = ((point.x - points_center.x) * Math.Cos(_direction) - 
+			(point.y - points_center.y) * Math.Sin(_direction));
+		double y = ((point.x - points_center.x) * Math.Sin(_direction) + 
+			(point.y - points_center.y) * Math.Cos(_direction));
+		// now we translate:
+		return new Point(center.x + x - points_center.x, 
+			center.y + y - points_center.y);
+	  }
+	  
+	  public void rotate(double degrees) {
+		_direction -= (Math.PI / 180.0) * degrees;
+		Console.WriteLine("_direction is {0}", _direction);
+		QueueDraw();
+	  }
+	  
+	  public void rotate_to(double degrees) {
+		_direction = degrees * (Math.PI) / 180.0;
+		Console.WriteLine("_direction is {0}", _direction);
+		QueueDraw();
+	  }
+	  
+   public void compute_points_center() {
 	  double sum_x = 0, sum_y = 0;
 	  if (points.Length == 0) {
 		points_center.x = 0;
