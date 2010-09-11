@@ -1,20 +1,24 @@
-import time
-import random
 from Graphics import *
+import random
 
-init()
 win = GraphWin("Turtles!")
 
 turtles = []
 for x in range(1000):
-    turtle = Arrow(Point(random.random() * 200,random.random() * 200), random.random() * 360)
+    width, height = win.DefaultWidth, win.DefaultHeight
+    turtle = Arrow(Point(random.random() * win.DefaultWidth, 
+                         random.random() * win.DefaultHeight), 
+                   random.random() * 360)
     turtle.draw(win)
     turtle.color = random.choice(["red", "green", "blue", "yellow"])
     turtles.append(turtle)
 
 win.ShowAll()
+
 for x in range(10):
     for t in turtles:
         t.move(random.random() * 6 - 3, 
                random.random() * 6 - 3)
-    win.update()
+
+for x in range(1000):
+    turtles[x].color = ["red", "green", "blue", "black"][x / 333]

@@ -8,7 +8,10 @@ public static class Graphics {
 	new Dictionary<string, Cairo.Color>();
 
     public static Cairo.Color color_map(string name) {
-	return _color_map[name];
+	if (_color_map.ContainsKey(name))
+	    return _color_map[name];
+	else
+	    throw new Exception(String.Format("unknown color '{0}'", name));
     }
 
     public static Cairo.Color color_rgb(int r, int g, int b) {
@@ -38,11 +41,15 @@ public static class Graphics {
 	private bool timer_running = false;
 	private DateTime last_update = new DateTime(2000,1,1);
 	private uint _update_interval = 100;
-	
-	public GraphWin(string title) : base(title) {
+
+	public GraphWin(string title, 
+			int width=300, 
+			int height=300) : base(title) {
+
 	  if (! Graphics.initialize) 
 		Graphics.init();
 	  _canvas = new Canvas("draw");
+	  SetDefaultSize(width, height);
 	  this.Add(_canvas);
 	  ShowAll();
 	}
@@ -343,10 +350,23 @@ public static class Graphics {
 	    }
 	  }
 	  
-	  public Cairo.Color cairo_color {
+	  public Cairo.Color raw_fill_color {
 		// Set color from cairo color object
+	    get {
+		  return _fill_color;
+	    }
 	    set {
 		  _fill_color = value;
+		  QueueDraw();
+	    }
+	  }
+
+	  public Cairo.Color raw_outline_color {
+		// Set color from cairo color object
+	    get {
+		  return _outline_color;
+	    }
+	    set {
 		  _outline_color = value;
 		  QueueDraw();
 	    }

@@ -1,5 +1,6 @@
 import clr
 import System
+import time
 
 def get_reference(dll_file):
     """
@@ -29,36 +30,37 @@ def get_class(dll_file, _class):
         if not c.Name.startswith("_") and c.Name == _class:
             return c
 
-def get_items(dll_file, _class):
+def get_items(dll_file, _class, item_type):
+    # method_type is from System.Reflection.MemberTypes.Method
     # How to get all of the items in a class:
     # >>> [x.Name for x in clr.References[2].ManifestModule.GetTypes()[0].GetMembers()]
     # ['init', 'forward', 'backward', 'Equals', 'GetHashCode', 'GetType', 'ToString', 'robot', '_Scribbler', '_Robot']
     # MemberType -> System.Reflection.MemberTypes.Method
-    return [i.Name for i in [c for c in get_reference(dll_file).ManifestModule.GetTypes() if c.Name == _class] 
-            if (i.Name not in ["GetType"]) and 
-               ((int(System.Reflection.MethodAttributes.VtableLayoutMask) & int(i.Attributes)) == 0) and 
-               not i.Name.startswith("_")]
+    items = []
+    reference = get_reference(dll_file)
+    if reference:
+        manifest = reference.ManifestModule
+        if manifest:
+            mtypes = manifest.GetTypes()
+            if mtypes:
+                for c in mtypes:
+                    if c is not None and c.Name == _class:
+                        for member in c.GetMembers():
+                            if (member and (member.Name not in ["GetType"]) and 
+                                (int(System.Reflection.MethodAttributes.VtableLayoutMask) & int(member.Attributes)) == 0 and 
+                                member.MemberType == item_type and
+                                not member.Name.startswith("_")):
+                                items.append((c, member))
+    return items
 
 def get_methods(dll_file, _class):
-    # How to get all of the items in a class:
-    # >>> [x.Name for x in clr.References[2].ManifestModule.GetTypes()[0].GetMembers()]
-    # ['init', 'forward', 'backward', 'Equals', 'GetHashCode', 'GetType', 'ToString', 'robot', '_Scribbler', '_Robot']
-    # MemberType -> System.Reflection.MemberTypes.Method
-    return [i.Name for i in [c for c in get_reference(dll_file).ManifestModule.GetTypes() if c.Name == _class] 
-            if (i.Name not in ["GetType"]) and i.MemberType is System.Reflection.MemberTypes.Method and
-               (int(System.Reflection.MethodAttributes.VtableLayoutMask) & int(i.Attributes) == 0) and 
-               not i.Name.startswith("_")]
+    return get_items(dll_file, _class, System.Reflection.MemberTypes.Method)
 
-# [('init', <enum System.Reflection.MethodAttributes: Public, Static, HideBySig>, Method), 
-#  ('forward', <enum System.Reflection.MethodAttributes: Public, Static, HideBySig>, Method), 
-#  ('backward', <enum System.Reflection.MethodAttributes: Public, Static, HideBySig>, Method), 
-#  ('Equals', <enum System.Reflection.MethodAttributes: Public, Virtual, HideBySig, VtableLayoutMask>, Method),
-#  ('GetHashCode', <enum System.Reflection.MethodAttributes: Public, Virtual, HideBySig, VtableLayoutMask>, Method),
-#  ('GetType', <enum System.Reflection.MethodAttributes: Public, HideBySig>, Method), 
-#  ('ToString', <enum System.Reflection.MethodAttributes: Public, Virtual, HideBySig, VtableLayoutMask>, Method),
-#  ('robot', <enum System.Reflection.FieldAttributes: Public, Static>, Field), 
-#  ('_Scribbler', <enum System.Reflection.TypeAttributes: NestedPublic, Serializable, BeforeFieldInit>, NestedType),
-#  ('_Robot', <enum System.Reflection.TypeAttributes: NestedPublic, BeforeFieldInit>, NestedType)]
+def get_fields(dll_file, _class):
+    # How to find static fields in class:
+    # >>> clr.References[2].ManifestModule.GetTypes()[0].GetFields()[0].Name
+    # 'robot'
+    return get_items(dll_file, _class, System.Reflection.MemberTypes.Field)
 
         # How many params does each take? What is return value?
         # repr(m)
@@ -74,6 +76,3 @@ def get_methods(dll_file, _class):
         # p.DefaultValue, p.ParameterType, 
         # 1, System.Single, 
  
-        # How to find static fields in class:
-        # >>> clr.References[2].ManifestModule.GetTypes()[0].GetFields()[0].Name
-        # 'robot'

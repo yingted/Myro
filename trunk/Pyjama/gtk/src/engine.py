@@ -86,6 +86,11 @@ class DLREngine(Engine):
                                                       "red"), 
                                          System.Text.Encoding.UTF8)
 
+    def parse(self, text):
+        sctype = Microsoft.Scripting.SourceCodeKind.InteractiveCode
+        source = self.engine.CreateScriptSourceFromString(text, sctype)
+        return source.GetCodeProperties() == Microsoft.Scripting.ScriptCodeParseResult.Complete
+
     def execute(self, text):
         sctype = Microsoft.Scripting.SourceCodeKind.InteractiveCode
         source = self.engine.CreateScriptSourceFromString(text, sctype)

@@ -18,6 +18,8 @@ class SchemeEngine(Engine):
     def start(self, stderr, stdout, stdin):
         super(SchemeEngine, self).start(stderr, stdout, stdin)
         self.engine.set_dlr(self.manager.scope, self.manager.runtime)
+    def parse(self, text):
+        return False # requires an empty line
 
 class Scheme(Language):
     def get_engine_class(self):

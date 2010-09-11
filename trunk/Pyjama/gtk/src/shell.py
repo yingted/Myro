@@ -31,6 +31,7 @@ class History(object):
     def __init__(self):
         self.history = []
         self.position = None
+        self.dirty = False
 
     def up(self):
         #print "up", self.position, self.history
@@ -48,10 +49,20 @@ class History(object):
             return self.history[self.position]
         return None
 
+    def replace(self, text):
+        self.history[-1] = text
+
     def add(self, text):
+        self.dirty = False
         self.history.append(text)
         self.position = len(self.history)
         #print "add", self.position, self.history
+
+    def last(self):
+        return self.position == len(self.history)
+
+    def nextlast(self):
+        return self.position == len(self.history) - 1
 
 class MyWindow(Gtk.Window):
     def set_on_key_press(self, on_key_press):
@@ -118,7 +129,23 @@ class ShellWindow(Window):
         self.command_area.PackStart(self.scrolled_window, True, True, 0)
         self.scrolled_window.ShadowType = Gtk.ShadowType.Out
         self.scrolled_window.HeightRequest = 20
-        self.textview = Gtk.TextView()
+
+        try:
+            import clr
+            clr.AddReference("gtksourceview2-sharp")
+            import GtkSourceView
+            self.lang_manager = GtkSourceView.SourceLanguageManager()
+            self.textview = GtkSourceView.SourceView()
+            self.textview.ShowLineNumbers = False
+            self.textview.InsertSpacesInsteadOfTabs = True
+            self.textview.IndentWidth = 4
+            self.textview.Buffer.Language = self.lang_manager.GetLanguage(
+                self.language)
+            self.textview.Editable = True
+            self.textview.WrapMode = Gtk.WrapMode.Word
+            self.textview.AcceptsTab = True
+        except:
+            self.textview = Gtk.TextView()
         #self.textview.KeyPressEvent += self.on_key_press
         self.textview.Show()
         self.textview.ModifyFont(Pango.FontDescription.FromString("Monospace 10"))
@@ -126,7 +153,8 @@ class ShellWindow(Window):
         self.results = Gtk.ScrolledWindow()
         for color in ["red", "blue", "green", "black"]:
             tag = Gtk.TextTag(color)
-            tag.Weight = Pango.Weight.Bold
+            if color in ["red", "black"]:
+                tag.Weight = Pango.Weight.Bold
             tag.Foreground = color 
             self.history_textview.Buffer.TagTable.Add(tag)
         self.history_textview.ModifyFont(Pango.FontDescription.FromString("Monospace 10"))
@@ -170,30 +198,56 @@ class ShellWindow(Window):
         if str(event.Key) == "Return":
             mark = self.textview.Buffer.InsertMark
             itermark = self.textview.Buffer.GetIterAtMark(mark)
-            line = itermark.Line - 1
+            line = itermark.Line
             iterline = self.textview.Buffer.GetIterAtLine(line)
             end = self.textview.Buffer.EndIter
-            text = self.textview.Buffer.GetText(iterline, end, False)
-            text = text.rstrip()
-            if text == "":
-                self.history.add(text)
-                self.execute(text, self.language)
-            elif text[-1] == ":":
-                self.textview.Buffer.InsertAtCursor("\n    ")
-            elif text[0] == " ":
-                self.textview.Buffer.InsertAtCursor("\n    ")
-            else:
-                self.history.add(text)
-                self.execute(text, self.language)
-            return True
+            start = self.textview.Buffer.StartIter
+            # get text:
+            lastline = self.textview.Buffer.GetText(iterline, end, False)
+            lastline = lastline.rstrip()
+            alltext = self.textview.Buffer.GetText(start, end, False)
+            # decide what to do:
+            if alltext.strip() == "":
+                return True # nothing to do, but handled
+            line_count = len(alltext.split("\n"))
+            if line_count == 1: # one line
+                parsed = self.parse(alltext) # does it parse?
+                if parsed: # ok, then it is a full statement/expression
+                    if self.history.dirty and self.history.nextlast():
+                        self.history.replace(alltext)
+                    else:
+                        self.history.add(alltext)
+                    self.execute(alltext, self.language)
+                    return True
+            else: # more than one line
+                if lastline != "": # empty line triggers execute
+                    return False # return not handled
+                else:
+                    # Not working... maybe newline diff?
+                    #parsed = self.parse(alltext)
+                    #if parsed:
+                    self.history.add(alltext.strip())
+                    self.execute(alltext.strip(), self.language)
+                    return True
         elif str(event.Key) == "Up":
             mark = self.textview.Buffer.InsertMark
             itermark = self.textview.Buffer.GetIterAtMark(mark)
             line = itermark.Line
+            start = self.textview.Buffer.StartIter
+            end = self.textview.Buffer.EndIter
+            alltext = self.textview.Buffer.GetText(start, end, False)
             #print "line:", line
             if line == 0:
+                # if on a new line, save it
+                if not self.history.dirty:
+                    self.history.add(alltext)
+                    self.history.dirty = True
+                    self.history.up()
+                elif self.history.nextlast():
+                    self.history.replace(alltext)
+                #else: abandon any changes
                 text = self.history.up()
-                if text:
+                if text is not None:
                     self.textview.Buffer.Text = text
                     return True
         elif str(event.Key) == "Down":
@@ -202,7 +256,7 @@ class ShellWindow(Window):
             line = itermark.Line
             if line == self.textview.Buffer.LineCount - 1:
                 text = self.history.down()
-                if text:
+                if text is not None:
                     self.textview.Buffer.Text = text
                     return True
         return False
@@ -285,3 +339,6 @@ class ShellWindow(Window):
     @BGThread
     def execute_in_background(self, text):
         self.engine[self.language].execute(text)
+
+    def parse(self, text):
+        return self.engine[self.language].parse(text)
