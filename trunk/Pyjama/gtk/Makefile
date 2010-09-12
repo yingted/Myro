@@ -2,6 +2,10 @@
 
 all: modules/Graphics.dll modules/Myro.dll languages/PJScheme.dll
 
+download: all
+	zip -r Pyjama-0.1.0.zip * -x \*/.svn/\* \*~ Makefile languages/Scheme/\* modules/Myro/\* modules/Graphics/\*
+
+
 modules/Graphics.dll:
 	cd modules/Graphics; make
 
@@ -14,4 +18,4 @@ languages/PJScheme.dll:
 
 
 clean:
-	rm -f modules/Graphics.dll modules/Myro.dll languages/PJScheme.dll
+	rm -f modules/Graphics.dll modules/Myro.dll languages/PJScheme.dll Pyjama*.zip
