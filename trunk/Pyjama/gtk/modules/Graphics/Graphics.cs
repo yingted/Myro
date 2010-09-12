@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+//using System.Timers;
+using System.Threading;
 using System;
 
 public static class Graphics {
@@ -67,17 +69,12 @@ public static class Graphics {
 	
 	public void step() {
 	  if (mode == "animate") {
-		DateTime start = DateTime.Now;
-		DateTime now = DateTime.Now;
-		// diff is TimeSpan
-		while ((now - start).TotalMilliseconds < animate_step_time) {
-		  now = DateTime.Now;
-		}
+		Thread.Sleep((int)(animate_step_time));
 	  }
 	  update(); // used without timing in "draw" mode, but draw
 	            // issues QueueDraw's per object redraw
 	}
-	
+
 	public string mode {
 	  get {
 		return _canvas.mode;
@@ -470,13 +467,11 @@ public static class Graphics {
 	
 	public void rotate(double degrees) {
 	  _direction -= (Math.PI / 180.0) * degrees;
-	  Console.WriteLine("_direction is {0}", _direction);
 	  QueueDraw();
 	}
 	
 	public void rotate_to(double degrees) {
 	  _direction = degrees * (Math.PI) / 180.0;
-	  Console.WriteLine("_direction is {0}", _direction);
 	  QueueDraw();
 	}
 	
@@ -512,7 +507,6 @@ public static class Graphics {
 		}
 		points_center.x = sum_x/points.Length;
 		points_center.y = sum_y/points.Length;
-		Console.WriteLine("points center at ({0}, {1})", points_center.x, points_center.y);
 	  }
 	}
 	
@@ -656,4 +650,65 @@ public static class Graphics {
 	  raw_fill_color = color;
 	}
   }
+
+  public class Group {
+
+	public List<Shape> items = new List<Shape>();
+	public string mode = "individual"; // squadron or individual
+	public Point center = new Point(0,0);
+
+	public Group(params Shape [] shapes) {
+	  foreach (Shape shape in shapes) {
+		items.Add(shape);
+	  }
+	}
+
+	public void rotate(double degrees) {
+	  if (mode == "individual") {
+		foreach (Shape shape in items) {
+		  shape.rotate(degrees);
+		}
+	  } else {
+		// find center of screen positions
+		double x = 0, y = 0;
+		foreach (Shape shape in items) {
+		  x += shape.center.x;
+		  y += shape.center.y;
+		}
+		center.x = x/(items.Count);
+		center.y = y/(items.Count);
+		// save the original points_center
+		// set all points_center to main center
+		foreach (Shape shape in items) {
+		  shape.points_center.x = center.x;
+		  shape.points_center.y = center.y;
+		}
+		// rotate them
+		foreach (Shape shape in items) {
+		  shape.rotate(degrees);
+		}
+		// set points_center's back?
+	  }
+	}
+
+	public void rotate_to(double degrees) {
+	  foreach (Shape shape in items) {
+		shape.rotate_to(degrees);
+	  }
+	}
+
+	public void move_to(int x, int y) {
+	  foreach (Shape shape in items) {
+		shape.move_to(x, y);
+	  }
+	}
+
+	public void move(int x, int y) {
+	  foreach (Shape shape in items) {
+		shape.move(x, y);
+	  }
+	}
+
+  }
+
 }
