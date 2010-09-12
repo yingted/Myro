@@ -1,6 +1,6 @@
 MCS=gmcs
 
-Scheme.dll: pjscheme.exe
+../PJScheme.dll: pjscheme.exe
 	$(MCS) -debug Scheme.cs pjscheme.cs -target:library -lib:../../bin -r:Microsoft.VisualBasic.dll -r:Microsoft.Scripting.dll -out:../PJScheme.dll
 
 pjscheme: pjscheme.exe
