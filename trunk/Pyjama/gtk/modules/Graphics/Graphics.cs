@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-//using System.Timers;
 using System.Threading;
 using System;
 
@@ -37,7 +36,7 @@ public static class Graphics {
 	}
   }
   
-  public class GraphWin : Gtk.Window {
+  public class Window : Gtk.Window {
 	private Canvas _canvas;
 	private bool _dirty = false;
 	private bool timer_running = false;
@@ -46,7 +45,7 @@ public static class Graphics {
 	public uint animate_step_time = 200; // how often, in ms, to
 										 // animate steps
 	
-	public GraphWin(string title, 
+	public Window(string title="Pyjama Graphics Window", 
 		int width=300, 
 		int height=300) : base(title) {
 	  
@@ -64,6 +63,13 @@ public static class Graphics {
 	  }
 	  set {
 		_update_interval = value;
+	  }
+	}
+	
+
+	public Canvas canvas {
+	  get {
+		return _canvas;
 	  }
 	}
 	
@@ -155,10 +161,21 @@ public static class Graphics {
   public class Point {
 	public double x;
 	public double y;
-	
 	public Point(double x, double y) {
 	  this.x = x;
 	  this.y = y;
+	}
+  }
+
+  public class GPoint : Shape {
+	public double x;
+	public double y;
+	
+	public GPoint(double x, double y) : base(false) {
+	  this.x = x;
+	  this.y = y;
+	  set_points(new Point(x,y));
+	  move_to(points_center.x, points_center.y);
 	}
   }
   
@@ -195,7 +212,8 @@ public static class Graphics {
 			shape.render(g);
 		  }
 		} catch {
-		  // updating the window while someone changed the objects
+		  // updating the window while someone changed the shapes
+		  // list.
 		}
 	  }
 	  return true;
@@ -204,7 +222,7 @@ public static class Graphics {
 
   public class Shape {
 	public Point center;
-	public GraphWin window;
+	public Window window;
 	public double _direction; // radians
 	public bool fill_path;
 	
@@ -227,7 +245,7 @@ public static class Graphics {
 	  fill_color = "black";
 	  outline_color = "black";
 	  fill_path = true;
-	  width = 1;
+	  line_width = 1;
 	}
 	
 	public bool has_pen {
@@ -271,7 +289,7 @@ public static class Graphics {
 	}
 	
 	public void QueueDraw() {
-	  if (window is GraphWin) {
+	  if (window is Window) {
 		Gtk.Application.Invoke(delegate {
 			  if (window.mode == "draw") { // else, we will issue an update, or step
 				window.need_to_redraw();
@@ -307,16 +325,6 @@ public static class Graphics {
 	  }
 	}
 
-	public int width {
-	  get {
-		return _line_width;
-	  }
-	  set {
-		_line_width = value;
-		QueueDraw();
-	  }
-	}
-	
 	public double alpha {
 	  get {
 		return _outline_color.A;
@@ -385,7 +393,7 @@ public static class Graphics {
 		points[p] = new Point(new_points[p].x, 
 			new_points[p].y);
 	  }
-	  compute_points_center();
+	  compute_center_point();
 	}
 	
 	public void move_to(double x, double y) {
@@ -402,15 +410,19 @@ public static class Graphics {
 	  QueueDraw();
 	}
 	
+	public double screen_angle(double dir) {
+	  // Screen coords are 45 degrees from system
+	  return dir - (45 * Math.PI/180.0);
+	}
+
 	public void forward(double distance) {
-	  double x = ((center.x + distance) * Math.Cos(_direction) - 
-		  (center.y) * Math.Sin(_direction));
-	  double y = ((center.x - distance) * Math.Sin(_direction) + 
-		  (center.y) * Math.Cos(_direction));
+	  double angle = screen_angle(_direction);
+	  double x = ((distance) * Math.Cos(angle) - (distance) * Math.Sin(angle));
+	  double y = ((distance) * Math.Sin(angle) + (distance) * Math.Cos(angle));
+	  center.x += x;
+	  center.y += y;
 	  if (has_pen && pen.down)
-		pen.append_path(new Point(x, y));
-	  center.x = x;
-	  center.y = y;
+		pen.append_path(new Point(center.x, center.y));
 	  QueueDraw();
 	}
 
@@ -429,10 +441,11 @@ public static class Graphics {
 	  forward(-distance);
 	}
 	
-	public void render(Cairo.Context g) {
+	public virtual void render(Cairo.Context g) {
+	  g.Save();
 	  Point temp;
 	  if (points != null) {
-		g.LineWidth = width;
+		g.LineWidth = line_width;
 		temp = screen_coord(points[0]);
 		g.MoveTo(temp.x, temp.y);
 		for (int p = 1; p < points.Length; p++) {
@@ -452,6 +465,7 @@ public static class Graphics {
 		if (has_pen)
 		  pen.render(g);
 	  }
+	  g.Restore();
 	}
 	
 	public Point screen_coord(Point point) {
@@ -492,7 +506,7 @@ public static class Graphics {
 	  }
 	}
 	
-	public void compute_points_center() {
+	public void compute_center_point() {
 	  double sum_x = 0, sum_y = 0;
 	  if (points.Length == 0) {
 		points_center.x = 0;
@@ -514,9 +528,9 @@ public static class Graphics {
 	  QueueDraw();
 	}
 	
-	public void draw(GraphWin win) {
+	public void draw(Window win) {
 	  // Add this shape to the Canvas dictionary.
-	  ((Canvas)win.Children[0]).shapes.Add(this);
+	  win.canvas.shapes.Add(this);
 	  // FIXME: QueueDrawRect
 	  // FIXME: invalidate from and to rects on move
 	  window = win;
@@ -524,20 +538,21 @@ public static class Graphics {
 	}
 
 	public void undraw() {
-	  ((Canvas)window.Children[0]).shapes.Remove(this);
+	  window.canvas.shapes.Remove(this);
 	  window = null;
 	  QueueDraw();
 	}
   }
   
   public class Line : Shape {
-	public Line(Point p1, Point p2) : base(true) {
-	  set_points(p1, p2);
-	  move_to(points_center.x, points_center.y);
+	public Line(Point p1, Point p2) : this(true, p1, p2) {
 	}
 	public Line(bool has_pen, Point p1, Point p2) : base(has_pen) {
 	  set_points(p1, p2);
-	  move_to(points_center.x, points_center.y);
+	  compute_center_point();
+	  center.x = points_center.x;
+	  center.y = points_center.y;
+	  compute_points_around_origin();
 	}
   }
   
@@ -592,8 +607,9 @@ public static class Graphics {
 	  }
 	}
 	
-	public new void render(Cairo.Context g) {
+	public override void render(Cairo.Context g) {
 	  // render path
+	  g.Save();
 	  Point temp;
 	  if (path != null) {
 		g.LineWidth = line_width;
@@ -614,7 +630,63 @@ public static class Graphics {
 		  g.Stroke();
 		}
 	  }
+	  g.Restore();
 	}
+  }
+
+  public class Picture : Shape {
+	public Gdk.Pixbuf _pixbuf; // in memory rep of picture
+	public Cairo.Format format = Cairo.Format.Rgb24;
+	public Cairo.Surface surface;
+	public Cairo.Context context;
+
+	public Picture(string filename) : base(true) {
+	  _pixbuf = new Gdk.Pixbuf(filename);
+	  format = Cairo.Format.Rgb24;
+	  if (_pixbuf.HasAlpha) {
+        format = Cairo.Format.Argb32;
+	  }
+	  // Create a new ImageSurface
+	  surface = new Cairo.ImageSurface(format, _pixbuf.Width, _pixbuf.Height);
+	}
+
+	public override void render(Cairo.Context g) {
+	  g.Save();
+	  //g.Translate(-_pixbuf.Width/2, -_pixbuf.Height/2);
+	  g.Translate(center.x, center.y);
+	  g.Rotate(_direction);
+	  Gdk.CairoHelper.SetSourcePixbuf(g, _pixbuf, -_pixbuf.Width/2, -_pixbuf.Height/2);
+	  g.Paint();
+	  g.LineWidth = line_width;
+	  g.MoveTo(-_pixbuf.Width/2, -_pixbuf.Height/2);
+	  g.LineTo(_pixbuf.Width/2, -_pixbuf.Height/2);
+	  g.LineTo(_pixbuf.Width/2, _pixbuf.Height/2);
+	  g.LineTo(-_pixbuf.Width/2, _pixbuf.Height/2);
+	  g.ClosePath();
+	  g.Color = raw_outline_color;
+	  g.Stroke();
+	  g.Restore();
+	  // FIXME: add pen
+	}
+
+	public int width {
+	  get {
+		return _pixbuf.Width;
+	  }
+	}
+	public int height {
+	  get {
+		return _pixbuf.Height;
+	  }
+	}
+
+	public Pixel [] get_pixels() {
+	  return new Pixel[10];
+	}
+
+  }
+
+  public class Pixel {
   }
 
   public class Polygon : Shape {
@@ -627,7 +699,7 @@ public static class Graphics {
 		this.points[count] = p ;
 		count++;
 	  }
-	  compute_points_center();
+	  compute_center_point();
 	  center.x = points_center.x;
 	  center.y = points_center.y;
 	  compute_points_around_origin();
@@ -642,7 +714,7 @@ public static class Graphics {
 		this.points[count] = new Point(p.x, p.y);
 		count++;
 	  }
-	  compute_points_center();
+	  compute_center_point();
 	  center.x = points_center.x;
 	  center.y = points_center.y;
 	  compute_points_around_origin();
@@ -708,7 +780,5 @@ public static class Graphics {
 		shape.move(x, y);
 	  }
 	}
-
   }
-
 }

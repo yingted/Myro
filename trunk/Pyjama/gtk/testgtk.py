@@ -1,7 +1,7 @@
 from Graphics import *
 import random
 
-win = GraphWin("Turtles!")
+win = Window("Turtles!")
 
 turtles = []
 for x in range(1000):

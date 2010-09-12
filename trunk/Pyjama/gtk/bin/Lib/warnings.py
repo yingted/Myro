@@ -33,7 +33,7 @@ def warn(message, category=None, stacklevel=1):
     # Get context information
     try:
         caller = sys._getframe(stacklevel)
-    except ValueError:
+    except:
         globals = sys.__dict__
         lineno = 1
     else:
