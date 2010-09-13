@@ -244,7 +244,38 @@ class DinahDocument(PlainDocument):
         block.DragDataReceived += Gtk.DragDataReceivedHandler(handleDragDataReceived)
         self.layout.PackStart(block, False, True, 0)
         
-        top_level = [] # read and parse from file
+        #top_level = [] # read and parse from file
+
+        top_level = [Block("Do together:", 
+                           Statement("Myro", "forward", 1),
+                           Statement("Myro", "forward", 1, .5),
+                           parallel=True),
+                     Block("Do in order:", 
+                           Statement("Myro", "forward", 1, 1),
+                           Statement("Myro", "init", "COM1", 0),
+                           Statement("Myro", "backward", 1, 1),
+                           Statement("Myro", "backward", 1, 1),
+                           Block("Do together:",
+                                 Statement("Myro", "init", "COM1", 0),
+                                 Statement("Myro", "backward", 1),
+                                 Statement("Myro", "backward", 1, 1),
+                                 Statement("Myro", "init", "COM1", 0),
+                                 Statement("Myro", "backward", 1, 1),
+                                 Statement("Myro", "backward", 1, 1),
+                                 parallel=True
+                                 )
+                           ),
+                     Block("Do together:", 
+                           Statement("Myro", "backward", 1),
+                           Statement("Myro", "forward", 1, ),
+                           Statement("Myro", "backward", 1, ),
+                           Statement("Myro", "forward", 1, ),
+                           Statement("Myro", "backward", 1, ),
+                           Statement("Myro", "forward", 1, ),
+                           parallel=True),
+                     ]
+
+
         process_list(self.layout, top_level)
 
         print process_widgets(self.layout)
@@ -336,7 +367,23 @@ class DinahDocument(PlainDocument):
             store.AppendValues(module, '<span bgcolor="%s">.%s()</span>' % 
                                (color_code(statement_color), x))
 
+        module = store.AppendValues("<b>Graphics</b>")
+        for x in ["Window", "Picture", "Polygon", "Line", "Group", 
+                  "Arrow", "Point"]:
+            store.AppendValues(module, '<span bgcolor="%s">.%s()</span>' % 
+                               (color_code(statement_color), x))
 
+
+        module = store.AppendValues("<b>Window members</b>")
+        for x in ["mode", "animate_step_time", ]:
+            store.AppendValues(module, '<span bgcolor="%s">.%s()</span>' % 
+                               (color_code(statement_color), x))
+
+
+        module = store.AppendValues("<b>Members</b>")
+        for x in ["mode", "animate_step_time", ]:
+            store.AppendValues(module, '<span bgcolor="%s">.%s()</span>' % 
+                               (color_code(statement_color), x))
 
         return store
 
@@ -351,36 +398,6 @@ class DinahDocument(PlainDocument):
 
     def save_as(self):
         pass
-
-        # top_level = [Block("Do together:", 
-        #                    Statement("Myro", "forward", 1),
-        #                    Statement("Myro", "forward", 1, .5),
-        #                    parallel=True),
-        #              Block("Do in order:", 
-        #                    Statement("Myro", "forward", 1, 1),
-        #                    Statement("Myro", "init", "COM1", 0),
-        #                    Statement("Myro", "backward", 1, 1),
-        #                    Statement("Myro", "backward", 1, 1),
-        #                    Block("Do together:",
-        #                          Statement("Myro", "init", "COM1", 0),
-        #                          Statement("Myro", "backward", 1),
-        #                          Statement("Myro", "backward", 1, 1),
-        #                          Statement("Myro", "init", "COM1", 0),
-        #                          Statement("Myro", "backward", 1, 1),
-        #                          Statement("Myro", "backward", 1, 1),
-        #                          parallel=True
-        #                          )
-        #                    ),
-        #              Block("Do together:", 
-        #                    Statement("Myro", "backward", 1),
-        #                    Statement("Myro", "forward", 1, ),
-        #                    Statement("Myro", "backward", 1, ),
-        #                    Statement("Myro", "forward", 1, ),
-        #                    Statement("Myro", "backward", 1, ),
-        #                    Statement("Myro", "forward", 1, ),
-        #                    parallel=True),
-        #              ]
-
 
 class Dinah(Language):
     def get_engine_class(self):
