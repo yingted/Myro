@@ -11,17 +11,16 @@ class MyScrolledWindow(Gtk.ScrolledWindow):
     """
 
 class PlainDocument(object):
-    def __init__(self, filename, project):
+    def __init__(self, filename, project, language="python"):
+        self.filename = filename
         if filename:
             filename = os.path.abspath(filename)
-        self.filename = filename
         self.project = project
+        self.language = language
         if self.filename:
             self.title = os.path.basename(self.filename)
-            self.language = "python"
         else:
-            self.title = "New Python Script"
-            self.language = "python"
+            self.title = "New %s Script" % self.language.title()
         self.make_tab()
         self.make_widget()
         if self.filename and os.path.exists(self.filename):
@@ -111,7 +110,17 @@ class PlainDocument(object):
             self.filename = fc.Filename
             self.title = os.path.basename(self.filename)
             self.label.Text = self.title
-            self.language = "python"
+            # FIXME: get this from languages
+            if self.filename.endswith(".ss"):
+                self.language = "scheme"
+            elif self.filename.endswith(".py"):
+                self.language = "python"
+            elif self.filename.endswith(".dnh"):
+                self.language = "dinah"
+            elif self.filename.endswith(".rb"):
+                self.language = "ruby"
+            else:
+                self.language = "python"
             retval = True
         fc.Destroy()
         return retval
@@ -132,6 +141,7 @@ try:
             self.textview.IndentWidth = 4
             self.textview.ModifyFont(
                 Pango.FontDescription.FromString("Monospace 10"))
+            # FIXME: change language if save as a different ext
             self.textview.Buffer.Language = self.lang_manager.GetLanguage(
                 self.language)
             self.widget.Add(self.textview)

@@ -113,8 +113,8 @@ class ShellWindow(Window):
                 ]
         toolbar = [(Gtk.Stock.New, self.on_new_file),
                    (Gtk.Stock.Open, self.on_open_file),
-                   (Gtk.Stock.Save, self.on_save_file), 
-                   (Gtk.Stock.Quit, self.on_quit),]
+                   (Gtk.Stock.Apply, self.on_run),
+                   ]
         self.make_gui(menu, toolbar)
         self.history = History()
         self.statusbar = Gtk.Statusbar()
@@ -280,11 +280,12 @@ class ShellWindow(Window):
 
     # these aren't needed?
     def on_new_file(self, obj, event):
-        pass
+        self.project.setup_editor()
+        self.project.editor.on_new_file(obj, event)
+
     def on_open_file(self, obj, event):
-        pass
-    def on_save_file(self, obj, event):
-        pass
+        self.project.setup_editor()
+        self.project.editor.on_open_file(obj, event)
 
     def reset_shell(self, obj, event):
         self.engine.reset()

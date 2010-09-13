@@ -1,3 +1,5 @@
+import clr
+clr.AddReference("gtk-sharp")
 import Gtk
 import System
 from System.Threading import ManualResetEvent
@@ -83,4 +85,26 @@ class CustomStream(System.IO.Stream):
     @property
     def Position(self):
         return 0
+
+def pick_file():
+    global retval
+    retval = None
+    Gtk.Application.Init()
+    fc = Gtk.FileChooserDialog("Select a file",
+                               None,
+                               Gtk.FileChooserAction.Open,
+                               "Cancel", Gtk.ResponseType.Cancel,
+                               "Open", Gtk.ResponseType.Accept)
+    Gtk.Application.Invoke(lambda obj, args: fc.ShowAll())
+    ev = ManualResetEvent(False)
+    def get_filename_cb(obj, args):
+        global retval
+        if (fc.Run() == int(Gtk.ResponseType.Accept)):
+            retval = fc.Filename
+        fc.Destroy()
+        ev.Set()
+    Gtk.Application.Invoke(get_filename_cb)
+    ev.WaitOne()
+    return retval
+
 

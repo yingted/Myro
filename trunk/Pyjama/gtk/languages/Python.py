@@ -21,7 +21,8 @@ class PythonEngine(DLREngine):
         super(PythonEngine, self).start(stderr, stdout, stdin)
         paths = self.engine.GetSearchPaths()
         ## Let users find Pyjama modules:
-        paths.Add(os.path.abspath("modules"))
+        for folder in ["modules", "src"]:
+            paths.Add(os.path.abspath(folder))
         self.engine.SetSearchPaths(paths)
         # Start up, in Python: ------------------
         script = """
