@@ -2256,6 +2256,11 @@
       (make-cont2 '<cont2-25>))
     (trampoline)))
 
+(define try-parse-string
+  (lambda (string)
+    (read-datum string init-handler (make-cont2 '<cont2-18>))
+    (trampoline)))
+
 (define pattern?
   (lambda (x)
     (or (null? x)

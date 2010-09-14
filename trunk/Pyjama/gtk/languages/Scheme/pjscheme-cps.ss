@@ -1999,6 +1999,14 @@
 	    (lambda-cont (exp)
 	      (m exp toplevel-env init-handler init-cont)))))
       (trampoline)))
+
+(define try-parse-string
+  (lambda (string)
+    (read-datum string init-handler
+      (lambda-cont2 (datum tokens-left)
+	(parse datum init-handler init-cont)))
+    (trampoline)))
+    
 (load "transformer-macros.ss")
 
 ;; Unification pattern-matcher

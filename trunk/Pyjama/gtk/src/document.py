@@ -10,7 +10,7 @@ class MyScrolledWindow(Gtk.ScrolledWindow):
     Wrapper so that we can keep track of additional items.
     """
 
-class PlainDocument(object):
+class BaseDocument(object):
     def __init__(self, filename, project, language="python"):
         self.filename = filename
         if filename:
@@ -110,26 +110,30 @@ class PlainDocument(object):
             self.filename = fc.Filename
             self.title = os.path.basename(self.filename)
             self.label.Text = self.title
-            # FIXME: get this from languages
-            if self.filename.endswith(".ss"):
-                self.language = "scheme"
-            elif self.filename.endswith(".py"):
-                self.language = "python"
-            elif self.filename.endswith(".dnh"):
-                self.language = "dinah"
-            elif self.filename.endswith(".rb"):
-                self.language = "ruby"
-            else:
-                self.language = "python"
+            self.on_change_file()
             retval = True
         fc.Destroy()
         return retval
+
+    def on_change_file(self):
+        # FIXME: get this from languages
+        if self.filename.endswith(".ss"):
+            self.language = "scheme"
+        elif self.filename.endswith(".py"):
+            self.language = "python"
+        elif self.filename.endswith(".dnh"):
+            self.language = "dinah"
+        elif self.filename.endswith(".rb"):
+            self.language = "ruby"
+        else:
+            self.language = "python"
+
 
 try:
     import clr
     clr.AddReference("gtksourceview2-sharp")
     import GtkSourceView
-    class Document(PlainDocument):
+    class Document(BaseDocument):
         def make_widget(self):
             self.widget = MyScrolledWindow()
             self.widget.document = self
@@ -141,7 +145,6 @@ try:
             self.textview.IndentWidth = 4
             self.textview.ModifyFont(
                 Pango.FontDescription.FromString("Monospace 10"))
-            # FIXME: change language if save as a different ext
             self.textview.Buffer.Language = self.lang_manager.GetLanguage(
                 self.language)
             self.widget.Add(self.textview)
@@ -151,8 +154,14 @@ try:
             self.textview.Show()
             self.widget.Show()
             self.textview.GrabFocus()
+
+        def on_change_file(self):
+            super(Document, self).on_change_file()
+            self.textview.Buffer.Language = self.lang_manager.GetLanguage(
+                self.language)
+
 except:
-    Document = PlainDocument
+    Document = BaseDocument
 
 # How to list relevant items out of a reference:
 # [getattr(clr.References[2], x) for x in dir(clr.References[2]) if type(getattr(clr.References[2], x)) is type]

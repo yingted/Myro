@@ -76,6 +76,7 @@ class ShellWindow(Window):
     def __init__(self, project):
         self.project = project
         self.language = "python"
+        self.lang_manager = None
         self.window = MyWindow(_("Pyjama Shell"))
         self.window.set_on_key_press(self.on_key_press)
         self.window.SetDefaultSize(600, 550)
@@ -175,8 +176,8 @@ class ShellWindow(Window):
         self.window.ShowAll()
         # Set this Python's stderr:
         sys.stderr = CustomStream(self.history_textview, "red")
-        self.update_gui()
         self.textview.GrabFocus()
+        self.change_to_lang(self.language)
 
     def make_language_menu(self):
         languages = []
@@ -263,6 +264,9 @@ class ShellWindow(Window):
 
     def change_to_lang(self, language):
         self.language = language
+        if self.lang_manager:
+            self.textview.Buffer.Language = self.lang_manager.GetLanguage(
+                self.language)
         self.update_gui()
 
     def on_save_file_as(self, obj, event):

@@ -19,7 +19,12 @@ class SchemeEngine(Engine):
         super(SchemeEngine, self).start(stderr, stdout, stdin)
         self.engine.set_dlr(self.manager.scope, self.manager.runtime)
     def parse(self, text):
-        return False # requires an empty line
+        """
+        Return True if expression parses ok.
+        """
+        # FIXME: when exceptions have a better format in Scheme:
+        retval = str(self.engine.try_parse_string(text))
+        return not retval.startswith("(exception ")
 
 class Scheme(Language):
     def get_engine_class(self):

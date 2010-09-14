@@ -7757,6 +7757,15 @@ public class PJScheme:Scheme
       return ((object) PJScheme.trampoline ());
    }
 
+   new public static object try_parse_string (object make_string)
+   {
+      k_reg = PJScheme.make_cont2 ((object) symbol ("<cont2-18>"));
+      handler_reg = init_handler;
+      input_reg = make_string;
+      pc = (Function) read_datum;
+      return ((object) PJScheme.trampoline ());
+   }
+
    new public static bool pattern_q (object x)
    {
       return ((bool)

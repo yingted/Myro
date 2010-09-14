@@ -9,7 +9,7 @@ import Gdk
 import Pango
 import System
 from utils import Language
-from document import PlainDocument, MyScrolledWindow
+from document import BaseDocument, MyScrolledWindow
 import Myro
 import Graphics
 
@@ -18,16 +18,6 @@ purple = Gdk.Color(227, 70, 207)
 orange = Gdk.Color(243, 111, 11)
 statement_color = blue
 block_color = orange
-
-# Formats target will accept:
-target_table = System.Array[Gtk.TargetEntry]([
-        Gtk.TargetEntry("application/x-dinah", 0, 0),
-        ])
-
-# Formats source provides:
-source_table = System.Array[Gtk.TargetEntry]([
-        Gtk.TargetEntry("application/x-dinah", 0, 0),
-        ])
 
 def color_code(color):
     r = int(color.Red/float(2**16) * 255)
@@ -54,7 +44,29 @@ def handleSourceDragDataGet(obj, args):
     packed = System.Text.Encoding.UTF8.GetBytes(data)
     args.SelectionData.Set(targets[0], 8, packed)
 
-def make_drag_drop(name, color):
+def accepts(item):
+    """
+    Create a target table base on parameters.
+    """
+    # Formats target will accept:
+    print "making accepts for", item
+    target_table = System.Array[Gtk.TargetEntry]([
+            Gtk.TargetEntry("application/x-dinah", 0, 0),
+            ])
+    return target_table
+
+def provides(item):
+    """
+    Create a source table base on parameters.
+    """
+    # Formats source provides:
+    print "making provides for", item
+    source_table = System.Array[Gtk.TargetEntry]([
+            Gtk.TargetEntry("application/x-dinah", 0, 0),
+            ])
+    return source_table
+
+def make_drag_drop(name, item, color):
     box = Gtk.EventBox()
     img = Gtk.Image(name, Gtk.IconSize.Button)
     box.Add(img)
@@ -63,7 +75,7 @@ def make_drag_drop(name, color):
     # Set item up as a drag source:
     Gtk.Drag.SourceSet(box,
                        Gdk.ModifierType.Button1Mask,
-                       source_table, 
+                       provides(item), 
                        Gdk.DragAction.Copy | Gdk.DragAction.Move)
     box.DragDataGet += Gtk.DragDataGetHandler(handleSourceDragDataGet)
     return box
@@ -116,11 +128,11 @@ def process_statement(statement):
     # Set item up as a drop target:
     Gtk.Drag.DestSet(enclosure, 
                      Gtk.DestDefaults.All, 
-                     target_table, 
+                     accepts(statement), 
                      Gdk.DragAction.Copy | Gdk.DragAction.Move)
     enclosure.DragDataReceived += Gtk.DragDataReceivedHandler(handleDragDataReceived)
     hbox = Gtk.HBox()
-    img = make_drag_drop('gtk-dnd', statement_color) 
+    img = make_drag_drop('gtk-dnd', statement, statement_color) 
     hbox.PackStart(img, False, True, 0)
     
     label = Gtk.Label("%s.%s(" % (statement._class, statement._method))
@@ -161,17 +173,17 @@ def process_block(block):
     # Set item up as a drop target:
     Gtk.Drag.DestSet(enclosure, 
                      Gtk.DestDefaults.All, 
-                     target_table, 
+                     accepts(block), 
                      Gdk.DragAction.Copy | Gdk.DragAction.Move)
     enclosure.DragDataReceived += Gtk.DragDataReceivedHandler(handleDragDataReceived)
     expander_row = Gtk.HBox()
-    img = make_drag_drop('gtk-dnd-multiple', block_color)
+    img = make_drag_drop('gtk-dnd-multiple', block, block_color)
     expander_row.PackStart(img, False, True, 0)
     expander = Gtk.Expander(block.type)
     # Set item up as a drop target:
     Gtk.Drag.DestSet(expander, 
                      Gtk.DestDefaults.All, 
-                     target_table, 
+                     accepts(block), 
                      Gdk.DragAction.Copy | Gdk.DragAction.Move)
     expander.DragDataReceived += Gtk.DragDataReceivedHandler(handleDragDataReceived)
     expander.Expanded = True
@@ -189,7 +201,7 @@ def process_block(block):
     end.Add(label)
     Gtk.Drag.DestSet(end, 
                      Gtk.DestDefaults.All, 
-                     target_table, 
+                     accepts(block), 
                      Gdk.DragAction.Copy | Gdk.DragAction.Move)
     end.DragDataReceived += Gtk.DragDataReceivedHandler(handleDragDataReceived)
     box.PackStart(end, True, True, 0)
@@ -210,7 +222,7 @@ class Statement(object):
         self.args = args
         self.kwargs = kwargs
 
-class DinahDocument(PlainDocument):
+class DinahDocument(BaseDocument):
     def make_widget(self):
         self.widget = MyScrolledWindow()
         self.widget.document = self
@@ -226,7 +238,7 @@ class DinahDocument(PlainDocument):
         # Set item up as a drag source:
         self.treeview.EnableModelDragSource(
             Gdk.ModifierType.Button1Mask,
-            source_table, 
+            provides(self.treeview), 
             Gdk.DragAction.Copy | Gdk.DragAction.Move)
         self.treeview.DragDataGet += Gtk.DragDataGetHandler(handleSourceDragDataGet)
         column.PackStart(cell, True)
@@ -239,7 +251,7 @@ class DinahDocument(PlainDocument):
         block.Add(label)
         Gtk.Drag.DestSet(block, 
                          Gtk.DestDefaults.All, 
-                         target_table, 
+                         accepts(block), 
                          Gdk.DragAction.Copy | Gdk.DragAction.Move)
         block.DragDataReceived += Gtk.DragDataReceivedHandler(handleDragDataReceived)
         self.layout.PackStart(block, False, True, 0)
@@ -287,7 +299,7 @@ class DinahDocument(PlainDocument):
         block.Add(label)
         Gtk.Drag.DestSet(block, 
                          Gtk.DestDefaults.All, 
-                         target_table, 
+                         accepts(block), 
                          Gdk.DragAction.Copy | Gdk.DragAction.Move)
         block.DragDataReceived += Gtk.DragDataReceivedHandler(handleDragDataReceived)
         self.layout.PackStart(block, True, True, 0)

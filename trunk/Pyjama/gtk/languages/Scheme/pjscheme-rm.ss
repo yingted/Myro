@@ -4165,6 +4165,14 @@
     (set! pc read-datum)
     (return* (trampoline))))
 
+(define try-parse-string
+  (lambda (string)
+    (set! k_reg (make-cont2 '<cont2-18>))
+    (set! handler_reg init-handler)
+    (set! input_reg string)
+    (set! pc read-datum)
+    (return* (trampoline))))
+
 (define pattern?
   (lambda (x)
     (return*
