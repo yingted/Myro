@@ -27,20 +27,17 @@ def handle_exception(e):
 from utils import _
 
 def get_registered_languages():
+    import glob
     sys.path.append(os.path.abspath("languages"))
     results = {}
-    import Python as LanguageModule
-    lang = LanguageModule.register_language()
-    results[lang.language] = lang
-    import Ruby as LanguageModule
-    lang = LanguageModule.register_language()
-    results[lang.language] = lang
-    import Dinah as LanguageModule
-    lang = LanguageModule.register_language()
-    results[lang.language] = lang
-    import Scheme as LanguageModule
-    lang = LanguageModule.register_language()
-    results[lang.language] = lang
+    for filename in glob.glob("languages/*.py"):
+        try:
+            import_name, ext = os.path.basename(filename).rsplit(".")
+            exec("import %s as LanguageModule" % import_name)
+            lang = LanguageModule.register_language()
+            results[lang.language] = lang
+        except:
+            print "Cannot load language file '%s'" % filename
     return results
 
 class PyjamaProject(object):

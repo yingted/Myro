@@ -25,10 +25,17 @@ class PythonEngine(DLREngine):
             paths.Add(os.path.abspath(folder))
         self.engine.SetSearchPaths(paths)
         # Start up, in Python: ------------------
+        # FIXME: do here, not in sub-Python
         script = """
 import clr
-clr.AddReference("Myro.dll")
-clr.AddReference("Graphics.dll")
+try:
+    clr.AddReference("Myro.dll")
+except:
+    pass
+try:
+    clr.AddReference("Graphics.dll")
+except:
+    pass
 del clr
 """
         temp_scope = self.manager.runtime.CreateScope()
