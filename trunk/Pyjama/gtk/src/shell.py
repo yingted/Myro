@@ -120,7 +120,7 @@ class ShellWindow(Window):
         self.history = History()
         self.statusbar = Gtk.Statusbar()
         self.statusbar.Show()
-        self.statusbar.Push(1, "Language: Python")
+        self.statusbar.Push(0, "Language: Python")
         self.command_area = Gtk.HBox()
         alignment = Gtk.Alignment( 0.5, 0.0, 0, 0)
         self.prompt = Gtk.Label("python>")

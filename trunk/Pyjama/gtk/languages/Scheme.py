@@ -38,4 +38,4 @@ class Scheme(Language):
         return Document
 
 def register_language():
-    return Scheme("scheme")
+    return Scheme("scheme", "ss")

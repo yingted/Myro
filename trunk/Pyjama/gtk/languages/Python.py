@@ -51,5 +51,5 @@ class Python(Language):
         return Document
 
 def register_language():
-    return Python("python")
+    return Python("python", "py")
 

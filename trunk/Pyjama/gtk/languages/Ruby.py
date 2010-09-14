@@ -31,4 +31,4 @@ class Ruby(Language):
         return Document
 
 def register_language():
-    return Ruby("ruby")
+    return Ruby("ruby", "rb")

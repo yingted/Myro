@@ -14,8 +14,9 @@ def Array(*list):
     return System.Array.CreateInstance(Type, *dimensions)
 
 class Language(object):
-    def __init__(self, language):
+    def __init__(self, language, extension):
         self.language = language
+        self.extension = extension
 
 class CustomStream(System.IO.Stream):
     def __init__(self, textview, tag=None):

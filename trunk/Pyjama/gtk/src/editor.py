@@ -17,15 +17,9 @@ class EditorWindow(Window):
                  [("Open Script...", Gtk.Stock.Open, 
                    None, self.on_open_file),
                   None,
-                  # FIXME: get these from engines:
-                  ("New Python Script", None, 
-                   None, lambda o,e: self.on_new_file(o, e, "python")),
-                  ("New Scheme Script", None, 
-                   None, lambda o,e: self.on_new_file(o, e, "scheme")),
-                  ("New Ruby Script", None, 
-                   None, lambda o,e: self.on_new_file(o, e, "ruby")),
-                  ("New Dinah Script", None, 
-                   None, lambda o,e: self.on_new_file(o, e, "dinah")),
+                  ] + 
+                  self.make_new_file_menu() +
+                 [
                   None,
                   ("Save...", Gtk.Stock.Save, 
                    None, self.on_save_file),
@@ -58,8 +52,10 @@ class EditorWindow(Window):
         self.notebook.TabHborder = 5
         self.notebook.TabBorder = 1
         self.notebook.TabVborder = 1
+        self.notebook.SwitchPage += self.changed_page
+        self.notebook.PageRemoved += self.changed_page
         self.statusbar = Gtk.Statusbar()
-        self.statusbar.Push(0, "Language: Python   Column: 0 Row: 0")
+        self.statusbar.Push(0, "Language: Python")
         self.statusbar.HasResizeGrip = True
         self.statusbar.Show()
         # initialize
@@ -81,6 +77,15 @@ class EditorWindow(Window):
         doc = self.get_current_doc()
         if doc:
             doc.grab_focus()
+
+    def changed_page(self, obj, event):
+        doc = self.get_current_doc()
+        if doc:
+            self.statusbar.Pop(0)
+            self.statusbar.Push(0, _("Language: %s") % doc.language.title())
+        else:
+            self.statusbar.Pop(0)
+            self.statusbar.Push(0, _("Language: "))
 
     def on_open_file(self, obj, event):
         retval = False
@@ -106,21 +111,24 @@ class EditorWindow(Window):
         page_num = self.notebook.AppendPage(page.widget, page.tab)
         self.notebook.CurrentPage = page_num
 
+    def make_new_file_menu(self):
+        retval = []
+        for lang in self.project.languages:
+            retval.append(
+                ("New %s Script" % lang.title(), None, 
+                 None, lambda o,e,lang=lang: self.on_new_file(o, e, lang))
+                )
+        return retval
+
     def make_document(self, filename):
-        # FIXME: handle default here too (option?)
-        # FIXME: get documents from registered engines
-        if filename and filename.endswith(".dnh"):
-            page = self.project.languages["dinah"].get_document_class()(filename, self.project, "dinah")
-        elif filename and filename.endswith(".py"):
-            page = self.project.languages["python"].get_document_class()(filename, self.project, "python")
-        
-        elif filename and filename.endswith(".rb"):
-            page = self.project.languages["ruby"].get_document_class()(filename, self.project, "ruby")
-        
-        elif filename and filename.endswith(".ss"):
-            page = self.project.languages["scheme"].get_document_class()(filename, self.project, "scheme")
-        else: # DEFAULT:
-            page = self.project.languages["python"].get_document_class()(filename, self.project, "python")
+        if filename:
+            pathname, extension = filename.rsplit(".")
+            for lang in self.project.languages:
+                if self.project.languages[lang].extension == extension:
+                    page = self.project.languages[lang].get_document_class()(filename, self.project, lang)
+                    return page
+        # FIXME: handle default here
+        page = self.project.languages["python"].get_document_class()(filename, self.project, "python")
         return page
 
     def on_save_file(self, obj, event):
@@ -145,7 +153,7 @@ class EditorWindow(Window):
         if doc:
             if doc.save():
                 self.project.shell.message("Loading file...\n")
-                self.project.shell.execute_file(doc.filename, "python")
+                self.project.shell.execute_file(doc.filename, doc.language)
                 self.project.shell.message("Done loading!\n")
 
     def on_close(self, obj, event):
