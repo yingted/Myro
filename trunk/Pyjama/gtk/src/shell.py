@@ -197,39 +197,18 @@ class ShellWindow(Window):
 
     def on_key_press(self, event):
         if str(event.Key) == "Return":
-            mark = self.textview.Buffer.InsertMark
-            itermark = self.textview.Buffer.GetIterAtMark(mark)
-            line = itermark.Line
-            iterline = self.textview.Buffer.GetIterAtLine(line)
             end = self.textview.Buffer.EndIter
             start = self.textview.Buffer.StartIter
-            # get text:
-            lastline = self.textview.Buffer.GetText(iterline, end, False)
-            lastline = lastline.rstrip()
-            alltext = self.textview.Buffer.GetText(start, end, False)
-            # decide what to do:
-            if alltext.strip() == "":
+            text = self.textview.Buffer.GetText(start, end, False)
+            if text.strip() == "":
                 return True # nothing to do, but handled
-            line_count = len(alltext.split("\n"))
-            if line_count == 1: # one line
-                parsed = self.parse(alltext) # does it parse?
-                if parsed: # ok, then it is a full statement/expression
-                    if self.history.dirty and self.history.nextlast():
-                        self.history.replace(alltext)
-                    else:
-                        self.history.add(alltext)
-                    self.execute(alltext, self.language)
-                    return True
-            else: # more than one line
-                if lastline != "": # empty line triggers execute
-                    return False # return not handled
+            elif self.ready_for_execute(text):
+                if self.history.dirty and self.history.nextlast():
+                    self.history.replace(text)
                 else:
-                    # Not working... maybe newline diff?
-                    #parsed = self.parse(alltext)
-                    #if parsed:
-                    self.history.add(alltext.strip())
-                    self.execute(alltext.strip(), self.language)
-                    return True
+                    self.history.add(text)
+                self.execute(text, self.language)
+                return True
         elif str(event.Key) == "Up":
             mark = self.textview.Buffer.InsertMark
             itermark = self.textview.Buffer.GetIterAtMark(mark)
@@ -345,5 +324,5 @@ class ShellWindow(Window):
     def execute_in_background(self, text):
         self.engine[self.language].execute(text)
 
-    def parse(self, text):
-        return self.engine[self.language].parse(text)
+    def ready_for_execute(self, text):
+        return self.engine[self.language].ready_for_execute(text)

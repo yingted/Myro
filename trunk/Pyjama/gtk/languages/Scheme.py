@@ -18,12 +18,16 @@ class SchemeEngine(Engine):
     def start(self, stderr, stdout, stdin):
         super(SchemeEngine, self).start(stderr, stdout, stdin)
         self.engine.set_dlr(self.manager.scope, self.manager.runtime)
-    def parse(self, text):
+    def ready_for_execute(self, text):
         """
         Return True if expression parses ok.
         """
-        # FIXME: when exceptions have a better format in Scheme:
+        lines = text.split("\n")
+        if lines[-1] == "":
+            return True # force it
+        # else, only if valid parse
         retval = str(self.engine.try_parse_string(text))
+        # FIXME: when exceptions have a better format in Scheme:
         return not retval.startswith("(exception ")
 
 class Scheme(Language):

@@ -86,10 +86,19 @@ class DLREngine(Engine):
                                                       "red"), 
                                          System.Text.Encoding.UTF8)
 
-    def parse(self, text):
-        sctype = Microsoft.Scripting.SourceCodeKind.InteractiveCode
-        source = self.engine.CreateScriptSourceFromString(text, sctype)
-        return source.GetCodeProperties() == Microsoft.Scripting.ScriptCodeParseResult.Complete
+    def ready_for_execute(self, text):
+        """
+        Is the text ready for executing?
+        """
+        # If more than one line in DLR, wait for a blank line
+        lines = text.split("\n")
+        line_count = len(lines)
+        if line_count == 1:
+            sctype = Microsoft.Scripting.SourceCodeKind.InteractiveCode
+            source = self.engine.CreateScriptSourceFromString(text, sctype)
+            return (source.GetCodeProperties() == 
+                    Microsoft.Scripting.ScriptCodeParseResult.Complete)
+        return lines[-1] == ""
 
     def execute(self, text):
         sctype = Microsoft.Scripting.SourceCodeKind.InteractiveCode
