@@ -1,3 +1,4 @@
+#pragma warning disable 109
 using System;
 using Microsoft.VisualBasic.CompilerServices;
 

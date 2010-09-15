@@ -8,6 +8,7 @@ using Microsoft.Scripting.Hosting;
 using System.Collections; // Hashtable
 using System.Collections.Generic; // List
 using Microsoft.VisualBasic.CompilerServices;
+using IronPython;
 
 public class Config {
   public int DEBUG = 0;
@@ -490,6 +491,11 @@ public class Scheme {
 	set_first_frame_b(env, cons(make_binding(var, PJScheme.make_external_proc(val)), frame));
   }
 
+  public static void set_env_raw_b(object env, object var, object val) {
+	object frame = first_frame(env);
+	set_first_frame_b(env, cons(make_binding(var, val), frame));
+  }
+
   public static object make_initial_env_extended (object env) {
   	set_env_b(env, symbol("property"), new Proc("property", (Procedure1)property, -1, 1));
  	set_env_b(env, symbol("debug"), new Proc("debug", (Procedure1)debug, -1, 1));
@@ -680,7 +686,7 @@ public class Scheme {
 	// implements "using"
 	if (list_q(args)) {
 	  int len = (int) length(args);
-	  if (len > 0) { // (using "file.dll")
+	  if (len > 0) { // (using "file.dll"), (using "System")
 		String filename = car(args).ToString();
 		Assembly assembly = null;
 		try {
@@ -691,24 +697,17 @@ public class Scheme {
 #pragma warning restore 612
 		}
 		// add assembly to assemblies
-		//string[] parts = get_parts(filename, ".");
 		if (assembly != null) {
 		  config.AddAssembly(assembly);
+          _dlr_runtime.LoadAssembly(assembly);
 		  // then add each type to environment
+          // FIXME: optionally module name
 		  foreach (Type type in assembly.GetTypes()) {
 			if (type.IsPublic) {
-			  string moduleName = null;
-			  if (len == 2)  // (using "file.dll" 'module)
-				moduleName = cadr(args).ToString();
-			  else
-				moduleName = type.FullName;
-			  String className = type.FullName;
-			  //classname_parts = get_parts(className, "+");
-              System.Console.WriteLine("Adding module.class name {0}.{1} ", 
-                  moduleName, className);
-			  set_env_b(env, symbol(moduleName), new Proc("make-external", 
-					  (Procedure2)make_instance_proc(className), 2, 1));
-			}
+              _dlr_env.SetVariable(type.Name, 
+                  IronPython.Runtime.Types.DynamicHelpers. 
+                  GetPythonTypeFromType(type));
+            }
 		  }
 		} else {
 		  throw new Exception(String.Format("external library '{0}' could not be loaded", filename));
@@ -1216,42 +1215,40 @@ public class Scheme {
   }
 
   public static bool dlr_env_contains(object variable) {
-      trace(1, "contains?: {0}\n", variable); 
-      // could be "object.item"
-	  string [] parts = variable.ToString().Split('.');
-	  ScriptScope env = _dlr_env;
-	  bool result = true;
-	  foreach (string part in parts) {
-		if (env.ContainsVariable(part)) {
-		  result = true;
-          object value = env.GetVariable(part);
-		  Console.WriteLine("Result: contains({0}) => {1}", part, env.GetVariable(part));
-          //if (value as System.MonoType) {
-          //  env = (result as System.MonoType).scope;
-		} else {
-		  result = false;
-		  break;
-		}
-	  }
-	  return result;
+    trace(1, "contains?: {0}\n", variable); 
+    // could be "object.item"
+    string [] parts = variable.ToString().Split('.');
+    int current = 1;
+    object retobj = _dlr_env.GetVariable(parts[0]);
+    bool retval = true;
+    while (current < parts.Length) {
+      object tuple;
+      try {
+        _dlr_runtime.Operations.TryGetMember(retobj, 
+            parts[current].ToString(), false, out tuple); // ignore
+                                                          // case?
+        // tuple is actually lookup?
+      } catch {
+        retval = false;
+        break;
+      }
+      current += 1;
+    }
+    return retval;
   }
 
   public static object dlr_env_lookup(object variable) {
-      trace(1, "lookup: {0}\n", variable);
-      // could be "object.item"
-	  string [] parts = variable.ToString().Split();
-	  ScriptScope env = _dlr_env;
-	  object result = null;
-	  foreach (string part in parts) {
-		if (env.ContainsVariable(part)) {
-		  result = env.GetVariable(part);
-		  // if (result is Module)
-		  // env = (result as Module).scope
-		} else {
-		  break;
-		}
-	  }
-	  return make_binding("dlr", result);
+    trace(1, "lookup: {0}\n", variable);
+    // could be "object.item"
+    string [] parts = variable.ToString().Split('.');
+    int current = 1;
+    object retval = _dlr_env.GetVariable(parts[0]);
+    while (current < parts.Length) {
+      retval = _dlr_runtime.Operations.GetMember(retval, 
+          parts[current].ToString());
+      current += 1;
+    }
+    return make_binding("dlr", retval);
   }
 
   public static object printf_prim(object args) {

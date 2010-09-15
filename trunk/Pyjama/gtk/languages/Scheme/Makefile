@@ -1,7 +1,7 @@
 MCS=gmcs
 
-../PJScheme.dll: pjscheme.exe
-	$(MCS) -debug Scheme.cs pjscheme.cs -target:library -lib:../../bin -r:Microsoft.VisualBasic.dll -r:Microsoft.Scripting.dll -out:../PJScheme.dll
+../PJScheme.dll: pjscheme-rm.ss scheme-to-csharp.ss Scheme.cs pjscheme.cs
+	$(MCS) -debug Scheme.cs pjscheme.cs -target:library -lib:../../bin -r:Microsoft.VisualBasic.dll -r:Microsoft.Scripting.dll -r:IronPython.dll -out:../PJScheme.dll
 
 pjscheme: pjscheme.exe
 	MONO_PATH=../../bin mono --debug pjscheme.exe
@@ -29,13 +29,15 @@ run: pjscheme-rm.ss
 	echo "(begin (display (run start)) (newline))" >> pjscheme-run.ss
 	petite pjscheme-run.ss
 
-pjscheme.exe: pjscheme-rm.ss scheme-to-csharp.ss Scheme.cs
+pjscheme.cs:
 	echo "(load \"scheme-to-csharp.ss\")" > make-pjscheme.ss
 	echo "(delete-file \"pjscheme.cs\")" >> make-pjscheme.ss
 	echo "(convert-file \"pjscheme-rm.ss\" \"pjscheme.cs\")" >> make-pjscheme.ss
 	echo "(exit)" >> make-pjscheme.ss
 	petite make-pjscheme.ss
-	indent -di0 -i3 pjscheme.cs
+	indent -di0 -i3 pjscheme.cs &> /dev/null
+
+pjscheme.exe: pjscheme-rm.ss scheme-to-csharp.ss Scheme.cs pjscheme.cs
 	$(MCS) -debug pjscheme.cs Scheme.cs getline.cs -main:PJScheme \
 		-lib:../../bin -r:Microsoft.VisualBasic.dll -r:Microsoft.Scripting.dll
 

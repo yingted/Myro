@@ -161,7 +161,7 @@
 	    (header "using System;\nusing Microsoft.VisualBasic.CompilerServices;\n\n"))
 	(if (equal? *class* 'undefined)
 	    (set! *class* name))
-	(format "~a public class ~a: Scheme {\n~a\n~a ~a}\n"
+	(format "#pragma warning disable 109\n~a public class ~a: Scheme {\n~a\n~a ~a}\n"
 		header *class*
 		(apply string-append (map convert-define defs))
 		cs-trampoline
