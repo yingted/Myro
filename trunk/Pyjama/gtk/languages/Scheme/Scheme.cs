@@ -10,6 +10,16 @@ using System.Collections.Generic; // List
 using Microsoft.VisualBasic.CompilerServices;
 using IronPython;
 
+public class Method {
+  public object obj;
+  public object parts_list;
+
+  public Method(object obj, object parts_list) {
+    this.obj = obj;
+    this.parts_list = parts_list;
+  }
+}
+
 public class Config {
   public int DEBUG = 0;
   public bool NEED_NEWLINE = false;
@@ -482,7 +492,7 @@ public class Scheme {
 
   // given a name, return a function that given an array, returns object
   public static Procedure2 make_instance_proc(object tname) {
-	return (path, args) => call_external_proc(null, get_the_type(tname.ToString()), path, args);
+	return (path, args) => call_external_proc(tname, path, args);
   }
   
   public static void set_env_b(object env, object var, object val) {
@@ -610,42 +620,40 @@ public class Scheme {
   public static object property (object args) {
 	object the_obj = car(args);
 	object property_list = cdr(args);
-	return call_external_proc(the_obj, the_obj.GetType(), property_list, list());
+	return call_external_proc(the_obj, property_list, null);
   }
 
-  public static object get_external_thing(object obj, Type type, object lyst, Type[] types) {
-	ConstructorInfo constructor = type.GetConstructor(types);
-	if (constructor != null) {
-	  return list(symbol("constructor"), "ctor", constructor);
-	}
-	object current = lyst;
-	while (!Eq(current, EmptyList)) {
-	  string name = car(current).ToString();
-	  MethodInfo method = type.GetMethod(name, types);
-	  if (method != null) {
-		return list(symbol("method"), name, method);
-	  }
-	  FieldInfo field = type.GetField(name);
-	  if (field != null) {
-		return list(symbol("field"), name, field);
-	  }
-	  PropertyInfo property = type.GetProperty(name);
-	  if (property != null) {
-		return list(symbol("property"), name, property);
-	  }
-	}
+  public static object get_external_member(object obj, string name) {
+    printf("get_external_member: {0}, {1}\n", obj, name);
+    Type type = obj.GetType();
+    MethodInfo method = type.GetMethod(name);
+    if (method != null) {
+      printf("GetMethod: {0}\n", method);
+      return list(symbol("method"), name, method);
+    }
+    FieldInfo field = type.GetField(name);
+    if (field != null) {
+      printf("GetField: {0}\n", field.GetValue(obj));
+      return field.GetValue(obj);
+    }
+    PropertyInfo property = type.GetProperty(name);
+    if (property != null) {
+      printf("GetProperty: {0}\n", property);
+      return list(symbol("property"), name, property);
+    }
 	// Type Members
-	return list();
+	return null;
   }
 
-  public static object call_external_proc(object obj, Type type, object path, object args) {
+  public static object call_external_proc(object obj, object path, object args) {
 	//string name = obj.ToString();
 	//Type type = null;
 	//type = get_the_type(name.ToString());
+    Type type = obj.GetType();
 	if (type != null) {
 	  Type[] types = get_arg_types(args);
 	  object[] arguments = (object[]) list_to_vector(args);
-	  object result = get_external_thing(obj, type, path, types);
+	  object result = get_external_member(obj, car(path).ToString());
 	  if (!null_q(result)) {
 		if (Eq(car(result), symbol("method"))) {
 		  string method_name = cadr(result).ToString();
@@ -888,50 +896,6 @@ public class Scheme {
 	  current1 = cdr(current1);
 	}
   }
-
-    public static object dlr_exp_q(object rator) {
-	trace(1, "called: dlr_exp_q({0})\n", rator);
-	return (! pair_q(rator));
-    }
-    
-    public static object dlr_apply(object proc, object args) {
-	trace(1, "called: dlr_apply({0}, {1})\n", proc, args);
-	int len = (int) length(args);
-
-	if (len == 0) {
-	    return _dlr_runtime.Operations.Invoke(proc);
-	} else if (len == 1)
-	    return _dlr_runtime.Operations.Invoke(proc, list_ref(args, 0));
-	else if (len == 2)
-	    return _dlr_runtime.Operations.Invoke(proc, list_ref(args, 0), list_ref(args, 1));
-	// FIXME: how to properly call proc from DLR or reflection?
-	// http://dlr.codeplex.com/discussions
-	// Solution: Wait for DLR 1.0, or use this:
-	// public object Invoke(object obj, params object[] parameters) {
-	// return GetInvoker(parameters.Length)(this, _lc.CreateInvokeBinder(new CallInfo(parameters.Length)), obj, parameters);
-	//}
-	// See http://github.com/ironruby/ironruby/blob/master/Runtime/Microsoft.Scripting/Runtime/DynamicOperations.cs
-	// Even this ugly hack doesn't work in DLR 0.9, as Invoke only
-	// takes at most two arguments:
-	// else if (len == 3)
-	//     return _dlr_runtime.Operations.Invoke(proc, new object [] {list_ref(args, 0), list_ref(args, 1), list_ref(args, 2)});
-	// else if (len == 4)
-	//     return ((Procedure4)proc)(list_ref(args, 0), list_ref(args, 1), list_ref(args, 2), list_ref(args, 3));
-	// else if (len == 5)
-	//     return ((Procedure5)proc)(list_ref(args, 0), list_ref(args, 1), list_ref(args, 2), list_ref(args, 3), list_ref(args, 4));
-	// else if (len == 6)
-	//     return ((Procedure6)proc)(list_ref(args, 0), list_ref(args, 1), list_ref(args, 2), list_ref(args, 3), list_ref(args, 4), list_ref(args, 5));
-	// else if (len == 7)
-	//     return ((Procedure7)proc)(list_ref(args, 0), list_ref(args, 1), list_ref(args, 2), list_ref(args, 3), list_ref(args, 4), list_ref(args, 5), list_ref(args, 6));
-	// else if (len == 8)
-	//     return ((Procedure8)proc)(list_ref(args, 0), list_ref(args, 1), list_ref(args, 2), list_ref(args, 3), list_ref(args, 4), list_ref(args, 5), list_ref(args, 6), list_ref(args, 7));
-	// else if (len == 9)
-	//     return ((Procedure9)proc)(list_ref(args, 0), list_ref(args, 1), list_ref(args, 2), list_ref(args, 3), list_ref(args, 4), list_ref(args, 5), list_ref(args, 6), list_ref(args, 7), list_ref(args, 8));
-	// else if (len == 10)
-	//     return ((Procedure10)proc)(list_ref(args, 0), list_ref(args, 1), list_ref(args, 2), list_ref(args, 3), list_ref(args, 4), list_ref(args, 5), list_ref(args, 6), list_ref(args, 7), list_ref(args, 8), list_ref(args, 9));
-	else 
-	    throw new Exception(string.Format("too many parameters needed for proc: {0}", proc));
-    }
 
   public static object apply(object proc, object args) {
 	trace(1, "called: apply({0}, {1})\n", proc, args);
@@ -1214,12 +1178,74 @@ public class Scheme {
 	Console.Write(s);
   }
 
+    public static object dlr_exp_q(object rator) {
+	trace(1, "called: dlr_exp_q({0})\n", rator);
+	return (! pair_q(rator));
+    }
+    
+    public static object dlr_apply(object proc, object args) {
+	trace(1, "called: dlr_apply({0}, {1})\n", proc, args);
+	int len = (int) length(args);
+
+	if (len == 0) {
+	    return _dlr_runtime.Operations.Invoke(proc);
+	} else if (len == 1)
+	    return _dlr_runtime.Operations.Invoke(proc, list_ref(args, 0));
+	else if (len == 2)
+	    return _dlr_runtime.Operations.Invoke(proc, list_ref(args, 0), list_ref(args, 1));
+	// FIXME: how to properly call proc from DLR or reflection?
+	// http://dlr.codeplex.com/discussions
+	// Solution: Wait for DLR 1.0:
+	// public object Invoke(object obj, params object[] parameters) {
+	else 
+	    throw new Exception(string.Format("too many parameters needed for proc: {0}", proc));
+    }
+
   public static bool dlr_env_contains(object variable) {
     trace(1, "contains?: {0}\n", variable); 
-    // could be "object.item"
-    string [] parts = variable.ToString().Split('.');
-    int current = 1;
-    object retobj = _dlr_env.GetVariable(parts[0]);
+	bool retval = true;
+	try {
+	  _dlr_env.GetVariable(variable.ToString());
+	} catch {
+	  retval = false;
+	}
+	return retval;
+  }
+
+  public static object dlr_env_lookup(object variable) {
+    trace(1, "lookup: {0}\n", variable); 
+	object retval = null;
+	try {
+	  retval = _dlr_env.GetVariable(variable.ToString());
+	} catch {
+	  retval = null;
+	}
+    return make_binding("dlr", retval);
+  }
+
+  public static bool dlr_object_q(object result) {
+    printf("dlr_object_q: {0}\n", result);
+    return true;
+    //return (result is IronPython.Runtime.Types.PythonType);
+  }
+
+  public static object dlr_lookup_components(object result, object parts_list) {
+    printf("dlr_lookup_components: {0}, {1}\n", result, parts_list);
+    object retobj = result;
+    while (pair_q(parts_list)) {
+      printf("...loop: {0}\n", parts_list);
+      try{
+        retobj = _dlr_runtime.Operations.GetMember(retobj, 
+            car(parts_list).ToString());
+      } catch {
+        return make_binding("dlr", get_external_member(result, car(parts_list).ToString()));
+      }
+      parts_list = cdr(parts_list);
+    }
+    return make_binding("dlr", retobj);
+  }
+
+  /*
     bool retval = true;
     while (current < parts.Length) {
       object tuple;
@@ -1236,20 +1262,7 @@ public class Scheme {
     }
     return retval;
   }
-
-  public static object dlr_env_lookup(object variable) {
-    trace(1, "lookup: {0}\n", variable);
-    // could be "object.item"
-    string [] parts = variable.ToString().Split('.');
-    int current = 1;
-    object retval = _dlr_env.GetVariable(parts[0]);
-    while (current < parts.Length) {
-      retval = _dlr_runtime.Operations.GetMember(retval, 
-          parts[current].ToString());
-      current += 1;
-    }
-    return make_binding("dlr", retval);
-  }
+  */
 
   public static object printf_prim(object args) {
 	int len = ((int) length(args)) - 1;
@@ -2262,11 +2275,15 @@ public class Cons {
   
   public static Func<object,bool> module_q = tagged_list(symbol("module"), (Predicate2)GreaterOrEqual, 1);
 
+  public static Func<object,bool> environment_q = tagged_list(symbol("environment"), (Predicate2)GreaterOrEqual, 1);
+
   public override string ToString() { // Unsafe
 	if (procedure_q(this)) 
 	  return "#<procedure>";
 	else if (module_q(this)) 
 	  return String.Format("#<module {0}>", this.car);
+	else if (environment_q(this)) 
+	  return String.Format("#<environment>");
 	else if (this.car == symbol("quote") &&
 		(this.cdr is Cons) &&
 		((Cons)this.cdr).cdr == EmptyList) {

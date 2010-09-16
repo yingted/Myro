@@ -141,7 +141,7 @@
 	      (k new-binding))))))))
 
 (define* lookup-variable-components
-  ;; math.x.y.z
+  ;; math.x.y.z where math is a module or a DLR module/item
   ;; components: '(test x y z) "" ...
   ;; components: '(x y z) "test" ...
   ;; components: '(y z) "test.x" ...
@@ -158,8 +158,10 @@
 			      (format "~a" var)
 			      (format "~a.~a" path var))))
 	      (if (not (environment? result))
-		  (handler (format "~a is not a module" new-path))
-		  (lookup-variable-components
+                  (if (dlr-object? result)
+                      (k (dlr-lookup-components result (cdr components)))
+                      (handler (format "~a is not a module" new-path)))
+                  (lookup-variable-components
 		    (cdr components) new-path result handler k)))))))))
 
 (define* lookup-module-binding
@@ -167,8 +169,9 @@
     (let ((binding (search-env env var)))
       (cond
 	(binding (k binding))
-	((string=? path "") (handler (format "unbound variable ~a" var)))
-	(else (handler (format "unbound variable ~a in module ~a" var path)))))))
+        ((dlr-env-contains var) (k (dlr-env-lookup var)))
+	((string=? path "") (handler (format "unbound module '~a'" var)))
+	(else (handler (format "unbound variable '~a' in module '~a'" var path)))))))
 
 (define* split-variable
   (lambda (variable k)
