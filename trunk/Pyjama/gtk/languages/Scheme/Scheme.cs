@@ -11,12 +11,12 @@ using Microsoft.VisualBasic.CompilerServices;
 using IronPython;
 
 public class Method {
-  public object obj;
-  public object parts_list;
+  public object classobj;
+  public MethodInfo method;
 
-  public Method(object obj, object parts_list) {
-    this.obj = obj;
-    this.parts_list = parts_list;
+  public Method(object classobj, MethodInfo method) {
+    this.classobj = classobj;
+    this.method = method;
   }
 }
 
@@ -624,24 +624,25 @@ public class Scheme {
   }
 
   public static object get_external_member(object obj, string name) {
-    printf("get_external_member: {0}, {1}\n", obj, name);
+    //printf("get_external_member: {0}, {1}\n", obj, name);
     Type type = obj.GetType();
     MethodInfo method = type.GetMethod(name);
     if (method != null) {
-      printf("GetMethod: {0}\n", method);
-      return list(symbol("method"), name, method);
+      //printf("GetMethod: {0}\n", method);
+	  return new Method(obj, method);
     }
     FieldInfo field = type.GetField(name);
     if (field != null) {
-      printf("GetField: {0}\n", field.GetValue(obj));
+      //printf("GetField: {0}\n", field.GetValue(obj));
       return field.GetValue(obj);
     }
     PropertyInfo property = type.GetProperty(name);
     if (property != null) {
-      printf("GetProperty: {0}\n", property);
-      return list(symbol("property"), name, property);
+      //printf("GetProperty: {0}\n", property);
+	  return property;
+	  //return IronPython.Runtime.Types.DynamicHelpers.
+	  //GetPythonTypeFromType(property.GetType());
     }
-	// Type Members
 	return null;
   }
 
@@ -1178,15 +1179,18 @@ public class Scheme {
 	Console.Write(s);
   }
 
-    public static object dlr_exp_q(object rator) {
+  public static object dlr_exp_q(object rator) {
 	trace(1, "called: dlr_exp_q({0})\n", rator);
 	return (! pair_q(rator));
-    }
-    
-    public static object dlr_apply(object proc, object args) {
-	trace(1, "called: dlr_apply({0}, {1})\n", proc, args);
+  }
+  
+  public static object dlr_apply(object proc, object args) {
+	//printf("dlr_apply({0}, {1})\n", proc, args);
 	int len = (int) length(args);
-
+	if (proc is Method) {
+	  return ((Method)proc).method.Invoke(((Method)proc).classobj, 
+		  (object [])list_to_vector(args));
+	}
 	if (len == 0) {
 	    return _dlr_runtime.Operations.Invoke(proc);
 	} else if (len == 1)
@@ -1216,6 +1220,8 @@ public class Scheme {
     trace(1, "lookup: {0}\n", variable); 
 	object retval = null;
 	try {
+	  //retval =
+	  //_dlr_runtime.Operations.Invoke(_dlr_env.GetVariable(variable.ToString()));
 	  retval = _dlr_env.GetVariable(variable.ToString());
 	} catch {
 	  retval = null;
@@ -1224,16 +1230,17 @@ public class Scheme {
   }
 
   public static bool dlr_object_q(object result) {
-    printf("dlr_object_q: {0}\n", result);
+	// FIXME: can we see if it is a dlr object?
+    //printf("dlr_object_q: {0}\n", result);
     return true;
     //return (result is IronPython.Runtime.Types.PythonType);
   }
 
   public static object dlr_lookup_components(object result, object parts_list) {
-    printf("dlr_lookup_components: {0}, {1}\n", result, parts_list);
+    //printf("dlr_lookup_components: {0}, {1}\n", result, parts_list);
     object retobj = result;
     while (pair_q(parts_list)) {
-      printf("...loop: {0}\n", parts_list);
+      //printf("...loop: {0}\n", parts_list);
       try{
         retobj = _dlr_runtime.Operations.GetMember(retobj, 
             car(parts_list).ToString());
