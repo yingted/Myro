@@ -181,10 +181,13 @@ class ShellWindow(Window):
 
     def make_language_menu(self):
         languages = []
-        for (num, lang) in enumerate(self.engine.get_languages()):
-            languages.append(["Change to %s" % lang.title(), 
-                    None, "<control>%d" % (num + 1), 
+        num = 1
+        for lang in self.engine.get_languages():
+            if self.engine[lang].text_based:
+                languages.append(["Change to %s" % lang.title(), 
+                    None, "<control>%d" % num, 
                     lambda obj, event, lang=lang: self.change_to_lang(lang)])
+                num += 1
         return ([("Run", Gtk.Stock.Apply, "F5", self.on_run)] + 
                 languages +
                 [("Reset Shell", None, "<control>r", self.reset_shell)])

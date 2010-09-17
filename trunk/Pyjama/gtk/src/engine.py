@@ -47,6 +47,7 @@ class Engine(object):
     def __init__(self, manager, language):
         self.manager = manager
         self.language = language
+        self.text_based = True
 
     def execute(self, text):
         raise NotImplemented

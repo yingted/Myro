@@ -10,6 +10,7 @@ import Pango
 import System
 from utils import Language
 from document import BaseDocument, MyScrolledWindow
+from engine import Engine
 import Myro
 import Graphics
 
@@ -27,6 +28,7 @@ def color_code(color):
 
 class StatementWidget(Gtk.EventBox):
     def set_data(self, statement):
+        self.pjobj = statement
         self._class = statement._class
         self._method = statement._method
         self.args = statement.args
@@ -34,6 +36,7 @@ class StatementWidget(Gtk.EventBox):
 
 class BlockWidget(Gtk.EventBox):
     def set_data(self, block):
+        self.pjobj = block
         self.type = block.type
         self.statements = block.statements[:]
         self.parallel = block.parallel
@@ -258,10 +261,9 @@ class DinahDocument(BaseDocument):
         if data in self.lookup:
             item = self.lookup[data]
             if item.create:
-                # Where to add? get container from item?
+                # Where to add? get container, and use "where"
                 layout = self.layouts[obj]
                 widgets = self.process_list(layout, [item])
-                #where = obj.pjobj.drops_go, but not for Gtk widgets
                 position = layout.ChildGetProperty(obj, "position").Val
                 for widget in widgets:
                     # 0 to pos, negative at end
@@ -362,7 +364,6 @@ class DinahDocument(BaseDocument):
 
     def process_statement(self, statement, layout):
         enclosure = StatementWidget()
-        enclosure.pjobj = statement
         statement.widget = enclosure
         enclosure.set_data(statement)
         enclosure.ModifyBg(Gtk.StateType.Normal, statement_color)
@@ -413,7 +414,6 @@ class DinahDocument(BaseDocument):
     def process_block(self, block, layout):
         enclosure = BlockWidget()
         block.widget = enclosure
-        enclosure.pjobj = block
         enclosure.set_data(block)
         enclosure.ModifyBg(Gtk.StateType.Normal, block_color)
         vbox = Gtk.VBox()
@@ -449,10 +449,10 @@ class DinahDocument(BaseDocument):
                          Gtk.DestDefaults.All, 
                          self.accepts(block), 
                          Gdk.DragAction.Copy | Gdk.DragAction.Move)
-        self.layouts[enclosure] = expander.Child
-        enclosure.DragDataReceived += Gtk.DragDataReceivedHandler(self.startHandleDragDataReceived)
-        self.layouts[expander] = expander.Child
-        expander.DragDataReceived += Gtk.DragDataReceivedHandler(self.startHandleDragDataReceived)
+        self.layouts[enclosure] = layout
+        enclosure.DragDataReceived += Gtk.DragDataReceivedHandler(self.beforeHandleDragDataReceived)
+        self.layouts[expander] = layout
+        expander.DragDataReceived += Gtk.DragDataReceivedHandler(self.beforeHandleDragDataReceived)
         self.layouts[end] = expander.Child
         end.DragDataReceived += Gtk.DragDataReceivedHandler(self.endHandleDragDataReceived)
         box.PackEnd(end, True, True, 0)
@@ -460,9 +460,19 @@ class DinahDocument(BaseDocument):
         vbox.PackStart(Gtk.HSeparator(), True, True, 0)
         return enclosure
 
+class DinahEngine(Engine):
+    def __init__(self, manager):
+        super(DinahEngine, self).__init__(manager, "dinah")
+        self.text_based = False
+
+    def execute_file(self, filename):
+        self.stdout.write("Run filename '%s'!\n" % filename)
+    def start(self, stderr, stdout, stdin):
+        super(DinahEngine, self).start(stderr, stdout, stdin)
+
 class Dinah(Language):
     def get_engine_class(self):
-        return None
+        return DinahEngine
 
     def get_document_class(self):
         return DinahDocument
