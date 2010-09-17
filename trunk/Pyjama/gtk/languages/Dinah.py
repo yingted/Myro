@@ -121,6 +121,7 @@ class StatementWidget(Gtk.EventBox):
 
 def process_statement(statement):
     enclosure = StatementWidget()
+    statement.widget = enclosure
     enclosure.set_data(statement)
     enclosure.ModifyBg(Gtk.StateType.Normal, statement_color)
     vbox = Gtk.VBox()
@@ -166,6 +167,7 @@ class BlockWidget(Gtk.EventBox):
 
 def process_block(block):
     enclosure = BlockWidget()
+    block.widget = enclosure
     enclosure.set_data(block)
     enclosure.ModifyBg(Gtk.StateType.Normal, block_color)
     vbox = Gtk.VBox()
@@ -214,6 +216,7 @@ class Block(object):
         self.type = block_type
         self.statements = statements[:]
         self.parallel = kwargs["parallel"] if "parallel" in kwargs else False
+        self.widget = None
 
 class Statement(object):
     def __init__(self, _class, _method, *args, **kwargs):
@@ -221,6 +224,7 @@ class Statement(object):
         self._method = _method
         self.args = args
         self.kwargs = kwargs
+        self.widget = None
 
 class DinahDocument(BaseDocument):
     def make_widget(self):
@@ -240,7 +244,7 @@ class DinahDocument(BaseDocument):
             Gdk.ModifierType.Button1Mask,
             provides(self.treeview), 
             Gdk.DragAction.Copy | Gdk.DragAction.Move)
-        self.treeview.DragDataGet += Gtk.DragDataGetHandler(handleSourceDragDataGet)
+        self.treeview.DragDataGet += Gtk.DragDataGetHandler(self.treeviewHandleSourceDragDataGet)
         column.PackStart(cell, True)
         column.AddAttribute(cell, "markup", 0)
         self.layout = Gtk.VBox()
@@ -301,7 +305,7 @@ class DinahDocument(BaseDocument):
                          Gtk.DestDefaults.All, 
                          accepts(block), 
                          Gdk.DragAction.Copy | Gdk.DragAction.Move)
-        block.DragDataReceived += Gtk.DragDataReceivedHandler(handleDragDataReceived)
+        block.DragDataReceived += Gtk.DragDataReceivedHandler(self.endHandleDragDataReceived)
         self.layout.PackStart(block, True, True, 0)
 
         #Gtk.Layout(Gtk.Adjustment(0, 0, 100, 1, 10, 10), 
@@ -318,84 +322,45 @@ class DinahDocument(BaseDocument):
         self.treeview.GrabFocus()
 
     def make_store(self):
-        store = Gtk.TreeStore(str)
-        module = store.AppendValues("<b>Control</b>")
-        for x in ["Do times:", "Do for each:", "Do in order:",
-                  "Do together:", "Do while:", "If:"]:
+        store = Gtk.TreeStore(str, object)
+        #### Control
+        module = store.AppendValues("<b>Control</b>", None)
+        for block in [
+            Block("Do times:"), 
+            Block("Do for each:"), 
+            Block("Do in order:"),
+            Block("Do together:"), 
+            Block("Do while:"), 
+            Block("If:"),
+            ]:
             store.AppendValues(module, '<span bgcolor="%s">%s</span>' % 
-                               (color_code(block_color), x))
-        module = store.AppendValues("<b>Dinah</b>")
-        for x in ["wait", "beep", "random", "ask"]:
-            store.AppendValues(module, '<span bgcolor="%s">.%s()</span>' % 
-                               (color_code(statement_color), x))
-        
+                               (color_code(block_color), block.type), block)
+        # #### Dinah (utils)
+        # module = store.AppendValues("<b>Dinah</b>")
+        # for x in ["import", "wait", "beep", "random", "ask"]:
+        #     store.AppendValues(module, '<span bgcolor="%s">.%s()</span>' % 
+        #                        (color_code(statement_color), x))
+        # #### Myro (will come from dll)
+        # module = store.AppendValues("<b>Myro</b>")
+        # for x in ["forward", "backward", "init", "beep"]:
+        #     store.AppendValues(module, '<span bgcolor="%s">.%s()</span>' % 
+        #                        (color_code(statement_color), x))
 
-        # How to get References that have been added, by Name:
-        # >>> clr.References[2].ManifestModule.Name
-        # 'Myro.dll'
-        # How to find classes in DLL:
-        # >>> [x.Name for x in clr.References[2].ManifestModule.GetTypes()]
-        # ['Myro', '_Robot', '_Scribbler']
-        # How to find static fields in class:
-        # >>> clr.References[2].ManifestModule.GetTypes()[0].GetFields()[0].Name
-        # 'robot'
-        # How to get all of the items in a class:
-        # >>> [x.Name for x in clr.References[2].ManifestModule.GetTypes()[0].GetMembers()]
-        # ['init', 'forward', 'backward', 'Equals', 'GetHashCode', 'GetType', 'ToString', 'robot', '_Scribbler', '_Robot']
-        # What types are these members:
-        # >>> clr.References[2].ManifestModule.GetTypes()[0].GetMembers()[0].MemberType
-        # >>> [str(x.MemberType) for x in clr.References[2].ManifestModule.GetTypes()[0].GetMembers()]
-        # ['Method', 'Method', 'Method', 'Method', 'Method', 'Method', 'Method', 'Field', 'NestedType', 'NestedType']
-        # Which are the ones we are interested in?
-        # >>> [(x.Name, x.Attributes) for x in clr.References[2].ManifestModule.GetTypes()[0].GetMembers()]
-        # [('init', <enum System.Reflection.MethodAttributes: Public, Static, HideBySig>), 
-        #  ('forward', <enum System.Reflection.MethodAttributes: Public, Static, HideBySig>), 
-        #  ('backward', <enum System.Reflection.MethodAttributes: Public, Static, HideBySig>), 
-        #  ('Equals', <enum System.Reflection.MethodAttributes: Public, Virtual, HideBySig, VtableLayoutMask>), 
-        #  ('GetHashCode', <enum System.Reflection.MethodAttributes: Public, Virtual, HideBySig, VtableLayoutMask>), 
-        #  ('GetType', <enum System.Reflection.MethodAttributes: Public, HideBySig>), 
-        #  ('ToString', <enum System.Reflection.MethodAttributes: Public, Virtual, HideBySig, VtableLayoutMask>), 
-        #  ('robot', <enum System.Reflection.FieldAttributes: Public, Static>), 
-        #  ('_Scribbler', <enum System.Reflection.TypeAttributes: NestedPublic, Serializable, BeforeFieldInit>), 
-        #  ('_Robot', <enum System.Reflection.TypeAttributes: NestedPublic, BeforeFieldInit>)]
-        # How many params does each take? What is return value?
-        # repr(m)
-        # The following is about Myro.forward(), m:
-        # '<System.Reflection.MonoMethod object at 0x0000000000000066 [Void forward(Single, Nullable`1)]>'
-        # >>> m.GetParameters()
-        # Array[ParameterInfo]((<System.Reflection.ParameterInfo object at 0x000000000000006C [Single power]>, <System.Reflection.ParameterInfo object at 0x000000000000006D [System.Nullable`1[[System.Single, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089]] time]>))
-        # >>> dir(m.GetParameters()[0])
-        # ['Attributes', 'AttrsImpl', 'ClassImpl', 'DefaultValue', 'DefaultValueImpl', 'Equals', 'Finalize', 'GetCustomAttributes', 'GetHashCode', 'GetIDsOfNames', 'GetOptionalCustomModifiers', 'GetRequiredCustomModifiers', 'GetType', 'GetTypeInfo', 'GetTypeInfoCount', 'Invoke', 'IsDefined', 'IsIn', 'IsLcid', 'IsOptional', 'IsOut', 'IsRetval', 'Member', 'MemberImpl', 'MemberwiseClone', 'MetadataToken', 'Name', 'NameImpl', 'ParameterType', 'Position', 'PositionImpl', 'RawDefaultValue',...]
-        # p is a parameter:
-        # p.Attributes
-        # <enum System.Reflection.ParameterAttributes: Optional, HasDefault>
-        # p.DefaultValue, p.ParameterType, 
-        # 1, System.Single, 
-        
+        # module = store.AppendValues("<b>Graphics</b>")
+        # for x in ["Window", "Picture", "Polygon", "Line", "Group", 
+        #           "Arrow", "Point"]:
+        #     store.AppendValues(module, '<span bgcolor="%s">.%s()</span>' % 
+        #                        (color_code(statement_color), x))
 
-        
-        module = store.AppendValues("<b>Myro</b>")
-        for x in ["forward", "backward", "init", "beep"]:
-            store.AppendValues(module, '<span bgcolor="%s">.%s()</span>' % 
-                               (color_code(statement_color), x))
+        # module = store.AppendValues("<b>Window members</b>")
+        # for x in ["mode", "animate_step_time", ]:
+        #     store.AppendValues(module, '<span bgcolor="%s">.%s()</span>' % 
+        #                        (color_code(statement_color), x))
 
-        module = store.AppendValues("<b>Graphics</b>")
-        for x in ["Window", "Picture", "Polygon", "Line", "Group", 
-                  "Arrow", "Point"]:
-            store.AppendValues(module, '<span bgcolor="%s">.%s()</span>' % 
-                               (color_code(statement_color), x))
-
-
-        module = store.AppendValues("<b>Window members</b>")
-        for x in ["mode", "animate_step_time", ]:
-            store.AppendValues(module, '<span bgcolor="%s">.%s()</span>' % 
-                               (color_code(statement_color), x))
-
-
-        module = store.AppendValues("<b>Members</b>")
-        for x in ["mode", "animate_step_time", ]:
-            store.AppendValues(module, '<span bgcolor="%s">.%s()</span>' % 
-                               (color_code(statement_color), x))
+        # module = store.AppendValues("<b>Members</b>")
+        # for x in ["mode", "animate_step_time", ]:
+        #     store.AppendValues(module, '<span bgcolor="%s">.%s()</span>' % 
+        #                        (color_code(statement_color), x))
 
         return store
 
@@ -410,6 +375,23 @@ class DinahDocument(BaseDocument):
 
     def save_as(self):
         pass
+
+    def treeviewHandleSourceDragDataGet(self, obj, args):
+        # DragDropGetArgs: args
+        print "dnd get", obj, args
+        targets = args.Context.Targets
+        selected, treeiter = obj.Selection.GetSelected()
+        item = obj.Model.GetValue(treeiter, 1)
+        if item:
+            data = item.type # 0- text, 1-object
+            packed = System.Text.Encoding.UTF8.GetBytes(data)
+            args.SelectionData.Set(targets[0], 8, packed)
+
+    def endHandleDragDataReceived(self, obj, args):
+        print "Put at end"
+        bytes = args.SelectionData.Data
+        data = System.Text.Encoding.UTF8.GetString(bytes)
+        print "is it new or a move?", data
 
 class Dinah(Language):
     def get_engine_class(self):

@@ -75,4 +75,3 @@ def get_fields(dll_file, _class):
         # <enum System.Reflection.ParameterAttributes: Optional, HasDefault>
         # p.DefaultValue, p.ParameterType, 
         # 1, System.Single, 
- 
