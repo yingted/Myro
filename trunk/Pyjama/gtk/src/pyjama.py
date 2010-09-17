@@ -1,5 +1,5 @@
 # Setup environment:
-import sys, os
+import sys, os, traceback
 sys.path.append(os.path.abspath("modules"))
 
 # Bring in DLLs to import from:
@@ -37,6 +37,7 @@ def get_registered_languages():
             lang = LanguageModule.register_language()
             results[lang.language] = lang
         except:
+            traceback.print_exc()
             print "Cannot load language file '%s'" % filename
     return results
 
