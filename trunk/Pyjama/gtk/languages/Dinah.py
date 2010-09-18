@@ -18,23 +18,84 @@ import Graphics
 blue = Gdk.Color(70, 227, 207)
 purple = Gdk.Color(227, 70, 207)
 orange = Gdk.Color(243, 111, 11)
-# structure colors
-expression_color = blue
-block_color = orange
-statement_color = purple
+red = Gdk.Color(243, 50, 50)
+pink = Gdk.Color(255, 200, 200)
+green = Gdk.Color(50, 243, 50)
+white = Gdk.Color(200, 200, 200)
 
-def color_code(color):
+def color_markup(color):
     r = int(color.Red/float(2**16) * 255)
     g = int(color.Green/float(2**16) * 255)
     b = int(color.Blue/float(2**16) * 255)
     return "#%02X%02X%02X" % (r, g, b)
 
-class Method(object):
-    def __init__(self, *args, **kwargs):
-        self.type = "method"
-        self.args = args
-        self.kwargs = kwargs
-        self.drops_go = kwargs["drops_go"] if "drops_go" in kwargs else "before"
+def make_expression_label(exp):
+    if exp.type in ["ctor",]:
+        return "%s.%s(" % (exp.module, exp._class)
+    elif exp.type in ["var",]:
+        return "%s" % (exp.name,)
+    elif exp.type in ["value",]:
+        if exp.value_type == "Boolean":
+            return "["
+        else:
+            return "[%s:" % exp.value_type
+    elif exp.type in ["property",]:
+        return "%s.%s" % (exp.instance, exp.name)
+    elif exp.type in ["method",]:
+        return "%s.%s(" % (exp.instance, exp.name)
+    elif exp.type in ["create variable"]:
+        return ""
+    elif exp.type in ["set property"]:
+        return ""
+    elif exp.type in ["import"]:
+        return "import"
+    elif exp.type in ["type",]:
+        return "[%s]" % (exp.name, )
+    elif exp.type in ["block",]:
+        return "%s" % (exp.block_type,)
+    else:
+        return "???"
+
+def make_treeview_text(exptype, **kwargs):
+    if exptype == "block":
+        return kwargs['block_type']
+    elif exptype == "ctor":
+        return "%s()" % kwargs['_class']
+    elif exptype == "var":
+        return "<i>%s</i> - %s" % (kwargs['name'], kwargs['_class'])
+    elif exptype == "value":
+        return "[%s]" % kwargs['value_type']
+    elif exptype == "property":
+        return ".%s" % kwargs['name']
+    elif exptype == "method":
+        return ".%s()" % kwargs['name']
+    else:
+        return exptype
+
+def make_color(exptype, **kwargs):
+    if exptype in ["ctor",]:
+        return white
+    elif exptype in ["var",]:
+        return white
+    elif exptype in ["value",]:
+        return white
+    elif exptype in ["property",]:
+        return blue
+    elif exptype in ["import", "create variable", "set property"]:
+        return pink
+    elif exptype in ["type",]:
+        return red
+    elif exptype in ["method",]:
+        return green
+    elif exptype in ["block",]:
+        return orange
+    else:
+        return white
+
+class Entry(object):
+    def __init__(self, default, callback):
+        self.default = default
+        self.callback = callback
 
 class MyEventBox(Gtk.EventBox):
     """
@@ -44,52 +105,44 @@ class MyEventBox(Gtk.EventBox):
 class ExpressionWidget(Gtk.EventBox):
     def set_data(self, expression):
         self.id = str(id(self))
-        self.pjobj = expression
-        self._class = expression._class
-        self._method = expression._method
-        self.args = expression.args
-        self.kwargs = expression.kwargs
-
-class StatementWidget(Gtk.EventBox):
-    def set_data(self, statement):
-        self.id = str(id(self))
-        self.type = statement.type
-        self.pjobj = statement
+        self.pobj = expression
 
 class BlockWidget(Gtk.EventBox):
     def set_data(self, block):
         self.id = str(id(self))
-        self.pjobj = block
-        self.type = block.type
-        self.statements = block.statements[:]
-        self.parallel = block.parallel
-
-class Statement(object):
-    def __init__(self, statement_type, *args, **kwargs):
-        self.type = statement_type
-        self.args = args
-        self.kwargs = kwargs
-        self.drops_go = kwargs["drops_go"] if "drops_go" in kwargs else "before"
-        self.widget = None
+        self.pobj = block
 
 class Block(object):
     def __init__(self, block_type, *statements, **kwargs):
-        self.type = block_type
+        self.pid = str(id(self))
+        self.type = "block"
+        self.block_type = block_type
+        self.text = make_treeview_text(self.type, block_type=self.block_type)
+        self.color = make_color(self.type, block_type=self.block_type)
         self.statements = statements[:]
         self.parallel = kwargs["parallel"] if "parallel" in kwargs else False
         self.drops_go = kwargs["drops_go"] if "drops_go" in kwargs else "before"
         self.widget = None
 
 class Expression(object):
-    def __init__(self, _class, _method, *args, **kwargs):
-        self._class = _class
-        self._method = _method
-        self.type = ".%s()" % self._method
+    def __init__(self, exptype, *args, **kwargs):
+        self.pid = str(id(self))
+        self.type = exptype
+        self.separator = kwargs["separator"] if "separator" in kwargs else ","
+        self.end = kwargs["end"] if "end" in kwargs else ""
+        self.text = make_treeview_text(self.type, **kwargs)
+        self.color = make_color(self.type, **kwargs)
+        self.drops_go = kwargs["drops_go"] if "drops_go" in kwargs else "before"
+        self.members = kwargs["members"] if "members" in kwargs else []
+        self.widget = None
         self.args = args
         self.kwargs = kwargs
-        self.members = kwargs["members"] if "members" in kwargs else []
-        self.drops_go = kwargs["drops_go"] if "drops_go" in kwargs else "before"
-        self.widget = None
+    def __getattr__(self, attr):
+        if attr in self.kwargs:
+            return self.kwargs[attr]
+        raise AttributeError("no such attr: '%s'" % attr)
+
+E = Expression
 
 class DinahDocument(BaseDocument):
     def make_widget(self):
@@ -116,7 +169,7 @@ class DinahDocument(BaseDocument):
         column.AddAttribute(cell, "markup", 0)
         self.layout = Gtk.VBox()
         block = Gtk.EventBox()
-        #block.ModifyBg(Gtk.StateType.Normal, block_color)
+        #block.ModifyBg(Gtk.StateType.Normal, block.color)
         label = Gtk.Label("Start of Dinah Script. Drag and Drop from the Module list on left.")
         label.Xalign = 0
         block.Add(label)
@@ -167,50 +220,44 @@ class DinahDocument(BaseDocument):
             Block("If:"),
             ]:
             store.AppendValues(module, '<span bgcolor="%s">%s</span>' % 
-                               (color_code(block_color), block.type), block)
+                               (color_markup(block.color), block.text), block)
+
+        #### Variable
+        self.variables = store.AppendValues("<b>Variables</b>", None)
+
+        #### Values
+        module = store.AppendValues("<b>Direct Values</b>", None)
+        for value in [
+            Expression("value", 0, value_type="Integer", end="]"), 
+            Expression("value", 0.0, value_type="Floating point", end="]"), 
+            Expression("value", "", value_type="String", end="]"), 
+            Expression("value", "", value_type="Filename", end="]"), 
+            Expression("value", True, value_type="Boolean", end="]"), 
+            ]:
+            store.AppendValues(module, '<span bgcolor="%s">%s</span>' % 
+                               (color_markup(value.color), value.text), 
+                               value)
 
         #### Imports
         module = store.AppendValues("<b>Statements</b>", None)
         for statement in [
-            Statement("Import"), 
-            Statement("Assignment"), 
+            Expression("import", 
+                       Entry("", callback=self.import_module_cb),
+                       ), 
+            Expression("create variable", 
+                       Entry("", callback=self.define_variable_cb),
+                       ":=", 
+                       E("type", name="Expression"), 
+                       separator=""), 
+            Expression("set property", 
+                       E("type", name="Property"), 
+                       ":=", 
+                       E("type", name="Expression"), 
+                       separator=""), 
             ]:
             store.AppendValues(module, '<span bgcolor="%s">%s</span>' % 
-                               (color_code(statement_color), statement.type), 
+                               (color_markup(statement.color), statement.text), 
                                statement)
-
-        #### Graphics
-        module = store.AppendValues("<b>Graphics</b>", None)
-        for expression in [
-            Expression("Graphics", "Window", "'Title'", 
-                       members=[
-                    Expression("Graphics.Window", "animate_step_time"), 
-                    Expression("Graphics.Window", "title")
-                    ], 
-                       ),
-            Expression("Graphics", "Picture", "filename", 
-                       members=[
-                    Expression("Graphics.Picture", "draw", ""), 
-                    Expression("Graphics.Picture", "move", 0, 0), 
-                    Expression("Graphics.Picture", "rotate", 0), 
-                    Expression("Graphics.Picture", "move_to", 0, 0), 
-                    Expression("Graphics.Picture", "rotate_to", 0),
-                    ],
-                       ), 
-            Expression("Graphics", "Point", 0, 0, 
-#                       members=["draw", "move", "rotate", "move_to", "rotate_to"],
-                       ),
-            Expression("Graphics", "Line", 
-                      Expression("Graphics", "Point", 0, 0), 
-                      Expression("Graphics", "Point", 1, 1), 
- #                      members=["draw", "move", "rotate", "move_to", "rotate_to"],
-                       ), 
-            ]:
-            _class = store.AppendValues(module, '<span bgcolor="%s">%s</span>' % 
-                                        (color_code(expression_color), expression.type), 
-                                        expression)
-            for member in expression.members:
-                store.AppendValues(_class, member._method, member)
 
         # #### Dinah (utils)
         # module = store.AppendValues("<b>Dinah</b>")
@@ -241,36 +288,144 @@ class DinahDocument(BaseDocument):
 
         return store
 
-    def open(self):
-        top_level = [Block("Do together:", 
-                           Expression("Myro", "forward", 1),
-                           Expression("Myro", "forward", 1, .5),
-                           parallel=True),
-                     Block("Do in order:", 
-                           Expression("Myro", "forward", 1, 1),
-                           Expression("Myro", "init", "COM1", 0),
-                           Expression("Myro", "backward", 1, 1),
-                           Expression("Myro", "backward", 1, 1),
-                           Block("Do together:",
-                                 Expression("Myro", "init", "COM1", 0),
-                                 Expression("Myro", "backward", 1),
-                                 Expression("Myro", "backward", 1, 1),
-                                 Expression("Myro", "init", "COM1", 0),
-                                 Expression("Myro", "backward", 1, 1),
-                                 Expression("Myro", "backward", 1, 1),
-                                 parallel=True
-                                 )
+    def define_variable_cb(self, widget, event):
+        result = widget.Text
+        return self.define_variable(widget, result)
+
+    def define_variable(self, widget, result):
+        store = self.treeview.Model
+        exp = None
+        if result == "win":
+            exp = Expression("var", name="win",
+                             _class="Graphics.Window",
+                             members=[
+                    Expression("property", name="animate_step_time"), 
+                    Expression("property", name="title"),
+                    Expression("property", name="mode"),
+                    ], 
+                             )
+        elif result == "pic":
+            exp = Expression("var", name="pic", 
+                             _class="Graphics.Picture", 
+                             members=[
+                    Expression("method", 
+                               E("type", name="Graphics.Window"), 
+                               name="draw", end=")"), 
+                    Expression("method", 
+                               E("type", name="Integer"), 
+                               E("type", name="Integer"), 
+                               name="move", end=")"), 
+                    Expression("method", 
+                               E("type", name="Integer"), 
+                               name="rotate", end=")"), 
+                    Expression("method", 
+                               E("type", name="Integer"), 
+                               E("type", name="Integer"), 
+                               name="move_to", end=")"), 
+                    Expression("method", 
+                               E("type", name="Integer"), 
+                               name="rotate_to", end=")"), 
+                    ],
+                             )
+        if exp:
+            _class = store.AppendValues(self.variables,
+                                        '<span bgcolor="%s">%s</span>' % 
+                                        (color_markup(exp.color), exp.text), 
+                                        exp)
+            for member in exp.members:
+                member.instance = exp.name
+                store.AppendValues(_class, 
+                                   '<span bgcolor="%s">%s</span>' % 
+                                   (color_markup(member.color), member.text), 
+                                   member)
+        widget.CanFocus = False
+        return True
+
+    def import_module_cb(self, widget, event):
+        result = widget.Text
+        return self.import_module(widget, result)
+        
+    def import_module(self, widget, module_name):
+        ### FIXME: will come from DLL
+        ### FIXME: don't add twice
+        #### Graphics
+        store = self.treeview.Model
+        if module_name == "Graphics":
+            module = store.AppendValues("<b>Graphics</b>", None)
+            for exp in [
+                Expression("ctor", E("type", name="String"), 
+                           _class="Window",
+                           end=")",
                            ),
-                     Block("Do together:", 
-                           Expression("Myro", "backward", 1),
-                           Expression("Myro", "forward", 1, ),
-                           Expression("Myro", "backward", 1, ),
-                           Expression("Myro", "forward", 1, ),
-                           Expression("Myro", "backward", 1, ),
-                           Expression("Myro", "forward", 1, ),
-                           parallel=True),
-                     ]
-        self.process_list(self.layout, top_level)
+                Expression("ctor", E("type", name="Filename"), 
+                           _class="Picture", 
+                           end=")",
+                           ), 
+                Expression("ctor", 
+                           E("type", name="Integer"), 
+                           E("type", name="Integer"), 
+                           _class="Point",
+                           end=")",
+                           ),
+                Expression("ctor", 
+                           Expression("type", name="Graphics.Point"), 
+                           Expression("type", name="Graphics.Point"), 
+                           _class="Line", 
+                           end=")",
+                           ), 
+                ]:
+                exp.module = 'Graphics'
+                _class = store.AppendValues(module, 
+                                            '<span bgcolor="%s">%s</span>' % 
+                                            (color_markup(exp.color), exp.text), 
+                                            exp)
+                for member in exp.members:
+                    member.module = 'Graphics'
+                    member._class = exp._class
+                    store.AppendValues(_class, 
+                                       '<span bgcolor="%s">%s</span>' % 
+                                       (color_markup(member.color), member.text), 
+                                       member)
+            self.treeview.ShowAll()
+            widget.CanFocus = False
+            return True 
+        elif module_name == "Myro":
+            module = store.AppendValues("<b>Myro</b>", None)
+            widget.CanFocus = False
+            self.treeview.ShowAll()
+            return True 
+        return False # Gtk needs boolean?
+
+    def open(self):
+        # top_level = [Block("Do together:", 
+        #                    Expression("Myro", "forward", 1),
+        #                    Expression("Myro", "forward", 1, .5),
+        #                    parallel=True),
+        #              Block("Do in order:", 
+        #                    Expression("Myro", "forward", 1, 1),
+        #                    Expression("Myro", "init", "COM1", 0),
+        #                    Expression("Myro", "backward", 1, 1),
+        #                    Expression("Myro", "backward", 1, 1),
+        #                    Block("Do together:",
+        #                          Expression("Myro", "init", "COM1", 0),
+        #                          Expression("Myro", "backward", 1),
+        #                          Expression("Myro", "backward", 1, 1),
+        #                          Expression("Myro", "init", "COM1", 0),
+        #                          Expression("Myro", "backward", 1, 1),
+        #                          Expression("Myro", "backward", 1, 1),
+        #                          parallel=True
+        #                          )
+        #                    ),
+        #              Block("Do together:", 
+        #                    Expression("Myro", "backward", 1),
+        #                    Expression("Myro", "forward", 1, ),
+        #                    Expression("Myro", "backward", 1, ),
+        #                    Expression("Myro", "forward", 1, ),
+        #                    Expression("Myro", "backward", 1, ),
+        #                    Expression("Myro", "forward", 1, ),
+        #                    parallel=True),
+        #              ]
+        # self.process_list(self.layout, top_level)
         self.layout.ShowAll()
 
     def get_text(self):
@@ -289,8 +444,9 @@ class DinahDocument(BaseDocument):
         selected, treeiter = obj.Selection.GetSelected()
         item = obj.Model.GetValue(treeiter, 1) # 0- text, 1-object
         if item:
-            data = item.type
+            data = "create:%s" % item.pid
             self.lookup[data] = item
+            self.lookup[item.pid] = item
             packed = System.Text.Encoding.UTF8.GetBytes(data)
             args.SelectionData.Set(targets[0], 8, packed)
 
@@ -311,15 +467,14 @@ class DinahDocument(BaseDocument):
         data = System.Text.Encoding.UTF8.GetString(bytes)
         if data in self.lookup:
             item = self.lookup[data]
-            if isinstance(item, Gtk.Widget):
-                print "Move '%s'" % data
-                # Need to know if within same parent, or diff parents
-            else: # Create!
+            print item
+            if data.startswith("create:"):
                 # Where to add? get container, and use "where"
                 # obj is the item we are dropping onto:
                 layout = self.layouts[obj]
                 # construct the new dropped expression/statement:
                 widgets = self.process_list(layout, [item])
+                #self.lookup[widgets[0].widget.id] = widgets[0].widget
                 # put it in right place:
                 position = layout.ChildGetProperty(obj, "position").Val
                 for widget in widgets:
@@ -333,6 +488,9 @@ class DinahDocument(BaseDocument):
                     elif where == "start":
                         layout.ReorderChild(widget, 0) 
                 layout.ShowAll()
+            else: # Move!
+                print "Move '%s'" % data
+                # Need to know if within same parent, or diff parents?
         else:
             print "unknown object: '%s'" % data
             print self.lookup
@@ -387,12 +545,9 @@ class DinahDocument(BaseDocument):
         retval = []
         for widget in layout:
             if isinstance(widget, BlockWidget):
-                retval.extend([("Block", widget.type, self.process_widgets(widget))])
+                retval.extend([("Block", widget.pobj.block_type, self.process_widgets(widget))])
             elif isinstance(widget, ExpressionWidget):
-                retval.extend([("Expression", widget._class, 
-                                self.process_widgets(widget))])
-            elif isinstance(widget, StatementWidget):
-                retval.extend([("Statement", widget.type, 
+                retval.extend([("Expression", widget.pobj.type, 
                                 self.process_widgets(widget))])
             elif isinstance(widget, Gtk.Entry):
                 retval.extend([('Entry', widget.Text)])
@@ -411,8 +566,6 @@ class DinahDocument(BaseDocument):
                 box = self.process_block(item, layout)
             elif isinstance(item, Expression):
                 box = self.process_expression(item, layout)
-            elif isinstance(item, Statement):
-                box = self.process_statement(item, layout)
             else:
                 raise Exception("unknown item: '%s'" % item)
             layout.PackStart(box, False, True, 0)
@@ -428,7 +581,7 @@ class DinahDocument(BaseDocument):
         expression.widget = enclosure
         enclosure.set_data(expression)
         self.lookup[enclosure.id] = expression
-        enclosure.ModifyBg(Gtk.StateType.Normal, expression_color)
+        enclosure.ModifyBg(Gtk.StateType.Normal, expression.color)
         vbox = Gtk.VBox()
         enclosure.Add(vbox)
         # Set item up as a drop target:
@@ -441,19 +594,31 @@ class DinahDocument(BaseDocument):
             enclosure.DragDataReceived += Gtk.DragDataReceivedHandler(self.beforeHandleDragDataReceived)
         hbox = Gtk.HBox()
         if layout:
-            img = self.make_drag_drop('gtk-dnd', expression, expression_color, 
+            img = self.make_drag_drop('gtk-dnd', expression, expression.color, 
                                       enclosure.id) 
             hbox.PackStart(img, False, True, 0)
 
-        label = Gtk.Label("%s.%s(" % (expression._class, expression._method))
+        label = Gtk.Label(make_expression_label(expression))
         hbox.PackStart(label, False, True, 0)
         for count in range(len(expression.args)):
             arg = expression.args[count]
-            if isinstance(arg, basestring):
+            if arg == ":=":
+                label = Gtk.Label("<=")
+                hbox.PackStart(label, False, True, 0)
+            elif isinstance(arg, Entry):
+                entry = Gtk.Entry(arg.default)
+                entry.WidthChars = 7
+                entry.FocusOutEvent += arg.callback
+                hbox.PackStart(entry, False, True, 0)
+            elif isinstance(arg, basestring):
                 entry = Gtk.Entry(arg)
                 entry.WidthChars = 7
                 hbox.PackStart(entry, False, True, 0)
-            elif isinstance(arg, int): # FIXME: use Gtk.SpinButton
+            elif isinstance(arg, bool):
+                entry = Gtk.CheckButton("Boolean")
+                entry.Active = arg
+                hbox.PackStart(entry, False, True, 0)
+            elif isinstance(arg, int): # maybe use Gtk.SpinButton?
                 entry = Gtk.Entry(str(arg))
                 entry.WidthChars = 3
                 hbox.PackStart(entry, False, True, 0)
@@ -466,56 +631,12 @@ class DinahDocument(BaseDocument):
                 box = self.process_expression(arg, None)
                 hbox.PackStart(box, False, True, 0)
             if count < len(expression.args) - 1:
-                comma = Gtk.Label(", ")
+                comma = Gtk.Label(expression.separator)
                 hbox.PackStart(comma, False, True, 0)
 
-        label = Gtk.Label(")")
-        hbox.PackStart(label, False, True, 0)
-        vbox.PackStart(hbox, False, True, 0)
-        return enclosure
-
-    def process_statement(self, statement, layout):
-        enclosure = StatementWidget()
-        statement.widget = enclosure
-        enclosure.set_data(statement)
-        self.lookup[enclosure.id] = statement
-        enclosure.ModifyBg(Gtk.StateType.Normal, statement_color)
-        vbox = Gtk.VBox()
-        enclosure.Add(vbox)
-        # Set item up as a drop target:
-        Gtk.Drag.DestSet(enclosure, 
-                         Gtk.DestDefaults.All, 
-                         self.accepts(statement), 
-                         Gdk.DragAction.Copy | Gdk.DragAction.Move)
-        if layout:
-            self.layouts[enclosure] = layout
-            enclosure.DragDataReceived += Gtk.DragDataReceivedHandler(self.beforeHandleDragDataReceived)
-        hbox = Gtk.HBox()
-        if layout:
-            img = self.make_drag_drop('gtk-dnd', statement, statement_color, 
-                                      enclosure.id) 
-            hbox.PackStart(img, False, True, 0)
-
-        label = Gtk.Label("%s" % (statement.type, ))
-        hbox.PackStart(label, False, True, 0)
-        for count in range(len(statement.args)):
-            arg = statement.args[count]
-            if isinstance(arg, basestring):
-                entry = Gtk.Entry(arg)
-                entry.WidthChars = 7
-                hbox.PackStart(entry, False, True, 0)
-            elif isinstance(arg, int): # FIXME: use Gtk.SpinButton
-                entry = Gtk.Entry(str(arg))
-                entry.WidthChars = 3
-                hbox.PackStart(entry, False, True, 0)
-            elif isinstance(arg, float):
-                entry = Gtk.Entry(str(arg))
-                entry.WidthChars = 5
-                hbox.PackStart(entry, False, True, 0)
-            else:
-                print "process_statement, statements:", arg, type(arg)
-                box = self.process_expression(arg, None)
-                hbox.PackStart(box, False, True, 0)
+        if expression.end:
+            end = Gtk.Label(expression.end)
+            hbox.PackStart(end, False, True, 0)
 
         vbox.PackStart(hbox, False, True, 0)
         return enclosure
@@ -525,7 +646,7 @@ class DinahDocument(BaseDocument):
         block.widget = enclosure
         enclosure.set_data(block)
         self.lookup[enclosure.id] = block
-        enclosure.ModifyBg(Gtk.StateType.Normal, block_color)
+        enclosure.ModifyBg(Gtk.StateType.Normal, block.color)
         vbox = Gtk.VBox()
         enclosure.Add(vbox)
         # Set item up as a drop target:
@@ -534,10 +655,10 @@ class DinahDocument(BaseDocument):
                          self.accepts(block), 
                          Gdk.DragAction.Copy | Gdk.DragAction.Move)
         expander_row = Gtk.HBox()
-        img = self.make_drag_drop('gtk-dnd-multiple', block, block_color,
+        img = self.make_drag_drop('gtk-dnd-multiple', block, block.color,
                                   enclosure.id)
         expander_row.PackStart(img, False, True, 0)
-        expander = Gtk.Expander(block.type)
+        expander = Gtk.Expander(block.block_type)
         # Set item up as a drop target:
         Gtk.Drag.DestSet(expander, 
                          Gtk.DestDefaults.All, 
@@ -552,7 +673,7 @@ class DinahDocument(BaseDocument):
         expander.Add(box)
         self.process_list(box, block.statements, parallel=block.parallel)
         end = Gtk.EventBox()
-        #block.ModifyBg(Gtk.StateType.Normal, block_color)
+        #block.ModifyBg(Gtk.StateType.Normal, block.color)
         label = Gtk.Label("End of %s" % block.type)
         label.Xalign = 0
         end.Add(label)
