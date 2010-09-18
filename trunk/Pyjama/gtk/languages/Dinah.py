@@ -338,7 +338,7 @@ class DinahDocument(BaseDocument):
                                    '<span bgcolor="%s">%s</span>' % 
                                    (color_markup(member.color), member.text), 
                                    member)
-        widget.CanFocus = False
+            widget.CanFocus = False
         return True
 
     def import_module_cb(self, widget, event):
@@ -438,6 +438,7 @@ class DinahDocument(BaseDocument):
         print self.process_widgets(self.layout)
 
     def treeviewHandleSourceDragDataGet(self, obj, args):
+        print "treeviewHandleSourceDragDataGet!"
         # DragDropGetArgs: args
         #print "dnd get", obj, args
         targets = args.Context.Targets
@@ -462,7 +463,31 @@ class DinahDocument(BaseDocument):
     def startHandleDragDataReceived(self, obj, args):
         self.handleDragDataReceived(obj, args, "start")
 
+    def typeDragDataReceived(self, obj, args):
+        # obj is the dropped upon label to be replaced
+        print "Received onto a type place holder!"
+        print obj, str(id(obj))
+        if str(id(obj)) in self.layouts:
+            print "Yes, label's layout found!"
+            layout = self.layouts[str(id(obj))]
+            bytes = args.SelectionData.Data
+            data = System.Text.Encoding.UTF8.GetString(bytes)
+            if data in self.lookup:
+                layout.Remove(obj)
+                print "Yes, item to drop found!"
+                item = self.lookup[data]
+                if data.startswith("create:"):
+                    direct_entry_exp = self.process_list(layout, [item], icons=False)
+                    layout.ShowAll()
+                else:
+                    print "Copy reference to variable here?"
+            else:
+                print "drop item not found"
+        else:
+            print "label not found"
+
     def handleDragDataReceived(self, obj, args, where):
+        print "Received!"
         bytes = args.SelectionData.Data
         data = System.Text.Encoding.UTF8.GetString(bytes)
         if data in self.lookup:
@@ -496,6 +521,7 @@ class DinahDocument(BaseDocument):
             print self.lookup
 
     def handleSourceDragDataGet(self, obj, args):
+        print "handleSourceDragDropGet!"
         # DragDropGetArgs: args
         #print "dnd get", obj, args
         targets = args.Context.Targets
@@ -559,13 +585,13 @@ class DinahDocument(BaseDocument):
                 retval.extend(self.process_widgets(widget))
         return retval
 
-    def process_list(self, layout, items, parallel=False):
+    def process_list(self, layout, items, parallel=False, icons=True):
         retval = []
         for item in items:
             if isinstance(item, Block):
-                box = self.process_block(item, layout)
+                box = self.process_block(item, layout, icons)
             elif isinstance(item, Expression):
-                box = self.process_expression(item, layout)
+                box = self.process_expression(item, layout, icons)
             else:
                 raise Exception("unknown item: '%s'" % item)
             layout.PackStart(box, False, True, 0)
@@ -576,7 +602,7 @@ class DinahDocument(BaseDocument):
             retval.append(box)
         return retval
 
-    def process_expression(self, expression, layout):
+    def process_expression(self, expression, layout, icons=True):
         enclosure = ExpressionWidget()
         expression.widget = enclosure
         enclosure.set_data(expression)
@@ -591,14 +617,24 @@ class DinahDocument(BaseDocument):
                          Gdk.DragAction.Copy | Gdk.DragAction.Move)
         if layout:
             self.layouts[enclosure] = layout
-            enclosure.DragDataReceived += Gtk.DragDataReceivedHandler(self.beforeHandleDragDataReceived)
+            enclosure.DragDataReceived += Gtk.DragDataReceivedHandler(
+                self.beforeHandleDragDataReceived)
         hbox = Gtk.HBox()
-        if layout:
+        if layout and icons:
             img = self.make_drag_drop('gtk-dnd', expression, expression.color, 
                                       enclosure.id) 
             hbox.PackStart(img, False, True, 0)
 
         label = Gtk.Label(make_expression_label(expression))
+        ### 
+        Gtk.Drag.DestSet(label, 
+                         Gtk.DestDefaults.All, 
+                         self.accepts("accepts a specific type, or general Expression"), 
+                         Gdk.DragAction.Copy | Gdk.DragAction.Move)
+        self.layouts[str(id(label))] = hbox
+        label.DragDataReceived += Gtk.DragDataReceivedHandler(
+            self.typeDragDataReceived)
+        ###
         hbox.PackStart(label, False, True, 0)
         for count in range(len(expression.args)):
             arg = expression.args[count]
@@ -641,7 +677,7 @@ class DinahDocument(BaseDocument):
         vbox.PackStart(hbox, False, True, 0)
         return enclosure
 
-    def process_block(self, block, layout):
+    def process_block(self, block, layout, icons=True):
         enclosure = BlockWidget()
         block.widget = enclosure
         enclosure.set_data(block)
@@ -655,9 +691,10 @@ class DinahDocument(BaseDocument):
                          self.accepts(block), 
                          Gdk.DragAction.Copy | Gdk.DragAction.Move)
         expander_row = Gtk.HBox()
-        img = self.make_drag_drop('gtk-dnd-multiple', block, block.color,
-                                  enclosure.id)
-        expander_row.PackStart(img, False, True, 0)
+        if icons:
+            img = self.make_drag_drop('gtk-dnd-multiple', block, block.color,
+                                      enclosure.id)
+            expander_row.PackStart(img, False, True, 0)
         expander = Gtk.Expander(block.block_type)
         # Set item up as a drop target:
         Gtk.Drag.DestSet(expander, 
