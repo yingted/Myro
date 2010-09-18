@@ -19,9 +19,9 @@ blue = Gdk.Color(70, 227, 207)
 purple = Gdk.Color(227, 70, 207)
 orange = Gdk.Color(243, 111, 11)
 # structure colors
-statement_color = blue
+expression_color = blue
 block_color = orange
-command_color = purple
+statement_color = purple
 
 def color_code(color):
     r = int(color.Red/float(2**16) * 255)
@@ -29,25 +29,32 @@ def color_code(color):
     b = int(color.Blue/float(2**16) * 255)
     return "#%02X%02X%02X" % (r, g, b)
 
+class Method(object):
+    def __init__(self, *args, **kwargs):
+        self.type = "method"
+        self.args = args
+        self.kwargs = kwargs
+        self.drops_go = kwargs["drops_go"] if "drops_go" in kwargs else "before"
+
 class MyEventBox(Gtk.EventBox):
     """
     So as to add an ID.
     """
 
+class ExpressionWidget(Gtk.EventBox):
+    def set_data(self, expression):
+        self.id = str(id(self))
+        self.pjobj = expression
+        self._class = expression._class
+        self._method = expression._method
+        self.args = expression.args
+        self.kwargs = expression.kwargs
+
 class StatementWidget(Gtk.EventBox):
     def set_data(self, statement):
         self.id = str(id(self))
+        self.type = statement.type
         self.pjobj = statement
-        self._class = statement._class
-        self._method = statement._method
-        self.args = statement.args
-        self.kwargs = statement.kwargs
-
-class CommandWidget(Gtk.EventBox):
-    def set_data(self, command):
-        self.id = str(id(self))
-        self.type = command.type
-        self.pjobj = command
 
 class BlockWidget(Gtk.EventBox):
     def set_data(self, block):
@@ -57,12 +64,11 @@ class BlockWidget(Gtk.EventBox):
         self.statements = block.statements[:]
         self.parallel = block.parallel
 
-class Command(object):
-    def __init__(self, command_type, *args, **kwargs):
-        self.type = command_type
+class Statement(object):
+    def __init__(self, statement_type, *args, **kwargs):
+        self.type = statement_type
         self.args = args
         self.kwargs = kwargs
-        self.create = kwargs["create"] if "create" in kwargs else False
         self.drops_go = kwargs["drops_go"] if "drops_go" in kwargs else "before"
         self.widget = None
 
@@ -71,18 +77,17 @@ class Block(object):
         self.type = block_type
         self.statements = statements[:]
         self.parallel = kwargs["parallel"] if "parallel" in kwargs else False
-        self.create = kwargs["create"] if "create" in kwargs else False
         self.drops_go = kwargs["drops_go"] if "drops_go" in kwargs else "before"
         self.widget = None
 
-class Statement(object):
+class Expression(object):
     def __init__(self, _class, _method, *args, **kwargs):
         self._class = _class
         self._method = _method
         self.type = ".%s()" % self._method
         self.args = args
         self.kwargs = kwargs
-        self.create = kwargs["create"] if "create" in kwargs else False
+        self.members = kwargs["members"] if "members" in kwargs else []
         self.drops_go = kwargs["drops_go"] if "drops_go" in kwargs else "before"
         self.widget = None
 
@@ -154,95 +159,115 @@ class DinahDocument(BaseDocument):
         #### Control
         module = store.AppendValues("<b>Control</b>", None)
         for block in [
-            Block("Do times:", create=True), 
-            Block("Do for each:", create=True), 
-            Block("Do in order:", create=True),
-            Block("Do together:", create=True), 
-            Block("Do while:", create=True), 
-            Block("If:", create=True),
+            Block("Do times:"), 
+            Block("Do for each:"), 
+            Block("Do in order:"),
+            Block("Do together:"), 
+            Block("Do while:"), 
+            Block("If:"),
             ]:
             store.AppendValues(module, '<span bgcolor="%s">%s</span>' % 
                                (color_code(block_color), block.type), block)
 
         #### Imports
-        module = store.AppendValues("<b>Commands</b>", None)
-        for command in [
-            Command("Import", create=True), 
-            Command("Assignment", create=True), 
+        module = store.AppendValues("<b>Statements</b>", None)
+        for statement in [
+            Statement("Import"), 
+            Statement("Assignment"), 
             ]:
             store.AppendValues(module, '<span bgcolor="%s">%s</span>' % 
-                               (color_code(command_color), command.type), 
-                               command)
+                               (color_code(statement_color), statement.type), 
+                               statement)
 
         #### Graphics
         module = store.AppendValues("<b>Graphics</b>", None)
-        for statement in [
-            Statement("Graphics", "Window", "Title", create=True), 
-            Statement("Graphics", "Picture", "filename", create=True), 
-            Statement("Graphics", "Point", 0, 0, create=True),
-            Statement("Graphics", "Line", 
-                      Statement("Graphics", "Point", 0, 0), 
-                      Statement("Graphics", "Point", 1, 1), create=True), 
+        for expression in [
+            Expression("Graphics", "Window", "'Title'", 
+                       members=[
+                    Expression("Graphics.Window", "animate_step_time"), 
+                    Expression("Graphics.Window", "title")
+                    ], 
+                       ),
+            Expression("Graphics", "Picture", "filename", 
+                       members=[
+                    Expression("Graphics.Picture", "draw", ""), 
+                    Expression("Graphics.Picture", "move", 0, 0), 
+                    Expression("Graphics.Picture", "rotate", 0), 
+                    Expression("Graphics.Picture", "move_to", 0, 0), 
+                    Expression("Graphics.Picture", "rotate_to", 0),
+                    ],
+                       ), 
+            Expression("Graphics", "Point", 0, 0, 
+#                       members=["draw", "move", "rotate", "move_to", "rotate_to"],
+                       ),
+            Expression("Graphics", "Line", 
+                      Expression("Graphics", "Point", 0, 0), 
+                      Expression("Graphics", "Point", 1, 1), 
+ #                      members=["draw", "move", "rotate", "move_to", "rotate_to"],
+                       ), 
             ]:
-            store.AppendValues(module, '<span bgcolor="%s">%s</span>' % 
-                               (color_code(statement_color), statement.type), statement)
+            _class = store.AppendValues(module, '<span bgcolor="%s">%s</span>' % 
+                                        (color_code(expression_color), expression.type), 
+                                        expression)
+            for member in expression.members:
+                store.AppendValues(_class, member._method, member)
 
         # #### Dinah (utils)
         # module = store.AppendValues("<b>Dinah</b>")
         # for x in ["import", "wait", "beep", "random", "ask"]:
         #     store.AppendValues(module, '<span bgcolor="%s">.%s()</span>' % 
-        #                        (color_code(statement_color), x))
+        #                        (color_code(expression_color), x))
         # #### Myro (will come from dll)
         # module = store.AppendValues("<b>Myro</b>")
         # for x in ["forward", "backward", "init", "beep"]:
         #     store.AppendValues(module, '<span bgcolor="%s">.%s()</span>' % 
-        #                        (color_code(statement_color), x))
+        #                        (color_code(expression_color), x))
 
         # module = store.AppendValues("<b>Graphics</b>")
         # for x in ["Window", "Picture", "Polygon", "Line", "Group", 
         #           "Arrow", "Point"]:
         #     store.AppendValues(module, '<span bgcolor="%s">.%s()</span>' % 
-        #                        (color_code(statement_color), x))
+        #                        (color_code(expression_color), x))
 
         # module = store.AppendValues("<b>Window members</b>")
         # for x in ["mode", "animate_step_time", ]:
         #     store.AppendValues(module, '<span bgcolor="%s">.%s()</span>' % 
-        #                        (color_code(statement_color), x))
+        #                        (color_code(expression_color), x))
 
         # module = store.AppendValues("<b>Members</b>")
         # for x in ["mode", "animate_step_time", ]:
         #     store.AppendValues(module, '<span bgcolor="%s">.%s()</span>' % 
-        #                        (color_code(statement_color), x))
+        #                        (color_code(expression_color), x))
 
         return store
 
     def open(self):
         top_level = [Block("Do together:", 
-                           Statement("Myro", "forward", 1),
-                           Statement("Myro", "forward", 1, .5),
+                           Expression("Myro", "forward", 1),
+                           Expression("Myro", "forward", 1, .5),
                            parallel=True),
                      Block("Do in order:", 
-                           Statement("Myro", "forward", 1, 1),
-                           Statement("Myro", "init", "COM1", 0),
-                           Statement("Myro", "backward", 1, 1),
-                           Statement("Myro", "backward", 1, 1),
+                           Expression("Myro", "forward", 1, 1),
+                           Expression("Myro", "init", "COM1", 0),
+                           Expression("Myro", "backward", 1, 1),
+                           Expression("Myro", "backward", 1, 1),
                            Block("Do together:",
-                                 Statement("Myro", "init", "COM1", 0),
-                                 Statement("Myro", "backward", 1),
-                                 Statement("Myro", "backward", 1, 1),
-                                 Statement("Myro", "init", "COM1", 0),
-                                 Statement("Myro", "backward", 1, 1),
-                                 Statement("Myro", "backward", 1, 1),
+                                 Expression("Myro", "init", "COM1", 0),
+                                 Expression("Myro", "backward", 1),
+                                 Expression("Myro", "backward", 1, 1),
+                                 Expression("Myro", "init", "COM1", 0),
+                                 Expression("Myro", "backward", 1, 1),
+                                 Expression("Myro", "backward", 1, 1),
                                  parallel=True
                                  )
                            ),
                      Block("Do together:", 
-                           Statement("Myro", "backward", 1),
-                           Statement("Myro", "forward", 1, ),
-                           Statement("Myro", "backward", 1, ),
-                           Statement("Myro", "forward", 1, ),
-                           Statement("Myro", "backward", 1, ),
-                           Statement("Myro", "forward", 1, ),
+                           Expression("Myro", "backward", 1),
+                           Expression("Myro", "forward", 1, ),
+                           Expression("Myro", "backward", 1, ),
+                           Expression("Myro", "forward", 1, ),
+                           Expression("Myro", "backward", 1, ),
+                           Expression("Myro", "forward", 1, ),
                            parallel=True),
                      ]
         self.process_list(self.layout, top_level)
@@ -286,10 +311,16 @@ class DinahDocument(BaseDocument):
         data = System.Text.Encoding.UTF8.GetString(bytes)
         if data in self.lookup:
             item = self.lookup[data]
-            if item.create:
+            if isinstance(item, Gtk.Widget):
+                print "Move '%s'" % data
+                # Need to know if within same parent, or diff parents
+            else: # Create!
                 # Where to add? get container, and use "where"
+                # obj is the item we are dropping onto:
                 layout = self.layouts[obj]
+                # construct the new dropped expression/statement:
                 widgets = self.process_list(layout, [item])
+                # put it in right place:
                 position = layout.ChildGetProperty(obj, "position").Val
                 for widget in widgets:
                     # 0 to pos, negative at end
@@ -302,9 +333,6 @@ class DinahDocument(BaseDocument):
                     elif where == "start":
                         layout.ReorderChild(widget, 0) 
                 layout.ShowAll()
-            else:
-                print "Move '%s'" % data
-                # Need to know if within same parent, or diff parents
         else:
             print "unknown object: '%s'" % data
             print self.lookup
@@ -360,11 +388,11 @@ class DinahDocument(BaseDocument):
         for widget in layout:
             if isinstance(widget, BlockWidget):
                 retval.extend([("Block", widget.type, self.process_widgets(widget))])
-            elif isinstance(widget, StatementWidget):
-                retval.extend([("Statement", widget._class, 
+            elif isinstance(widget, ExpressionWidget):
+                retval.extend([("Expression", widget._class, 
                                 self.process_widgets(widget))])
-            elif isinstance(widget, CommandWidget):
-                retval.extend([("Command", widget.type, 
+            elif isinstance(widget, StatementWidget):
+                retval.extend([("Statement", widget.type, 
                                 self.process_widgets(widget))])
             elif isinstance(widget, Gtk.Entry):
                 retval.extend([('Entry', widget.Text)])
@@ -381,10 +409,10 @@ class DinahDocument(BaseDocument):
         for item in items:
             if isinstance(item, Block):
                 box = self.process_block(item, layout)
+            elif isinstance(item, Expression):
+                box = self.process_expression(item, layout)
             elif isinstance(item, Statement):
                 box = self.process_statement(item, layout)
-            elif isinstance(item, Command):
-                box = self.process_command(item, layout)
             else:
                 raise Exception("unknown item: '%s'" % item)
             layout.PackStart(box, False, True, 0)
@@ -394,6 +422,57 @@ class DinahDocument(BaseDocument):
                 layout.PackStart(Gtk.HSeparator(), False, True, 0)
             retval.append(box)
         return retval
+
+    def process_expression(self, expression, layout):
+        enclosure = ExpressionWidget()
+        expression.widget = enclosure
+        enclosure.set_data(expression)
+        self.lookup[enclosure.id] = expression
+        enclosure.ModifyBg(Gtk.StateType.Normal, expression_color)
+        vbox = Gtk.VBox()
+        enclosure.Add(vbox)
+        # Set item up as a drop target:
+        Gtk.Drag.DestSet(enclosure, 
+                         Gtk.DestDefaults.All, 
+                         self.accepts(expression), 
+                         Gdk.DragAction.Copy | Gdk.DragAction.Move)
+        if layout:
+            self.layouts[enclosure] = layout
+            enclosure.DragDataReceived += Gtk.DragDataReceivedHandler(self.beforeHandleDragDataReceived)
+        hbox = Gtk.HBox()
+        if layout:
+            img = self.make_drag_drop('gtk-dnd', expression, expression_color, 
+                                      enclosure.id) 
+            hbox.PackStart(img, False, True, 0)
+
+        label = Gtk.Label("%s.%s(" % (expression._class, expression._method))
+        hbox.PackStart(label, False, True, 0)
+        for count in range(len(expression.args)):
+            arg = expression.args[count]
+            if isinstance(arg, basestring):
+                entry = Gtk.Entry(arg)
+                entry.WidthChars = 7
+                hbox.PackStart(entry, False, True, 0)
+            elif isinstance(arg, int): # FIXME: use Gtk.SpinButton
+                entry = Gtk.Entry(str(arg))
+                entry.WidthChars = 3
+                hbox.PackStart(entry, False, True, 0)
+            elif isinstance(arg, float):
+                entry = Gtk.Entry(str(arg))
+                entry.WidthChars = 5
+                hbox.PackStart(entry, False, True, 0)
+            else:
+                print "process_expression, statements:", arg, type(arg)
+                box = self.process_expression(arg, None)
+                hbox.PackStart(box, False, True, 0)
+            if count < len(expression.args) - 1:
+                comma = Gtk.Label(", ")
+                hbox.PackStart(comma, False, True, 0)
+
+        label = Gtk.Label(")")
+        hbox.PackStart(label, False, True, 0)
+        vbox.PackStart(hbox, False, True, 0)
+        return enclosure
 
     def process_statement(self, statement, layout):
         enclosure = StatementWidget()
@@ -417,12 +496,12 @@ class DinahDocument(BaseDocument):
                                       enclosure.id) 
             hbox.PackStart(img, False, True, 0)
 
-        label = Gtk.Label("%s.%s(" % (statement._class, statement._method))
+        label = Gtk.Label("%s" % (statement.type, ))
         hbox.PackStart(label, False, True, 0)
         for count in range(len(statement.args)):
             arg = statement.args[count]
             if isinstance(arg, basestring):
-                entry = Gtk.Entry(repr(arg))
+                entry = Gtk.Entry(arg)
                 entry.WidthChars = 7
                 hbox.PackStart(entry, False, True, 0)
             elif isinstance(arg, int): # FIXME: use Gtk.SpinButton
@@ -434,59 +513,8 @@ class DinahDocument(BaseDocument):
                 entry.WidthChars = 5
                 hbox.PackStart(entry, False, True, 0)
             else:
-                print "process_statement, expressions:", arg, type(arg)
-                box = self.process_statement(arg, None)
-                hbox.PackStart(box, False, True, 0)
-            if count < len(statement.args) - 1:
-                comma = Gtk.Label(", ")
-                hbox.PackStart(comma, False, True, 0)
-
-        label = Gtk.Label(")")
-        hbox.PackStart(label, False, True, 0)
-        vbox.PackStart(hbox, False, True, 0)
-        return enclosure
-
-    def process_command(self, command, layout):
-        enclosure = CommandWidget()
-        command.widget = enclosure
-        enclosure.set_data(command)
-        self.lookup[enclosure.id] = command
-        enclosure.ModifyBg(Gtk.StateType.Normal, command_color)
-        vbox = Gtk.VBox()
-        enclosure.Add(vbox)
-        # Set item up as a drop target:
-        Gtk.Drag.DestSet(enclosure, 
-                         Gtk.DestDefaults.All, 
-                         self.accepts(command), 
-                         Gdk.DragAction.Copy | Gdk.DragAction.Move)
-        if layout:
-            self.layouts[enclosure] = layout
-            enclosure.DragDataReceived += Gtk.DragDataReceivedHandler(self.beforeHandleDragDataReceived)
-        hbox = Gtk.HBox()
-        if layout:
-            img = self.make_drag_drop('gtk-dnd', command, command_color, 
-                                      enclosure.id) 
-            hbox.PackStart(img, False, True, 0)
-
-        label = Gtk.Label("%s" % (command.type, ))
-        hbox.PackStart(label, False, True, 0)
-        for count in range(len(command.args)):
-            arg = command.args[count]
-            if isinstance(arg, basestring):
-                entry = Gtk.Entry(repr(arg))
-                entry.WidthChars = 7
-                hbox.PackStart(entry, False, True, 0)
-            elif isinstance(arg, int): # FIXME: use Gtk.SpinButton
-                entry = Gtk.Entry(str(arg))
-                entry.WidthChars = 3
-                hbox.PackStart(entry, False, True, 0)
-            elif isinstance(arg, float):
-                entry = Gtk.Entry(str(arg))
-                entry.WidthChars = 5
-                hbox.PackStart(entry, False, True, 0)
-            else:
-                print "process_command, expressions:", arg, type(arg)
-                box = self.process_statement(arg, None)
+                print "process_statement, statements:", arg, type(arg)
+                box = self.process_expression(arg, None)
                 hbox.PackStart(box, False, True, 0)
 
         vbox.PackStart(hbox, False, True, 0)
