@@ -14,11 +14,14 @@ from engine import Engine
 import Myro
 import Graphics
 
+# color names
 blue = Gdk.Color(70, 227, 207)
 purple = Gdk.Color(227, 70, 207)
 orange = Gdk.Color(243, 111, 11)
+# structure colors
 statement_color = blue
 block_color = orange
+command_color = purple
 
 def color_code(color):
     r = int(color.Red/float(2**16) * 255)
@@ -26,20 +29,42 @@ def color_code(color):
     b = int(color.Blue/float(2**16) * 255)
     return "#%02X%02X%02X" % (r, g, b)
 
+class MyEventBox(Gtk.EventBox):
+    """
+    So as to add an ID.
+    """
+
 class StatementWidget(Gtk.EventBox):
     def set_data(self, statement):
+        self.id = str(id(self))
         self.pjobj = statement
         self._class = statement._class
         self._method = statement._method
         self.args = statement.args
         self.kwargs = statement.kwargs
 
+class CommandWidget(Gtk.EventBox):
+    def set_data(self, command):
+        self.id = str(id(self))
+        self.type = command.type
+        self.pjobj = command
+
 class BlockWidget(Gtk.EventBox):
     def set_data(self, block):
+        self.id = str(id(self))
         self.pjobj = block
         self.type = block.type
         self.statements = block.statements[:]
         self.parallel = block.parallel
+
+class Command(object):
+    def __init__(self, command_type, *args, **kwargs):
+        self.type = command_type
+        self.args = args
+        self.kwargs = kwargs
+        self.create = kwargs["create"] if "create" in kwargs else False
+        self.drops_go = kwargs["drops_go"] if "drops_go" in kwargs else "before"
+        self.widget = None
 
 class Block(object):
     def __init__(self, block_type, *statements, **kwargs):
@@ -140,13 +165,14 @@ class DinahDocument(BaseDocument):
                                (color_code(block_color), block.type), block)
 
         #### Imports
-        module = store.AppendValues("<b>Import</b>", None)
-        for statement in [
-            Statement("import", "Graphics", create=True), 
-            Statement("import", "Myro", create=True), 
+        module = store.AppendValues("<b>Commands</b>", None)
+        for command in [
+            Command("Import", create=True), 
+            Command("Assignment", create=True), 
             ]:
             store.AppendValues(module, '<span bgcolor="%s">%s</span>' % 
-                               (color_code(statement_color), statement.type), statement)
+                               (color_code(command_color), command.type), 
+                               command)
 
         #### Graphics
         module = store.AppendValues("<b>Graphics</b>", None)
@@ -236,9 +262,9 @@ class DinahDocument(BaseDocument):
         #print "dnd get", obj, args
         targets = args.Context.Targets
         selected, treeiter = obj.Selection.GetSelected()
-        item = obj.Model.GetValue(treeiter, 1)
+        item = obj.Model.GetValue(treeiter, 1) # 0- text, 1-object
         if item:
-            data = "Create: %s" % item.type # 0- text, 1-object
+            data = item.type
             self.lookup[data] = item
             packed = System.Text.Encoding.UTF8.GetBytes(data)
             args.SelectionData.Set(targets[0], 8, packed)
@@ -277,16 +303,17 @@ class DinahDocument(BaseDocument):
                         layout.ReorderChild(widget, 0) 
                 layout.ShowAll()
             else:
-                print "Move!"
+                print "Move '%s'" % data
                 # Need to know if within same parent, or diff parents
         else:
-            print "Huh?"
+            print "unknown object: '%s'" % data
+            print self.lookup
 
     def handleSourceDragDataGet(self, obj, args):
         # DragDropGetArgs: args
         #print "dnd get", obj, args
         targets = args.Context.Targets
-        data = "ok"
+        data = obj.id
         packed = System.Text.Encoding.UTF8.GetBytes(data)
         args.SelectionData.Set(targets[0], 8, packed)
 
@@ -312,8 +339,9 @@ class DinahDocument(BaseDocument):
                 ])
         return source_table
 
-    def make_drag_drop(self, name, item, color):
-        box = Gtk.EventBox()
+    def make_drag_drop(self, name, item, color, widget_id):
+        box = MyEventBox()
+        box.id = widget_id
         img = Gtk.Image(name, Gtk.IconSize.Button)
         img.Show()
         box.Add(img)
@@ -335,6 +363,9 @@ class DinahDocument(BaseDocument):
             elif isinstance(widget, StatementWidget):
                 retval.extend([("Statement", widget._class, 
                                 self.process_widgets(widget))])
+            elif isinstance(widget, CommandWidget):
+                retval.extend([("Command", widget.type, 
+                                self.process_widgets(widget))])
             elif isinstance(widget, Gtk.Entry):
                 retval.extend([('Entry', widget.Text)])
             elif isinstance(widget, Gtk.Box):
@@ -352,8 +383,10 @@ class DinahDocument(BaseDocument):
                 box = self.process_block(item, layout)
             elif isinstance(item, Statement):
                 box = self.process_statement(item, layout)
+            elif isinstance(item, Command):
+                box = self.process_command(item, layout)
             else:
-                print "error!"
+                raise Exception("unknown item: '%s'" % item)
             layout.PackStart(box, False, True, 0)
             if parallel:
                 layout.PackStart(Gtk.VSeparator(), False, True, 0)
@@ -366,6 +399,7 @@ class DinahDocument(BaseDocument):
         enclosure = StatementWidget()
         statement.widget = enclosure
         enclosure.set_data(statement)
+        self.lookup[enclosure.id] = statement
         enclosure.ModifyBg(Gtk.StateType.Normal, statement_color)
         vbox = Gtk.VBox()
         enclosure.Add(vbox)
@@ -379,7 +413,8 @@ class DinahDocument(BaseDocument):
             enclosure.DragDataReceived += Gtk.DragDataReceivedHandler(self.beforeHandleDragDataReceived)
         hbox = Gtk.HBox()
         if layout:
-            img = self.make_drag_drop('gtk-dnd', statement, statement_color) 
+            img = self.make_drag_drop('gtk-dnd', statement, statement_color, 
+                                      enclosure.id) 
             hbox.PackStart(img, False, True, 0)
 
         label = Gtk.Label("%s.%s(" % (statement._class, statement._method))
@@ -411,10 +446,57 @@ class DinahDocument(BaseDocument):
         vbox.PackStart(hbox, False, True, 0)
         return enclosure
 
+    def process_command(self, command, layout):
+        enclosure = CommandWidget()
+        command.widget = enclosure
+        enclosure.set_data(command)
+        self.lookup[enclosure.id] = command
+        enclosure.ModifyBg(Gtk.StateType.Normal, command_color)
+        vbox = Gtk.VBox()
+        enclosure.Add(vbox)
+        # Set item up as a drop target:
+        Gtk.Drag.DestSet(enclosure, 
+                         Gtk.DestDefaults.All, 
+                         self.accepts(command), 
+                         Gdk.DragAction.Copy | Gdk.DragAction.Move)
+        if layout:
+            self.layouts[enclosure] = layout
+            enclosure.DragDataReceived += Gtk.DragDataReceivedHandler(self.beforeHandleDragDataReceived)
+        hbox = Gtk.HBox()
+        if layout:
+            img = self.make_drag_drop('gtk-dnd', command, command_color, 
+                                      enclosure.id) 
+            hbox.PackStart(img, False, True, 0)
+
+        label = Gtk.Label("%s" % (command.type, ))
+        hbox.PackStart(label, False, True, 0)
+        for count in range(len(command.args)):
+            arg = command.args[count]
+            if isinstance(arg, basestring):
+                entry = Gtk.Entry(repr(arg))
+                entry.WidthChars = 7
+                hbox.PackStart(entry, False, True, 0)
+            elif isinstance(arg, int): # FIXME: use Gtk.SpinButton
+                entry = Gtk.Entry(str(arg))
+                entry.WidthChars = 3
+                hbox.PackStart(entry, False, True, 0)
+            elif isinstance(arg, float):
+                entry = Gtk.Entry(str(arg))
+                entry.WidthChars = 5
+                hbox.PackStart(entry, False, True, 0)
+            else:
+                print "process_command, expressions:", arg, type(arg)
+                box = self.process_statement(arg, None)
+                hbox.PackStart(box, False, True, 0)
+
+        vbox.PackStart(hbox, False, True, 0)
+        return enclosure
+
     def process_block(self, block, layout):
         enclosure = BlockWidget()
         block.widget = enclosure
         enclosure.set_data(block)
+        self.lookup[enclosure.id] = block
         enclosure.ModifyBg(Gtk.StateType.Normal, block_color)
         vbox = Gtk.VBox()
         enclosure.Add(vbox)
@@ -424,7 +506,8 @@ class DinahDocument(BaseDocument):
                          self.accepts(block), 
                          Gdk.DragAction.Copy | Gdk.DragAction.Move)
         expander_row = Gtk.HBox()
-        img = self.make_drag_drop('gtk-dnd-multiple', block, block_color)
+        img = self.make_drag_drop('gtk-dnd-multiple', block, block_color,
+                                  enclosure.id)
         expander_row.PackStart(img, False, True, 0)
         expander = Gtk.Expander(block.type)
         # Set item up as a drop target:
