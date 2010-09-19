@@ -1,3 +1,8 @@
+import clr
+clr.AddReference("IronRuby")
+clr.AddReference("IronRuby.Libraries")
+clr.AddReference("Microsoft.Scripting")
+import IronRuby
 import Microsoft.Scripting
 import System
 from document import Document
@@ -16,12 +21,21 @@ class RubyEngine(DLREngine):
                 ["IronRuby", "Ruby", "ruby", "rb"],
                 [".rb"]))
 
-    def start(self, stderr, stdout, stdin):
-        super(RubyEngine, self).start(stderr, stdout, stdin)
+    def setup(self, stderr, stdout, stdin):
+        super(RubyEngine, self).setup(stderr, stdout, stdin)
         # FIXME: IronRuby bug: returns Array, doesn't take list
         paths = list(self.engine.GetSearchPaths())
         paths.Add(os.path.abspath("modules"))
         self.engine.SetSearchPaths(System.Array[str](paths))
+
+    def start(self):
+        # Load Languages so that Host System can find DLLs:
+        self.engine.Runtime.LoadAssembly(
+            System.Type.GetType(IronRuby.Hosting.RubyCommandLine).Assembly)
+        self.engine.Runtime.LoadAssembly(
+            System.Type.GetType(
+             IronRuby.StandardLibrary.BigDecimal.Fraction).Assembly)
+
 
 class Ruby(Language):
     def get_engine_class(self):

@@ -88,7 +88,10 @@ class ShellWindow(Window):
             if lclass:
                 self.engine.register(lclass)
         self.history_textview = Gtk.TextView()
-        self.engine.start(self.history_textview, self.history_textview, None)
+        # Set up all of the engines:
+        self.engine.setup(self.history_textview, self.history_textview, None)
+        # Start them up:
+        self.engine.start()
         self.vbox = Gtk.VBox()
         # ---------------------
         # make menu:

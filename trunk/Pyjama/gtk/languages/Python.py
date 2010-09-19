@@ -1,5 +1,9 @@
 import clr
+clr.AddReference("IronPython")
+clr.AddReference("IronPython.Modules")
 clr.AddReference("Microsoft.Scripting")
+import IronPython
+import System
 import Microsoft.Scripting
 from document import Document
 from engine import DLREngine
@@ -17,8 +21,12 @@ class PythonEngine(DLREngine):
                 ["IronPython", "Python", "python", "py"],
                 [".py"]))
 
-    def start(self, stderr, stdout, stdin):
-        super(PythonEngine, self).start(stderr, stdout, stdin)
+    def setup(self, stderr, stdout, stdin):
+        super(PythonEngine, self).setup(stderr, stdout, stdin)
+        self.engine.Runtime.LoadAssembly(
+            System.Type.GetType(IronPython.Hosting.Python).Assembly)
+
+    def start(self):
         paths = self.engine.GetSearchPaths()
         ## Let users find Pyjama modules:
         for folder in ["modules", "src"]:

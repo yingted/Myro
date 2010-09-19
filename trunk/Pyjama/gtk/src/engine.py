@@ -6,15 +6,6 @@ import System
 
 from utils import CustomStream
 
-### FIXME: remove, if possible:
-import clr
-clr.AddReference("IronPython")
-clr.AddReference("IronPython.Modules")
-import IronPython
-clr.AddReference("IronRuby")
-clr.AddReference("IronRuby.Libraries")
-import IronRuby
-
 class EngineManager(object):
     def __init__(self, project):
         self.project = project
@@ -31,17 +22,21 @@ class EngineManager(object):
         engine = EngineClass(self)
         self.engine[engine.language] = engine
 
-    def start(self, stderr, stdout, stdin): # textviews
+    def setup(self, stderr, stdout, stdin): # textviews
         self.stderr, self.stdout, self.stdin = stderr, stdout, stdin
     	self.runtime = Microsoft.Scripting.Hosting.ScriptRuntime(
             self.scriptRuntimeSetup)
     	self.scope = self.runtime.CreateScope()
         self.scope.SetVariable("pyjama", self.project)
         for engine in self.engine:
-            self.engine[engine].start(self.stderr, self.stdout, self.stdin)
+            self.engine[engine].setup(self.stderr, self.stdout, self.stdin)
+
+    def start(self):
+        for engine in self.engine:
+            self.engine[engine].start()
 
     def reset(self):
-        self.start(self.stderr, self.stdout, self.stdin)
+        self.setup(self.stderr, self.stdout, self.stdin)
 
 class Engine(object):
     def __init__(self, manager, language):
@@ -55,12 +50,15 @@ class Engine(object):
     def execute_file(self, filename):
         raise NotImplemented
 
-    def start(self, stderr, stdout, stdin): # textviews
+    def setup(self, stderr, stdout, stdin): # textviews
         self.sterr = CustomStream(stderr)
         self.stdout = CustomStream(stdout)
 
+    def start(self):
+        pass
+
 class DLREngine(Engine):
-    def start(self, stderr, stdout, stdin): # textviews
+    def setup(self, stderr, stdout, stdin): # textviews
         # True? A hint from the interwebs:
         #options["Debug"] = true;
         #Python.CreateEngine(options);
@@ -68,14 +66,6 @@ class DLREngine(Engine):
         # Load mscorlib.dll:
         self.engine.Runtime.LoadAssembly(
             System.Type.GetType(System.String).Assembly)
-        # Load Languages so that Host System can find DLLs:
-        self.engine.Runtime.LoadAssembly(
-            System.Type.GetType(IronPython.Hosting.Python).Assembly)
-        self.engine.Runtime.LoadAssembly(
-            System.Type.GetType(IronRuby.Hosting.RubyCommandLine).Assembly)
-        self.engine.Runtime.LoadAssembly(
-            System.Type.GetType(
-             IronRuby.StandardLibrary.BigDecimal.Fraction).Assembly)
         # Load System.dll
         self.engine.Runtime.LoadAssembly(System.Type.GetType(
                 System.Diagnostics.Debug).Assembly)
