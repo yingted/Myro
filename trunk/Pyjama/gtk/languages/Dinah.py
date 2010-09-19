@@ -5,11 +5,13 @@ clr.AddReference('pango-sharp')
 clr.AddReference('Myro.dll')
 clr.AddReference('Graphics.dll')
 clr.AddReference('Microsoft.Scripting')
+clr.AddReference("System.Core")
 import Gtk
 import Gdk
 import Pango
 import System
 import Microsoft.Scripting.Ast as Ast
+import System.Linq.Expressions as Expressions
 from utils import Language
 from document import BaseDocument, MyScrolledWindow
 from engine import Engine
@@ -802,9 +804,13 @@ class DinahEngine(Engine):
 
     def execute(self, layout):
         print layout
-
-        program = Ast.Utils.Lambda(type(object), "Test")
-        n = program.Variable(int, "n")
+        #program = Ast.Utils.Lambda(type(object), "Test")
+        #statements = []
+        #clr.AddReference("System.Core")
+        #import Microsoft.Scripting.Ast as Ast
+        #import System.Linq
+        #dir(System.Linq.Expressions)
+        #n = program.Variable(int, "n")
 
     def execute_file(self, filename):
         self.stdout.write("Run filename '%s'!\n" % filename)
