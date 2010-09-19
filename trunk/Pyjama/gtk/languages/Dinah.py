@@ -43,7 +43,7 @@ def make_expression_label(exp):
         return "%s.%s" % (exp.instance, exp.name)
     elif exp.type in ["method",]:
         return "%s.%s(" % (exp.instance, exp.name)
-    elif exp.type in ["create variable"]:
+    elif exp.type in ["set variable"]:
         return ""
     elif exp.type in ["set property"]:
         return ""
@@ -81,7 +81,7 @@ def make_color(exptype, **kwargs):
         return white
     elif exptype in ["property",]:
         return blue
-    elif exptype in ["import", "create variable", "set property"]:
+    elif exptype in ["import", "set variable", "set property"]:
         return pink
     elif exptype in ["type",]:
         return red
@@ -244,7 +244,7 @@ class DinahDocument(BaseDocument):
             Expression("import", 
                        Entry("", callback=self.import_module_cb),
                        ), 
-            Expression("create variable", 
+            Expression("set variable", 
                        Entry("", callback=self.define_variable_cb),
                        ":=", 
                        E("type", name="Expression"), 
@@ -478,6 +478,36 @@ class DinahDocument(BaseDocument):
                 item = self.lookup[data]
                 if data.startswith("create:"):
                     direct_entry_exp = self.process_list(layout, [item], icons=False)
+                    layout.ModifyBg(Gtk.StateType.Normal, item.color)
+                    layout.Parent.ModifyBg(Gtk.StateType.Normal, item.color)
+                    layout.Parent.Parent.ModifyBg(Gtk.StateType.Normal, item.color)
+                    layout.ShowAll()
+                else:
+                    print "Copy reference to variable here?"
+            else:
+                print "drop item not found"
+        else:
+            print "label not found"
+
+    def typeEnclosureDragDataReceived(self, obj, args):
+        # FIXME: remove item [Integer] in the related hbox
+        # obj is the dropped upon label to be replaced
+        print "Received onto a type place holder!"
+        print obj, str(id(obj))
+        if str(id(obj)) in self.layouts:
+            print "Yes, label's layout found!"
+            layout = self.layouts[str(id(obj))]
+            bytes = args.SelectionData.Data
+            data = System.Text.Encoding.UTF8.GetString(bytes)
+            if data in self.lookup:
+                layout.Remove(obj)
+                print "Yes, item to drop found!"
+                item = self.lookup[data]
+                if data.startswith("create:"):
+                    direct_entry_exp = self.process_list(layout, [item], icons=False)
+                    layout.ModifyBg(Gtk.StateType.Normal, item.color)
+                    layout.Parent.ModifyBg(Gtk.StateType.Normal, item.color)
+                    layout.Parent.Parent.ModifyBg(Gtk.StateType.Normal, item.color)
                     layout.ShowAll()
                 else:
                     print "Copy reference to variable here?"
@@ -610,30 +640,40 @@ class DinahDocument(BaseDocument):
         enclosure.ModifyBg(Gtk.StateType.Normal, expression.color)
         vbox = Gtk.VBox()
         enclosure.Add(vbox)
+        hbox = Gtk.HBox()
         # Set item up as a drop target:
-        Gtk.Drag.DestSet(enclosure, 
-                         Gtk.DestDefaults.All, 
-                         self.accepts(expression), 
-                         Gdk.DragAction.Copy | Gdk.DragAction.Move)
-        if layout:
+        if expression.type == "type":
+            Gtk.Drag.DestSet(enclosure, 
+                             Gtk.DestDefaults.All, 
+                             self.accepts("accepts a specific type, or general Expression"), 
+                             Gdk.DragAction.Copy | Gdk.DragAction.Move)
+            self.layouts[str(id(enclosure))] = hbox
+            enclosure.DragDataReceived += Gtk.DragDataReceivedHandler(
+                self.typeDragDataReceived)
+        elif layout:
+            Gtk.Drag.DestSet(enclosure, 
+                             Gtk.DestDefaults.All, 
+                             self.accepts(expression), 
+                             Gdk.DragAction.Copy | Gdk.DragAction.Move)
             self.layouts[enclosure] = layout
             enclosure.DragDataReceived += Gtk.DragDataReceivedHandler(
                 self.beforeHandleDragDataReceived)
-        hbox = Gtk.HBox()
         if layout and icons:
             img = self.make_drag_drop('gtk-dnd', expression, expression.color, 
                                       enclosure.id) 
             hbox.PackStart(img, False, True, 0)
 
+        ### FIXME: on expression "type", the whole area needs to be connected
+        ### to this handler:
         label = Gtk.Label(make_expression_label(expression))
-        ### 
-        Gtk.Drag.DestSet(label, 
-                         Gtk.DestDefaults.All, 
-                         self.accepts("accepts a specific type, or general Expression"), 
-                         Gdk.DragAction.Copy | Gdk.DragAction.Move)
-        self.layouts[str(id(label))] = hbox
-        label.DragDataReceived += Gtk.DragDataReceivedHandler(
-            self.typeDragDataReceived)
+        if expression.type == "type":
+            Gtk.Drag.DestSet(label, 
+                             Gtk.DestDefaults.All, 
+                             self.accepts("accepts a specific type, or general Expression"), 
+                             Gdk.DragAction.Copy | Gdk.DragAction.Move)
+            self.layouts[str(id(label))] = hbox
+            label.DragDataReceived += Gtk.DragDataReceivedHandler(
+                self.typeEnclosureDragDataReceived)
         ###
         hbox.PackStart(label, False, True, 0)
         for count in range(len(expression.args)):
@@ -703,6 +743,30 @@ class DinahDocument(BaseDocument):
                          Gdk.DragAction.Copy | Gdk.DragAction.Move)
         expander.Expanded = True
         expander_row.PackStart(expander, True, True, 0)
+        # Add other items to expander_row, if needed:
+        extras = None
+        if block.block_type == "Do times:":
+            extras = self.process_expression(Expression("type", name="Integer"), expander_row)
+        elif block.block_type == "Do for each:":
+            extras = self.process_expression(
+                Expression("set variable", 
+                           Entry("", callback=self.define_variable_cb),
+                           ":=", 
+                           E("type", name="Expression"), 
+                           separator=""), 
+                expander_row)
+        elif block.block_type == "Do in order:":
+            pass
+        elif block.block_type == "Do together:":
+            pass
+        elif block.block_type == "Do while:":
+            extras = self.process_expression(Expression("type", name="Boolean"), expander_row)
+        elif block.block_type == "If:":
+            extras = self.process_expression(Expression("type", name="Boolean"), expander_row)
+        else:
+            raise AttributeError("unknown block_type: '%s'" % block.block_type)
+        if extras:
+            expander_row.PackStart(extras, True, True, 0)
         if block.parallel:
             box = Gtk.HBox()
         else:
