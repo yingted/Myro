@@ -21,8 +21,8 @@ class PythonEngine(DLREngine):
                 ["IronPython", "Python", "python", "py"],
                 [".py"]))
 
-    def setup(self, stderr, stdout, stdin):
-        super(PythonEngine, self).setup(stderr, stdout, stdin)
+    def setup(self):
+        super(PythonEngine, self).setup()
         self.engine.Runtime.LoadAssembly(
             System.Type.GetType(IronPython.Hosting.Python).Assembly)
 
@@ -32,24 +32,6 @@ class PythonEngine(DLREngine):
         for folder in ["modules", "src"]:
             paths.Add(os.path.abspath(folder))
         self.engine.SetSearchPaths(paths)
-        # Start up, in Python: ------------------
-        # FIXME: do here, not in sub-Python
-        script = """
-import clr
-try:
-    clr.AddReference("Myro.dll")
-except:
-    pass
-try:
-    clr.AddReference("Graphics.dll")
-except:
-    pass
-del clr
-"""
-        temp_scope = self.manager.runtime.CreateScope()
-	source = self.engine.CreateScriptSourceFromString(script)
-        source.Compile().Execute(temp_scope)
-        # ---------------------------------------
 
 class Python(Language):
     def get_engine_class(self):

@@ -21,8 +21,8 @@ class RubyEngine(DLREngine):
                 ["IronRuby", "Ruby", "ruby", "rb"],
                 [".rb"]))
 
-    def setup(self, stderr, stdout, stdin):
-        super(RubyEngine, self).setup(stderr, stdout, stdin)
+    def setup(self):
+        super(RubyEngine, self).setup()
         # FIXME: IronRuby bug: returns Array, doesn't take list
         paths = list(self.engine.GetSearchPaths())
         paths.Add(os.path.abspath("modules"))

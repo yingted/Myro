@@ -1,4 +1,6 @@
+import clr
 import traceback
+import glob
 import os
 
 import Microsoft.Scripting
@@ -22,21 +24,27 @@ class EngineManager(object):
         engine = EngineClass(self)
         self.engine[engine.language] = engine
 
-    def setup(self, stderr, stdout, stdin): # textviews
-        self.stderr, self.stdout, self.stdin = stderr, stdout, stdin
+    def setup(self): 
     	self.runtime = Microsoft.Scripting.Hosting.ScriptRuntime(
             self.scriptRuntimeSetup)
     	self.scope = self.runtime.CreateScope()
         self.scope.SetVariable("pyjama", self.project)
         for engine in self.engine:
-            self.engine[engine].setup(self.stderr, self.stdout, self.stdin)
+            self.engine[engine].setup()
+
+    def set_redirects(self, stderr, stdout, stdin): # textviews
+        self.stderr, self.stdout, self.stdin = stderr, stdout, stdin
+        for engine in self.engine:
+            self.engine[engine].set_redirects(self.stderr, self.stdout, self.stdin)
 
     def start(self):
         for engine in self.engine:
             self.engine[engine].start()
 
     def reset(self):
-        self.setup(self.stderr, self.stdout, self.stdin)
+        self.setup()
+        self.start()
+        self.set_redirects(self.stderr, self.stdout, self.stdin)
 
 class Engine(object):
     def __init__(self, manager, language):
@@ -50,15 +58,20 @@ class Engine(object):
     def execute_file(self, filename):
         raise NotImplemented
 
-    def setup(self, stderr, stdout, stdin): # textviews
-        self.sterr = CustomStream(stderr)
-        self.stdout = CustomStream(stdout)
+    def setup(self):
+        pass
+
+    def set_redirects(self, stderr, stdout, stdin): # textviews
+        if stderr:
+            self.sterr = CustomStream(stderr)
+        if stdout:
+            self.stdout = CustomStream(stdout)
 
     def start(self):
         pass
 
 class DLREngine(Engine):
-    def setup(self, stderr, stdout, stdin): # textviews
+    def setup(self):
         # True? A hint from the interwebs:
         #options["Debug"] = true;
         #Python.CreateEngine(options);
@@ -66,9 +79,17 @@ class DLREngine(Engine):
         # Load mscorlib.dll:
         self.engine.Runtime.LoadAssembly(
             System.Type.GetType(System.String).Assembly)
-        # Load System.dll
+        # ---------------------------------------
+        for file in glob.glob("modules/*.dll"):
+            #path, dll_name = os.path.split(file)
+            clr.AddReference(file)
+        for assembly in clr.References:
+            self.engine.Runtime.LoadAssembly(assembly)
+        # ---------------------------------------
         self.engine.Runtime.LoadAssembly(System.Type.GetType(
                 System.Diagnostics.Debug).Assembly)
+
+    def set_redirects(self, stderr, stdout, stdin): # textviews
         if stdout:
             self.engine.Runtime.IO.SetOutput(CustomStream(stdout), 
                                         System.Text.Encoding.UTF8)

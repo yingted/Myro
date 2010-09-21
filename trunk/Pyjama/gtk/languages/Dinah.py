@@ -2,21 +2,18 @@ import clr
 clr.AddReference('gtk-sharp')
 clr.AddReference('gdk-sharp')
 clr.AddReference('pango-sharp')
-clr.AddReference('Myro.dll')
-clr.AddReference('Graphics.dll')
 clr.AddReference('Microsoft.Scripting')
-clr.AddReference("System.Core")
+#clr.AddReference("System.Core")
+#import System.Linq.Expressions as Expressions
 import Gtk
 import Gdk
 import Pango
 import System
 import Microsoft.Scripting.Ast as Ast
-import System.Linq.Expressions as Expressions
 from utils import Language
 from document import BaseDocument, MyScrolledWindow
 from engine import Engine
-import Myro
-import Graphics
+import glob
 
 # color names
 blue = Gdk.Color(70, 227, 207)
@@ -349,55 +346,114 @@ class DinahDocument(BaseDocument):
         result = widget.Text
         return self.import_module(widget, result)
         
+
+    def find_module(self, module_name):
+        for assembly in clr.References:
+            print assembly
+            for t in assembly.GetTypes():
+                if module_name in t.Name:
+                    return assembly
+        return None
+
     def import_module(self, widget, module_name):
-        ### FIXME: will come from DLL
-        ### FIXME: don't add twice
-        #### Graphics
         store = self.treeview.Model
-        if module_name == "Graphics":
-            module = store.AppendValues("<b>Graphics</b>", None)
-            for exp in [
-                Expression("ctor", E("type", name="String"), 
-                           _class="Window",
-                           end=")",
-                           ),
-                Expression("ctor", E("type", name="Filename"), 
-                           _class="Picture", 
-                           end=")",
-                           ), 
-                Expression("ctor", 
-                           E("type", name="Integer"), 
-                           E("type", name="Integer"), 
-                           _class="Point",
-                           end=")",
-                           ),
-                Expression("ctor", 
-                           Expression("type", name="Graphics.Point"), 
-                           Expression("type", name="Graphics.Point"), 
-                           _class="Line", 
-                           end=")",
-                           ), 
-                ]:
-                exp.module = 'Graphics'
-                _class = store.AppendValues(module, 
-                                            '<span bgcolor="%s">%s</span>' % 
-                                            (color_markup(exp.color), exp.text), 
-                                            exp)
-                for member in exp.members:
-                    member.module = 'Graphics'
-                    member._class = exp._class
-                    store.AppendValues(_class, 
-                                       '<span bgcolor="%s">%s</span>' % 
-                                       (color_markup(member.color), member.text), 
-                                       member)
+        module = self.find_module(module_name)
+        if module: # gets assembly from references
+            print "Found module", module
+            # Graphics
+            module_path = store.AppendValues("<b>%s</b>" % module_name, None)
+            print "Getting classes:"
+            for _class in module.GetTypes():
+                print "   _class:", _class.Name
+                # Graphics, Window, Button, Point, etc.
+                exps = []
+                # color_map
+                for attr in _class.GetMethods():
+                    print "      attr:", attr.Name
+                    try:
+                        method = _class.GetMethod(attr.Name)
+                    except:
+                        print "skipping ambiguous name", attr.Name
+                    if (attr.IsSpecialName and 
+                        attr.IsPublic and 
+                        not attr.Name.startswith("_") and 
+                        (attr.Name.lower() == attr.Name)):
+                        print attr.Name
+                        # eg, module_name is "Graphics", attr is:
+                        # color_map, color_rgb, color_names, init
+                        params = method.GetParameters()
+                        pexps = []
+                        for parameter in params:
+                            pexps.append(
+                                Expression("type", 
+                                           name=parameter.ParameterType.Name))
+                        e = Expression("method", *pexps, 
+                                       module=module_name,
+                                       name=attr.Name, 
+                                       end=")")
+                        exps.append(e)
+                #for attr in module.GetFields():
+                #    if not attr.Name.startswith("_") and (attr.Name.lower() == 
+                #                                          attr.Name):
+                #        e = Expression("property", name=attr.Name
+                #                       name=attr.Name, end=")")
+                #        exps.append(e)
+                # Now, add the methods to the tree:
+                print "exps:", exps
+                for exp in exps:
+                    _class = store.AppendValues(module_path, 
+                                                '<span bgcolor="%s">%s</span>' % 
+                                                (color_markup(exp.color), exp.text), 
+                                                exp)
+                    for member in exp.members:
+                        store.AppendValues(_class, 
+                                           '<span bgcolor="%s">%s</span>' % 
+                                           (color_markup(member.color), member.text), 
+                                           member)
             self.treeview.ShowAll()
             widget.CanFocus = False
             return True 
-        elif module_name == "Myro":
-            module = store.AppendValues("<b>Myro</b>", None)
-            widget.CanFocus = False
-            self.treeview.ShowAll()
-            return True 
+        # if module_name == "Graphics":
+        #     module = store.AppendValues("<b>Graphics</b>", None)
+        #     for exp in [
+        #         Expression("ctor", E("type", name="String"), 
+        #                    _class="Window",
+        #                    end=")",
+        #                    ),
+        #         Expression("ctor", E("type", name="Filename"), 
+        #                    _class="Picture", 
+        #                    end=")",
+        #                    ), 
+        #         Expression("ctor", 
+        #                    E("type", name="Integer"), 
+        #                    E("type", name="Integer"), 
+        #                    _class="Point",
+        #                    end=")",
+        #                    ),
+        #         Expression("ctor", 
+        #                    Expression("type", name="Graphics.Point"), 
+        #                    Expression("type", name="Graphics.Point"), 
+        #                    _class="Line", 
+        #                    end=")",
+        #                    ), 
+        #         ]:
+        #         exp.module = 'Graphics'
+        #         _class = store.AppendValues(module, 
+        #                                     '<span bgcolor="%s">%s</span>' % 
+        #                                     (color_markup(exp.color), exp.text), 
+        #                                     exp)
+        #         for member in exp.members:
+        #             member.module = 'Graphics'
+        #             member._class = exp._class
+        #             store.AppendValues(_class, 
+        #                                '<span bgcolor="%s">%s</span>' % 
+        #                                (color_markup(member.color), member.text), 
+        #                                member)
+        # elif module_name == "Myro":
+        #     module = store.AppendValues("<b>Myro</b>", None)
+        #     widget.CanFocus = False
+        #     self.treeview.ShowAll()
+        #     return True 
         return False # Gtk needs boolean?
 
     def open(self):
@@ -801,6 +857,17 @@ class DinahEngine(Engine):
     def __init__(self, manager):
         super(DinahEngine, self).__init__(manager, "dinah")
         self.text_based = False
+
+    def setup(self):
+        super(DinahEngine, self).setup()
+        print "Setup"
+        for file in glob.glob("modules/*.dll"):
+            print "adding", file
+            #path, dll_name = os.path.split(file)
+            clr.AddReference(file)
+
+    def set_redirects(self, stderr, stdout, stdin): # textviews
+        super(DinahEngine, self).set_redirects(stderr, stdout, stdin)
 
     def execute(self, layout):
         print layout

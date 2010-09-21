@@ -16,6 +16,9 @@ import GLib
 # Import pure-Python modules:
 import traceback
 
+# Pyjama imports:
+from engine import EngineManager
+
 # Setup Runtime environment:
 def handle_exception(e):
     print e.__class__.__name__
@@ -46,6 +49,15 @@ class PyjamaProject(object):
         self.shell = None
         self.editor = None
         self.languages = get_registered_languages()
+	self.engine = EngineManager(self)
+        for lang in self.languages:
+            language = self.languages[lang]
+            lclass = language.get_engine_class()
+            if lclass:
+                self.engine.register(lclass)
+        # Set up all of the engines:
+        self.engine.setup()
+        self.engine.start()
         request_shell = False
         request_editor = False
         files = []

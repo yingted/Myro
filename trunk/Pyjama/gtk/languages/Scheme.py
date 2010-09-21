@@ -15,8 +15,8 @@ class SchemeEngine(Engine):
         self.stdout.write("%s\n" % result)
     def execute_file(self, filename):
         self.stdout.write("Run filename '%s'!\n" % filename)
-    def setup(self, stderr, stdout, stdin):
-        super(SchemeEngine, self).setup(stderr, stdout, stdin)
+    def setup(self):
+        super(SchemeEngine, self).setup()
         self.engine.set_dlr(self.manager.scope, self.manager.runtime)
     def ready_for_execute(self, text):
         """

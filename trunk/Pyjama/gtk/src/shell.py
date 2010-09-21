@@ -3,7 +3,6 @@ import Gtk, Pango
 import System
 
 from window import Window
-from engine import EngineManager
 from utils import _, CustomStream
 
 import traceback
@@ -81,17 +80,9 @@ class ShellWindow(Window):
         self.window.set_on_key_press(self.on_key_press)
         self.window.SetDefaultSize(600, 550)
         self.window.DeleteEvent += Gtk.DeleteEventHandler(self.on_close)
-	self.engine = EngineManager(self.project)
-        for lang in self.project.languages:
-            language = self.project.languages[lang]
-            lclass = language.get_engine_class()
-            if lclass:
-                self.engine.register(lclass)
         self.history_textview = Gtk.TextView()
         # Set up all of the engines:
-        self.engine.setup(self.history_textview, self.history_textview, None)
-        # Start them up:
-        self.engine.start()
+        self.project.engine.set_redirects(self.history_textview, self.history_textview, None)
         self.vbox = Gtk.VBox()
         # ---------------------
         # make menu:
@@ -185,8 +176,8 @@ class ShellWindow(Window):
     def make_language_menu(self):
         languages = []
         num = 1
-        for lang in self.engine.get_languages():
-            if self.engine[lang].text_based:
+        for lang in self.project.engine.get_languages():
+            if self.project.engine[lang].text_based:
                 languages.append(["Change to %s" % lang.title(), 
                     None, "<control>%d" % num, 
                     lambda obj, event, lang=lang: self.change_to_lang(lang)])
@@ -277,7 +268,7 @@ class ShellWindow(Window):
         self.project.editor.on_open_file(obj, event)
 
     def reset_shell(self, obj, event):
-        self.engine.reset()
+        self.project.engine.reset()
         self.message("-----------\n")
         self.message("Reset shell\n")
         self.message("-----------\n")
@@ -293,7 +284,7 @@ class ShellWindow(Window):
 
     @BGThread
     def execute_file(self, filename, language):
-        return self.engine[language].execute_file(filename)
+        return self.project.engine[language].execute_file(filename)
 
     def execute(self, text, language):
         self.textview.Buffer.Clear()
@@ -315,7 +306,7 @@ class ShellWindow(Window):
         elif text and text[0:2] == "#;":
             text = text[2:].strip()
             command = text.lower()
-            if command in self.engine.get_languages():
+            if command in self.project.engine.get_languages():
                 self.language = command
                 self.update_gui()
                 return True
@@ -328,7 +319,7 @@ class ShellWindow(Window):
 
     @BGThread
     def execute_in_background(self, text):
-        self.engine[self.language].execute(text)
+        self.project.engine[self.language].execute(text)
 
     def ready_for_execute(self, text):
-        return self.engine[self.language].ready_for_execute(text)
+        return self.project.engine[self.language].ready_for_execute(text)
