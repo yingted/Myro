@@ -4,14 +4,29 @@ using System.Collections.Generic;
 
 public static class Conx {
 
-  static int seed = 0; 
-  static Random random;
+  public class Randomizer(int seed) {
+	int _seed = 0; 
+	Random _random;
 	
-  public static void Randomize(int seed) {
-	Conx.seed = seed;
-	Conx.random = new Random(Conx.seed);
+	public int seed {
+	  get { 
+		return _seed; 
+	  }
+	  put { 
+		_seed = value; 
+		_random = new Random(_seed);
+	  }
+	}
+
+	public int Next() {
+	  return _random.Next();
+	}
+
   }
 	
+  // instance 
+  public static Randomizer RandomStream = new Randomizer(); 
+
   public class Network {
 	public List<Layer> layers = new List<Layer>();
 	public Dictionary<string,Layer> layer = new Dictionary<string,Layer>();
@@ -120,7 +135,7 @@ public static class Conx {
 	}
 
     public void setSeed(int seed=0) {
-	  Conx.Randomize(seed);
+	  Conx.Randomizer(seed);
 	  Console.WriteLine("Conx using seed: {0}", Conx.seed);
     }
   }
