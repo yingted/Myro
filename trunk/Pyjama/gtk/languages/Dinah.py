@@ -3,7 +3,8 @@ clr.AddReference('gtk-sharp')
 clr.AddReference('gdk-sharp')
 clr.AddReference('pango-sharp')
 clr.AddReference('Microsoft.Scripting')
-#clr.AddReference("System.Core")
+clr.AddReference('Microsoft.Scripting.Core')
+clr.AddReference("System.Core")
 #import System.Linq.Expressions as Expressions
 import Gtk
 import Gdk

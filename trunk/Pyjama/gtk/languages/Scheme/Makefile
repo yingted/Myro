@@ -1,7 +1,7 @@
 MCS=gmcs
 
 ../PJScheme.dll: pjscheme-rm.ss scheme-to-csharp.ss Scheme.cs pjscheme.cs
-	$(MCS) -debug Scheme.cs pjscheme.cs -target:library -lib:../../bin -r:Microsoft.VisualBasic.dll -r:Microsoft.Scripting.dll -r:IronPython.dll -out:../PJScheme.dll
+	$(MCS) -debug Scheme.cs pjscheme.cs -target:library -lib:../../bin -r:Microsoft.VisualBasic.dll -r:Microsoft.Scripting.dll -r:IronPython.dll -r:Microsoft.Dynamic -out:../PJScheme.dll
 
 pjscheme: pjscheme.exe
 	MONO_PATH=../../bin mono --debug pjscheme.exe
