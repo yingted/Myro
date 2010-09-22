@@ -1,10 +1,11 @@
 import clr
 import System
 import time
+import os
 
 def get_reference(dll_file):
     """
-    >>> get_references("Myro.dll")
+    >>> get_reference("Myro.dll")
     [<reference>, <reference>, ...]
     """
     for reference in clr.References:
@@ -12,13 +13,13 @@ def get_reference(dll_file):
             return reference
     return None
 
-def get_classes(dll_file):
+def get_class_names(dll_file):
     """
     >>> get_classes("Myro.dll")
     ['Myro']
     """
     reference = get_reference(dll_file)
-    return [c for c in reference.ManifestModule.GetTypes() if not c.Name.startswith("_")]
+    return set([c.Name for c in reference.ManifestModule.GetTypes() if not c.Name.startswith("_")])
 
 def get_class(dll_file, _class):
     """
@@ -30,7 +31,7 @@ def get_class(dll_file, _class):
         if not c.Name.startswith("_") and c.Name == _class:
             return c
 
-def get_items(dll_file, _class, item_type):
+def get_items(dll_file, class_name, item_type):
     # method_type is from System.Reflection.MemberTypes.Method
     # How to get all of the items in a class:
     # >>> [x.Name for x in clr.References[2].ManifestModule.GetTypes()[0].GetMembers()]
@@ -44,9 +45,12 @@ def get_items(dll_file, _class, item_type):
             mtypes = manifest.GetTypes()
             if mtypes:
                 for c in mtypes:
-                    if c is not None and c.Name == _class:
+                    print "considering 1:", c.Name
+                    if c is not None and c.Name == class_name:
                         for member in c.GetMembers():
-                            if (member and (member.Name not in ["GetType"]) and 
+                            print "considering 2:", member.Name
+                            if (member and 
+                                member.Name not in ["GetType"] and 
                                 (int(System.Reflection.MethodAttributes.VtableLayoutMask) & int(member.Attributes)) == 0 and 
                                 member.MemberType == item_type and
                                 not member.Name.startswith("_")):
@@ -75,3 +79,17 @@ def get_fields(dll_file, _class):
         # <enum System.Reflection.ParameterAttributes: Optional, HasDefault>
         # p.DefaultValue, p.ParameterType, 
         # 1, System.Single, 
+
+if __name__ == "__main__":
+    
+    import sys
+    for full_dll in sys.argv[1:]:
+        clr.AddReference(full_dll)
+        print full_dll
+        path, dll = os.path.split(full_dll)
+        for class_name in get_class_names(dll):
+            print "   Class:", class_name
+            for (c,item) in get_methods(dll, class_name):
+                print "      Method:", item.Name
+            for (c,item) in get_fields(dll, class_name):
+                print "      Field:", item.Name
