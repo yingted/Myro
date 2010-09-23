@@ -25,3 +25,9 @@ clean-build:
 clean:
 	rm -f modules/Graphics.dll modules/Myro.dll \
 		languages/PJScheme.dll Pyjama*.zip
+
+# mono ../bin/ipy.exe ../bin/pyc.py *.py /main:__main__.py /target:exe
+# ISSUES:
+# needed to have main file named __main__.py
+# needed to have files in directory?
+# needed to have everything in same dir?
