@@ -1,8 +1,10 @@
 
 all: ../Myro.dll
 
+MONO_PATH=../../bin
+
 ../Myro.dll: Myro.cs
-	gmcs -target:library Myro.cs -out:../Myro.dll
+	MONO_PATH=$(MONO_PATH) gmcs -target:library Myro.cs -r:IronPython -out:../Myro.dll
 
 clean::
 	rm -rf ../Myro.dll */*~ *~
