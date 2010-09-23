@@ -652,8 +652,8 @@ public class Scheme {
 	//type = get_the_type(name.ToString());
     Type type = obj.GetType();
 	if (type != null) {
-	  Type[] types = get_arg_types(args);
-	  object[] arguments = (object[]) list_to_vector(args);
+	  //Type[] types = get_arg_types(args);
+	  object[] arguments = list_to_array(args);
 	  object result = get_external_member(obj, car(path).ToString());
 	  if (!null_q(result)) {
 		if (Eq(car(result), symbol("method"))) {
@@ -1000,7 +1000,7 @@ public class Scheme {
   }
 
   public static object make_vector(object lyst) {
-	trace(2, "called: list_to_vector\n");
+	trace(2, "called: make_vector\n");
 	int len = (int) length(lyst);
 	object current = lyst;
 	object[] retval = new object[len];
@@ -1028,6 +1028,18 @@ public class Scheme {
 
   public static object list_to_vector(object lyst) {
 	trace(2, "called: list_to_vector\n");
+	int len = (int) length(lyst);
+	object current = lyst;
+	object[] retval = new object[len];
+	for (int i = 0; i < len; i++) {
+	  retval[i] = car(current);
+	  current = cdr(current);
+	}
+	return retval;
+  }
+
+  public static object [] list_to_array(object lyst) {
+	trace(2, "called: list_to_array\n");
 	int len = (int) length(lyst);
 	object current = lyst;
 	object[] retval = new object[len];
@@ -1186,24 +1198,13 @@ public class Scheme {
   
   public static object dlr_apply(object proc, object args) {
 	//printf("dlr_apply({0}, {1})\n", proc, args);
-	int len = (int) length(args);
 	if (proc is Method) {
 	  return ((Method)proc).method.Invoke(((Method)proc).classobj, 
-		  (object [])list_to_vector(args));
-	}
-	if (len == 0) {
-	    return _dlr_runtime.Operations.Invoke(proc);
-	} else if (len == 1)
-	    return _dlr_runtime.Operations.Invoke(proc, list_ref(args, 0));
-	else if (len == 2)
-	    return _dlr_runtime.Operations.Invoke(proc, list_ref(args, 0), list_ref(args, 1));
-	// FIXME: how to properly call proc from DLR or reflection?
-	// http://dlr.codeplex.com/discussions
-	// Solution: Wait for DLR 1.0:
-	// public object Invoke(object obj, params object[] parameters) {
-	else 
-	    throw new Exception(string.Format("too many parameters needed for proc: {0}", proc));
+		  list_to_array(args));
+	} else {
+      return _dlr_runtime.Operations.Invoke(proc, list_to_array(args));
     }
+  }
 
   public static bool dlr_env_contains(object variable) {
     trace(1, "contains?: {0}\n", variable); 
@@ -1349,7 +1350,7 @@ public class Scheme {
 	  if (len == 1)
 		return format(car(args), new object[0]);
 	  else if (len > 1) {
-		object[] options = (object[])list_to_vector(cdr(args));
+		object[] options = list_to_array(cdr(args));
 		return format(car(args), options);
 	  }
 	}

@@ -1,40 +1,49 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
+using IronPython.Runtime;
 
 public static class Conx {
 
-  public class Randomizer(int seed) {
-	int _seed = 0; 
-	Random _random;
+  public class Randomizer {
+	int _seed; 
+	Random _random = new Random();
 	
+	public Randomizer(int seed=0) {
+	  if (seed != 0)
+		this.seed = seed;
+	}
+
 	public int seed {
 	  get { 
 		return _seed; 
 	  }
-	  put { 
+	  set { 
 		_seed = value; 
 		_random = new Random(_seed);
 	  }
 	}
 
-	public int Next() {
-	  return _random.Next();
+	public double random() {
+	  return _random.NextDouble();
 	}
 
   }
 	
-  // instance 
-  public static Randomizer RandomStream = new Randomizer(); 
+  // singleton
+  public static Randomizer Random = new Randomizer(); 
 
   public class Network {
-	public List<Layer> layers = new List<Layer>();
-	public Dictionary<string,Layer> layer = new Dictionary<string,Layer>();
-	public List<Connection> connections = new List<Connection>();
+	public List layers = new List();
+	public List connections = new List();
+	public PythonDictionary layer = new PythonDictionary();
 	public int verbosity;
+	public bool learning = true;
+	public bool batch = false;
 
 	public Network(int verbosity = 0, int seed = 0) {
-	  setSeed(seed);
+	  if (seed != 0)
+		setSeed(seed);
+	  else
+		setSeed((int)(Random.random()*100000000));
 	  this.verbosity = verbosity;
 	  // self.setSeed(x)
       //   self.complete = 0
@@ -97,26 +106,50 @@ public static class Conx {
 	  setup();
 	}
 
+	public void step() {
+	  propagate();
+	  backprop();
+	  if (learning & !batch)
+		change_weights();
+	}
+
+	public void propagate(List input=null, List hidden=null, 
+		List context=null, List output=null) {
+	  for (int i = 0; i < hidden.Count; i++) {
+		Console.WriteLine(hidden[i]);
+	  }
+	}
+
+	public void backprop() {
+	}
+
+	public void change_weights() {
+	}
+
 	public void setup() {
 	  // for overloads
 	}
 
 	public void addLayers(params int [] layer_sizes){
-	  List<Layer> hiddens = new List<Layer>();
+	  List hiddens = new List();
 	  int hidden_count = 1;
 	  Layer temp;
 	  for (int i = 0; i < layer_sizes.Length; i++) {
-		if (i == 0)
-		  temp = layer["input"] = new Layer("input", layer_sizes[i]);
-		else if (i == layer_sizes.Length - 1)
-		  temp = layer["output"] = new Layer("output", layer_sizes[i]);
-		else {
+		if (i == 0) {
+		  layer["input"] = new Layer("input", layer_sizes[i]);
+		  temp = (Layer)layer["input"];
+		} else if (i == layer_sizes.Length - 1) {
+		  layer["output"] = new Layer("output", layer_sizes[i]);
+		  temp = (Layer)layer["output"];
+		} else {
 		  if (layer_sizes.Length > 3) {
 			string name = String.Format("hidden{0}", hidden_count);
-			temp = layer[name] = new Layer(name, layer_sizes[i]);
+			layer[name] = new Layer(name, layer_sizes[i]);
+			temp = (Layer)layer[name];
 			hidden_count += 1;
 		  } else {
-			temp = layer["hidden"] = new Layer("hidden", layer_sizes[i]);
+			layer["hidden"] = new Layer("hidden", layer_sizes[i]);
+			temp = (Layer)layer["hidden"];
 		  }
 		  hiddens.Add(temp);
 		}
@@ -131,12 +164,13 @@ public static class Conx {
 	}
 
 	public void connect(string fromLayerName, string toLayerName) {
-	  connections.Add( new Connection(layer[fromLayerName], layer[toLayerName]));
+	  connections.Add( new Connection((Layer)layer[fromLayerName], 
+			                          (Layer)layer[toLayerName]));
 	}
 
     public void setSeed(int seed=0) {
-	  Conx.Randomizer(seed);
-	  Console.WriteLine("Conx using seed: {0}", Conx.seed);
+	  Conx.Random.seed = seed;
+	  Console.WriteLine("Conx using seed: {0}", Conx.Random.seed);
     }
   }
 
@@ -151,7 +185,7 @@ public static class Conx {
   public static double [] randomArray(int size, double maxRandom) {
 	double [] temp = new double [size];
 	for (int i = 0; i < temp.Length; i++) {
-	  temp[i] = random.Next() * (maxRandom * 2.0) - maxRandom;
+	  temp[i] = Random.random() * (maxRandom * 2.0) - maxRandom;
 	}
 	return temp;
   }
@@ -160,7 +194,7 @@ public static class Conx {
 	double [,] temp = new double [fromSize, toSize];
 	for (int i = 0; i < fromSize; i++) {
 	  for (int j = 0; j < toSize; j++) {
-		temp[i,j] = random.Next() * (maxRandom * 2.0) - maxRandom;
+		temp[i,j] = Random.random() * (maxRandom * 2.0) - maxRandom;
 	  }
 	}
 	return temp;
@@ -262,7 +296,7 @@ public static class Conx {
 	Console.WriteLine("Network.layers are:");
 	foreach (string name in net.layer.Keys) {
 	  Console.WriteLine("layer '{0}':", name);
-	  Console.WriteLine("   net.layer[{0}] = {1}", name, net.layer[name].weight);
+	  Console.WriteLine("   net.layer[{0}] = {1}", name, ((Layer)net.layer[name]).weight);
 	}
   }
 
