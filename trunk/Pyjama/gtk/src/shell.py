@@ -171,7 +171,9 @@ class ShellWindow(Window):
         # Set this Python's stderr:
         sys.stderr = CustomStream(self.history_textview, "red")
         sys.stdout = CustomStream(self.history_textview, "black")
-        self.project.engine.set_redirects(sys.stderr, sys.stdout, None)
+        self.project.engine.set_redirects(self.history_textview, 
+                                          self.history_textview, 
+                                          None)
         self.textview.GrabFocus()
         self.change_to_lang(self.language)
 
