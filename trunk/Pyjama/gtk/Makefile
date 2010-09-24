@@ -23,7 +23,7 @@ clean-build:
 	rm -f Pyjama-*.zip *~
 
 clean:
-	rm -f modules/Graphics.dll modules/Myro.dll \
+	rm -f modules/Graphics.dll modules/Myro.dll modules/Conx.dll \
 		languages/PJScheme.dll Pyjama*.zip
 
 # mono ../bin/ipy.exe ../bin/pyc.py *.py /main:__main__.py /target:exe

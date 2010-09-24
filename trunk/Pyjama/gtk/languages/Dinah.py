@@ -867,9 +867,6 @@ class DinahEngine(Engine):
             #path, dll_name = os.path.split(file)
             clr.AddReference(file)
 
-    def set_redirects(self, stderr, stdout, stdin): # textviews
-        super(DinahEngine, self).set_redirects(stderr, stdout, stdin)
-
     def execute(self, layout):
         print layout
         #program = Ast.Utils.Lambda(type(object), "Test")

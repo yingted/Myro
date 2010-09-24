@@ -32,10 +32,10 @@ class EngineManager(object):
         for engine in self.engine:
             self.engine[engine].setup()
 
-    def set_redirects(self, stderr, stdout, stdin): # textviews
+    def set_redirects(self, stdout, stderr, stdin): # textviews
         self.stderr, self.stdout, self.stdin = stderr, stdout, stdin
         for engine in self.engine:
-            self.engine[engine].set_redirects(self.stderr, self.stdout, self.stdin)
+            self.engine[engine].set_redirects(self.stdout, self.stderr, self.stdin)
 
     def start(self):
         for engine in self.engine:
@@ -44,7 +44,7 @@ class EngineManager(object):
     def reset(self):
         self.setup()
         self.start()
-        self.set_redirects(self.stderr, self.stdout, self.stdin)
+        self.set_redirects(self.stdout, self.stderr, self.stdin)
 
 class Engine(object):
     def __init__(self, manager, language):
@@ -61,11 +61,9 @@ class Engine(object):
     def setup(self):
         pass
 
-    def set_redirects(self, stderr, stdout, stdin): # textviews
-        if stderr:
-            self.sterr = CustomStream(stderr)
-        if stdout:
-            self.stdout = CustomStream(stdout)
+    def set_redirects(self, stdout, stderr, stdin): # textviews
+        self.sterr = stderr
+        self.stdout = stdout
 
     def start(self):
         pass
@@ -89,14 +87,15 @@ class DLREngine(Engine):
         self.engine.Runtime.LoadAssembly(System.Type.GetType(
                 System.Diagnostics.Debug).Assembly)
 
-    def set_redirects(self, stderr, stdout, stdin): # textviews
+    def set_redirects(self, stdout, stderr, stdin): # textviews
+        super(DLREngine, self).set_redirects(stdout, stderr, stdin)
         if stdout:
-            self.engine.Runtime.IO.SetOutput(CustomStream(stdout), 
-                                        System.Text.Encoding.UTF8)
+            #print "Setting stdout", stdout
+            self.engine.Runtime.IO.SetOutput(stdout, 
+                                             System.Text.Encoding.UTF8)
         if stderr:
-            self.engine.Runtime.IO.SetErrorOutput(CustomStream(stderr, 
-                                                      "red"), 
-                                         System.Text.Encoding.UTF8)
+            self.engine.Runtime.IO.SetErrorOutput(stderr,
+                                                  System.Text.Encoding.UTF8)
 
     def ready_for_execute(self, text):
         """

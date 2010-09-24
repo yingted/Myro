@@ -82,7 +82,10 @@ class ShellWindow(Window):
         self.window.DeleteEvent += Gtk.DeleteEventHandler(self.on_close)
         self.history_textview = Gtk.TextView()
         # Set up all of the engines:
-        self.project.engine.set_redirects(self.history_textview, self.history_textview, None)
+        self.project.engine.set_redirects(CustomStream(self.history_textview), 
+                                          CustomStream(self.history_textview,
+                                                       "red"), 
+                                          None)
         self.vbox = Gtk.VBox()
         # ---------------------
         # make menu:
@@ -169,11 +172,9 @@ class ShellWindow(Window):
         self.vbox.PackEnd(self.statusbar, False, False, 0)
         self.window.ShowAll()
         # Set this Python's stderr:
-        sys.stderr = CustomStream(self.history_textview, "red")
         sys.stdout = CustomStream(self.history_textview, "black")
-        self.project.engine.set_redirects(self.history_textview, 
-                                          self.history_textview, 
-                                          None)
+        sys.stderr = CustomStream(self.history_textview, "red")
+        self.project.engine.set_redirects(sys.stdout, sys.stderr, None)
         self.textview.GrabFocus()
         self.change_to_lang(self.language)
 
