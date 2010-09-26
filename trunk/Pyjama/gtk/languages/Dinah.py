@@ -350,7 +350,7 @@ class DinahDocument(BaseDocument):
 
     def find_module(self, module_name):
         for assembly in clr.References:
-            print assembly
+            #print assembly
             for t in assembly.GetTypes():
                 if module_name in t.Name:
                     return assembly
@@ -360,26 +360,27 @@ class DinahDocument(BaseDocument):
         store = self.treeview.Model
         module = self.find_module(module_name)
         if module: # gets assembly from references
-            print "Found module", module
+            #print "Found module", module
             # Graphics
             module_path = store.AppendValues("<b>%s</b>" % module_name, None)
-            print "Getting classes:"
+            #print "Getting classes:"
             for _class in module.GetTypes():
-                print "   _class:", _class.Name
+                #print "   _class:", _class.Name
                 # Graphics, Window, Button, Point, etc.
                 exps = []
                 # color_map
                 for attr in _class.GetMethods():
-                    print "      attr:", attr.Name
+                    #print "      attr:", attr.Name
                     try:
                         method = _class.GetMethod(attr.Name)
                     except:
-                        print "skipping ambiguous name", attr.Name
+                        #print "skipping ambiguous name", attr.Name
+                        pass
                     if (attr.IsSpecialName and 
                         attr.IsPublic and 
                         not attr.Name.startswith("_") and 
                         (attr.Name.lower() == attr.Name)):
-                        print attr.Name
+                        #print attr.Name
                         # eg, module_name is "Graphics", attr is:
                         # color_map, color_rgb, color_names, init
                         params = method.GetParameters()
@@ -400,7 +401,7 @@ class DinahDocument(BaseDocument):
                 #                       name=attr.Name, end=")")
                 #        exps.append(e)
                 # Now, add the methods to the tree:
-                print "exps:", exps
+                #print "exps:", exps
                 for exp in exps:
                     _class = store.AppendValues(module_path, 
                                                 '<span bgcolor="%s">%s</span>' % 
@@ -493,13 +494,15 @@ class DinahDocument(BaseDocument):
         return self.layout
  
     def save(self):
-        print self.process_widgets(self.layout)
+        #print self.process_widgets(self.layout)
+        pass
 
     def save_as(self):
-        print self.process_widgets(self.layout)
+        #print self.process_widgets(self.layout)
+        pass
 
     def treeviewHandleSourceDragDataGet(self, obj, args):
-        print "treeviewHandleSourceDragDataGet!"
+        #print "treeviewHandleSourceDragDataGet!"
         # DragDropGetArgs: args
         #print "dnd get", obj, args
         targets = args.Context.Targets
@@ -526,16 +529,16 @@ class DinahDocument(BaseDocument):
 
     def typeDragDataReceived(self, obj, args):
         # obj is the dropped upon label to be replaced
-        print "Received onto a type place holder!"
-        print obj, str(id(obj))
+        #print "Received onto a type place holder!"
+        #print obj, str(id(obj))
         if str(id(obj)) in self.layouts:
-            print "Yes, label's layout found!"
+            #print "Yes, label's layout found!"
             layout = self.layouts[str(id(obj))]
             bytes = args.SelectionData.Data
             data = System.Text.Encoding.UTF8.GetString(bytes)
             if data in self.lookup:
                 layout.Remove(obj)
-                print "Yes, item to drop found!"
+                #print "Yes, item to drop found!"
                 item = self.lookup[data]
                 if data.startswith("create:"):
                     direct_entry_exp = self.process_list(layout, [item], icons=False)
@@ -553,16 +556,16 @@ class DinahDocument(BaseDocument):
     def typeEnclosureDragDataReceived(self, obj, args):
         # FIXME: remove item [Integer] in the related hbox
         # obj is the dropped upon label to be replaced
-        print "Received onto a type place holder!"
-        print obj, str(id(obj))
+        #print "Received onto a type place holder!"
+        #print obj, str(id(obj))
         if str(id(obj)) in self.layouts:
-            print "Yes, label's layout found!"
+            #print "Yes, label's layout found!"
             layout = self.layouts[str(id(obj))]
             bytes = args.SelectionData.Data
             data = System.Text.Encoding.UTF8.GetString(bytes)
             if data in self.lookup:
                 layout.Remove(obj)
-                print "Yes, item to drop found!"
+                #print "Yes, item to drop found!"
                 item = self.lookup[data]
                 if data.startswith("create:"):
                     direct_entry_exp = self.process_list(layout, [item], icons=False)
@@ -578,12 +581,11 @@ class DinahDocument(BaseDocument):
             print "label not found"
 
     def handleDragDataReceived(self, obj, args, where):
-        print "Received!"
+        #print "Received!"
         bytes = args.SelectionData.Data
         data = System.Text.Encoding.UTF8.GetString(bytes)
         if data in self.lookup:
             item = self.lookup[data]
-            print item
             if data.startswith("create:"):
                 # Where to add? get container, and use "where"
                 # obj is the item we are dropping onto:
@@ -612,7 +614,7 @@ class DinahDocument(BaseDocument):
             print self.lookup
 
     def handleSourceDragDataGet(self, obj, args):
-        print "handleSourceDragDropGet!"
+        #print "handleSourceDragDropGet!"
         # DragDropGetArgs: args
         #print "dnd get", obj, args
         targets = args.Context.Targets
@@ -764,7 +766,7 @@ class DinahDocument(BaseDocument):
                 entry.WidthChars = 5
                 hbox.PackStart(entry, False, True, 0)
             else:
-                print "process_expression, statements:", arg, type(arg)
+                #print "process_expression, statements:", arg, type(arg)
                 box = self.process_expression(arg, None)
                 hbox.PackStart(box, False, True, 0)
             if count < len(expression.args) - 1:
@@ -861,14 +863,13 @@ class DinahEngine(Engine):
 
     def setup(self):
         super(DinahEngine, self).setup()
-        print "Setup"
         for file in glob.glob("modules/*.dll"):
-            print "adding", file
             #path, dll_name = os.path.split(file)
             clr.AddReference(file)
 
     def execute(self, layout):
-        print layout
+        #print layout
+        pass
         #program = Ast.Utils.Lambda(type(object), "Test")
         #statements = []
         #clr.AddReference("System.Core")

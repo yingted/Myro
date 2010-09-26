@@ -78,6 +78,10 @@ class PyjamaProject(object):
             from shell import ShellWindow
             self.shell = ShellWindow(self)
 
+    def Print(self, message):
+        self.setup_shell()
+        self.shell.message(message, "green")
+
     def on_run(self, obj, event):
         doc = self.get_current_doc()
         if doc and doc.textview.HasFocus:

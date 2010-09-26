@@ -90,7 +90,6 @@ class DLREngine(Engine):
     def set_redirects(self, stdout, stderr, stdin): # textviews
         super(DLREngine, self).set_redirects(stdout, stderr, stdin)
         if stdout:
-            #print "Setting stdout", stdout
             self.engine.Runtime.IO.SetOutput(stdout, 
                                              System.Text.Encoding.UTF8)
         if stderr:
