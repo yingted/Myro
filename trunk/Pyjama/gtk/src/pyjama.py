@@ -95,14 +95,14 @@ class PyjamaProject(object):
     def on_close(self, what):
         if what == "shell":
             if self.shell:
-                self.shell.window.Hide()
+                self.shell.window.Destroy()
+                self.shell = None 
         elif what == "editor":
             if self.editor:
-                self.editor.window.Hide()
-        if (((self.editor.window is None) or 
-             (not self.editor.window.Visible)) and 
-            ((self.shell is None) or 
-             (not self.shell.window.Visible))):
+                self.editor.window.Destroy()
+                self.editor = None 
+        if ((self.editor is None) and
+            (self.shell is None)):
             Gtk.Application.Quit()
 
     def setup_shell(self, *args, **kwargs):
@@ -110,14 +110,18 @@ class PyjamaProject(object):
             from shell import ShellWindow
             self.shell = ShellWindow(self)
         else:
-            self.shell.window.ShowAll()
+            def invoke(sender, args):
+                self.shell.window.Deiconify()
+            Gtk.Application.Invoke(invoke)
 
     def setup_editor(self, *args, **kwargs):
         if self.editor is None:
             from editor import EditorWindow
             self.editor = EditorWindow(self)
         else:
-            self.editor.window.ShowAll()
+            def invoke(sender, args):
+                self.editor.window.Deiconify()
+            Gtk.Application.Invoke(invoke)
 
 # Let's start!
 Gtk.Application.Init()

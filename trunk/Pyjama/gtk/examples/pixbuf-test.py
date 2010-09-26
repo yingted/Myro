@@ -1,6 +1,6 @@
 from Graphics import *
 win = Window()
-pic = Picture("/home/dblank/Desktop/blankenship.jpg")
+pic = Picture("images/blankenship.jpg")
 pic.draw(win)
 
 arrow = Arrow(Point(10, 10), 0)

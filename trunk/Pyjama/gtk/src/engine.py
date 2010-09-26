@@ -95,10 +95,12 @@ class DLREngine(Engine):
         if stderr:
             self.engine.Runtime.IO.SetErrorOutput(stderr,
                                                   System.Text.Encoding.UTF8)
-        System.Console.SetOut(self.engine.Runtime.IO.OutputWriter)
-        System.Console.SetError(self.engine.Runtime.IO.ErrorWriter)
-        System.Console.Out.AutoFlush = True
-        System.Console.Error.AutoFlush = True
+        # Only do this when you have it debugged; crashes just seem to hang
+        # the GUI:
+        #System.Console.SetOut(self.engine.Runtime.IO.OutputWriter)
+        #System.Console.SetError(self.engine.Runtime.IO.ErrorWriter)
+        #System.Console.Out.AutoFlush = True
+        #System.Console.Error.AutoFlush = True
 
     def ready_for_execute(self, text):
         """

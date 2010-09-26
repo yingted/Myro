@@ -172,9 +172,9 @@ class ShellWindow(Window):
         self.vbox.PackEnd(self.statusbar, False, False, 0)
         self.window.ShowAll()
         # Set this Python's stderr:
-        sys.stdout = CustomStream(self.history_textview, "black")
-        sys.stderr = CustomStream(self.history_textview, "red")
-        self.project.engine.set_redirects(sys.stdout, sys.stderr, None)
+        #sys.stdout = CustomStream(self.history_textview, "black")
+        #sys.stderr = CustomStream(self.history_textview, "red")
+        #self.project.engine.set_redirects(sys.stdout, sys.stderr, None)
         self.textview.GrabFocus()
         self.change_to_lang(self.language)
 
@@ -279,11 +279,12 @@ class ShellWindow(Window):
         self.message("-----------\n")
 
     def message(self, message, tag="green"):
+        # DO NOT PUT the ev stuff here!
         #ev = ManualResetEvent(False)
         def invoke(sender, args):
             end = self.history_textview.Buffer.EndIter
             self.history_textview.Buffer.InsertWithTagsByName(end, message, tag)
-        #    ev.Set()
+            #ev.Set()
         Gtk.Application.Invoke(invoke)
         #ev.WaitOne()
 

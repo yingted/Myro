@@ -25,6 +25,25 @@ pink = Gdk.Color(255, 200, 200)
 green = Gdk.Color(50, 243, 50)
 white = Gdk.Color(200, 200, 200)
 
+def process_widgets(layout):
+    retval = []
+    for widget in layout:
+        if isinstance(widget, BlockWidget):
+            retval.extend([("Block", widget.pobj.block_type, 
+                            process_widgets(widget))])
+        elif isinstance(widget, ExpressionWidget):
+            retval.extend([("Expression", widget.pobj.type, 
+                            process_widgets(widget))])
+        elif isinstance(widget, Gtk.Entry):
+            retval.extend([('Entry', widget.Text)])
+        elif isinstance(widget, Gtk.Box):
+            retval.extend(process_widgets(widget))
+        elif isinstance(widget, Gtk.Expander):
+            retval.extend(process_widgets(widget))
+        elif isinstance(widget, Gtk.EventBox):
+            retval.extend(process_widgets(widget))
+    return retval
+
 def color_markup(color):
     r = int(color.Red/float(2**16) * 255)
     g = int(color.Green/float(2**16) * 255)
@@ -130,6 +149,7 @@ class Expression(object):
     def __init__(self, exptype, *args, **kwargs):
         self.pid = str(id(self))
         self.type = exptype
+        self.instance = None
         self.separator = kwargs["separator"] if "separator" in kwargs else ","
         self.end = kwargs["end"] if "end" in kwargs else ""
         self.text = make_treeview_text(self.type, **kwargs)
@@ -146,13 +166,19 @@ class Expression(object):
 
 E = Expression
 
+class MyHPaned(Gtk.HPaned):
+    """
+    To add reference to document
+    """
+
 class DinahDocument(BaseDocument):
     def make_widget(self):
         self.layouts = {}
         self.lookup = {}
-        self.widget = MyScrolledWindow()
+        self.widget = MyHPaned()
         self.widget.document = self
-        self.hpaned = Gtk.HPaned()
+        tree_scroll = Gtk.ScrolledWindow()
+        layout_scroll = Gtk.ScrolledWindow()
         self.treeview = Gtk.TreeView()
         self.treeview.GrabFocus()
         self.treeview.Model = self.make_store()
@@ -198,12 +224,11 @@ class DinahDocument(BaseDocument):
 
         #Gtk.Layout(Gtk.Adjustment(0, 0, 100, 1, 10, 10), 
         #           Gtk.Adjustment(0, 0, 100, 1, 10, 10))
-        self.widget.AddWithViewport(self.hpaned)
-        self.hpaned.Add1(self.treeview)
-        self.hpaned.Add2(self.layout)
-        self.treeview.Show()
-        self.hpaned.Show()
-        self.layout.Show()
+        #self.widget.AddWithViewport(self.hpaned)
+        tree_scroll.AddWithViewport(self.treeview)
+        layout_scroll.AddWithViewport(self.layout)
+        self.widget.Add1(tree_scroll)
+        self.widget.Add2(layout_scroll)
         self.widget.ShowAll()
 
     def grab_focus(self):
@@ -494,12 +519,12 @@ class DinahDocument(BaseDocument):
         return self.layout
  
     def save(self):
-        #print self.process_widgets(self.layout)
-        pass
+        print process_widgets(self.layout)
+        return True
 
     def save_as(self):
-        #print self.process_widgets(self.layout)
-        pass
+        print process_widgets(self.layout)
+        return True
 
     def treeviewHandleSourceDragDataGet(self, obj, args):
         #print "treeviewHandleSourceDragDataGet!"
@@ -659,24 +684,6 @@ class DinahDocument(BaseDocument):
                            Gdk.DragAction.Copy | Gdk.DragAction.Move)
         box.DragDataGet += Gtk.DragDataGetHandler(self.handleSourceDragDataGet)
         return box
-
-    def process_widgets(self, layout):
-        retval = []
-        for widget in layout:
-            if isinstance(widget, BlockWidget):
-                retval.extend([("Block", widget.pobj.block_type, self.process_widgets(widget))])
-            elif isinstance(widget, ExpressionWidget):
-                retval.extend([("Expression", widget.pobj.type, 
-                                self.process_widgets(widget))])
-            elif isinstance(widget, Gtk.Entry):
-                retval.extend([('Entry', widget.Text)])
-            elif isinstance(widget, Gtk.Box):
-                retval.extend(self.process_widgets(widget))
-            elif isinstance(widget, Gtk.Expander):
-                retval.extend(self.process_widgets(widget))
-            elif isinstance(widget, Gtk.EventBox):
-                retval.extend(self.process_widgets(widget))
-        return retval
 
     def process_list(self, layout, items, parallel=False, icons=True):
         retval = []
@@ -867,9 +874,9 @@ class DinahEngine(Engine):
             #path, dll_name = os.path.split(file)
             clr.AddReference(file)
 
-    def execute(self, layout):
-        #print layout
-        pass
+    def execute_file(self, filename):
+        print("Run filename '%s'!" % filename)
+        print process_widget(self.layout)
         #program = Ast.Utils.Lambda(type(object), "Test")
         #statements = []
         #clr.AddReference("System.Core")
@@ -877,9 +884,6 @@ class DinahEngine(Engine):
         #import System.Linq
         #dir(System.Linq.Expressions)
         #n = program.Variable(int, "n")
-
-    def execute_file(self, filename):
-        self.stdout.write("Run filename '%s'!\n" % filename)
 
 class Dinah(Language):
     def get_engine_class(self):

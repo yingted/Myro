@@ -148,13 +148,15 @@ class EditorWindow(Window):
             return None
 
     def on_run(self, obj, event):
-        self.project.setup_shell()
         doc = self.get_current_doc()
         if doc:
             if doc.save():
+                self.project.setup_shell()
                 self.project.shell.message("Loading file...\n")
+                # Happens in the background:
                 self.project.shell.execute_file(doc.filename, doc.language)
-                self.project.shell.message("Done loading!\n")
+                # FIXME: need callback to do this:
+                #self.project.shell.message("Done loading!\n")
 
     def on_close(self, obj, event):
         self.project.on_close("editor")
