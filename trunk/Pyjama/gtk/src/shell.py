@@ -151,7 +151,7 @@ class ShellWindow(Window):
         self.results = Gtk.ScrolledWindow()
         for color in ["red", "blue", "green", "black"]:
             tag = Gtk.TextTag(color)
-            if color in ["red", "black"]:
+            if color in ["red"]:
                 tag.Weight = Pango.Weight.Bold
             tag.Foreground = color 
             self.history_textview.Buffer.TagTable.Add(tag)
