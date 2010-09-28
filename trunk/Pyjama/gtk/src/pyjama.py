@@ -111,7 +111,7 @@ class PyjamaProject(object):
             self.shell = ShellWindow(self)
         else:
             def invoke(sender, args):
-                self.shell.window.Deiconify()
+                self.shell.window.Present()
             Gtk.Application.Invoke(invoke)
 
     def setup_editor(self, *args, **kwargs):
@@ -120,7 +120,7 @@ class PyjamaProject(object):
             self.editor = EditorWindow(self)
         else:
             def invoke(sender, args):
-                self.editor.window.Deiconify()
+                self.editor.window.Present()
             Gtk.Application.Invoke(invoke)
 
 # Let's start!
