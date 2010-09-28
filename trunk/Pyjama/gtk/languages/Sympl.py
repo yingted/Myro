@@ -13,8 +13,12 @@ class SymplEngine(Engine):
         self.scope =  self.engine.CreateScope()
 
     def execute(self, text):
-        result = self.engine.ExecuteExpr(text, self.scope)
-        self.stdout.write("%s\n" % result)
+        try:
+            sympl.parser.ParseExpr(StringReader(text))
+            result = self.engine.ExecuteExpr(text, self.scope)
+            self.stdout.write("%s\n" % result)
+        except Exception, e:
+            System.Console.WriteLine(e)
 
     def execute_file(self, filename):
         self.engine.ExecuteFileInScope(filename, self.scope)
