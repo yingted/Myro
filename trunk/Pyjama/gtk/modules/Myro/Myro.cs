@@ -37,6 +37,8 @@ public static class Myro {
 	public string port;
 	public SerialPort serial;
 	public string dongle;
+	public byte [] lastSensors;
+	public int volume;
 
     static int SOFT_RESET=33;
     static int GET_ALL=65 ;
@@ -178,11 +180,11 @@ public static class Myro {
 	  return retval;
 	}
 
-	public PythonDictionary list(params object [] items) {
+	public List list(params object [] items) {
 	  // make a list from an array
 	  List retval = new List();
 	  for (int i = 0; i < items.Length; i++) {
-		retval.append(list[i]);
+		retval.append(items[i]);
 	  }
 	  return retval;
 	}
@@ -216,7 +218,7 @@ public static class Myro {
 	  return retval;
 	}
 
-    public object Get(string sensor="all", params int [] position) {
+    public object Get(string sensor="all", params object [] position) {
 	  object retval = null;
 	  sensor = sensor.ToLower();
 	  if (sensor == "config") {
@@ -227,11 +229,12 @@ public static class Myro {
 			  "battery", 1, "obstacle", 3, "bright", 3);
 		}
 	  } else if (sensor == "stall") {
-		retval = GetBytes(Scribbler.GET_ALL, 11); // returned as bytes
-		_lastSensors = retval; // single bit sensors
-		return retval[10];
+		// lastSensors are the single byte sensors
+		lastSensors = GetBytes(Scribbler.GET_ALL, 11); 
+		// returned as bytes
+		return (object)(lastSensors[10]);
 	  } else if (sensor == "forwardness") {
-		if (read_mem(ser, 0, 0) != 0xDF) {
+		if (read_mem(0, 0) != 0xDF) {
 		  retval = "fluke-forward";
 		} else {
 		  retval = "scribbler-forward";
@@ -244,9 +247,9 @@ public static class Myro {
 		//TODO: just return this version for now; get from flash
 		return REVISION.Split()[1];
 	  } else if (sensor == "data") {
-		return getData(position);
+		//return getData(position);
 	  } else if (sensor == "info") {
-		return getInfo(position);
+		return getInfo();
 	  } else if (sensor == "name") {
 		string c = "Scribby";
 		//c = GetBytes(Scribbler.GET_NAME1, 8);
@@ -260,13 +263,13 @@ public static class Myro {
 		//c = string.join([chr(x) for x in c if "0" <= chr(x) <= "z"], '').strip();
 		return c;
 	  } else if (sensor == "volume") {
-		return _volume;
+		return volume;
 	  } else if (sensor == "battery") {
-		return getBattery();
+		//return getBattery();
 	  } else if (sensor == "blob") {
-		return getBlob();
+		//return getBlob();
 	  } else {
-		if (len(position) == 0) {
+		if (position.Length == 0) {
 		  if (sensor == "light") {
 			return GetWord(Scribbler.GET_LIGHT_ALL, 6);
 		  } else if (sensor == "line") {
@@ -274,64 +277,76 @@ public static class Myro {
 		  } else if (sensor == "ir") {
 			return GetBytes(Scribbler.GET_IR_ALL, 2);
 		  } else if (sensor == "obstacle") {
-			return new List(getObstacle("left"), getObstacle("center"), getObstacle("right"));
+			return list(getObstacle("left"), 
+				getObstacle("center"), 
+				getObstacle("right"));
 		  } else if (sensor == "bright") {
-			return new List(getBright("left"), getBright("middle"), getBright("right"));
+			return list(getBright("left"), 
+				getBright("middle"), 
+				getBright("right"));
 		  } else if (sensor == "all") {
-			retval = GetBytes(Scribbler.GET_ALL, 11); // returned as bytes
-			_lastSensors = retval; // single bit sensors
+			lastSensors = GetBytes(Scribbler.GET_ALL, 11); 
+			// returned as bytes
+			// single bit sensors
 			if (dongle == null) {
 			  return dict(
-				  "light", new List(retval[2] << 8 | retval[3], retval[4] << 8 | retval[5], 
-					  retval[6] << 8 | retval[7]),
-				  "ir", new List(retval[0], retval[1]), 
-				  "line", new List(retval[8], retval[9]), 
-				  "stall", retval[10]);
+				  "light", list(lastSensors[2] << 8 | lastSensors[3], 
+					  lastSensors[4] << 8 | lastSensors[5], 
+					  lastSensors[6] << 8 | lastSensors[7]),
+				  "ir", list(lastSensors[0], lastSensors[1]), 
+				  "line", list(lastSensors[8], lastSensors[9]), 
+				  "stall", lastSensors[10]);
 			} else {
 			  return dict(
-				  "light", new List(retval[2] << 8 | retval[3], retval[4] << 8 | retval[5], 
-					  retval[6] << 8 | retval[7]),
-				  "ir", new List(retval[0], retval[1]), 
-				  "line", new List(retval[8], retval[9]), 
-				  "stall", retval[10],
-				  "obstacle", new List(getObstacle("left"), getObstacle("center"), getObstacle("right")),
-				  "bright", new List(getBright("left"), getBright("middle"), getBright("right")),
+				  "light", list(lastSensors[2] << 8 | lastSensors[3], 
+					  lastSensors[4] << 8 | lastSensors[5], 
+					  lastSensors[6] << 8 | lastSensors[7]),
+				  "ir", list(lastSensors[0], lastSensors[1]), 
+				  "line", list(lastSensors[8], lastSensors[9]), 
+				  "stall", lastSensors[10],
+				  "obstacle", list(getObstacle("left"), 
+					  getObstacle("center"), 
+					  getObstacle("right")),
+				  "bright", list(getBright("left"), 
+					  getBright("middle"), 
+					  getBright("right")),
 				  "blob", getBlob(),
 				  "battery", getBattery()
 						  );
 			}
 		  } else {
-			throw new Exception("invalid sensor name: '%s'" % sensor);
+			throw new Exception(String.Format("invalid sensor name: '{0}'", 
+					sensor));
 		  }
 		}
-		List retvals = new List();
-		foreach (int pos in position) {
+		List retvals = list();
+		foreach (object pos in position) {
 		  if (sensor == "light") {
-			values = GetWord(Scribbler.GET_LIGHT_ALL, 6);
+			List values = GetWord(Scribbler.GET_LIGHT_ALL, 6);
 			if (Contains(pos, 0, "left")) {
-			  retvals.Append(values[0]);
+			  retvals.append(values[0]);
 			} else if (Contains(pos, 1, "middle", "center")) {
-			  retvals.Append(values[1]);
+			  retvals.append(values[1]);
 			} else if (Contains(pos, 2, "right")) {
-			  retvals.Append(values[2]);
-			} else if (pos == None | pos == "all") {
-			  retvals.Append(values);
+			  retvals.append(values[2]);
+			} else if (pos == null | (string)pos == "all") {
+			  retvals.append(values);
 			}
 		  } else if (sensor == "ir") {
-			values = GetBytes(Scribbler.GET_IR_ALL, 2);
+			byte [] values = GetBytes(Scribbler.GET_IR_ALL, 2);
 			if (Contains(pos, 0, "left")) {
-			  retvals.Append(values[0]);
+			  retvals.append(values[0]);
 			} else if (Contains(pos, 1, "right")) {
-			  retvals.Append(values[1]);
-			} else if (pos == None | pos == "all") {
-			  retvals.Append(values);
+			  retvals.append(values[1]);
+			} else if (pos == null | (string)pos == "all") {
+			  retvals.append(values);
 			}
 		  } else if (sensor == "line") {
-			values = GetBytes(Scribbler.GET_LINE_ALL, 2);
+			byte [] values = GetBytes(Scribbler.GET_LINE_ALL, 2);
 			if (Contains(pos, 0, "left")) {
-			  retvals.Append(values[0]);
+			  retvals.append(values[0]);
 			} else if (Contains(pos, 1, "right")) {
-			  retvals.Append(values[1]);
+			  retvals.append(values[1]);
 			}
 		  } else if (sensor == "obstacle") {
 			return getObstacle(pos);
@@ -340,29 +355,31 @@ public static class Myro {
 		  } else if (sensor == "picture") {
 			return takePicture(pos);
 		  } else {
-			throw new Exception("invalid sensor name: '%s'" % sensor);
+			throw new Exception(String.Format("invalid sensor name: '{0}'",
+					sensor));
 		  }
 		}
-		if (len(retvals) == 0) {
-		  return None;
-		} else if (len(retvals) == 1) {
+		if (retvals.__len__() == 0) {
+		  return null;
+		} else if (retvals.__len__() == 1) {
 		  return retvals[0];
 		} else {
 		  return retvals;
 		}
 	  }
+	  return null;
 	}
 	/*
         sensor = sensor.lower()
         if sensor == "config":
-            if dongle == None:
+            if dongle == null:
                 return {"ir": 2, "line": 2, "stall": 1, "light": 3}
             else:
                 return {"ir": 2, "line": 2, "stall": 1, "light": 3,
                         "battery": 1, "obstacle": 3, "bright": 3}
         elif sensor == "stall":
             retval = GetBytes(Scribbler.GET_ALL, 11) // returned as bytes
-            _lastSensors = retval // single bit sensors
+            lastSensors = retval // single bit sensors
             return retval[10]
         elif sensor == "forwardness":
             if read_mem(ser, 0, 0) != 0xDF:
@@ -391,13 +408,13 @@ public static class Myro {
             c = string.join([chr(x) for x in c if "0" <= chr(x) <= "z"], '').strip()
             return c
         elif sensor == "volume":
-            return _volume
+            return volume
         elif sensor == "battery":
             return getBattery()
         elif sensor == "blob":
             return getBlob()
         else:
-            if len(position) == 0:
+            if position.Length == 0:
                 if sensor == "light":
                     return GetWord(Scribbler.GET_LIGHT_ALL, 6)
                 elif sensor == "line":
@@ -410,8 +427,8 @@ public static class Myro {
                     return [getBright("left"), getBright("middle"), getBright("right") ]
                 elif sensor == "all":
                     retval = GetBytes(Scribbler.GET_ALL, 11) // returned as bytes
-                    _lastSensors = retval // single bit sensors
-                    if dongle == None:
+                    lastSensors = retval // single bit sensors
+                    if dongle == null:
                         return {"light": [retval[2] << 8 | retval[3], retval[4] << 8 | retval[5], retval[6] << 8 | retval[7]],
                                 "ir": [retval[0], retval[1]], "line": [retval[8], retval[9]], "stall": retval[10]}
                     else:
@@ -434,7 +451,7 @@ public static class Myro {
                         retvals.append(values[1])
                     elif pos in [2, "right"]:
                         retvals.append(values[2])
-                    elif pos == None | pos == "all":
+                    elif pos == null | pos == "all":
                         retvals.append(values)
                 elif sensor == "ir":
                     values = GetBytes(Scribbler.GET_IR_ALL, 2)                    
@@ -442,7 +459,7 @@ public static class Myro {
                         retvals.append(values[0])
                     elif pos in [1, "right"]:
                         retvals.append(values[1])
-                    elif pos == None | pos == "all":
+                    elif pos == null | pos == "all":
                         retvals.append(values)
                 elif sensor == "line":
                     values = GetBytes(Scribbler.GET_LINE_ALL, 2)
@@ -458,9 +475,9 @@ public static class Myro {
                     return takePicture(pos)
                 else:
                     raise ("invalid sensor name: '%s'" % sensor)
-            if len(retvals) == 0:
-                return None
-            elif len(retvals) == 1:
+            if retvals.Length == 0:
+                return null;
+            elif retvals.Length == 1:
                 return retvals[0]
             else:
                 return retvals
@@ -477,6 +494,26 @@ public static class Myro {
             else:
                 return retval
 	*/
+
+	public int getObstacle(object position) {
+	  return 0;
+	}
+
+	public int getBright(object position) {
+	  return 0;
+	}
+
+	public int getBlob() {
+	  return 0;
+	}
+
+	public int getBattery() {
+	  return 0;
+	}
+
+	public int takePicture(object position) {
+	  return 0;
+	}
 
 	public PythonDictionary getInfo() {
 	  PythonDictionary retDict = new PythonDictionary();
@@ -547,7 +584,9 @@ public static class Myro {
 	
 	public byte [] read(int bytes) {
 	  byte[] buffer = new byte[bytes];
-	  len = serial.Read(buffer, 0, (int)buffer.Length);
+	  int len = serial.Read(buffer, 0, (int)buffer.Length);
+	  if (len != bytes) 
+		throw new Exception("wrong number of bytes read");
 	  //sp.BaseStream.Read(buffer, 0, (int)buffer.Length);
 	  return buffer;
 	}
@@ -569,6 +608,18 @@ public static class Myro {
 	  return rxString;
 	}
 	
+	public void write_2byte(int value) {
+	  write((char)((value >> 8) & 0xFF));
+	  write((char)(value & 0xFF));
+	}
+
+	public int read_mem(int page, int offset) {
+	  write((char)Scribbler.GET_SERIAL_MEM);
+	  write_2byte(page);
+	  write_2byte(offset);
+	  return read(1)[0];
+	}
+
 	public bool write(string data) {
 	  serial.Write(data);
 	  return true;		
@@ -576,7 +627,7 @@ public static class Myro {
 
 	public bool write(params int [] data) {
 	  foreach (int datum in data) {
-		serial.Write((char)datum);
+		serial.Write(String.Format("{0}", (char)datum));
 	  }
 	  return true;		
 	}
