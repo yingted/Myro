@@ -2,12 +2,14 @@ using System;
 using System.IO.Ports;
 using System.Threading;
 using IronPython.Runtime;
+using System.Collections.Generic; // IList
 
 public static class Myro {
-  public static _Robot robot;
+  public static Robot robot;
+  public static string REVISION = "$Revision: $";
   
   public static void init(string port, int baud=38400) {
-	robot = new _Scribbler(port, baud);
+	robot = new Scribbler(port, baud);
   }
   
   public static void forward(float power=1, float? time=null) {
@@ -18,18 +20,23 @@ public static class Myro {
 	robot.backward(power, time);
   }
 
-  public class _Robot {
+  public class Robot {
 	public virtual void forward(float power, float? time) {
 	}
 	
 	public virtual void backward(float power, float? time) {
 	}
   }
+
+  public static bool Contains(object item, params object[] items) {
+	return ((IList<object>)items).Contains(item);
+  }
   
   [Serializable()]
-  public class _Scribbler: _Robot {
-	string _port;
-	SerialPort _serial;
+  public class Scribbler: Robot {
+	public string port;
+	public SerialPort serial;
+	public string dongle;
 
     static int SOFT_RESET=33;
     static int GET_ALL=65 ;
@@ -144,52 +151,353 @@ public static class Myro {
 	static int CAM_COMB_EXPOSURE_CONTROL_ON= (CAM_COMB_DEFAULT |  (1 << 0));
 	static int CAM_COMB_EXPOSURE_CONTROL_OFF=(CAM_COMB_DEFAULT & ~(1 << 0));
 
-	public _Scribbler(string port, int baud) {
-	  _port = port;
-	  _serial = new SerialPort(port, baud);
-	  _serial.Open();
+	public Scribbler(string port, int baud) {
+	  this.port = port;
+	  serial = new SerialPort(this.port, baud);
+	  serial.ReadTimeout = 100; // milliseconds
+	  serial.Open();
 	  PythonDictionary info = getInfo();
 	  if (info.Contains("fluke")) {
+		dongle = (string)info["fluke"];
 		Console.WriteLine("You are using fluke firmware {0}", info["fluke"]);
 	  } else if (info.Contains("dongle")) {
+		dongle = (string)info["dongle"];
 		Console.WriteLine("You are using fluke firmware {0}", info["dongle"]);
+	  } else {
+		dongle = null;
+		Console.WriteLine("You are using the scribbler without the fluke");
 	  }
 	}
 
-	public void manual_flush() {
-	  int old = _serial.ReadTimeout; // milliseconds
-	  //old = self.ser.timeout
-	  //self.ser.setTimeout(.5)
-	  _serial.ReadTimeout = 500; // milliseconds
-	  string l = "a";
-	  int count = 0;
-	  while (l.Length != 0 & count < 50000) {
-		l = read();
-		count += l.Length;
+	public PythonDictionary dict(params object [] list) {
+	  // make a dictionary from a list
+	  PythonDictionary retval = new PythonDictionary();
+	  for (int i = 0; i < list.Length; i += 2) {
+		retval[list[i]] = list[i+1];
 	  }
-	  _serial.ReadTimeout = old;
+	  return retval;
 	}
+
+	public PythonDictionary list(params object [] items) {
+	  // make a list from an array
+	  List retval = new List();
+	  for (int i = 0; i < items.Length; i++) {
+		retval.append(list[i]);
+	  }
+	  return retval;
+	}
+
+    public byte [] GetBytes(int value, int bytes=1) {
+	  byte [] retval = null;
+	  try {
+		//lock.acquire();
+		write(value);
+		read(Scribbler.PACKET_LENGTH); // read the echo
+		retval = read(bytes);
+	  } finally {
+		//lock.release();
+	  }
+	  return retval;
+	}
+
+    public List GetWord(int value, int bytes=1) {
+	  List retval = new List();
+	  try {
+		//lock.acquire();
+		write(value);
+		read(Scribbler.PACKET_LENGTH); // read the echo
+		byte [] retvalBytes = read(bytes);
+		for (int p = 0; p < retvalBytes.Length; p += 2) {
+		  retval.append(retvalBytes[p] << 8 | retvalBytes[p + 1]);
+		}
+	  } finally {
+		// lock.release();
+	  }
+	  return retval;
+	}
+
+    public object Get(string sensor="all", params int [] position) {
+	  object retval = null;
+	  sensor = sensor.ToLower();
+	  if (sensor == "config") {
+		if (dongle == null) {
+		  return dict("ir", 2, "line", 2, "stall", 1, "light", 3);
+		} else {
+		  return dict("ir", 2, "line", 2, "stall", 1, "light", 3,
+			  "battery", 1, "obstacle", 3, "bright", 3);
+		}
+	  } else if (sensor == "stall") {
+		retval = GetBytes(Scribbler.GET_ALL, 11); // returned as bytes
+		_lastSensors = retval; // single bit sensors
+		return retval[10];
+	  } else if (sensor == "forwardness") {
+		if (read_mem(ser, 0, 0) != 0xDF) {
+		  retval = "fluke-forward";
+		} else {
+		  retval = "scribbler-forward";
+		}
+		return retval;
+	  } else if (sensor == "startsong") {
+		//TODO: need to get this from flash memory
+		return "tada";
+	  } else if (sensor == "version") {
+		//TODO: just return this version for now; get from flash
+		return REVISION.Split()[1];
+	  } else if (sensor == "data") {
+		return getData(position);
+	  } else if (sensor == "info") {
+		return getInfo(position);
+	  } else if (sensor == "name") {
+		string c = "Scribby";
+		//c = GetBytes(Scribbler.GET_NAME1, 8);
+		//c += GetBytes(Scribbler.GET_NAME2, 8);
+		//c = string.join([chr(x) for x in c if "0" <= chr(x) <= "z"], '').strip();
+		return c;
+	  } else if (sensor == "password") {
+		string c = "Scribby";
+		//c = GetBytes(Scribbler.GET_PASS1, 8);
+		//c += GetBytes(Scribbler.GET_PASS2, 8);
+		//c = string.join([chr(x) for x in c if "0" <= chr(x) <= "z"], '').strip();
+		return c;
+	  } else if (sensor == "volume") {
+		return _volume;
+	  } else if (sensor == "battery") {
+		return getBattery();
+	  } else if (sensor == "blob") {
+		return getBlob();
+	  } else {
+		if (len(position) == 0) {
+		  if (sensor == "light") {
+			return GetWord(Scribbler.GET_LIGHT_ALL, 6);
+		  } else if (sensor == "line") {
+			return GetBytes(Scribbler.GET_LINE_ALL, 2);
+		  } else if (sensor == "ir") {
+			return GetBytes(Scribbler.GET_IR_ALL, 2);
+		  } else if (sensor == "obstacle") {
+			return new List(getObstacle("left"), getObstacle("center"), getObstacle("right"));
+		  } else if (sensor == "bright") {
+			return new List(getBright("left"), getBright("middle"), getBright("right"));
+		  } else if (sensor == "all") {
+			retval = GetBytes(Scribbler.GET_ALL, 11); // returned as bytes
+			_lastSensors = retval; // single bit sensors
+			if (dongle == null) {
+			  return dict(
+				  "light", new List(retval[2] << 8 | retval[3], retval[4] << 8 | retval[5], 
+					  retval[6] << 8 | retval[7]),
+				  "ir", new List(retval[0], retval[1]), 
+				  "line", new List(retval[8], retval[9]), 
+				  "stall", retval[10]);
+			} else {
+			  return dict(
+				  "light", new List(retval[2] << 8 | retval[3], retval[4] << 8 | retval[5], 
+					  retval[6] << 8 | retval[7]),
+				  "ir", new List(retval[0], retval[1]), 
+				  "line", new List(retval[8], retval[9]), 
+				  "stall", retval[10],
+				  "obstacle", new List(getObstacle("left"), getObstacle("center"), getObstacle("right")),
+				  "bright", new List(getBright("left"), getBright("middle"), getBright("right")),
+				  "blob", getBlob(),
+				  "battery", getBattery()
+						  );
+			}
+		  } else {
+			throw new Exception("invalid sensor name: '%s'" % sensor);
+		  }
+		}
+		List retvals = new List();
+		foreach (int pos in position) {
+		  if (sensor == "light") {
+			values = GetWord(Scribbler.GET_LIGHT_ALL, 6);
+			if (Contains(pos, 0, "left")) {
+			  retvals.Append(values[0]);
+			} else if (Contains(pos, 1, "middle", "center")) {
+			  retvals.Append(values[1]);
+			} else if (Contains(pos, 2, "right")) {
+			  retvals.Append(values[2]);
+			} else if (pos == None | pos == "all") {
+			  retvals.Append(values);
+			}
+		  } else if (sensor == "ir") {
+			values = GetBytes(Scribbler.GET_IR_ALL, 2);
+			if (Contains(pos, 0, "left")) {
+			  retvals.Append(values[0]);
+			} else if (Contains(pos, 1, "right")) {
+			  retvals.Append(values[1]);
+			} else if (pos == None | pos == "all") {
+			  retvals.Append(values);
+			}
+		  } else if (sensor == "line") {
+			values = GetBytes(Scribbler.GET_LINE_ALL, 2);
+			if (Contains(pos, 0, "left")) {
+			  retvals.Append(values[0]);
+			} else if (Contains(pos, 1, "right")) {
+			  retvals.Append(values[1]);
+			}
+		  } else if (sensor == "obstacle") {
+			return getObstacle(pos);
+		  } else if (sensor == "bright") {
+			return getBright(pos);
+		  } else if (sensor == "picture") {
+			return takePicture(pos);
+		  } else {
+			throw new Exception("invalid sensor name: '%s'" % sensor);
+		  }
+		}
+		if (len(retvals) == 0) {
+		  return None;
+		} else if (len(retvals) == 1) {
+		  return retvals[0];
+		} else {
+		  return retvals;
+		}
+	  }
+	}
+	/*
+        sensor = sensor.lower()
+        if sensor == "config":
+            if dongle == None:
+                return {"ir": 2, "line": 2, "stall": 1, "light": 3}
+            else:
+                return {"ir": 2, "line": 2, "stall": 1, "light": 3,
+                        "battery": 1, "obstacle": 3, "bright": 3}
+        elif sensor == "stall":
+            retval = GetBytes(Scribbler.GET_ALL, 11) // returned as bytes
+            _lastSensors = retval // single bit sensors
+            return retval[10]
+        elif sensor == "forwardness":
+            if read_mem(ser, 0, 0) != 0xDF:
+                retval = "fluke-forward"
+            else:
+                retval = "scribbler-forward"
+            return retval
+        elif sensor == "startsong":
+            //TODO: need to get this from flash memory
+            return "tada"
+        elif sensor == "version":
+            //TODO: just return this version for now; get from flash
+            return __REVISION__.split()[1]
+        elif sensor == "data":
+            return getData(*position)
+        elif sensor == "info":
+            return getInfo(*position)
+        elif sensor == "name":
+            c = GetBytes(Scribbler.GET_NAME1, 8)
+            c += GetBytes(Scribbler.GET_NAME2, 8)
+            c = string.join([chr(x) for x in c if "0" <= chr(x) <= "z"], '').strip()
+            return c
+        elif sensor == "password":
+            c = GetBytes(Scribbler.GET_PASS1, 8)
+            c += GetBytes(Scribbler.GET_PASS2, 8)
+            c = string.join([chr(x) for x in c if "0" <= chr(x) <= "z"], '').strip()
+            return c
+        elif sensor == "volume":
+            return _volume
+        elif sensor == "battery":
+            return getBattery()
+        elif sensor == "blob":
+            return getBlob()
+        else:
+            if len(position) == 0:
+                if sensor == "light":
+                    return GetWord(Scribbler.GET_LIGHT_ALL, 6)
+                elif sensor == "line":
+                    return GetBytes(Scribbler.GET_LINE_ALL, 2)
+                elif sensor == "ir":
+                    return GetBytes(Scribbler.GET_IR_ALL, 2)
+                elif sensor == "obstacle":
+                    return [getObstacle("left"), getObstacle("center"), getObstacle("right")]
+                elif sensor == "bright":
+                    return [getBright("left"), getBright("middle"), getBright("right") ]
+                elif sensor == "all":
+                    retval = GetBytes(Scribbler.GET_ALL, 11) // returned as bytes
+                    _lastSensors = retval // single bit sensors
+                    if dongle == None:
+                        return {"light": [retval[2] << 8 | retval[3], retval[4] << 8 | retval[5], retval[6] << 8 | retval[7]],
+                                "ir": [retval[0], retval[1]], "line": [retval[8], retval[9]], "stall": retval[10]}
+                    else:
+                        return {"light": [retval[2] << 8 | retval[3], retval[4] << 8 | retval[5], retval[6] << 8 | retval[7]],
+                                "ir": [retval[0], retval[1]], "line": [retval[8], retval[9]], "stall": retval[10],
+                                "obstacle": [getObstacle("left"), getObstacle("center"), getObstacle("right")],
+                                "bright": [getBright("left"), getBright("middle"), getBright("right")],
+                                "blob": getBlob(),
+                                "battery": getBattery(),
+                                }
+                else:                
+                    raise ("invalid sensor name: '%s'" % sensor)
+            retvals = []
+            for pos in position:
+                if sensor == "light":
+                    values = GetWord(Scribbler.GET_LIGHT_ALL, 6)
+                    if pos in [0, "left"]:
+                        retvals.append(values[0])
+                    elif pos in [1, "middle", "center"]:
+                        retvals.append(values[1])
+                    elif pos in [2, "right"]:
+                        retvals.append(values[2])
+                    elif pos == None | pos == "all":
+                        retvals.append(values)
+                elif sensor == "ir":
+                    values = GetBytes(Scribbler.GET_IR_ALL, 2)                    
+                    if pos in [0, "left"]:
+                        retvals.append(values[0])
+                    elif pos in [1, "right"]:
+                        retvals.append(values[1])
+                    elif pos == None | pos == "all":
+                        retvals.append(values)
+                elif sensor == "line":
+                    values = GetBytes(Scribbler.GET_LINE_ALL, 2)
+                    if pos in [0, "left"]:
+                        retvals.append(values[0])
+                    elif pos in [1, "right"]:
+                        retvals.append(values[1])
+                elif sensor == "obstacle":
+                    return getObstacle(pos)
+                elif sensor == "bright":
+                    return getBright(pos)
+                elif sensor == "picture":
+                    return takePicture(pos)
+                else:
+                    raise ("invalid sensor name: '%s'" % sensor)
+            if len(retvals) == 0:
+                return None
+            elif len(retvals) == 1:
+                return retvals[0]
+            else:
+                return retvals
+
+    def getData(self, *position):
+        if len(position) == 0: 
+            return GetBytes(Scribbler.GET_DATA, 8)
+        else:   
+            retval = []               
+            for p in position:
+                retval.append(GetBytes(Scribbler.GET_DATA, 8)[p])
+            if len(retval) == 1:
+                return retval[0]
+            else:
+                return retval
+	*/
 
 	public PythonDictionary getInfo() {
 	  PythonDictionary retDict = new PythonDictionary();
-	  int old = _serial.ReadTimeout; // milliseconds
+	  int old = serial.ReadTimeout; // milliseconds
 	  string retval;
-	  // _serial.setTimeout(4)
-	  _serial.ReadTimeout = 4000; // milliseconds
+	  // serial.setTimeout(4)
+	  serial.ReadTimeout = 4000; // milliseconds
         
 	  manual_flush();
 	  // have to do this twice since sometime the first echo isn't
 	  // echoed correctly (spaces) from the scribbler
 
-	  _serial.Write(String.Format("{0}        ", (char)_Scribbler.GET_INFO));
-	  retval = _serial.ReadLine();
+	  serial.Write(String.Format("{0}        ", (char)Scribbler.GET_INFO));
+	  retval = serial.ReadLine();
 	  //#print "Got", retval
 
 	  Thread.Sleep(100); 
 	  //time.sleep(.1)
         
-	  _serial.Write(String.Format("{0}        ", (char)_Scribbler.GET_INFO));
-	  retval = _serial.ReadLine();
+	  serial.Write(String.Format("{0}        ", (char)Scribbler.GET_INFO));
+	  retval = serial.ReadLine();
 	  //#print "Got", retval
         
 	  //# remove echoes
@@ -205,7 +513,7 @@ public static class Myro {
 		retval = retval.Substring(1);
 	  }
 
-	  _serial.ReadTimeout = old;
+	  serial.ReadTimeout = old;
 
 	  foreach (string pair in retval.Split(',')) {
 		if (pair.Contains(":")) {
@@ -237,6 +545,13 @@ public static class Myro {
 	  // deal with null time
 	}
 	
+	public byte [] read(int bytes) {
+	  byte[] buffer = new byte[bytes];
+	  len = serial.Read(buffer, 0, (int)buffer.Length);
+	  //sp.BaseStream.Read(buffer, 0, (int)buffer.Length);
+	  return buffer;
+	}
+
 	public string read() {
 	  //byte[] buffer = new byte[256];
 	  //len = _serial.Read(buffer, 0, (int)buffer.Length);
@@ -244,10 +559,10 @@ public static class Myro {
 	  byte tmpByte;
 	  string rxString = "";
 	  try {
-		tmpByte = (byte) _serial.ReadByte();
+		tmpByte = (byte) serial.ReadByte();
 		while (tmpByte != 255) {
 		  rxString += ((char) tmpByte);
-		  tmpByte = (byte) _serial.ReadByte();			
+		  tmpByte = (byte) serial.ReadByte();			
 		}
 	  } catch {
 	  }
@@ -255,9 +570,31 @@ public static class Myro {
 	}
 	
 	public bool write(string data) {
-	  _serial.Write(data);
+	  serial.Write(data);
 	  return true;		
 	}
+
+	public bool write(params int [] data) {
+	  foreach (int datum in data) {
+		serial.Write((char)datum);
+	  }
+	  return true;		
+	}
+
+	public void manual_flush() {
+	  int old = serial.ReadTimeout; // milliseconds
+	  //old = ser.timeout
+	  //ser.setTimeout(.5)
+	  serial.ReadTimeout = 500; // milliseconds
+	  string l = "a";
+	  int count = 0;
+	  while (l.Length != 0 & count < 50000) {
+		l = read();
+		count += l.Length;
+	  }
+	  serial.ReadTimeout = old;
+	}
+
   }
 }
 
