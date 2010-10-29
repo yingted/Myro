@@ -1,0 +1,14 @@
+#BlueJ class context
+comment0.params=w\ h
+comment0.target=MyroColorImage(int,\ int)
+comment1.params=filename
+comment1.target=MyroColorImage(java.lang.String)
+comment2.params=x\ y
+comment2.target=java.awt.Color\ get(int,\ int)
+comment3.params=x\ y
+comment3.target=int\ getGray(int,\ int)
+comment4.params=x\ y\ c
+comment4.target=void\ set(int,\ int,\ java.awt.Color)
+comment5.params=x\ y\ g
+comment5.target=void\ setGray(int,\ int,\ int)
+numComments=6

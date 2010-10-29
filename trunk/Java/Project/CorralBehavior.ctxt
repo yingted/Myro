@@ -1,0 +1,14 @@
+#BlueJ class context
+comment0.params=portName
+comment0.target=CorralBehavior(java.lang.String)
+comment1.params=output\ translate\ rotate
+comment1.target=void\ cruise(boolean,\ double,\ double)
+comment2.params=output\ translate\ rotate
+comment2.target=void\ avoid(boolean,\ double,\ double)
+comment3.params=output\ translate\ rotate
+comment3.target=void\ seekLight(boolean,\ double,\ double)
+comment4.params=translate\ rotate
+comment4.target=void\ arbitrate(double,\ double)
+comment5.params=
+comment5.target=void\ doIt()
+numComments=6
