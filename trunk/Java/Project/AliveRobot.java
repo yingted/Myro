@@ -2,20 +2,16 @@ import Myro.Scribbler;
 
 public class AliveRobot
 {
-    Scribbler robot;
-
-    AliveRobot(String portName)
+    public static void main( String[] args )
     {
-        robot = new Scribbler(portName);
-    }
+        Scribbler robot;
 
-    public void doIt()
-    {
+        robot = new Scribbler("/dev/rfcomm0");
         int light;
         int ambient;
-        
+
         ambient = robot.getLight(Scribbler.SENSOR_LIGHT_CENTER);
-        
+
         while( true )
         {
             light = robot.getLight(Scribbler.SENSOR_LIGHT_CENTER);
@@ -23,12 +19,12 @@ public class AliveRobot
         }
     }
 
-    private double normalize( int v, int ambient )
+    private static double normalize( int v, int ambient )
     {
         if( v > ambient )
             v = ambient;
-            
-            return 1.0 - (double)v / (double)ambient;
+
+        return 1.0 - (double)v / (double)ambient;
     }
 
 }

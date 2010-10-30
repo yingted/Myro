@@ -2,18 +2,14 @@ import Myro.*;
 
 public class AggressiveRobot
 {
-    Scribbler robot;
-
-    AggressiveRobot(String portName)
+    public static void main( String[] args )
     {
-        robot = new Scribbler(portName);
-    }
+        Scribbler robot;
 
-    public void doIt()
-    {
+        robot = new Scribbler("/dev/rfcomm0");
         int leftLight, rightLight;
         int leftAmbient, rightAmbient;
-        
+
         leftAmbient = robot.getLight(Scribbler.SENSOR_LIGHT_LEFT);
         rightAmbient = robot.getLight(Scribbler.SENSOR_LIGHT_RIGHT);
         while( true )
@@ -24,12 +20,12 @@ public class AggressiveRobot
         }
     }
 
-    private double normalize( int v, int ambient )
+    private static double normalize( int v, int ambient )
     {
         if( v > ambient )
             v = ambient;
-            
-            return 1.0 - (double)v / (double)ambient;
+
+        return 1.0 - (double)v / (double)ambient;
     }
 
 }

@@ -150,56 +150,13 @@ public class Scribbler  {
      */
     public boolean connect( String portName )
     {
-        String portNameLower = portName.toLowerCase();   // ignore case when searching for port
-        boolean portFound=false;
-        //CommPortIdentifier portId=null;
-        //CommPortIdentifier saveportId;
-        //Enumeration        portList;
-
-        DecimalFormat myFormatter = new DecimalFormat("0.0000");  // only for debugging to print time
-        String output;
-
         // close the connection if it is currently opened
         if( _scribblerConnected || _flukeConnected )
             close();
 
-        // This should make things go more quickly
-        //System.setProperty("scribbler.io.rxtx.SerialPorts", "/dev/rfcomm0");
-
-        // parse ports, looking for the specified port
-
-        //         System.out.println("About to get available ports.  Time is now " + myFormatter.format(System.currentTimeMillis()/1000.0));
-        //         portList = CommPortIdentifier.getPortIdentifiers();
-        // 
-        //         // Let's try sleeping to see if this helps with fluke conenctions
-        //         System.out.println("About to sleep for a bit.  Time is now " + myFormatter.format(System.currentTimeMillis()/1000.0));
-        //         try {
-        //             Thread.sleep(500);
-        //         } catch (InterruptedException e) {};
-        //         System.out.println("Done sleeping.  Time is now " + myFormatter.format(System.currentTimeMillis()/1000.0));
-        // 
-        //         while (portList.hasMoreElements()) {
-        //             portId = (CommPortIdentifier) portList.nextElement();
-        //             System.out.println(portId.getName());
-        //             if (portId.getPortType() == CommPortIdentifier.PORT_SERIAL) {
-        //                 if (portId.getName().toLowerCase().equals(portNameLower)) {
-        //                     portFound = true;
-        //                     break;
-        //                 } 
-        //             } 
-        //         } 
-        // 
-        //         if (!portFound) {
-        //             System.out.println("port " + portName + " not found.");
-        //             return false;
-        //         } 
-
         // initalize serial port
-        //System.out.println("About to open the port.  Time is now " + myFormatter.format(System.currentTimeMillis()/1000.0));
         _serialPort = null;
         try {
-            // //             _serialPort = (SerialPort) portId.open("Scribbler", 2000);
-            //             _serialPort = (RXTXScribblerPort) portId.open("Scribbler", 2000);
             _serialPort = new RXTXScribblerPort( portName );
         } catch (PortInUseException e)
         {
@@ -212,7 +169,6 @@ public class Scribbler  {
             return false;
         }
 
-        //System.out.println("About to set port parameters.  Time is now " + myFormatter.format(System.currentTimeMillis()/1000.0));
         try {
             // set port parameters
             _serialPort.setSerialPortParams( 57600, RXTXScribblerPort.DATABITS_8, 
@@ -225,24 +181,10 @@ public class Scribbler  {
             return false;
         }
 
-        //System.out.println("Finished setting port parameters.  Time is now " + myFormatter.format(System.currentTimeMillis()/1000.0));
-        //try {
+        // get the input and output streams so we can access this port
         _inputStream = _serialPort.getInputStream();
-        //} catch (IOException e)
-        //         {
-        //             System.out.println("IOException");
-        //             return false;
-        //         }
-
-        //        try {
-        // get the outputstream
         _outputStream = _serialPort.getOutputStream();
-        //         } catch (IOException e)
-        //         {
-        //             System.out.println("IOException");
-        //             return false;
-        //         }
-
+        
         // flush any garbage left in input buffer
         _flushInput();
 

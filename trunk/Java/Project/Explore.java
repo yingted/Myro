@@ -2,17 +2,14 @@ import Myro.*;
 
 public class Explore
 {
-    Scribbler robot;
+    public static void main( String[] args )
+    {
+        Scribbler robot;
 
-    public Explore ()
-    {
         robot = new Scribbler("/dev/rfcomm1");
-    }
-    
-    public void doIt()
-    {
+
         robot.forward( 0.7 );
-        
+
         while( true )
         {
             if( robot.getStall() )

@@ -1,6 +1,4 @@
 #BlueJ class context
-comment0.params=
-comment0.target=Explore()
-comment1.params=
-comment1.target=void\ doIt()
-numComments=2
+comment0.params=args
+comment0.target=void\ main(java.lang.String[])
+numComments=1
