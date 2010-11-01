@@ -75,7 +75,7 @@ public class RXTXVersion
 	private static String Version;
 
 	static {
-		RXTXVersion.loadLibrary( "rxtxSerial" );
+		RXTXVersion.loadLibrary( "rxtxScribblerSerial" );
 		Version = "RXTX-2.2";
 	}
 	/**

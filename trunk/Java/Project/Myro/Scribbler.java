@@ -134,6 +134,19 @@ public class Scribbler  {
 
         _scribblerConnected = false;
         _flukeConnected = false;
+        _serialPort = null;
+
+        // print a warning if asserts are disabled
+        boolean testAssert = false;
+        assert testAssert=true;
+        if( !testAssert )
+        {
+            System.out.println("WARNING: asserts are disabled!  You might want to add:");
+            System.out.println("\"bluej.vm.args=-ea\" to your bluej.properties file to enable");
+            System.out.println("assertion checking.");
+        }
+
+        // try to connect to the robot
         connect( portName );
     }
 
@@ -184,7 +197,7 @@ public class Scribbler  {
         // get the input and output streams so we can access this port
         _inputStream = _serialPort.getInputStream();
         _outputStream = _serialPort.getOutputStream();
-        
+
         // flush any garbage left in input buffer
         _flushInput();
 
@@ -215,7 +228,7 @@ public class Scribbler  {
     {
         if( _scribblerConnected || _flukeConnected )
         {
-            // kill threads associated with this robot
+            // kill any threads associated with this robot
             if( currentSensesThread != null )
             {
                 currentSensesThread.interrupt();
@@ -245,11 +258,14 @@ public class Scribbler  {
             }
         }
 
+        // close the port if it's opened
         if( _serialPort != null )
             _serialPort.close();
 
+        // indicate that nothing is connected
         _scribblerConnected = false;
         _flukeConnected = false;
+        _serialPort = null;
     }
 
     /**
@@ -271,6 +287,19 @@ public class Scribbler  {
     public boolean flukeConnected()
     {
         return _flukeConnected;
+    }
+
+    /**
+     * Indicates whether the port connecting to the robot has been opened.  Note that it if true
+     * is returned it isn't necessarily know what kind of robot is connected (e.g., scribler or fluke);
+     * {@link #flukeConnected flukeConnected} or {@link #scribblerConnected scribblerConnected} should
+     * be used to determine this.
+     * 
+     * @return true iff the connection to the robot has been established.
+     */
+    public boolean portOpened()
+    {
+        return _serialPort != null;
     }
 
     /**
@@ -452,7 +481,7 @@ public class Scribbler  {
      * Returns the info string provided by the Scribbler.  The specific information contains such things as the 
      * firmware version, the type of robot (i.e., Scribbler) and the communication mode (e.g., Serial).
      * <p><p>
-     * <b>Precondition:</b> scribblerConnected or flukeConnected
+     * <b>Precondition:</b> portOpened
      * 
      * @return A String containing information about the connected robot, such as robot type (e.g., Scribbler),
      * firmware version number, and communication mode (e.g., Serial).
@@ -461,7 +490,7 @@ public class Scribbler  {
     {
         int[] info = _getLine( GET_INFO );
 
-        assert scribblerConnected() || flukeConnected() : "Neither Scribbler nore Fluke connected";
+        assert portOpened() : "The port is not opened";
 
         // create String from the data, using a temp byte array
         byte[] temp = new byte[ info.length ];
@@ -1357,9 +1386,9 @@ public class Scribbler  {
     //
     //---------------------------------------------------------------------------------------------
 
-    private InputStream         _inputStream;
+    private InputStream                             _inputStream;
     private scribbler.io.RXTXScribblerPort          _serialPort;
-    private OutputStream        _outputStream;
+    private OutputStream                            _outputStream;
 
     // bytecode constants
     // Scribbler codes
