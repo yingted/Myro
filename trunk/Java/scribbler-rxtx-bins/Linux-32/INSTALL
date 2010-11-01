@@ -1,0 +1,5 @@
+To install these binaries on linux:
+
+Copy librxtxScribblerSerial.so to (javahome)/jre/lib/i386
+Copy RXTXScribblerComm.jar to (javahome)/jre/lib/ext
+
