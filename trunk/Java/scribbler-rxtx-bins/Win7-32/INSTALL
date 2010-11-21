@@ -1,4 +1,0 @@
-To install these on a Win32 system:
-
-Copy RXTXScribblerComm.jar to (javahome)/jre/lib/ext
-Copy rxtxScribblerSerial.dll to (javahome)/jre/bin
