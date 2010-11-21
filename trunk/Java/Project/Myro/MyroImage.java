@@ -410,7 +410,7 @@ public abstract class MyroImage
     /**
      * Class that handles mouse events for the image window.
      */
-    private class imageMouseEventHandler extends MouseAdapter
+    private class imageMouseEventHandler implements MouseListener, MouseMotionListener
     {
         /**
          * When the mouse moves over the image display the pixel location and RGB color of the pixel.  Nothing
@@ -488,6 +488,14 @@ public abstract class MyroImage
                 repaint();
             }
         }
+
+        // methods that must be defined for interface MouseListener
+        public void mouseClicked( MouseEvent e )
+        {}
+
+        public void mouseEntered( MouseEvent e )
+        {}
+
     }
 
     /**

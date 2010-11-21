@@ -16,7 +16,7 @@ public class AggressiveRobot
         {
             leftLight = robot.getLight(Scribbler.SENSOR_LIGHT_LEFT);
             rightLight = robot.getLight(Scribbler.SENSOR_LIGHT_RIGHT);
-            robot.motors(normalize(rightLight,rightAmbient), normalize(leftLight,leftAmbient));
+            robot.motors( normalize(rightLight,rightAmbient), normalize(leftLight,leftAmbient) );
         }
     }
 

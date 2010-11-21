@@ -1873,21 +1873,21 @@ public class Scribbler  {
         }
 
         // print message if there are problems
-        if( !echoOK )
-        {
-            System.out.println("There seems to be problems with the echo :-(");
-            System.out.print("Expected:" );
-            for(int k=0; k< 9; k++ )
-                if( k < message.length )
-                    System.out.print( message[k] + " ");
-                else
-                    System.out.print( "0 ");
-            System.out.println();
-            System.out.print("Received:");
-            for( int k=0; k<echo.length; k++ )
-                System.out.print(echo[k] + " ");
-            System.out.println();
-        }
+//         if( !echoOK )
+//         {
+//             System.out.println("There seems to be problems with the echo :-(");
+//             System.out.print("Expected:" );
+//             for(int k=0; k< 9; k++ )
+//                 if( k < message.length )
+//                     System.out.print( message[k] + " ");
+//                 else
+//                     System.out.print( "0 ");
+//             System.out.println();
+//             System.out.print("Received:");
+//             for( int k=0; k<echo.length; k++ )
+//                 System.out.print(echo[k] + " ");
+//             System.out.println();
+//         }
 
         return echoOK;
     }
@@ -2557,7 +2557,7 @@ public class Scribbler  {
             }
         }
 
-        private class mouseEventHandler extends MouseAdapter
+        private class mouseEventHandler implements MouseListener, MouseMotionListener
         {
             public void mousePressed( MouseEvent e )
             {
@@ -2627,6 +2627,20 @@ public class Scribbler  {
 
             }
 
+            // methods required by MouseMotionListener
+            
+            public void mouseExited( MouseEvent e )
+            {}
+            
+            public void mouseEntered( MouseEvent e )
+            {}
+            
+            public void mouseClicked( MouseEvent e )
+            {}
+            
+            public void mouseMoved( MouseEvent e )
+            {}
+            
         }
     }
 }

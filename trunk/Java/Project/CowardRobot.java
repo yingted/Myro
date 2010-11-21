@@ -17,7 +17,7 @@ public class CowardRobot
         {
             leftLight = robot.getLight(Scribbler.SENSOR_LIGHT_LEFT);
             rightLight = robot.getLight(Scribbler.SENSOR_LIGHT_RIGHT);
-            robot.motors(normalize(leftLight,leftAmbient), normalize(rightLight,rightAmbient));
+            robot.motors( normalize(leftLight,leftAmbient), normalize(rightLight,rightAmbient));
         }
     }
 

@@ -18,7 +18,7 @@ public class LoveRobot
         {
             leftLight = robot.getLight(Scribbler.SENSOR_LIGHT_LEFT);
             rightLight = robot.getLight(Scribbler.SENSOR_LIGHT_RIGHT);
-            robot.motors(normalize(leftLight,leftAmbient), normalize(rightLight,rightAmbient));
+            robot.motors( -normalize(leftLight,leftAmbient), -normalize(rightLight,rightAmbient));
             //System.out.println("left="+normalize(leftLight,leftAmbient)+",right="+normalize(rightLight,rightAmbient));
         }
     }

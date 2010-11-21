@@ -99,12 +99,6 @@ typedef unsigned int    tcflag_t;
    interfaces.
 */
 
-struct timespec
-{
-	time_t	tv_sec;
-	long	tv_nsec;
-};
-
 #define NCCS 32
 struct termios
   {

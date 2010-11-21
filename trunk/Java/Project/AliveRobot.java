@@ -15,7 +15,7 @@ public class AliveRobot
         while( true )
         {
             light = robot.getLight(Scribbler.SENSOR_LIGHT_CENTER);
-            robot.forward(normalize(light,ambient));
+            robot.forward( -normalize(light,ambient) );
         }
     }
 

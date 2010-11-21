@@ -6,7 +6,7 @@ public class dance
     {
         Scribbler robot;
 
-        robot = new Scribbler("/dev/rfcomm1");
+        robot = new Scribbler("/dev/rfcomm0");
         
         robot.forward(1.0, 1.0);
         robot.turnRight(0.75, 2.0 );

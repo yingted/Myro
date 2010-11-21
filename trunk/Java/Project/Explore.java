@@ -6,7 +6,7 @@ public class Explore
     {
         Scribbler robot;
 
-        robot = new Scribbler("/dev/rfcomm1");
+        robot = new Scribbler("/dev/rfcomm0");
 
         robot.forward( 0.7 );
 
