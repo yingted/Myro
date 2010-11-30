@@ -5,7 +5,7 @@ Copy the following files to (javahome)/jre/lib/amd64
      libjinput-linux64.so
 
 Copy the following files to (javahome)/jre/lib/ext
-     RXTXScribblerComm.jar to (javahome)/jre/lib/ext
+     RXTXScribblerComm.jar
      jinput.jar
      jutils.jar
 
