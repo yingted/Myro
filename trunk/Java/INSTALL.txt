@@ -1,0 +1,17 @@
+Installing Myro-Java
+
+1) Install JDK (http://www.oracle.com/technetwork/java/javase/downloads/index.html)
+   MacOSX Note: JDK is on the System Installation Disc, under dev tools.  The
+   package is XCode.
+
+   Linux Note: on Linux systems openjdk is often installed, but this doesn't play
+   nicely with BlueJ, so installing Sun's JDK is necessary.
+
+
+2) Install BlueJ (http://www.bluej.org)
+   Note: On Linux systems be sure to select Sun's JDK, not openJDK, during BlueJ
+   installation.
+   
+3) Copy the .jar files and library files based on your system.  These files, 
+   along with instructions, are contained in the Binaries folder.
+ 

@@ -11,7 +11,7 @@ import javax.swing.*;
 import javax.swing.border.*;
 
 import scribbler.io.*; // for rxtxSerial library
-//import javax.comm.*;
+import net.java.games.input.*;  // JInput for gamepad
 
 /**
  * Class Scribbler defines methods to control and query a Scribbler robot.  The methods  defined follow
@@ -213,6 +213,8 @@ public class Scribbler  {
         //System.out.println( getName() + " is Ready!!" );
         System.out.println("Info=\"" + getInfo() + "\"" );
 
+        _connectedFrame = new connectedFrame( getInfo() );
+
         return true;
     }
 
@@ -256,6 +258,20 @@ public class Scribbler  {
                 //System.out.println("JoyStick thread has died.");
                 currentJoyStickThread = null;
             }
+
+            if( currentGamepadThread != null )
+            {
+                currentGamepadThread.interrupt();
+                try
+                {
+                    currentGamepadThread.join();
+                } catch (InterruptedException e)
+                {
+                    System.out.println("While waiting for gamepad to die, we were interrupted.");
+                }
+                //System.out.println("Gamepad thread has died.");
+                currentGamepadThread = null;
+            }
         }
 
         // close the port if it's opened
@@ -266,6 +282,11 @@ public class Scribbler  {
         _scribblerConnected = false;
         _flukeConnected = false;
         _serialPort = null;
+
+        // close the connected frame window if it exists
+        if( _connectedFrame != null )
+            _connectedFrame.setVisible( false );
+        _connectedFrame = null;
     }
 
     /**
@@ -725,6 +746,32 @@ public class Scribbler  {
         currentJoyStickThread = new Thread( new joyStickThread(this) );
         currentJoyStickThread.start();
         //currentJoyStickFrame = new joyStickFrame( this );
+    }
+
+    /**
+     * Opens a window that permits the user to control the movement of the Scribbler.  The window allows the user
+     * to control the Scribbler using a joystick-like interface, permitting forward, backward, right, and left
+     * movement.
+     * <p><p>
+     * Only one joystick window is permitted to be opened for a particular Scribbler; no action occurs if
+     * this method is invoked when a joystick window is already opened.  The window will stay opened until the user
+     * closes it (by clicking the window's close icon) or the {@link #close close} method is invoked.
+     * <p><p>
+     * <b>Precondition:</b> scribblerConnected
+     */
+    public void gamepad()
+    {
+        assert scribblerConnected() : "Scribbler not connected";
+
+        //can only have one joystick thread open for this robot
+        if( currentGamepadThread != null && currentGamepadThread.isAlive() )
+        {
+            return;
+        }
+
+        // create a thread for this joystick and start it
+        currentGamepadThread = new Thread( new gamepadThread(this) );
+        currentGamepadThread.start();
     }
 
     /**
@@ -1389,6 +1436,7 @@ public class Scribbler  {
     private InputStream                             _inputStream;
     private scribbler.io.RXTXScribblerPort          _serialPort;
     private OutputStream                            _outputStream;
+    private connectedFrame                          _connectedFrame;
 
     // bytecode constants
     // Scribbler codes
@@ -1508,6 +1556,7 @@ public class Scribbler  {
     private boolean _scribblerConnected = false;       // true=>robot is connected to a scribbler
     private Thread currentSensesThread;
     private Thread currentJoyStickThread;
+    private Thread currentGamepadThread;
 
     /**
      * Write a sequence of ints to the robot.  Note that the difference between _write and _writePadded
@@ -1873,21 +1922,21 @@ public class Scribbler  {
         }
 
         // print message if there are problems
-//         if( !echoOK )
-//         {
-//             System.out.println("There seems to be problems with the echo :-(");
-//             System.out.print("Expected:" );
-//             for(int k=0; k< 9; k++ )
-//                 if( k < message.length )
-//                     System.out.print( message[k] + " ");
-//                 else
-//                     System.out.print( "0 ");
-//             System.out.println();
-//             System.out.print("Received:");
-//             for( int k=0; k<echo.length; k++ )
-//                 System.out.print(echo[k] + " ");
-//             System.out.println();
-//         }
+        //         if( !echoOK )
+        //         {
+        //             System.out.println("There seems to be problems with the echo :-(");
+        //             System.out.print("Expected:" );
+        //             for(int k=0; k< 9; k++ )
+        //                 if( k < message.length )
+        //                     System.out.print( message[k] + " ");
+        //                 else
+        //                     System.out.print( "0 ");
+        //             System.out.println();
+        //             System.out.print("Received:");
+        //             for( int k=0; k<echo.length; k++ )
+        //                 System.out.print(echo[k] + " ");
+        //             System.out.println();
+        //         }
 
         return echoOK;
     }
@@ -2509,9 +2558,11 @@ public class Scribbler  {
 
         private class joyStickPanel extends JPanel
         {
-            public void paintChildren( Graphics g )
+            public void paintComponent( Graphics g )
             {
                 Graphics2D g2 = (Graphics2D) g;
+
+                super.paintComponent( g );
 
                 // draw axes
                 g2.setColor( Color.BLACK );
@@ -2536,7 +2587,7 @@ public class Scribbler  {
         {
             public void componentResized( ComponentEvent e)
             {
-                Component c = e.getComponent();
+                java.awt.Component c = e.getComponent();
                 panelWidth = c.getWidth();
                 panelHeight = c.getHeight();
                 panelHalfWidth = panelWidth / 2;
@@ -2628,19 +2679,313 @@ public class Scribbler  {
             }
 
             // methods required by MouseMotionListener
-            
+
             public void mouseExited( MouseEvent e )
             {}
-            
+
             public void mouseEntered( MouseEvent e )
             {}
-            
+
             public void mouseClicked( MouseEvent e )
             {}
-            
+
             public void mouseMoved( MouseEvent e )
             {}
-            
+
+        }
+    }
+
+    /**
+     * An instance of this class creates a gamepad window and a thread that uses mouse events to control the Scribbler.
+     * The thread will be killed (and the window closed) when the user clicks the window's close icon or the
+     * Scribbler's close method is invoked.
+     */
+    private class gamepadThread implements Runnable
+    {
+        private Scribbler robot;
+        boolean finished;
+        gamepadPanel panel;
+        int xPos, yPos;
+        int panelHeight, panelWidth;
+        int panelHalfHeight, panelHalfWidth;
+        JFrame frame;
+
+        Controller gamepad;
+        net.java.games.input.Component forwardButton, rotationButton;
+        net.java.games.input.Component[] button;
+
+        /**
+         * Create a window and set up a window listener (to handle the window close event), mouse listeners (to 
+         * handle mouse click and drag events), and a component listener (to handle window resize events).
+         */
+        public gamepadThread( Scribbler _robot )
+        {
+            Container frameContentPane;
+            robot = _robot;
+            finished = false;
+
+            // find the first gamepad
+            gamepad = null;
+            ControllerEnvironment ce = ControllerEnvironment.getDefaultEnvironment();
+            Controller[] cs = ce.getControllers();
+            for( int i=0; i<cs.length; i++ )
+            {
+                System.out.println(i + ": " +cs[i].getName() + ", " + cs[i].getType() );
+                if( gamepad == null && cs[i].getType() == Controller.Type.GAMEPAD )
+                {
+                    gamepad = cs[i];
+                }
+            }
+
+            // nothing to do if there aren't any gamepads
+            if( gamepad == null )
+            {
+                System.out.println("Apparently there are no gamepads connected to the system.");
+                return;
+            }
+
+            // get the needed components from the gamepad
+            button = new net.java.games.input.Component[8];
+            net.java.games.input.Component[] comps = gamepad.getComponents();
+
+            // forward/rotation will be controlled by the first axes found
+            rotationButton = forwardButton = null;
+
+            // Note:  These assume a Thrustmaster Firestorm digital 3 gamepad.  Other gamepads may
+            // or may not be quite the same
+            for( int i=0; i<comps.length; i++ )
+            {
+                net.java.games.input.Component.Identifier compId = comps[i].getIdentifier();
+
+                if( rotationButton == null && compId == net.java.games.input.Component.Identifier.Axis.X )
+                    rotationButton = comps[i];
+                else if( forwardButton == null && compId == net.java.games.input.Component.Identifier.Axis.Y )
+                    forwardButton = comps[i];
+                else if( compId == net.java.games.input.Component.Identifier.Button.A  // linux
+                || compId == net.java.games.input.Component.Identifier.Button._0 // Windows
+                )
+                {
+                    // we found the first button, so assume the other 7 follow it
+                    for( int k=0; k<8; k++ )
+                    {
+                        if( (i+k) < comps.length )
+                            button[k] = comps[i+k];
+                    }
+                }
+            }
+
+            // create the frame and contents
+            frame = new JFrame("Scribbler Gamepad");
+            frameContentPane = frame.getContentPane();
+            frameContentPane.setLayout( new BorderLayout() );
+
+            frameContentPane.add( makeLabel("forward"), BorderLayout.NORTH );
+            frameContentPane.add( makeLabel("backward"), BorderLayout.SOUTH );
+            frameContentPane.add( makeLabel("right"), BorderLayout.EAST );
+            frameContentPane.add( makeLabel("left"), BorderLayout.WEST );
+
+            panel = new gamepadPanel();
+            panel.setBorder(  new LineBorder( Color.BLACK, 3) );
+            panel.setPreferredSize(new Dimension(300, 300));
+            frameContentPane.add( panel, BorderLayout.CENTER );
+            // add mouse listener to handle mouse press and release events
+            //panel.addMouseListener ( mouseEvent );
+            // add mouse motion listener to handle mouse drag events
+            //panel.addMouseMotionListener ( mouseEvent );
+            // add a component listener to handle resize events
+            panel.addComponentListener( new panelEventHandler() );
+
+            frame.pack();
+            frame.setVisible( true );
+
+            // add window listener to handle window close events
+            frame.addWindowListener( new windowEventHandler() );
+
+            // Print gamepad map for user
+            System.out.println("   Pad        Action");
+            System.out.println("----------  ----------");
+            System.out.println("Left/Right  turnLeft() / turnRight()");
+            System.out.println(" Up/Down    forward() / backward()");
+            System.out.println();
+            System.out.println("  Button      Action");
+            System.out.println("----------  ----------");
+            System.out.println("    1       takePicture()");
+            System.out.println("    2       beep(.25, 523)");
+            System.out.println("    3       beep(.25, 587)");
+            System.out.println("    4       beep(.25, 659)");
+            System.out.println("    5       nothing");
+            System.out.println("    6       nothing");
+            System.out.println("    7       nothing");
+            System.out.println("    8       exit gamepad");
+        }
+
+        /**
+         * Method executed in the gamepad thread.  The listeners do all the work so all we do is sleep all day!
+         * If we're interrupted that means the Scribbler's close method has been called, so we force a window
+         * close event that will eventually close the window and tell us to stop.
+         */
+        public void run()
+        {
+            float oldTranslate = 0.0f;
+            float translate = 0.0f;
+            float oldRotate = 0.0f;
+            float rotate = 0.0f;
+
+            MyroImage image=null;
+
+            // loop until the window is closed (which sets finished to true) or our parent thread interrupts us
+            while( !finished )
+                try
+                {
+                    Thread.sleep(10);
+
+                    if( gamepad.poll() )
+                    {
+                        // get state of forward/rotate buttons
+                        translate = -forwardButton.getPollData();
+                        rotate = -rotationButton.getPollData();
+
+                        // process only if these are different from the last poll
+                        if( translate != oldTranslate || rotate != oldRotate )
+                        {
+                            // draw line in the window
+                            xPos = (int)(-rotate * panelHalfHeight);
+                            yPos = (int)(translate * panelHalfHeight);
+                            frame.repaint();
+
+                            // control the robot
+                            robot.move( translate, rotate );
+
+                            // save gamepad values
+                            oldTranslate = translate;
+                            oldRotate = rotate;
+                        }
+                        // process the various buttons
+                        // button0 == takePicture
+                        if( button[0].getPollData() != 0.0 )
+                        {
+                            if( image == null )
+                                image = robot.takePicture(IMAGE_COLOR);
+                            else
+                                image.setImage( robot.takePicture(IMAGE_COLOR) );
+                            image.show();
+                        }
+
+                        // button1 == beep(.25, 523)
+                        if( button[1].getPollData() != 0.0 )
+                        {
+                            robot.beep( 0.25, 523 );
+                        }
+
+                        // button2 == beep(.25, 587)
+                        if( button[2].getPollData() != 0.0 )
+                        {
+                            robot.beep( 0.25, 587 );
+                        }
+
+                        // button3 == beep(.25, 659)
+                        if( button[3].getPollData() != 0.0 )
+                        {
+                            robot.beep( 0.25, 659 );
+                        }
+
+                        //button7 == exit
+                        if( button[7].getPollData() != 0.0 )
+                        {
+                            frame.getToolkit().getSystemEventQueue().postEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING));
+                        }
+                    }
+                } catch (InterruptedException e)
+                { 
+                    // We've been interrupted, so handle this as if the user closed the window
+                    frame.getToolkit().getSystemEventQueue().postEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING)); 
+            }
+
+            // close image if it exists
+            if( image != null )
+                image.hide();
+
+            //panel.stopThread();
+        }
+
+        /**
+         * Utility method to make a label.
+         */
+        private JLabel makeLabel(String caption)
+        {
+            JLabel label = new JLabel();
+            label.setPreferredSize(new Dimension(100, 20));
+            label.setText(caption);
+            label.setHorizontalAlignment(SwingConstants.CENTER);
+
+            return label;
+        }
+
+        private class gamepadPanel extends JPanel
+        {
+            public void paintComponent( Graphics g )
+            {
+                Graphics2D g2 = (Graphics2D) g;
+
+                super.paintComponent( g );
+
+                // draw axes
+                g2.setColor( Color.BLACK );
+                g2.drawLine( panelHalfWidth, 0, panelHalfHeight, panelHeight );
+                g2.drawLine( 0, panelHalfHeight, panelWidth, panelHalfHeight );
+
+                // draw line to coordinate if the robot is moving
+                g2.setColor( Color.RED );
+                g2.setStroke(new BasicStroke(3));
+                g2.drawLine( panelHalfWidth, panelHalfHeight, xPos+panelHalfWidth, panelHalfHeight-yPos );
+            }
+        }
+
+        /**
+         * Process window (actually panel) resize events, which simply means setting instance fields for the 
+         * panel dimensions that are used in the repaint method.
+         */
+        private class panelEventHandler extends ComponentAdapter
+        {
+            public void componentResized( ComponentEvent e)
+            {
+                java.awt.Component c = e.getComponent();
+                panelWidth = c.getWidth();
+                panelHeight = c.getHeight();
+                panelHalfWidth = panelWidth / 2;
+                panelHalfHeight = panelHeight / 2;
+            }
+        }
+
+        /**
+         * Handle window close events.  All we do is set instance field finished to true, and the run routine will
+         * then terminate the thread.
+         */
+        private class windowEventHandler extends WindowAdapter
+        {
+            public void windowClosing(WindowEvent e) 
+            {
+                finished = true;
+                //panel.stopThread();
+            }
+        }
+
+    }
+
+    private class connectedFrame extends JFrame
+    {        
+        public connectedFrame( String info )
+        {
+            MyroListener listener;
+
+            add( new JLabel( "Your Robot is Connected!!"), BorderLayout.NORTH );
+            add( new JLabel( info ), BorderLayout.CENTER );
+            pack();
+            setVisible( true );
+
+            listener = new MyroListener();
+            addKeyListener( listener.getKeyListener() );
+            addMouseListener( listener.getMouseListener() );
         }
     }
 }
