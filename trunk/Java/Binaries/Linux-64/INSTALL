@@ -1,0 +1,11 @@
+To install these binaries on 64 bit linux: (you may have to be root)
+
+Copy the following files to (javahome)/jre/lib/amd64
+     librxtxScribblerSerial64.so
+     libjinput-linux64.so
+
+Copy the following files to (javahome)/jre/lib/ext
+     RXTXScribblerComm.jar to (javahome)/jre/lib/ext
+     jinput.jar
+     jutils.jar
+

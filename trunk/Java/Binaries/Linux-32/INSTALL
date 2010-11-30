@@ -1,0 +1,11 @@
+To install these binaries on linux: (you may have to be root)
+
+Copy the following files to (javahome)/jre/lib/i386
+     librxtxScribblerSerial.so
+     libjinput-linux.so
+
+Copy the following files to (javahome)/jre/lib/ext
+     RXTXScribblerComm.jar to (javahome)/jre/lib/ext
+     jinput.jar
+     jutils.jar
+

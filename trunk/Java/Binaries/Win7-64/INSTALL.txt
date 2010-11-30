@@ -1,0 +1,11 @@
+To install these on a Win64 system:
+
+Copy the following files to (javahome)/jre/lib/ext
+     RXTXScribblerComm.jar
+     jinput.jar
+     jutils.jar
+
+Copy the following files to (javahome)/jre/bin
+     rxtxScribblerSerial.dll
+     jinput-dx8_64.dll
+     jinput-raw_64.dll
