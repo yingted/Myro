@@ -1,8 +1,8 @@
 #BlueJ package file
 package.editor.height=368
 package.editor.width=544
-package.editor.x=433
-package.editor.y=106
+package.editor.x=147
+package.editor.y=55
 package.numDependencies=0
 package.numTargets=14
 package.showExtends=true
@@ -52,7 +52,7 @@ target12.y=10
 target13.editor.height=700
 target13.editor.width=900
 target13.editor.x=77
-target13.editor.y=243
+target13.editor.y=245
 target13.height=50
 target13.name=simpleListenerTest
 target13.naviview.expanded=true
