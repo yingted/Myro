@@ -1078,7 +1078,7 @@ public class Scribbler  {
         assert numSeconds > 0.0 : "numSeconds not > 0.0";
 
         move( speed, 0.0 );
-        _wait( numSeconds );
+        wait( numSeconds );
         stop();
     }
 
@@ -1151,7 +1151,7 @@ public class Scribbler  {
         assert numSeconds > 0.0 : "numSeconds not > 0.0";
 
         move( -speed, 0.0 );
-        _wait( numSeconds );
+        wait( numSeconds );
         stop();
     }
 
@@ -1211,7 +1211,7 @@ public class Scribbler  {
         assert numSeconds > 0.0 : "numSeconds not > 0.0";
 
         move( 0.0, speed );
-        _wait( numSeconds );
+        wait( numSeconds );
         stop();
     }
 
@@ -1270,7 +1270,7 @@ public class Scribbler  {
         assert numSeconds > 0.0 : "numSeconds not > 0.0";
 
         move( 0.0, -speed );
-        _wait( numSeconds );
+        wait( numSeconds );
         stop();
     }
 
@@ -1869,7 +1869,7 @@ public class Scribbler  {
         _setFluke( SET_CAM_PARAM );
 
         // wait for the Fluke to reconfigure
-        _wait( 0.150 );  
+        wait( 0.150 );  
     }
 
     /**
@@ -1942,12 +1942,9 @@ public class Scribbler  {
     }
 
     /**
-     * Cause the current thread to sleep for numSeconds.  This method was originally a Myro method, but since the
-     * actions of this are implemented by the computer (as opposed to the Scribbler) I decided to make it a 
-     * private method used only by the implementation of myro.  Programmers should use java's Thread.sleep method
-     * directly.
+     * Cause the current thread to sleep for numSeconds.  
      */
-    private  void _wait( double numSeconds )
+    public static void wait( double numSeconds )
     {
         try
         {
@@ -2168,6 +2165,7 @@ public class Scribbler  {
         // fields for Fluke status (if there is one)
         private JLabel BrightLeftValue, BrightCenterValue, BrightRightValue;
         private JLabel ObstacleLeftValue, ObstacleCenterValue, ObstacleRightValue;
+        private JLabel BatteryValue;
 
         /**
          * Construct a JFrame containing fields for the Scribbler's sensor values and set a windowListener that
@@ -2359,6 +2357,22 @@ public class Scribbler  {
                 gridbag.setConstraints( ObstacleRightValue, c );
                 frameContentPane.add( ObstacleRightValue );
                 row++;
+
+                // Battery
+                c.gridx = 0;
+                c.gridy = row;
+                c.gridwidth = 1;
+                temp = makeLabel("Battery", border);
+                gridbag.setConstraints( temp, c );
+                frameContentPane.add( temp );
+
+                c.gridx = 1;
+                c.gridy = row;
+                c.gridwidth = 6;
+                BatteryValue = makeLabel("0", border);
+                gridbag.setConstraints( BatteryValue, c );
+                frameContentPane.add( BatteryValue );
+                row++;
             }
             frame.pack();
             frame.setVisible( true );
@@ -2397,6 +2411,7 @@ public class Scribbler  {
             Integer LightLeft, LightCenter, LightRight;
             Integer BrightLeft, BrightCenter, BrightRight;
             Integer ObstacleLeft, ObstacleCenter, ObstacleRight;
+            Double Battery;
 
             while( !finished )
             {
@@ -2432,12 +2447,14 @@ public class Scribbler  {
                     ObstacleLeft = new Integer( robot.getObstacle( 0 ) );
                     ObstacleCenter = new Integer( robot.getObstacle( 1 ) );
                     ObstacleRight = new Integer( robot.getObstacle( 2 ) );
+                    Battery = new Double( robot.getBattery() );
                     BrightLeftValue.setText( BrightLeft.toString() );
                     BrightCenterValue.setText( BrightCenter.toString() );
                     BrightRightValue.setText( BrightRight.toString() );
                     ObstacleLeftValue.setText( ObstacleLeft.toString() );
                     ObstacleCenterValue.setText( ObstacleCenter.toString() );
                     ObstacleRightValue.setText( ObstacleRight.toString() );
+                    BatteryValue.setText( Battery.toString() );
                 }
                 // wait .25 seconds.  If our parent thread interrupts us then we're finished
                 try
