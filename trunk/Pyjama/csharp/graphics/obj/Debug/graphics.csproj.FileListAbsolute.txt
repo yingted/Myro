@@ -1,7 +1,0 @@
-C:\Users\Vincent\Documents\Pyjama\csharp\graphics\bin\Debug\graphics.pdb
-C:\Users\Vincent\Documents\Pyjama\csharp\graphics\obj\Debug\ResolveAssemblyReference.cache
-C:\Users\Vincent\Documents\Pyjama\csharp\graphics\obj\Debug\graphics.pdb
-C:\Users\Vincent\Documents\Pyjama\csharp\graphics\bin\Debug\graphics.dll
-C:\Users\Vincent\Documents\Pyjama\csharp\graphics\obj\Debug\graphics.dll
-C:\Users\Vincent\Documents\Pyjama\csharp\graphics\bin\Debug\Pyjama.exe
-C:\Users\Vincent\Documents\Pyjama\csharp\graphics\bin\Debug\Pyjama.pdb

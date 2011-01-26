@@ -1,5 +1,0 @@
-#!/bin/sh
-
-PYJAMAPATH=/home/dblank/Myro/Pyjama/src
-
-XMODIFIERS= MONO_PATH=$PYJAMAPATH/../libs mono --debug $PYJAMAPATH/pyjama.exe $@
