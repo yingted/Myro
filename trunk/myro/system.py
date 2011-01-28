@@ -220,10 +220,12 @@ def upgrade_scribbler(url=None, scrib_version=1):
         url = "http://myro.roboteducation.org/upgrade/scribbler/"
         startswith = "scribbler-upgrade-"
         endswidth = ".bytecode"
+        startpos = 18
         if scrib_version == 2:
             url = "http://myro.roboteducation.org/upgrade/scribbler2/"
             startswith = "scribbler2-upgrade-"
             endswidth = ".binary"
+            startpos = 19
 
     install_count = 0
     if not url.startswith("http://"):
@@ -264,7 +266,7 @@ def upgrade_scribbler(url=None, scrib_version=1):
                 print "Considering", filename, "..."
                 if filename.startswith(startswith):
                     end = filename.index(endswidth)
-                    patch_ver = filename[18:end].split(".")
+                    patch_ver = filename[startpos:end].split(".")
                     try:
                         scribbler_ver = map(int, scribbler_ver)
                     except:

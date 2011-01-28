@@ -784,7 +784,10 @@ def _cleanup():
                 except: # catch serial.SerialException
                     # port already closed
                     pass
-            myro.globvars.robot.close()
+            try:
+                myro.globvars.robot.close()
+            except:
+                pass
 
 import signal
 
