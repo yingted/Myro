@@ -186,7 +186,7 @@ class SerialRobot:
     def restart(self):
         print "Please run initialize() to connect onto robot"
 
-def upgrade_scribbler(url=None):
+def upgrade_scribbler(url=None, scrib_version=1):
     """
     Takes a url or filename and upgrades Myro.
     """
@@ -194,15 +194,46 @@ def upgrade_scribbler(url=None):
         # force upgrade
         print "Connecting to Scribbler for initial firmware installation..."
         myro.globvars.robot = SerialRobot()
-            
+
     s = myro.globvars.robot.ser
+
+    info = get_info_timeout(s)
+    
+    scribbler_ver = [0, 0, 0]
+    if "robot-version" in info.keys():            
+        scribbler_ver = info["robot-version"].split(".")
+    elif "api" in info.keys():            
+        scribbler_ver = info["api"].split(".")
+
+    if "robot" in info.keys():
+        robot_version = info["robot"]
+        if robot_version == "Scribbler2":
+            scrib_version = 2
+    else:
+        robot_type = get_robot_type(s) 
+        print "using robot: ", robot_type
+        if robot_type == "SCRIBBLER-2\n":
+            scrib_version = 2
+
+            
     if url == None:
         url = "http://myro.roboteducation.org/upgrade/scribbler/"
+        startswith = "scribbler-upgrade-"
+        endswidth = ".bytecode"
+        if scrib_version == 2:
+            url = "http://myro.roboteducation.org/upgrade/scribbler2/"
+            startswith = "scribbler2-upgrade-"
+            endswidth = ".binary"
+
     install_count = 0
     if not url.startswith("http://"):
-        print "Looking for Scribbler upgrades in file", url, "..."
-        f = open(url, 'r')
-        install_count += load_scribbler(s, f) # which is a filename
+        print "Looking for Scribbler", scrib_version, "upgrades in file", url, "..."
+        if scrib_version == 2:
+            f = open(url, 'rb')
+        else:
+            f = open(url, 'r')
+            
+        install_count += load_scribbler(s, f, True, scrib_version) # which is a filename
     else:        
         print "Looking for Scribbler upgrades at", url, "..."
 
@@ -231,8 +262,8 @@ def upgrade_scribbler(url=None):
             filename = filename.strip()
             if filename != "" and filename[0] != '#':
                 print "Considering", filename, "..."
-                if filename.startswith("scribbler-upgrade-"):
-                    end = filename.index(".bytecode")
+                if filename.startswith(startswith):
+                    end = filename.index(endswidth)
                     patch_ver = filename[18:end].split(".")
                     try:
                         scribbler_ver = map(int, scribbler_ver)
@@ -249,7 +280,7 @@ def upgrade_scribbler(url=None):
             full_url = consider[consider_keys[-1]]
             print "Loading", full_url
             f = urllib.urlopen(full_url)
-            install_count += load_scribbler(s, f)
+            install_count += load_scribbler(s, f, True, scrib_version)
     if install_count > 0:
         print "Done upgrading!"
     else:
@@ -298,7 +329,7 @@ def get_info_timeout(s):
             retDict[it.lower().strip()] = value.strip()
     return retDict
             
-def load_scribbler(s, f, force=False):
+def load_scribbler(s, f, force=False, scrib_version = 1):
     
     # check to see if we need to send magicKey when upgrading
     if (myro.globvars.robot and 
@@ -328,28 +359,39 @@ def load_scribbler(s, f, force=False):
         print "Older firmware version, Not sending magic key"            
 
     bytes=[]
-    for t in f:        
-        t = t.strip()
-        if (len(t) > 0):
-            nv = int(t)
-            bytes.append(nv)
-    print "Program size (bytes) = ", len(bytes)    
+    if scrib_version == 2:
+        bytes = f.read()
+    else:
+        for t in f:        
+            t = t.strip()
+            if (len(t) > 0):               
+                nv = int(t)
+                bytes.append(nv)
+    print "Program size (bytes) = %d; scribbler version = %d" % (len(bytes), scrib_version)
     f.close()
     print "Storing program in memory..."
-    for i in range(0, len(bytes)):
-        set_scribbler_memory(s, i, bytes[i])
-    print "Programming scribbler..."
+    if scrib_version == 2:        
+        set_scribbler2_memory_batch(s, bytes)
+    else:
+        for i in range(0, len(bytes)):
+            set_scribbler_memory(s, i, bytes[i])
+            
+    print "Programming scribbler %d..." % scrib_version
     if sendMagicKey:
         print "sending magic key"
-        set_scribbler_start_program(s, len(bytes))
+        if scrib_version == 2:
+            set_scribbler2_start_program(s, len(bytes))
+        else:
+            set_scribbler_start_program(s, len(bytes))
     else:
         print "older version, not sending magic key"
         set_scribbler_start_program_old(s, len(bytes))
 
-    time.sleep(10)
+    time.sleep(30)
 
-    print "Done!"
+    print "Wait for the robot to reboot!"
     myro.globvars.robot.restart()
+
     return 1
 
 def upgrade(what="myro", url = None, version=None):
@@ -368,12 +410,31 @@ def upgrade(what="myro", url = None, version=None):
 GET_SCRIB_PROGRAM=91  # with offset, returns the scribbler program buffer
 SET_SCRIB_PROGRAM=122   # set scribbler program memory byte
 SET_START_PROGRAM=123   # initiate scribbler programming process
+SET_START_PROGRAM2=153   # initiate scribbler 2 programming process
+SET_SCRIB2_RESET=154   # initiate scribbler 2 programming process
+SET_SCRIB_BATCH=155   # initiate scribbler 2 programming process
+GET_ROBOT_ID = 156    # find out which type of robot - scribbler 1 or 2
 UPDATE_FIRMWARE = 40	# Updates the firmware of the robot 
+
+def get_robot_type(ser):
+    ser.write(chr(GET_ROBOT_ID))
+    return ser.readline()
 
 def set_scribbler_memory(ser, offset, byte):
     ser.write(chr(SET_SCRIB_PROGRAM))
     write_2byte(ser, offset)
     ser.write(chr(byte))
+
+def set_scribbler2_memory(ser, offset, byte):
+    ser.write(chr(SET_SCRIB_PROGRAM))
+    write_2byte(ser, offset)
+    ser.write(byte)
+
+def set_scribbler2_memory_batch(ser, bytes):
+    ser.write(chr(SET_SCRIB_BATCH))
+    write_2byte(ser, len(bytes))
+    for byte in bytes:
+        ser.write(byte)
 
 def get_scribbler_memory(ser, offset):
     ser.write(chr(GET_SCRIB_PROGRAM))
@@ -390,6 +451,14 @@ def set_scribbler_start_program(ser, size):
 
 def set_scribbler_start_program_old(ser, size):
     ser.write(chr(SET_START_PROGRAM))
+    write_2byte(ser, size)
+
+    
+def set_scribbler2_start_program(ser, size):
+    ser.write(chr(SET_START_PROGRAM2))
+    # magic code to ensure we don't enter scribbler program by accident
+    ser.write(chr(0x01))
+    ser.write(chr(0x23))
     write_2byte(ser, size)
 
 def write_2byte(ser, value):

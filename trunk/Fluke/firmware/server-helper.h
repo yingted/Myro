@@ -157,6 +157,11 @@ void serve_ir(uint8_t emitters);
 void serve_set_scrib_program();
 
 /*
+ * Fill the scribbler program buffer. (Also the image buffer)
+ */
+void serve_set_scrib_program_batch();
+
+/*
  * Read the scribbler program buffer. (Also the image buffer)
  */
 void serve_get_scrib_program();
@@ -172,9 +177,30 @@ void serve_get_scrib_program();
 void serve_start_scrib_program();
 
 /*
+ * Begin programming the scribbler2. Assumes you have filled the buffer
+ * with a valid program or are using the one stored in this firmware
+ * (indicated by and program size of 0).
+ *
+ * A magic code is expected to enter program mode. Used to reduce
+ * unintended reprogramming.
+ */
+void serve_start_scrib2_program();
+
+/*
  * reset the scribbler
  */
 void serve_reset_scribbler();
+
+/*
+ * reset the scribbler 2
+ */
+void serve_reset_scribbler2();
+
+/*
+ * Returns what type of robot is connected
+ * currently: scribbler-1 scribbler-2 or unkown
+ */
+void serve_identify_robot();
 
 /*
  * Used to reconfigure UART0

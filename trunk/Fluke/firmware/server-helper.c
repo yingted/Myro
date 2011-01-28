@@ -3,6 +3,7 @@
 #include "ov7649.h"
 #include "uart.h"
 #include "scribbler.h"
+#include "scribbler2.h"
 #include "firmware_upgrade.h"
 #include "jpeg.h"
 #include "constants.h"
@@ -391,16 +392,44 @@ void serve_ir(uint8_t emitters)
 void serve_set_scrib_program()
 {
   int addr;
+  uint8_t data;
 
   // get the address
   addr = getchblock();
   addr = (addr << 8);
   addr = addr | getchblock();
+
+  data = getchblock();
   
   // store the byte
   if (addr < WIDTH_SIZE*HEIGHT_SIZE)
     {
-      img[addr] = getchblock();
+      img[addr] = data;
+    }
+}
+
+/*
+ * Fill the scribbler program buffer. (Also the image buffer)
+ */
+void serve_set_scrib_program_batch()
+{
+  int size, i;
+  uint8_t data;
+
+  // get the address
+  size = getchblock();
+  size = (size << 8);
+  size = size | getchblock();
+
+  for (i = 0; i < size; i++)
+    {
+      data = getchblock();
+      
+      // store the byte
+      if (i < WIDTH_SIZE*HEIGHT_SIZE)
+	{
+	  img[i] = data;
+	}
     }
 }
 
@@ -431,17 +460,17 @@ void serve_get_scrib_program()
 
 void serve_start_scrib_program()
 {
-  int code, addr;
+  int code, size;
 
   code = getchblock2b();		  
-  addr = getchblock2b();	      		  
+  size = getchblock2b();	      		  
   
   // magic code to enable scribbler programming
   if (code == 0x0123)
     {	
       set_led(0);
       led_off();
-      if (addr == 0)
+      if (size == 0)
 	{
 	  program_scribbler((unsigned char*)init_scribbler_prog, 
 			    INIT_PROG_SIZE);
@@ -449,11 +478,43 @@ void serve_start_scrib_program()
       else
 	{
 	  led_on();
-	  program_scribbler(img, addr);
+	  program_scribbler(img, size);
 	  led_off();
 	}
       msleep(250);
       reset_scribbler();
+    }  
+}
+
+
+/*
+ * Begin programming the scribbler2. Assumes you have filled the buffer
+ * with a valid program.
+ *
+ * A magic code is expected to enter program mode. Used to reduce
+ * unintended reprogramming.
+ */
+void serve_start_scrib2_program()
+{
+  int code, size;
+
+  code = getchblock2b();		  
+  size = getchblock2b();	      		  
+  
+  // magic code to enable scribbler programming
+  if (code == 0x0123)
+    {	
+      set_led(0);
+      led_on();
+      if (program_scribbler2(img, size) == 0){
+	msleep(250);
+	reset_scribbler2();
+      }
+      else{
+	// failure
+	set_led(255);
+      }
+      led_off();
     }  
 }
 
@@ -463,6 +524,33 @@ void serve_start_scrib_program()
 void serve_reset_scribbler()
 {
   reset_scribbler();
+}
+
+/*
+ * reset the scribbler2
+ */
+void serve_reset_scribbler2()
+{
+  reset_scribbler2();
+}
+
+
+void serve_identify_robot()
+{
+  if (id_scribbler1() == 0)
+    {
+      putstr("SCRIBBLER-1\n");
+      return;
+    }
+  else if (id_scribbler2() == 0)
+    {
+      putstr("SCRIBBLER-2\n");
+      return;
+    }
+  else
+    {
+      putstr("UNKNOWN\n");
+    }
 }
 
 /*

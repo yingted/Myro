@@ -152,6 +152,10 @@ class Scribbler(Robot):
     SEND_IR_MESSAGE = 151
     SET_IR_EMITTERS = 152
 
+    SET_START_PROGRAM2=153   # initiate scribbler2 programming process
+    SET_RESET_SCRIBBLER2=154 # hard reset scribbler2
+    SET_SCRIB_BATCH=155      # upload scribbler2 firmware
+    GET_ROBOT_ID=156
 
     PACKET_LENGTH     =  9
     
@@ -1092,6 +1096,15 @@ class Scribbler(Robot):
             self.lock.release()
         return retval
 
+    def identifyRobot(self):
+        try:
+            self.lock.acquire()
+            self.ser.write(chr(Scribbler.GET_ROBOT_ID))
+            retval = self.ser.readline()
+        finally:
+            self.lock.release()
+        return retval
+
     def getIRMessage(self):
         line = ''
         
@@ -1826,6 +1839,10 @@ def get_scribbler_memory(ser, offset):
 
 def set_scribbler_start_program(ser, size):
     ser.write(chr(Scribbler.SET_START_PROGRAM))
+    write_2byte(ser, size)
+
+def set_scribbler2_start_program(ser, size):
+    ser.write(chr(Scribbler.SET_START_PROGRAM2))
     write_2byte(ser, size)
             
 def get_window_avg(ser, window):

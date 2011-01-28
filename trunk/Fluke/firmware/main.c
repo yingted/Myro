@@ -188,6 +188,7 @@ int main (void)
 	      else if (ch == SET_DIMMER_LED)	   serve_back_led();
 	      else if (ch == SET_DONGLE_IR)	   serve_ir_power();
 	      else if (ch == SET_RESET_SCRIBBLER)  serve_reset_scribbler();
+	      else if (ch == SET_RESET_SCRIBBLER2) serve_reset_scribbler2();
 	      else if (ch == GET_SERIAL_MEM)	   serve_get_serial_mem();
 	      else if (ch == SET_SERIAL_MEM)	   serve_set_serial_mem();
 	      else if (ch == SET_SERIAL_ERASE)	   serve_erase_serial_mem();
@@ -195,8 +196,10 @@ int main (void)
 	      else if (ch == GET_DONGLE_L_IR)	   serve_ir(0x2);
 	      else if (ch == GET_DONGLE_C_IR)	   serve_ir(0x4);
 	      else if (ch == SET_SCRIB_PROGRAM)	   serve_set_scrib_program();
+	      else if (ch == SET_SCRIB_BATCH)	   serve_set_scrib_program_batch();
 	      else if (ch == GET_SCRIB_PROGRAM)	   serve_get_scrib_program();
 	      else if (ch == SET_START_PROGRAM)	   serve_start_scrib_program();
+	      else if (ch == SET_START_PROGRAM2)   serve_start_scrib2_program();
 	      else if (ch == SET_UART0)		   serve_set_uart0();
 	      else if (ch == SET_PASS_BYTE)	   serve_send_byte();
 	      else if (ch == SET_PASSTHROUGH)	   serve_set_passthrough();
@@ -222,6 +225,7 @@ int main (void)
 	      else if (ch == GET_IR_MESSAGE)       serve_get_ir_message();
 	      else if (ch == SEND_IR_MESSAGE)      serve_send_ir_message();
 	      else if (ch == SET_IR_EMITTERS)      serve_set_ir_emitters();
+	      else if (ch == GET_ROBOT_ID)         serve_identify_robot();
 	      else scribbler_cmd = 1;
 	    }
 	  

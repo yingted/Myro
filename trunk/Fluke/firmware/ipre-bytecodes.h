@@ -118,3 +118,8 @@
 #define GET_IR_MESSAGE        150
 #define SEND_IR_MESSAGE       151
 #define SET_IR_EMITTERS       152
+
+#define SET_START_PROGRAM2    153
+#define SET_RESET_SCRIBBLER2  154
+#define SET_SCRIB_BATCH       155
+#define GET_ROBOT_ID          156

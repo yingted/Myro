@@ -18,7 +18,7 @@
 #include "inttypes.h"
 #include "uart_queue.h"
 
-#define VERSION "fluke:2.8.2"
+#define VERSION "fluke:2.9.1"
 #define VERSION_OF_BOARD 6
 
 // when the battery value is lower than this blink the LED

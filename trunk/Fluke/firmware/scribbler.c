@@ -14,10 +14,46 @@
 
 //#define SCRIB_DEBUG 1
 
+int id_scribbler1()
+{ 
+  int scrib1 = 0;
+  unsigned char v, tc_v;
+  int ch1, ch2;
+
+  program_mode();
+
+  v = 'B';
+  
+  // 2's complement of v
+  tc_v = (~v) + 1;
+
+  uart0Putch(v);
+
+  usleep(5000);
+  //echo of v
+  ch1 = uart0Getch();
+
+  usleep(5000);
+  // 2's complement of v
+  ch2 = uart0Getch();
+
+  if (ch2 != tc_v || ch1 != v) scrib1  = -1;
+  
+  reset_scribbler();
+  cleanup();
+
+  return scrib1;
+}
+
+void cleanup()
+{
+  uart0Init(B38400, UART_8N1, UART_FIFO_8);
+}
+
 void reset_scribbler()
 {  
   IOSET = S_RST;
-  usleep(100);
+  usleep(500);
   IOCLR = S_RST;
 }
 
@@ -134,7 +170,6 @@ int program_scribbler(unsigned char* buffer, int size)
   int ch;
   int fail = 0;
 
-  //id_scribbler(); return 0;
   
 #ifdef SCRIB_DEBUG
 
@@ -188,7 +223,7 @@ int program_scribbler(unsigned char* buffer, int size)
       uart0Putch(0);	  
     }
 
-  uart0Init(B38400, UART_8N1, UART_FIFO_8);  
+  cleanup();
   return fail;
 }
 

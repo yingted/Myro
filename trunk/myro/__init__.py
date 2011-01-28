@@ -6,7 +6,7 @@ Distributed under a Shared Source License
 """
 
 __REVISION__ = "$Revision$"
-__VERSION__  = "2.8.16"
+__VERSION__  = "2.9.0"
 __AUTHOR__   = "Doug Blank <dblank@cs.brynmawr.edu>"
 
 import sys, atexit, time, random, pickle, threading, os, types, copy
@@ -1077,6 +1077,12 @@ def setIRPower(value):
 def getBattery():
     if myro.globvars.robot:
         return myro.globvars.robot.getBattery()
+    else:
+        raise AttributeError, "need to initialize robot"
+
+def identifyRobot():
+    if myro.globvars.robot:
+        return myro.globvars.robot.identifyRobot()
     else:
         raise AttributeError, "need to initialize robot"
 

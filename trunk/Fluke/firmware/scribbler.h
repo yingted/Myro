@@ -18,9 +18,11 @@
 //#define PROG_SIZE 36
 
 void reset_scribbler();
+int id_scribbler1();
 int program_scribbler(unsigned char* buffer, int size);
-
-
+int send_id();
+void program_mode();
+void cleanup();
 
 #endif /* __SCRIBBLER__ */
 
