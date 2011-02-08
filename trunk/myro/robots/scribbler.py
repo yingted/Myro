@@ -966,9 +966,9 @@ class Scribbler(Robot):
                     U = U - 128
                     V = V - 128
                     Y = Y
-                    buffer[(i * width + j) * 3 + 0] = max(min(Y + 1.13983 * V, 255), 0)
-                    buffer[(i * width + j) * 3 + 1] = max(min(Y - 0.39466*U-0.58060*V, 255), 0)
-                    buffer[(i * width + j) * 3 + 2] = max(min(Y + 2.03211*U, 255), 0)
+                    buffer[(i * width + j) * 3 + 0] = int(max(min(Y + 1.13983 * V, 255), 0))
+                    buffer[(i * width + j) * 3 + 1] = int(max(min(Y - 0.39466*U-0.58060*V, 255), 0))
+                    buffer[(i * width + j) * 3 + 2] = int(max(min(Y + 2.03211*U, 255), 0))
             self.ser.setTimeout(oldtimeout)
         finally:
             self.lock.release()
