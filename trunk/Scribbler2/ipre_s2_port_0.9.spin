@@ -102,7 +102,7 @@ obj
 
 dat
 
-roboData      byte      "Robot-Version:1.0.0,Robot:Scribbler2,Mode:Serial", 10, 0
+roboData      byte      "Robot-Version:1.0.1,Robot:Scribbler2,Mode:Serial", 10, 0
 
 nameData      byte      "Scribby         ", 0           'null terminate string
 ipreData      byte      127, 127, 127, 127, 0, 0, 0, 0
@@ -335,10 +335,10 @@ pub Set_Pass2 | i
   Get_All
 
 pub Get_IR_Left
-  enqueue(s2.obstacle(s2#LEFT, 0) & 1)
+  enqueue(!s2.obstacle(s2#LEFT, 0) & 1)
 
 pub Get_IR_Right
-  enqueue(s2.obstacle(s2#RIGHT, 0) & 1)
+  enqueue(!s2.obstacle(s2#RIGHT, 0) & 1)
       
 pub Get_Light_Right
   enqueue((s2.light_sensor_raw(s2#RIGHT)>>8) & $FF)     'enqueue high byte
@@ -409,8 +409,8 @@ pub Get_State | outByte
   outByte |= s2.light_sensor(s2#CENTER) << 1           'LightCenterPin
   outByte |= s2.light_sensor(s2#LEFT) << 2             'LightLeftPin
   outByte |= 1 << 3             'LineEnablePin, always running on S2, so static true here
-  outByte |= (s2.line_sensor(s2#RIGHT, 0) & 1) << 4 'LineRightPin
-  outByte |= (s2.line_sensor(s2#LEFT, 0) & 1) << 5  'LineLeftPin
+  outByte |= (!s2.line_sensor(s2#RIGHT, 0) & 1) << 4 'LineRightPin
+  outByte |= (!s2.line_sensor(s2#LEFT, 0) & 1) << 5  'LineLeftPin
   outByte |= (ina[s2#OBS_RX] & 1) << 6              'ObsRxPin
   outByte |= (s2.stalled & 1) << 7                  'StallPin
 
@@ -420,8 +420,8 @@ pub Get_State | outByte
   outByte |= (ina[s2#SPEAKER] & 1) << 11
   outByte |= 0 << 12
   outByte |= 0 << 13
-  outByte |= (ina[s2#OBS_TX_RIGHT] & 1) << 14
-  outByte |= (ina[s2#OBS_TX_LEFT] & 1) << 15      
+  outByte |= (!ina[s2#OBS_TX_RIGHT] & 1) << 14
+  outByte |= (!ina[s2#OBS_TX_LEFT] & 1) << 15
 
   enqueue(outByte & $FF)                                'enqueue low byte
   enqueue((outByte >> 8) & $FF)                         'enqueue high byte
@@ -432,19 +432,19 @@ pub Get_All_Binary | temp
 
   temp~
 
-  temp := (s2.obstacle(s2#LEFT, 0) & 1) << 4
-  temp |= (s2.obstacle(s2#RIGHT, 0) & 1) << 3
+  temp := (!s2.obstacle(s2#LEFT, 0) & 1) << 4
+  temp |= (!s2.obstacle(s2#RIGHT, 0) & 1) << 3
   temp |= (s2.stalled & 1) << 2
-  temp |= (s2.line_sensor(s2#LEFT, 0) & 1) << 1
-  temp |= (s2.line_sensor(s2#RIGHT, 0) & 1)
+  temp |= (!s2.line_sensor(s2#LEFT, 0) & 1) << 1
+  temp |= (!s2.line_sensor(s2#RIGHT, 0) & 1)
 
   enqueue(temp)    
 
 pub Get_Line_Right
-  enqueue(s2.line_sensor(s2#RIGHT, 0))
+  enqueue(!s2.line_sensor(s2#RIGHT, 0) & 1)
 
 pub Get_Line_Left
-  enqueue(s2.line_sensor(s2#LEFT, 0))
+  enqueue(!s2.line_sensor(s2#LEFT, 0) & 1)
 
 pub Set_Quiet
 
@@ -479,8 +479,8 @@ pub Set_LED_All_Off
 
 pub Get_All | temp
 
-  enqueue(s2.obstacle(s2#LEFT, 0))
-  enqueue(s2.obstacle(s2#RIGHT, 0))
+  enqueue(!s2.obstacle(s2#LEFT, 0) & 1)
+  enqueue(!s2.obstacle(s2#RIGHT, 0) &1)
 
   temp := s2.light_sensor_raw(s2#LEFT)
   enqueue((temp>>8)&$FF)
@@ -494,8 +494,8 @@ pub Get_All | temp
   enqueue((temp>>8)&$FF)
   enqueue((temp)&$FF)
 
-  enqueue(s2.line_sensor(s2#LEFT, 0) & 1)
-  enqueue(s2.line_sensor(s2#RIGHT, 0) & 1)
+  enqueue(!s2.line_sensor(s2#LEFT, 0) & 1)
+  enqueue(!s2.line_sensor(s2#RIGHT, 0) & 1)
 
   enqueue(s2.stalled & 1)
 
@@ -515,13 +515,13 @@ pub Get_Light_All | temp
 
 pub Get_IR_All
 
-  enqueue(s2.obstacle(s2#LEFT, 0) & 1)
-  enqueue(s2.obstacle(s2#RIGHT, 0) & 1)
+  enqueue(!s2.obstacle(s2#LEFT, 0) & 1)
+  enqueue(!s2.obstacle(s2#RIGHT, 0) & 1)
 
 pub Get_Line_All
 
-  enqueue(s2.line_sensor(s2#LEFT, 0)  & 1)
-  enqueue(s2.line_sensor(s2#RIGHT, 0) & 1)
+  enqueue(!s2.line_sensor(s2#LEFT, 0)  & 1)
+  enqueue(!s2.line_sensor(s2#RIGHT, 0) & 1)
 
 pub Reboot_S2
   
