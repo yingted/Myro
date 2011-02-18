@@ -68,7 +68,7 @@ extern void report_error( char * );
 #include <errno.h>
 #include <time.h>
 #include "win32termios.h"
-
+#include <ctype.h> 
 /*
  * odd malloc.h error with lcc compiler
  * winsock has FIONREAD with lcc
@@ -1196,12 +1196,33 @@ serial_open()
    comments:
 ----------------------------------------------------------*/
 
-int serial_open( const char *filename, int flags, ... )
+int serial_open( const char *portname, int flags, ... )
 {
 	struct termios_list *index;
 	char message[80];
+	char filename[100];
+	int i;
+	char temp[100];
 
 	ENTER( "serial_open" );
+	
+	// if this is a com port (which it most likely is) then we need to
+	// adjust the name so com ports >9 can be accessed
+	
+	// first let's copy the passed name to a local string and convert the
+	// name to all caps
+	strcpy( filename, portname );
+	for( i=0; i<strlen(filename); i++ )
+		filename[i] = toupper( filename[i] );
+		
+	// if the filename starts with "COM" then we'll assume it's a com port
+	if( strncmp( filename, "COM", 3 ) == 0 )
+	{
+		strcpy( temp, "\\\\.\\" );
+		strcat( temp, filename );
+		strcpy( filename, temp );
+	}
+	
 	if ( port_opened( filename ) )
 	{
 		report( "Port is already opened\n" );
