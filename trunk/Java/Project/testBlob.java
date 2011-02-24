@@ -11,7 +11,7 @@ public class testBlob
 {
     public static void main(String[] args)
     {
-        Scribbler robot = new Scribbler("/dev/rfcomm0");        
+        Scribbler robot = new Scribbler("/dev/rfcomm2");        
         MyroImage image = robot.takePicture(Scribbler.IMAGE_COLOR);
         MyroBlobSpec blobSpec;
         

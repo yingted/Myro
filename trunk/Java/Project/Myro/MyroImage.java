@@ -6,6 +6,7 @@ import java.awt.image.*;
 import java.awt.event.*;
 import javax.swing.*;
 import javax.imageio.*;
+import java.util.*;
 
 /**
  * Abstract class MyroImage
@@ -16,14 +17,11 @@ import javax.imageio.*;
 public abstract class MyroImage
 {
     protected BufferedImage image;               // the rasterized image
-    protected JFrame frame;                      // on-screen view
     protected int width, height;                 // width and height
     protected int imageType;
-    private JLabel imageStatusLine;
-    private JPanel imagePane;
-    private boolean definingBlob;
-    private int blobx1, bloby1, blobx2, bloby2;
-    private boolean isVisible;
+    private MyroFrame frame;                        // on-screen view
+
+    private static Hashtable<String, MyroFrame> frames = new Hashtable<String, MyroFrame>();            // map frame names to JFrames
 
     /**
      * Constant returned by {@link #getType getType} indicating that this image is a color image
@@ -40,8 +38,7 @@ public abstract class MyroImage
      */
     protected MyroImage()
     {
-        definingBlob = false;
-        isVisible = false;
+
     }
 
     //     public JLabel getJLabel()
@@ -58,37 +55,28 @@ public abstract class MyroImage
      * @param x x coordinate of the upperleft corner of the window
      * @param y y coordinate of the upperleft corner of the window
      */
-    public void show( int x, int y )
+    public void show( int x, int y, String frameName )
     {
-        // create the GUI for viewing the image if needed
+        // set our frame to the MyroFrame named frameName (if any)
+        frame = (MyroFrame)frames.get( frameName );
+
+        // create a new frame for viewing the image if one doesn't already exist
         if ( frame == null )
         {
-            frame = new JFrame();
-            //frame.setContentPane(getJLabel());
-            //imagePane = getJLabel();
-            imagePane = new imagePanel();
-            imagePane.setPreferredSize( new Dimension( width, height ) );
-            frame.add( imagePane, BorderLayout.CENTER );            
-            frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-            //frame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-            frame.setResizable(false);
+            frame = new MyroFrame( frameName, this, x, y );
 
-            imageStatusLine = _makeLabel( " " );
-            frame.add( imageStatusLine, BorderLayout.SOUTH );
-
-            imageMouseEventHandler mouseEvent = new imageMouseEventHandler();
-            imagePane.addMouseMotionListener( mouseEvent );
-            imagePane.addMouseListener( mouseEvent );
-
-            frame.pack();
-            //frame.setVisible(true);
+            // add it to the hashtable so future calls to show will know about this frame
+            frames.put( frameName, frame );
         }
 
-        // set location of the window and draw it
-        frame.setLocation( x, y );
-        frame.setVisible( true );
-        frame.repaint();
-        isVisible = true;
+        // if we are not the image currently associated with frame then change things so that we are
+        if( frame.getCurrentImage() != this )
+        {
+            frame.setImage( this );
+        }
+
+        // make the frame visible
+        frame.makeVisible();
     }
 
     /**
@@ -98,12 +86,14 @@ public abstract class MyroImage
     public void show()
     {
         if( frame == null )
-            show( 0, 0 );
+            show( 0, 0, "Myro" );
         else
         {
-            frame.setVisible( true );
-            frame.repaint();
-            isVisible = true;
+            if( frame.getCurrentImage() != this )
+            {
+                frame.setImage( this );
+            }
+            frame.makeVisible();
         }
     }
 
@@ -113,13 +103,10 @@ public abstract class MyroImage
      */
     public void hide()
     {
-        if( frame != null )
+        if( frame != null && frame.getCurrentImage() == this )
         {
-            frame.setVisible( false );
-            //frame.repaint();
+            frame.makeInvisible();
         }
-
-        isVisible = false;
     }
 
     /**
@@ -128,33 +115,10 @@ public abstract class MyroImage
      */
     public void repaint()
     {
-        if( frame != null )
+        if( frame != null && frame.getCurrentImage() == this )
         {
             frame.repaint();
         }
-    }
-
-    /**
-     * Changes this image to be a copy of the one passed as a parameter.  If the image is visible, then the
-     * image is redisplayed to reflect the new image.
-     */
-    public void setImage( MyroImage newImage )
-    {
-        // copy instance fields from newImage
-        image = newImage.image;
-        height = newImage.height;
-        width = newImage.width;
-        imageType = newImage.imageType;
-
-        // update the frame if there is one
-        if( frame != null )
-        {
-            imagePane.setPreferredSize( new Dimension( width, height ) );
-            frame.pack();
-        }
-
-        // repaint the frame
-        repaint();
     }
 
     /**
@@ -182,6 +146,13 @@ public abstract class MyroImage
     }
 
     /**
+     * Returns the BufferedImage defined in this MyroImage.
+     */
+    public BufferedImage getImage() {
+        return image;
+    }
+
+    /**
      * Allows the user to select a rectangular area of the image used to define a blob.  The image is first
      * made visible, then a message at the bottom of the window instructs the user to drag an area to define
      * a blob.  The blob returned contains the average color of the selected area and can be passed to the
@@ -192,33 +163,33 @@ public abstract class MyroImage
      */
     public MyroBlobSpec getUserDefinedBlob()
     {
-        // make sure the image is visible
-        show();
+        int[] blobVals;
+        int xLow, yLow, blobWidth, blobHeight;
+        
+        // make sure this image is has a frame and it's visible
+        if( frame==null )
+        {
+            show();
+        }
+        if( frame.getCurrentImage() != this )
+        {
+            frame.setImage( this );
+        }
+        frame.makeVisible();
 
-        // go into blob definition mode.  Until the mouse is pressed the defined rectangle is empty.
-        definingBlob = true;
-        blobx1 = bloby1 = 0;
-        blobx2 = bloby2 = 0;
-        imageStatusLine.setText( "Drag a rectangle in the image to define a blob" );
-        while( definingBlob )
-            Thread.yield();
-
-        imageStatusLine.setText( " " );
-
-        // deterine upperleft corner and width,height of the selected rectangle
-        int xlow = Math.min( blobx1, blobx2 );
-        int xhigh = Math.max( blobx1, blobx2 );
-        int ylow = Math.min( bloby1, bloby2 );
-        int yhigh = Math.max( bloby1, bloby2 );
-        int blobWidth = xhigh - xlow + 1;
-        int blobHeight = yhigh - ylow + 1;
+        // get a user-defined rectangle
+        blobVals = frame.getUserRect( "Drag a rectangle in the image to define a blob" );
+        xLow = blobVals[0];
+        yLow = blobVals[1];
+        blobWidth = blobVals[2];
+        blobHeight = blobVals[3];
 
         // if either the width or height is 0, then nothing selected so return null, otherwise return
         // a blob defined by the rectangle
         if( blobWidth==0 || blobHeight==0 )
             return null;
         else
-            return defineBlob( xlow, ylow, blobWidth, blobHeight );
+            return defineBlob( xLow, yLow, blobWidth, blobHeight );
     }
 
     /**
@@ -304,6 +275,17 @@ public abstract class MyroImage
         return new MyroBlobSpec( 0, 254, minU, maxU, minV, maxV, 4 );
     }
 
+    /**
+     * Returns the MyroFrame that has a specified name.
+     * 
+     * @param frameName Name of a MyroFrame
+     * @return the MyroFrame with the associated name, or null if no frame has that name
+     */
+    public static MyroFrame getMyroFrame( String frameName )
+    {
+        return (MyroFrame)frames.get( frameName );
+    }
+    
     /**
      * Returns the RGB color of pixel (x,y).
      * <p><p>
@@ -392,144 +374,6 @@ public abstract class MyroImage
     protected Color toGray(Color color) {
         int y = (int) (Math.round( lum( color ) ) );   // round to nearest int        
         return new Color( y, y, y );
-    }
-
-    /**
-     * Returns a JLabel containing the passed String.
-     */
-    private JLabel _makeLabel(String caption)
-    {
-        JLabel label = new JLabel();
-        //label.setPreferredSize(new Dimension(100, 20));
-        label.setText(caption);
-        label.setHorizontalAlignment(SwingConstants.LEFT);
-
-        return label;
-    }
-
-    /**
-     * Class that handles mouse events for the image window.
-     */
-    private class imageMouseEventHandler implements MouseListener, MouseMotionListener
-    {
-        /**
-         * When the mouse moves over the image display the pixel location and RGB color of the pixel.  Nothing
-         * happens if the user is defining a blob, though.
-         */
-        public void mouseMoved( MouseEvent e )
-        {
-            // don't do anything if the user is in the process of defining a blob
-            if( definingBlob )
-                return;
-
-            // get the position of the mouse and the color of that pixel
-            int x = e.getX();
-            int y = e.getY();
-            Color c = get( x, y );
-            int r = c.getRed();
-            int g = c.getGreen();
-            int b = c.getBlue();
-
-            // display the location and color in the status line underneath the image.
-            imageStatusLine.setText( "("+x+", "+y+"): ( r="+r+", g="+g+", b="+b+" )"  );
-        }
-
-        /**
-         * Clear the status line when the mouse exits the window and the user is not defining a blob
-         */
-        public void mouseExited( MouseEvent e )
-        {
-            if( !definingBlob )
-                imageStatusLine.setText( " " );
-        }
-
-        /**
-         * If the user is not defining a blob then pressing the mouse is the same as moving it.  If the user
-         * is defining a blob then the press event specifies the starting corner of the blob rectangle.
-         */
-        public void mousePressed( MouseEvent e )
-        {
-            if( !definingBlob )
-                mouseMoved( e );
-            else
-            {
-                blobx1 = blobx2 = e.getX();
-                bloby1 = bloby2 = e.getY();
-            }
-        }
-
-        /**
-         * If the user is not defining a blob, then do nothing.  If s/he is defining a blob then the current
-         * mouse position defines the other corner of the blob rectangle.  Remember this and repaint the window
-         * so the rectangle is visible.
-         */
-        public void mouseDragged( MouseEvent e )
-        {
-            if( definingBlob )
-            {
-                blobx2 = Math.max( Math.min( e.getX(), width-1 ), 0 );
-                bloby2 = Math.max( Math.min( e.getY(), height-1 ), 0 );
-                repaint();
-            }
-        }
-
-        /**
-         * If the user is not defining a blob then do nothing.  Otherwise the mouse position specifies the
-         * other corner of the blob rectangle.  Remember this position and indicate that we're not in blob
-         * definition mode any longer.
-         */
-        public void mouseReleased( MouseEvent e )
-        {
-            if( definingBlob )
-            {
-                blobx2 = Math.max( Math.min( e.getX(), width-1 ), 0 );
-                bloby2 = Math.max( Math.min( e.getY(), height-1 ), 0 );
-                definingBlob = false;
-                repaint();
-            }
-        }
-
-        // methods that must be defined for interface MouseListener
-        public void mouseClicked( MouseEvent e )
-        {}
-
-        public void mouseEntered( MouseEvent e )
-        {}
-
-    }
-
-    /**
-     * Class that defines the image portion of the window.
-     */
-    private class imagePanel extends JPanel
-    {
-        /**
-         * Method to paint the contents of the image.  Always display the image, and if the user is defining
-         * a blob then also draw a rectangle showing the current blob rectangle.
-         */
-        public void paintComponent( Graphics g )
-        {
-            Graphics2D g2 = (Graphics2D)g;
-
-            // draw the image
-            g2.drawImage( image, 0, 0, width, height, this );
-
-            // if the user is in blobdefintion mode then draw the currently defined rectangle
-            if( definingBlob )
-            {
-                // deterine upperleft corner and width,height of the currently defined rectangle
-                int xlow = Math.min( blobx1, blobx2 );
-                int xhigh = Math.max( blobx1, blobx2 );
-                int ylow = Math.min( bloby1, bloby2 );
-                int yhigh = Math.max( bloby1, bloby2 );
-                int blobWidth = xhigh - xlow + 1;
-                int blobHeight = yhigh - ylow + 1;
-
-                // draw the rectangle
-                g2.setColor( Color.BLACK );
-                g2.drawRect( xlow, ylow, blobWidth, blobHeight );
-            }
-        }
     }
 
     /**

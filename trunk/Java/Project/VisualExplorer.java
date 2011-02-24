@@ -12,14 +12,14 @@ public class VisualExplorer
 {
    public static void main(String[] args)
    {
-       Scribbler robot = new Scribbler("/dev/rfcomm0");
+       Scribbler robot = new Scribbler("/dev/rfcomm2");
        MyroImage image = new MyroColorImage(100,100);
        
        robot.joyStick();
        
        while (true)
        {
-           image.setImage( robot.takePicture(Scribbler.IMAGE_GRAY) );
+           image = robot.takePicture(Scribbler.IMAGE_GRAY);
            image.show();
            try
            {

@@ -17,28 +17,30 @@ public class PictureSequence
         String ans;
 
         // take 10 pictures and store them in the images array
-        for( int i=0; i<5; i++ )
+        for( int i=0; i<10; i++ )
         {
             images[i] = robot.takePicture( Scribbler.IMAGE_COLOR );
             robot.turnLeft( 0.3, 0.1 );
         }
 
         // now display the 10 images
-        MyroImage displayImage = images[0];
-        displayImage.show();
+        //MyroImage displayImage = images[0];
+        //displayImage.show();
         do
         {
-            for( int i=0; i<5; i++ )
+            for( int i=0; i<10; i++ )
             {
-                displayImage.setImage( images[i] );
-                Scribbler.wait( 0.25 );
+                //displayImage.setImage( images[i] );
+                images[i].show();
+                Scribbler.wait( 0.5 );
             }
 
             ans = MyroGUI.askQuestion( "Would you like to see it again?", options );
         }
         while( ans.equals("Yes") );
 
-        displayImage.hide();
+        //displayImage.hide();
+        images[9].hide();
         robot.close();
     }
 }

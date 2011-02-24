@@ -272,6 +272,20 @@ public class Scribbler  {
                 //System.out.println("Gamepad thread has died.");
                 currentGamepadThread = null;
             }
+            
+            if( currentCameraThread != null )
+            {
+                currentCameraThread.interrupt();
+                try
+                {
+                    currentCameraThread.join();
+                } catch (InterruptedException e)
+                {
+                    System.out.println("While waiting for camera to die, we were interrupted.");
+                }
+                //System.out.println("Gamepad thread has died.");
+                currentCameraThread = null;
+            }
         }
 
         // close the port if it's opened
@@ -719,6 +733,31 @@ public class Scribbler  {
         // create a thread for the senses window and start it.
         currentSensesThread = new Thread( new sensesThread(this) );
         currentSensesThread.start();
+    }
+
+    /**
+     * Opens a window that continually displays the Fluke's camera image.  The image is updated every
+     * second.
+     * <p><p>
+     * Only one camera window is permitted to be opened for a particular Scribbler/Fluke; no action occurs if this
+     * method is invoked when a camera window is already opened.  The window will stay opened until the user closes
+     * it (by clicking the window's close icon) or the {@link #close close} method is invoked.
+     * <p><p>
+     * <b>Precondition:</b> scribblerConnected or flukeConnected
+     */
+    public  void camera()
+    {
+        assert scribblerConnected() || flukeConnected(): "Neither Scribbler nor Fluke connected";
+
+        // can only have one senses window open for this robot
+        if( currentCameraThread != null && currentCameraThread.isAlive() )
+        {
+            return;
+        }
+
+        // create a thread for the senses window and start it.
+        currentCameraThread = new Thread( new cameraThread(this) );
+        currentCameraThread.start();
     }
 
     /**
@@ -1557,6 +1596,7 @@ public class Scribbler  {
     private Thread currentSensesThread;
     private Thread currentJoyStickThread;
     private Thread currentGamepadThread;
+    private Thread currentCameraThread;
 
     /**
      * Write a sequence of ints to the robot.  Note that the difference between _write and _writePadded
@@ -2483,6 +2523,80 @@ public class Scribbler  {
     }
 
     /**
+     * An instance of this class creates a camera window and a thread that captures and displays the
+     * image every second.  The thread will be killed (and the window closed) when the user clicks the
+     * window's close icon or the Scribbler's close method is invoked.
+     */
+    private class cameraThread implements Runnable 
+    {
+        private Scribbler robot;
+        private boolean finished;
+        private MyroFrame frame;
+
+        /**
+         * Construct a JFrame containing fields for the Scribbler's sensor values and set a windowListener that
+         * will respond to the window close event.
+         */
+        public cameraThread(Scribbler _robot)
+        {
+            // initialize some things
+            finished = false;
+            robot = _robot;
+
+            // Capture the camera image and display it
+            MyroImage image = robot.takePicture( IMAGE_GRAY );
+            image.show( 10, 10, "Scribbler Camera" );
+
+            // get the MyroFrame of the camera window
+            frame = MyroImage.getMyroFrame( "Scribbler Camera" );
+
+            // create an event handler that will handle the window's close event
+            if( frame != null )
+            {
+                frame.addWindowListener( new windowEventHandler() );
+            }
+        }
+
+        /**
+         * Main method to execute in the camera thread.  Capture the image every second and display it.
+         * If the Sleep method is interrupted it means that the Scribbler's close method has been called;
+         * in this case we create a window close event which will be handled exacly as if the user closed
+         * the window.
+         */
+        public void run()
+        {
+            while( !finished )
+            {
+                // capture the camera image and display it
+                robot.takePicture( IMAGE_GRAY ).show( 10, 10, "Scribbler Camera" );
+
+                // wait 1 second.  If our parent thread interrupts us then we're finished
+                try
+                {
+                    Thread.sleep( 1000 );
+                } catch (InterruptedException e)
+                {
+                    // We've been interrupted, so force an event as if the user closed the window
+                    frame.getToolkit().getSystemEventQueue().postEvent(new WindowEvent(frame, WindowEvent.WINDOW_CLOSING)); 
+                }
+            }
+        }
+
+        /**
+         * The user has closed the window so simply set finished to true, and the next time the loop executes in
+         * method run, the thread will terminate.
+         */
+        private class windowEventHandler extends WindowAdapter
+        {
+            public void windowClosing(WindowEvent e) 
+            {
+                finished = true;
+            }
+        }
+
+    }
+
+    /**
      * An instance of this class creates a joystick window and a thread that uses mouse events to control the Scribbler.
      * The thread will be killed (and the window closed) when the user clicks the window's close icon or the
      * Scribbler's close method is invoked.
@@ -2881,10 +2995,10 @@ public class Scribbler  {
                         // button0 == takePicture
                         if( button[0].getPollData() != 0.0 )
                         {
-                            if( image == null )
-                                image = robot.takePicture(IMAGE_COLOR);
-                            else
-                                image.setImage( robot.takePicture(IMAGE_COLOR) );
+                            //if( image == null )
+                            image = robot.takePicture(IMAGE_COLOR);
+                            //else
+                            //image.setImage( robot.takePicture(IMAGE_COLOR) );
                             image.show();
                         }
 
