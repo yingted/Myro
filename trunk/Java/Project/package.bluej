@@ -1,8 +1,8 @@
 #BlueJ package file
 package.editor.height=368
 package.editor.width=544
-package.editor.x=125
-package.editor.y=48
+package.editor.x=212
+package.editor.y=305
 package.numDependencies=0
 package.numTargets=18
 package.showExtends=true
@@ -81,7 +81,7 @@ target14.x=10
 target14.y=250
 target15.editor.height=700
 target15.editor.width=900
-target15.editor.x=881
+target15.editor.x=700
 target15.editor.y=102
 target15.height=50
 target15.name=Flute
