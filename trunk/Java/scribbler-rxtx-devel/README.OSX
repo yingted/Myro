@@ -8,3 +8,6 @@ Then move the following files:
   RXTXScribblerComm.jar to /Library/Java/Extensions
   (apple-darwin)librxtxScribblerSerial.jnilib to /Library/Java/Extensions
 
+NOTE: You may need to have the developer version of JDK installed.  If ./configure has problems
+finding the HEADERS folder you may have to edit Makefile (instructions will be printed by
+./configure script).
