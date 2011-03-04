@@ -1,9 +1,0 @@
-To install these on a MacOSX 10.4 (Tiger) system for all users:
-
-Copy RXTXScribblerComm.jar to /Library/Java/Extensions
-Copy rxtxScribblerSerial.jnilib to /Library/Java/Extensions
-
-To install these on a MacOSX 10.4 (Tiger) system for one user:
-
-Copy RXTXScribblerComm.jar to ~/Library/Java/Extensions
-Copy rxtxScribblerSerial.jnilib to ~/Library/Java/Extensions
