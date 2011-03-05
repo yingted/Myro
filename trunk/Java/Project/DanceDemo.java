@@ -6,7 +6,6 @@ import java.util.Random;
  * Jennie Kay's demo, described at http://elvis.rowan.edu/~kay/sigcse/kayScribbler/
  * 
  * @author Douglas Harms 
- * @version (a version number or a date)
  */
 public class DanceDemo
 {

@@ -19,7 +19,6 @@ public class PictureSequence
         }
 
         MyroImage images[] = new MyroImage[10];
-        String[] options = {"Yes", "No" };
         String ans;
 
         // take 10 pictures and store them in the images array
@@ -30,22 +29,18 @@ public class PictureSequence
         }
 
         // now display the 10 images
-        //MyroImage displayImage = images[0];
-        //displayImage.show();
         do
         {
             for( int i=0; i<10; i++ )
             {
-                //displayImage.setImage( images[i] );
                 images[i].show();
                 Scribbler.wait( 0.5 );
             }
 
-            ans = MyroGUI.askQuestion( "Would you like to see it again?", options );
+            ans = MyroGUI.askQuestion( "Would you like to see it again?" );
         }
         while( ans.equals("Yes") );
 
-        //displayImage.hide();
         images[9].hide();
         robot.close();
     }
