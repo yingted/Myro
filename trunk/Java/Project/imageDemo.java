@@ -2,18 +2,27 @@ import Myro.*;
 import java.awt.Color;
 
 /**
- * Simple program that reads in an image and does some simple processing of that image.  This program
- * does not use the scribbler, and is similar to imageDemo.
+ * This simple program captures an image from the scribbler and does some simple processing of that
+ * image.  This program is similar to testImage, except that testImage reads in the image from a file
+ * rather than capturing it from the scribbler.
  * 
- * @author Douglas Harms 
+ * @author Douglas Harms
  */
-
-public class testImage
+public class imageDemo
 {
     public static void main( String[] args )
     {
-        // read in an image and display it
-        MyroImage image = new MyroColorImage("testimage.jpg");
+
+        final String scribblerPort = "/dev/rfcomm1";
+        Scribbler robot= new Scribbler( scribblerPort );
+        if( !robot.portOpened() )
+        {
+            MyroGUI.tellUser( "Scribbler not connected to " + scribblerPort, "Bummer" );
+            return;
+        }
+
+        // take a picture and display it
+        MyroImage image = robot.takePicture( Scribbler.IMAGE_COLOR );
         image.show();
 
         // let the user spend time pondering the wonderful photo
@@ -126,7 +135,8 @@ public class testImage
         // Wait for the user to be ready to exit
         MyroGUI.tellUser( "Click when ready to exit.", "Exit" );
         
-        // hide the image
+        // close the robot and hide the image
+        robot.close();
         negImage.hide();
     }
 }

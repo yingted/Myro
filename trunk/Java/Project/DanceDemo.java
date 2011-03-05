@@ -81,9 +81,18 @@ public class DanceDemo
     public static void main( String args[] )
     {
 
-        robot = new Scribbler( "/dev/rfcomm1" );
+        final String scribblerPort = "/dev/rfcomm1";
+        
+        robot = new Scribbler( scribblerPort );
         randSeq = new Random();
 
+        // abort if port does not exist
+        if( !robot.portOpened() )
+        {
+            MyroGUI.tellUser( "Scribbler not connected to "+scribblerPort, "Bummer" );
+            return;
+        }
+        
         // dance for 15 seconds
         long startTime = System.currentTimeMillis();
         long endTime = System.currentTimeMillis() + 15*1000;

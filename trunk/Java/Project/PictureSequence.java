@@ -1,16 +1,22 @@
 import Myro.*;
 
 /**
- * Write a description of class PictureSequence here.
+ * Takes a sequence of pictures then displays them in rapid succession
  * 
- * @author (your name) 
- * @version (a version number or a date)
+ * @author Douglas Harms 
  */
 public class PictureSequence
 {
     public static void main()
     {
-        Scribbler robot= new Scribbler("/dev/rfcomm2");
+        final String scribblerPort = "/dev/rfcomm1";
+        
+        Scribbler robot= new Scribbler( scribblerPort );
+        if( !robot.portOpened() )
+        {
+            MyroGUI.tellUser( "Scribbler not connected to " + scribblerPort, "Bummer" );
+            return;
+        }
 
         MyroImage images[] = new MyroImage[10];
         String[] options = {"Yes", "No" };
