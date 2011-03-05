@@ -1,29 +1,23 @@
+import Myro.*;
+import java.awt.Color;
 
 /**
- * Write a description of class testImage here.
+ * Simple program that reads in an image and does some simple processing of that image.  THis program
+ * does not use the scribbler.
  * 
- * @author (your name) 
- * @version (a version number or a date)
+ * @author Douglas Harms 
  */
-import java.awt.*;
-import javax.swing.*;
-
-import Myro.*;
 
 public class testImage
 {
     public static void main( String[] args )
     {
         MyroImage image = new MyroColorImage("testimage.jpg");
-        MyroImage displayedImage = new MyroColorImage(1,1);
 
-        displayedImage.setImage( image );
-        displayedImage.show(100,200);
-        //image.show();
+        image.show();
 
-        JOptionPane.showMessageDialog(null, "Click when ready to see the negative.");
-        displayedImage.hide();
-
+        MyroGUI.askQuestion( "Click when ready to see the negative.", "OK" );
+        
         MyroImage negImage= new MyroColorImage( image.width(), image.height() );
         for( int row=0; row<image.height(); row++)
         {
@@ -35,14 +29,10 @@ public class testImage
             }
         }
 
-        displayedImage.setImage( negImage );
-        displayedImage.show();
-        displayedImage.repaint();
-        //negImage.show();
+        negImage.show();
 
-        JOptionPane.showMessageDialog(null, "Click when ready to see the edge image.");
-        displayedImage.hide();
-
+        MyroGUI.askQuestion( "Click when ready to see the edge image.", "OK" );
+        
         MyroImage edgeImage = new MyroGrayImage( image.width(), image.height() );
 
         float[][] edgeKernel = {
@@ -78,7 +68,7 @@ public class testImage
 
         edgeImage.show();
 
-        JOptionPane.showMessageDialog(null, "Click when ready to see the blur image.");
+        MyroGUI.askQuestion( "Click when ready to see the blur image.", "OK");
         edgeImage.hide();
 
         MyroImage blurImage = new MyroGrayImage( image.width(), image.height() );
@@ -116,22 +106,22 @@ public class testImage
         }
 
         blurImage.show();
-
-        JOptionPane.showMessageDialog(null, "Click when ready to continue.");
+        MyroGUI.askQuestion( "Click when ready to continue.", "OK" );
         blurImage.hide();
 
         negImage.show();
 
-        JOptionPane.showMessageDialog(null, "Click again when ready to continue.");
+        MyroGUI.askQuestion( "Click again when ready to continue.", "OK");
         for( int y=0; y<image.height(); y++ )
         {
             negImage.set( y, y, Color.RED );
             negImage.set( image.height()-y, y, Color.GREEN );
         }
 
-        JOptionPane.showMessageDialog(null, "Click when ready to see an X in the image.");
+        MyroGUI.askQuestion( "Click when ready to see an X in the image.", "OK");
         negImage.repaint();
 
-        JOptionPane.showMessageDialog(null, "Click when ready to exit.");
+        MyroGUI.askQuestion( "Click when ready to exit.", "Exit" );
+        negImage.hide();
     }
 }

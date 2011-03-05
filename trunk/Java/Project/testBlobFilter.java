@@ -60,17 +60,17 @@ public class testBlobFilter
 
         // let user define a blob in the robot's image
         MyroImage image = robot.takePicture(Scribbler.IMAGE_COLOR);
-        image.show( 100, 200 );
+        image.show();
         MyroBlobSpec blobSpec = image.getUserDefinedBlob();
         robot.configureBlob( blobSpec );
 
         // get the blob image from the robot and display it
         MyroImage image1 = robot.takePicture(Scribbler.IMAGE_BLOB);
-        image1.show( 300, 200 );
+        image1.show();
 
         // filter the image and display it
         MyroImage image2 = filterBlob( image1 );
-        image2.show( 500, 200 );
+        image2.show( );
 
         // that's all folks
         robot.close();

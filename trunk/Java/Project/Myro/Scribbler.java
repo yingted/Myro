@@ -3111,6 +3111,7 @@ public class Scribbler  {
 
             add( new JLabel( "Your Robot is Connected!!"), BorderLayout.NORTH );
             add( new JLabel( info ), BorderLayout.CENTER );
+            add( new JLabel( "This window must be active for Myro key/mouse events" ), BorderLayout.SOUTH );
             pack();
             setVisible( true );
 

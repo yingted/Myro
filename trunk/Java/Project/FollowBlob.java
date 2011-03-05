@@ -13,14 +13,16 @@ public class FollowBlob
 
     public static void main(String[] args)
     {
-        final double TURN_SPEED_TRACKING = 0.1;
-        final double TURN_TIME_TRACKING = 0.1;
-        final double TURN_SPEED_SEARCHING = 0.2;
-        final double TURN_TIME_SEARCHING = 0.2;
+        final String scribblerPort = "/dev/rfcomm1";
+        
+        final double TURN_SPEED_TRACKING = 0.4;
+        final double TURN_TIME_TRACKING = 0.3;
+        final double TURN_SPEED_SEARCHING = 0.6;
+        final double TURN_TIME_SEARCHING = 0.4;
         
         int pixelCountThreshold;
 
-        Scribbler robot = new Scribbler("/dev/rfcomm0");
+        Scribbler robot = new Scribbler( scribblerPort );
 
         // let user define a blob in the robot's image
         MyroImage image = robot.takePicture(Scribbler.IMAGE_COLOR);
@@ -33,12 +35,13 @@ public class FollowBlob
 
         // for the next minute make sure the blob is in the center of the image
         long startTime = System.currentTimeMillis();
+        long endTime = startTime + 60*1000;
 
         // get the blob and set the count threshold to it (since we assume that when the user
         // set the blob, the number of pixels that are in the blob now are what we expect)
         MyroBlobImageInfo blobInfo = robot.getBlob();
         pixelCountThreshold = (int)(blobInfo.getPixelCount() * 0.9);
-        while( System.currentTimeMillis()-startTime <= 60000 )
+        while( System.currentTimeMillis()-startTime < endTime )
         {
             blobInfo = robot.getBlob();
             System.out.println("pixel count=" + blobInfo.getPixelCount());
