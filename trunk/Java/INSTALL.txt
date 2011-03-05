@@ -14,6 +14,13 @@ Installing Myro-Java
    
 3) Copy the .jar files and library files based on your system.  These files, 
    along with instructions, are contained in the Binaries folder.
+
+
+NOTE: If I haven't supplied pre-compiled binaries for the scribbler-rxtx driver (e.g., rxtxSscribblerSerial.dll,
+librxtxScribblerSerial.so, etc.) that work on your system, you can build your own from source in the
+scribbler-rxtx-devel folder.  Brief instructions for various platforms are included as README files.  Please let
+me (Doug Harms) know if my supplied binaries don't work since I'd like to include working ones in futire
+distributions.  I can be contacted at dharms@depauw.edu .
  
 
 
