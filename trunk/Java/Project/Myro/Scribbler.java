@@ -699,6 +699,14 @@ public class Scribbler  {
 
     }
 
+    /**
+     * Turns the volume of the scribbler on or off.
+     * <p><p>
+     * <b>Precondition:</b> scribblerConnected, onOff is VOLUME_OFF (or 0) or VOLUME_ON (or 1)
+     * 
+     * @param onOff Value indicating whether to turn the volume on (VOLUME_ON or 1) or 
+     * off (VOLUME_OFF or 0)
+     */
     public void setVolume( int onOff )
     {
         assert scribblerConnected() : "Scribbler not connected";
