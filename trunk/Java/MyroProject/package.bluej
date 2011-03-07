@@ -1,0 +1,19 @@
+#BlueJ package file
+package.editor.height=252
+package.editor.width=432
+package.editor.x=49
+package.editor.y=83
+package.numDependencies=0
+package.numTargets=1
+package.showExtends=true
+package.showUses=true
+readme.editor.height=700
+readme.editor.width=900
+readme.editor.x=0
+readme.editor.y=0
+target1.height=62
+target1.name=Myro
+target1.type=PackageTarget
+target1.width=80
+target1.x=70
+target1.y=10
