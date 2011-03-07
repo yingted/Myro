@@ -26,7 +26,7 @@ public class MyroListener
     /**
      * Constant returned by whichKeyPressed to indicate that no key was pressed.
      */
-    public static char NO_KEY_PRESSED = (char)0;
+    public static final char NO_KEY_PRESSED = (char)0;
 
     private static char _lastChar;
     private static boolean _keyPressed = false;
@@ -34,6 +34,16 @@ public class MyroListener
 
     private simpleKeyListener _keyListener;
     private simpleMouseListener _mouseListener;
+
+    // locks for synchronization of keyboard events and mouse events
+    private static Object keyLock;
+    private static Object mouseLock;
+
+    // allocate global synchronization locks
+    static {
+        keyLock = new Object();
+        mouseLock= new Object();
+    }
 
     public MyroListener()
     {
@@ -61,16 +71,24 @@ public class MyroListener
     {
         public void keyTyped( KeyEvent e )
         {
+            synchronized (keyLock)
+            {
             _keyPressed = true;
             _lastChar = e.getKeyChar();
+            }
         }
     }
 
     /**
-     * Returns true iff a key press event has occurred since the last time isKeyPressed was called.
+     * Returns true iff a key press event has occurred since the last time isKeyPressed or
+     * getKeyPressed was called.  It is not possible to to determine which key was actually pressed;
+     * this functionality is only available in method getKeyPressed.
+     * 
      */
     public static boolean isKeyPressed()
     {
+        synchronized (keyLock)
+        {
         if( _keyPressed )
         {
             _keyPressed = false;
@@ -78,25 +96,33 @@ public class MyroListener
             return true;
         }
         return false;
+        }
     }
 
     /** 
-     * If a key was pressed since the last time isKeyPressed or whichKeyPressed was called, then
-     * the key that was most recently pressed is returned, otherwise NO_KEY_PRESSED is returned.
+     * Determines whether a key has been pressed since the last time isKeyPressed or getKeyPressed
+     * was called.  If a key was pressed, then the key that was most recently pressed is returned,
+     * otherwise NO_KEY_PRESSED is returned.
      */
-    public static char whichKeyPressed()
+    public static char getKeyPressed()
     {
+        synchronized (keyLock)
+        {
         char retVal = _lastChar;
         _keyPressed = false;
         _lastChar = NO_KEY_PRESSED;
         return retVal;
+        }
     }
 
     private class simpleMouseListener extends MouseAdapter
     {
         public void mousePressed( MouseEvent e )
         {
+            synchronized (mouseLock)
+            {
             _mousePressed = true;
+            }
         }
     }
 
@@ -105,9 +131,12 @@ public class MyroListener
      */
     public static boolean isMousePressed()
     {
+        synchronized (mouseLock)
+        {
         boolean retVal = _mousePressed;
         _mousePressed = false;
         return retVal;
+        }
     }
 
 }

@@ -9,7 +9,7 @@ public class PictureSequence
 {
     public static void main()
     {
-        final String scribblerPort = "/dev/rfcomm1";
+        final String scribblerPort = "com10";
         
         Scribbler robot= new Scribbler( scribblerPort );
         if( !robot.portOpened() )
@@ -34,7 +34,7 @@ public class PictureSequence
             for( int i=0; i<10; i++ )
             {
                 images[i].show();
-                Scribbler.wait( 0.5 );
+                MyroUtils.wait( 0.1 );
             }
 
             ans = MyroGUI.askQuestion( "Would you like to see it again?" );

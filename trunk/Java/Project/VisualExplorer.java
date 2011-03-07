@@ -33,7 +33,7 @@ public class VisualExplorer
             image.show();
             
             // wait 1 second
-            robot.wait( 1.0 );
+            MyroUtils.wait( 1.0 );
         }
         
         // stop the robot, hide the image window, and close the connection

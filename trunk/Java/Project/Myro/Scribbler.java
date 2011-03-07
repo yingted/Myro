@@ -1125,7 +1125,7 @@ public class Scribbler  {
         assert numSeconds > 0.0 : "numSeconds not > 0.0";
 
         move( speed, 0.0 );
-        wait( numSeconds );
+        MyroUtils.wait( numSeconds );
         stop();
     }
 
@@ -1198,7 +1198,7 @@ public class Scribbler  {
         assert numSeconds > 0.0 : "numSeconds not > 0.0";
 
         move( -speed, 0.0 );
-        wait( numSeconds );
+        MyroUtils.wait( numSeconds );
         stop();
     }
 
@@ -1258,7 +1258,7 @@ public class Scribbler  {
         assert numSeconds > 0.0 : "numSeconds not > 0.0";
 
         move( 0.0, speed );
-        wait( numSeconds );
+        MyroUtils.wait( numSeconds );
         stop();
     }
 
@@ -1317,7 +1317,7 @@ public class Scribbler  {
         assert numSeconds > 0.0 : "numSeconds not > 0.0";
 
         move( 0.0, -speed );
-        wait( numSeconds );
+        MyroUtils.wait( numSeconds );
         stop();
     }
 
@@ -1917,7 +1917,7 @@ public class Scribbler  {
         _setFluke( SET_CAM_PARAM );
 
         // wait for the Fluke to reconfigure
-        wait( 0.150 );  
+        MyroUtils.wait( 0.150 );  
     }
 
     /**
@@ -1989,17 +1989,6 @@ public class Scribbler  {
         return echoOK;
     }
 
-    /**
-     * Cause the current thread to sleep for numSeconds.  
-     */
-    public static void wait( double numSeconds )
-    {
-        try
-        {
-            Thread.sleep( (int)(numSeconds * 1000.0) );
-        } catch (InterruptedException e) {}
-
-    }
 
     /**
      * Defines an image window on the fluke.  The image is from (xlow,ylow) to (xhigh,yhigh).  xstep and ystep
