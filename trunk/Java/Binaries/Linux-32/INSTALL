@@ -8,4 +8,5 @@ Copy the following files to (javahome)/jre/lib/ext
      RXTXScribblerComm.jar
      jinput.jar
      jutils.jar
+     Myro.jar
 
