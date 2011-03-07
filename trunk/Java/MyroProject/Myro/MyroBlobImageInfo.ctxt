@@ -1,0 +1,10 @@
+#BlueJ class context
+comment0.params=count\ avgX\ avgY
+comment0.target=MyroBlobImageInfo(int,\ int,\ int)
+comment1.params=
+comment1.target=int\ getPixelCount()
+comment2.params=
+comment2.target=int\ getAverageX()
+comment3.params=
+comment3.target=int\ getAverageY()
+numComments=4
