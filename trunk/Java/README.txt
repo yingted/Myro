@@ -11,8 +11,11 @@ instructions are included in the various system sub directories.
 
 JInput-Test: A BlueJ project for testing communication with the gamepad
 
-Project: a BlueJ project that contains the Myro-Java code as well as a few simple
-test applications.
+MyroProject: a BlueJ project that contains the Myro-Java source code.  This is 
+for informational purposes only - the Myro package is included in the Binaries
+folder as a jar file.
+
+Demos: a BlueJ project with some demonstation programs.
 
 scribbler-rxtx-devel: Source code and binaries for the scribbler-adapted rxtx
 library, used for communication with the scribbler/fluke.  The files in this
@@ -35,7 +38,7 @@ Using Myro-Java
 Myro-Java can be used in three general ways in BlueJ: Create an instance, use
 the codepad, or write Java application.
 
-1) Create an instance.  Open the "Project" project in BlueJ and navigate to the
+1) Create an instance.  Open the "MyroProject" project in BlueJ and navigate to the
 Myro package by double-clicking on "Myro".  Several classes are defined in the
 Myro package, including Scribbler.  An instance of Scribbler can be created by
 right-clicking on the Scribbler icon and selecting "new Myro.Scribbler" from the
@@ -56,4 +59,4 @@ example, the following command will take a color picture and display it:
 
   scribble1.takePicture(0).show();
 
-3) Java application.  Several example applications are included in the Project.
+3) Java application.  Several example applications are included in the Demo project.
