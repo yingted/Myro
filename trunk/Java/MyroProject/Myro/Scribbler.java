@@ -724,7 +724,7 @@ public class Scribbler  {
 
     /**
      * Opens a window that continually displays the sensor values of the Scribbler and/or Fluke.  The values are
-     * updated every .25 seconds.
+     * updated every .5 seconds.
      * <p><p>
      * Only one senses window is permitted to be opened for a particular Scribbler/Fluke; no action occurs if this
      * method is invoked when a senses window is already opened.  The window will stay opened until the user closes
@@ -2437,7 +2437,7 @@ public class Scribbler  {
         }
 
         /**
-         * Main method to execute in the senses thread.  Query the Scribbler every 0.25 seconds and set the fields
+         * Main method to execute in the senses thread.  Query the Scribbler every 0.5 seconds and set the fields
          * in the window accordingly.  If the Sleep method is interrupted it means that the Scribbler's close
          * method has been called; in this case we create a window close event which will be handled exacly as
          * if the user closed the window.
@@ -2496,10 +2496,10 @@ public class Scribbler  {
                     ObstacleRightValue.setText( ObstacleRight.toString() );
                     BatteryValue.setText( Battery.toString() );
                 }
-                // wait .25 seconds.  If our parent thread interrupts us then we're finished
+                // wait .5 seconds.  If our parent thread interrupts us then we're finished
                 try
                 {
-                    Thread.sleep( 250 );
+                    Thread.sleep( 500 );
                 } catch (InterruptedException e)
                 {
                     // We've been interrupted, so force an event as if the user closed the window

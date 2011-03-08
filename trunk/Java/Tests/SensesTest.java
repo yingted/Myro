@@ -13,7 +13,7 @@ public class SensesTest
     public static void main( String[] args )
     {
         // open connection to robot and abort if this failed
-        final String scribblerPort = "/dev/rfcomm1";
+        final String scribblerPort = "com10";
         
         robot = new Scribbler( scribblerPort );
         if( !robot.portOpened() )
