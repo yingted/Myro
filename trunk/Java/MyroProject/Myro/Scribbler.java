@@ -1129,7 +1129,7 @@ public class Scribbler  {
         assert numSeconds > 0.0 : "numSeconds not > 0.0";
 
         move( speed, 0.0 );
-        MyroUtils.wait( numSeconds );
+        MyroUtils.sleep( numSeconds );
         stop();
     }
 
@@ -1202,7 +1202,7 @@ public class Scribbler  {
         assert numSeconds > 0.0 : "numSeconds not > 0.0";
 
         move( -speed, 0.0 );
-        MyroUtils.wait( numSeconds );
+        MyroUtils.sleep( numSeconds );
         stop();
     }
 
@@ -1262,7 +1262,7 @@ public class Scribbler  {
         assert numSeconds > 0.0 : "numSeconds not > 0.0";
 
         move( 0.0, speed );
-        MyroUtils.wait( numSeconds );
+        MyroUtils.sleep( numSeconds );
         stop();
     }
 
@@ -1321,7 +1321,7 @@ public class Scribbler  {
         assert numSeconds > 0.0 : "numSeconds not > 0.0";
 
         move( 0.0, -speed );
-        MyroUtils.wait( numSeconds );
+        MyroUtils.sleep( numSeconds );
         stop();
     }
 
@@ -1921,7 +1921,7 @@ public class Scribbler  {
         _setFluke( SET_CAM_PARAM );
 
         // wait for the Fluke to reconfigure
-        MyroUtils.wait( 0.150 );  
+        MyroUtils.sleep( 0.150 );  
     }
 
     /**

@@ -26,7 +26,7 @@ public class MyroUtils
      * 
      * @param numSeconds The length of time to sleep.
      */
-    public static void wait( double numSeconds )
+    public static void sleep( double numSeconds )
     {
         assert numSeconds >= 0.0 : "numSeconds must be >= 0.0";
         try

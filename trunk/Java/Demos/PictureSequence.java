@@ -34,7 +34,7 @@ public class PictureSequence
             for( int i=0; i<10; i++ )
             {
                 images[i].show();
-                MyroUtils.wait( 0.1 );
+                MyroUtils.sleep( 0.1 );
             }
 
             ans = MyroGUI.askQuestion( "Would you like to see it again?" );

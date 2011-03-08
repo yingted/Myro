@@ -29,7 +29,7 @@ public class DanceDemo
 
         // straighten out and pause
         robot.turnRight( 1.0, 0.1 );
-        MyroUtils.wait( 0.5 );
+        MyroUtils.sleep( 0.5 );
     }
 
     // ---- backSteps ----
@@ -41,10 +41,10 @@ public class DanceDemo
         for( int i=0; i< howMany; i++ )
         {
             robot.backward( 1.0, 0.5 );
-            MyroUtils.wait( 0.1 );
+            MyroUtils.sleep( 0.1 );
         }
 
-        MyroUtils.wait( 0.5 );
+        MyroUtils.sleep( 0.5 );
 
     }
 
@@ -57,7 +57,7 @@ public class DanceDemo
         // We could have just done robot.turnRight( 1.0, howLong) but this demonstrates
         // the use of directly controlling the motors.
         robot.motors( 1.0, -1.0 );
-        MyroUtils.wait( howLong );
+        MyroUtils.sleep( howLong );
         robot.stop();
 
         if( turnBothWays )
