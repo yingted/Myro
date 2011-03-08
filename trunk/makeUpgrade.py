@@ -7,13 +7,14 @@ import sys, os, datetime, posixpath
 upgrade_against = sys.argv[1] # 2.0.2
 upgrade_name    = sys.argv[2] # 2.5.0
 
-ctime = os.path.getctime("../../html/myro/myro-%s.zip" % upgrade_against)
+ctime = os.path.getctime("../html/myro/myro-%s.zip" % upgrade_against)
 
 stime = datetime.date.fromtimestamp(ctime)
 
-print """svn diff -r {%s}:HEAD --summarize | grep " myro/" | cut -c 8- """ % stime
-
-pipe = os.popen("""svn diff -r {%s}:HEAD --summarize | grep " myro/" | cut -c 8- """ % stime)
+#print """svn diff -r {%s}:HEAD | grep " myro/" | cut -c 8- """ % stime
+print("""find myro | grep -v /osc/ | grep "\.py$" """)
+#pipe = os.popen("""svn diff -r {%s}:HEAD | grep " myro/" | cut -c 8- """ % stime)
+pipe = os.popen("""find myro | grep -v /osc/ | grep "\.py$" """)
 
 manifest = {}
 for line in pipe:
