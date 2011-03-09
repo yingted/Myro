@@ -213,6 +213,11 @@ public class Scribbler  {
         if( info.contains("scribbler" ) )
             _scribblerConnected = true;
 
+        // do any device-specific initialization
+        if( _flukeConnected )
+        {
+            setIRPower( 135 );
+        }
         // Print information messages
         //System.out.println( getName() + " is Ready!!" );
         System.out.println("Info=\"" + getInfo() + "\"" );

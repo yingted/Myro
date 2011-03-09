@@ -22,6 +22,7 @@ public class SensesTest
             return;
         }
 
+        //robot.setIRPower( 135 );
         robot.senses();
         
 //         long startTime = System.currentTimeMillis();
