@@ -13,7 +13,7 @@ public class Tutorial1_SimpleDance
     public static void main( String[] args )
     {
         // open connection to robot and abort if this failed
-        final String scribblerPort = "com10";
+        final String scribblerPort = "/dev/rfcomm1";
 
         robot = new Scribbler( scribblerPort );
         if( !robot.portOpened() )

@@ -13,7 +13,7 @@ public class Tutorial2_Simple_IR_Sensing
     public static void main( String[] args )
     {
         // open connection to robot and abort if this failed
-        final String scribblerPort = "com10";
+        final String scribblerPort = "/dev/rfcomm0";
 
         robot = new Scribbler( scribblerPort );
         if( !robot.portOpened() )
