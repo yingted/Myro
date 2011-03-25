@@ -1,3 +1,27 @@
+/*
+ * Myro/Java license - GPL
+ * 
+ * Myro/Java is a Java implementation of the Myro API, defined by the Institute for Robots in
+ * Education (IPRE).  See http://wiki.roboteducation.org for more information.
+ * 
+ * Copyright 2010-2011 Douglas Harms dharms@depauw.edu
+ * 
+ * This file is part of Myro/Java.
+ * 
+ * Myro/Java is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ * 
+ * Myro/Java is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with Myro/Java.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package Myro;
 
 import java.io.*;
@@ -24,16 +48,6 @@ public abstract class MyroImage
     private static Hashtable<String, MyroFrame> frames = new Hashtable<String, MyroFrame>();            // map frame names to JFrames
 
     /**
-     * Constant returned by {@link #getType getType} indicating that this image is a color image
-     */
-    public static int MYRO_IMAGE_COLOR = 0;
-
-    /**
-     * Constant returned by {@link #getType getType} indicating that this image is a gray scale image
-     */
-    public static int MYRO_IMAGE_GRAY = 1;
-
-    /**
      * Default constructor, only callable by subclass constructor.
      */
     protected MyroImage()
@@ -41,32 +55,27 @@ public abstract class MyroImage
 
     }
 
-    //     public JLabel getJLabel()
-    //     {
-    //         if (image == null) { return null; }         // no image available
-    //         ImageIcon icon = new ImageIcon( image );
-    //         return new JLabel( icon );
-    //     }
-
     /**
-     * Causes this image to be visible in a window located at a specified location on the screen.  The parameters
-     * specify the location of the upperleft corner of the window.
+     * Causes this image to be visible in a window located at a specified location on the screen.
+     * The parameters specify the location of the upperleft corner of the window and the title of the
+     * window.  If the window already exists, the location parameters are ignored.
      * 
      * @param x x coordinate of the upperleft corner of the window
      * @param y y coordinate of the upperleft corner of the window
+     * @param title Title of the window
      */
-    public void show( int x, int y, String frameName )
+    public void show( int x, int y, String title )
     {
         // set our frame to the MyroFrame named frameName (if any)
-        frame = (MyroFrame)frames.get( frameName );
+        frame = (MyroFrame)frames.get( title );
 
         // create a new frame for viewing the image if one doesn't already exist
         if ( frame == null )
         {
-            frame = new MyroFrame( frameName, this, x, y );
+            frame = new MyroFrame( title, this, x, y );
 
             // add it to the hashtable so future calls to show will know about this frame
-            frames.put( frameName, frame );
+            frames.put( title, frame );
         }
 
         // if we are not the image currently associated with frame then change things so that we are
@@ -81,22 +90,24 @@ public abstract class MyroImage
 
     /**
      * Causes this image to be visible in a window.  If the image had not been displayed previously a window will
-     * be created at the upperleft corner of the screen.
+     * be created at the upperleft corner of the screen.  The title of the window will be "Myro".
      */
     public void show()
     {
-        if( frame == null )
-            show( 0, 0, "Myro" );
-        else
-        {
-            if( frame.getCurrentImage() != this )
-            {
-                frame.setImage( this );
-            }
-            frame.makeVisible();
-        }
+        show( 0, 0, "Myro" );
     }
 
+    /**
+     * Causes this image to be visible in a window.  If the image had not been displayed previously a window will
+     * be created at the upperleft corner of the screen.  The title of the window is passed as a parameter.
+     * 
+     * @param title Title of the window
+     */
+    public void show( String title )
+    {
+        show( 0, 0, title );
+    }
+    
     /**
      * Causes this image to be invisible (i.e., the window disappears from the screen).  If this image was already
      * invisible, no changes are made to any window.
@@ -138,7 +149,7 @@ public abstract class MyroImage
     /**
      * Returns the type (i.e., Color or Grayscale) of this image.
      * 
-     * @return Value MYRO_IMAGE_COLOR or MYRO_IMAGE_GRAY.
+     * @return Value Scribbler.IMAGE_COLOR or Scribbler.IMAGE_GRAY.
      */
     public int getType()
     {
@@ -165,7 +176,7 @@ public abstract class MyroImage
     {
         int[] blobVals;
         int xLow, yLow, blobWidth, blobHeight;
-        
+
         // make sure this image is has a frame and it's visible
         if( frame==null )
         {
@@ -285,7 +296,7 @@ public abstract class MyroImage
     {
         return (MyroFrame)frames.get( frameName );
     }
-    
+
     /**
      * Returns the RGB color of pixel (x,y).
      * <p><p>

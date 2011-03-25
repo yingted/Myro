@@ -10,7 +10,7 @@ public class VisualExplorer
 {
     public static void main(String[] args)
     {
-        final String scribblerPort = "/dev/rfcomm1";
+        final String scribblerPort = "com10";
 
         Scribbler robot = new Scribbler( scribblerPort );
         // abort if port does not exist
@@ -29,7 +29,7 @@ public class VisualExplorer
         while ( !MyroListener.isKeyPressed() )
         {
             // display the camera image
-            image = robot.takePicture(Scribbler.IMAGE_GRAY);
+            image = robot.takePicture(Scribbler.IMAGE_COLOR);
             image.show();
             
             // wait 1 second

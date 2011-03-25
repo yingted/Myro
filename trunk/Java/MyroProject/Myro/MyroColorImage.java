@@ -1,3 +1,27 @@
+/*
+ * Myro/Java license - GPL
+ * 
+ * Myro/Java is a Java implementation of the Myro API, defined by the Institute for Robots in
+ * Education (IPRE).  See http://wiki.roboteducation.org for more information.
+ * 
+ * Copyright 2010-2011 Douglas Harms dharms@depauw.edu
+ * 
+ * This file is part of Myro/Java.
+ * 
+ * Myro/Java is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * any later version.
+ * 
+ * Myro/Java is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with Myro/Java.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
 package Myro;
 
 
@@ -13,7 +37,7 @@ public class MyroColorImage extends MyroImage {
         width = w;
         height = h;
         image = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
-        imageType = MyroImage.MYRO_IMAGE_COLOR;
+        imageType = Scribbler.IMAGE_COLOR;
     }
 
     public MyroColorImage(String filename) {
@@ -32,7 +56,7 @@ public class MyroColorImage extends MyroImage {
             }
             width  = image.getWidth(null);
             height = image.getHeight(null);
-            imageType = MyroImage.MYRO_IMAGE_COLOR;
+            imageType = Scribbler.IMAGE_COLOR;
         }
         catch (IOException e) {
             throw new RuntimeException("Could not open file: " + filename);
