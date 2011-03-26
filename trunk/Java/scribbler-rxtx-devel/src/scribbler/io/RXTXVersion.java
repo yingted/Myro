@@ -4,6 +4,9 @@
 |   Copyright 1997-2009 by Trent Jarvi tjarvi@qbang.org and others who
 |   actually wrote it.  See individual source files for more information.
 |
+|   Port to interface with Scribbler robots as part of the Myro/Java
+|   project copyright 2010-2011 by Douglas Harms dharms@depauw.edu.
+|
 |   A copy of the LGPL v 2.1 may be found at
 |   http://www.gnu.org/licenses/lgpl.txt on March 4th 2007.  A copy is
 |   here for your convenience.
