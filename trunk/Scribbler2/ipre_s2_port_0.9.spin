@@ -138,7 +138,6 @@ pub go | i
 
   Play_Intro                    'Play the turn on chirp
 
-  
 
   '======================== Main Loop ===========================
   repeat

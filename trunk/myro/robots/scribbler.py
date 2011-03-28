@@ -313,6 +313,9 @@ class Scribbler(Robot):
             while 1:
                 try:
                     self.ser = serial.Serial(self.serialPort, timeout = 10) 
+                    # for directly connected scribler-2's
+                    self.ser.setDTR(0)
+
                     break
                 except KeyboardInterrupt:
                     raise
