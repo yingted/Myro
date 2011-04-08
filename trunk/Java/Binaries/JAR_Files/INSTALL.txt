@@ -1,0 +1,19 @@
+This directory contains the four jar files needed for Myro/Java (RXTXScribblerComm.jar,
+jinput.jar, jutils.jar, and  Myro.jar).  Installation consists of copying these files to
+the appropriate place.  Follow the installation instructions for your platform.
+
+Windows:
+If you're using BlueJ, copy the four jar files to C:\BlueJ\lib\userlib
+If you're not using BlueJ, copy the four jar files to (javahome)\jre\lib\ext
+ 
+MacOSX:
+To install Myro/Java for all users, copy the four jar files to /Library/Java/Extensions
+To install Myro/Java for one user, copy the four jar files ti ~/Library/Java/Extensions
+
+Linux:
+If you're using BlueJ, copy the four jar files to /usr/local/bluej/lib/userlib
+If you're not using BlueJ, copy the four jar files to (javahome)/jre/lib/ext
+
+
+NOTE:  Don't forget to also install the platform-specific driver files, contained in
+other folders.
