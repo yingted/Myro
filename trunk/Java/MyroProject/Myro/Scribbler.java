@@ -244,9 +244,9 @@ public class Scribbler  {
         }
         // Print information messages
         //System.out.println( getName() + " is Ready!!" );
-        System.out.println("Info=\"" + getInfo() + "\"" );
+        //System.out.println("Info=\"" + getInfo() + "\"" );
 
-        _connectedFrame = new connectedFrame( portName, getInfo() );
+        _connectedFrame = new connectedFrame( portName, getName(), getInfo() );
 
         return true;
     }
@@ -684,6 +684,9 @@ public class Scribbler  {
         // send to robot
         _set( SET_NAME1, name1 );
         _set( SET_NAME2, name2 );
+        
+        // update the header of the connected window
+        _connectedFrame.setRobotName( getName() );
     }
 
     /**
@@ -3134,9 +3137,15 @@ public class Scribbler  {
 
     private class connectedFrame extends JFrame
     {        
-        public connectedFrame( String portName, String info )
+        private JLabel windowHeader;
+        private String robotName, portName;
+        
+        public connectedFrame( String _portName, String _robotName, String info )
         {
-            super( portName );
+            super( _portName );
+            
+            portName = _portName;
+            robotName = _robotName;
             
             MyroListener listener;
             BufferedImage image = null;
@@ -3173,7 +3182,8 @@ public class Scribbler  {
             }
 
             // now set up the JFrame
-            add( new JLabel( "Your Robot is Connected to " + portName ), BorderLayout.NORTH );
+            windowHeader = new JLabel( "Robot " + robotName + " is connected to port " + portName );
+            add( windowHeader, BorderLayout.NORTH );
             add( new JLabel( "This window must be active for Myro key/mouse events" ), BorderLayout.SOUTH );
 
             // Center is either an image or the info string passed
@@ -3194,6 +3204,12 @@ public class Scribbler  {
             listener = new MyroListener();
             addKeyListener( listener.getKeyListener() );
             addMouseListener( listener.getMouseListener() );
+        }
+        
+        public void setRobotName( String newRobotName )
+        {
+            robotName = newRobotName;
+            windowHeader.setText( "Robot " + robotName + " is connected to port " + portName );
         }
     }
 
