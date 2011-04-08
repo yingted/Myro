@@ -1,0 +1,11 @@
+The Binaries folder contains all files needed to install Myro/Java in your system.  Two types
+of files are necessary - jar files that are common to all platforms, and drivers specific for
+each platform.
+
+The jar files are contained in the JAR_FILES folder, and INSTALL.txt contains installation
+instructions.
+
+All platform-specific drivers are contained in a single folder with an appropriate name
+(e.g., folder Win-32 contains drivers specific for 32 bit Windows systems).  Each of these
+folders has an INSTLL.txt file with instructions.
+
