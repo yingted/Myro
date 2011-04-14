@@ -56,6 +56,21 @@ public abstract class MyroImage
     }
 
     /**
+     * resizes the image to be width x height
+     */
+    public void resize( int newWidth, int newHeight )
+    {
+        BufferedImage newImage = new BufferedImage(newWidth, newHeight, image.getType());  
+        Graphics2D g = newImage.createGraphics();  
+        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);  
+        g.drawImage(image, 0, 0, newWidth, newHeight, 0, 0, width, height, null);  
+        g.dispose();
+        image = newImage;
+        width = newWidth;
+        height = newHeight;
+    }
+
+    /**
      * Causes this image to be visible in a window located at a specified location on the screen.
      * The parameters specify the location of the upperleft corner of the window and the title of the
      * window.  If the window already exists, the location parameters are ignored.
@@ -107,7 +122,7 @@ public abstract class MyroImage
     {
         show( 0, 0, title );
     }
-    
+
     /**
      * Causes this image to be invisible (i.e., the window disappears from the screen).  If this image was already
      * invisible, no changes are made to any window.

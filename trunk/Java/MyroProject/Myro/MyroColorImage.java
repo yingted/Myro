@@ -20,17 +20,16 @@
  * 
  * You should have received a copy of the GNU General Public License
  * along with Myro/Java.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 package Myro;
 
+import java.io.*;
+import java.awt.*;
+import java.awt.image.*;
+import java.net.*;
+import javax.imageio.*;
 
- import java.io.*;
- import java.awt.*;
- import java.awt.image.*;
- import java.net.*;
- import javax.imageio.*;
- 
 public class MyroColorImage extends MyroImage {
 
     public MyroColorImage(int w, int h) {
@@ -68,6 +67,21 @@ public class MyroColorImage extends MyroImage {
         }
     }
 
+    public MyroColorImage( byte[] jpegBuf )
+    {
+        try {
+            ByteArrayInputStream stream = new ByteArrayInputStream( jpegBuf );
+            image = ImageIO.read( ImageIO.createImageInputStream( stream ) );
+            width  = image.getWidth(null);
+            height = image.getHeight(null);
+            imageType = Scribbler.IMAGE_COLOR;
+
+        } catch (IOException e) {
+            throw new RuntimeException("Could not open passed buffer");
+        }
+        
+    }
+
     public Color get(int x, int y)
     {
         return new Color(image.getRGB(x, y));
@@ -77,7 +91,7 @@ public class MyroColorImage extends MyroImage {
     {
         return (int) lum( get( x, y ) );
     }
-    
+
     public void set(int x, int y, Color c)
     {
         assert c!=null : "Color must be non-null";
@@ -88,7 +102,7 @@ public class MyroColorImage extends MyroImage {
     public void setGray( int x, int y, int g)
     {
         assert 0<=g && g<=255 : "Grayscale value out of 0..255 range";
-        
+
         set( x, y, new Color( g, g, g ) );
     }
 }

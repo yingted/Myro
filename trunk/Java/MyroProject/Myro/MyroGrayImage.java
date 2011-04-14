@@ -20,15 +20,15 @@
  * 
  * You should have received a copy of the GNU General Public License
  * along with Myro/Java.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 package Myro;
 
- import java.io.*;
- import java.awt.*;
- import java.awt.image.*;
- import java.net.*;
- import javax.imageio.*;
+import java.io.*;
+import java.awt.*;
+import java.awt.image.*;
+import java.net.*;
+import javax.imageio.*;
 
 public class MyroGrayImage extends MyroImage  {
 
@@ -57,7 +57,7 @@ public class MyroGrayImage extends MyroImage  {
                 if (url == null) { url = new URL(filename); }
                 colorImage = ImageIO.read(url);
             }
-            
+
             width = colorImage.getWidth( null );
             height = colorImage.getHeight( null );
             imageType = Scribbler.IMAGE_GRAY;
@@ -85,11 +85,39 @@ public class MyroGrayImage extends MyroImage  {
         }
     }
 
+    public MyroGrayImage( byte[] jpegBuf )
+    {
+        BufferedImage colorImage;
+        try {
+            ByteArrayInputStream stream = new ByteArrayInputStream( jpegBuf );
+            colorImage = ImageIO.read( ImageIO.createImageInputStream( stream ) );
+            width  = colorImage.getWidth(null);
+            height = colorImage.getHeight(null);
+            imageType = Scribbler.IMAGE_GRAY;
+
+        } catch (IOException e) {
+            throw new RuntimeException("Could not open passed buffer");
+        }
+
+        // convert to grayscale
+        int w = colorImage.getWidth(null);
+        int h = colorImage.getHeight(null);
+        image = new BufferedImage(w, h, BufferedImage.TYPE_BYTE_GRAY);
+        for (int i = 0; i < w; i++) {
+            for (int j = 0; j < h; j++) {
+                Color color = new Color(colorImage.getRGB(i, j));
+                Color gray = toGray(color);
+                image.setRGB(i, j, gray.getRGB());
+            }
+        }
+
+    }
+
     public Color get(int x, int y) {
         Color color = new Color(image.getRGB(x, y));
         return toGray(color);
     }
-    
+
     public int getGray(int x, int y)
     {
         Color color = new Color( image.getRGB(x,y));
@@ -99,11 +127,11 @@ public class MyroGrayImage extends MyroImage  {
     public void set(int x, int y, Color c)
     {
         assert c!=null : "Color must be non-null";
-        
+
         Color gray = toGray(c);
         image.setRGB(x, y, gray.getRGB());
     }
-    
+
     public void setGray(int x, int y, int grayLevel)
     {
         Color gray = new Color( grayLevel, grayLevel, grayLevel );

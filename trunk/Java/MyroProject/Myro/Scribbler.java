@@ -20,7 +20,7 @@
  * 
  * You should have received a copy of the GNU General Public License
  * along with Myro/Java.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 package Myro;
 
@@ -150,19 +150,16 @@ public class Scribbler  {
     public static final int VOLUME_ON               = 1;
 
     /**
-     * Construct a Scribbler object and connect it to port portName.  If the connection was successfully made then it
-     * is legal to invoke methods that require
-     * the scribbler be connected; if the connection was not successful then it is not legal to invoke 
-     * methods that require the scribbler to be connected.  Method {@link #scribblerConnected scribblerConnected} can be used to
-     * determine if the connection was successfully made.
-     * 
-     * @param portName  the name of the port the Scribbler is attached to (e.g., "COM1", "/dev/ttyS0")
+     * Construct a Scribbler object that is not connected to any port.  Method {@link #connect connect}
+     * must be called to connect this Scribbler to a port.
      */
-    public Scribbler(String portName) {
+    public Scribbler() {
 
         _scribblerConnected = false;
         _flukeConnected = false;
         _serialPort = null;
+        _robotVersion = new int[] { 0, 0, 0 };
+        _flukeVersion = new int[] { 0, 0, 0 };
 
         // print a warning if asserts are disabled
         boolean testAssert = false;
@@ -173,6 +170,20 @@ public class Scribbler  {
             System.out.println("\"bluej.vm.args=-ea\" to your bluej.properties file to enable");
             System.out.println("assertion checking.");
         }
+    }
+
+    /**
+     * Construct a Scribbler object and connect it to port portName.  If the connection was successfully made then it
+     * is legal to invoke methods that require
+     * the scribbler be connected; if the connection was not successful then it is not legal to invoke 
+     * methods that require the scribbler to be connected.  Method {@link #scribblerConnected scribblerConnected} can be used to
+     * determine if the connection was successfully made.
+     * 
+     * @param portName  the name of the port the Scribbler is attached to (e.g., "COM1", "/dev/ttyS0")
+     */
+    public Scribbler(String portName) {
+        // execute the default constructor
+        this();
 
         // try to connect to the robot
         connect( portName );
@@ -194,6 +205,12 @@ public class Scribbler  {
         // close the connection if it is currently opened
         if( _scribblerConnected || _flukeConnected )
             close();
+
+        // nothing connected now
+        _flukeConnected = false;
+        _scribblerConnected = false;
+        _flukeVersion = new int[] {0, 0, 0};
+        _robotVersion = new int[] {0, 0, 0};
 
         // initalize serial port
         _serialPort = null;
@@ -232,23 +249,65 @@ public class Scribbler  {
         // get info about the robot
         String info = getInfo();
         info = info.toLowerCase();
-        if( info.contains("fluke") )
-            _flukeConnected = true;
-        if( info.contains("scribbler" ) )
-            _scribblerConnected = true;
+        info = info.substring( 9 );  // remove echo, since getInfo doesn't know if we're a scribbler
+
+        // Example return value from getInfo():
+        //fluke:2.9.1,Robot-Version:2.6.1,Robot:Scribbler,Mode:Serial
+
+        // info string parts are separated by commas
+        String[] infoTokens = info.split( "," );
+        for( int i=0; i<infoTokens.length; i++ )
+        {
+            // each token consists of a name followed by a colon followed by a value
+            String[] tokenParts = infoTokens[i].split( ":" );
+
+            // process the info token
+            if( tokenParts[0].equals("fluke") )
+            {
+                _flukeConnected = true;
+                _flukeVersion = parseVersion( tokenParts[1] );
+            }
+            else if( tokenParts[0].equals( "robot-version" ) )
+            {
+                _robotVersion = parseVersion( tokenParts[1] );
+            }
+            else if( tokenParts[0].equals( "robot" ) )
+            {
+                if( tokenParts[1].equals( "scribbler" ) )
+                {
+                    _scribblerConnected = true;
+                }
+            }
+        }
 
         // do any device-specific initialization
         if( _flukeConnected )
         {
             setIRPower( 135 );
+            autoCamera();
         }
-        // Print information messages
-        //System.out.println( getName() + " is Ready!!" );
-        //System.out.println("Info=\"" + getInfo() + "\"" );
 
         _connectedFrame = new connectedFrame( portName, getName(), getInfo() );
 
         return true;
+    }
+
+    /**
+     * Split a period-seperated string of ints into its component integers.  The return value is
+     * an int array of these integers.
+     */
+    private int[] parseVersion( String token )
+    {
+        // break the string period-separated ints into its components
+        String parts[] = token.split( "\\." );
+
+        // convert strings to ints and return
+        int[] intArr = new int [parts.length];        
+        for( int i=0; i<parts.length; i++ )
+        {
+            intArr[i] = Integer.parseInt( parts[i] );
+        }
+        return intArr;
     }
 
     /**
@@ -684,7 +743,7 @@ public class Scribbler  {
         // send to robot
         _set( SET_NAME1, name1 );
         _set( SET_NAME2, name2 );
-        
+
         // update the header of the connected window
         _connectedFrame.setRobotName( getName() );
     }
@@ -1478,8 +1537,24 @@ public class Scribbler  {
         MyroImage retImage=null;
 
         switch (imageType) {
-            case IMAGE_COLOR: retImage = _readColorImage(); break;
-            case IMAGE_GRAY:  retImage = _readGrayImage(); break;
+            case IMAGE_COLOR:
+            {
+                if( _versionCompare( _flukeVersion, new int[]{2, 7, 8} ) < 0 )
+                    retImage = _readColorImage();
+                else
+                    retImage = _readColorJpegImage();
+                break;
+            }
+
+            case IMAGE_GRAY:
+            {
+                if( _versionCompare( _flukeVersion, new int[]{2, 7, 8} ) < 0 )
+                    retImage = _readGrayImage();
+                else
+                    retImage = _readGrayJpegImage();
+                break;
+            }
+            
             case IMAGE_BLOB:  retImage = _readBlobImage(); break;
         }
 
@@ -1561,6 +1636,8 @@ public class Scribbler  {
     private static final int GET_JPEG_GRAY_SCAN     = 136;
     private static final int GET_JPEG_COLOR_HEADER  = 137;
     private static final int GET_JPEG_COLOR_SCAN    = 138;
+    private static final int GET_IR_MESSAGE         = 150;
+    private static final int SEND_IR_MESSAGE        = 151;
 
     // Scribbler codes
     private static final int SET_PASS1              = 55;
@@ -1602,6 +1679,7 @@ public class Scribbler  {
     private static final int SET_WHITE_BALANCE      = 129;
     private static final int SET_NO_WHITE_BALANCE   = 130;
     private static final int SET_CAM_PARAM          = 131;
+    private static final int SET_IR_EMITTERS        = 152;
 
     // Fluke camera addresses and associated constants
     private static final int CAM_PID                = 0x0A;
@@ -1632,11 +1710,14 @@ public class Scribbler  {
     private static final int CAM_COMB_EXPOSURE_CONTROL_OFF = (CAM_COMB_DEFAULT & ~(1 << 0));
 
     // robot state
-    private boolean _flukeConnected = false;
+    private boolean _flukeConnected;
+    private int[] _flukeVersion;
     private double _lastTranslate = 0.0;
     private double _lastRotate = 0.0;
     private int[] _lastSensors;     // Included because Myro-Pytyhon had this.  Not sure it's necessary
-    private boolean _scribblerConnected = false;       // true=>robot is connected to a scribbler
+    private boolean _scribblerConnected;
+    private int[] _robotVersion;
+
     private Thread currentSensesThread;
     private Thread currentJoyStickThread;
     private Thread currentGamepadThread;
@@ -1950,7 +2031,7 @@ public class Scribbler  {
     {
         // send the command to the Fluke
         int[] data = new int[] { addr, value };
-        _setFluke( SET_CAM_PARAM );
+        _setFluke( SET_CAM_PARAM, data );
 
         // wait for the Fluke to reconfigure
         MyroUtils.sleep( 0.150 );  
@@ -1967,11 +2048,76 @@ public class Scribbler  {
         return _read( numResponseBytes );
     }
 
+    /**
+     * Send a command with data to the fluke.  The command opcode and command data are passed to the method
+     * as well as the number of response bytes expected.  Only one trhead at a time can communicate with
+     * the Fluke/Scribbler.
+     */
     private synchronized int[] _getFluke( int command, int data, int numResponseBytes)
     {
         int[] message = new int[] { command, data };
         _write( message );
         return _read( numResponseBytes );
+    }
+
+    /**
+     * get a jpeg header from the fluke and return it.  The command should be either GET_JPEG_GRAY_HEADER
+     * or GET_JPEG_COLOR_HEADER.
+     */
+    private synchronized int[] _getJpegHeader( int command )
+    {
+        int[] message = new int[] { command };
+        _write( message );
+
+        // get the length of the header
+        int resp[]  = _read( 2 );
+        int len = resp[0] + resp[1]*256;
+
+        // read the header and return it
+        return _read( len );
+    }
+
+    /**
+     * 
+     */
+    private synchronized int[] _getJpegScan( int command )
+    {
+        final int arrSize = 10000;  // assume the image size will be less than this
+        int[] tempBuf = new int[arrSize];
+        int len = 0;
+        int lastChar = 0;
+
+        // send the command to the Fluke
+        int[] message = new int[] { command, 1 };
+        _write( message );
+
+        // read response until end of image encountered
+        while( true )
+        {
+            int temp[] = _read( 1 );
+            tempBuf[len++] = temp[0];
+
+            // exit loop if end of image marker found
+            if( lastChar == 0xff && tempBuf[len-1] == 0xd9 )
+            {
+                break;
+            }
+
+            lastChar = tempBuf[len-1];
+        }
+
+        int[] bm0 = _read( 4 );     // Start
+        int[] bm1 = _read( 4 );     // Read
+        int[] bm2 = _read( 4 );     // Compress
+
+        // now copy the temporary buffer to a new array of the proper size and return it
+        int[] buf = new int[len];
+        for( int i=0; i<len; i++ )
+        {
+            buf[i] = tempBuf[i];
+        }
+
+        return buf;
     }
 
     /**
@@ -2053,6 +2199,70 @@ public class Scribbler  {
 
         // create a rgb color and return it
         return new Color( r, g, b);
+    }
+
+    /**
+     * Read the 256x192 jpeg color image from the fluke board and return it as a MyroColorImage instance.
+     */
+    private MyroColorImage _readColorJpegImage()
+    {
+        assert flukeConnected() : "_readColorJpegImage: no Fluke on robot";
+
+        // read the jpeg image from the fluke
+        int[] header = _getJpegHeader( GET_JPEG_COLOR_HEADER );
+        int[] scan = _getJpegScan( GET_JPEG_COLOR_SCAN );
+
+        // copy into a byte array
+        byte[] jpeg = new byte[ header.length + scan.length ];
+        for( int i=0; i<header.length; i++ )
+        {
+            jpeg[i] = (byte)(header[i] & 0xff);
+        }
+        for( int j=0; j<scan.length; j++ )
+        {
+            jpeg[j+header.length] = (byte)(scan[j] & 0xff);
+        }
+
+        // create a MyroColorImage from jpeg array
+        MyroColorImage image = new MyroColorImage( jpeg );
+
+        // scale the image to be 256x192 (the fluke sends back a 128x192 image)
+        image.resize( 256, 192 );
+
+        // return the scaled image
+        return image;
+    }
+
+    /**
+     * Read the 256x192 jpeg grayscale image from the fluke board and return it as a MyroColorImage instance.
+     */
+    private MyroGrayImage _readGrayJpegImage()
+    {
+        assert flukeConnected() : "_readGrayJpegImage: no Fluke on robot";
+
+        // read the jpeg image from the fluke
+        int[] header = _getJpegHeader( GET_JPEG_GRAY_HEADER );
+        int[] scan = _getJpegScan( GET_JPEG_GRAY_SCAN );
+
+        // copy into a byte array
+        byte[] jpeg = new byte[ header.length + scan.length ];
+        for( int i=0; i<header.length; i++ )
+        {
+            jpeg[i] = (byte)(header[i] & 0xff);
+        }
+        for( int j=0; j<scan.length; j++ )
+        {
+            jpeg[j+header.length] = (byte)(scan[j] & 0xff);
+        }
+
+        // create a MyroColorImage from jpeg array
+        MyroGrayImage image = new MyroGrayImage( jpeg );
+
+        // scale the image to be 256x192 (the fluke sends back a 128x192 image)
+        image.resize( 256, 192 );
+
+        // return the scaled image
+        return image;
     }
 
     /**
@@ -2170,11 +2380,15 @@ public class Scribbler  {
      * Read a blob (i.e., RLE) image from the Fluke and return it as a 256x192 MyroGrayImage.  Because we'll
      * need to call i/o routines twice we need to be synchronized.
      */
-    private synchronized MyroImage _readBlobImage()
+    private MyroImage _readBlobImage()
     {
         int width = 256;
         int height = 192;
+        int[] rle;
 
+        // We can't let other methods communicate with the robot until we get the entire response
+        synchronized(this)
+        {
         // get the RLE image from the Fluke.  The first two response bytes are the reply size
         int[] sizeResponse = _getFluke( GET_RLE, 2 );
 
@@ -2182,7 +2396,8 @@ public class Scribbler  {
         int size = (sizeResponse[0]<<8) | sizeResponse[1];
 
         // read the rest of the response
-        int[] rle = _read( size );
+        rle = _read( size );
+        }
 
         // define a grayscale image based on the RLE blob image
         MyroImage image = new MyroGrayImage( width, height );
@@ -2215,6 +2430,64 @@ public class Scribbler  {
 
         return image;
 
+    }
+
+    /**
+     * compares two arrays of ints and returns an indicatation of how they compare.  
+     */
+    private int _versionCompare( int [] a1, int[] a2 )
+    {
+        for( int i=0; i<a1.length && i<a2.length; i++ )
+        {
+            if( a1[i] < a2[i] )
+            {
+                return -1;
+            }
+            else if( a1[i] > a2[i] )
+            {
+                return 1;
+            }
+        }
+
+        // if no more values in either array they must be equal
+        if( a1.length == a2.length )
+        {
+            return 0;
+        }
+
+        // a1 is shorter
+        if( a1.length < a2.length )
+        {
+            for( int i=a1.length; i<a2.length; i++ )
+            {
+                if( 0 < a2[i] )
+                {
+                    return -1;
+                }
+                else if( 0 > a2[i] )
+                {
+                    return 1;
+                }
+            }
+            return 0;
+        }
+
+        // a2 is shorter
+        else
+        {
+            for( int i=a2.length; i<a1.length; i++ )
+            {
+                if( a1[i] < 0 )
+                {
+                    return -1;
+                }
+                else if (a1[i] > 0 )
+                {
+                    return 1;
+                }
+            }
+            return 0;
+        }
     }
 
     /**
@@ -2576,7 +2849,7 @@ public class Scribbler  {
             robot = _robot;
 
             // Capture the camera image and display it
-            MyroImage image = robot.takePicture( IMAGE_GRAY );
+            MyroImage image = robot.takePicture( IMAGE_COLOR );
             image.show( 10, 10, "Scribbler Camera" );
 
             // get the MyroFrame of the camera window
@@ -2600,7 +2873,7 @@ public class Scribbler  {
             while( !finished )
             {
                 // capture the camera image and display it
-                robot.takePicture( IMAGE_GRAY ).show( 10, 10, "Scribbler Camera" );
+                robot.takePicture( IMAGE_COLOR ).show( 10, 10, "Scribbler Camera" );
 
                 // wait 1 second.  If our parent thread interrupts us then we're finished
                 try
@@ -3139,14 +3412,14 @@ public class Scribbler  {
     {        
         private JLabel windowHeader;
         private String robotName, portName;
-        
+
         public connectedFrame( String _portName, String _robotName, String info )
         {
             super( _portName );
-            
+
             portName = _portName;
             robotName = _robotName;
-            
+
             MyroListener listener;
             BufferedImage image = null;
 
@@ -3205,7 +3478,7 @@ public class Scribbler  {
             addKeyListener( listener.getKeyListener() );
             addMouseListener( listener.getMouseListener() );
         }
-        
+
         public void setRobotName( String newRobotName )
         {
             robotName = newRobotName;

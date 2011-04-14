@@ -20,7 +20,7 @@
  * 
  * You should have received a copy of the GNU General Public License
  * along with Myro/Java.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 package Myro;
 
@@ -35,14 +35,17 @@ import java.util.Random;
 public class MyroUtils
 {
 
-    private static Random randomSeq;
-    
+    private static Random _randomSeq;
+    private static boolean _newCountDown;
+    private static long _startTime;
+
     // static constructor
     static
     {
-        randomSeq = new Random();
+        _randomSeq = new Random();
+        _newCountDown = true;
     }
-    
+
     /**
      * Cause the current thread to sleep for numSeconds.
      * <p><p>
@@ -59,7 +62,7 @@ public class MyroUtils
         } catch (InterruptedException e) {}
 
     }
-    
+
     /**
      * Returns a random integer within a specified range.
      * <p><p>
@@ -72,8 +75,28 @@ public class MyroUtils
     public static int randomInt( int low, int high )
     {
         assert low <= high : "low cannot be greater than high";
-        
-        return randomSeq.nextInt( high-low+1 ) + low ;
+
+        return _randomSeq.nextInt( high-low+1 ) + low ;
+    }
+
+    /**
+     * 
+     */
+    public static boolean timeRemaining( double seconds )
+    {
+        if( _newCountDown )
+        {
+            _startTime = System.currentTimeMillis();
+            _newCountDown = false;
+        }
+
+        if( System.currentTimeMillis() <= _startTime+seconds*1000 )
+            return true;
+        else
+        {
+            _newCountDown = true;
+            return false;
+        }
     }
 
 }
