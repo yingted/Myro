@@ -20,7 +20,7 @@
  * 
  * You should have received a copy of the GNU General Public License
  * along with Myro/Java.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 package Myro;
 
@@ -75,6 +75,98 @@ public class MyroGUI
     }
 
     /**
+     * Presents the user with an information modal dialog box with only an OK response.
+     * 
+     * @param message The text message presented to the user
+     */
+    public static void tellUser( String message )
+    {
+        String[] options = new String[] { "OK" };
+        showDialogBox( message, options, JOptionPane.INFORMATION_MESSAGE );
+    }
+
+    /**
+     * Presents user with an input dialog box, allowing her/him to enter a String.
+     * 
+     * @param message The text message presented to the user
+     * @return The String entered by the user, or null if user cancels the input
+     */
+    public static String inputString( String message )
+    {
+        return JOptionPane.showInputDialog( message );
+    }
+
+    /**
+     * Presents user with an input dialog box, allowing her/him to enter an integer.  If the user
+     * enters an illegal value, the user is told about this and presented with the original
+     * dialog box asking for input.  This continues until the user enters a valid integer or
+     * hits the Cancel button, in which case 0 is returned.
+     * 
+     * @param message The text message presented to the user
+     * @return The integer entered by the user.  0 is returned if the user cancels the input.
+     */
+    public static int inputInteger( String message )
+    {
+        String response;
+        int retVal;
+
+        while (true)
+        {
+            // present user with input dialog box, prompting with message
+            response = inputString( message );
+
+            // process the response
+            // user cancelled the input, so just return 0
+            if( response == null )
+                return 0;
+
+            // try to convert response to int.  If this fails, have user re-enter
+            try {
+                retVal = Integer.valueOf( response );
+                return retVal;
+            } catch (NumberFormatException e)
+            {
+                tellUser( "Improper integer entered.  Please try again." );
+            }
+        }
+    }
+
+    /**
+     * Presents user with an input dialog box, allowing her/him to enter a double.  If the user
+     * enters an illegal value, the user is told about this and presented with the original
+     * dialog box asking for input.  This continues until the user enters a valid double or
+     * hits the Cancel button, in which case 0.0 is returned.
+     * 
+     * @param message The text message presented to the user
+     * @return The integer entered by the user.  0.0 is returned if the user cancels the input.
+     */
+    public static double inputDouble( String message )
+    {
+        String response;
+        double retVal;
+
+        while (true)
+        {
+            // present user with input dialog box, prompting with message
+            response = inputString( message );
+
+            // process the response
+            // user cancelled the input, so just return 0
+            if( response == null )
+                return 0.0;
+
+            // try to convert response to double.  If this fails, have user re-enter
+            try {
+                retVal = Double.valueOf( response );
+                return retVal;
+            } catch (NumberFormatException e)
+            {
+                tellUser( "Improper double entered.  Please try again." );
+            }
+        }
+    }
+
+    /**
      * Presents the user with a modal dialog box with 1 or more responses.
      * <p><p>
      * precondition: length of options > 0
@@ -93,9 +185,8 @@ public class MyroGUI
                 messageType,
                 null,
                 options,
-                null);
+                options[0]);
 
         return options[n];
     }
-
 }
