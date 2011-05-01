@@ -25,6 +25,7 @@
 package Myro;
 
 import java.util.Random;
+import com.sun.speech.freetts.*; // for text-to-speech
 
 /**
  * Miscellaneous methods for Myro/Java programs
@@ -38,12 +39,23 @@ public class MyroUtils
     private static Random _randomSeq;
     private static boolean _newCountDown;
     private static long _startTime;
+    private static Voice _voice;
 
     // static constructor
     static
     {
+        String VOICE_NAME = "kevin";
+
+        // initialize random number sequence
         _randomSeq = new Random();
+
+        // initialize timeRemaining 
         _newCountDown = true;
+
+        // initialize text-to-speach
+        VoiceManager voiceManager = VoiceManager.getInstance();
+        _voice = voiceManager.getVoice( VOICE_NAME );
+        _voice.allocate();
     }
 
     /**
@@ -80,7 +92,21 @@ public class MyroUtils
     }
 
     /**
+     * Returns a random double in the range 0.0 (inclusive) and 1.0 (exclusive).
+     * <p><p>
      * 
+     * @return A uniformly distributed random double between 0.0 (inclusive) and 1.0 (exclusive)
+     */
+    public static double randomDouble( )
+    {
+        return _randomSeq.nextDouble();
+    }
+
+    /**
+     * Controls a while-loop for a specific number of seconds.
+     * 
+     * @param seconds number of seconds to loop
+     * @return true iff the specified number of seconds has not elapsed
      */
     public static boolean timeRemaining( double seconds )
     {
@@ -97,6 +123,16 @@ public class MyroUtils
             _newCountDown = true;
             return false;
         }
+    }
+
+    /**
+     * Speak the passed string using the speach synthesizer.
+     * 
+     * @param message The string to speak.
+     */
+    public static void speak( String message )
+    {
+        _voice.speak( message );
     }
 
 }
