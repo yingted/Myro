@@ -43,7 +43,7 @@ public class Flute
                 note += 4;
 
             // have the scribbler play the note
-            robot.beep( 0.2, notes[note] );
+            robot.beep( notes[note], 0.2 );
         }
 
         robot.close();
