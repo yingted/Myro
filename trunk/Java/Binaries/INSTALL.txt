@@ -7,5 +7,5 @@ instructions.
 
 All platform-specific drivers are contained in a single folder with an appropriate name
 (e.g., folder Win-32 contains drivers specific for 32 bit Windows systems).  Each of these
-folders has an INSTLL.txt file with instructions.
+folders has an INSTALL.txt file with instructions.
 

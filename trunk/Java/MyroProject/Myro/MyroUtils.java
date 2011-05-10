@@ -44,7 +44,7 @@ public class MyroUtils
     // static constructor
     static
     {
-        String VOICE_NAME = "kevin";
+        String VOICE_NAME = "kevin16";
 
         // initialize random number sequence
         _randomSeq = new Random();

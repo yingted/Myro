@@ -209,6 +209,7 @@ public class Scribbler  {
         // nothing connected now
         _flukeConnected = false;
         _scribblerConnected = false;
+        _scribbler2Connected = false;
         _portName = null;
         _flukeVersion = new int[] {0, 0, 0};
         _robotVersion = new int[] {0, 0, 0};
@@ -253,7 +254,6 @@ public class Scribbler  {
         // get info about the robot
         String info = getInfo();
         info = info.toLowerCase();
-        info = info.substring( 9 );  // remove echo, since getInfo doesn't know if we're a scribbler
 
         // Example return value from getInfo():
         //fluke:2.9.1,Robot-Version:2.6.1,Robot:Scribbler,Mode:Serial
@@ -280,6 +280,11 @@ public class Scribbler  {
                 if( tokenParts[1].equals( "scribbler" ) )
                 {
                     _scribblerConnected = true;
+                }
+                else if( tokenParts[1].equals( "scribbler2" ) )
+                {
+                    _scribblerConnected = true;
+                    _scribbler2Connected = true;
                 }
             }
         }
@@ -400,14 +405,24 @@ public class Scribbler  {
     }
 
     /**
-     * Returns whether the scribbler is currently connected.
+     * Returns whether a scribbler or Scribbler2 is currently connected.
      * 
-     * @return true iff the Scribbler is currently connected
+     * @return true iff a Scribbler or Scribbler2 is currently connected
      * 
      */
     public boolean scribblerConnected()
     {
         return _scribblerConnected;
+    }
+
+    /**
+     * Returns whether a scribbler2 is currently connected.
+     * 
+     * @return true iff a Scribbler2 is currently connected.
+     */
+    public boolean scribbler2Connected()
+    {
+        return _scribbler2Connected;
     }
 
     /**
@@ -474,12 +489,14 @@ public class Scribbler  {
      * Scribbler.SENSOR_LIGHT_CENTER (or 1), or Scribbler.SENSOR_LIGHT_RIGHT (or 2).
      * 
      * @return The value of the selected light sensor.  The value will be non-negative, and a low value indicates
-     * bright light, a high value indicates low light.
+     * low light, a high value indicates bright light.
      */
     public  int getLight( int whichLight ) 
     {
         assert scribblerConnected() : "Scribbler not connected";
         assert SENSOR_LIGHT_LEFT<=whichLight && whichLight<=SENSOR_LIGHT_RIGHT : "Illegal light sensor";
+
+        int retVal;
 
         // set command to be the appropriate Scribbler command
         int command = 0;
@@ -492,7 +509,15 @@ public class Scribbler  {
 
         // issue the command to the Scribbler and read the response
         int[] data = _get( command, 2 );
-        return (data[0] << 8) | data[1];
+        retVal = (data[0] << 8) | data[1];
+
+        // "invert" the value if this is a Scribbler (and not a Scribbler2)
+        if( !scribbler2Connected() )
+        {
+            retVal = _adjustLightLevel( retVal );
+        }
+
+        return retVal;
     }
 
     /**
@@ -513,6 +538,38 @@ public class Scribbler  {
         retVal[0] = (data[0] << 8) | data[1];
         retVal[1] = (data[2] << 8) | data[3];
         retVal[2] = (data[4] << 8) | data[5];
+
+        // "invert" the values if this is a scribbler (and not a scribbler2)
+        if( !scribbler2Connected() )
+        {
+            for( int i=0; i<3; i++ )
+            {
+                retVal[i] = _adjustLightLevel( retVal[i] );
+            }
+        }
+
+        return retVal;
+    }
+
+    /**
+     * adjust scribbler 1 light readings so that small values represent low light levels and large value
+     * represent bright light levels.  This is only necessary for a Scribbler1.
+     */
+    private int _adjustLightLevel( int val )
+    {
+        int retVal = val;
+
+        // clamp at 5000
+        if( retVal > 5000 )
+            retVal = 5000;
+
+        // retVal=10^(4.5-log10(x))
+        retVal = (int)Math.exp( 4.5 * Math.log(10) - Math.log(retVal) );
+
+        // clamp return value to 5000
+        if( retVal > 5000 )
+            retVal = 5000;
+
         return retVal;
     }
 
@@ -531,7 +588,7 @@ public class Scribbler  {
     public  boolean getIR( int whichIR ) 
     {
         assert scribblerConnected() : "Scribbler not connected";
-        assert whichIR>=SENSOR_IR_LEFT && whichIR<=SENSOR_IR_RIGHT;
+        assert whichIR>=SENSOR_IR_LEFT && whichIR<=SENSOR_IR_RIGHT : "Illegal IR sensor selected";
 
         int command;
         if( whichIR == SENSOR_IR_LEFT )
@@ -540,7 +597,15 @@ public class Scribbler  {
             command = GET_IR_RIGHT;
 
         int[] data = _get( command, 1 );
-        return data[0] == 1;
+
+        if( scribbler2Connected() )
+        {
+            return data[0] == 0;
+        }
+        else
+        {
+            return data[0] != 0;
+        }
     }
 
     /**
@@ -557,8 +622,17 @@ public class Scribbler  {
 
         boolean[] retVal = new boolean[2];
         int[] data = _get( GET_IR_ALL, 2 );
-        retVal[0] = data[0] == 1;
-        retVal[1] = data[1] == 1;
+
+        if( scribbler2Connected() )
+        {
+            retVal[0] = data[0] == 0;
+            retVal[1] = data[1] == 0;
+        }
+        else
+        {
+            retVal[0] = data[0] != 0;
+            retVal[1] = data[1] != 0;
+        }
         return retVal;
     }
 
@@ -586,7 +660,15 @@ public class Scribbler  {
             command = GET_LINE_RIGHT;
 
         int[] data = _get( command, 1 );
-        return data[0] == 1;
+
+        if( scribbler2Connected() )
+        {
+            return data[0] != 1;
+        }
+        else
+        {
+            return data[0] == 1;
+        }
     }
 
     /**
@@ -603,8 +685,17 @@ public class Scribbler  {
 
         boolean[] retVal = new boolean[2];
         int[] data = _get( GET_LINE_ALL, 2 );
-        retVal[0] = data[0] == 1;
-        retVal[1] = data[1] == 1;
+
+        if( scribbler2Connected() )
+        {
+            retVal[0] = data[0] != 1;
+            retVal[1] = data[1] != 1;
+        }
+        else
+        {
+            retVal[0] = data[0] == 1;
+            retVal[1] = data[1] == 1;
+        }
         return retVal;
     }
 
@@ -629,10 +720,10 @@ public class Scribbler  {
             temp[i] = (byte)info[i];
         String retVal = new String(temp);
 
-        // if the scribbler is connected then the first 9 characters are the echo of the command, so we'll
-        // remove them
-        if( scribblerConnected() )
-            retVal = retVal.substring( 9 );
+        // if the first character is the GET_INFO char and the second chara is nul then we assume the command
+        // was echoed, and we'll remove the echo
+        if( retVal.charAt(0) == GET_INFO && retVal.charAt(1) == 0 )
+            retVal = retVal.substring( 9 ) ;
 
         return retVal;
     }
@@ -1721,6 +1812,7 @@ public class Scribbler  {
     private double _lastRotate = 0.0;
     private int[] _lastSensors;     // Included because Myro-Pytyhon had this.  Not sure it's necessary
     private boolean _scribblerConnected;
+    private boolean _scribbler2Connected;
     private int[] _robotVersion;
     private String _portName;
 
@@ -2770,14 +2862,30 @@ public class Scribbler  {
                 if( scribblerConnected() )
                 {
                     data = robot._getAll();
+
+                    // Scribbler1 and Scribbler2 return different values for many of the sensors
+                    if( scribbler2Connected() )
+                    {
+                        IRLeft = new Boolean( data[0] == 0 );
+                        IRRight = new Boolean( data[1] == 0 );
+                        LightLeft = new Integer( (data[2]<<8) | data[3] );
+                        LightCenter = new Integer( (data[4]<<8) | data[5] );
+                        LightRight = new Integer( (data[6]<<8) | data[7] );
+                        LineLeft = new Boolean( data[8]==0 );
+                        LineRight = new Boolean( data[9]==0 );
+                    }
+                    else
+                    {
+                        IRLeft = new Boolean( data[0] != 0 );
+                        IRRight = new Boolean( data[1] != 0 );
+                        LightLeft = new Integer( _adjustLightLevel( (data[2]<<8) | data[3] ) );
+                        LightCenter = new Integer( _adjustLightLevel( (data[4]<<8) | data[5] ) );
+                        LightRight = new Integer( _adjustLightLevel( (data[6]<<8) | data[7] ) );
+                        LineLeft = new Boolean( data[8]!=0 );
+                        LineRight = new Boolean( data[9]!=0 );
+                    }
+
                     Stall = new Boolean( data[10]!=0 );
-                    IRLeft = new Boolean( data[0]!=0 );
-                    IRRight = new Boolean( data[1]!=0 );
-                    LineLeft = new Boolean( data[8]!=0 );
-                    LineRight = new Boolean( data[9]!=0 );
-                    LightLeft = new Integer( (data[2]<<8) | data[3] );
-                    LightCenter = new Integer( (data[4]<<8) | data[5] );
-                    LightRight = new Integer( (data[6]<<8) | data[7] );
 
                     stallValue.setText( Stall.toString() );
                     IRLeftValue.setText( IRLeft.toString() );
