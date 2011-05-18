@@ -1,6 +1,6 @@
 {
 ***************************************
-*  IPRE Scribbler2 Firmware v1.1      *
+*  IPRE Scribbler2 Firmware v1.0.2    *
 *  Date:   12-6-2010                  *
 *  Author: Daniel Harris              *
 ***************************************
@@ -102,7 +102,7 @@ obj
 
 dat
 
-roboData      byte      "Robot-Version:1.0.1,Robot:Scribbler2,Mode:Serial", 10, 0
+roboData      byte      "Robot-Version:1.0.2,Robot:Scribbler2,Mode:Serial", 10, 0
 
 nameData      byte      "Scribby         ", 0           'null terminate string
 ipreData      byte      127, 127, 127, 127, 0, 0, 0, 0
@@ -340,16 +340,16 @@ pub Get_IR_Right
   enqueue(!s2.obstacle(s2#RIGHT, 0) & 1)
       
 pub Get_Light_Right
-  enqueue((s2.light_sensor_raw(s2#RIGHT)>>8) & $FF)     'enqueue high byte
-  enqueue(s2.light_sensor_raw(s2#RIGHT) & $FF)          'enqueue low byte
+  enqueue((s2.light_sensor_raw_inv(s2#RIGHT)>>8) & $FF)     'enqueue high byte
+  enqueue(s2.light_sensor_raw_inv(s2#RIGHT) & $FF)          'enqueue low byte
       
 pub Get_Light_Center
-  enqueue((s2.light_sensor_raw(s2#CENTER)>>8) & $FF)    'enqueue high byte
-  enqueue(s2.light_sensor_raw(s2#CENTER) & $FF)         'enqueue low byte
+  enqueue((s2.light_sensor_raw_inv(s2#CENTER)>>8) & $FF)    'enqueue high byte
+  enqueue(s2.light_sensor_raw_inv(s2#CENTER) & $FF)         'enqueue low byte
 
 pub Get_Light_Left
-  enqueue((s2.light_sensor_raw(s2#LEFT)>>8) & $FF)      'enqueue high byte
-  enqueue(s2.light_sensor_raw(s2#LEFT) & $FF)           'enqueue low byte
+  enqueue((s2.light_sensor_raw_inv(s2#LEFT)>>8) & $FF)      'enqueue high byte
+  enqueue(s2.light_sensor_raw_inv(s2#LEFT) & $FF)           'enqueue low byte
 
 pub Set_LED_All
 
@@ -481,15 +481,15 @@ pub Get_All | temp
   enqueue(!s2.obstacle(s2#LEFT, 0) & 1)
   enqueue(!s2.obstacle(s2#RIGHT, 0) &1)
 
-  temp := s2.light_sensor_raw(s2#LEFT)
+  temp := s2.light_sensor_raw_inv(s2#LEFT)
   enqueue((temp>>8)&$FF)
   enqueue((temp)&$FF)
   
-  temp := s2.light_sensor_raw(s2#CENTER)
+  temp := s2.light_sensor_raw_inv(s2#CENTER)
   enqueue((temp>>8)&$FF)
   enqueue((temp)&$FF)
 
-  temp := s2.light_sensor_raw(s2#RIGHT)
+  temp := s2.light_sensor_raw_inv(s2#RIGHT)
   enqueue((temp>>8)&$FF)
   enqueue((temp)&$FF)
 
@@ -500,15 +500,15 @@ pub Get_All | temp
 
 pub Get_Light_All | temp
 
-  temp := s2.light_sensor_raw(s2#LEFT)
+  temp := s2.light_sensor_raw_inv(s2#LEFT)
   enqueue((temp>>8)&$FF)
   enqueue((temp)&$FF)
   
-  temp := s2.light_sensor_raw(s2#CENTER)
+  temp := s2.light_sensor_raw_inv(s2#CENTER)
   enqueue((temp>>8)&$FF)
   enqueue((temp)&$FF)
 
-  temp := s2.light_sensor_raw(s2#RIGHT)
+  temp := s2.light_sensor_raw_inv(s2#RIGHT)
   enqueue((temp>>8)&$FF)
   enqueue((temp)&$FF)
 
