@@ -1,6 +1,6 @@
 {
 ***************************************
-*  IPRE Scribbler2 Firmware v0.9      *
+*  IPRE Scribbler2 Firmware v1.1      *
 *  Date:   12-6-2010                  *
 *  Author: Daniel Harris              *
 ***************************************
