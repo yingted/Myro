@@ -296,6 +296,18 @@ public class Scribbler  {
             autoCamera();
         }
 
+        // Some sensor values were wrong in Scribbler2 firmware versions prior to 1.0.2, so check this
+        // and warn the user if the firmware is older than this.
+        if( scribbler2Connected() )
+        {
+            if( _versionCompare( _robotVersion, new int[]{1, 0, 2} ) < 0 )
+            {
+                System.out.println("WARNING: Your Scribbler2 firmware is older than to 1.0.2.");
+                System.out.println("Sensor values may not be correct.  Please consider");
+                System.out.println("upgrading your scribbler's firmware.");
+            }
+        }
+
         _connectedFrame = new connectedFrame( portName, getName(), getInfo() );
 
         return true;
@@ -511,11 +523,8 @@ public class Scribbler  {
         int[] data = _get( command, 2 );
         retVal = (data[0] << 8) | data[1];
 
-        // "invert" the value if this is a Scribbler (and not a Scribbler2)
-        if( !scribbler2Connected() )
-        {
-            retVal = _adjustLightLevel( retVal );
-        }
+        // "invert" the value so that large values indicate high light levels
+        retVal = _adjustLightLevel( retVal );
 
         return retVal;
     }
@@ -527,7 +536,7 @@ public class Scribbler  {
      * 
      * @return A three element array.  element 0 contains the value of the left sensor, element 1 contains the value
      * of the center sensor, and element 2 contains the value of the right sensor.  All values are non-negative,
-     * and low values indicate bright light, high values indicate low light.
+     * and low values indicate low light, high values indicate high light.
      */
     public  int[] getLight()
     {
@@ -539,13 +548,10 @@ public class Scribbler  {
         retVal[1] = (data[2] << 8) | data[3];
         retVal[2] = (data[4] << 8) | data[5];
 
-        // "invert" the values if this is a scribbler (and not a scribbler2)
-        if( !scribbler2Connected() )
+        // "invert" the values so that laarge values indicate high light levels
+        for( int i=0; i<3; i++ )
         {
-            for( int i=0; i<3; i++ )
-            {
-                retVal[i] = _adjustLightLevel( retVal[i] );
-            }
+            retVal[i] = _adjustLightLevel( retVal[i] );
         }
 
         return retVal;
@@ -559,16 +565,24 @@ public class Scribbler  {
     {
         int retVal = val;
 
-        // clamp at 5000
-        if( retVal > 5000 )
-            retVal = 5000;
+        // Inverting the value is different for scribbler2 and scribbler1 robots
+        if( scribbler2Connected() )
+        {
+            retVal = 4095 - retVal;
+        }
+        else
+        {
+            // clamp at 5000
+            if( retVal > 5000 )
+                retVal = 5000;
 
-        // retVal=10^(4.5-log10(x))
-        retVal = (int)Math.exp( 4.5 * Math.log(10) - Math.log(retVal) );
+            // retVal=10^(4.5-log10(x))  Note:4.5*ln(10) = 10.3
+            retVal = (int)Math.exp( 10.3 - Math.log(retVal) );
 
-        // clamp return value to 5000
-        if( retVal > 5000 )
-            retVal = 5000;
+            // clamp return value to 5000
+            if( retVal > 5000 )
+                retVal = 5000;
+        }
 
         return retVal;
     }
@@ -597,15 +611,8 @@ public class Scribbler  {
             command = GET_IR_RIGHT;
 
         int[] data = _get( command, 1 );
+        return data[0] != 0;
 
-        if( scribbler2Connected() )
-        {
-            return data[0] == 0;
-        }
-        else
-        {
-            return data[0] != 0;
-        }
     }
 
     /**
@@ -623,16 +630,9 @@ public class Scribbler  {
         boolean[] retVal = new boolean[2];
         int[] data = _get( GET_IR_ALL, 2 );
 
-        if( scribbler2Connected() )
-        {
-            retVal[0] = data[0] == 0;
-            retVal[1] = data[1] == 0;
-        }
-        else
-        {
-            retVal[0] = data[0] != 0;
-            retVal[1] = data[1] != 0;
-        }
+        retVal[0] = data[0] != 0;
+        retVal[1] = data[1] != 0;
+
         return retVal;
     }
 
@@ -661,14 +661,7 @@ public class Scribbler  {
 
         int[] data = _get( command, 1 );
 
-        if( scribbler2Connected() )
-        {
-            return data[0] != 1;
-        }
-        else
-        {
-            return data[0] == 1;
-        }
+        return data[0] == 1;
     }
 
     /**
@@ -686,16 +679,9 @@ public class Scribbler  {
         boolean[] retVal = new boolean[2];
         int[] data = _get( GET_LINE_ALL, 2 );
 
-        if( scribbler2Connected() )
-        {
-            retVal[0] = data[0] != 1;
-            retVal[1] = data[1] != 1;
-        }
-        else
-        {
-            retVal[0] = data[0] == 1;
-            retVal[1] = data[1] == 1;
-        }
+        retVal[0] = data[0] == 1;
+        retVal[1] = data[1] == 1;
+
         return retVal;
     }
 
@@ -2863,29 +2849,17 @@ public class Scribbler  {
                 {
                     data = robot._getAll();
 
-                    // Scribbler1 and Scribbler2 return different values for many of the sensors
-                    if( scribbler2Connected() )
-                    {
-                        IRLeft = new Boolean( data[0] == 0 );
-                        IRRight = new Boolean( data[1] == 0 );
-                        LightLeft = new Integer( (data[2]<<8) | data[3] );
-                        LightCenter = new Integer( (data[4]<<8) | data[5] );
-                        LightRight = new Integer( (data[6]<<8) | data[7] );
-                        LineLeft = new Boolean( data[8]==0 );
-                        LineRight = new Boolean( data[9]==0 );
-                    }
-                    else
-                    {
-                        IRLeft = new Boolean( data[0] != 0 );
-                        IRRight = new Boolean( data[1] != 0 );
-                        LightLeft = new Integer( _adjustLightLevel( (data[2]<<8) | data[3] ) );
-                        LightCenter = new Integer( _adjustLightLevel( (data[4]<<8) | data[5] ) );
-                        LightRight = new Integer( _adjustLightLevel( (data[6]<<8) | data[7] ) );
-                        LineLeft = new Boolean( data[8]!=0 );
-                        LineRight = new Boolean( data[9]!=0 );
-                    }
+                    // light values need to be inverted so that low values indicate low light
+                    // and high values indicate bright light
+                    LightLeft = new Integer( _adjustLightLevel( (data[2]<<8) | data[3] ) );
+                    LightCenter = new Integer( _adjustLightLevel( (data[4]<<8) | data[5] ) );
+                    LightRight = new Integer( _adjustLightLevel( (data[6]<<8) | data[7] ) );
 
                     Stall = new Boolean( data[10]!=0 );
+                    IRLeft = new Boolean( data[0] != 0 );
+                    IRRight = new Boolean( data[1] != 0 );
+                    LineLeft = new Boolean( data[8]!=0 );
+                    LineRight = new Boolean( data[9]!=0 );
 
                     stallValue.setText( Stall.toString() );
                     IRLeftValue.setText( IRLeft.toString() );
@@ -3537,8 +3511,18 @@ public class Scribbler  {
             MyroListener listener;
             BufferedImage image = null;
 
+            // Image file depends on which type of robot is connected
+            String filename;
+            if( scribbler2Connected() )
+            {
+                filename = "Connected_Image-S2.jpg";
+            }
+            else
+            {
+                filename = "Connected_Image.jpg";
+            }
+
             // try to open the scribbler/fluke image
-            String filename = "Connected_Image.jpg";
             boolean imageOpened = false;
             try {
                 // try to read from file in working directory
