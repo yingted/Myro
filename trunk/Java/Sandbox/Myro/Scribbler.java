@@ -26,6 +26,7 @@ package Myro;
 
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.*;
 import java.text.*;  // for decimal formatting (debugging)
 
 import java.awt.*;
@@ -294,6 +295,20 @@ public class Scribbler  {
         {
             setIRPower( 135 );
             autoCamera();
+
+            // initialize structures used to average obstacle readings
+//             _leftObstacleReadings = new LinkedList<obstacleReading>();
+//             _centerObstacleReadings = new LinkedList<obstacleReading>();
+//             _rightObstacleReadings = new LinkedList<obstacleReading>();
+
+            _leftObstacleReadings = new ArrayBlockingQueue<obstacleReading>(100);
+            _centerObstacleReadings = new ArrayBlockingQueue<obstacleReading>(100);
+            _rightObstacleReadings = new ArrayBlockingQueue<obstacleReading>(100);
+            _obstacleSums = new int[3];
+            for( int i=0; i<3; i++ )
+            {
+                _obstacleSums[i] = 0;
+            }
         }
 
         // Some sensor values were wrong in Scribbler2 firmware versions prior to 1.0.2, so check this
@@ -1085,17 +1100,84 @@ public class Scribbler  {
         assert whichSensor==SENSOR_IR_LEFT || whichSensor==SENSOR_IR_CENTER || whichSensor==SENSOR_IR_RIGHT :
         "getObstacle: whichSensor not valid";
 
-        // read the appropriate Fluke sensor
-        int[] data=null;
-        switch( whichSensor ) {
-            case SENSOR_IR_LEFT: data = _getFluke( GET_DONGLE_L_IR, 2 ); break;
-            case SENSOR_IR_CENTER: data = _getFluke( GET_DONGLE_C_IR, 2 ); break;
-            case SENSOR_IR_RIGHT: data = _getFluke( GET_DONGLE_R_IR, 2 ); break;
+        // get the queue and sum for the selected sensor
+        Queue<obstacleReading> readings = null;
+        switch ( whichSensor )
+        {
+            case SENSOR_IR_LEFT: readings = _leftObstacleReadings; break;
+            case SENSOR_IR_CENTER: readings = _centerObstacleReadings; break;
+            case SENSOR_IR_RIGHT: readings = _rightObstacleReadings; break;
         }
 
-        // convert the returned byte values to a 16-bit int and return it
-        return (data[0]<<8) + data[1];
+        // remove all readings that are too old
+        long currentTime = System.currentTimeMillis();
+        long tooOld = currentTime - 1000;  // one second
+        while( true )
+        {
+            if( readings.isEmpty() )
+                break;
+            obstacleReading oldestReading = readings.peek();
+            if( oldestReading.timeStamp < tooOld )
+            {
+                readings.remove();
+            }
+            else
+                break;
+        }
 
+        // take new readings and add them to the queue.  We will take at least one new reading, and keep taking
+        // readings until there are at least 9 in the queue.  Because we'll be taking the median, we want an odd
+        // numbher of readings in the queue.
+        do
+        {
+            // read the appropriate Fluke sensor
+            int[] data=null;
+            switch( whichSensor ) {
+                case SENSOR_IR_LEFT: data = _getFluke( GET_DONGLE_L_IR, 2 ); break;
+                case SENSOR_IR_CENTER: data = _getFluke( GET_DONGLE_C_IR, 2 ); break;
+                case SENSOR_IR_RIGHT: data = _getFluke( GET_DONGLE_R_IR, 2 ); break;
+            }
+
+            // convert the returned byte values to a 16-bit int
+            int val = (data[0]<<8) + data[1];
+
+            // add it to the queue
+            obstacleReading newReading = new obstacleReading();
+            newReading.timeStamp = System.currentTimeMillis();
+            newReading.reading = val;
+            readings.add( newReading );
+        } while( readings.size() < 9 || readings.size()%2==0 );
+
+        // sort the readings so we can determine the median
+        int i=0;
+        int[] arr = new int[ readings.size() ];
+        Iterator<obstacleReading> itr = readings.iterator();
+        while( itr.hasNext() )
+        {
+            arr[i++] = itr.next().reading;
+        }
+        java.util.Arrays.sort( arr );
+
+        // return the average of the three middle values
+        int mid = arr.length / 2;
+        return (arr[mid-1] + arr[mid] + arr[mid+1]) / 3;
+    }
+
+    /**
+     * Returns the values of all three obstacles sensors on the Fluke.
+     * <p><p>
+     * <b>Precondition:</b> flukeConnected
+     * 
+     * @return a 3-element array containing the values of the left (in element 0), center (in element 1), and
+     * right (in element 2) obstacle sensors.
+     */
+    public int[] getObstacle()
+    {
+        int left = getObstacle( SENSOR_IR_LEFT );
+        int center = getObstacle( SENSOR_IR_CENTER );
+        int right = getObstacle( SENSOR_IR_RIGHT );
+
+        return new int[] { left, center, right };
     }
 
     /**
@@ -1251,6 +1333,24 @@ public class Scribbler  {
         // convert the returned 3-byte value to an int and return it
         return (data[0]<<16) | (data[1]<<8) | (data[2]);        
     }
+
+    /**
+     * Returns the values of all three virtual light sensors on the Fluke
+     * <p><p>
+     * <b>Precondition:</b> flukeConnected
+     * 
+     * @return A 3-element array containing the values of the left (in element 0), center (in element 1), and right
+     * (in element 2) virtual light sensors.
+     */
+    public int[] getBright()
+    {
+        int left = getBright( SENSOR_LIGHT_LEFT );
+        int center = getBright( SENSOR_LIGHT_CENTER );
+        int right = getBright( SENSOR_LIGHT_RIGHT );
+
+        return new int[] { left, center, right };
+    }
+
     //---------------------------------------------------------------------------------------------
     //
     // Movement methods
@@ -1806,6 +1906,17 @@ public class Scribbler  {
     private Thread currentJoyStickThread;
     private Thread currentGamepadThread;
     private Thread currentCameraThread;
+
+    // used for averaging obstacle sensors
+    private class obstacleReading
+    {
+        public long timeStamp;
+        public int reading;
+    };
+    private Queue<obstacleReading> _leftObstacleReadings;
+    private Queue<obstacleReading> _centerObstacleReadings;
+    private Queue<obstacleReading> _rightObstacleReadings;
+    private int[] _obstacleSums;
 
     /**
      * Write a sequence of ints to the robot.  Note that the difference between _write and _writePadded
