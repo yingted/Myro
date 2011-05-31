@@ -1078,6 +1078,10 @@ public class Scribbler  {
 
         // scale brighness value to be an int between 170 and 255
         int level = (int)Math.round( brightness*(255-170) + 170);
+        
+        // of course, 0 really does mean 0
+        if( level == 170 )
+            level = 0;
 
         // set the LED's brightness
         _setFluke( SET_DIMMER_LED, level );
