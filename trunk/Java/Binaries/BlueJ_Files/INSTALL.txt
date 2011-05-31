@@ -1,0 +1,20 @@
+INSTALL
+
+The files in this folder contain definitions for Myro/Java templates for use in the BlueJ
+environment.  These are not necessary per-se, but will be helpful for students using 
+"Learning Computing with Robots-Java Edition" textbook.
+
+Installation:
+
+1) Copy the files in folder newclass to (bluej_dir)/lib/english/templates/newclass
+
+2) Edit file (bluej_dir)/lib/bluej.defs to include extendScribbler and scribblerMain in
+the definition of bluej.classTemplates.  (Alternatively, have each student edit their own
+bluej.proerties file.)
+
+For example, this definition might look like:
+
+	bluej.classTemplates = extendScribbler scribblerMain stdclass
+
+3) Copy folder Sandbox to a location in each student's class folder (i.e., where they will save
+all class work).

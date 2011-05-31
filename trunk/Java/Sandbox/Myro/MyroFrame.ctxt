@@ -1,0 +1,23 @@
+#BlueJ class context
+comment0.params=frameName\ image\ x\ y
+comment0.target=MyroFrame(java.lang.String,\ MyroImage,\ int,\ int)
+comment0.text=\n\ Constructs\ a\ JFrame\ with\ a\ specified\ name,\ location,\ and\ associated\ MyroImage.\n\ \n\ @param\ frameName\ Name\ of\ this\ frame\n\ @param\ iamge\ MyroImage\ initially\ associated\ with\ this\ MyroFrame\n\ @param\ x\ x\ coordinate\ of\ the\ initial\ position\ of\ this\ MyroFramee\n\ @param\ y\ y\ coordinate\ of\ the\ initial\ position\ of\ this\ MyroFrame\n
+comment1.params=
+comment1.target=MyroImage\ getCurrentImage()
+comment1.text=\n\ Returns\ the\ MyroImage\ currently\ associated\ with\ this\ MyroFrame\n
+comment2.params=image
+comment2.target=void\ setImage(MyroImage)
+comment2.text=\n\ Sets\ the\ MyroImage\ that\ is\ associated\ with\ this\ MyroFrame\n
+comment3.params=
+comment3.target=void\ makeVisible()
+comment3.text=\n\ Makes\ the\ MyroFrame\ visible\ on\ the\ screen.\ \ If\ the\ MyroFrame\ was\ already\ visible,\ nothing\n\ changes.\n
+comment4.params=
+comment4.target=void\ makeInvisible()
+comment4.text=\n\ Makes\ the\ MyroFrame\ invisible.\ \ If\ the\ MyroFrame\ was\ already\ invisible,\ nothing\ changes.\n
+comment5.params=prompt
+comment5.target=int[]\ getUserRect(java.lang.String)
+comment5.text=\n\ Permits\ the\ user\ to\ select\ a\ rectangle\ in\ the\ MyroFrame.\n\ \n\ @param\ prompt\ A\ String\ that\ will\ be\ displayed\ at\ the\ bottom\ of\ the\ MyroFrame\n\ @return\ A\ 4-element\ array\ of\ ints\ containing\ [xLow,\ yLow,\ Width,\ Height]\ of\ the\ selected\ rectangle\n
+comment6.params=caption
+comment6.target=javax.swing.JLabel\ _makeLabel(java.lang.String)
+comment6.text=\n\ Returns\ a\ JLabel\ containing\ the\ passed\ String.\n
+numComments=7
