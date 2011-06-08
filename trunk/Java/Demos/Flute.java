@@ -16,13 +16,13 @@ public class Flute
         // define the 8 notees on the flute
         int[] notes = {440, 494, 554, 588, 659, 740, 831, 880};
 
-        // This constant defines the threshold for the light sensors.  A reading larger than
+        // This constant defines the threshold for the light sensors.  A reading smaller than
         // this means the sensor is "closed".  You may need to adjust this depending on the ambient
         // light levels in the room,
-        final int THRESHOLD = 2000;
+        final double THRESHOLD = 0.01;
 
         int note;               // this is the selected note to play (0-7)
-        int[] lights;           // array used to hold the values of the 3 light sensors
+        double[] lights;        // array used to hold the values of the 3 light sensors
 
         // instantiate the scribbler
         Scribbler robot = new Scribbler(scribblerPort);
@@ -35,11 +35,11 @@ public class Flute
 
             // calculate the note selected
             note = 0;
-            if( lights[0] > THRESHOLD )
+            if( lights[0] < THRESHOLD )
                 note += 1;
-            if( lights[1] > THRESHOLD )
+            if( lights[1] < THRESHOLD )
                 note += 2;
-            if( lights[2] > THRESHOLD )
+            if( lights[2] < THRESHOLD )
                 note += 4;
 
             // have the scribbler play the note

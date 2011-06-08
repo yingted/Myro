@@ -27,7 +27,7 @@ package Myro;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.*;
-import java.text.*;  // for decimal formatting (debugging)
+import java.text.*;  // for decimal formatting
 
 import java.awt.*;
 import java.awt.event.*;
@@ -48,7 +48,7 @@ import net.java.games.input.*;  // JInput for gamepad
  * (see www.roboteducation.org )
  * 
  * @author Douglas Harms
- * @version 1.0
+ * @version 1.0.0
  * 
  */
 public class Scribbler  {
@@ -294,21 +294,8 @@ public class Scribbler  {
         if( _flukeConnected )
         {
             setIRPower( 135 );
-            autoCamera();
-
-            // initialize structures used to average obstacle readings
-//             _leftObstacleReadings = new LinkedList<obstacleReading>();
-//             _centerObstacleReadings = new LinkedList<obstacleReading>();
-//             _rightObstacleReadings = new LinkedList<obstacleReading>();
-
-            _leftObstacleReadings = new ArrayBlockingQueue<obstacleReading>(100);
-            _centerObstacleReadings = new ArrayBlockingQueue<obstacleReading>(100);
-            _rightObstacleReadings = new ArrayBlockingQueue<obstacleReading>(100);
-            _obstacleSums = new int[3];
-            for( int i=0; i<3; i++ )
-            {
-                _obstacleSums[i] = 0;
-            }
+            _set_cam_param( CAM_COMA, CAM_COMA_WHITE_BALANCE_ON );
+            _set_cam_param( CAM_COMB, CAM_COMB_GAIN_CONTROL_ON | CAM_COMB_EXPOSURE_CONTROL_ON );
         }
 
         // Some sensor values were wrong in Scribbler2 firmware versions prior to 1.0.2, so check this
@@ -515,15 +502,16 @@ public class Scribbler  {
      * @param whichLight Specifies the light sensor to query.  Must be Scribbler.SENSOR_LIGHT_LEFT (or 0),
      * Scribbler.SENSOR_LIGHT_CENTER (or 1), or Scribbler.SENSOR_LIGHT_RIGHT (or 2).
      * 
-     * @return The value of the selected light sensor.  The value will be non-negative, and a low value indicates
+     * @return The value of the selected light sensor.  The value will be between 0.0 and 1.0, and a low value indicates
      * low light, a high value indicates bright light.
      */
-    public  int getLight( int whichLight ) 
+    public  double getLight( int whichLight ) 
     {
         assert scribblerConnected() : "Scribbler not connected";
         assert SENSOR_LIGHT_LEFT<=whichLight && whichLight<=SENSOR_LIGHT_RIGHT : "Illegal light sensor";
 
-        int retVal;
+        double retVal;
+        int intVal;
 
         // set command to be the appropriate Scribbler command
         int command = 0;
@@ -536,10 +524,10 @@ public class Scribbler  {
 
         // issue the command to the Scribbler and read the response
         int[] data = _get( command, 2 );
-        retVal = (data[0] << 8) | data[1];
+        intVal = (data[0] << 8) | data[1];
 
         // "invert" the value so that large values indicate high light levels
-        retVal = _adjustLightLevel( retVal );
+        retVal = _adjustLightLevel( intVal );
 
         return retVal;
     }
@@ -550,23 +538,24 @@ public class Scribbler  {
      * <b>Precondition:</b> scribblerConnected()
      * 
      * @return A three element array.  element 0 contains the value of the left sensor, element 1 contains the value
-     * of the center sensor, and element 2 contains the value of the right sensor.  All values are non-negative,
+     * of the center sensor, and element 2 contains the value of the right sensor.  All values are between 0 and 1000,
      * and low values indicate low light, high values indicate high light.
      */
-    public  int[] getLight()
+    public  double[] getLight()
     {
         assert scribblerConnected() : "Scribbler not connected";
 
-        int[] retVal = new int[3];
+        int[] intVal = new int[3];
+        double retVal[] = new double[3];
         int[] data = _get( GET_LIGHT_ALL, 6 );
-        retVal[0] = (data[0] << 8) | data[1];
-        retVal[1] = (data[2] << 8) | data[3];
-        retVal[2] = (data[4] << 8) | data[5];
+        intVal[0] = (data[0] << 8) | data[1];
+        intVal[1] = (data[2] << 8) | data[3];
+        intVal[2] = (data[4] << 8) | data[5];
 
         // "invert" the values so that laarge values indicate high light levels
         for( int i=0; i<3; i++ )
         {
-            retVal[i] = _adjustLightLevel( retVal[i] );
+            retVal[i] = _adjustLightLevel( intVal[i] );
         }
 
         return retVal;
@@ -574,29 +563,35 @@ public class Scribbler  {
 
     /**
      * adjust scribbler 1 light readings so that small values represent low light levels and large value
-     * represent bright light levels.  This is only necessary for a Scribbler1.
+     * represent bright light levels.  Also, scale the values to be in the range 0.0 to 1.0
      */
-    private int _adjustLightLevel( int val )
+    private double _adjustLightLevel( int val )
     {
-        int retVal = val;
+        double retVal;
+        int intVal;
 
         // Inverting the value is different for scribbler2 and scribbler1 robots
         if( scribbler2Connected() )
         {
-            retVal = 4095 - retVal;
+            // val is originally in 0..4095 range
+            retVal = (4095 - val) / 4095.0 ;
         }
         else
         {
+            // make sure value is in 0..5000 range
             // clamp at 5000
-            if( retVal > 5000 )
-                retVal = 5000;
+            if( val > 5000 )
+                val = 5000;
 
             // retVal=10^(4.5-log10(x))  Note:4.5*ln(10) = 10.3
-            retVal = (int)Math.exp( 10.3 - Math.log(retVal) );
+            intVal = (int)Math.exp( 10.3 - Math.log(val) );
 
             // clamp return value to 5000
-            if( retVal > 5000 )
-                retVal = 5000;
+            if( intVal > 5000 )
+                intVal = 5000;
+
+            // scale to 0..1000 range
+            retVal = intVal / 5000.0;
         }
 
         return retVal;
@@ -721,11 +716,13 @@ public class Scribbler  {
             temp[i] = (byte)info[i];
         String retVal = new String(temp);
 
-        // if the first character is the GET_INFO char and the second chara is nul then we assume the command
+        // if the first character is the GET_INFO char and the second char is nul then we assume the command
         // was echoed, and we'll remove the echo
         if( retVal.charAt(0) == GET_INFO && retVal.charAt(1) == 0 )
             retVal = retVal.substring( 9 ) ;
 
+        // add the Myro/Java version to the info string
+        retVal += ",Myro-Java-Version:" + MYRO_JAVA_VERSION;
         return retVal;
     }
 
@@ -1078,7 +1075,7 @@ public class Scribbler  {
 
         // scale brighness value to be an int between 170 and 255
         int level = (int)Math.round( brightness*(255-170) + 170);
-        
+
         // of course, 0 really does mean 0
         if( level == 170 )
             level = 0;
@@ -1096,75 +1093,30 @@ public class Scribbler  {
      * @param whichSensor Selects the Fluke IR sensor.  Should be Scribbler.SENSOR_IR_LEFT (or 0), Scribbler.SENSOR_IR_CENTER (or 2), or
      * Scribbler.SENSIR_IR_RIGHT (or 1)
      * @return The value of the selected sensor.  A low value means there are no obstacles detected, a high value
-     * means there is an obstacle detected.  The return value is in the range 0..6400.
+     * means there is an obstacle detected.  The return value is in the range 0.0 to 1.0.
      */
-    public int getObstacle( int whichSensor )
+    public double getObstacle( int whichSensor )
     {
         assert flukeConnected() : "Scribbler does not have a Fluke board";
         assert whichSensor==SENSOR_IR_LEFT || whichSensor==SENSOR_IR_CENTER || whichSensor==SENSOR_IR_RIGHT :
         "getObstacle: whichSensor not valid";
 
-        // get the queue and sum for the selected sensor
-        Queue<obstacleReading> readings = null;
-        switch ( whichSensor )
-        {
-            case SENSOR_IR_LEFT: readings = _leftObstacleReadings; break;
-            case SENSOR_IR_CENTER: readings = _centerObstacleReadings; break;
-            case SENSOR_IR_RIGHT: readings = _rightObstacleReadings; break;
+        // read the appropriate Fluke sensor
+        int[] data=null;
+        switch( whichSensor ) {
+            case SENSOR_IR_LEFT: data = _getFluke( GET_DONGLE_L_IR, 2 ); break;
+            case SENSOR_IR_CENTER: data = _getFluke( GET_DONGLE_C_IR, 2 ); break;
+            case SENSOR_IR_RIGHT: data = _getFluke( GET_DONGLE_R_IR, 2 ); break;
         }
 
-        // remove all readings that are too old
-        long currentTime = System.currentTimeMillis();
-        long tooOld = currentTime - 1000;  // one second
-        while( true )
-        {
-            if( readings.isEmpty() )
-                break;
-            obstacleReading oldestReading = readings.peek();
-            if( oldestReading.timeStamp < tooOld )
-            {
-                readings.remove();
-            }
-            else
-                break;
-        }
+        // convert the returned byte values to a 16-bit int
+        int intVal = (data[0]<<8) + data[1];
 
-        // take new readings and add them to the queue.  We will take at least one new reading, and keep taking
-        // readings until there are at least 9 in the queue.  Because we'll be taking the median, we want an odd
-        // numbher of readings in the queue.
-        do
-        {
-            // read the appropriate Fluke sensor
-            int[] data=null;
-            switch( whichSensor ) {
-                case SENSOR_IR_LEFT: data = _getFluke( GET_DONGLE_L_IR, 2 ); break;
-                case SENSOR_IR_CENTER: data = _getFluke( GET_DONGLE_C_IR, 2 ); break;
-                case SENSOR_IR_RIGHT: data = _getFluke( GET_DONGLE_R_IR, 2 ); break;
-            }
+        if( intVal > 1000 )
+            intVal = 1000;
 
-            // convert the returned byte values to a 16-bit int
-            int val = (data[0]<<8) + data[1];
-
-            // add it to the queue
-            obstacleReading newReading = new obstacleReading();
-            newReading.timeStamp = System.currentTimeMillis();
-            newReading.reading = val;
-            readings.add( newReading );
-        } while( readings.size() < 9 || readings.size()%2==0 );
-
-        // sort the readings so we can determine the median
-        int i=0;
-        int[] arr = new int[ readings.size() ];
-        Iterator<obstacleReading> itr = readings.iterator();
-        while( itr.hasNext() )
-        {
-            arr[i++] = itr.next().reading;
-        }
-        java.util.Arrays.sort( arr );
-
-        // return the average of the three middle values
-        int mid = arr.length / 2;
-        return (arr[mid-1] + arr[mid] + arr[mid+1]) / 3;
+        // scale the value again to 0.0 to 1.0 and return it
+        return intVal / 1000.0;
     }
 
     /**
@@ -1175,13 +1127,13 @@ public class Scribbler  {
      * @return a 3-element array containing the values of the left (in element 0), center (in element 1), and
      * right (in element 2) obstacle sensors.
      */
-    public int[] getObstacle()
+    public double[] getObstacle()
     {
-        int left = getObstacle( SENSOR_IR_LEFT );
-        int center = getObstacle( SENSOR_IR_CENTER );
-        int right = getObstacle( SENSOR_IR_RIGHT );
+        double left = getObstacle( SENSOR_IR_LEFT );
+        double center = getObstacle( SENSOR_IR_CENTER );
+        double right = getObstacle( SENSOR_IR_RIGHT );
 
-        return new int[] { left, center, right };
+        return new double[] { left, center, right };
     }
 
     /**
@@ -1316,9 +1268,9 @@ public class Scribbler  {
      * @param whichSensor Specifies the sensor to use.  Must be Scribbler.SENSOR_LIGHT_LEFT (or 0), Scribbler.SENSOR_LIGHT_CENTER (or 1),
      * or Scribbler.SENSOR_LIGHT_RIGHT (or 2).
      * 
-     * @return The intensity of the light in the selected sensor area.
+     * @return The intensity of the light in the selected sensor area.  The value is between 0.0 and 1.0.
      */
-    public int getBright( int whichSensor )
+    public double getBright( int whichSensor )
     {
         assert flukeConnected() : "Scribbler does not have a Fluke board";
         assert whichSensor>=SENSOR_LIGHT_LEFT && whichSensor<=SENSOR_LIGHT_RIGHT: "getBright: whichSensor not valid";
@@ -1326,16 +1278,28 @@ public class Scribbler  {
         // define the window of interest.  Note that we're only looking at the intensity (i.e., Y component).
         // We're also always using Fluke image window 0.
         switch( whichSensor ) {
-            case 0: _setImageWindow( 0, 1,   0,  84, 191, 2, 1 ); break;
-            case 1: _setImageWindow( 0, 84,  0, 170, 191, 2, 1 ); break;
-            case 2: _setImageWindow( 0, 170, 0, 254, 191, 2, 1 ); break;
+            case 0: _setImageWindow( 0, 3,   0, 128, 191, 2, 1 ); break;
+            case 1: _setImageWindow( 0, 65,  0, 190, 191, 2, 1 ); break;
+            case 2: _setImageWindow( 0, 129, 0, 254, 191, 2, 1 ); break;
+
         }
 
         // read the total intensity of the defined window (i.e., window 0)
         int[] data = _getFluke( GET_WINDOW_LIGHT, 0, 3 );
 
-        // convert the returned 3-byte value to an int and return it
-        return (data[0]<<16) | (data[1]<<8) | (data[2]);        
+        // convert the returned 3-byte value to an int
+        int intVal = (data[0]<<16) | (data[1]<<8) | (data[2]);
+
+        // clamp it to the range 350,000 to 3,000,000
+        if( intVal < 350000 )
+            intVal = 350000;
+        if( intVal > 3000000 )
+            intVal = 3000000;
+
+        // now scale it to 0.0 to 1.0
+        double retVal = (intVal - 350000) / 2650000.0;
+
+        return retVal;
     }
 
     /**
@@ -1346,13 +1310,13 @@ public class Scribbler  {
      * @return A 3-element array containing the values of the left (in element 0), center (in element 1), and right
      * (in element 2) virtual light sensors.
      */
-    public int[] getBright()
+    public double[] getBright()
     {
-        int left = getBright( SENSOR_LIGHT_LEFT );
-        int center = getBright( SENSOR_LIGHT_CENTER );
-        int right = getBright( SENSOR_LIGHT_RIGHT );
+        double left = getBright( SENSOR_LIGHT_LEFT );
+        double center = getBright( SENSOR_LIGHT_CENTER );
+        double right = getBright( SENSOR_LIGHT_RIGHT );
 
-        return new int[] { left, center, right };
+        return new double[] { left, center, right };
     }
 
     //---------------------------------------------------------------------------------------------
@@ -1889,6 +1853,8 @@ public class Scribbler  {
     private static final int CAM_COMB_EXPOSURE_CONTROL_ON = (CAM_COMB_DEFAULT |  (1 << 0));
     private static final int CAM_COMB_EXPOSURE_CONTROL_OFF = (CAM_COMB_DEFAULT & ~(1 << 0));
 
+    private static final String MYRO_JAVA_VERSION   = "1.0.0";
+
     // i/o streams, etc.
     private InputStream                             _inputStream;
     private scribbler.io.RXTXScribblerPort          _serialPort;
@@ -1911,16 +1877,6 @@ public class Scribbler  {
     private Thread currentGamepadThread;
     private Thread currentCameraThread;
 
-    // used for averaging obstacle sensors
-    private class obstacleReading
-    {
-        public long timeStamp;
-        public int reading;
-    };
-    private Queue<obstacleReading> _leftObstacleReadings;
-    private Queue<obstacleReading> _centerObstacleReadings;
-    private Queue<obstacleReading> _rightObstacleReadings;
-    private int[] _obstacleSums;
 
     /**
      * Write a sequence of ints to the robot.  Note that the difference between _write and _writePadded
@@ -2952,10 +2908,9 @@ public class Scribbler  {
             Boolean Stall;
             Boolean IRLeft, IRRight;
             Boolean LineLeft,LineRight;
-            Integer LightLeft, LightCenter, LightRight;
-            Integer BrightLeft, BrightCenter, BrightRight;
-            Integer ObstacleLeft, ObstacleCenter, ObstacleRight;
-            Double Battery;
+            double[] brightVals, obstacleVals;
+            double batteryVal;
+            DecimalFormat doubleFormat = new DecimalFormat("0.000");
 
             while( !finished )
             {
@@ -2963,12 +2918,6 @@ public class Scribbler  {
                 if( scribblerConnected() )
                 {
                     data = robot._getAll();
-
-                    // light values need to be inverted so that low values indicate low light
-                    // and high values indicate bright light
-                    LightLeft = new Integer( _adjustLightLevel( (data[2]<<8) | data[3] ) );
-                    LightCenter = new Integer( _adjustLightLevel( (data[4]<<8) | data[5] ) );
-                    LightRight = new Integer( _adjustLightLevel( (data[6]<<8) | data[7] ) );
 
                     Stall = new Boolean( data[10]!=0 );
                     IRLeft = new Boolean( data[0] != 0 );
@@ -2981,28 +2930,24 @@ public class Scribbler  {
                     IRRightValue.setText( IRRight.toString() );
                     LineLeftValue.setText( LineLeft.toString() );
                     LineRightValue.setText( LineRight.toString() );
-                    LightLeftValue.setText( LightLeft.toString() );
-                    LightCenterValue.setText( LightCenter.toString() );
-                    LightRightValue.setText( LightRight.toString() );
+                    LightLeftValue.setText( doubleFormat.format( _adjustLightLevel( (data[2]<<8) | data[3] ) ) );
+                    LightCenterValue.setText( doubleFormat.format( _adjustLightLevel( (data[4]<<8) | data[5] ) ) );
+                    LightRightValue.setText( doubleFormat.format( _adjustLightLevel( (data[6]<<8) | data[7] ) ) );
                 }
 
                 // get the state of the Fluke sensors (if there is one) and display
                 if( flukeConnected() )
                 {
-                    BrightLeft = new Integer( robot.getBright( 0 ) );
-                    BrightCenter = new Integer( robot.getBright( 1 ) );
-                    BrightRight = new Integer( robot.getBright( 2 ) );
-                    ObstacleLeft = new Integer( robot.getObstacle( 0 ) );
-                    ObstacleCenter = new Integer( robot.getObstacle( 1 ) );
-                    ObstacleRight = new Integer( robot.getObstacle( 2 ) );
-                    Battery = new Double( robot.getBattery() );
-                    BrightLeftValue.setText( BrightLeft.toString() );
-                    BrightCenterValue.setText( BrightCenter.toString() );
-                    BrightRightValue.setText( BrightRight.toString() );
-                    ObstacleLeftValue.setText( ObstacleLeft.toString() );
-                    ObstacleCenterValue.setText( ObstacleCenter.toString() );
-                    ObstacleRightValue.setText( ObstacleRight.toString() );
-                    BatteryValue.setText( Battery.toString() );
+                    brightVals = robot.getBright();
+                    obstacleVals = robot.getObstacle();
+                    batteryVal = robot.getBattery();
+                    BrightLeftValue.setText( doubleFormat.format( brightVals[0] ) );
+                    BrightCenterValue.setText( doubleFormat.format( brightVals[1] ) );
+                    BrightRightValue.setText( doubleFormat.format( brightVals[2] ) );
+                    ObstacleLeftValue.setText( doubleFormat.format( obstacleVals[0] ) );
+                    ObstacleCenterValue.setText( doubleFormat.format( obstacleVals[1] ) );
+                    ObstacleRightValue.setText( doubleFormat.format( obstacleVals[2] ) );
+                    BatteryValue.setText( doubleFormat.format( batteryVal ) );
                 }
                 // wait .5 seconds.  If our parent thread interrupts us then we're finished
                 try
