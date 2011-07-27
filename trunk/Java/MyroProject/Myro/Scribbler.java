@@ -48,11 +48,22 @@ import net.java.games.input.*;  // JInput for gamepad
  * (see www.roboteducation.org )
  * 
  * @author Douglas Harms
- * @version 1.0.0
+ * @version 1.0.1
  * 
+ * Version History:
+ * 
+ * 1.0.1 - 20 July 2011
+ *  Added setForwardness and getForwardness methods
+ *  Changed preconditions to @pre (which assumes -tag pre:cm:Preconditions in specified in the javadoc command)
+ *  
+ * 1.0.0
+ *  Initial release
  */
 public class Scribbler  {
 
+    // define this constant here at the beginning rather than later where other private constants are defined.
+    private static final String MYRO_JAVA_VERSION   = "1.0.1";
+    
     // public constants
 
     /**
@@ -149,6 +160,16 @@ public class Scribbler  {
      * Constant passed to {@link #setVolume setVolume} to turn the Scribbler's speaker on
      */
     public static final int VOLUME_ON               = 1;
+
+    /**
+     * Constant passed to {@link #setForwardness setForwardness} to set the Fluke board facing forward
+     */
+    public static final int FORWARD_FLUKE           = 1;
+
+    /**
+     * Constant passed to {@link #setForwardness setForwardness} to set the Scribbler sensors facing forward
+     */
+    public static final int FORWARD_SCRIBBLER       = 0;
 
     /**
      * Construct a Scribbler object that is not connected to any port.  Method {@link #connect connect}
@@ -296,6 +317,7 @@ public class Scribbler  {
             setIRPower( 135 );
             _set_cam_param( CAM_COMA, CAM_COMA_WHITE_BALANCE_ON );
             _set_cam_param( CAM_COMB, CAM_COMB_GAIN_CONTROL_ON | CAM_COMB_EXPOSURE_CONTROL_ON );
+            setForwardness( FORWARD_FLUKE );
         }
 
         // Some sensor values were wrong in Scribbler2 firmware versions prior to 1.0.2, so check this
@@ -337,7 +359,7 @@ public class Scribbler  {
      * Close the connection between the computer and the Scribbler.  Any threads associated with this robot
      * (e.g., senses, joystick) will be killed.  After calling close the Scribbler cannot be accessed again unless
      * {@link #connect connect} is called to reestablish the connection.
-     * <p><p>
+     * 
      * It is important to invoke this method at the end of the program.  Failure to do so may cause problems when
      * connecting to the Scribbler in the future.
      */
@@ -464,8 +486,8 @@ public class Scribbler  {
 
     /**
      * resets the Scribbler.
-     * <p><p>
-     * <b>Precondition:</b> scribblerConnected()
+     * 
+     * @pre scribblerConnected()
      */
     public  void reset()
     {
@@ -483,8 +505,8 @@ public class Scribbler  {
 
     /**
      * Returns whether the Scribbler has stalled (i.e., stopped moving).  Returns true iff the Scribbler has stalled.
-     * <p><p>
-     * <b>Precondition:</b> scribblerConnected()
+     * 
+     * @pre scribblerConnected()
      */
     public  boolean getStall()
     {
@@ -495,8 +517,8 @@ public class Scribbler  {
 
     /**
      * Returns the state of one of the Scribbler's light sensors.  whichLight specifies the light sensor to query.
-     * <p><p>
-     * <b>Precondition:</b> scribblerConnected() and whichLight is Scribbler.SENSOR_LIGHT_LEFT (or 0), Scribbler.SENSOR_LIGHT_CENTER (or 1),
+     * 
+     * @pre scribblerConnected() and whichLight is Scribbler.SENSOR_LIGHT_LEFT (or 0), Scribbler.SENSOR_LIGHT_CENTER (or 1),
      * or Scribbler.SENSOR_LIGHT_RIGHT (or 2).
      * 
      * @param whichLight Specifies the light sensor to query.  Must be Scribbler.SENSOR_LIGHT_LEFT (or 0),
@@ -534,8 +556,8 @@ public class Scribbler  {
 
     /**
      * Returns the state of all three Scribbler light sensors.
-     * <p><p>
-     * <b>Precondition:</b> scribblerConnected()
+     * 
+     * @pre scribblerConnected()
      * 
      * @return A three element array.  element 0 contains the value of the left sensor, element 1 contains the value
      * of the center sensor, and element 2 contains the value of the right sensor.  All values are between 0 and 1000,
@@ -599,8 +621,8 @@ public class Scribbler  {
 
     /**
      * Returns the state of one of the Scribbler's IR sensors.  whichIR specifies the IR sensor to query.
-     * <p><p>
-     * <b>Precondition:</b> scribblerConnected() and whichIR is {@link #SENSOR_IR_LEFT Scribbler.SENSOR_IR_LEFT} (or 0)
+     * 
+     * @pre scribblerConnected() and whichIR is {@link #SENSOR_IR_LEFT Scribbler.SENSOR_IR_LEFT} (or 0)
      *  or {@link #SENSOR_IR_RIGHT Scribbler.SENSOR_IR_RIGHT} (or 1).
      * 
      * @param whichIR Specifies the IR sensor to query.  Should be {@link #SENSOR_IR_LEFT Scribbler.SENSOR_IR_LEFT} (or 0)
@@ -627,8 +649,8 @@ public class Scribbler  {
 
     /**
      * Returns the state of both of the Scribbler's IR sensors.
-     * <p><p>
-     * <b>Precondition:</b> scribblerConnected()
+     * 
+     * @pre scribblerConnected()
      * 
      * @return A two element boolean array containing the values of the IR sensort. True means that an obstacle is
      * NOT detected by the selected IR sensor, and false means that an obstacle IS detected by the sensor.
@@ -648,8 +670,8 @@ public class Scribbler  {
 
     /**
      * Returns the state of one of the Scribbler's line sensors.  whichSensor specifies the line sensor to query.
-     * <p><p>
-     * <b>Precondition:</b> scribblerConnected() and whichSensor is {@link #SENSOR_LINE_LEFT Scribbler.SENSOR_LINE_LEFT} (or 0)
+     * 
+     * @pre scribblerConnected() and whichSensor is {@link #SENSOR_LINE_LEFT Scribbler.SENSOR_LINE_LEFT} (or 0)
      *  or {@link #SENSOR_LINE_RIGHT Scribbler.SENSOR_LINE_RIGHT} (or 1).
      * 
      * @param whichSensor Specifies the line sensor to query.  Should be {@link #SENSOR_LINE_LEFT Scribbler.SENSOR_LINE_LEFT} (or 0)
@@ -676,8 +698,8 @@ public class Scribbler  {
 
     /**
      * Returns the state of both of the Scribbler's line sensors.
-     * <p><p>
-     * <b>Precondition:</b> scribblerConnected()
+     * 
+     * @pre scribblerConnected()
      * 
      * @return A two element boolean array containing the values of the line sensort. True means that a (dark) line
      * is detected by the selected line sensor, and false means that a (dark) line is not detected by the sensor.
@@ -698,8 +720,8 @@ public class Scribbler  {
     /**
      * Returns the info string provided by the Scribbler.  The specific information contains such things as the 
      * firmware version, the type of robot (i.e., Scribbler) and the communication mode (e.g., Serial).
-     * <p><p>
-     * <b>Precondition:</b> portOpened
+     * 
+     * @pre portOpened
      * 
      * @return A String containing information about the connected robot, such as robot type (e.g., Scribbler),
      * firmware version number, and communication mode (e.g., Serial).
@@ -731,8 +753,8 @@ public class Scribbler  {
      * (inclusive). A value of 1.0 indicates no tweaking, values between 0.0 and 1.0 indicate a leftward adjustment,
      * and values between 1.0 and 2.0 indicate a rightward adjustment.  The further a value is away from 1.0, the
      * larger the adjustment.
-     * <p><p>
-     * <b>Precondition:</b> scribblerConnected()
+     * 
+     * @pre scribblerConnected()
      * 
      * @return A four element array.  Element 0 is the adjustment for high forward speeds (i.e., > 0.5), element 1
      * is the adjustment for slow forward speeds (i.e., &lt;= 0.5), element 2 is the adjustment for high backward
@@ -762,8 +784,8 @@ public class Scribbler  {
      * (inclusive). A value of 1.0 indicates no tweaking, values between 0.0 and 1.0 indicate a leftward adjustment,
      * and values between 1.0 and 2.0 indicate a rightward adjustment.  The further a value is away from 1.0, the
      * larger the adjustment.
-     * <p><p>
-     * <b>Precondition:</b> scribblerConnected and all four parameters between 0.0 (inclusive) and 2.0 (inclusive)
+     * 
+     * @pre scribblerConnected and all four parameters between 0.0 (inclusive) and 2.0 (inclusive)
      * 
      * @param fastForward Tweak value for fast forward speeds (i.e., speed > 0.5 )
      * @param slowForward Tweak value for slow forward speeds (i.e., speed &lt;= 0.5 )
@@ -786,8 +808,8 @@ public class Scribbler  {
 
     /**
      * Returns the name of the Scribbler.  The name is set with {@link #setName setName}.
-     * <p><p>
-     * <b>Precondition:</b> scribblerConnected
+     * 
+     * @pre scribblerConnected
      * 
      * @return The name of the Scribbler.
      */
@@ -812,8 +834,8 @@ public class Scribbler  {
 
     /**
      * Sets the name of the Scribbler.
-     * <p><p>
-     * <b>Precondition:</b> scribblerConnected
+     * 
+     * @pre scribblerConnected
      * 
      * @param newName String containing the new name of the Scribbler.  Only the first 16 characters of newName are
      * used.
@@ -842,9 +864,42 @@ public class Scribbler  {
     }
 
     /**
+     * Sets the forwardness of the robot.  The forwardness specifies which end of the robot is considered to
+     * be "forward" for the purposes of movement methods.  The two possible directions are either the Fluke board is
+     * "forward" or the Scribbler light sensors are "forward".The default is FORWARD_FLUKE.
+     * 
+     * @pre flukeConnected and forwardness is Scribbler.FORWARD_SCRIBBLER (or 0) or Scribbler.FORWARD_FLUKE (or 1)
+     * @param forwardness Indicates which robot end is "forward".  Must be Scribbler.FORWARD_FLUKE or
+     * Scribbler.FORWARD_SCRIBBLER.
+     */
+    public void setForwardness( int forwardness )
+    {
+        assert flukeConnected() : "Fluke not connected";
+        assert (forwardness==FORWARD_SCRIBBLER || forwardness==FORWARD_FLUKE) : "invalid forwardness";
+
+        _setFluke( SET_FORWARDNESS, forwardness );
+    }
+
+    /**
+     * Gets the current forwardness of the robot.  This is an indication of which end of the robot is considered to
+     * be "forward", which is either the Fluke board or the Scribbler light sensors.
+     * 
+     * @pre flukeConnected
+     * @return The forwardness of the robot.  This will be either Scribbler.FORWARD_SCRIBBLER or Scribbler.FORWARD_FLUKE
+     */
+    public int getForwardness()
+    {
+        int val = _read_mem( 0, 0 );
+        if( val == 0xdf )
+            return FORWARD_SCRIBBLER;
+        else
+            return FORWARD_FLUKE;
+    }
+
+    /**
      * Causes the Scribbler to emit a melodic single frequency tone.
-     * <p><p>
-     * <b>Precondition:</b> scribblerConnected
+     * 
+     * @pre scribblerConnected
      * 
      * @param frequency The frequency of the tone to emit.
      * @param duration The length of the tone to be emitted, in seconds.
@@ -864,8 +919,8 @@ public class Scribbler  {
 
     /**
      * Causes the Scribbler to emit a melodic dual frequency tone.
-     * <p><p>
-     * <b>Precondition:</b> scribblerConnected
+     * 
+     * @pre scribblerConnected
      * 
      * @param frequency1 The frequency of one of the tones to emit.
      * @param frequency2 The frequency of the other tone to emit.
@@ -889,8 +944,8 @@ public class Scribbler  {
 
     /**
      * Turns the volume of the scribbler on or off.
-     * <p><p>
-     * <b>Precondition:</b> scribblerConnected, onOff is Scribbler.VOLUME_OFF (or 0) or Scribbler.VOLUME_ON (or 1)
+     * 
+     * @pre scribblerConnected, onOff is Scribbler.VOLUME_OFF (or 0) or Scribbler.VOLUME_ON (or 1)
      * 
      * @param onOff Value indicating whether to turn the volume on (Scribbler.VOLUME_ON or 1) or 
      * off (Scribbler.VOLUME_OFF or 0)
@@ -909,12 +964,12 @@ public class Scribbler  {
     /**
      * Opens a window that continually displays the sensor values of the Scribbler and/or Fluke.  The values are
      * updated every .5 seconds.
-     * <p><p>
+     * 
      * Only one senses window is permitted to be opened for a particular Scribbler/Fluke; no action occurs if this
      * method is invoked when a senses window is already opened.  The window will stay opened until the user closes
      * it (by clicking the window's close icon) or the {@link #close close} method is invoked.
-     * <p><p>
-     * <b>Precondition:</b> scribblerConnected or flukeConnected
+     * 
+     * @pre scribblerConnected or flukeConnected
      */
     public  void senses()
     {
@@ -934,12 +989,12 @@ public class Scribbler  {
     /**
      * Opens a window that continually displays the Fluke's camera image.  The image is updated every
      * second.
-     * <p><p>
+     * 
      * Only one camera window is permitted to be opened for a particular Scribbler/Fluke; no action occurs if this
      * method is invoked when a camera window is already opened.  The window will stay opened until the user closes
      * it (by clicking the window's close icon) or the {@link #close close} method is invoked.
-     * <p><p>
-     * <b>Precondition:</b> scribblerConnected or flukeConnected
+     * 
+     * @pre scribblerConnected or flukeConnected
      */
     public  void camera()
     {
@@ -960,12 +1015,12 @@ public class Scribbler  {
      * Opens a window that permits the user to control the movement of the Scribbler.  The window allows the user
      * to control the Scribbler using a joystick-like interface, permitting forward, backward, right, and left
      * movement.
-     * <p><p>
+     * 
      * Only one joystick window is permitted to be opened for a particular Scribbler; no action occurs if
      * this method is invoked when a joystick window is already opened.  The window will stay opened until the user
      * closes it (by clicking the window's close icon) or the {@link #close close} method is invoked.
-     * <p><p>
-     * <b>Precondition:</b> scribblerConnected
+     * 
+     * @pre scribblerConnected
      */
     public void joyStick()
     {
@@ -987,12 +1042,12 @@ public class Scribbler  {
      * Opens a window that permits the user to control the movement of the Scribbler.  The window allows the user
      * to control the Scribbler using a joystick-like interface, permitting forward, backward, right, and left
      * movement.
-     * <p><p>
+     * 
      * Only one joystick window is permitted to be opened for a particular Scribbler; no action occurs if
      * this method is invoked when a joystick window is already opened.  The window will stay opened until the user
      * closes it (by clicking the window's close icon) or the {@link #close close} method is invoked.
-     * <p><p>
-     * <b>Precondition:</b> scribblerConnected
+     * 
+     * @pre scribblerConnected
      */
     public void gamepad()
     {
@@ -1011,8 +1066,8 @@ public class Scribbler  {
 
     /**
      * Sets one (or all) of the Scribbler's LEDs on or off.
-     * <p><p>
-     * <b>Precondition:</b> scribblerConnected; position is Scribbler.LED_LEFT (or 0), Scribbler.LED_CENTER (or 1), 
+     * 
+     * @pre scribblerConnected; position is Scribbler.LED_LEFT (or 0), Scribbler.LED_CENTER (or 1), 
      * Scribbler.LED_RIGHT (or 2), or Scribbler.LED_ALL (or 3); onOff is Scribbler.LED_OFF (or 0) or Scribbler.LED_ON (or 1)
      */
     public void setLED( int position, int onOff )
@@ -1045,8 +1100,8 @@ public class Scribbler  {
 
     /**
      * Sets the front LED on the Fluke board on or off.
-     * <p><p>
-     * <b>Precondition:</b> flukeConnected, onOff either Scribbler.LED_OFF (or 0) or Scribbler.LED_ON (or 1)
+     * 
+     * @pre flukeConnected, onOff either Scribbler.LED_OFF (or 0) or Scribbler.LED_ON (or 1)
      * 
      * @param onOff Specifies whether to turn on the LED (Scribbler.LED_ON) or turn it off (Scribbler.LED_OFF)
      */
@@ -1063,8 +1118,8 @@ public class Scribbler  {
 
     /**
      * Sets the back LED on the Fluke board to a specified brightness.
-     * <p><p>
-     * <b>Precondition:</b> flukeConnected, and brightness between 0.0 (inclusive) and 1.0 (inclusive)
+     * 
+     * @pre flukeConnected, and brightness between 0.0 (inclusive) and 1.0 (inclusive)
      * 
      * @param brightness A value between 0.0 and 1.0 that specifies the brightness of the LED
      */
@@ -1086,8 +1141,8 @@ public class Scribbler  {
 
     /**
      * Read one of the Fluke's IR obstacle sensors.
-     * <p><p>
-     * <b>Precondition:</b> flukeConnected, whichSensor is Scribbler.SENSOR_IR_LEFT (or 0), Scribbler.SENSOR_IR_CENTER (or 2), or
+     * 
+     * @pre flukeConnected, whichSensor is Scribbler.SENSOR_IR_LEFT (or 0), Scribbler.SENSOR_IR_CENTER (or 2), or
      * Scribbler.SENSOR_IR_RIGHT (or 1)
      * 
      * @param whichSensor Selects the Fluke IR sensor.  Should be Scribbler.SENSOR_IR_LEFT (or 0), Scribbler.SENSOR_IR_CENTER (or 2), or
@@ -1121,8 +1176,8 @@ public class Scribbler  {
 
     /**
      * Returns the values of all three obstacles sensors on the Fluke.
-     * <p><p>
-     * <b>Precondition:</b> flukeConnected
+     * 
+     * @pre flukeConnected
      * 
      * @return a 3-element array containing the values of the left (in element 0), center (in element 1), and
      * right (in element 2) obstacle sensors.
@@ -1140,8 +1195,8 @@ public class Scribbler  {
      * Sets the power level of the Fluke's IR obstacle sensors.  The default value is 135.  If
      * {@link #getObstacle getObstacle} always reports high values, try lowering the power level; if it always
      * reports very low values, try increasing the power level.
-     * <p><p>
-     * <b>Precondition:</b> flukeConnected, powerLevel between 0 (inclusive) and 255 (inclusive)
+     * 
+     * @pre flukeConnected, powerLevel between 0 (inclusive) and 255 (inclusive)
      * 
      * @param powerLevel Specifies the power level
      */
@@ -1156,8 +1211,8 @@ public class Scribbler  {
     /**
      * Turn off the Fluke camera's auto-exposure, auto-gain, and lower the gain to the specified value.  This is
      * useful when using {@link #getBright getBright} virtual sensors.
-     * <p><p>
-     * <b>Precondition:</b> flukeConnected, level between 0 (inclusive) and 255 (inclusive)
+     * 
+     * @pre flukeConnected, level between 0 (inclusive) and 255 (inclusive)
      * 
      * @param level The camera's gain level, between 0 and 255.
      * 
@@ -1178,8 +1233,8 @@ public class Scribbler  {
 
     /**
      * Turn on the Fluke camera's auto-exposure, auto-gain, and auto-color-balance.
-     * <p><p>
-     * <b>Precondition:</b> flukeConnected
+     * 
+     * @pre flukeConnected
      * 
      */
     public void autoCamera()
@@ -1199,8 +1254,8 @@ public class Scribbler  {
     /**
      * Set the Fluke camera's gain, brightness, and exposore control to specific values.  The default values
      * are: gain:0, brightness: 120, exposure:65.
-     * <p><p>
-     * <b>Precondition:</b> flukeConnected, all parameters between 0 (inclusive) and 255 (inclusive)
+     * 
+     * @pre flukeConnected, all parameters between 0 (inclusive) and 255 (inclusive)
      */
     public void manualCamera( int gain, int brightness, int exposure )
     {
@@ -1219,8 +1274,8 @@ public class Scribbler  {
     /**
      * Defines the blob used by {@link #takePicture takePicture}(Scribbler.IMAGE_BLOB).  A blob specifies a range of colors
      * and is usually defined by calling defineBlob or getUserDefinedBlob in a MyroImage.
-     * <p><p>
-     * <b>Precondition:</b> flukeConnected, blob not null
+     * 
+     * @pre flukeConnected, blob not null
      * 
      * @param blob Specifies the color range of the blob
      */
@@ -1242,8 +1297,8 @@ public class Scribbler  {
     /**
      * Gets the voltage of the Scribbler's battery.  If the battery voltage drops below ~6.1V the Fluke's back
      * LED will flash to alert you to change (or preferably recharge) the batteries.
-     * <p><p>
-     * <b>Precondition:</b> flukeConnected
+     * 
+     * @pre flukeConnected
      * 
      * @return The voltage of the Scribbler's battery
      */
@@ -1261,8 +1316,8 @@ public class Scribbler  {
     /**
      * Read one of the Fluke's virtual light sensors.  The Fluke's virtual light sensors report the total
      * intensity on the left, center, and right sides of the Fluke's camera.
-     * <p><p>
-     * <b>Precondition:</b> flukeConnected, and whichSensor is Scribbler.SENSOR_LIGHT_LEFT (or 0),
+     * 
+     * @pre flukeConnected, and whichSensor is Scribbler.SENSOR_LIGHT_LEFT (or 0),
      * Scribbler.SENSOR_LIGHT_CENTER (or 1), or Scribbler.SENSOR_LIGHT_RIGHT (or 2).
      * 
      * @param whichSensor Specifies the sensor to use.  Must be Scribbler.SENSOR_LIGHT_LEFT (or 0), Scribbler.SENSOR_LIGHT_CENTER (or 1),
@@ -1304,8 +1359,8 @@ public class Scribbler  {
 
     /**
      * Returns the values of all three virtual light sensors on the Fluke
-     * <p><p>
-     * <b>Precondition:</b> flukeConnected
+     * 
+     * @pre flukeConnected
      * 
      * @return A 3-element array containing the values of the left (in element 0), center (in element 1), and right
      * (in element 2) virtual light sensors.
@@ -1330,8 +1385,8 @@ public class Scribbler  {
      * The Scribbler will continue to move until another movement method is invoked (e.g., {@link #stop stop}, 
      * {@link #move move}, {@link #forward forward}, {@link #backward backward}, {@link #turnLeft turnLeft}, 
      * {@link #turnRight turnRight}, {@link #motors motors}, {@link #translate translate}, {@link #rotate rotate} ).
-     * <p><p>
-     * <b>Precondition:</b> scribblerConnected, and translate and rotate are both between -1.0 (inclusive) and 1.0 (inclusive)
+     * 
+     * @pre scribblerConnected, and translate and rotate are both between -1.0 (inclusive) and 1.0 (inclusive)
      * 
      * @param translate Specifies the forward movement speed.  Values > 0 specify forward speed (with 1.0 specifying
      * full forward speed), values &lt; 0 specify backward speed (with -1.0 specifying full backward speed).  0
@@ -1354,8 +1409,8 @@ public class Scribbler  {
      * Moves the Scribbler in a forward direction at a specified speed with no rotational movement for a specified
      * amount of time.  The Scribbler will stop moving at the end of the specified time period.  This method will
      * not return until the specified time period has occurred.
-     * <p><p>
-     * <b>Precondition:</b> scribblerConnected, speed between -1.0 (inclusive) and 1.0 (inclusive), numSeconds >= 0.0
+     * 
+     * @pre scribblerConnected, speed between -1.0 (inclusive) and 1.0 (inclusive), numSeconds >= 0.0
      * 
      * @param speed Specifies the forward speed.  Positive values specify forward movement (1.0 is full forward speed),
      * negative values specify backward movement (-1.0 is full backward speed).
@@ -1378,8 +1433,8 @@ public class Scribbler  {
      * continue to move until another movement method is invoked (e.g., {@link #stop stop}, 
      * {@link #move move}, {@link #forward forward}, {@link #backward backward}, {@link #turnLeft turnLeft}, 
      * {@link #turnRight turnRight}, {@link #motors motors}, {@link #translate translate}, {@link #rotate rotate} ).
-     * <p><p>
-     * <b>Precondition:</b> scribblerConnected and speed between -1.0 (inclusive) and 1.0 (inclusive)
+     * 
+     * @pre scribblerConnected and speed between -1.0 (inclusive) and 1.0 (inclusive)
      * 
      * @param speed Specifies the speed.  Positive values specify forward movement (1.0 is full forward speed),
      * negative values specify backward movement (-1.0 is full backward speed).
@@ -1398,8 +1453,8 @@ public class Scribbler  {
      * move until another movement method is invoked (e.g., {@link #stop stop}, {@link #move move},
      * {@link #forward forward}, {@link #backward backward}, {@link #turnLeft turnLeft}, {@link #turnRight turnRight},
      * {@link #motors motors}, {@link #translate translate}, {@link #rotate rotate} ).
-     * <p><p>
-     * <b>Precondition:</b> scribblerConnected
+     * 
+     * @pre scribblerConnected
      * 
      */
     public  void forward()
@@ -1411,8 +1466,8 @@ public class Scribbler  {
 
     /**
      * Causes the Scribbler to stop moving.
-     * <p><p>
-     * <b>Precondition:</b> scribblerConnected
+     * 
+     * @pre scribblerConnected
      */
     public  void stop()
     {
@@ -1427,8 +1482,8 @@ public class Scribbler  {
      * Moves the Scribbler in a backward direction at a specified speed with no rotational movement for a specified
      * amount of time.  The Scribbler will stop moving at the end of the specified time period.  This method will
      * not return until the specified time period has occurred.
-     * <p><p>
-     * <b>Precondition:</b> scribblerConnected, speed between -1.0 (inclusive) and 1.0 (inclusive), numSeconds >= 0.0
+     * 
+     * @pre scribblerConnected, speed between -1.0 (inclusive) and 1.0 (inclusive), numSeconds >= 0.0
      * 
      * @param speed Specifies the backward speed.  Positive values specify backward movement (1.0 is full backward
      * speed), negative values specify forward movement (-1.0 is full forward speed).
@@ -1451,8 +1506,8 @@ public class Scribbler  {
      * continue to move until another movement method is invoked (e.g., {@link #stop stop}, {@link #move move},
      * {@link #forward forward}, {@link #backward backward}, {@link #turnLeft turnLeft}, 
      * {@link #turnRight turnRight}, {@link #motors motors}, {@link #translate translate}, {@link #rotate rotate} ).
-     * <p><p>
-     * <b>Precondition:</b> scribblerConnected and speed between -1.0 (inclusive) and 1.0 (inclusive)
+     * 
+     * @pre scribblerConnected and speed between -1.0 (inclusive) and 1.0 (inclusive)
      * 
      * @param speed Specifies the speed.  Positive values specify backward movement (1.0 is full backward speed),
      * negative values specify forward movement (-1.0 is full forward speed).
@@ -1471,8 +1526,8 @@ public class Scribbler  {
      * move until another movement method is invoked (e.g., {@link #stop stop}, {@link #move move},
      * {@link #forward forward}, {@link #backward backward}, {@link #turnLeft turnLeft}, 
      * {@link #turnRight turnRight}, {@link #motors motors}, {@link #translate translate}, {@link #rotate rotate} ).
-     * <p><p>
-     * <b>Precondition:</b> scribblerConnected
+     * 
+     * @pre scribblerConnected
      * 
      */
     public  void backward()
@@ -1486,8 +1541,8 @@ public class Scribbler  {
      * Moves the Scribbler in a counterclockwise rotation at a specified speed with no forward or backward movement
      * for a specified amount of time.  The Scribbler will stop moving at the end of the specified time period.  This
      * method will not return until the specified time period has occurred.
-     * <p><p>
-     * <b>Precondition:</b> scribblerConnected, speed between -1.0 (inclusive) and 1.0 (inclusive), numSeconds >= 0.0
+     * 
+     * @pre scribblerConnected, speed between -1.0 (inclusive) and 1.0 (inclusive), numSeconds >= 0.0
      * 
      * @param speed Specifies the rotational speed.  Positive values specify counterclockwise rotation 
      * (1.0 is full counterclockwise speed),
@@ -1511,8 +1566,8 @@ public class Scribbler  {
      * The Scribbler will continue to move until another movement method is invoked (e.g., {@link #stop stop}, 
      * {@link #move move}, {@link #forward forward}, {@link #backward backward}, {@link #turnLeft turnLeft}, 
      * {@link #turnRight turnRight}, {@link #motors motors}, {@link #translate translate}, {@link #rotate rotate} ).
-     * <p><p>
-     * <b>Precondition:</b> scribblerConnected, speed between -1.0 (inclusive) and 1.0 (inclusive)
+     * 
+     * @pre scribblerConnected, speed between -1.0 (inclusive) and 1.0 (inclusive)
      * 
      * @param speed Specifies the rotational speed.  Positive values specify counterclockwise rotation (1.0 is full
      * counterclockwise speed), negative values specify clockwise rotation (-1.0 is full clockwise speed).
@@ -1531,8 +1586,8 @@ public class Scribbler  {
      * The Scribbler will continue to move until another movement method is invoked (e.g., {@link #stop stop}, 
      * {@link #move move}, {@link #forward forward}, {@link #backward backward}, {@link #turnLeft turnLeft}, 
      * {@link #turnRight turnRight}, {@link #motors motors}, {@link #translate translate}, {@link #rotate rotate} ).
-     * <p><p>
-     * <b>Precondition:</b> scribblerConnected
+     * 
+     * @pre scribblerConnected
      * 
      */
     public  void turnLeft()
@@ -1546,8 +1601,8 @@ public class Scribbler  {
      * Moves the Scribbler in a clockwise rotation at a specified speed with no forward or backward movement
      * for a specified amount of time.  The Scribbler will stop moving at the end of the specified time period.  This
      * method will not return until the specified time period has occurred.
-     * <p><p>
-     * <b>Precondition:</b> scribblerConnected, speed between -1.0 (inclusive) and 1.0 (inclusive), numSeconds >= 0.0
+     * 
+     * @pre scribblerConnected, speed between -1.0 (inclusive) and 1.0 (inclusive), numSeconds >= 0.0
      * 
      * @param speed Specifies the rotational speed.  Positive values specify clockwise rotation (1.0 is full
      * clockwise speed), negative values specify counterclockwise rotation (-1.0 is full counterclockwise speed).
@@ -1570,8 +1625,8 @@ public class Scribbler  {
      * Scribbler will continue to move until another movement method is invoked (e.g., {@link #stop stop}, 
      * {@link #move move}, {@link #forward forward}, {@link #backward backward}, {@link #turnLeft turnLeft}, 
      * {@link #turnRight turnRight}, {@link #motors motors}, {@link #translate translate}, {@link #rotate rotate} ).
-     * <p><p>
-     * <b>Precondition:</b> scribblerConnected, speed between -1.0 (inclusive) and 1.0 (inclusive)
+     * 
+     * @pre scribblerConnected, speed between -1.0 (inclusive) and 1.0 (inclusive)
      * 
      * @param speed Specifies the rotational speed.  Positive values specify clockwise rotation 
      * (1.0 is full clockwise speed),
@@ -1591,8 +1646,8 @@ public class Scribbler  {
      * will continue to move until another movement method is invoked (e.g., {@link #stop stop}, 
      * {@link #move move}, {@link #forward forward}, {@link #backward backward}, {@link #turnLeft turnLeft}, 
      * {@link #turnRight turnRight}, {@link #motors motors}, {@link #translate translate}, {@link #rotate rotate} ).
-     * <p><p>
-     * <b>Precondition:</b> scribblerConnected
+     * 
+     * @pre scribblerConnected
      * 
      */
     public  void turnRight()
@@ -1607,8 +1662,8 @@ public class Scribbler  {
      * to move until another movement method is invoked (e.g., {@link #stop stop}, {@link #move move},
      * {@link #forward forward}, {@link #backward backward}, {@link #turnLeft turnLeft}, 
      * {@link #turnRight turnRight}, {@link #motors motors}, {@link #translate translate}, {@link #rotate rotate} ).
-     * <p><p>
-     * <b>Precondition:</b> scribblerConnected, and left and right are both between -1.0 (inclusive) and 1.0 (inclusive)
+     * 
+     * @pre scribblerConnected, and left and right are both between -1.0 (inclusive) and 1.0 (inclusive)
      * 
      * @param left Specifies the speed of the left wheel.  Values > 0 specify forward speed (with 1.0 specifying
      * full forward speed), values &lt; 0 specify backward speed (with -1.0 specifying full backward speed).  0
@@ -1635,8 +1690,8 @@ public class Scribbler  {
      * (e.g., {@link #stop stop}, {@link #move move}, {@link #forward forward}, {@link #backward backward},
      * {@link #turnLeft turnLeft}, {@link #turnRight turnRight}, {@link #motors motors}, {@link #translate translate},
      * {@link #rotate rotate} ).
-     * <p><p>
-     * <b>Precondition:</b> scribblerConnected and speed between -1.0 (inclusive) and 1.0 (inclusive)
+     * 
+     * @pre scribblerConnected and speed between -1.0 (inclusive) and 1.0 (inclusive)
      * 
      * @param speed Specifies the speed.  Positive values specify forward movement (1.0 is full forward speed),
      * negative values specify backward movement (-1.0 is full backward speed).
@@ -1655,8 +1710,8 @@ public class Scribbler  {
      * movement.  The Scribbler will continue to move until another movement method is invoked (e.g., {@link #stop stop}, 
      * {@link #move move}, {@link #forward forward}, {@link #backward backward}, {@link #turnLeft turnLeft}, 
      * {@link #turnRight turnRight}, {@link #motors motors}, {@link #translate translate}, {@link #rotate rotate} ).
-     * <p><p>
-     * <b>Precondition:</b> scribblerConnected and speed between -1.0 (inclusive) and 1.0 (inclusive)
+     * 
+     * @pre scribblerConnected and speed between -1.0 (inclusive) and 1.0 (inclusive)
      * 
      * @param speed Specifies the rotational speed.  Positive values specify counterclockwise rotation (1.0 is full
      * counterclockwise speed), negative values specify clockwise rotation (-1.0 is full clockwise speed).
@@ -1672,8 +1727,8 @@ public class Scribbler  {
 
     /**
      * Takes a picture with Fluke's camera.  The imageType parameter determines what kind of picture is taken.
-     * <p><p>
-     * <b>Precondition:</b> flukeConnected, imageType is Scribbler.IMAGE_COLOR (or 0), Scribbler.IMAGE_GRAY (or 1), or
+     * 
+     * @pre flukeConnected, imageType is Scribbler.IMAGE_COLOR (or 0), Scribbler.IMAGE_GRAY (or 1), or
      * Scribbler.IMAGE_BLOB (or 2)
      * 
      * @param imageType Specifies the type of picture to take.  Scribbler.IMAGE_COLOR, Scribbler.IMAGE_GRAY, or Scribbler.IMAGE_BLOB
@@ -1713,8 +1768,8 @@ public class Scribbler  {
     /**
      * Get info about the blob image.  The returned MyroBlobImageInfo contains the number of pixels in the blob,
      * the average X coordinate and the average Y coordinate.
-     * <p><p>
-     * <b>Precondition:</b> flukeConnected
+     * 
+     * @pre flukeConnected
      * 
      * @return A MyroBlobImageInfo instance that has information about the blob image (number of pixels in the
      * blob, and average location of the blob)
@@ -1853,8 +1908,6 @@ public class Scribbler  {
     private static final int CAM_COMB_EXPOSURE_CONTROL_ON = (CAM_COMB_DEFAULT |  (1 << 0));
     private static final int CAM_COMB_EXPOSURE_CONTROL_OFF = (CAM_COMB_DEFAULT & ~(1 << 0));
 
-    private static final String MYRO_JAVA_VERSION   = "1.0.0";
-
     // i/o streams, etc.
     private InputStream                             _inputStream;
     private scribbler.io.RXTXScribblerPort          _serialPort;
@@ -1876,7 +1929,6 @@ public class Scribbler  {
     private Thread currentJoyStickThread;
     private Thread currentGamepadThread;
     private Thread currentCameraThread;
-
 
     /**
      * Write a sequence of ints to the robot.  Note that the difference between _write and _writePadded
@@ -2204,8 +2256,8 @@ public class Scribbler  {
     }
 
     /**
-     * Send a command with data to the fluke.  The command opcode and command data are passed to the method
-     * as well as the number of response bytes expected.  Only one trhead at a time can communicate with
+     * Send a command with one data value to the fluke.  The command opcode and command data are passed to the method
+     * as well as the number of response bytes expected.  Only one thread at a time can communicate with
      * the Fluke/Scribbler.
      */
     private synchronized int[] _getFluke( int command, int data, int numResponseBytes)
@@ -2213,6 +2265,30 @@ public class Scribbler  {
         int[] message = new int[] { command, data };
         _write( message );
         return _read( numResponseBytes );
+    }
+
+    /**
+     * Send a command with multiple data values to the fluke.  The command opcode and command data are passed to the method
+     * as well as the number of response bytes expected. Only 1 thread at a time can communicate with the robot.
+     */
+    private synchronized int[] _getFluke( int command, int[] data, int numResponseBytes )
+    {
+        int[] message = new int[ data.length + 1];
+        message[0] = command;
+        for( int i=0; i<data.length; i++ )
+            message[i+1] = data[i];
+        _write( message );
+        return _read( numResponseBytes );
+    }
+
+    /**
+     * Read a byte from the scribbler/fluke serial memory
+     */
+    private int _read_mem( int page, int offset )
+    {
+        int[] data = new int[] { (page>>8)&0xff, page&0xff, (offset>>8)&0xff, offset&0xff };
+        int[] retVal = _getFluke( GET_SERIAL_MEM, data, 1 );
+        return retVal[0];
     }
 
     /**

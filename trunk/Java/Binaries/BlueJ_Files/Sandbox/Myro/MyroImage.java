@@ -222,8 +222,8 @@ public abstract class MyroImage
      * Calculate a blob based on a rectangular area of the image.  The specified rectangle must be non-empty
      * and be conpletely within the image.  The returned blob contains the average color of the rectangular area
      * of the image and can be passed to the scribbler's configureBlob method.
-     * <p><p>
-     * <b>Precondition:</b> (xlow,ylow) is the coordinate of the upperleft corner or a rectangle within the image
+     * 
+     * @pre (xlow,ylow) is the coordinate of the upperleft corner or a rectangle within the image
      * (i.e., >=0), width and height are both > 0, and the lowerright corner of the rectangle is within the image.
      * 
      * @return A blob that can be passed to a scribbler configureBlob method.
@@ -314,8 +314,8 @@ public abstract class MyroImage
 
     /**
      * Returns the RGB color of pixel (x,y).
-     * <p><p>
-     * <b>Precondition:</b> (x,y) is the coordinate of a pixel in the image.
+     * 
+     * @pre (x,y) is the coordinate of a pixel in the image.
      * 
      * @param x x xoordinate of the pixel
      * @param y y coordinate of the pixel
@@ -325,8 +325,8 @@ public abstract class MyroImage
 
     /**
      * Returns the grayscale value of pixel (x,y).
-     * <p><p>
-     * <b>Precondition:</b> (x,y) is the coordinate of a pixel in the image.
+     * 
+     * @pre (x,y) is the coordinate of a pixel in the image.
      * 
      * @param x x xoordinate of the pixel
      * @param y y coordinate of the pixel
@@ -337,8 +337,8 @@ public abstract class MyroImage
     /**
      * Sets the color of pixel (x,y) to an RGB color.  Changes will not appear on the screen until either
      * {@link #show show} or {@link #repaint repaint} is called.
-     * <p><p>
-     * <b>Precondition:</b> (x,y) is the coordinate of a pixel in the image, color is not null.
+     * 
+     * @pre (x,y) is the coordinate of a pixel in the image, color is not null.
      * 
      * @param x x xoordinate of the pixel
      * @param y y coordinate of the pixel
@@ -348,8 +348,8 @@ public abstract class MyroImage
 
     /**
      * Sets the color of pixel (x,y) to a grayscale color.
-     * <p><p>
-     * <b>Precondition:</b> (x,y) is the coordinate of a pixel in the image, grayLevel is between 0 (inclusive)
+     * 
+     * @pre (x,y) is the coordinate of a pixel in the image, grayLevel is between 0 (inclusive)
      * and 255 (inclusive).  Changes will not appear on the screen until either {@link #show show}
      * or {@link #repaint repaint} is called.
      * 
@@ -361,8 +361,8 @@ public abstract class MyroImage
 
     /**
      * Save the image to a file.  The only supported formats are jpg and png.
-     * <p><p>
-     * <b>Precondition:</b> filename must have an extension of .jpg or .png
+     * 
+     * @pre filename must have an extension of .jpg or .png
      * 
      * @param filename Name of the file to save the image to.
      */

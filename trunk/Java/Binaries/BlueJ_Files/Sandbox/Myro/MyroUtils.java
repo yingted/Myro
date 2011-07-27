@@ -44,7 +44,7 @@ public class MyroUtils
     // static constructor
     static
     {
-        String VOICE_NAME = "kevin";
+        String VOICE_NAME = "kevin16";
 
         // initialize random number sequence
         _randomSeq = new Random();
@@ -60,8 +60,8 @@ public class MyroUtils
 
     /**
      * Cause the current thread to sleep for numSeconds.
-     * <p><p>
-     * <b>Precondition:</b> numSeconds >= 0.0
+     * 
+     * @pre numSeconds >= 0.0
      * 
      * @param numSeconds The length of time to sleep.
      */
@@ -77,8 +77,8 @@ public class MyroUtils
 
     /**
      * Returns a random integer within a specified range.
-     * <p><p>
-     * <b>Precondition:</b> low <= high
+     * 
+     * @pre low &lt= high
      * 
      * @param low Low end of range
      * @param high High end of range
@@ -93,7 +93,6 @@ public class MyroUtils
 
     /**
      * Returns a random double in the range 0.0 (inclusive) and 1.0 (exclusive).
-     * <p><p>
      * 
      * @return A uniformly distributed random double between 0.0 (inclusive) and 1.0 (exclusive)
      */

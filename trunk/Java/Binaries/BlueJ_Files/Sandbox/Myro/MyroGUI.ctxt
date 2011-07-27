@@ -1,7 +1,7 @@
 #BlueJ class context
 comment0.params=message\ options
 comment0.target=java.lang.String\ askQuestion(java.lang.String,\ java.lang.String[])
-comment0.text=\n\ Presents\ the\ user\ with\ a\ question\ modal\ dialog\ box\ with\ 1\ or\ more\ responses.\n\ <p><p>\n\ precondition\:\ length\ of\ options\ >\ 0\n\ \n\ @param\ message\ The\ text\ presented\ to\ the\ user\n\ @param\ options\ An\ array\ of\ Strings\ containing\ the\ text\ of\ the\ buttons(s)\n\ @return\ The\ text\ of\ the\ button\ the\ user\ clicked\n
+comment0.text=\n\ Presents\ the\ user\ with\ a\ question\ modal\ dialog\ box\ with\ 1\ or\ more\ responses.\n\ \n\ @pre\ length\ of\ options\ >\ 0\n\ \n\ @param\ message\ The\ text\ presented\ to\ the\ user\n\ @param\ options\ An\ array\ of\ Strings\ containing\ the\ text\ of\ the\ buttons(s)\n\ @return\ The\ text\ of\ the\ button\ the\ user\ clicked\n
 comment1.params=message
 comment1.target=java.lang.String\ askQuestion(java.lang.String)
 comment1.text=\n\ Presents\ the\ user\ with\ a\ question\ modal\ dialog\ box\ for\ a\ yes/no\ response.\n\ \n\ @param\ message\ The\ text\ message\ presented\ to\ the\ user\n\ @return\ "Yes"\ or\ "no"\n
@@ -22,5 +22,5 @@ comment6.target=double\ inputDouble(java.lang.String)
 comment6.text=\n\ Presents\ user\ with\ an\ input\ dialog\ box,\ allowing\ her/him\ to\ enter\ a\ double.\ \ If\ the\ user\n\ enters\ an\ illegal\ value,\ the\ user\ is\ told\ about\ this\ and\ presented\ with\ the\ original\n\ dialog\ box\ asking\ for\ input.\ \ This\ continues\ until\ the\ user\ enters\ a\ valid\ double\ or\n\ hits\ the\ Cancel\ button,\ in\ which\ case\ 0.0\ is\ returned.\n\ \n\ @param\ message\ The\ text\ message\ presented\ to\ the\ user\n\ @return\ The\ integer\ entered\ by\ the\ user.\ \ 0.0\ is\ returned\ if\ the\ user\ cancels\ the\ input.\n
 comment7.params=message\ options\ messageType
 comment7.target=java.lang.String\ showDialogBox(java.lang.String,\ java.lang.String[],\ int)
-comment7.text=\n\ Presents\ the\ user\ with\ a\ modal\ dialog\ box\ with\ 1\ or\ more\ responses.\n\ <p><p>\n\ precondition\:\ length\ of\ options\ >\ 0\n\ \n\ @param\ message\ The\ text\ presented\ to\ the\ user\n\ @param\ options\ An\ array\ of\ Strings\ containing\ the\ text\ of\ the\ buttons(s)\n\ @return\ The\ text\ of\ the\ button\ the\ user\ clicked\n
+comment7.text=\n\ Presents\ the\ user\ with\ a\ modal\ dialog\ box\ with\ 1\ or\ more\ responses.\n\ \n\ @pre\ length\ of\ options\ >\ 0\n\ \n\ @param\ message\ The\ text\ presented\ to\ the\ user\n\ @param\ options\ An\ array\ of\ Strings\ containing\ the\ text\ of\ the\ buttons(s)\n\ @return\ The\ text\ of\ the\ button\ the\ user\ clicked\n
 numComments=8

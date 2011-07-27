@@ -20,11 +20,13 @@
  * 
  * You should have received a copy of the GNU General Public License
  * along with Myro/Java.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 package Myro;
 
 import java.awt.event.*;
+import java.util.LinkedList;
+import java.util.Queue;
 
 /**
  * Provides a simple interface to determine whether or not key and mouse events have occurred.  The
@@ -37,7 +39,8 @@ import java.awt.event.*;
  *      j.addKeyListener( listener.getKeyListener() );<p>
  *      j.addMouseListener( listener.getMouseListener() );<p>
  * 
- * Static methods MyroListener.isKeyPressed(), MyroListener.whicKeyPressed(), and MyroListener.isMousePressed()
+ * Static methods MyroListener.isKeyPressed(), MyroListener.whichKey(),
+ * MyroListener.isMousePressed(), and MyroListener.whichButton()
  * can be used to determine whether an appropriate event occurred in j.  (Note that it is not possible to 
  * determine in which frame the event occurred.)
  * 
@@ -47,13 +50,26 @@ import java.awt.event.*;
 
 public class MyroListener
 { 
+    // constants returned by whichButton
     /**
-     * Constant returned by whichKeyPressed to indicate that no key was pressed.
+     * Constant returned by whichButton to indicate the left mouse button was pressed.
      */
-    public static final char NO_KEY_PRESSED = (char)0;
-
+    public static final int LEFT_BUTTON     = MouseEvent.BUTTON1;
+    
+    /**
+     * Constant returned by whichButton to indicate the middle mouse button was pressed.
+     */
+    public static final int MIDDLE_BUTTON   = MouseEvent.BUTTON2;
+    
+    /**
+     * Constant returned by whichButton to indicate the right mouse button was pressed.
+     */
+    public static final int RIGHT_BUTTON    = MouseEvent.BUTTON3;
+    
+    private static Queue<Character> _bufferedChar;
     private static char _lastChar;
-    private static boolean _keyPressed = false;
+    private static int _bufferedButton;
+    private static int _lastButton;
     private static boolean _mousePressed = false;
 
     private simpleKeyListener _keyListener;
@@ -67,6 +83,7 @@ public class MyroListener
     static {
         keyLock = new Object();
         mouseLock= new Object();
+        _bufferedChar = new LinkedList<Character>();
     }
 
     public MyroListener()
@@ -91,32 +108,34 @@ public class MyroListener
         return _mouseListener;
     }
 
+    /**
+     * keyListener to process keyboard events
+     */
     private class simpleKeyListener extends KeyAdapter
     {
         public void keyTyped( KeyEvent e )
         {
             synchronized (keyLock)
             {
-            _keyPressed = true;
-            _lastChar = e.getKeyChar();
+            _bufferedChar.add( e.getKeyChar() );
             }
         }
     }
 
     /**
-     * Returns true iff a key press event has occurred since the last time isKeyPressed or
-     * getKeyPressed was called.  It is not possible to to determine which key was actually pressed;
-     * this functionality is only available in method getKeyPressed.
+     * Returns true iff a key press event has occurred since the last time isKeyPressed was called.
+     * When isKeyPressed returns true, whichKey() will return the key that was pressed.
+     * 
+     * @return True iff a key was pressed since the last time isKeyPressed was invoked.
      * 
      */
     public static boolean isKeyPressed()
     {
         synchronized (keyLock)
         {
-        if( _keyPressed )
+        if( !_bufferedChar.isEmpty() )
         {
-            _keyPressed = false;
-            _lastChar = NO_KEY_PRESSED;
+            _lastChar = _bufferedChar.remove();
             return true;
         }
         return false;
@@ -124,21 +143,30 @@ public class MyroListener
     }
 
     /** 
-     * Determines whether a key has been pressed since the last time isKeyPressed or getKeyPressed
-     * was called.  If a key was pressed, then the key that was most recently pressed is returned,
-     * otherwise NO_KEY_PRESSED is returned.
+     * Returns the key that was pressed when isKeyPressed() returned true.  If the last invocation of
+     * isKeyPressed returned false, the return value of whichKey() is undefined.
+     * 
+     * @return The key that was pressed the last time isKeyPressed returned true.
      */
-    public static char getKeyPressed()
+    public static char whichKey()
     {
         synchronized (keyLock)
         {
-        char retVal = _lastChar;
-        _keyPressed = false;
-        _lastChar = NO_KEY_PRESSED;
-        return retVal;
+        return _lastChar;
         }
     }
 
+    /**
+     * Flushes any buffered keystrokes that may have been pressed since the last time isKeyPressed()
+     * was invoked.
+     */
+    public static void flushKeys()
+    {
+        synchronized( keyLock )
+        {
+            _bufferedChar.clear();
+        }
+    }
     private class simpleMouseListener extends MouseAdapter
     {
         public void mousePressed( MouseEvent e )
@@ -146,20 +174,44 @@ public class MyroListener
             synchronized (mouseLock)
             {
             _mousePressed = true;
+            _bufferedButton = e.getButton();
             }
         }
     }
 
     /**
      * Returns true iff the mouse has been pressed since the last time isMousePressed was called.
+     * 
+     * @return True iff the mouse has been pressed since the last time isMousePressed was invoked.
      */
     public static boolean isMousePressed()
     {
         synchronized (mouseLock)
         {
-        boolean retVal = _mousePressed;
-        _mousePressed = false;
-        return retVal;
+        if( _mousePressed )
+        {
+            _mousePressed = false;
+            _lastButton = _bufferedButton;
+            return true;
+        }
+        else
+            return false;
+        }
+    }
+
+    /**
+     * Returns an indication of which button was pressed the last time isMousePressed returned true.
+     * If the most recent invocation of isMousePressed returned false, the return value of 
+     * whichButton is undefined.
+     * 
+     * @return The most recent button pressed.  This will be MyroListener.LEFT_BUTTON,
+     * MyroListener.MIDDLE_BUTTON, or MyroListener.RIGHT_BUTTON.
+     */
+    public static int whichButton()
+    {
+        synchronized( mouseLock )
+        {
+        return _lastButton;
         }
     }
 

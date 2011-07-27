@@ -10,11 +10,22 @@ Installation:
 
 2) Edit file (bluej_dir)/lib/bluej.defs to include extendScribbler and scribblerMain in
 the definition of bluej.classTemplates.  (Alternatively, have each student edit their own
-bluej.proerties file.)
+bluej.properties file.)
 
 For example, this definition might look like:
 
 	bluej.classTemplates = extendScribbler scribblerMain stdclass
+
+3) Edit file (bluej_dir)/lib/bluej.defs to include the following in the definition of 
+doctool.options:
+
+	-tag pre:cm:Precondition: -tag post:cm:Postcondition:
+
+For example, the definition might look like:
+
+	doctool.options=-author -version -nodeprecated -package -tag pre:cm:Precondition:  -tag post:cm:Postcondition:
+
+(Alternatively, have each student edit their own bluej.properties file.)
 
 3) Copy folder Sandbox to a location in each student's class folder (i.e., where they will save
 all class work).

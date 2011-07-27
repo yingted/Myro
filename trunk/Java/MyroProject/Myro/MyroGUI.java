@@ -38,8 +38,8 @@ public class MyroGUI
 
     /**
      * Presents the user with a question modal dialog box with 1 or more responses.
-     * <p><p>
-     * precondition: length of options > 0
+     * 
+     * @pre length of options > 0
      * 
      * @param message The text presented to the user
      * @param options An array of Strings containing the text of the buttons(s)
@@ -168,8 +168,8 @@ public class MyroGUI
 
     /**
      * Presents the user with a modal dialog box with 1 or more responses.
-     * <p><p>
-     * precondition: length of options > 0
+     * 
+     * @pre length of options > 0
      * 
      * @param message The text presented to the user
      * @param options An array of Strings containing the text of the buttons(s)
