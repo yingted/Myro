@@ -1,0 +1,10 @@
+#BlueJ class context
+comment0.params=image
+comment0.target=MyroPixelIterator(MyroImage)
+comment1.params=
+comment1.target=MyroPixel\ next()
+comment2.params=
+comment2.target=boolean\ hasNext()
+comment3.params=
+comment3.target=void\ remove()
+numComments=4
