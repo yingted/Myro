@@ -13,7 +13,9 @@ public class imageDemo
     public static void main( String[] args )
     {
 
-        final String scribblerPort = "/dev/rfcomm1";
+        String scribblerPort;
+        scribblerPort = MyroGUI.inputString("Please enter the port name");
+
         Scribbler robot= new Scribbler( scribblerPort );
         if( !robot.portOpened() )
         {
@@ -28,16 +30,22 @@ public class imageDemo
         // let the user spend time pondering the wonderful photo
         MyroGUI.tellUser( "Click when ready to see the negative.", "OK" );
 
-        // calculate and display the image negative
+        // calculate and display the image negative.  This uses a for-each loop to iterate over
+        // all pixels in image
         MyroImage negImage= new MyroColorImage( image.width(), image.height() );
-        for( int row=0; row<image.height(); row++)
+        for( MyroPixel p : image )
         {
-            for( int col=0; col<image.width(); col++)
-            {
-                Color c=image.get(col, row);
-                Color neg = new Color(255-c.getRed(), 255-c.getGreen(), 255-c.getBlue() );
-                negImage.set(col, row, neg );
-            }
+            // get the coordinate and color of the current pixel
+            int x = p.getX();
+            int y = p.getY();
+            Color c = p.getColor();
+
+            // create a new color that is the negative
+            Color neg = new Color(255-c.getRed(), 255-c.getGreen(), 255-c.getBlue() );
+
+            // set the color of the corresponding pixel in negImage
+            MyroPixel negPixel = negImage.getPixel( x, y );
+            negPixel.setColor( neg );
         }
 
         negImage.show();
@@ -53,7 +61,8 @@ public class imageDemo
                 { -1,  9, -1 },
                 { -1, -1, -1 } };
 
-        // Loop through every pixel in the image.
+        // Loop through every pixel in the image.  This uses nested for loops with
+        // getPixel/setPixel
         for (int y = 1; y < image.height()-1; y++)
         {
             for (int x = 1; x < image.width()-1; x++)
@@ -66,7 +75,8 @@ public class imageDemo
                         // Calculate the adjacent pixel for this kernel point
                         //int pos = (y + ky)*img.width + (x + kx);
                         // Image is grayscale, red/green/blue are identical
-                        int val = image.getGray( x+kx, y+ky );
+                        MyroPixel pixel = image.getPixel(x+kx, y+ky);
+                        int val = pixel.getGray();
                         // Multiply adjacent pixels based on the kernel values
                         sum += edgeKernel[ky+1][kx+1] * val;
                     }
@@ -75,7 +85,8 @@ public class imageDemo
                 // based on the sum from the kernel
                 //edgeImg.pixels[y*img.width + x] = color(sum);
                 sum = Math.min( Math.max( sum, 0 ), 255 );
-                edgeImage.setGray( x, y, Math.round(sum) );
+                MyroPixel newPixel = edgeImage.getPixel( x, y );
+                newPixel.setGray( Math.round(sum) );
             }
         }
 
@@ -93,7 +104,7 @@ public class imageDemo
                 { v, v, v },
                 { v, v, v } };
 
-        // Loop through every pixel in the image.
+        // Loop through every pixel in the image.  This uses nested for loops and getColor/setColor
         for (int y = 1; y < image.height()-1; y++)
         {
             for (int x = 1; x < image.width()-1; x++)
@@ -120,21 +131,21 @@ public class imageDemo
         }
 
         blurImage.show();
-        
+
         // Let the user ponder this image
         MyroGUI.tellUser( "Click when ready to see an X in the negative image.", "OK" );
-        
+
         // Create an X in the negative image and display it
         for( int y=0; y<image.height(); y++ )
         {
-            negImage.set( y, y, Color.RED );
-            negImage.set( image.height()-y, y, Color.GREEN );
+            negImage.setColor( y, y, Color.RED );
+            negImage.setColor( image.height()-y, y, Color.GREEN );
         }
         negImage.show();
 
         // Wait for the user to be ready to exit
         MyroGUI.tellUser( "Click when ready to exit.", "Exit" );
-        
+
         // close the robot and hide the image
         robot.close();
         negImage.hide();

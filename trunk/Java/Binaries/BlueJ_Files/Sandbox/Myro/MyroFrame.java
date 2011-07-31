@@ -181,7 +181,7 @@ public class MyroFrame extends JFrame
             // get the position of the mouse and the color of that pixel
             int x = e.getX();
             int y = e.getY();
-            Color c = currentImage.get( x, y );
+            Color c = currentImage.getColor( x, y );
             int r = c.getRed();
             int g = c.getGreen();
             int b = c.getBlue();

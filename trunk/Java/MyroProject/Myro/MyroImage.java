@@ -33,12 +33,15 @@ import javax.imageio.*;
 import java.util.*;
 
 /**
- * Abstract class MyroImage
+ * This class represents an image in the Myro/Java environment.  Methods permit simple manipulation of
+ * an image, as well as methods to display and hide an image.  This is an abstract class and therefore
+ * cannot be instantiated; classes MyroGrayImage and MyroColorImage are derived from MyroImage and
+ * can be instantiated.
  * 
  * @author Douglas Harms
  * @version 1.0 - September 2010
  */
-public abstract class MyroImage
+public abstract class MyroImage implements Iterable<MyroPixel>
 {
     protected BufferedImage image;               // the rasterized image
     protected int width, height;                 // width and height
@@ -52,7 +55,6 @@ public abstract class MyroImage
      */
     protected MyroImage()
     {
-
     }
 
     /**
@@ -252,7 +254,7 @@ public abstract class MyroImage
             for( int y=ylow; y<=yhigh; y++)
             {
                 // convert rgb pixel to yuv and store in yuvPixels array
-                yuvPixels[pos] = new MyroYUVColor( get( x, y ) );
+                yuvPixels[pos] = new MyroYUVColor( getColor( x, y ) );
 
                 // add yuv values to component totals
                 totalY += yuvPixels[pos].getY();
@@ -321,7 +323,7 @@ public abstract class MyroImage
      * @param y y coordinate of the pixel
      * @return The color of pixel (x,y)
      */
-    public abstract Color get( int x, int y );
+    public abstract Color getColor( int x, int y );
 
     /**
      * Returns the grayscale value of pixel (x,y).
@@ -344,7 +346,7 @@ public abstract class MyroImage
      * @param y y coordinate of the pixel
      * @param color An RGB Color that pixel (x,y) is set to.
      */
-    public abstract void set( int x, int y, Color color);
+    public abstract void setColor( int x, int y, Color color);
 
     /**
      * Sets the color of pixel (x,y) to a grayscale color.
@@ -359,6 +361,31 @@ public abstract class MyroImage
      */
     public abstract void setGray( int x, int y, int grayLevel);
 
+    /**
+     * Returns a MyroPixel instance that can be used to examine and modify a pixel in this image.
+     * 
+     * @pre (x,y) is the coordinate of a pixel in the image
+     * 
+     * @param x x xoordinate of the pixel
+     * @param y y coordinate of the pixel
+     * @return The MyroPixel that references pixel (x,y)
+     */
+    public MyroPixel getPixel( int x, int y )
+    {
+        assert x >= 0 && x < width: "x out of range";
+        assert y >= 0 && y < height: "y out of range";
+        
+        return new MyroPixel( this, x, y );
+    }
+    
+    /**
+     * Returns an iterator that can be used to iterate over the pixels in this image.
+     */
+    public Iterator<MyroPixel> iterator()
+    {
+        return new MyroPixelIterator( this );
+    }
+    
     /**
      * Save the image to a file.  The only supported formats are jpg and png.
      * 

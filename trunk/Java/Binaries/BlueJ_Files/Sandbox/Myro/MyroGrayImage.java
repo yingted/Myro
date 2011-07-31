@@ -113,7 +113,7 @@ public class MyroGrayImage extends MyroImage  {
 
     }
 
-    public Color get(int x, int y) {
+    public Color getColor(int x, int y) {
         Color color = new Color(image.getRGB(x, y));
         return toGray(color);
     }
@@ -124,7 +124,7 @@ public class MyroGrayImage extends MyroImage  {
         return color.getRed();
     }
 
-    public void set(int x, int y, Color c)
+    public void setColor(int x, int y, Color c)
     {
         assert c!=null : "Color must be non-null";
 

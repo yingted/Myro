@@ -48,22 +48,14 @@ import net.java.games.input.*;  // JInput for gamepad
  * (see www.roboteducation.org )
  * 
  * @author Douglas Harms
- * @version 1.0.1
+ * @version 1.0.2
  * 
- * Version History:
- * 
- * 1.0.1 - 20 July 2011
- *  Added setForwardness and getForwardness methods
- *  Changed preconditions to @pre (which assumes -tag pre:cm:Preconditions in specified in the javadoc command)
- *  
- * 1.0.0
- *  Initial release
  */
 public class Scribbler  {
 
     // define this constant here at the beginning rather than later where other private constants are defined.
-    private static final String MYRO_JAVA_VERSION   = "1.0.1";
-    
+    private static final String MYRO_JAVA_VERSION   = "1.0.2";
+
     // public constants
 
     /**
@@ -311,6 +303,15 @@ public class Scribbler  {
             }
         }
 
+        // print warning if a Scribbler isn't connected
+        if( !scribblerConnected() )
+        {
+            System.out.println("WARNING: The connection does not appear to be to");
+            System.out.println("a Scribbler robot.  If a Scribbler is connected");
+            System.out.println("you should check to make sure the IPRE firmware");
+            System.out.println("is installed.");
+        }
+
         // do any device-specific initialization
         if( _flukeConnected )
         {
@@ -332,7 +333,13 @@ public class Scribbler  {
             }
         }
 
-        _connectedFrame = new connectedFrame( portName, getName(), getInfo() );
+        // display window showing information about the connection
+        String botName;
+        if( scribblerConnected() )
+            botName = getName();
+        else
+            botName = "";
+        _connectedFrame = new connectedFrame( portName, botName, getInfo() );
 
         return true;
     }
@@ -728,9 +735,9 @@ public class Scribbler  {
      */
     public String getInfo()
     {
-        int[] info = _getLine( GET_INFO );
-
         assert portOpened() : "The port is not opened";
+
+        int[] info = _getLine( GET_INFO );
 
         // create String from the data, using a temp byte array
         byte[] temp = new byte[ info.length ];
@@ -940,6 +947,26 @@ public class Scribbler  {
         int[] data = new int[] {durationHigh, durationLow, freq1High, freq1Low, freq2High, freq2Low};
         _set( SET_SPEAKER_2, data );
 
+    }
+
+    /**
+     * Causes the Scribbler to play a song comprised of a sequence of 0 or more notes.  The song is passed as a String comprised
+     * of note specifications separated by semicolons.  A note specification is either a single note followed by a duration or
+     * a chord followed by a duration.  A single note is either a note name (e.g., A A# Bb B) or a frequency (e.g., 440); a
+     * chord consists of two single notes.  Duration is expressed in terms of fraction of a wholenote.
+     * 
+     * @pre scribblerConnected, wholeNote &gt; 0
+     * 
+     * @param song A sequence of 0 or more notes
+     * @param wholeNote The duration of a whole note, in seconds
+     */
+    public void playSong( String str, double wholeNote)
+    {
+        assert scribblerConnected() : "Scribbler not connected";
+        assert wholeNote > 0.0 : "wholeNote <= 0";
+
+        song thisSong = new song( str );
+        thisSong.play( wholeNote );
     }
 
     /**
@@ -2528,19 +2555,19 @@ public class Scribbler  {
             v = pixels[pos] - 128;
             y = pixels[pos+1];
             u = pixels[pos+2] - 128;
-            image.set( 0, row, _calcColor( y, u, v ) );
+            image.setColor( 0, row, _calcColor( y, u, v ) );
 
             // pixel 1 (V4 Y1 U2)
             v = pixels[pos+4] - 128;
-            image.set( 1, row, _calcColor( y, u, v ) );
+            image.setColor( 1, row, _calcColor( y, u, v ) );
 
             // pixel 2 (V4 Y3 U2)
             y = pixels[pos+3];
-            image.set( 2, row, _calcColor( y, u, v ) );
+            image.setColor( 2, row, _calcColor( y, u, v ) );
 
             // pixel 3 (V0 Y3 U2)
             v = pixels[pos] - 128;
-            image.set( 3, row, _calcColor( y, u, v ) );
+            image.setColor( 3, row, _calcColor( y, u, v ) );
 
             // After processing the 1st four pixels in this line, we're back at the beginning of the cycle
             cyclePos = 0;
@@ -2560,7 +2587,7 @@ public class Scribbler  {
                 }
 
                 // calculate the rgb color from the yuv and store the pixel in the image
-                image.set( col, row, _calcColor( y, u, v) );
+                image.setColor( col, row, _calcColor( y, u, v) );
 
                 // increment pos and cyclePos
                 pos++;
@@ -3683,7 +3710,7 @@ public class Scribbler  {
             catch (IOException e) { }
 
             // check that image was read in
-            if ( image == null )
+            if ( image == null || !scribblerConnected() )
             {
                 imageOpened = false;
             }
@@ -3745,5 +3772,158 @@ public class Scribbler  {
                 image.getWidth(null), image.getHeight(null), this );
 
         }
+    }
+
+    /**
+     * Class that represents a note
+     */
+    private class note
+    {
+        public note( String n )
+        {
+            // remove leading/trailing whitespace, collapse duplicate whitespace, and convert to lowercase
+            String s = n.trim().replaceAll("\\s+"," ").toLowerCase();
+
+            // Separate note specification from duration
+            String parts[] = s.split("\\s");
+            int numParts = parts.length;
+
+            // now we'll parse the string.  Assume it's not valid
+            valid = false;
+
+            // must be 2 or three parts
+            if( numParts < 2 || numParts > 3 )
+                return;
+
+            // first item must be a note specification
+            freq1 = parseNote( parts[0] );
+            if( freq1 == 0 )
+                return;
+
+            // last item must be a double
+            try
+            {
+                duration = Double.parseDouble( parts[numParts-1] );
+            } catch (NumberFormatException e)
+            {
+                return;
+            }
+
+            // if there are 3 items then the middle must be a not specification
+            if( numParts == 3 )
+            {
+                freq2 = parseNote( parts[1] );
+                if( freq2 == 0 )
+                    return;
+            }
+
+            // if we've made it this far, it's a valid note specification!
+            valid = true;
+        }
+
+        public void play( double wholeNote )
+        {
+            if( freq2 != 0 )
+            {
+                beep( freq1, freq2, duration*wholeNote );
+            }
+            else
+            {
+                beep( freq1, duration*wholeNote );
+            }
+        }
+
+        public boolean isValid()
+        {
+            return valid;
+        }
+
+        private int freq1, freq2;
+        private double duration;
+        private boolean valid;
+
+        private final String[] names={ "c","c#","db","d","d#","eb","e","f","f#","gb","g","g#","ab","a","a#","bb","b" };
+        private final double[] freqs={
+                16.35 /* C */,
+                17.32, 17.32, /* C#, Db */
+                18.35, /* D */
+                19.45, 19.45, /* D#, Eb */
+                20.60, /* E */
+                21.83, /* F */
+                23.12, 23.12, /* F#, Gb */
+                24.50, /* G */
+                25.96, 25.96, /* G#, Ab */
+                27.50, /* A */
+                29.14, 29.14, /* A#, Bb */
+                30.87 /* B */
+            };
+
+        private int parseNote( String s )
+        {
+            int retVal=0;
+
+            // if the first char is a digit, we'll assume it's a frequency
+            if( Character.isDigit( s.charAt( 0 ) ) )
+            {
+                // convert to an int, if possible
+                try
+                {
+                    retVal = Integer.parseInt( s );
+                } catch ( NumberFormatException e) {};
+            }
+            else
+            {
+                // doesn't start with a digit so it must be a note name
+                // determine octave (default is 5)
+                int octave = 5;
+                if( Character.isDigit( s.charAt( s.length()-1 ) ) )
+                {
+                    // determine octave number and remove the digit from s
+                    octave = s.charAt( s.length()-1 ) - '0';
+                    s = s.substring( 0, s.length()-1 );                   
+                }
+
+                // see if s is a valid note name, andif so calculate the frequency
+                for( int i=0; i<names.length; i++ )
+                {
+                    if( s.equals( names[i] ) )
+                    {
+                        retVal = (int)Math.round( freqs[i] * Math.pow( 2, octave ) );
+                        break;
+                    }
+                }
+            }
+            return retVal;
+        }
+    }
+
+    /**
+     * Class that represents a song
+     */
+    private class song
+    {
+        public song( String str )
+        {
+            notes = new ArrayList<note>();
+            String[] specs = str.split( ";" );
+
+            for( int i=0; i<specs.length; i++ )
+            {
+                note newNote = new note( specs[i] );
+                if( newNote.isValid() )
+                    notes.add( newNote );
+            }
+        }
+
+        public void play( double wholeNote )
+        {
+            for( int i=0; i<notes.size(); i++ )
+            {
+                notes.get(i).play( wholeNote );
+            }
+        }
+
+        private ArrayList<note> notes;
+
     }
 }

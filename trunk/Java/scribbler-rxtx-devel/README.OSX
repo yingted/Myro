@@ -10,4 +10,8 @@ Then move the following files:
 
 NOTE: You may need to have the developer version of JDK installed.  If ./configure has problems
 finding the HEADERS folder you may have to edit Makefile (instructions will be printed by
-./configure script).
+./configure script).  Or the following command may be helpful:
+
+sudo ln -s /System/Library/Frameworks/JavaVM.framework/Headers /System/Library/Java/JavaVirtualMachines/
+
+(See https://issues.sonatype.org/browse/NAR-177 for a description. )

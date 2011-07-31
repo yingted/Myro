@@ -1,0 +1,18 @@
+Myro/Java RELEASE NOTES
+
+Version 1.0.2 - 31 July 2011
+
+ * Class MyroPixel added to package Myro, as well as method MyroImage.getPixel to get a pixel
+ * iterator() added to MyroImage to allow a foreach loop to iterate over all pixels
+ * Scribbler.playSong added
+ * Warnings printed if Scribbler not detected
+ * INSTALL instructions improved
+
+Version 1.0.1 - 27 July 2011
+
+ * Added setForwardness in class Scribbler
+ * Modified methods for key press events in class MyroListener
+
+Version 1.0.0 - 8 June 2011
+
+ * Initial release

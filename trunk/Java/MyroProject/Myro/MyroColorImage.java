@@ -82,17 +82,17 @@ public class MyroColorImage extends MyroImage {
         
     }
 
-    public Color get(int x, int y)
+    public Color getColor(int x, int y)
     {
         return new Color(image.getRGB(x, y));
     }
 
     public int getGray(int x, int y)
     {
-        return (int) lum( get( x, y ) );
+        return (int) lum( getColor( x, y ) );
     }
 
-    public void set(int x, int y, Color c)
+    public void setColor(int x, int y, Color c)
     {
         assert c!=null : "Color must be non-null";
 
@@ -103,6 +103,6 @@ public class MyroColorImage extends MyroImage {
     {
         assert 0<=g && g<=255 : "Grayscale value out of 0..255 range";
 
-        set( x, y, new Color( g, g, g ) );
+        setColor( x, y, new Color( g, g, g ) );
     }
 }

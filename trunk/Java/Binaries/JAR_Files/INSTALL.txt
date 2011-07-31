@@ -3,9 +3,14 @@ copying these files to the appropriate place.  Follow the instructions for your
 platform.
 
 Windows:
-Copy RXTXScribblerComm.jar to (javahome)\jre\lib\ext
-If you're using BlueJ, copy the remaining jar files and voices.txt to C:\BlueJ\lib\userlib
-If you're not using BlueJ, copy the remaining jar files and voices.txt to (javahome)\jre\lib\ext
+Copy RXTXScribblerComm.jar to (javahome)\jdk<version>\jre\lib\ext
+If you're using BlueJ, copy the remaining jar files and voices.txt to (BlueJ_home)\lib\userlib
+If you're not using BlueJ, copy the remaining jar files and voices.txt to (javahome)\jdk<version>\jre\lib\ext
+
+Windows Notes: 
+(javahome) will probably be something like c:\Program Files\Java
+(BlueJ_home) will probably be something like c:\Program Files\BlueJ
+
  
 MacOSX:
 To install Myro/Java for all users, copy all jar files and voices.txt to /Library/Java/Extensions
@@ -13,8 +18,12 @@ To install Myro/Java for one user, copy all jar files and voices.txt to ~/Librar
 
 Linux:
 Copy RXTXScribblerComm.jar tp (javahome)/jre/lib/ext
-If you're using BlueJ, copy the remaining jar files and voices.txt to /usr/local/bluej/lib/userlib
+If you're using BlueJ, copy the remaining jar files and voices.txt to (BlueJ_home)/lib/userlib
 If you're not using BlueJ, copy the remaining jar files and voices.txt to (javahome)/jre/lib/ext
+
+Linux Notes:
+(javahome) will probably be something like /usr/java/jdk<version>/
+(BlueJ_home) will probably be something like /usr/local/bluej/
 
 
 NOTE:  Don't forget to also install the platform-specific driver files, contained in
