@@ -1,0 +1,13 @@
+#BlueJ class context
+comment0.params=count\ avgX\ avgY
+comment0.target=MyroBlobImageInfo(int,\ int,\ int)
+comment1.params=
+comment1.target=int\ getPixelCount()
+comment1.text=\n\ Returns\ the\ number\ of\ pixels\ that\ were\ in\ the\ blob.\n\ \n\ @return\ The\ number\ of\ pixels\ in\ the\ blob\n
+comment2.params=
+comment2.target=int\ getAverageX()
+comment2.text=\n\ Returns\ the\ average\ x-coordinate\ of\ the\ pixels\ that\ were\ in\ the\ blob.\n\ \n\ @return\ The\ average\ x-coordinate\ of\ the\ pixels\ in\ the\ blob\n
+comment3.params=
+comment3.target=int\ getAverageY()
+comment3.text=\n\ Returns\ the\ average\ y-coordinate\ of\ the\ pixels\ that\ were\ in\ the\ blob.\n\ \n\ @return\ The\ average\ y-coordinate\ of\ the\ pixels\ in\ the\ blob\n
+numComments=4

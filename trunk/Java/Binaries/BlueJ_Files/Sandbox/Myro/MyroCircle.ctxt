@@ -1,0 +1,25 @@
+#BlueJ class context
+comment0.params=whichCanvas\ centerX\ centerY\ radius
+comment0.target=MyroCircle(MyroCanvas,\ int,\ int,\ int)
+comment0.text=\n\ Construct\ a\ circle.\ \ Initially\ the\ circle\ will\ be\ an\ outline\ shape,\ but\ this\ can\ be\ changed\ by\ invoking\n\ makeFilled\ method.\ \ The\ intial\ outline\ color\ will\ be\ black\ and\ the\ fill\ color\ will\ be\ white.\ \ The\ circle\ will\n\ not\ be\ visible\ initially.\n\ \n\ @pre\ radius\ >\ 0\n\ \n\ @param\ whichCanvas\ Specifies\ which\ MyroCanvas\ this\ circle\ will\ be\ drawn\ on\n\ @param\ centerX\ Initial\ x\ coordiante\ of\ the\ center\ of\ this\ circle\n\ @param\ centerY\ Initial\ y\ coordinate\ of\ the\ center\ of\ this\ circle\n\ @param\ radius\ Initial\ radius\ of\ this\ circle.\n
+comment1.params=newX\ newY
+comment1.target=void\ setCenter(int,\ int)
+comment1.text=\n\ Set\ a\ new\ center\ for\ this\ circle\n\ \n\ @param\ newX\ The\ new\ x\ coordinate\ of\ this\ circel\n\ @param\ newY\ The\ new\ y\ coordinate\ of\ this\ circle\n
+comment2.params=newRadius
+comment2.target=void\ setRadius(int)
+comment2.text=\n\ Set\ a\ new\ radius\ for\ this\ circle\n\ \n\ @pre\ newRadius\ >\ 0\n\ \n\ @param\ newRadius\ The\ new\ radius\ for\ this\ circle\n
+comment3.params=
+comment3.target=int\ getRadius()
+comment3.text=\n\ Return\ the\ current\ radius\ of\ this\ circle.\n\ \n\ @return\ The\ current\ radius\ of\ this\ crcle\n
+comment4.params=deltaX\ deltaY
+comment4.target=void\ move(int,\ int)
+comment4.text=\n\ Move\ this\ circle\ by\ (deltaX,\ deltaY)\n\ \n\ @param\ deltaX\ The\ amount\ to\ move\ this\ dicrle\ in\ the\ x\ direction\n\ @param\ deltaY\ The\ amount\ to\ move\ this\ circle\ in\ the\ y\ direction\n
+comment5.params=
+comment5.target=int\ getCenterX()
+comment5.text=\n\ Returns\ the\ x-coordinate\ of\ the\ center\ of\ this\ circle.\n
+comment6.params=
+comment6.target=int\ getCenterY()
+comment6.text=\n\ Returns\ the\ y-coordinate\ of\ the\ center\ of\ this\ circle.\n
+comment7.params=
+comment7.target=void\ redrawCircle()
+numComments=8

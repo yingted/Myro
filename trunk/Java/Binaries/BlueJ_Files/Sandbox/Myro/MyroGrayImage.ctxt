@@ -1,0 +1,29 @@
+#BlueJ class context
+comment0.params=
+comment0.target=MyroGrayImage()
+comment0.text=\n\ Create\ a\ 1x1\ grayscale\ image.\ \ Normally\ an\ image\ will\ be\ loaded\ into\ this\ image\ using\n\ loadImage.\n
+comment1.params=w\ h\ gray
+comment1.target=MyroGrayImage(int,\ int,\ int)
+comment1.text=\n\ Create\ an\ empty\ grayscale\ image\ of\ a\ specified\ dimension.\ \ The\ initial\ grayscale\ color\ of\ all\n\ pixels\ is\ passed\ as\ a\ parameter.\n\ \n\ @pre\ w\ >\ 0\ and\ h\ >\ 0,\ 0\ &lt;\=\ gray\ &lt;\=255\n\ \n\ @param\ w\ The\ width\ of\ the\ color\ image\n\ @param\ h\ The\ height\ of\ the\ color\ image\n\ @param\ gray\ The\ initial\ grayscale\ level\ for\ all\ pixels\n
+comment2.params=w\ h
+comment2.target=MyroGrayImage(int,\ int)
+comment2.text=\n\ Create\ an\ empty\ grayscale\ image\ of\ a\ specified\ dimension.\ \ All\ pixels\ will\ initially\ be\ black.\n\ \n\ @pre\ w\ >\ 0\ and\ h\ >\ 0\n\ \n\ @param\ w\ The\ width\ of\ the\ color\ image\n\ @param\ h\ The\ height\ of\ the\ color\ image\n
+comment3.params=jpegBuf
+comment3.target=MyroGrayImage(byte[])
+comment3.text=\n\ Creates\ a\ grayscale\ image\ from\ a\ stream\ of\ bytes\ that\ comprise\ a\ jpeg\ image.\ \ A\ RuntimeException\n\ is\ thrown\ if\ an\ error\ occurs\ decoding\ the\ byte\ stream.\n\ \n\ @param\ jpegBuf\ An\ array\ of\ bytes\ that\ somprise\ a\ jpeg\ image.\n
+comment4.params=filename
+comment4.target=boolean\ loadImage(java.lang.String)
+comment4.text=\n\ Load\ a\ grayscale\ image\ from\ a\ file.\ \ The\ dimension\ of\ the\ image\ will\ be\ the\ dimension\n\ of\ the\ image\ in\ the\ file.\n\ \n\ @param\ filename\ The\ name\ of\ a\ file\ containing\ an\ image.\n\ \n\ @return\ true\ if\ the\ image\ was\ successfuly\ loaded,\ false\ if\ an\ error\ occurred\n
+comment5.params=x\ y
+comment5.target=java.awt.Color\ getColor(int,\ int)
+comment5.text=\n\ Returns\ the\ RGB\ grayscale\ color\ of\ pixel\ (x,y).\ \ All\ three\ components\ of\ the\ color\ will\ be\n\ equal\ (because\ it's\ a\ grayscale).\n\ \n\ @pre\ (x,y)\ is\ the\ coordinate\ of\ a\ pixel\ in\ the\ image.\n\ \n\ @param\ x\ x\ xoordinate\ of\ the\ pixel\n\ @param\ y\ y\ coordinate\ of\ the\ pixel\n\ @return\ The\ grayscale\ color\ of\ pixel\ (x,y)\n
+comment6.params=x\ y
+comment6.target=int\ getGray(int,\ int)
+comment6.text=\n\ Returns\ the\ grayscale\ value\ of\ pixel\ (x,y).\n\ \n\ @pre\ (x,y)\ is\ the\ coordinate\ of\ a\ pixel\ in\ the\ image.\n\ \n\ @param\ x\ x\ xoordinate\ of\ the\ pixel\n\ @param\ y\ y\ coordinate\ of\ the\ pixel\n\ @return\ The\ grayscale\ value\ of\ pixel\ (x,y),\ in\ the\ range\ 0..255\n
+comment7.params=x\ y\ c
+comment7.target=void\ setColor(int,\ int,\ java.awt.Color)
+comment7.text=\n\ Sets\ the\ color\ of\ pixel\ (x,y)\ to\ a\ grayscale\ color.\ \ The\ color\ will\ be\ the\ grayscale\ color\n\ of\ the\ color\ passed\ to\ this\ method.\ Changes\ will\ not\ appear\ on\ the\ screen\ until\ either\n\ {@link\ \#show\ show}\ or\ {@link\ \#repaint\ repaint}\ is\ called.\n\ \n\ @pre\ (x,y)\ is\ the\ coordinate\ of\ a\ pixel\ in\ the\ image,\ color\ is\ not\ null.\n\ \n\ @param\ x\ x\ xoordinate\ of\ the\ pixel\n\ @param\ y\ y\ coordinate\ of\ the\ pixel\n\ @param\ color\ An\ RGB\ Color.\ \ Pixel\ (x,y)\ will\ be\ set\ to\ the\ grayscale\ value\ of\ this\ color.\n
+comment8.params=x\ y\ grayLevel
+comment8.target=void\ setGray(int,\ int,\ int)
+comment8.text=\n\ Sets\ the\ color\ of\ pixel\ (x,y)\ to\ a\ grayscale\ color.\n\ \n\ @pre\ (x,y)\ is\ the\ coordinate\ of\ a\ pixel\ in\ the\ image,\ grayLevel\ is\ between\ 0\ (inclusive)\n\ and\ 255\ (inclusive).\ \ Changes\ will\ not\ appear\ on\ the\ screen\ until\ either\ {@link\ \#show\ show}\n\ or\ {@link\ \#repaint\ repaint}\ is\ called.\n\ \n\ @param\ x\ x\ xoordinate\ of\ the\ pixel\n\ @param\ y\ y\ coordinate\ of\ the\ pixel\n\ @param\ grayLevel\ A\ grayscale\ value\ between\ 0\ and\ 255\ that\ pixel\ (x,y)\ is\ set\ to.\n
+numComments=9

@@ -1,0 +1,25 @@
+#BlueJ class context
+comment0.params=whichCanvas\ x\ y
+comment0.target=MyroPoint(MyroCanvas,\ int,\ int)
+comment0.text=\n\ Construct\ a\ point.\ \ The\ color\ will\ initially\ be\ black\ and\ will\ not\ be\ visible.\ \n\ \n\ @param\ whichCanvas\ Specifies\ which\ MyroCanvas\ this\ point\ will\ be\ drawn\ on\n\ @param\ x\ The\ x\ coordinate\ of\ the\ point\n\ @param\ y\ The\ y\ coordinate\ of\ the\ point\n
+comment1.params=newX\ newY
+comment1.target=void\ setCoordinate(int,\ int)
+comment1.text=\n\ Set\ a\ new\ coordinate\ of\ this\ point\n\ \n\ @param\ newX\ The\ new\ x\ coordinate\ of\ the\ this\ point\n\ @param\ newY\ The\ new\ y\ coordinate\ of\ the\ fthis\ point\n
+comment2.params=
+comment2.target=int\ getX()
+comment2.text=\n\ Return\ the\ current\ x\ coordinate\ of\ this\ point.\n\ \n\ @return\ The\ x\ coordinate\ of\ this\ point\n
+comment3.params=
+comment3.target=int\ getY()
+comment3.text=\n\ Return\ the\ current\ y\ coordinate\ of\ this\ point.\n\ \n\ @return\ The\ y\ coordinate\ of\ this\ point\n
+comment4.params=deltaX\ deltaY
+comment4.target=void\ move(int,\ int)
+comment4.text=\n\ Move\ this\ point\ by\ (deltaX,\ deltaY)\n\ \n\ @param\ deltaX\ The\ amount\ to\ move\ this\ point\ in\ the\ x\ direction\n\ @param\ deltaY\ The\ amount\ to\ move\ this\ point\ in\ the\ y\ direction\n
+comment5.params=
+comment5.target=int\ getCenterX()
+comment5.text=\n\ Returns\ the\ x-coordinate\ of\ the\ point\ at\ the\ center\n
+comment6.params=
+comment6.target=int\ getCenterY()
+comment6.text=\n\ Returns\ the\ y-coordinate\ of\ the\ point\ at\ the\ center\n
+comment7.params=
+comment7.target=void\ redrawPoint()
+numComments=8

@@ -1,0 +1,25 @@
+#BlueJ class context
+comment0.params=whichCanvas\ left\ top\ width\ height
+comment0.target=MyroOval(MyroCanvas,\ int,\ int,\ int,\ int)
+comment0.text=\n\ Construct\ an\ oval.\ \ Initially\ the\ oval\ will\ be\ an\ outline\ shape,\ but\ this\ can\ be\ changed\ by\ invoking\n\ makeFilled\ method.\ \ The\ intial\ outline\ color\ will\ be\ black\ and\ the\ fill\ color\ will\ be\ white.\ \ The\ oval\ will\n\ not\ be\ visible\ initially.\n\ \n\ @pre\ width\ and\ height\ must\ be\ >\ 0\n\ \n\ @param\ whichCanvas\ Specifies\ which\ MyroCanvas\ this\ circle\ will\ be\ drawn\ on\n\ @param\ top\ The\ x\ coordinate\ of\ the\ upperleft\ corner\ of\ a\ rectangle\ in\ which\ the\ oval\ is\ drawn\n\ @param\ left\ The\ y\ coordinate\ of\ the\ upperleft\ corner\ of\ a\ rectangle\ in\ which\ the\ oval\ is\ drawn\n\ @param\ width\ The\ width\ of\ the\ rectangle\ in\ which\ the\ oval\ is\ drawn\n\ @param\ height\ The\ height\ of\ the\ rectangle\ in\ which\ the\ oval\ is\ drawn\n
+comment1.params=newX\ newY
+comment1.target=void\ setCorner(int,\ int)
+comment1.text=\n\ Set\ a\ new\ upperleft\ corner\ for\ the\ rectangle\ in\ which\ the\ oval\ is\ drawn\n\ \n\ @param\ newX\ The\ new\ x\ coordinate\ of\ the\ upperleft\ corner\ of\ the\ rectangle\ in\ which\ the\ oval\ is\ drawn\n\ @param\ newY\ The\ new\ y\ coordinate\ of\ tthe\ upperleft\ corner\ of\ the\ rectangle\ in\ which\ the\ oval\ is\ drawn\n
+comment2.params=newWidth
+comment2.target=void\ setWidth(int)
+comment2.text=\n\ Set\ a\ new\ width\ for\ the\ rectangle\ in\ which\ the\ oval\ is\ drawn\n\ \n\ @pre\ newWidth\ >\ 0\n\ \n\ @param\ newWidth\ The\ new\ width\ for\ the\ rectangle\ in\ which\ the\ oval\ is\ drawn\n
+comment3.params=newHeight
+comment3.target=void\ setHeight(int)
+comment3.text=\n\ Set\ a\ new\ height\ for\ the\ rectangle\ in\ which\ the\ oval\ is\ drawn\n\ \n\ @pre\ newHieght\ >\ 0\n\ \n\ @param\ newHeight\ The\ new\ height\ for\ the\ rectangle\ in\ which\ the\ oval\ is\ drawn\n
+comment4.params=
+comment4.target=int\ getCenterX()
+comment4.text=\n\ Returns\ the\ x-coordinate\ of\ the\ point\ at\ the\ center\ of\ this\ oval\n
+comment5.params=
+comment5.target=int\ getCenterY()
+comment5.text=\n\ Returns\ the\ y-coordinate\ of\ the\ point\ at\ the\ center\ of\ this\ oval\n
+comment6.params=deltaX\ deltaY
+comment6.target=void\ move(int,\ int)
+comment6.text=\n\ Move\ the\ oval\ by\ (deltaX,\ deltaY)\n\ \n\ @param\ deltaX\ The\ amount\ to\ move\ this\ oval\ in\ the\ x\ direction\n\ @param\ deltaY\ The\ amount\ to\ move\ this\ oval\ in\ the\ y\ direction\n
+comment7.params=
+comment7.target=void\ redrawOval()
+numComments=8
