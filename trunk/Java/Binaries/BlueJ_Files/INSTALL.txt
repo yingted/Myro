@@ -27,5 +27,9 @@ For example, the definition might look like:
 
 (Alternatively, have each student edit their own bluej.properties file.)
 
-3) Copy folder Sandbox to a location in each student's class folder (i.e., where they will save
+4) Edit file (bluej_dir)/lib/bluej.defs and change "-paackage" to "-public" in the definition of
+doctool.options.  (See the example in step 3.)  This will cause protected fields of Myro/Java classes
+to be hidden should students open the Documentation view of Myro/Java classes.
+
+5) Copy folder Sandbox to a location in each student's class folder (i.e., where they will save
 all class work).

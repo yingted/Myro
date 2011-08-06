@@ -32,7 +32,7 @@ public class imageDemo
 
         // calculate and display the image negative.  This uses a for-each loop to iterate over
         // all pixels in image
-        MyroImage negImage= new MyroColorImage( image.width(), image.height() );
+        MyroImage negImage= new MyroColorImage( image.getWidth(), image.getHeight() );
         for( MyroPixel p : image )
         {
             // get the coordinate and color of the current pixel
@@ -54,7 +54,7 @@ public class imageDemo
         MyroGUI.tellUser( "Click when ready to see the edge image.", "OK" );
 
         // now calculate and display an edge-enhanced image
-        MyroImage edgeImage = new MyroGrayImage( image.width(), image.height() );
+        MyroImage edgeImage = new MyroGrayImage( image.getWidth(), image.getHeight() );
 
         float[][] edgeKernel = {
                 { -1, -1, -1 },
@@ -63,9 +63,9 @@ public class imageDemo
 
         // Loop through every pixel in the image.  This uses nested for loops with
         // getPixel/setPixel
-        for (int y = 1; y < image.height()-1; y++)
+        for (int y = 1; y < image.getHeight()-1; y++)
         {
-            for (int x = 1; x < image.width()-1; x++)
+            for (int x = 1; x < image.getWidth()-1; x++)
             {
                 float sum = 0; // Kernel sum for this pixel
                 for (int ky = -1; ky <= 1; ky++)
@@ -96,7 +96,7 @@ public class imageDemo
         MyroGUI.tellUser( "Click when ready to see the blur image.", "OK");
 
         // calculate and display a blurred image
-        MyroImage blurImage = new MyroGrayImage( image.width(), image.height() );
+        MyroImage blurImage = new MyroGrayImage( image.getWidth(), image.getHeight() );
 
         double v = 1.0 / 9.0;
         double[][] blurKernel = {
@@ -105,9 +105,9 @@ public class imageDemo
                 { v, v, v } };
 
         // Loop through every pixel in the image.  This uses nested for loops and getColor/setColor
-        for (int y = 1; y < image.height()-1; y++)
+        for (int y = 1; y < image.getHeight()-1; y++)
         {
-            for (int x = 1; x < image.width()-1; x++)
+            for (int x = 1; x < image.getWidth()-1; x++)
             {
                 double sum = 0; // Kernel sum for this pixel
                 for (int ky = -1; ky <= 1; ky++)
@@ -136,10 +136,10 @@ public class imageDemo
         MyroGUI.tellUser( "Click when ready to see an X in the negative image.", "OK" );
 
         // Create an X in the negative image and display it
-        for( int y=0; y<image.height(); y++ )
+        for( int y=0; y<image.getHeight(); y++ )
         {
             negImage.setColor( y, y, Color.RED );
-            negImage.setColor( image.height()-y, y, Color.GREEN );
+            negImage.setColor( image.getHeight()-y, y, Color.GREEN );
         }
         negImage.show();
 

@@ -20,7 +20,7 @@
  * 
  * You should have received a copy of the GNU General Public License
  * along with Myro/Java.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 package Myro;
 
@@ -56,7 +56,7 @@ public class MyroFrame extends JFrame
 
         // set up the new frame
         imagePane = new imagePanel();
-        imagePane.setPreferredSize( new Dimension( image.width(), image.height() ) );
+        imagePane.setPreferredSize( new Dimension( image.getWidth(), image.getHeight() ) );
 
         add( imagePane, BorderLayout.CENTER );            
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -75,8 +75,8 @@ public class MyroFrame extends JFrame
         setVisible( false );
         isVisible = false;
         currentImage = image;
-        width = image.width();
-        height = image.height();
+        width = image.getWidth();
+        height = image.getHeight();
         definingBlob = false;
     }
 
@@ -95,13 +95,13 @@ public class MyroFrame extends JFrame
     {
         // set the current image to the new one
         currentImage = image;
-        
+
         // check for a change in image dimensions
-        if( image.width() != width || image.height() != height )
+        if( image.getWidth() != width || image.getHeight() != height )
         {
-            imagePane.setPreferredSize( new Dimension( image.width(), image.height() ) );
-            width = image.width();
-            height = image.height();
+            imagePane.setPreferredSize( new Dimension( image.getWidth(), image.getHeight() ) );
+            width = image.getWidth();
+            height = image.getHeight();
             pack();
         }
 
@@ -181,13 +181,24 @@ public class MyroFrame extends JFrame
             // get the position of the mouse and the color of that pixel
             int x = e.getX();
             int y = e.getY();
-            Color c = currentImage.getColor( x, y );
-            int r = c.getRed();
-            int g = c.getGreen();
-            int b = c.getBlue();
 
-            // display the location and color in the status line underneath the image.
-            imageStatusLine.setText( "("+x+", "+y+"): ( r="+r+", g="+g+", b="+b+" )"  );
+            // It's possible that the window is larger than the image, so make sure (x,y)
+            // is in the image
+            if( x < currentImage.getWidth() && y < currentImage.getHeight() )
+            {
+                Color c = currentImage.getColor( x, y );
+                int r = c.getRed();
+                int g = c.getGreen();
+                int b = c.getBlue();
+
+                // display the location and color in the status line underneath the image.
+                imageStatusLine.setText( "("+x+", "+y+"): ( r="+r+", g="+g+", b="+b+" )"  );
+            }
+            else
+            {
+                // mouse is in window but not over image so clear status line
+                imageStatusLine.setText( " " );
+            }
         }
 
         /**
@@ -223,8 +234,8 @@ public class MyroFrame extends JFrame
         {
             if( definingBlob )
             {
-                blobx2 = Math.max( Math.min( e.getX(), currentImage.width()-1 ), 0 );
-                bloby2 = Math.max( Math.min( e.getY(), currentImage.height()-1 ), 0 );
+                blobx2 = Math.max( Math.min( e.getX(), currentImage.getWidth()-1 ), 0 );
+                bloby2 = Math.max( Math.min( e.getY(), currentImage.getHeight()-1 ), 0 );
                 repaint();
             }
         }
@@ -238,8 +249,8 @@ public class MyroFrame extends JFrame
         {
             if( definingBlob )
             {
-                blobx2 = Math.max( Math.min( e.getX(), currentImage.width()-1 ), 0 );
-                bloby2 = Math.max( Math.min( e.getY(), currentImage.height()-1 ), 0 );
+                blobx2 = Math.max( Math.min( e.getX(), currentImage.getWidth()-1 ), 0 );
+                bloby2 = Math.max( Math.min( e.getY(), currentImage.getHeight()-1 ), 0 );
                 definingBlob = false;
                 repaint();
             }
@@ -269,7 +280,7 @@ public class MyroFrame extends JFrame
 
             // draw the image
             g2.drawImage( currentImage.getImage(), 0, 0,
-                currentImage.width(), currentImage.height(), this );
+                currentImage.getWidth(), currentImage.getHeight(), this );
 
             // if the user is in blobdefintion mode then draw the currently defined rectangle
             if( definingBlob )

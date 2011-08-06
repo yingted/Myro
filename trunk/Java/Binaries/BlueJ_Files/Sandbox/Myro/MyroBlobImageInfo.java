@@ -20,15 +20,15 @@
  * 
  * You should have received a copy of the GNU General Public License
  * along with Myro/Java.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 package Myro;
 
 /**
- * Write a description of class MyroBlobImageInfo here.
+ * Information about a blob image, returned by robot.getBlob().
  * 
- * @author (your name) 
- * @version (a version number or a date)
+ * @author Douglas Harms
+ * @version September 2010
  */
 public class MyroBlobImageInfo
 {
@@ -43,16 +43,31 @@ public class MyroBlobImageInfo
         averageY = avgY;
     }
 
+    /**
+     * Returns the number of pixels that were in the blob.
+     * 
+     * @return The number of pixels in the blob
+     */
     public int getPixelCount()
     {
         return pixelCount;
     }
 
+    /**
+     * Returns the average x-coordinate of the pixels that were in the blob.
+     * 
+     * @return The average x-coordinate of the pixels in the blob
+     */
     public int getAverageX()
     {
         return averageX;
     }
 
+    /**
+     * Returns the average y-coordinate of the pixels that were in the blob.
+     * 
+     * @return The average y-coordinate of the pixels in the blob
+     */
     public int getAverageY()
     {
         return averageY;

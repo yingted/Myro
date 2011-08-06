@@ -22,7 +22,7 @@
  * along with Myro/Java.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package Myro;
+package Myro; 
 
 import java.io.*;
 import java.awt.*;
@@ -57,6 +57,15 @@ public abstract class MyroImage implements Iterable<MyroPixel>
     {
     }
 
+    /**
+     * Load an image from a file.
+     * 
+     * @param filename Name of a file containing an image.
+     * 
+     * @return true returned if the image was successfully loaded, false returned if an error occurred
+     */
+    abstract public boolean loadImage( String filename );
+    
     /**
      * resizes the image to be width x height
      */
@@ -152,14 +161,14 @@ public abstract class MyroImage implements Iterable<MyroPixel>
     /**
      * Returns the height of the image.
      */
-    public int height() {
+    public int getHeight() {
         return height;
     }
 
     /**
      * Returns the width of the image.
      */
-    public int width() {
+    public int getWidth() {
         return width;
     }
 
@@ -233,8 +242,8 @@ public abstract class MyroImage implements Iterable<MyroPixel>
     public MyroBlobSpec defineBlob( int xlow, int ylow, int width, int height )
     {
         assert width > 0 && height > 0 : "defineBlob: width or height is <= 0";
-        assert xlow + width - 1 < width() : "defineBlob: right side of rectangle not within image";
-        assert ylow + height - 1 < height() : "defineBlob: bottom of rectangle not within image";
+        assert xlow + width - 1 < getWidth() : "defineBlob: right side of rectangle not within image";
+        assert ylow + height - 1 < getHeight() : "defineBlob: bottom of rectangle not within image";
 
         // calculate size of the defined rectangle
         int size = width * height;

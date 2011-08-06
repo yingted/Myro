@@ -22,14 +22,9 @@
  * along with Myro/Java.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package Myro;
-
-import java.awt.event.*;
-import java.util.LinkedList;
-import java.util.Queue;
-
 /**
- * Provides a simple interface to determine whether or not key and mouse events have occurred.  The
+ * USAGE:
+ * The
  * programmer will associate an instance of MyroListener with each window whose events need monitoring.
  * Static methods isKeyPressed, whichKeyPressed, and isMousePressed will then return an indication
  * of events that have occurred in any associated window.
@@ -38,6 +33,17 @@ import java.util.Queue;
  *      MyroListener listener = new MyroListener();<p>
  *      j.addKeyListener( listener.getKeyListener() );<p>
  *      j.addMouseListener( listener.getMouseListener() );<p>
+ */
+package Myro;
+
+import java.awt.event.*;
+import java.util.LinkedList;
+import java.util.Queue;
+
+/**
+ * Provides a simple interface to determine whether or not key and mouse events have occurred.  
+ * The "robot connected" and MyroCanvas windows will automatically listen for key/mouse events, and
+ * other windows can be included too.  (Instructions are included in comments.)
  * 
  * Static methods MyroListener.isKeyPressed(), MyroListener.whichKey(),
  * MyroListener.isMousePressed(), and MyroListener.whichButton()

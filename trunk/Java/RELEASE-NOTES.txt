@@ -1,5 +1,13 @@
 Myro/Java RELEASE NOTES
 
+Version 1.1.0
+
+ * Classes for graphics (MycoCanvas, MyroShape, MyroCircle, MyroRectangle, etc.) added to
+   package Myro
+ * MyroGUI.pickAFile and MyroGUI.pickAColor methods added
+ * Added loadImage method to MyroColorImage and MyroGrayImage.  Added default constructors to
+   MyroColorImage and MyroGrayImage.  Added constructors to allow initial color to be specified.
+
 Version 1.0.2 - 31 July 2011
 
  * Class MyroPixel added to package Myro, as well as method MyroImage.getPixel to get a pixel

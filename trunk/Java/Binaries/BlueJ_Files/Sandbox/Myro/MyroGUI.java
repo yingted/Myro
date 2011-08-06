@@ -24,17 +24,27 @@
 
 package Myro;
 
+import javax.swing.*;
+import java.awt.*;
+
 /**
  * This class provides Myro/Java programs with some very simple GUI methods
  * 
  * @author Douglas Harms 
  * @version 1.0
  */
-
-import javax.swing.*;
-
 public class MyroGUI
 {
+
+    /**
+     * Constant passed to pickAFile to indicate opening an existing file
+     */
+    final public static int FILE_OPEN =   0;
+
+    /**
+     * Constant passed to pickAFile to indicate opening a file for saving
+     */
+    final public static int FILE_SAVE =   1;
 
     /**
      * Presents the user with a question modal dialog box with 1 or more responses.
@@ -164,6 +174,56 @@ public class MyroGUI
                 tellUser( "Improper double entered.  Please try again." );
             }
         }
+    }
+
+    /**
+     * Display a dialog box allowing the user to select a file for opening or saving.
+     * 
+     * @pre openType must be MyroGUI.FILE_OPEN (or 0) or MyroGUI.FILE_SAVE (or 1)
+     * 
+     * @param openType Indicates whether an existing file is being opened (MyroGUI.FILE_OPEN) or
+     * a file is being saved (MyroGUI.FILE_SAVE).
+     * @return The name of the selected file including the complete path.  If the user cancelled the
+     * open or an error occurred, the return value is the empty String.
+     */
+    public static String pickAFile( int openType )
+    {
+        assert openType==FILE_OPEN || openType==FILE_SAVE:"openType not valid";
+
+        int status;
+
+        // Create a file chooser
+        JFileChooser fc = new JFileChooser();
+
+        // determine which type of open to perform
+        if( openType == FILE_OPEN )
+        // open an existing file
+            status = fc.showOpenDialog( null );
+        else
+        // choose file to save
+            status = fc.showSaveDialog( null );
+
+        // check the status and return an appropriate String
+        if( status == JFileChooser.APPROVE_OPTION )
+            return fc.getSelectedFile().getPath();
+        else
+            return "";
+    }
+
+    /**
+     * Display a dialog box letting the user choose a color.
+     * 
+     * @return The color selected by the user.  If the user cancelled, black is returned.
+     */
+    public static Color pickAColor()
+    {
+        JColorChooser jc = new JColorChooser();
+
+        Color c = jc.showDialog( null, "Myro/Java Color Chooser", Color.white );
+        if( c==null )
+            return Color.black;
+        else
+            return c;
     }
 
     /**

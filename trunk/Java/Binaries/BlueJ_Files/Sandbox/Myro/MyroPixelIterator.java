@@ -40,8 +40,8 @@ public class MyroPixelIterator implements Iterator<MyroPixel>
         _image = image;
         _x = 0;
         _y = 0;
-        _width = _image.width();
-        _height = _image.height();
+        _width = _image.getWidth();
+        _height = _image.getHeight();
     }
 
     public MyroPixel next() throws NoSuchElementException

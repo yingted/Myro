@@ -48,13 +48,13 @@ import net.java.games.input.*;  // JInput for gamepad
  * (see www.roboteducation.org )
  * 
  * @author Douglas Harms
- * @version 1.0.2
+ * @version 1.1.0
  * 
  */
 public class Scribbler  {
 
     // define this constant here at the beginning rather than later where other private constants are defined.
-    private static final String MYRO_JAVA_VERSION   = "1.0.2";
+    private static final String MYRO_JAVA_VERSION   = "1.1.0";
 
     // public constants
 
@@ -960,12 +960,12 @@ public class Scribbler  {
      * @param song A sequence of 0 or more notes
      * @param wholeNote The duration of a whole note, in seconds
      */
-    public void playSong( String str, double wholeNote)
+    public void playSong( String song, double wholeNote)
     {
         assert scribblerConnected() : "Scribbler not connected";
         assert wholeNote > 0.0 : "wholeNote <= 0";
 
-        song thisSong = new song( str );
+        song thisSong = new song( song );
         thisSong.play( wholeNote );
     }
 
@@ -3790,6 +3790,7 @@ public class Scribbler  {
 
             // now we'll parse the string.  Assume it's not valid
             valid = false;
+            freq1 = freq2 = 0;
 
             // must be 2 or three parts
             if( numParts < 2 || numParts > 3 )
@@ -3797,7 +3798,7 @@ public class Scribbler  {
 
             // first item must be a note specification
             freq1 = parseNote( parts[0] );
-            if( freq1 == 0 )
+            if( freq1 < 0 )
                 return;
 
             // last item must be a double
@@ -3813,7 +3814,7 @@ public class Scribbler  {
             if( numParts == 3 )
             {
                 freq2 = parseNote( parts[1] );
-                if( freq2 == 0 )
+                if( freq2 < 0 )
                     return;
             }
 
@@ -3842,7 +3843,7 @@ public class Scribbler  {
         private double duration;
         private boolean valid;
 
-        private final String[] names={ "c","c#","db","d","d#","eb","e","f","f#","gb","g","g#","ab","a","a#","bb","b" };
+        private final String[] names={ "c","c#","db","d","d#","eb","e","f","f#","gb","g","g#","ab","a","a#","bb","b", "rest" };
         private final double[] freqs={
                 16.35 /* C */,
                 17.32, 17.32, /* C#, Db */
@@ -3855,12 +3856,13 @@ public class Scribbler  {
                 25.96, 25.96, /* G#, Ab */
                 27.50, /* A */
                 29.14, 29.14, /* A#, Bb */
-                30.87 /* B */
+                30.87, /* B */
+                0.0 /*rest*/
             };
 
         private int parseNote( String s )
         {
-            int retVal=0;
+            int retVal=-1;  // assume invalid note name
 
             // if the first char is a digit, we'll assume it's a frequency
             if( Character.isDigit( s.charAt( 0 ) ) )
@@ -3883,7 +3885,7 @@ public class Scribbler  {
                     s = s.substring( 0, s.length()-1 );                   
                 }
 
-                // see if s is a valid note name, andif so calculate the frequency
+                // see if s is a valid note name, and if so calculate the frequency
                 for( int i=0; i<names.length; i++ )
                 {
                     if( s.equals( names[i] ) )
