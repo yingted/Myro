@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 # Myro upgrade.py program
 # For upgrading Fluke and Scribbler over Bluetooth
 # (c) 2011, Institute for Personal Robots in Education
