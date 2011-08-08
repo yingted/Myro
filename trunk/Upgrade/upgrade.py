@@ -1,4 +1,8 @@
-# Myro upgrade.py
+# Myro upgrade.py program
+# For upgrading Fluke and Scribbler over Bluetooth
+# (c) 2011, Institute for Personal Robots in Education
+# Douglas Blank, <dblank@cs.brynmawr.edu>
+# Keith O'Hara <kohara@bard.edu>
 
 import urllib
 import sys, time
@@ -7,12 +11,12 @@ try:
 except:
     print("WARNING: pyserial not loaded: can't upgrade!")
     sys.exit()
-
 try:
     input = raw_input # Python 2.x
 except:
     pass # Python 3 and better, input is defined
 
+# Global variable robot, to set SerialPort()
 robot = None
 
 # intelhex.py
@@ -59,7 +63,6 @@ This script also may be used as hex2bin convertor utility.
 @version    0.9.0
 @date       2007/06/16
 '''
-
 
 __docformat__ = "javadoc"
 
@@ -399,14 +402,14 @@ class IntelHex:
         minaddr = IntelHex.minaddr(self)
         maxaddr = IntelHex.maxaddr(self)
         if maxaddr > 65535:
-            offset = (minaddr/65536)*65536
+            offset = int(minaddr/65536)*65536
         else:
             offset = None
 
         while True:
             if offset != None:
                 # emit 32-bit offset record
-                high_ofs = offset / 65536
+                high_ofs = int(offset / 65536)
                 offset_record = ":02000004%04X" % high_ofs
                 bytes = divmod(high_ofs, 256)
                 csum = 2 + 4 + bytes[0] + bytes[1]
@@ -536,7 +539,7 @@ class IntelHex16bit(IntelHex):
         if aa == []:
             return 0
         else:
-            return min(aa)/2
+            return int(min(aa)/2)
 
     def maxaddr(self):
         '''Get maximal address of HEX content in 16-bit mode.'''
@@ -544,7 +547,7 @@ class IntelHex16bit(IntelHex):
         if aa == []:
             return 0
         else:
-            return max(aa)/2
+            return int(max(aa)/2)
 
 #/class IntelHex16bit
 
@@ -980,7 +983,7 @@ def write_2byte(ser, value):
 
 def uf_sendPage(s,page,binarray):
     segment = 0
-    while segment < 264/132 :
+    while segment < int(264/132) :
         i = 0
         sum = 0
         for i in range (0,132) :
@@ -994,7 +997,7 @@ def uf_sendPage(s,page,binarray):
 
 def uf_recvPage(s,page,binarray):
     segment = 0
-    while segment < 264/132 :
+    while segment < int(264/132) :
         i = 0
         sum = 0
         chksum = 0
@@ -1025,7 +1028,7 @@ def uf_restoreEEPROMdump(s,eepromdump):
     print("")
 
 def uf_storeinEEPROM(s, arlen, binarray):
-    segs = arlen / 264
+    segs = int(arlen / 264)
     if segs*264 < arlen :
         segs = segs + 1
         for i in range (arlen,segs*264):
