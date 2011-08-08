@@ -6,6 +6,14 @@
 # Douglas Blank, <dblank@cs.brynmawr.edu>
 # Keith O'Hara <kohara@bard.edu>
 
+# Global variable robot, to set SerialPort()
+robot = None
+pythonVer = "?"
+rbString = None
+ptString = None
+statusString = None
+
+# Now, let's import things
 import urllib
 import sys, time
 try:
@@ -17,9 +25,12 @@ try:
     input = raw_input # Python 2.x
 except:
     pass # Python 3 and better, input is defined
-
-# Global variable robot, to set SerialPort()
-robot = None
+try:
+  from tkinter import *
+  pythonver = "3"
+except:
+  from Tkinter import *
+  pythonver = "2"
 
 # intelhex.py
 #!/usr/bin/python
@@ -567,8 +578,8 @@ def hex2bin(fin, fout, start=None, end=None, size=None, pad=0xFF):
     """
     try:
         h = IntelHex(fin)
-    except HexReaderError, e:
-        print("Error: bad HEX file: %s" % str(e))
+    except HexReaderError as e:
+        printStatus("Error: bad HEX file: %s" % str(e))
         return 1
 
     # start, end, size
@@ -586,7 +597,7 @@ def hex2bin(fin, fout, start=None, end=None, size=None, pad=0xFF):
     try:
         h.tobinfile(fout, start, end, pad)
     except IOError:
-        print("Could not write to file: %s" % fout)
+        printStatus("Could not write to file: %s" % fout)
         return 1
 
     return 0
@@ -629,7 +640,7 @@ class IntelHexError(Exception):
             return self.message
         try:
             return self._fmt % self.__dict__
-        except (NameError, ValueError, KeyError), e:
+        except (NameError, ValueError, KeyError) as e:
             return 'Unprintable exception %s: %s' \
                 % (self.__class__.__name__, str(e))
 
@@ -712,7 +723,7 @@ class SerialRobot:
         self.ser = serial.Serial(self.serialPort, timeout = 2) 
     def getInfo(self): return {"robot":"Serial", "mode": "serial"}
     def restart(self):
-        print("Please start myro to connect onto robot")
+        printStatus("Please start myro to connect onto robot")
 
 def upgrade_scribbler(url=None, port=None, scrib_version=1):
     """
@@ -721,7 +732,7 @@ def upgrade_scribbler(url=None, port=None, scrib_version=1):
     global robot
     if robot == None:
         # force upgrade
-        print("Connecting to Scribbler for initial firmware installation...")
+        printStatus("Connecting to Scribbler for initial firmware installation...")
         robot = SerialRobot(port)
 
     s = robot.ser
@@ -740,7 +751,7 @@ def upgrade_scribbler(url=None, port=None, scrib_version=1):
             scrib_version = 2
     else:
         robot_type = get_robot_type(s) 
-        print("using robot: ", robot_type)
+        printStatus("using robot: ", robot_type)
         if robot_type == "SCRIBBLER-2\n":
             scrib_version = 2
 
@@ -758,7 +769,7 @@ def upgrade_scribbler(url=None, port=None, scrib_version=1):
 
     install_count = 0
     if not url.startswith("http://"):
-        print("Looking for Scribbler", scrib_version, "upgrades in file", url, "...")
+        printStatus("Looking for Scribbler", scrib_version, "upgrades in file", url, "...")
         if scrib_version == 2:
             f = open(url, 'rb')
         else:
@@ -766,7 +777,7 @@ def upgrade_scribbler(url=None, port=None, scrib_version=1):
             
         install_count += load_scribbler(s, f, True, scrib_version) # which is a filename
     else:        
-        print("Looking for Scribbler upgrades at", url, "...")
+        printStatus("Looking for Scribbler upgrades at", url, "...")
 
         info = get_info_timeout(s)
 
@@ -780,10 +791,10 @@ def upgrade_scribbler(url=None, port=None, scrib_version=1):
         try:
             infp = urllib.urlopen(url)
         except:
-            print("ERROR: There was an error connecting to the web to download updates. Please check your internet connection. For example, see if you can access", url, "using a web browser.")
+            printStatus("ERROR: There was an error connecting to the web to download updates. Please check your internet connection. For example, see if you can access", url, "using a web browser.")
             return
         
-        print("Opened url...")
+        printStatus("Opened url...")
         contents = infp.read()
         lines = contents.split("\n")
         infp.close()
@@ -792,7 +803,7 @@ def upgrade_scribbler(url=None, port=None, scrib_version=1):
         for filename in lines:
             filename = filename.strip()
             if filename != "" and filename[0] != '#':
-                print("Considering", filename, "...")
+                printStatus("Considering", filename, "...")
                 if filename.startswith(startswith):
                     end = filename.index(endswidth)
                     patch_ver = filename[startpos:end].split(".")
@@ -809,13 +820,13 @@ def upgrade_scribbler(url=None, port=None, scrib_version=1):
         consider_keys.sort()
         if len(consider_keys) > 0:
             full_url = consider[consider_keys[-1]]
-            print("Loading", full_url)
+            printStatus("Loading", full_url)
             f = urllib.urlopen(full_url)
             install_count += load_scribbler(s, f, True, scrib_version)
     if install_count > 0:
-        print("Done upgrading!")
+        printStatus("Done upgrading!")
     else:
-        print("Nothing to upgrade on the Scribbler; it's up-to-date.")
+        printStatus("Nothing to upgrade on the Scribbler; it's up-to-date.")
     return install_count
 
 def manual_flush(ser):
@@ -874,20 +885,20 @@ def load_scribbler(s, f, force=False, scrib_version = 1):
         else:
             info = "0.0.0"
 
-    print(info)
+    printStatus(info)
 
     sendMagicKey = False
 
     version = map(int, info.split("."))
-    print("Version of fluke", version)
+    printStatus("Version of fluke", version)
     
     if version > [2, 5, 0] or force:
         sendMagicKey = True
 
     if sendMagicKey:
-        print("Sending magic key")
+        printStatus("Sending magic key")
     else:
-        print("Older firmware version, Not sending magic key")
+        printStatus("Older firmware version, Not sending magic key")
 
     bytes=[]
     if scrib_version == 2:
@@ -898,29 +909,29 @@ def load_scribbler(s, f, force=False, scrib_version = 1):
             if (len(t) > 0):               
                 nv = int(t)
                 bytes.append(nv)
-    print("Program size (bytes) = %d; scribbler version = %d" % (len(bytes), scrib_version))
+    printStatus("Program size (bytes) = %d; scribbler version = %d" % (len(bytes), scrib_version))
     f.close()
-    print("Storing program in memory...")
+    printStatus("Storing program in memory...")
     if scrib_version == 2:        
         set_scribbler2_memory_batch(s, bytes)
     else:
         for i in range(0, len(bytes)):
             set_scribbler_memory(s, i, bytes[i])
             
-    print("Programming scribbler %d..." % scrib_version)
+    printStatus("Programming scribbler %d..." % scrib_version)
     if sendMagicKey:
-        print("sending magic key")
+        printStatus("sending magic key")
         if scrib_version == 2:
             set_scribbler2_start_program(s, len(bytes))
         else:
             set_scribbler_start_program(s, len(bytes))
     else:
-        print("older version, not sending magic key")
+        printStatus("older version, not sending magic key")
         set_scribbler_start_program_old(s, len(bytes))
 
     time.sleep(30)
 
-    print("Wait for the robot to reboot!")
+    printStatus("Wait for the robot to reboot!")
     robot.restart()
 
     return 1
@@ -1017,17 +1028,17 @@ def uf_recvPage(s,page,binarray):
 
 def uf_saveEEPROMdump(s,eepromdump):
     for i in range (0,512) :
-        print("%d %%" % ((i*100)/512))
+        printStatus("%d %%" % ((i*100)/512))
         sys.stdout.flush()
         uf_recvPage(s,i,eepromdump)
-    print("")
+    printStatus("")
 
 def uf_restoreEEPROMdump(s,eepromdump):
     for i in range (0,512) :
-        print("%d %%" % ((i*100)/512))
+        printStatus("%d %%" % ((i*100)/512))
         sys.stdout.flush()
         uf_sendPage(s,i,eepromdump)
-    print("")
+    printStatus("")
 
 def uf_storeinEEPROM(s, arlen, binarray):
     segs = int(arlen / 264)
@@ -1038,10 +1049,10 @@ def uf_storeinEEPROM(s, arlen, binarray):
     #print "Writing %d segments" % segs
     write_2byte(s,segs)
     for i in range (0,segs) :
-        print("%d %%" % ((i*100)/segs))
+        printStatus("%d %%" % ((i*100)/segs))
         sys.stdout.flush()
         uf_sendPage(s,i,binarray)
-    print("")
+    printStatus("")
 
 def check_sum(binarray, arlen):
     for i in range(20,24):
@@ -1074,7 +1085,7 @@ def upgrade_fluke(url=None, port=None):
     #define UF_SEGMENT_SIZE 132
 
     if robot == None:
-        print("Connecting to Fluke for firmware installation...")
+        printStatus("Connecting to Fluke for firmware installation...")
         robot = SerialRobot(port)
         s = robot.ser
         info = get_info_timeout(s)
@@ -1086,15 +1097,15 @@ def upgrade_fluke(url=None, port=None):
         info = robot.dongle
         s = robot.ser
 
-    print(info)
+    printStatus(info)
     version = map(int, info.split("."))
-    print("Version of fluke", version)
+    printStatus("Version of fluke", version)
     
     if version <= [2, 4, 0]:
-        print("(If you just upgraded Myro, please restart Python.)")
-        print("Sorry, I can't upgrade the Fluke over Bluetooth.")
-        print("It must be upgraded manually over the serial port using lpc21isp.")
-        print("Please see http://wiki.roboteducation.org/IPRE_Fluke_Setup")
+        printStatus("(If you just upgraded Myro, please restart Python.)")
+        printStatus("Sorry, I can't upgrade the Fluke over Bluetooth.")
+        printStatus("It must be upgraded manually over the serial port using lpc21isp.")
+        printStatus("Please see http://wiki.roboteducation.org/IPRE_Fluke_Setup")
         return
 
     if url == None:
@@ -1103,13 +1114,13 @@ def upgrade_fluke(url=None, port=None):
     filename = None
     if url.startswith("http://"):
         #fluke_ver = info["fluke"].split(".")
-        print "Looking for Fluke upgrade at", url, "..."
+        printStatus("Looking for Fluke upgrade at", url, "...")
         # go to site, check for latest greater than our version
         #infp = urllib.urlopen(url)
         try:
             infp = urllib.urlopen(url)
         except:
-            print("ERROR: There was an error connecting to the web to download updates. Please check your internet connection. For example, see if you can access", url, "using a web browser.")
+            printStatus("ERROR: There was an error connecting to the web to download updates. Please check your internet connection. For example, see if you can access", url, "using a web browser.")
             return
 
         contents = infp.read()
@@ -1118,36 +1129,36 @@ def upgrade_fluke(url=None, port=None):
         for file in lines:
             file = file.strip()
             if file != "" and file[0] != '#':
-                print("Considering", file, "...")
+                printStatus("Considering", file, "...")
                 if file.startswith("/fluke-upgrade-"):
                     end = file.index(".hex")
                     patch_ver = file[15:end].split(".")
-                    print(patch_ver, version)
+                    printStatus(patch_ver, version)
                     if map(int, patch_ver) > map(int, version):
                         # download it
-                        print("   Downloading...")
+                        printStatus("   Downloading...")
                         filename = url_retrieve(url + file)
                         break
     else:
         filename = url
 
     if filename == None:
-        print("Nothing found to upgrade!")
+        printStatus("Nothing found to upgrade!")
         return
     #info = myro.globvars.robot.getInfo()
     sendMagicKey = True
 
     if version <= [2, 5, 0]:
         sendMagicKey = False
-        print("Older firmware version, Not sending magic key")
+        printStatus("Older firmware version, Not sending magic key")
     else:
-        print("Sending magic key")
+        printStatus("Sending magic key")
         
     ih = IntelHex(filename)
     binarray = ih.tobinarray()
     arlen = len(binarray)    
-    print("%d bytes of firmware." % arlen)
-    print("checksumming interrupt vectors")
+    printStatus("%d bytes of firmware." % arlen)
+    printStatus("checksumming interrupt vectors")
     sum = check_sum(binarray, arlen)
     #declare a finite sized array to hold eeprom dump. 
     #Dynamic appending of lists always comes with a performance hit
@@ -1158,7 +1169,7 @@ def upgrade_fluke(url=None, port=None):
     #print "Getting old EEPROM"
     #s.write(chr(SAVE_EEPROM))
     #uf_saveEEPROMdump()
-    print("Sending firmware")
+    printStatus("Sending firmware")
     s.write(chr(UPDATE_FIRMWARE))
     if sendMagicKey:        
         # magic code to ensure we don't enter program by accident    
@@ -1166,44 +1177,99 @@ def upgrade_fluke(url=None, port=None):
         s.write(chr(0x23))
         
     uf_storeinEEPROM(s, arlen, binarray)
-    print("Waiting for reboot...")
+    printStatus("Waiting for reboot...")
     time.sleep(2)
-    print("Done upgrading! Please turn your robot off and then back on, and exit and restart Python and Myro." )
+    printStatus("Done upgrading! Please turn your robot off and then back on, and exit and restart Python and Myro." )
     s.close()
 
-def usage():
-    print("Usage:")
-    print("   python upgrade.py --url=URL --port=PORT WHAT")
-    print("")
-    print("     URL - (optional) is an internat address to use")
-    print("     PORT - (optional) is the serial port address to use")
-    print("     WHAT - is scribbler OR fluke")
-    print("")
-    print("Examples:")
-    print("")
-    print("   python upgrade.py")
-    print("   python upgrade.py fluke")
-    print("   python upgrade.py scribbler")
-    print("   python upgrade.py --port=COM5 fluke")
-    print("   python upgrade.py --port=/dev/rfcomm3 scribbler")
-    print("   python upgrade.py --url=http://myurl.com/file.bin fluke")
-    print("   python upgrade.py --help")
-    print("")
+def printStatus(*stuff):
+    """
+    """
+    if statusString == None:
+        print(stuff)
+    else:
+        strAccm = ""
+        for item in stuff:
+            if strAccm:
+                strAccm += " "
+            strAccm += str(item)
+        statusString.set(strAccm)
 
-if __name__ == "__main__":
-    print("Fluke and Scribbler/Scribbler2 Upgrade Program")
-    print("----------------------------------------------")
+def graphicalMain():
+    global pythonVer
+    global rbString
+    global ptString
+    global statusString
+    #print("Python version is:", pythonVer)
+    mainWin = Tk()
+    rbString = StringVar()
+    ptString = StringVar()
+    statusString = StringVar()
+    Radiobutton(mainWin, variable=rbString, 
+                value="fluke", text="Upgrade Fluke").grid(row=0,column=0)
+    Radiobutton(mainWin, variable=rbString, 
+                value="scribbler", text="Upgrade Scribbler").grid(row=0,column=1)
+    Label(mainWin, text="Bluetooth COM port:").grid(row=1,column=0)
+    Entry(mainWin, textvariable=ptString).grid(row=1,column=1)
+    Label(mainWin, text="e.g. COM4 or /dev/tty.scribbler").grid(row=1,column=2)
+    rbString.set("scribbler")
+    
+    Button(mainWin, command=graphicalCallback, 
+           text="Upgrade!").grid(row=2,column=0,columnspan=3,sticky=E+W)
+    Label(mainWin, text="Status:").grid(row=3,column=0)
+    Entry(mainWin, textvariable=statusString, 
+          width=80, state="readonly").grid(row=3,column=1, columnspan=3, sticky=E+W)
+    mainWin.mainloop()
+    
+def usage():
+    printStatus("Usage:")
+    printStatus("   python upgrade.py --url=URL --port=PORT WHAT")
+    printStatus("")
+    printStatus("     URL - (optional) is an internat address to use")
+    printStatus("     PORT - (optional) is the serial port address to use")
+    printStatus("     WHAT - is scribbler OR fluke")
+    printStatus("")
+    printStatus("Examples:")
+    printStatus("")
+    printStatus("   python upgrade.py")
+    printStatus("   python upgrade.py fluke")
+    printStatus("   python upgrade.py scribbler")
+    printStatus("   python upgrade.py --port=COM5 fluke")
+    printStatus("   python upgrade.py --port=/dev/rfcomm3 scribbler")
+    printStatus("   python upgrade.py --url=http://myurl.com/file.bin fluke")
+    printStatus("   python upgrade.py --help")
+    printStatus("")
+
+def upgrade(what, url, port):
+    if what == "scribbler":
+        printStatus("Upgrading scribbler...")
+        if port != None:
+            printStatus("   with port", port)
+        if url != None:
+            printStatus("   with url", url)
+        upgrade_scribbler(url=url, port=port)
+    if what == "fluke":
+        printStatus("Upgrading fluke...")
+        if port != None:
+            printStatus("   with port", port)
+        if url != None:
+            printStatus("   with url", url)
+        upgrade_fluke(url=url, port=port)
+
+def main():
+    printStatus("Fluke and Scribbler/Scribbler2 Upgrade Program")
+    printStatus("----------------------------------------------")
     port = None
     url = None
     what = None
+    needhelp = False
     for arg in sys.argv:
         if arg == "scribbler":
             what = "scribbler"
         elif arg == "fluke":
             what = "fluke"
         elif arg == "--help":
-            usage()
-            sys.exit()
+            needhelp = True
         elif "=" in arg:
             option, value = arg.split("=", 1)
             if option == "--port":
@@ -1212,22 +1278,30 @@ if __name__ == "__main__":
                 url = value
             else:
                 raise Exception("Invalid option: " + option)
-    if what == None:
-        what = input("Upgrade (fluke or scribbler): ")
-    if what == "scribbler":
-        print("Upgrading scribbler...")
-        if port != None:
-            print "   with port", port
-        if url != None:
-            print "   with url", url
-        upgrade_scribbler(url=url, port=port)
-    elif what == "fluke":
-        print("Upgrading fluke...")
-        if port != None:
-            print "   with port", port
-        if url != None:
-            print "   with url", url
+    if needhelp:
+        usage()
+    elif what in ["scribbler", "fluke"]:
+        upgrade(what, url, port)
+    else:
+        try:
+            graphicalMain()
+        except:
+            what = input("Upgrade (fluke or scribbler): ")
+            if what in ["scribbler", "fluke"]:
+                upgrade(what, url, port)
+            else:
+                usage()
+
+def graphicalCallback():
+    port = ptString.get() 
+    url = None
+    if rbString.get() == "fluke":
         upgrade_fluke(url=url, port=port)
+    elif rbString.get() == "scribbler":
+        upgrade_scribbler(url=url, port=port)
     else:
         usage()
-        sys.exit()
+
+if __name__ == "__main__":
+    main()
+
