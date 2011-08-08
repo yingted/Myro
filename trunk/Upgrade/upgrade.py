@@ -1179,6 +1179,7 @@ def usage():
     print("")
     print("Examples:")
     print("")
+    print("   python upgrade.py")
     print("   python upgrade.py fluke")
     print("   python upgrade.py scribbler")
     print("   python upgrade.py --port=COM5 fluke")
@@ -1209,6 +1210,8 @@ if __name__ == "__main__":
                 url = value
             else:
                 raise Exception("Invalid option: " + option)
+    if what == None:
+        what = input("Upgrade (fluke or scribbler): ")
     if what == "scribbler":
         print("Upgrading scribbler...")
         if port != None:
