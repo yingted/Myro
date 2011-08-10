@@ -751,7 +751,7 @@ def upgrade_scribbler(url=None, port=None, scrib_version=1):
             scrib_version = 2
     else:
         robot_type = get_robot_type(s) 
-        printStatus("using robot: ", robot_type)
+        printStatus("using robot: %s" % robot_type)
         if robot_type == "SCRIBBLER-2\n":
             scrib_version = 2
 
@@ -769,7 +769,7 @@ def upgrade_scribbler(url=None, port=None, scrib_version=1):
 
     install_count = 0
     if not url.startswith("http://"):
-        printStatus("Looking for Scribbler", scrib_version, "upgrades in file", url, "...")
+        printStatus("Looking for Scribbler %s upgrades in file %s..." % (scrib_version, url))
         if scrib_version == 2:
             f = open(url, 'rb')
         else:
@@ -777,7 +777,7 @@ def upgrade_scribbler(url=None, port=None, scrib_version=1):
             
         install_count += load_scribbler(s, f, True, scrib_version) # which is a filename
     else:        
-        printStatus("Looking for Scribbler upgrades at", url, "...")
+        printStatus("Looking for Scribbler upgrades at %s..." % url)
 
         info = get_info_timeout(s)
 
@@ -791,7 +791,7 @@ def upgrade_scribbler(url=None, port=None, scrib_version=1):
         try:
             infp = urllib.urlopen(url)
         except:
-            printStatus("ERROR: There was an error connecting to the web to download updates. Please check your internet connection. For example, see if you can access", url, "using a web browser.")
+            printStatus("ERROR: There was an error connecting to the web to download updates. Please check your internet connection. For example, see if you can access %s using a web browser." % url)
             return
         
         printStatus("Opened url...")
@@ -803,7 +803,7 @@ def upgrade_scribbler(url=None, port=None, scrib_version=1):
         for filename in lines:
             filename = filename.strip()
             if filename != "" and filename[0] != '#':
-                printStatus("Considering", filename, "...")
+                printStatus("Considering %s ..." % filename)
                 if filename.startswith(startswith):
                     end = filename.index(endswidth)
                     patch_ver = filename[startpos:end].split(".")
@@ -820,7 +820,7 @@ def upgrade_scribbler(url=None, port=None, scrib_version=1):
         consider_keys.sort()
         if len(consider_keys) > 0:
             full_url = consider[consider_keys[-1]]
-            printStatus("Loading", full_url)
+            printStatus("Loading %s" % full_url)
             f = urllib.urlopen(full_url)
             install_count += load_scribbler(s, f, True, scrib_version)
     if install_count > 0:
@@ -890,7 +890,7 @@ def load_scribbler(s, f, force=False, scrib_version = 1):
     sendMagicKey = False
 
     version = map(int, info.split("."))
-    printStatus("Version of fluke", version)
+    printStatus("Version of fluke %s" % version)
     
     if version > [2, 5, 0] or force:
         sendMagicKey = True
@@ -1099,7 +1099,7 @@ def upgrade_fluke(url=None, port=None):
 
     printStatus(info)
     version = map(int, info.split("."))
-    printStatus("Version of fluke", version)
+    printStatus("Version of fluke %s" % version)
     
     if version <= [2, 4, 0]:
         printStatus("(If you just upgraded Myro, please restart Python.)")
@@ -1114,13 +1114,13 @@ def upgrade_fluke(url=None, port=None):
     filename = None
     if url.startswith("http://"):
         #fluke_ver = info["fluke"].split(".")
-        printStatus("Looking for Fluke upgrade at", url, "...")
+        printStatus("Looking for Fluke upgrade at %s..." % url)
         # go to site, check for latest greater than our version
         #infp = urllib.urlopen(url)
         try:
             infp = urllib.urlopen(url)
         except:
-            printStatus("ERROR: There was an error connecting to the web to download updates. Please check your internet connection. For example, see if you can access", url, "using a web browser.")
+            printStatus("ERROR: There was an error connecting to the web to download updates. Please check your internet connection. For example, see if you can access %s using a web browser." % url)
             return
 
         contents = infp.read()
@@ -1129,11 +1129,11 @@ def upgrade_fluke(url=None, port=None):
         for file in lines:
             file = file.strip()
             if file != "" and file[0] != '#':
-                printStatus("Considering", file, "...")
+                printStatus("Considering %s ..." % file)
                 if file.startswith("/fluke-upgrade-"):
                     end = file.index(".hex")
                     patch_ver = file[15:end].split(".")
-                    printStatus(patch_ver, version)
+                    printStatus("%s %s" % (patch_ver, version))
                     if map(int, patch_ver) > map(int, version):
                         # download it
                         printStatus("   Downloading...")
@@ -1182,18 +1182,13 @@ def upgrade_fluke(url=None, port=None):
     printStatus("Done upgrading! Please turn your robot off and then back on, and exit and restart Python and Myro." )
     s.close()
 
-def printStatus(*stuff):
+def printStatus(string):
     """
     """
     if statusString == None:
-        print(stuff)
+        print(string)
     else:
-        strAccm = ""
-        for item in stuff:
-            if strAccm:
-                strAccm += " "
-            strAccm += str(item)
-        statusString.set(strAccm)
+        statusString.set(str(string))
 
 def graphicalMain():
     global pythonVer
