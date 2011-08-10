@@ -26,11 +26,14 @@ try:
 except:
     pass # Python 3 and better, input is defined
 try:
-  from tkinter import *
-  pythonver = "3"
+    from tkinter import *
+    pythonver = "3"
 except:
-  from Tkinter import *
-  pythonver = "2"
+    try:
+        from Tkinter import *
+        pythonver = "2"
+    except:
+        pythonver = "?"
 
 # intelhex.py
 #!/usr/bin/python
