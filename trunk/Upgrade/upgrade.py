@@ -1246,17 +1246,25 @@ def graphicalMain():
     
 def usage():
     printStatus("Usage:")
-    printStatus("   python upgrade.py --url=URL --port=PORT WHAT")
+    printStatus("   python upgrade.py --gui=VALUE --url=URL --port=PORT WHAT")
     printStatus("")
-    printStatus("     URL - (optional) is an internat address to use")
-    printStatus("     PORT - (optional) is the serial port address to use")
+    printStatus("     VALUE - is True OR False")
+    printStatus("     URL - is an internat address to use")
+    printStatus("     PORT - is the serial port address to use")
     printStatus("     WHAT - is scribbler OR fluke")
     printStatus("")
-    printStatus("Examples:")
+    printStatus("Options with examples:")
+    printStatus("  --gui=False                      (optional)")
+    printStatus("  --port=COM8                      (optional)")
+    printStatus("  --url=http://myurl.com/fluke.bin (optional)")
+    printStatus("  --help")
+    printStatus("")
+    printStatus("Full Examples:")
     printStatus("")
     printStatus("   python upgrade.py")
     printStatus("   python upgrade.py fluke")
     printStatus("   python upgrade.py scribbler")
+    printStatus("   python upgrade.py --gui=False")
     printStatus("   python upgrade.py --port=COM5 fluke")
     printStatus("   python upgrade.py --port=/dev/rfcomm3 scribbler")
     printStatus("   python upgrade.py --url=http://myurl.com/file.bin fluke")
@@ -1286,6 +1294,7 @@ def main():
     url = None
     what = None
     needhelp = False
+    gui = True
     for arg in sys.argv:
         if arg == "scribbler":
             what = "scribbler"
@@ -1299,6 +1308,8 @@ def main():
                 port = value
             elif option == "--url":
                 url = value
+            elif option == "--gui":
+                gui = eval(value)
             else:
                 raise Exception("Invalid option: " + option)
     if needhelp:
@@ -1306,14 +1317,21 @@ def main():
     elif what in ["scribbler", "fluke"]:
         upgrade(what, url, port)
     else:
-        try:
-            graphicalMain()
-        except:
+        if not gui: # do not use gui
             what = input("Upgrade (fluke or scribbler): ")
             if what in ["scribbler", "fluke"]:
                 upgrade(what, url, port)
             else:
                 usage()
+        else:
+            try:
+                graphicalMain()
+            except: # fallback
+                what = input("Upgrade (fluke or scribbler): ")
+                if what in ["scribbler", "fluke"]:
+                    upgrade(what, url, port)
+                else:
+                    usage()
 
 def graphicalCallback():
     port = ptString.get() 
