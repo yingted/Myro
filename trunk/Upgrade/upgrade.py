@@ -5,13 +5,14 @@
 # (c) 2011, Institute for Personal Robots in Education
 # Douglas Blank, <dblank@cs.brynmawr.edu>
 # Keith O'Hara <kohara@bard.edu>
+# Jay Summet <summetj@gatech.edu> - GUI sugar coating...
 
 # Global variable robot, to set SerialPort()
 robot = None
 pythonVer = "?"
 rbString = None
 ptString = None
-statusString = None
+statusText = None
 
 # Now, let's import things
 import urllib
@@ -25,6 +26,7 @@ try:
     input = raw_input # Python 2.x
 except:
     pass # Python 3 and better, input is defined
+
 try:
     from tkinter import *
     pythonver = "3"
@@ -736,7 +738,11 @@ def upgrade_scribbler(url=None, port=None, scrib_version=1):
     if robot == None:
         # force upgrade
         printStatus("Connecting to Scribbler for initial firmware installation...")
-        robot = SerialRobot(port)
+        try:
+           robot = SerialRobot(port)
+        except:
+           printStatus("Error! That serial port not found!" )
+           raise 
 
     s = robot.ser
 
@@ -1089,7 +1095,12 @@ def upgrade_fluke(url=None, port=None):
 
     if robot == None:
         printStatus("Connecting to Fluke for firmware installation...")
-        robot = SerialRobot(port)
+        try:
+           robot = SerialRobot(port)
+        except:
+           printStatus("Error! That serial port not found!" )
+           raise 
+
         s = robot.ser
         info = get_info_timeout(s)
         if "fluke" in info:
@@ -1188,21 +1199,37 @@ def upgrade_fluke(url=None, port=None):
 def printStatus(string):
     """
     """
-    if statusString == None:
+    if statusText == None:
         print(string)
     else:
-        statusString.set(str(string))
+        print(string)
+        statusText.insert(END, str(string) + "\n" )
+        statusText.yview(MOVETO, 1.0)
 
 def graphicalMain():
     global pythonVer
     global rbString
     global ptString
-    global statusString
+    global statusText
     #print("Python version is:", pythonVer)
     mainWin = Tk()
+    mainWin.title("IPRE Stand Alone Scribbler / Fluke upgrade tool")
     rbString = StringVar()
     ptString = StringVar()
-    statusString = StringVar()
+
+    #Set up the text window & scrollbar frame for status messages.
+    f = Frame(mainWin)
+    scrollbar = Scrollbar(f)
+    statusText = Text(f, yscrollcommand=scrollbar.set, height=10 )
+    statusText.insert(END, "Welcome to the Standalone Scribbler / Fluke upgrader tool!\n")
+    scrollbar.config(command=statusText.yview)
+    statusText.focus_set()
+    statusText.grid(column=0,row=0,) 
+    scrollbar.grid(column=1,row=0, sticky=N+S)
+    f.grid(column=0, row=4,columnspan=3)
+
+
+
     Radiobutton(mainWin, variable=rbString, 
                 value="fluke", text="Upgrade Fluke").grid(row=0,column=0)
     Radiobutton(mainWin, variable=rbString, 
@@ -1214,9 +1241,7 @@ def graphicalMain():
     
     Button(mainWin, command=graphicalCallback, 
            text="Upgrade!").grid(row=2,column=0,columnspan=3,sticky=E+W)
-    Label(mainWin, text="Status:").grid(row=3,column=0)
-    Entry(mainWin, textvariable=statusString, 
-          width=80, state="readonly").grid(row=3,column=1, columnspan=3, sticky=E+W)
+    Label(mainWin, text="Watch here for important status messages:").grid(row=3,column=0)
     mainWin.mainloop()
     
 def usage():
@@ -1242,9 +1267,9 @@ def upgrade(what, url, port):
     if what == "scribbler":
         printStatus("Upgrading scribbler...")
         if port != None:
-            printStatus("   with port", port)
+            printStatus("   with port %s" % port)
         if url != None:
-            printStatus("   with url", url)
+            printStatus("   with url %s" % url)
         upgrade_scribbler(url=url, port=port)
     if what == "fluke":
         printStatus("Upgrading fluke...")
