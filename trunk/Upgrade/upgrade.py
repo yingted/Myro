@@ -1216,7 +1216,7 @@ def upgrade_fluke(url=None, port=None):
     uf_storeinEEPROM(s, arlen, binarray)
     printStatus("Waiting for reboot...")
     time.sleep(2)
-    printStatus("Done upgrading! Please turn your robot off and then back on, and exit and restart Python and Myro." )
+    printStatus("Done upgrading! Please turn your robot off and then back on." )
     s.close()
 
 def printStatus(string):
@@ -1236,7 +1236,7 @@ def graphicalMain():
     global statusText
     #print("Python version is:", pythonVer)
     mainWin = Tk()
-    mainWin.title("IPRE Stand Alone Scribbler / Fluke upgrade tool")
+    mainWin.title("IPRE Stand Alone Scribbler / Fluke upgrade tool " +str(VERSION) )
     rbString = StringVar()
     ptString = StringVar()
 
