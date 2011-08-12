@@ -7,6 +7,8 @@
 # Keith O'Hara <kohara@bard.edu>
 # Jay Summet <summetj@gatech.edu> - GUI sugar coating...
 
+VERSION = "1.0.1"
+
 # Global variable robot, to set SerialPort()
 robot = None
 pythonVer = "?"
@@ -1242,7 +1244,7 @@ def graphicalMain():
     f = Frame(mainWin)
     scrollbar = Scrollbar(f)
     statusText = Text(f, yscrollcommand=scrollbar.set, height=10 )
-    statusText.insert(END, "Welcome to the Standalone Scribbler / Fluke upgrader tool!\n")
+    statusText.insert(END, "Welcome to the Standalone Scribbler / Fluke upgrader tool, version %s!\n" % VERSION)
     scrollbar.config(command=statusText.yview)
     statusText.focus_set()
     statusText.grid(column=0,row=0,) 
@@ -1266,7 +1268,7 @@ def graphicalMain():
     mainWin.mainloop()
     
 def usage():
-    printStatus("Usage:")
+    printStatus("upgrade.py, version %s, usage:" % VERSION)
     printStatus("   python upgrade.py --gui=VALUE --url=URL --port=PORT WHAT")
     printStatus("")
     printStatus("     VALUE - is True OR False")
@@ -1309,8 +1311,9 @@ def upgrade(what, url, port):
         upgrade_fluke(url=url, port=port)
 
 def main():
-    printStatus("Fluke and Scribbler/Scribbler2 Upgrade Program")
-    printStatus("----------------------------------------------")
+    printStatus("Fluke and Scribbler/Scribbler2 Upgrade Program, version %s" 
+                % VERSION)
+    printStatus("-" * 75)
     port = None
     url = None
     what = None
