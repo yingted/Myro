@@ -16,7 +16,8 @@ statusText = None
 
 # Now, let's import things
 import urllib
-import sys, time
+import tempfile
+import os, sys, time
 try:
     import serial
 except:
@@ -1086,6 +1087,26 @@ def check_sum(binarray, arlen):
             sum = 0
         sum = sum + binarray[i]
     return sum
+
+def url_retrieve(url, tmp_dir = None):
+    """ Retrieves the contents of a url. """
+    if tmp_dir == None:
+        if "TMP" in os.environ:
+            tmp_dir = os.environ["TMP"]
+        elif "TEMP" in os.environ:
+            tmp_dir = os.environ["TEMP"]
+        else:
+            tmp_dir = tempfile.gettempdir()
+    # get url into tmp_file
+    path, file = url.rsplit("/", 1)
+    tmp_file = tmp_dir + os.sep + file
+    infp = urllib.urlopen(url)
+    contents = infp.read()
+    infp.close()
+    outfp = open(tmp_file, "wb")
+    outfp.write(contents)
+    outfp.close()
+    return tmp_file
 
 def upgrade_fluke(url=None, port=None):
     global robot
