@@ -1228,6 +1228,8 @@ def printStatus(string):
         print(string)
         statusText.insert(END, str(string) + "\n" )
         statusText.yview(MOVETO, 1.0)
+        statusText.update()	#Make sure updates happen even on long running
+				#Event handlers.
 
 def graphicalMain():
     global pythonVer
