@@ -1,8 +1,11 @@
 {
 ***************************************
-*  IPRE Scribbler2 Firmware v1.0.2    *
+*  IPRE Scribbler2 Firmware v1.1.0    *
 *  Date:   12-6-2010                  *
 *  Author: Daniel Harris              *
+*          Keith O'Hara               *
+*          John Cummins               *
+*          Christopher Hilbert        *
 ***************************************
 
 This program runs commands sent by Georgia Tech's Fluke module on Parallax's new Scribbler2
@@ -80,12 +83,38 @@ con
   PACKET_LENGTH = 9
 
   MAX_OUTBUFF   = 100
+
+'2.0 Extensions for S2 Begin
+'2.0 New messages
+
+  _SET_VOLUME         = 160 'Format 160 volume
+  _PATH               = 161 'Format 161 begin_or_end speed
+  _MOVE               = 162 'Format 162 type hXByte lXByte hYByte lYByte
+  _ARC                = 163 'Format 163 type hXByte lXByte hYByte lYByte hRadByte lRadByte
+  _TURN               = 164 'Format 164 type hAngleByte lAngleByte
+  _GET_POSN           = 165 'Format 165
+  _SET_POSN           = 166 'Format 166 x0Byte x1Byte x2Byte x3Byte y0Byte y1Byte y2Byte y3Byte
+  _GET_ANGLE          = 167 'Format 167
+  _SET_ANGLE          = 168 'Format 168 angle0Byte angle1Byte angle2Byte angle3Byte
+  _GET_MIC_ENV        = 169 'Format 169
+  _GET_MOTOR_STATS    = 170 'Format 170
+  _GET_ENCODERS       = 171 'Format 171 type
+
+  _BY                 = 4
+  _TO                 = 2
+  _DEG                = 1
+
+  _BEGIN              = 1
+  _END                = 0
+
+'2.0 Extensions for S2 End
   
   
 var
 
   long reset_stack[20]
   long FMStack[50]
+  long my_stats[6]
 
   byte indata[PACKET_LENGTH]
   byte outdata[MAX_OUTBUFF]
@@ -102,7 +131,7 @@ obj
 
 dat
 
-roboData      byte      "Robot-Version:1.0.2,Robot:Scribbler2,Mode:Serial", 10, 0
+roboData      byte      "Robot-Version:1.1.0,Robot:Scribbler2,Mode:Serial", 10, 0
 
 nameData      byte      "Scribby         ", 0           'null terminate string
 ipreData      byte      127, 127, 127, 127, 0, 0, 0, 0
@@ -120,7 +149,9 @@ pub go | i
   s2.start_tones                          'Start the tone sequencer/generator.
 
   s2.start_motors                         'Start the motor cog up
-  s2.get_wheel_calibration                'Read calibration data and inform the motor process              
+  s2.get_wheel_calibration                'Read calibration data and inform the motor process    
+
+  s2.start_mic_env                        '2.0 start the Mic cog          
   
   cognew(reset_button, @reset_stack)      'Start the reset button monitor cog
   cognew(FaultMonitor, @FMStack)          'Start the fault monitoring cog
@@ -156,8 +187,9 @@ pub go | i
 
       
     'We can only get here in the main loop if a packet was properly received.
-      
-    
+    if outdata_idx > 0           '2.0 don't echo if we don't have any thing
+      send_data                   '2.0 echo back packet immediately to be consistent with original Scribbler
+
     process_packet              'now process the packet
 
     if echo_mode                'if echo is on, then insert the command in the transmit buffer
@@ -221,6 +253,46 @@ pub process_packet
      
     _SET_MOTORS:
       Set_Motors
+
+'2.0 Extensions for S2 Begin
+
+    _SET_VOLUME:
+      Set_Volume 
+
+    _PATH:
+      Path
+
+    _MOVE:    
+      Move
+
+    _ARC:
+      Arc
+
+    _TURN:
+      Turn
+
+    _GET_POSN:
+      Get_Posn
+
+    _SET_POSN:
+      Set_Posn 
+
+    _GET_ANGLE:
+      Get_Angle
+
+    _SET_ANGLE:
+      Set_Angle
+
+    _GET_MIC_ENV:
+      Get_Mic_Env
+
+    _GET_MOTOR_STATS:
+      Get_Motor_Stats
+
+    _GET_ENCODERS:
+      Get_Encoders
+
+'2.0 Extensions for S2 End
      
     _SET_SPEAKER:
       Set_Speaker
@@ -391,6 +463,163 @@ pub Set_Motors | left_velocity, right_velocity
   s2.wheels_now(left_velocity, right_velocity, 0)       'stick motor data to the wheels (make the robot GO!)
 
   Get_All
+
+'2.0 Extensions for S2 Begin
+
+pub Set_Volume | vol
+  vol := indata[1]
+  s2.set_volume(vol)
+
+  Get_All
+
+pub  Path | speed
+'        0        1           2           3
+'Formal 161 begin_or_end hSpeedByte lSpeedByte
+  speed := (indata[2] << 8) + (indata[3])
+  ~~speed
+
+  case(indata[1])
+    _BEGIN:
+      s2.begin_path
+      s2.set_speed(speed)
+
+    _END:
+      s2.end_path
+
+  Get_All
+    
+
+pub Move | x_coord, y_coord
+'        0    1     2      3      4      5 
+'Format 162 type hXByte lXByte hYByte lYByte
+'  type    := indata[1]
+  x_coord := (indata[2]<<8 | indata[3])
+  y_coord := (indata[4]<<8 | indata[5])
+  ~~x_coord
+  ~~y_coord
+
+  case(indata[1])
+    _BY:
+      s2.move_by(x_coord, y_coord)
+
+    _TO:
+      s2.move_to(x_coord, y_coord)
+
+  Get_All
+
+pub Arc  | x_coord, y_coord, radius
+'        0    1    2      3      4      5        6        7 
+'Format 163 type hXByte lXByte hYByte lYByte hRadByte lRadByte
+'  type    := indata[1]
+  x_coord := (indata[2] << 8) + (indata[3])
+  y_coord := (indata[4] << 8) + (indata[5])
+  radius  := (indata[6] << 8) + (indata[7])
+  ~~x_coord
+  ~~y_coord
+  ~~radius
+
+  case(indata[1])
+    _BY:
+      s2.arc_by(x_coord, y_coord, radius)
+
+    _TO:
+      s2.arc_to(x_coord, y_coord, radius)
+
+  Get_All
+
+
+
+pub Turn | angle
+'Format 164 type hAngleByte lAngleByte
+'  type  := indata[1]
+  angle := (indata[2] << 8) + (indata[3])
+  ~~angle
+
+  case(indata[1])
+    _BY:
+      s2.turn_by(angle)
+
+    _TO:
+      s2.turn_to(angle)
+
+    _BY + _DEG:
+      s2.turn_by_deg(angle)
+
+    _TO + _DEG:
+      s2.turn_to_deg(angle)
+
+  Get_All
+
+
+pub Get_Posn | coord
+  coord := s2.get_current_x
+  enqueue((coord >> 24) & $FF)
+  enqueue((coord >> 16) & $FF)
+  enqueue((coord >>  8) & $FF)
+  enqueue((coord      ) & $FF)
+  coord := s2.get_current_y
+  enqueue((coord >> 24) & $FF)
+  enqueue((coord >> 16) & $FF)
+  enqueue((coord >>  8) & $FF)
+  enqueue((coord      ) & $FF)
+
+pub Set_Posn | x, y
+  x := (((((indata[1] << 8) | indata[2]) << 8) | indata[3]) << 8) | indata[4]
+  y := (((((indata[5] << 8) | indata[6]) << 8) | indata[7]) << 8) | indata[8]
+  s2.here_is(x, y)
+
+  Get_All
+
+pub Get_Angle | coord
+  coord := s2.get_current_w
+  enqueue((coord >> 24) & $FF)
+  enqueue((coord >> 16) & $FF)
+  enqueue((coord >>  8) & $FF)
+  enqueue((coord      ) & $FF)
+
+pub Set_Angle | angle
+  angle := (((((indata[1] << 8) | indata[2]) << 8) | indata[3]) << 8) | indata[4]
+  s2.heading_is(angle)
+
+  Get_All
+
+pub Get_Mic_Env | env
+  env := s2.get_mic_env
+  enqueue((env >> 24) & $FF)
+  enqueue((env >> 16) & $FF)
+  enqueue((env >>  8) & $FF)
+  enqueue((env      ) & $FF)
+
+pub Get_Motor_Stats | temp
+  longmove(@my_stats, s2.motion_addr, 6)
+  enqueue((my_stats[0] >> 24) & $FF)
+  enqueue((my_stats[0] >> 16) & $FF)
+  enqueue((my_stats[0] >>  8) & $FF)
+  enqueue((my_stats[0]      ) & $FF)
+
+  temp := s2.move_ready
+  if (temp)
+    enqueue(1)
+  else
+    enqueue(0)
+
+pub Get_Encoders | left, right, clear
+  clear := indata[1]
+  left  := s2.get_left_enc(clear)
+  right := s2.get_right_enc(clear)
+
+  enqueue((left >> 24) & $FF)
+  enqueue((left >> 16) & $FF)
+  enqueue((left >>  8) & $FF)
+  enqueue((left      ) & $FF)
+
+  enqueue((right >> 24) & $FF)
+  enqueue((right >> 16) & $FF)
+  enqueue((right >>  8) & $FF)
+  enqueue((right      ) & $FF)
+
+
+'2.0 Extensions for S2 End
 
 pub Get_Data | i
 

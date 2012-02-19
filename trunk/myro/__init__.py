@@ -853,6 +853,7 @@ def forward(speed=1, seconds=None):
         return myro.globvars.robot.forward(speed, seconds)
     else:
         raise AttributeError, "need to initialize robot"
+    
 def backward(speed=1, seconds=None):
     if myro.globvars.robot:
         return myro.globvars.robot.backward(speed, seconds)
@@ -876,6 +877,96 @@ def turnRight(speed=1, seconds=None):
 def stop():
     if myro.globvars.robot:
         return myro.globvars.robot.stop()
+def getPosition():
+    """This returns the x and y coordinates of the scribbler 2"""   
+    if myro.globvars.robot:
+        return myro.globvars.robot.getPosition()
+    else:
+        raise AttributeError, "need to initialize robot"    
+def hereIs(x=0, y=0):
+    if myro.globvars.robot:
+        return myro.globvars.robot.setHereIs(x, y)
+    else:
+        raise AttributeError, "need to initialize robot"
+def getAngle():
+    """This returns the current angle of the scribbler 2"""   
+    if myro.globvars.robot:
+        return myro.globvars.robot.getAngle()
+    else:
+        raise AttributeError, "need to initialize robot"        
+def setAngle(angle):
+    if myro.globvars.robot:
+        return myro.globvars.robot.setAngle(angle)
+    else:
+        raise AttributeError, "need to initialize robot"    
+def beginPath():
+    """Speed can be a value from 1 to 15"""   
+    if myro.globvars.robot:
+        return myro.globvars.robot.setBeginPath()
+    else:
+        raise AttributeError, "need to initialize robot"
+def moveTo(x, y):
+    if myro.globvars.robot:
+        return myro.globvars.robot.setMove(x, y, "to")
+    else:
+        raise AttributeError, "need to initialize robot"
+def moveBy(x, y):
+    if myro.globvars.robot:
+        return myro.globvars.robot.setMove(x, y, "by")
+    else:
+        raise AttributeError, "need to initialize robot"    
+def turnTo(angle, radsOrDegrees):
+    if myro.globvars.robot:
+        return myro.globvars.robot.setTurn(angle, "to", radsOrDegrees)
+    else:
+        raise AttributeError, "need to initialize robot" 
+def turnBy(angle, radsOrDegrees):
+    if myro.globvars.robot:
+        return myro.globvars.robot.setTurn(angle, "by", radsOrDegrees)
+    else:
+        raise AttributeError, "need to initialize robot"
+def arcTo(x, y, radius):
+    if myro.globvars.robot:
+        return myro.globvars.robot.setArc(x, y, radius, "to")
+    else:
+        raise AttributeError, "need to initialize robot"
+def arcBy(x, y, radius):
+    if myro.globvars.robot:
+        return myro.globvars.robot.setArc(x, y, radius, "by")
+    else:
+        raise AttributeError, "need to initialize robot"
+def endPath():
+    if myro.globvars.robot:
+        return myro.globvars.robot.setEndPath()
+    else:
+        raise AttributeError, "need to initialize robot"
+def getMicEnvelope():
+    """Returns a number representing the microphone envelope noise"""   
+    if myro.globvars.robot:
+        return myro.globvars.robot.getMicEnvelope()
+    else:
+        raise AttributeError, "need to initialize robot" 
+def getMotorStats():
+    '''Return the current motion status as a packed long and single additional byte showing if motors are ready for commands (1=ready, 0=busy):
+ Left wheel and right wheel are signed, twos complement eight bit velocity values,
+ Idler timer is the time in 1/10 second since the last idler edge,
+ Idler spd is an unsigned six-bit velocity value, and
+ Mov is non-zero iff one or more motors are turning.
+ Left and right wheel velocities are instanteous encoder counts over a 1/10-second interval.
+ Idler wheel wheel velocity is updated every 1/10 second and represents the idler encoder count during the last 1.6 seconds.'''   
+    if myro.globvars.robot:
+        return myro.globvars.robot.getMotorStats()
+    else:
+        raise AttributeError, "need to initialize robot" 
+def getEncoders(zeroEncoders=False):
+    '''Gets the values for the left and right encoder wheels.  Negative value means they have moved
+    backwards from the robots perspective.  Each turn of the encoder wheel is counted as and increment or
+    decrement of 2 depending on which direction the wheels moved.  
+    if zeroEncoders is set to True then the encoders will be set to zero after reading the values'''
+    if myro.globvars.robot:
+        return myro.globvars.robot.getEncoders(zeroEncoders)
+    else:
+        raise AttributeError, "need to initialize robot"   
 def openConnection():
     if myro.globvars.robot:
         return myro.globvars.robot.open()
@@ -1015,6 +1106,12 @@ def setVolume(value):
         return myro.globvars.robot.set("volume", value)
     else:
         raise AttributeError, "need to initialize robot"
+def setS2Volume(value):
+    """Level can be between 0-100 and represents the percent volume level of the speaker"""   
+    if myro.globvars.robot:
+        return myro.globvars.robot.setS2Volume(value)
+    else:
+        raise AttributeError, "need to initialize robot"    
 def setStartSong(songName):
     if myro.globvars.robot:
         return myro.globvars.robot.set("startsong", songName)

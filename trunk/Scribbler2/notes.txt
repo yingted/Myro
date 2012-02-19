@@ -1,0 +1,110 @@
+s2.spin has the low level drivers for the Scribbler 2.
+I have significantly modified the Motors code.
+The is written in Propeller assembly code. This is
+my first attempt at Propeller assembly so the code
+is not very elegant. I have marked the lines of code
+I added with my initials (JC). I have made available
+the wheel encoders count.
+ipre_s2_port.spin supports messaging that is as near
+to the messages supported by the original Scribbler.
+I have added code to support additional messages in
+the format that the original Scribbler used.
+This is one command byte followed by eight data bytes.
+These are the new messages:-
+
+  _SET_VOLUME         = 160 'Format 160 volume (0-99)
+  _PATH               = 161 'Format 161 begin_or_end speed
+	returns nothing, takes begin_or_end byte one byte speed (0-15)
+  _MOVE               = 162 'Format 162 type hXByte lXByte hYByte lYByte
+	returns nothing, takes move type byte and two big endian ints
+	the x and y coordinates
+  _ARC                = 163 'Format 163 type hXByte lXByte hYByte lYByte hRadByte lRadByte
+	returns nothing, takes move type byte and three big endian ints
+	the x and y coordinates and the radius of turn
+  _TURN               = 164 'Format 164 type hAngleByte lAngleByte
+	returns nothing, takes move type byte and a big endian int angle
+  _GET_POSN           = 165 'Format 165
+	returns two big endian longs the x and y coordinates
+  _SET_POSN           = 166 'Format 166 x0Byte x1Byte x2Byte x3Byte y0Byte y1Byte y2Byte y3Byte
+	returns nothing, takes two big endian longs the x and y coordinates
+  _GET_ANGLE          = 167 'Format 167
+	returns a big endian long the angle
+  _SET_ANGLE          = 168 'Format 168 angle0Byte angle1Byte angle2Byte angle3Byte
+	returns nothing, takes a long
+  _GET_MIC_ENV        = 169 'Format 169
+	returns a big endian long the Mic Envelope
+  _GET_MOTOR_STATS    = 170 'Format 170
+	returns a big endian long the motor stats and one byte motor ready
+  _GET_ENCODERS       = 171 'Format 171 type 
+		returns two big endian longs the left and right encoders
+		type = 0 means zero encoders after reading them
+
+The most interesting is the GET_ENCODERS. 
+This returns two signed Big Endian longs which are
+the values of the left and right encoders.
+Negative values indicate that that wheel is
+going backwards from the Scribblers point of
+view. If the type byte is zero the encoders
+are reset after being read.
+
+In the MOVE ARC TURN messages the type byte
+is a BY = 4, TO = 2, DEG = 1
+BY indicates the other parameters are relative
+to the current position.
+TO indicates the other parameters are absolute.
+DEG indicates the angle parameters are in
+degrees otherwise radians are assumed.
+So 5 would be a turn relative to the current
+posn expressed in degrees.
+DEG is only used in turn.
+
+The GET_MIC_ENV returns a Big Endian long
+that indicates the noise level. If the motors
+are running the mic picks up their noise.
+
+For more details probably the best place to
+look is the libscribbler *.cpp and *.h
+in scribbler2/lib/src
+
+I believe that all my changes are confined to
+s2.spin and ipre_s2_port.spin.
+I believe that the best documentation for the
+new messages is the cpp code in alllib.zip
+
+The cogs in the scribbler2
+project are assigned so (I think)
+? command processor?
+0. Serial port
+1. Analog, button, and LED drivers.
+2. Motor driver.
+3. Sound sequencer and synthesizer.
+4. Microphone envelope detector.
+5. Reset button
+6. fault monitor
+7. hacker port?
+ 
+4 is disabled in the basic ipre port but I added it and 7 is optional
+but very useful. 5 and 6 are very simple loops and with a little
+thought could be combined
+Encoder issues
+I count each change of state on the encoders, thus I count 2 clicks per
+encoder pulse.
+The way I reset encoders means there is a window between getting the value
+and zeroing it in which a click could come in and be ignored (zeroed out)
+I can reduce the size of this window by careful programming but I don't
+think it is possible to totally eliminate it. My first attempts to do so,
+synchronizing two cogs, actually made it more likely to occur.
+I am going to play with this some more as this sort of issue is one of the
+reasons this project is interesting, but it may be the the best solution
+may be just to ignore it. It may just be the nature of the parallel beast.
+I am currently trying to minimize this issue on the Propeller side and
+allow for it on the host side.
+There are other issues with my approach. If a wheel is moving in one 
+direction and reverses in between polls some clicks will be ignored.
+This is an issue with the polling idea and could be resolved with having
+the integrating of encoders done on the propeller. This would probably
+require a dedicated cog with floating point capability. Too big for this
+project.
+Also slippage occurs whenever the robot encounters an object. I am trying
+to reduce this by using robots sensors to avoid objects.
+
