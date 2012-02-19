@@ -1588,7 +1588,8 @@ class Scribbler(Robot):
         
     def setHereIs(self, x, y):
         if(self._IsScribbler2()):
-            self._set(Scribbler.SET_POSN, (x >> 8) & 0xff, x & 0xff, (y >> 8) & 0xff, y & 0xff)
+            self._set(Scribbler.SET_POSN, (x >> 24) & 0xff, (x >> 16) & 0xff, (x >> 8) & 0xff, x & 0xff,\
+                          (y >> 24) & 0xff, (y >> 16) & 0xff, (y >> 8) & 0xff, y & 0xff)
 
     def getAngle(self):
         """This returns the current angle of the scribbler 2"""
@@ -1597,7 +1598,7 @@ class Scribbler(Robot):
         
     def setAngle(self, angle):
         if(self._IsScribbler2()):
-            self._set(Scribbler.SET_ANGLE, (angle >> 8) & 0xff, angle & 0xff)
+            self._set(Scribbler.SET_ANGLE, (angle >> 24) & 0xff,(angle >> 16) & 0xff,(angle >> 8) & 0xff, angle & 0xff)
 
     def setBeginPath(self, speed=7):
         """Speed can be a value from 1 to 15"""
