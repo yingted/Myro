@@ -1,6 +1,6 @@
 {
 ***************************************
-*  IPRE Scribbler2 Firmware v1.1.0    *
+*  IPRE Scribbler2 Firmware v1.1.1    *
 *  Date:   12-6-2010                  *
 *  Author: Daniel Harris              *
 *          Keith O'Hara               *
@@ -131,7 +131,7 @@ obj
 
 dat
 
-roboData      byte      "Robot-Version:1.1.0,Robot:Scribbler2,Mode:Serial", 10, 0
+roboData      byte      "Robot-Version:1.1.1,Robot:Scribbler2,Mode:Serial", 10, 0
 
 nameData      byte      "Scribby         ", 0           'null terminate string
 ipreData      byte      127, 127, 127, 127, 0, 0, 0, 0
@@ -784,7 +784,7 @@ pub Set_Speaker
 
   ifnot quiet
     s2.play_tone((indata[1]<<8 | indata[2]), (indata[3]<<8 | indata[4]), 0)
-    pause(1000 * (indata[1]<<8 | indata[2]))
+    'pause(1000 * (indata[1]<<8 | indata[2]))
   else
     pause(1000 * (indata[1]<<8 | indata[2]))
 
@@ -794,7 +794,7 @@ pub Set_Speaker2
 
   ifnot quiet
     s2.play_tone((indata[1]<<8 | indata[2]), (indata[3]<<8 | indata[4]), (indata[5]<<8 | indata[6]))
-    pause(1000 * (indata[1]<<8 | indata[2]))
+    'pause(1000 * (indata[1]<<8 | indata[2]))
   else
     pause(1000 * (indata[1]<<8 | indata[2]))            'wait for the amount of time the tone would usually be played
 
