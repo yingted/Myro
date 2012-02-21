@@ -3,9 +3,6 @@
 *  IPRE Scribbler2 Firmware v1.1.1    *
 *  Date:   12-6-2010                  *
 *  Author: Daniel Harris              *
-*          Keith O'Hara               *
-*          John Cummins               *
-*          Christopher Hilbert        *
 ***************************************
 
 This program runs commands sent by Georgia Tech's Fluke module on Parallax's new Scribbler2
@@ -108,6 +105,20 @@ con
   _END                = 0
 
 '2.0 Extensions for S2 End
+
+
+'2.1 Extensions for S2 Begin
+'2.1 New messages
+  _GET_IR_EX          = 172 'Format 172 side type thres
+  _GET_LINE_EX        = 173 'Format 173 side type thres
+  _DISTANCE_EX        = 175 'Format 175 side
+
+
+  _NOW                = 8
+
+
+
+'2.1 Extensions for S2 End
   
   
 var
@@ -131,7 +142,7 @@ obj
 
 dat
 
-roboData      byte      "Robot-Version:1.1.1,Robot:Scribbler2,Mode:Serial", 10, 0
+roboData      byte      "Robot-Version:1.0.2,Robot:Scribbler2,Mode:Serial", 10, 0
 
 nameData      byte      "Scribby         ", 0           'null terminate string
 ipreData      byte      127, 127, 127, 127, 0, 0, 0, 0
@@ -187,8 +198,9 @@ pub go | i
 
       
     'We can only get here in the main loop if a packet was properly received.
-    if outdata_idx > 0           '2.0 don't echo if we don't have any thing
-      send_data                   '2.0 echo back packet immediately to be consistent with original Scribbler
+    
+    if outdata_idx > 0          '2.0 don't send it if we don't have it 
+      send_data                 '2.0 echo back packet immediately to be consistent with original Scribbler
 
     process_packet              'now process the packet
 
@@ -293,6 +305,23 @@ pub process_packet
       Get_Encoders
 
 '2.0 Extensions for S2 End
+
+'2.1 Extensions for S2 Begin
+'2.1 New messages
+
+    _GET_IR_EX:
+      Get_IR_Ex 
+
+    _GET_LINE_EX:
+      Get_Line_Ex
+
+    _DISTANCE_EX:
+      Distance_Ex
+
+'2.0 Extensions for S2 End
+
+
+
      
     _SET_SPEAKER:
       Set_Speaker
@@ -502,6 +531,9 @@ pub Move | x_coord, y_coord
     _BY:
       s2.move_by(x_coord, y_coord)
 
+    _BY + _NOW:
+      s2.move_now(x_coord, y_coord, 0, 15, 1)
+
     _TO:
       s2.move_to(x_coord, y_coord)
 
@@ -525,6 +557,9 @@ pub Arc  | x_coord, y_coord, radius
     _TO:
       s2.arc_to(x_coord, y_coord, radius)
 
+    _BY + _NOW:
+      s2.arc_now(x_coord, radius)
+
   Get_All
 
 
@@ -545,8 +580,11 @@ pub Turn | angle
     _BY + _DEG:
       s2.turn_by_deg(angle)
 
-    _TO + _DEG:
-      s2.turn_to_deg(angle)
+    _BY + _NOW:
+      s2.turn_now(angle)
+
+    _BY + _DEG + _NOW:
+      s2.turn_deg_now(angle)
 
   Get_All
 
@@ -620,6 +658,53 @@ pub Get_Encoders | left, right, clear
 
 
 '2.0 Extensions for S2 End
+
+'2.1 Extensions for S2 Begin
+'2.1 New messages
+
+pub Get_IR_Ex | side, type, thres, temp
+  side  := indata[1]
+  type  := indata[2]
+  thres := indata[3]
+
+  case (side)
+    0:
+      temp := !s2.obstacle(s2#LEFT, thres)
+
+    1:
+      temp := !s2.obstacle(s2#RIGHT, thres)
+ 
+  enqueue(temp & $01)
+
+pub Get_Line_Ex | side, type, thres, temp
+  side  := indata[1]
+  type  := indata[2]
+  thres := indata[3]
+
+  case (side)
+    0:
+      temp := s2.line_sensor(s2#LEFT, thres)
+
+    1:
+      temp := s2.line_sensor(s2#RIGHT, thres)
+
+  enqueue(temp & 1)
+
+
+pub Distance_Ex | side, temp
+  side  := indata[1]
+
+  case(side)
+    0:
+      temp := s2.distance(s2#LEFT)
+
+    1:
+      temp := s2.distance(s2#RIGHT)
+
+  enqueue(temp & $FF)
+
+'2.1 Extensions for S2 End
+
 
 pub Get_Data | i
 
@@ -784,7 +869,7 @@ pub Set_Speaker
 
   ifnot quiet
     s2.play_tone((indata[1]<<8 | indata[2]), (indata[3]<<8 | indata[4]), 0)
-    'pause(1000 * (indata[1]<<8 | indata[2]))
+    pause(1000 * (indata[1]<<8 | indata[2]))
   else
     pause(1000 * (indata[1]<<8 | indata[2]))
 
@@ -794,7 +879,7 @@ pub Set_Speaker2
 
   ifnot quiet
     s2.play_tone((indata[1]<<8 | indata[2]), (indata[3]<<8 | indata[4]), (indata[5]<<8 | indata[6]))
-    'pause(1000 * (indata[1]<<8 | indata[2]))
+    pause(1000 * (indata[1]<<8 | indata[2]))
   else
     pause(1000 * (indata[1]<<8 | indata[2]))            'wait for the amount of time the tone would usually be played
 
