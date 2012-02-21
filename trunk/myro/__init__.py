@@ -604,6 +604,10 @@ class Robot(object):
     def getIR(self, *position):
         """ Returns the infrared readings. """
         return self.get("ir", *position)
+    
+    def getDistance(self, *position):
+        """ Returns the S2 Distance readings. """
+        return self.getDistance(*position)
 
     def getLine(self, *position):
         """ Returns the line sensor readings. """
@@ -995,6 +999,12 @@ def getLight(*pos):
 def getIR(*pos):
     if myro.globvars.robot:
         return myro.globvars.robot.get("ir", *pos)
+    else:
+        raise AttributeError, "need to initialize robot"
+
+def getDistance(*pos):
+    if myro.globvars.robot:
+        return myro.globvars.robot.getDistance(*pos)
     else:
         raise AttributeError, "need to initialize robot"
 def getLine(*pos):

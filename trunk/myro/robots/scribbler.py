@@ -170,6 +170,12 @@ class Scribbler(Robot):
     GET_MIC_ENV         = 169 #Format 169
     GET_MOTOR_STATS     = 170 #Format 170
     GET_ENCODERS        = 171 #Format 171 type    
+
+    GET_IR_EX          = 172 #Format 172 side type thres
+    GET_LINE_EX        = 173 #Format 173 side type thres
+    GET_DISTANCE        = 175 #Format 175 side
+
+    
     PACKET_LENGTH     =  9
     BEGIN_PATH          = 0  #Used with SET_PATH to say beginning of a path
     END_PATH            = 1  #Used with SET_PATH to say end of a path
@@ -484,6 +490,8 @@ class Scribbler(Robot):
                     return self._get(Scribbler.GET_IR_ALL, 2)
                 elif sensor == "obstacle":
                     return [self.getObstacle("left"), self.getObstacle("center"), self.getObstacle("right")]
+                elif sensor == "distance":
+                    return [self.getDistance("left"), self.getDistance("right")]
                 elif sensor == "bright":
                     return [self.getBright("left"), self.getBright("middle"), self.getBright("right") ]
                 elif sensor == "all":
@@ -1254,6 +1262,22 @@ class Scribbler(Robot):
         finally:
             self.lock.release()
         return retval       
+
+    def getDistance(self, value=None):
+        if self._IsScribbler2():
+            if value == None:
+                return self.get("distance")
+            try:            
+                self.lock.acquire()
+                if value in ["left", 0]:
+                    self._write([Scribbler.GET_DISTANCE, 0])
+                elif value in ["right", 1]:
+                    self._write([Scribbler.GET_DISTANCE, 1])
+                self._read(Scribbler.PACKET_LENGTH) # read echo
+                retval = ord(self.ser.read(1))
+            finally:
+                self.lock.release()
+            return retval       
 
     def getBright(self, window=None):
         # left, middle, right
