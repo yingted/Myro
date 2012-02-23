@@ -1,6 +1,6 @@
 {
 ***************************************
-*  IPRE Scribbler2 Firmware v1.1.1    *
+*  IPRE Scribbler2 Firmware v1.1.2    *
 *  Date:   12-6-2010                  *
 *  Author: Daniel Harris              *
 ***************************************
@@ -142,7 +142,7 @@ obj
 
 dat
 
-roboData      byte      "Robot-Version:1.0.2,Robot:Scribbler2,Mode:Serial", 10, 0
+roboData      byte      "Robot-Version:1.1.2,Robot:Scribbler2,Mode:Serial", 10, 0
 
 nameData      byte      "Scribby         ", 0           'null terminate string
 ipreData      byte      127, 127, 127, 127, 0, 0, 0, 0
