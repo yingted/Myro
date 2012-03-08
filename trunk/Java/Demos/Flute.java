@@ -11,7 +11,7 @@ public class Flute
     public static void main(String[] args)
     {
         // change this for your scribbler port
-        final String scribblerPort = "/dev/rfcomm1";
+        final String scribblerPort = "/dev/rfcomm0";
         
         // define the 8 notees on the flute
         int[] notes = {440, 494, 554, 588, 659, 740, 831, 880};

@@ -15,3 +15,13 @@ finding the HEADERS folder you may have to edit Makefile (instructions will be p
 sudo ln -s /System/Library/Frameworks/JavaVM.framework/Headers /System/Library/Java/JavaVirtualMachines/
 
 (See https://issues.sonatype.org/browse/NAR-177 for a description. )
+
+If the following error occurs during make:
+
+   glibtool: compile: unable to infer tagged configuration
+
+edit Makefile and add "--tag=CC" to the definition of symbol GLIBTOOL.  For example:
+
+  GLIBTOOL = $(SHELL) glibtool --tag=CC
+
+
