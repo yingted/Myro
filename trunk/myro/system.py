@@ -125,7 +125,7 @@ def upgrade_myro(url=None, version=None):
     Takes a url or filename and upgrades Myro.
     """
     if url == None:
-        url = "http://myro.roboteducation.org/upgrade/"
+        url = "http://www.betterbots.com/upgrade/"
     if version != None:
         version = version.split(".")
     install_count = 0
@@ -217,12 +217,12 @@ def upgrade_scribbler(url=None, scrib_version=1):
 
             
     if url == None:
-        url = "http://myro.roboteducation.org/upgrade/scribbler/"
+        url = "http://www.betterbots.com/upgrade/scribbler/"
         startswith = "scribbler-upgrade-"
         endswidth = ".bytecode"
         startpos = 18
         if scrib_version == 2:
-            url = "http://myro.roboteducation.org/upgrade/scribbler2/"
+            url = "http://www.betterbots.com/upgrade/scribbler2/"
             startswith = "scribbler2-upgrade-"
             endswidth = ".binary"
             startpos = 19
@@ -409,14 +409,14 @@ def upgrade(what="myro", url = None, version=None):
         install_count += upgrade_scribbler(url)
         return install_count
 
-GET_SCRIB_PROGRAM=91  # with offset, returns the scribbler program buffer
+GET_SCRIB_PROGRAM=91    # with offset, returns the scribbler program buffer
 SET_SCRIB_PROGRAM=122   # set scribbler program memory byte
 SET_START_PROGRAM=123   # initiate scribbler programming process
-SET_START_PROGRAM2=153   # initiate scribbler 2 programming process
-SET_SCRIB2_RESET=154   # initiate scribbler 2 programming process
-SET_SCRIB_BATCH=155   # initiate scribbler 2 programming process
-GET_ROBOT_ID = 156    # find out which type of robot - scribbler 1 or 2
-UPDATE_FIRMWARE = 40	# Updates the firmware of the robot 
+SET_START_PROGRAM2=153  # initiate scribbler 2 programming process
+SET_SCRIB2_RESET=154    # initiate scribbler 2 programming process
+SET_SCRIB_BATCH=155     # initiate scribbler 2 programming process
+GET_ROBOT_ID = 156      # find out which type of robot - scribbler 1 or 2
+UPDATE_FIRMWARE = 40    # Updates the firmware of the robot 
 
 def get_robot_type(ser):
     ser.write(chr(GET_ROBOT_ID))
@@ -581,7 +581,8 @@ def upgrade_fluke(url=None):
         return
 
     if url == None:
-        url = "http://myro.roboteducation.org/upgrade/fluke/"
+        #url = "http://myro.roboteducation.org/upgrade/fluke/"
+        url = "http://www.betterbots.com/upgrade/fluke2"
     install_count = 0
     filename = None
     if url.startswith("http://"):
@@ -596,6 +597,11 @@ def upgrade_fluke(url=None):
             print "ERROR: There was an error connecting to the web to download updates. Please check your internet connection. For example, see if you can access", url, "using a web browser."
             return
 
+        if version >= [3, 0, 0]:
+            upgrade_prefix = "/fluke2-upgrade-"
+        else:
+            upgrade_prefix = "/fluke-upgrade-"
+
         contents = infp.read()
         lines = contents.split("\n")
         infp.close()
@@ -603,9 +609,10 @@ def upgrade_fluke(url=None):
             file = file.strip()
             if file != "" and file[0] != '#':
                 print "Considering", file, "..."
-                if file.startswith("/fluke-upgrade-"):
+                if file.startswith(upgrade_prefix):
                     end = file.index(".hex")
-                    patch_ver = file[15:end].split(".")
+                    #patch_ver = file[15:end].split(".")
+                    patch_ver = file[len(upgrade_prefix):end].split(".")
                     print patch_ver, version
                     if map(int, patch_ver) > map(int, version):
                         # download it
@@ -627,32 +634,63 @@ def upgrade_fluke(url=None):
     else:
         print "Sending magic key"
         
-    from intelhex import IntelHex
-    import time
-    ih = IntelHex(filename)
-    binarray = ih.tobinarray()
-    arlen = len(binarray)    
-    print "%d bytes of firmware." % arlen
-    print "checksumming interrupt vectors"
-    sum = check_sum(binarray, arlen)
-    #declare a finite sized array to hold eeprom dump. 
-    #Dynamic appending of lists always comes with a performance hit
-    eepromdump = [0] * 135168
-    s.flushOutput()
-    s.flushInput()
-       
-    #print "Getting old EEPROM"
-    #s.write(chr(SAVE_EEPROM))
-    #uf_saveEEPROMdump()
-    print "Sending firmware"
-    s.write(chr(UPDATE_FIRMWARE))
-    if sendMagicKey:        
-        # magic code to ensure we don't enter program by accident    
+    if version >= [3, 0, 0]:
+        import time
+        s.flushOutput()
+        s.flushInput()
+        print "Sending firmware"
+
+        s.write(chr(UPDATE_FIRMWARE))
+        # magic code to ensure we don't enter program by accident
         s.write(chr(0x01))
         s.write(chr(0x23))
-        
-    uf_storeinEEPROM(s, arlen, binarray)
-    print "Waiting for reboot..."
-    time.sleep(2)
-    print "Done upgrading! Please turn your robot off and then back on, and exit and restart Python and Myro." 
+
+        upfp = open(filename, "rb")
+        bytes = upfp.read()
+        upfp.close()
+        size = len(bytes)
+
+        s.write(chr((size >> 24) & 0xFF))
+        s.write(chr((size >> 16) & 0xFF))
+        s.write(chr((size >> 8) & 0xFF))
+        s.write(chr((size) & 0xFF))
+
+        for byte in bytes:
+            s.write(byte)
+
+        print "Waiting for reboot..."
+        for i in range(0,10):
+            time.sleep(3)
+            print "."
+
+    else:
+        from intelhex import IntelHex
+        import time
+        ih = IntelHex(filename)
+        binarray = ih.tobinarray()
+        arlen = len(binarray)
+        print "%d bytes of firmware." % arlen
+        print "checksumming interrupt vectors"
+        sum = check_sum(binarray, arlen)
+        #declare a finite sized array to hold eeprom dump.
+        #Dynamic appending of lists always comes with a performance hit
+        eepromdump = [0] * 135168
+        s.flushOutput()
+        s.flushInput()
+
+        #print "Getting old EEPROM"
+        #s.write(chr(SAVE_EEPROM))
+        #uf_saveEEPROMdump()
+        print "Sending firmware"
+        s.write(chr(UPDATE_FIRMWARE))
+        if sendMagicKey:
+            # magic code to ensure we don't enter program by accident
+            s.write(chr(0x01))
+            s.write(chr(0x23))
+
+        uf_storeinEEPROM(s, arlen, binarray)
+        print "Waiting for reboot..."
+        time.sleep(2)
+
+    print "Done upgrading! Please turn your robot off and then back on, and exit and restart Python and Myro."
     s.close()

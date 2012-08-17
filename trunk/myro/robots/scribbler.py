@@ -239,12 +239,15 @@ class Scribbler(Robot):
         self.serialPort = serialport
         self.baudRate = baudrate
         self.open()
-
+        
         myro.globvars.robot = self
         self._fudge = range(4)
         self._oldFudge = range(4)
         self.dongle = None
-
+        self.dongle_version = 0
+        self.imagewidth = 0
+        self.imageheight = 0
+        
         info = self.getInfo()
         if "fluke" in info.keys():
             self.dongle = info["fluke"]
@@ -253,13 +256,24 @@ class Scribbler(Robot):
             self.dongle = info["dongle"]
             print "You are using fluke firmware", info["dongle"]
         if self.dongle != None:
+            self.dongle_version = map(int, self.dongle.split("."))
+            if self.dongle_version >= [3, 0, 0]:
+                self.imagewidth = 1280
+                self.imageheight = 800
+            else:
+                self.imagewidth = 256
+                self.imageheight = 192
+
             # Turning on White Balance, Gain Control, and Exposure Control
             self.set_cam_param(self.CAM_COMA, self.CAM_COMA_WHITE_BALANCE_ON)
             self.set_cam_param(self.CAM_COMB, self.CAM_COMB_GAIN_CONTROL_ON | self.CAM_COMB_EXPOSURE_CONTROL_ON)
             # Config grayscale on window 0, 1, 2
-            conf_gray_window(self.ser, 0, 2,   0, 128, 191, 1, 1)
-            conf_gray_window(self.ser, 1, 64,  0, 190, 191, 1, 1)
-            conf_gray_window(self.ser, 2, 128, 0, 254, 191, 1, 1)
+            conf_gray_window(self, 0, 2,   0, self.imagewidth/2, self.imageheight-1, 1, 1)
+            conf_gray_window(self, 1, self.imagewidth/4,  0, self.imagewidth/4+self.imagewidth/2-2, self.imageheight-1, 1, 1)
+            conf_gray_window(self, 2, self.imagewidth/2, 0, self.imagewidth-2, self.imageheight-1, 1, 1)
+            # conf_gray_window(self.ser, 0, 2,   0, 128, 191, 1, 1)
+            # conf_gray_window(self.ser, 1, 64,  0, 190, 191, 1, 1)
+            # conf_gray_window(self.ser, 2, 128, 0, 254, 191, 1, 1)
             set_ir_power(self.ser, 135)
             self.conf_rle(delay = 90, smooth_thresh = 4,
                           y_low=0, y_high=255,
@@ -644,11 +658,11 @@ class Scribbler(Robot):
         totalY = 0.0
         totalU = 0.0
         totalV = 0.0
-
+       
         ySamples = []
         uSamples = []
         vSamples = [] 
-
+        
         for i in range(xs[0], xs[1], 1):
             for j in range(ys[0], ys[1], 1):
                 r,g,b = picture.getPixel(i,j).getRGB()
@@ -731,7 +745,7 @@ class Scribbler(Robot):
                       smooth_thresh=smooth_thresh)
 
 # conf_rle   - Sets parameters for the Run Length Encoded blob image
-#		returned by takePicture("blob")
+#        returned by takePicture("blob")
 #
 # Y,U,V high/low parameters configure a bounding box (in YUV color space)
 # of pixels that are "on" or white. All other pixels are off or black.
@@ -845,23 +859,23 @@ class Scribbler(Robot):
                    "jpeg-fast": "color",
                    "grayjpeg": "rawgray",
                    "grayjpeg-fast": "rawgray"}
-
+    
     def takePicture(self, mode=None):
         if mode == None:
             mode = "jpeg"
-        width = 256
-        height = 192
+        width = self.imagewidth
+        height = self.imageheight
         p = Picture()
 
         if self.dongle:
             version = map(int, self.dongle.split("."))
         else:
             version = [1, 0, 0]
-
+                
         if version < [2, 7, 8]:
             if mode in self.image_codes:
                 mode = self.image_codes[mode]
-
+            
         if mode == "color":
             a = self._grab_array()
             p.set(width, height, a)
@@ -886,9 +900,11 @@ class Scribbler(Robot):
             stream = cStringIO.StringIO(jpeg)  
             p.set(width, height, stream, "jpeg")
         elif mode in ["grayraw", "greyraw"]:
-            conf_window(self.ser, 0, 1, 0, 255, 191, 2, 2)
+            conf_window(self, 0, 1, 0, self.imagewidth-1, self.imageheight-1, 2, 2)
+            # conf_window(self.ser, 0, 1, 0, 255, 191, 2, 2)
             a = self._grab_gray_array()
-            conf_gray_window(self.ser, 0, 2, 0,    128, 191, 1, 1)
+            conf_gray_window(self, 0, 2, 0, self.imagewidth/2, self.imageheight-1, 1, 1)
+            # conf_gray_window(self.ser, 0, 2, 0,    128, 191, 1, 1)
             p.set(width, height, a, "gray")
         elif mode == "blob":
             a = self._grab_blob_array()
@@ -896,8 +912,8 @@ class Scribbler(Robot):
         return p
 
     def _grab_blob_array(self):
-        width = 256
-        height = 192    
+        width = self.imagewidth
+        height = self.imageheight
         blobs = array.array('B', [0] * (height * width)) # zeros(((height + 1), (width + 1)), dtype=uint8)
         line = ''
         try:
@@ -920,10 +936,14 @@ class Scribbler(Robot):
         for i in range(height):
             for j in range(0, width, 4):
                 if (counter < 1 and px < len(line)):
-                    counter = ord(line[px])    	
+                    counter = ord(line[px])        
                     px += 1
-                    counter = (counter << 8) | ord(line[px])    	
+                    counter = (counter << 8) | ord(line[px])        
                     px += 1
+                    # Fluke 2 large image requires a 3 byte counter
+                    if self.dongle_version >= [3, 0, 0]:
+                        counter = (counter << 8) | ord(line[px])
+                        px += 1
                     if (inside):
                         val = 0
                         inside = False
@@ -936,8 +956,10 @@ class Scribbler(Robot):
         return blobs
 
     def _grab_gray_array(self):
-        width = 128
-        height = 96
+        width = self.imagewidth/2
+        height = self.imageheight/2
+        # width = 128
+        # height = 96
         size= width*height
         #print "grabbing image size = ", size
         try:
@@ -950,13 +972,13 @@ class Scribbler(Robot):
                 #print "length so far = ", len(line), " waiting for total = ", size
         finally:
             self.lock.release()
-
+            
         line = quadrupleSize(line, width)
         return line
 
     def _grab_array(self):
-        width = 256
-        height = 192
+        width = self.imagewidth
+        height = self.imageheight
         buffer = array.array('B', [0] * (height * width * 3))
         try:
             self.lock.acquire()
@@ -1002,12 +1024,12 @@ class Scribbler(Robot):
             self.ser.setTimeout(oldtimeout)
         finally:
             self.lock.release()
-
+            
         return buffer
 
     def _grab_array_bilinear_horizontal(self):
-        width = 256
-        height = 192
+        width = self.imagewidth
+        height = self.imageheight
         buffer = array.array('B', [0] * (height * width * 3))
         try:
             self.lock.acquire()
@@ -1059,8 +1081,8 @@ class Scribbler(Robot):
         return buffer
 
     def _grab_array_bilinear_vert(self):
-        width = 256
-        height = 192
+        width = self.imagewidth
+        height = self.imageheight
         buffer = array.array('B', [0] * (height * width * 3))
         try:
             self.lock.acquire()
@@ -1313,6 +1335,12 @@ class Scribbler(Robot):
             numpixs = read_2byte(self.ser)
             xloc = ord(self.ser.read(1))
             yloc = ord(self.ser.read(1))
+
+            # fluke2 image coordinates don't fit in 1 byte without shifting
+            if self.dongle_version >= [3, 0, 0]:
+                xloc <<= 3;
+                yloc <<= 2;
+
         finally:
             self.lock.release()
         return (numpixs, xloc, yloc)
@@ -1380,7 +1408,9 @@ class Scribbler(Robot):
         if self.debug:
             print "Turning off White Balance, Gain Control, and Exposure Control", level
 
-
+        if self.dongle_version >= [3, 0, 0]:
+            level += 128
+            
         self.set_cam_param(self.CAM_COMA, self.CAM_COMA_WHITE_BALANCE_OFF)
         self.set_cam_param(self.CAM_COMB,
                            (self.CAM_COMB_GAIN_CONTROL_OFF & self.CAM_COMB_EXPOSURE_CONTROL_OFF))
@@ -1393,6 +1423,10 @@ class Scribbler(Robot):
     def manualCamera(self, gain=0x00, brightness=0x80, exposure=0x41):
         if self.debug:
             print "Turning off White Balance, Gain Control, and Exposure Control", level            
+
+        if self.dongle_version >= [3, 0, 0]:
+            gain += 128
+
         self.set_cam_param(self.CAM_COMA, self.CAM_COMA_WHITE_BALANCE_OFF)
         self.set_cam_param(self.CAM_COMB,
                            (self.CAM_COMB_GAIN_CONTROL_OFF & self.CAM_COMB_EXPOSURE_CONTROL_OFF))
@@ -1682,7 +1716,7 @@ class Scribbler(Robot):
             while(scribblerBusy):
                 scribblerBusy = self._IsInTransit()
                 if(scribblerBusy):
-                    time.sleep(1)	    
+                    time.sleep(1)        
 
     def setEndPath(self):
         if(self._IsScribbler2()):
@@ -1923,46 +1957,58 @@ def cap(c):
 
     return c
 
-def conf_window(ser, window, X_LOW, Y_LOW, X_HIGH, Y_HIGH, X_STEP, Y_STEP):
-    ser.write(chr(Scribbler.SET_WINDOW))
-    ser.write(chr(window)) 
-    ser.write(chr(X_LOW)) 
-    ser.write(chr(Y_LOW)) 
-    ser.write(chr(X_HIGH))
-    ser.write(chr(Y_HIGH))
-    ser.write(chr(X_STEP))
-    ser.write(chr(Y_STEP))
+def conf_window(self, window, X_LOW, Y_LOW, X_HIGH, Y_HIGH, X_STEP, Y_STEP):
+    # fluke2 needs 16-bit numbers to specify image coordinates
+    if self.dongle_version >= [3, 0, 0]:
+        self.ser.write(chr(Scribbler.SET_WINDOW))
+        self.ser.write(chr(window))
+        write_2byte(self.ser, X_LOW)
+        write_2byte(self.ser, Y_LOW)
+        write_2byte(self.ser, X_HIGH)
+        write_2byte(self.ser, Y_HIGH)
+        self.ser.write(chr(X_STEP))
+        self.ser.write(chr(Y_STEP))
+    else:
+        self.ser.write(chr(Scribbler.SET_WINDOW))
+        self.ser.write(chr(window))
+        self.ser.write(chr(X_LOW))
+        self.ser.write(chr(Y_LOW))
+        self.ser.write(chr(X_HIGH))
+        self.ser.write(chr(Y_HIGH))
+        self.ser.write(chr(X_STEP))
+        self.ser.write(chr(Y_STEP))
 
-def conf_gray_window(ser, window, lx, ly, ux, uy, xstep, ystep):
+def conf_gray_window(self, window, lx, ly, ux, uy, xstep, ystep):
     # Y's are on odd pixels
     if (lx % 2)== 0:
         lx += 1
     if (xstep % 2) == 1:
         xstep += 1
-    conf_window(ser, window, lx, ly, ux, uy, xstep, ystep)
+    conf_window(self, window, lx, ly, ux, uy, xstep, ystep)
 
-def conf_gray_image(ser):
+def conf_gray_image(self):
     # skip every other pixel
-    conf_window(ser, 0, 1, 0, 255, 191, 2, 2)
-
-def grab_rle_on(ser):
+    conf_window(self, 0, 1, 0, self.imagewidth-1, self.imageheight-1, 2, 2)
+    # conf_window(ser, 0, 1, 0, 255, 191, 2, 2)
+    
+def grab_rle_on(self):
     """
     Returns a list of pixels that match.
     """
     print "RLE"
-    width = 256
-    height = 192    
+    width = self.imagewidth
+    height = self.imageheight
     blobs = zeros(((height + 1), (width + 1)), dtype=uint8)
     on_pxs = []
     line = ''
-    ser.write(chr(Scribbler.GET_RLE))
-    size=ord(ser.read(1))
-    size = (size << 8) | ord(ser.read(1))
+    self.ser.write(chr(Scribbler.GET_RLE))
+    size=ord(self.ser.read(1))
+    size = (size << 8) | ord(self.ser.read(1))
     if self.debug:
         print "Grabbing RLE image size =", size
     line =''
     while (len(line) < size):
-        line+=ser.read(size-len(line))
+        line+=self.ser.read(size-len(line))
     px = 0
     counter = 0
     val = 128
@@ -2031,7 +2077,7 @@ def set_scribbler_memory(ser, offset, byte):
 def get_scribbler_memory(ser, offset):
     ser.write(chr(Scribbler.GET_SCRIB_PROGRAM))
     write_2byte(ser, offset)
-    v = ord(self.ser.read(1))
+    v = ord(ser.read(1))
     return v
 
 
