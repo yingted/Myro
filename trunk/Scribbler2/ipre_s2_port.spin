@@ -142,7 +142,7 @@ obj
 
 dat
 
-roboData      byte      "Robot-Version:1.1.2,Robot:Scribbler2,Mode:Serial", 10, 0
+roboData      byte      "Robot-Version:1.1.3,Robot:Scribbler2,Mode:Serial", 10, 0
 
 nameData      byte      "Scribby         ", 0           'null terminate string
 ipreData      byte      127, 127, 127, 127, 0, 0, 0, 0
@@ -579,6 +579,9 @@ pub Turn | angle
 
     _BY + _DEG:
       s2.turn_by_deg(angle)
+
+    _TO + _DEG:
+      s2.turn_to_deg(angle)
 
     _BY + _NOW:
       s2.turn_now(angle)
