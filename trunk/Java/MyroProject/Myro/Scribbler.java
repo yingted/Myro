@@ -48,13 +48,13 @@ import net.java.games.input.*;  // JInput for gamepad
  * (see www.roboteducation.org )
  * 
  * @author Douglas Harms
- * @version 1.1.1
+ * @version 1.1.2
  * 
  */
 public class Scribbler  {
 
     // define this constant here at the beginning rather than later where other private constants are defined.
-    private static final String MYRO_JAVA_VERSION   = "1.1.1";
+    private static final String MYRO_JAVA_VERSION   = "1.1.2";
 
     // public constants
 

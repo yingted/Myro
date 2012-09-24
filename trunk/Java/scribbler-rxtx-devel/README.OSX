@@ -6,16 +6,22 @@ make
 Then move the following files:
 
   RXTXScribblerComm.jar to /Library/Java/Extensions
-  (apple-darwin)librxtxScribblerSerial.jnilib to /Library/Java/Extensions
+  librxtxScribblerSerial.jnilib to /Library/Java/Extensions
 
-NOTE: You may need to have the developer version of JDK installed.  If ./configure has problems
-finding the HEADERS folder you may have to edit Makefile (instructions will be printed by
-./configure script).  Or the following command may be helpful:
+***********
+NOTE: You may need to have the developer version of JDK installed.  If ./configure
+has problems finding the HEADERS folder you may have to edit Makefile (instructions
+will be printed by ./configure script).  Or the following command may be helpful:
 
 sudo ln -s /System/Library/Frameworks/JavaVM.framework/Headers /System/Library/Java/JavaVirtualMachines/
 
 (See https://issues.sonatype.org/browse/NAR-177 for a description. )
 
+NOTE: When compiling for Mountain Lion (10.8) I had to do:
+
+sudo ln -s /System/Library/Frameworks/JavaVM.framework/Headers /Library/Java/JavaVirtualMachines/
+
+***********
 If the following error occurs during make:
 
    glibtool: compile: unable to infer tagged configuration
@@ -24,4 +30,14 @@ edit Makefile and add "--tag=CC" to the definition of symbol GLIBTOOL.  For exam
 
   GLIBTOOL = $(SHELL) glibtool --tag=CC
 
+***********
+on Mountain Lion (10.8) glibtool wasn't installed.  I downloaded glibtool from:
+
+  http://ftpmirror.gnu.org/libtool/
+
+Then:
+
+  ./configure --program-prefix=g
+  make
+  sudo make install
 

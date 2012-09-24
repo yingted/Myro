@@ -78,6 +78,11 @@ public class MyroFrame extends JFrame
         width = image.getWidth();
         height = image.getHeight();
         definingBlob = false;
+
+        // User can detect key/mouse events
+        MyroListener listener = new MyroListener();
+        addKeyListener( listener.getKeyListener() );
+        addMouseListener( listener.getMouseListener() );
     }
 
     /**
