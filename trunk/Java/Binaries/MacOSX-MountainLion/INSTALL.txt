@@ -1,0 +1,11 @@
+To install these on a MacOSX 10.8 (Mountain Lion) system for all users:
+
+Copy the following files to /Library/Java/Extensions
+     rxtxScribblerSerial.jnilib
+     libjinput-osx.jnilib
+
+To install these on a MacOSX 10.8 (Montain Lion) system for one user:
+
+Copy the following files to ~/Library/Java/Extensions
+     rxtxScribblerSerial.jnilib
+     libjinput-osx.jnilib

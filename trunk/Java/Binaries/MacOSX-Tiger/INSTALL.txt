@@ -1,0 +1,11 @@
+To install these on a MacOSX 10.4 (Tiger) system for all users:
+
+Copy the following files to /Library/Java/Extensions
+     rxtxScribblerSerial.jnilib
+     libjinput-osx.jnilib
+
+To install these on a MacOSX 10.4 (Tiger) system for one user:
+
+Copy the following files to ~/Library/Java/Extensions
+     rxtxScribblerSerial.jnilib
+     libjinput-osx.jnilib
