@@ -48,13 +48,13 @@ import net.java.games.input.*;  // JInput for gamepad
  * (see www.roboteducation.org )
  * 
  * @author Douglas Harms
- * @version 1.1.0
+ * @version 1.1.2
  * 
  */
 public class Scribbler  {
 
     // define this constant here at the beginning rather than later where other private constants are defined.
-    private static final String MYRO_JAVA_VERSION   = "1.1.0";
+    private static final String MYRO_JAVA_VERSION   = "1.1.2";
 
     // public constants
 
@@ -318,6 +318,7 @@ public class Scribbler  {
             setIRPower( 135 );
             _set_cam_param( CAM_COMA, CAM_COMA_WHITE_BALANCE_ON );
             _set_cam_param( CAM_COMB, CAM_COMB_GAIN_CONTROL_ON | CAM_COMB_EXPOSURE_CONTROL_ON );
+            autoCamera();
             setForwardness( FORWARD_FLUKE );
         }
 
@@ -540,7 +541,7 @@ public class Scribbler  {
         assert SENSOR_LIGHT_LEFT<=whichLight && whichLight<=SENSOR_LIGHT_RIGHT : "Illegal light sensor";
 
         double retVal;
-        int intVal;
+        long intVal;
 
         // set command to be the appropriate Scribbler command
         int command = 0;
@@ -574,7 +575,9 @@ public class Scribbler  {
     {
         assert scribblerConnected() : "Scribbler not connected";
 
-        int[] intVal = new int[3];
+        // We use long values because, starting in S2 firmware version 1.1.2, 16 bit unsigned values
+        // are returned, and java doesn't have unsigned ints.
+        long[] intVal = new long[3];
         double retVal[] = new double[3];
         int[] data = _get( GET_LIGHT_ALL, 6 );
         intVal[0] = (data[0] << 8) | data[1];
@@ -594,7 +597,7 @@ public class Scribbler  {
      * adjust scribbler 1 light readings so that small values represent low light levels and large value
      * represent bright light levels.  Also, scale the values to be in the range 0.0 to 1.0
      */
-    private double _adjustLightLevel( int val )
+    private double _adjustLightLevel( long val )
     {
         double retVal;
         int intVal;
@@ -602,8 +605,16 @@ public class Scribbler  {
         // Inverting the value is different for scribbler2 and scribbler1 robots
         if( scribbler2Connected() )
         {
-            // val is originally in 0..4095 range
-            retVal = (4095 - val) / 4095.0 ;
+            if( _versionCompare( _robotVersion, new int[]{ 1, 1, 2 } ) < 0 )
+            {
+                // S2 firmware before 1.1.2 returns values in the range 0..4095, so scale accordingly
+                retVal = (4095 - val) / 4095.0 ;
+            }
+            else
+            {
+                // S2 firmware beginning with 1.1.2 returns values in the range 0..65535, so scale accordingly
+                retVal = (65535 - val) / 65535.0;
+            }
         }
         else
         {
@@ -2647,14 +2658,14 @@ public class Scribbler  {
         // We can't let other methods communicate with the robot until we get the entire response
         synchronized(this)
         {
-        // get the RLE image from the Fluke.  The first two response bytes are the reply size
-        int[] sizeResponse = _getFluke( GET_RLE, 2 );
+            // get the RLE image from the Fluke.  The first two response bytes are the reply size
+            int[] sizeResponse = _getFluke( GET_RLE, 2 );
 
-        // convert the two bytes to an int
-        int size = (sizeResponse[0]<<8) | sizeResponse[1];
+            // convert the two bytes to an int
+            int size = (sizeResponse[0]<<8) | sizeResponse[1];
 
-        // read the rest of the response
-        rle = _read( size );
+            // read the rest of the response
+            rle = _read( size );
         }
 
         // define a grayscale image based on the RLE blob image

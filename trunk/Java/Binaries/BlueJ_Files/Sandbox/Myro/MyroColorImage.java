@@ -88,7 +88,7 @@ public class MyroColorImage extends MyroImage
      * Creates a color image from a stream of bytes that comprise a jpeg image.  A RuntimeException
      * is thrown if an error occurs decoding the byte stream.
      * 
-     * @param jpegBuf An array of bytes that somprise a jpeg image.
+     * @param jpegBuf An array of bytes that comprise a jpeg image.
      */
     public MyroColorImage( byte[] jpegBuf )
     {
