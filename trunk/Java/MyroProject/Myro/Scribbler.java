@@ -48,13 +48,13 @@ import net.java.games.input.*;  // JInput for gamepad
  * (see www.roboteducation.org )
  * 
  * @author Douglas Harms
- * @version 1.1.2
+ * @version 1.1.3
  * 
  */
 public class Scribbler  {
 
     // define this constant here at the beginning rather than later where other private constants are defined.
-    private static final String MYRO_JAVA_VERSION   = "1.1.2";
+    private static final String MYRO_JAVA_VERSION   = "1.1.3";
 
     // public constants
 
@@ -318,8 +318,18 @@ public class Scribbler  {
             setIRPower( 135 );
             _set_cam_param( CAM_COMA, CAM_COMA_WHITE_BALANCE_ON );
             _set_cam_param( CAM_COMB, CAM_COMB_GAIN_CONTROL_ON | CAM_COMB_EXPOSURE_CONTROL_ON );
-            autoCamera();
+            //autoCamera();
             setForwardness( FORWARD_FLUKE );
+            if( _versionCompare( _flukeVersion, new int[] { 3, 0, 0 } ) >= 0 )
+            {
+                imageWidth = 1280;
+                imageHeight = 800;
+            }
+            else
+            {
+                imageWidth = 256;
+                imageHeight = 192;
+            }
         }
 
         // Some sensor values were wrong in Scribbler2 firmware versions prior to 1.0.2, so check this
@@ -328,7 +338,7 @@ public class Scribbler  {
         {
             if( _versionCompare( _robotVersion, new int[]{1, 0, 2} ) < 0 )
             {
-                System.out.println("WARNING: Your Scribbler2 firmware is older than to 1.0.2.");
+                System.out.println("WARNING: Your Scribbler2 firmware is older than 1.0.2.");
                 System.out.println("Sensor values may not be correct.  Please consider");
                 System.out.println("upgrading your scribbler's firmware.");
             }
@@ -1196,6 +1206,7 @@ public class Scribbler  {
 
         // read the appropriate Fluke sensor
         int[] data=null;
+        int maxReading;
         switch( whichSensor ) {
             case SENSOR_IR_LEFT: data = _getFluke( GET_DONGLE_L_IR, 2 ); break;
             case SENSOR_IR_CENTER: data = _getFluke( GET_DONGLE_C_IR, 2 ); break;
@@ -1205,11 +1216,18 @@ public class Scribbler  {
         // convert the returned byte values to a 16-bit int
         int intVal = (data[0]<<8) + data[1];
 
-        if( intVal > 1000 )
-            intVal = 1000;
+        // normalize the reading.  Note that there is a different max reading between Fluke
+        // and Fluke2
+        if( _versionCompare( _flukeVersion, new int[] { 3, 0, 0 } ) >= 0 )
+            maxReading = 6400;
+        else
+            maxReading = 1100;
+
+        if( intVal > maxReading )
+            intVal = maxReading;
 
         // scale the value again to 0.0 to 1.0 and return it
-        return intVal / 1000.0;
+        return intVal / (double)(maxReading);
     }
 
     /**
@@ -1260,6 +1278,12 @@ public class Scribbler  {
         assert flukeConnected() : "Scribbler does not have a Fluke board";
         assert 0<=level && level<=255 : "darkenCamera: level not between 0 and 255";
 
+        // fluke2 level needs adjusted
+        if( _versionCompare( _flukeVersion, new int[] { 3, 0, 0 } ) >= 0 )
+        {
+            level += 128;
+        }
+
         _set_cam_param( CAM_COMA, CAM_COMA_WHITE_BALANCE_OFF );
         _set_cam_param( CAM_COMB, (CAM_COMB_GAIN_CONTROL_OFF & CAM_COMB_EXPOSURE_CONTROL_OFF) );
         _set_cam_param( CAM_GAIN, level);
@@ -1279,7 +1303,15 @@ public class Scribbler  {
     {
         assert flukeConnected() : "Scribbler does not have a Fluke board";
 
-        _set_cam_param( CAM_GAIN, CAM_GAIN_DEFAULT );
+        int gain = CAM_GAIN_DEFAULT;
+
+        // gain default is different for fluke and fluke2
+        if( _versionCompare( _flukeVersion, new int[]{3, 0, 0} ) <= 0 )
+        {
+            gain += 128;
+        }
+
+        _set_cam_param( CAM_GAIN, gain );
         _set_cam_param( 1, 0x80);
         _set_cam_param( 2, 0x80);
         _set_cam_param( CAM_BRT, CAM_BRT_DEFAULT );
@@ -1301,6 +1333,12 @@ public class Scribbler  {
         assert 0<=gain && gain<=255 : "manualCamera: gain not in 0..255";
         assert 0<=brightness && brightness<=255 : "manualCamera: brightness not in 0..255";
         assert 0<=exposure && exposure<=255 : "manualCamera: exposure not in 0..255";
+
+        // fluke2 gain needs adjusted
+        if( _versionCompare( _flukeVersion, new int[] { 3, 0, 0 } ) >= 0 )
+        {
+            gain += 128;
+        }
 
         _set_cam_param( CAM_COMA, CAM_COMA_WHITE_BALANCE_OFF );
         _set_cam_param( CAM_COMB, (CAM_COMB_GAIN_CONTROL_OFF & CAM_COMB_EXPOSURE_CONTROL_OFF) );
@@ -1370,11 +1408,13 @@ public class Scribbler  {
 
         // define the window of interest.  Note that we're only looking at the intensity (i.e., Y component).
         // We're also always using Fluke image window 0.
+        // NOTE: These are slightly different from the Myro/Python: the second parameter must be odd, and the 6th
+        // parameter must be even.  In Myro/Python this is done in method conf_gray_window, but I decided to do it
+        // here instead.
         switch( whichSensor ) {
-            case 0: _setImageWindow( 0, 3,   0, 128, 191, 2, 1 ); break;
-            case 1: _setImageWindow( 0, 65,  0, 190, 191, 2, 1 ); break;
-            case 2: _setImageWindow( 0, 129, 0, 254, 191, 2, 1 ); break;
-
+            case 0: _setImageWindow( 0, 2+1,   0, imageWidth/2, imageHeight-1, 2, 1 ); break;
+            case 1: _setImageWindow( 0, imageWidth/4+1,  0, imageWidth/4+imageWidth/2-2, imageHeight-1, 2, 1 ); break;
+            case 2: _setImageWindow( 0, imageWidth/2+1, 0, imageWidth-2, imageHeight-1, 2, 1 ); break;
         }
 
         // read the total intensity of the defined window (i.e., window 0)
@@ -1764,12 +1804,28 @@ public class Scribbler  {
     }
 
     /**
+     * Takes a color picture with the Fluke's camera.
+     * 
+     * @pre flukeConnected
+     * 
+     * @return The image taken by the Fluke camera
+     */
+    public MyroImage takePicture()
+    {
+        assert flukeConnected() : "Scribbler does not have a Fluke board";
+        
+        return takePicture( IMAGE_COLOR );
+    }
+    
+    /**
      * Takes a picture with Fluke's camera.  The imageType parameter determines what kind of picture is taken.
      * 
      * @pre flukeConnected, imageType is Scribbler.IMAGE_COLOR (or 0), Scribbler.IMAGE_GRAY (or 1), or
      * Scribbler.IMAGE_BLOB (or 2)
      * 
      * @param imageType Specifies the type of picture to take.  Scribbler.IMAGE_COLOR, Scribbler.IMAGE_GRAY, or Scribbler.IMAGE_BLOB
+     * 
+     * @return The image taken by the Fluke camera
      */
     public MyroImage takePicture( int imageType )
     {
@@ -1823,6 +1879,13 @@ public class Scribbler  {
         int pixelCount = ( data[0] << 8 ) | data[1];
         int averageX = data[2];
         int averageY = data[3];
+
+        // fluke2 blob coordinates need to be shifted for some reason
+        if( _versionCompare( _flukeVersion, new int[] { 3, 0, 0 } ) >= 0 )
+        {
+            averageX = averageX << 3;
+            averageY = averageY << 2;
+        }
 
         // return the info
         return new MyroBlobImageInfo( pixelCount, averageX, averageY );
@@ -1962,6 +2025,13 @@ public class Scribbler  {
     private boolean _scribbler2Connected;
     private int[] _robotVersion;
     private String _portName;
+    private int imageWidth;
+    private int imageHeight;
+
+    // The following variable is used for every invocation of _getJpeg.  This is an optimization so that we're not
+    // constantly allocating, extending, copying, etc. this array.  As the program executes the size
+    // will increase when needed; it is never decreased.
+    private byte jpegArr[] = new byte[1000];
 
     private Thread currentSensesThread;
     private Thread currentJoyStickThread;
@@ -2330,63 +2400,74 @@ public class Scribbler  {
     }
 
     /**
-     * get a jpeg header from the fluke and return it.  The command should be either GET_JPEG_GRAY_HEADER
-     * or GET_JPEG_COLOR_HEADER.
+     * get a jpeg image from the fluke and return it. headerCommand should be either GET_JPEG_GRAY_HEADER
+     * or GET_JPEG_COLOR_HEADER, and scanCommand should be either GET_JPEG_GRAY_SCAN or GET_JPEG_COLOR_SCAN.
      */
-    private synchronized int[] _getJpegHeader( int command )
+    private synchronized byte[] _getJpeg( int headerCommand, int scanCommand )
     {
-        int[] message = new int[] { command };
+        int pos=0;
+
+        // read the header
+        int[] message = new int[] { headerCommand };
         _write( message );
 
         // get the length of the header
         int resp[]  = _read( 2 );
         int len = resp[0] + resp[1]*256;
 
-        // read the header and return it
-        return _read( len );
-    }
+        // read the header
+        int[] header = _read( len );
 
-    /**
-     * 
-     */
-    private synchronized int[] _getJpegScan( int command )
-    {
-        final int arrSize = 10000;  // assume the image size will be less than this
-        int[] tempBuf = new int[arrSize];
-        int len = 0;
+        // store header in jpegArr
+        for( int i=0; i<header.length; i++ )
+        {
+            if( pos >= jpegArr.length )
+                _extendJpegArr();
+            jpegArr[pos++] = (byte)(header[i] & 0xff);
+        }
+
+        // new read in the scan
         int lastChar = 0;
 
-        // send the command to the Fluke
-        int[] message = new int[] { command, 1 };
+        // send the scan command to the Fluke
+        message = new int[] { scanCommand, 1 };
         _write( message );
 
         // read response until end of image encountered
         while( true )
         {
             int temp[] = _read( 1 );
-            tempBuf[len++] = temp[0];
+            if( pos >= jpegArr.length )
+                _extendJpegArr();
+            jpegArr[pos++] = (byte)(temp[0] & 0xff);
 
             // exit loop if end of image marker found
-            if( lastChar == 0xff && tempBuf[len-1] == 0xd9 )
+            if( lastChar == 0xff && temp[0] == 0xd9 )
             {
                 break;
             }
 
-            lastChar = tempBuf[len-1];
+            lastChar = temp[0];
         }
 
         int[] bm0 = _read( 4 );     // Start
         int[] bm1 = _read( 4 );     // Read
         int[] bm2 = _read( 4 );     // Compress
 
-        // now copy the temporary buffer to a new array of the proper size and return it
-        int[] buf = new int[len];
-        for( int i=0; i<len; i++ )
-        {
-            buf[i] = tempBuf[i];
-        }
+        return jpegArr;
+    }
 
-        return buf;
+    /**
+     * add more elements to jpegArr
+     */
+    private void _extendJpegArr()
+    {
+        byte temp[] = new byte[ jpegArr.length + 10000 ];
+
+        for( int i=0; i<jpegArr.length; i++ )
+            temp[i] = jpegArr[i];
+
+        jpegArr = temp;
     }
 
     /**
@@ -2450,8 +2531,22 @@ public class Scribbler  {
         assert 0<=win && win<=2 : "_setImageWindow: win out of range";
         assert flukeConnected() : "_setImageWindow: no fluke on robot";
 
-        int data[] = new int[] { win, xlow, ylow, xhigh, yhigh, xstep, ystep };
-        _setFluke( SET_WINDOW, data );
+        // fluke2 uses 16 bit image coordinates
+        if( _versionCompare( _flukeVersion, new int[] { 3, 0, 0 } ) >= 0 )
+        {
+            int data[] = new int[] { win,
+                    xlow >> 8 & 0xff, xlow & 0xff,
+                    ylow >> 8 & 0xff, ylow & 0xff,
+                    xhigh >> 8 & 0xff, xhigh & 0xff,
+                    yhigh >> 8 & 0xff, yhigh & 0xff,
+                    xstep, ystep };
+            _setFluke( SET_WINDOW, data );
+        }
+        else
+        {
+            int data[] = new int[] { win, xlow, ylow, xhigh, yhigh, xstep, ystep };
+            _setFluke( SET_WINDOW, data );
+        }
     }
 
     /**
@@ -2471,64 +2566,46 @@ public class Scribbler  {
     }
 
     /**
-     * Read the 256x192 jpeg color image from the fluke board and return it as a MyroColorImage instance.
+     * Read the jpeg color image from the fluke board and return it as a MyroColorImage instance.
      */
     private MyroColorImage _readColorJpegImage()
     {
         assert flukeConnected() : "_readColorJpegImage: no Fluke on robot";
 
         // read the jpeg image from the fluke
-        int[] header = _getJpegHeader( GET_JPEG_COLOR_HEADER );
-        int[] scan = _getJpegScan( GET_JPEG_COLOR_SCAN );
+        byte jpeg[] = _getJpeg( GET_JPEG_COLOR_HEADER, GET_JPEG_COLOR_SCAN );
 
-        // copy into a byte array
-        byte[] jpeg = new byte[ header.length + scan.length ];
-        for( int i=0; i<header.length; i++ )
-        {
-            jpeg[i] = (byte)(header[i] & 0xff);
-        }
-        for( int j=0; j<scan.length; j++ )
-        {
-            jpeg[j+header.length] = (byte)(scan[j] & 0xff);
-        }
-
-        // create a MyroColorImage from jpeg array
+        // create the image
         MyroColorImage image = new MyroColorImage( jpeg );
 
-        // scale the image to be 256x192 (the fluke sends back a 128x192 image)
-        image.resize( 256, 192 );
+        // fluke1's send back a 128x192 image, so scale this to be 256x192
+        if( _versionCompare( _flukeVersion, new int[]{ 3, 0, 0 } ) < 0 )
+        {
+            image.resize( 256, 192 );
+        }
 
         // return the scaled image
         return image;
     }
 
     /**
-     * Read the 256x192 jpeg grayscale image from the fluke board and return it as a MyroColorImage instance.
+     * Read the jpeg grayscale image from the fluke board and return it as a MyroGrayImage instance.
      */
     private MyroGrayImage _readGrayJpegImage()
     {
-        assert flukeConnected() : "_readGrayJpegImage: no Fluke on robot";
+        assert flukeConnected() : "_readColorJpegImage: no Fluke on robot";
 
         // read the jpeg image from the fluke
-        int[] header = _getJpegHeader( GET_JPEG_GRAY_HEADER );
-        int[] scan = _getJpegScan( GET_JPEG_GRAY_SCAN );
+        byte jpeg[] = _getJpeg( GET_JPEG_GRAY_HEADER, GET_JPEG_GRAY_SCAN );
 
-        // copy into a byte array
-        byte[] jpeg = new byte[ header.length + scan.length ];
-        for( int i=0; i<header.length; i++ )
-        {
-            jpeg[i] = (byte)(header[i] & 0xff);
-        }
-        for( int j=0; j<scan.length; j++ )
-        {
-            jpeg[j+header.length] = (byte)(scan[j] & 0xff);
-        }
-
-        // create a MyroColorImage from jpeg array
+        // create the image
         MyroGrayImage image = new MyroGrayImage( jpeg );
 
-        // scale the image to be 256x192 (the fluke sends back a 128x192 image)
-        image.resize( 256, 192 );
+        // fluke1's send back a 128x192 image, so scale this to be 256x192
+        if( _versionCompare( _flukeVersion, new int[]{ 3, 0, 0 } ) < 0 )
+        {
+            image.resize( 256, 192 );
+        }
 
         // return the scaled image
         return image;
@@ -2646,13 +2723,11 @@ public class Scribbler  {
     }
 
     /**
-     * Read a blob (i.e., RLE) image from the Fluke and return it as a 256x192 MyroGrayImage.  Because we'll
+     * Read a blob (i.e., RLE) image from the Fluke and return it as a MyroGrayImage.  Because we'll
      * need to call i/o routines twice we need to be synchronized.
      */
     private MyroImage _readBlobImage()
     {
-        int width = 256;
-        int height = 192;
         int[] rle;
 
         // We can't let other methods communicate with the robot until we get the entire response
@@ -2669,20 +2744,26 @@ public class Scribbler  {
         }
 
         // define a grayscale image based on the RLE blob image
-        MyroImage image = new MyroGrayImage( width, height );
+        MyroImage image = new MyroGrayImage( imageWidth, imageHeight );
 
         int runLength = 0;          // num pixels left in current run
         int pos = 0;                // position in rle
         int color = 255;            // grayscale color of pixel.  Start with white.
-        for( int y=0; y<height; y++ )
+        for( int y=0; y<imageHeight; y++ )
         {
-            for( int x=0; x<width; x+=4 ) // it seems that the RLE is in groups of 4 pixels.  Don't know why.
+            for( int x=0; x<imageWidth; x+=4 ) // it seems that the RLE is in groups of 4 pixels.  Don't know why.
             {
                 if( runLength == 0 )
                 {
                     // last run is finished so get length of next run
                     runLength = ( rle[pos] << 8 ) | rle[pos+1];
                     pos += 2;
+
+                    // fluke2 has a 3-byte runLength so include the 3rd byte
+                    if( _versionCompare( _flukeVersion, new int[] {3, 0, 0} ) >= 0 )
+                    {
+                        runLength = (runLength << 8) | rle[pos++];
+                    }
 
                     // set color of this run to be the opposite of the previous run
                     color = color ^ 0xff;
