@@ -48,13 +48,13 @@ import net.java.games.input.*;  // JInput for gamepad
  * (see www.roboteducation.org )
  * 
  * @author Douglas Harms
- * @version 1.1.3
+ * @version 1.1.4
  * 
  */
 public class Scribbler  {
 
     // define this constant here at the beginning rather than later where other private constants are defined.
-    private static final String MYRO_JAVA_VERSION   = "1.1.3";
+    private static final String MYRO_JAVA_VERSION   = "1.1.4";
 
     // public constants
 
@@ -332,15 +332,26 @@ public class Scribbler  {
             }
         }
 
-        // Some sensor values were wrong in Scribbler2 firmware versions prior to 1.0.2, so check this
-        // and warn the user if the firmware is older than this.
-        if( scribbler2Connected() )
+        if( scribblerConnected() )
         {
-            if( _versionCompare( _robotVersion, new int[]{1, 0, 2} ) < 0 )
+            // make sure the volume is on.  The volume setting is stored in NVRAM, so turning it off sticks
+            // with the bot.
+            setVolume( VOLUME_ON );
+
+            if( scribbler2Connected() )
             {
-                System.out.println("WARNING: Your Scribbler2 firmware is older than 1.0.2.");
-                System.out.println("Sensor values may not be correct.  Please consider");
-                System.out.println("upgrading your scribbler's firmware.");
+                // Some sensor values were wrong in Scribbler2 firmware versions prior to 1.0.2, so check this
+                // and warn the user if the firmware is older than this.
+                if( _versionCompare( _robotVersion, new int[]{1, 0, 2} ) < 0 )
+                {
+                    System.out.println("WARNING: Your Scribbler2 firmware is older than 1.0.2.");
+                    System.out.println("Sensor values may not be correct.  Please consider");
+                    System.out.println("upgrading your scribbler's firmware.");
+                }
+
+                // set the volume to max if the firmware can handle it
+                if( _versionCompare( _robotVersion, new int[]{1, 1, 2} ) >= 0 )
+                    setS2Volume( 100 );
             }
         }
 
@@ -1007,6 +1018,65 @@ public class Scribbler  {
             _set( SET_QUIET );
         else
             _set( SET_LOUD );
+    }
+
+    /**
+     * Sets the volume of a Scribbler2
+     * 
+     * @pre scribbler2Connected, 0<=level<=100
+     * 
+     * @param level The volume level of the scribbler.  0 is no volume, 100 is full volume
+     */
+    public void setS2Volume( int level )
+    {
+        assert scribbler2Connected() : "Scribbler2 is not connected";
+        assert 0<=level && level<=100 : "Volume level not between 0 and 100";
+
+        // be sure the scribbler's volume is turned on if level is > 0.  Surprisingly, if the volume is
+        // turned off (i.e., setVolume(VOLUME_OFF); ) setting the level does not have any effect until the volume
+        // is turned on (i.e., setVolume(VOLUME_ON); ).
+        if( level > 0 )
+            setVolume( VOLUME_ON );
+        else
+            setVolume( VOLUME_OFF );
+
+        // actually, setting the volume is only available on S2s with firmware >= 1.1.2
+        if( _versionCompare( _robotVersion, new int[]{1, 1, 2} ) >= 0 )
+            _set( SET_VOLUME, level );
+        else
+        {
+            System.out.println( "Warning: setS2Volume only defined for scribbler firmware >= 1.1.2." );
+            if( level > 0 )
+                System.out.println( "Invoking setVolume(VOLUME_ON) instead." );
+            else
+                System.out.println( "Invoking setVolume(VOLUME_OFF) instead." );
+        }
+    }
+
+    /**
+     * Returns the microphone volume envelope.
+     * 
+     * @pre scribbler2Connected
+     * 
+     * @return The microphone volume envelope
+     * 
+     */
+    public int getMicEnvelope()
+    {
+        assert scribbler2Connected() : "Scribbler2 is not connected";
+
+        // This only works for firmware version >= 1.1.2
+        if( _versionCompare( _robotVersion, new int[]{1, 1, 2} ) >= 0 )
+        {
+            int retVal[] = _get( GET_MIC_ENV, 4 );
+            return retVal[0]<<24 | retVal[1]<<16 | retVal[2]<<8 | retVal[3];
+        }
+        else
+        {
+            System.out.println( "Warning: getMicEnvelope() only works for scribbler firmware >= 1.1.2." );
+            System.out.println( "No action taken." );
+            return 0;
+        }
     }
 
     /**
@@ -1813,10 +1883,10 @@ public class Scribbler  {
     public MyroImage takePicture()
     {
         assert flukeConnected() : "Scribbler does not have a Fluke board";
-        
+
         return takePicture( IMAGE_COLOR );
     }
-    
+
     /**
      * Takes a picture with Fluke's camera.  The imageType parameter determines what kind of picture is taken.
      * 
@@ -1962,6 +2032,10 @@ public class Scribbler  {
     private static final int SET_QUIET              = 112;
     private static final int SET_SPEAKER            = 113;
     private static final int SET_SPEAKER_2          = 114;
+
+    // Scribbler 2 Codes
+    private static final int SET_VOLUME             = 160;
+    private static final int GET_MIC_ENV            = 169;
 
     // Fluke codes
     private static final int SET_DONGLE_LED_ON      = 116;
@@ -2217,6 +2291,18 @@ public class Scribbler  {
     private synchronized void _set( int command )
     {
         int[] data = new int[8];
+        _set( command, data );
+    }
+
+    /**
+     * Send one of the one parameter set commands to the Scribbler.  The command opcode and the parameter
+     * are passed to this method.  The command echo is read from the Scribbler and a sanity check is performed on
+     * the echo.  The 11 byte response is also read from the Scribbler and stored in instance field _lastSensors.
+     * Only one thread can can communicate with the Scribbler at a time.
+     */
+    private synchronized void _set( int command, int value )
+    {
+        int[] data = new int[] { value };
         _set( command, data );
     }
 
