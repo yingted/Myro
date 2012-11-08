@@ -61,47 +61,44 @@ public class MyroListener
      * Constant returned by whichButton to indicate the left mouse button was pressed.
      */
     public static final int LEFT_BUTTON     = MouseEvent.BUTTON1;
-    
+
     /**
      * Constant returned by whichButton to indicate the middle mouse button was pressed.
      */
     public static final int MIDDLE_BUTTON   = MouseEvent.BUTTON2;
-    
+
     /**
      * Constant returned by whichButton to indicate the right mouse button was pressed.
      */
     public static final int RIGHT_BUTTON    = MouseEvent.BUTTON3;
-    
+
     private static Queue<Character> _bufferedChar;
     private static char _lastChar;
     private static int _bufferedButton;
     private static int _lastButton;
     private static boolean _mousePressed = false;
 
-    private simpleKeyListener _keyListener;
-    private simpleMouseListener _mouseListener;
+    private static simpleKeyListener _keyListener;
+    private static simpleMouseListener _mouseListener;
 
     // locks for synchronization of keyboard events and mouse events
-    private static Object keyLock;
-    private static Object mouseLock;
+    private static Object _keyLock;
+    private static Object _mouseLock;
 
     // allocate global synchronization locks
     static {
-        keyLock = new Object();
-        mouseLock= new Object();
+        _keyLock = new Object();
+        _mouseLock= new Object();
         _bufferedChar = new LinkedList<Character>();
-    }
-
-    public MyroListener()
-    {
         _keyListener = new simpleKeyListener();
         _mouseListener = new simpleMouseListener();
+
     }
 
     /**
      * Returns the KeyAdapter instance created for this instance of MyroListener.
      */
-    public KeyAdapter getKeyListener()
+    public static KeyAdapter getKeyListener()
     {
         return _keyListener;
     }
@@ -109,7 +106,7 @@ public class MyroListener
     /**
      * Returns the MouseAdapter instance created for this instance of MyroListener.
      */
-    public MouseAdapter getMouseListener()
+    public static MouseAdapter getMouseListener()
     {
         return _mouseListener;
     }
@@ -117,13 +114,13 @@ public class MyroListener
     /**
      * keyListener to process keyboard events
      */
-    private class simpleKeyListener extends KeyAdapter
+    private static class simpleKeyListener extends KeyAdapter
     {
         public void keyTyped( KeyEvent e )
         {
-            synchronized (keyLock)
+            synchronized (_keyLock)
             {
-            _bufferedChar.add( e.getKeyChar() );
+                _bufferedChar.add( e.getKeyChar() );
             }
         }
     }
@@ -137,14 +134,14 @@ public class MyroListener
      */
     public static boolean isKeyPressed()
     {
-        synchronized (keyLock)
+        synchronized (_keyLock)
         {
-        if( !_bufferedChar.isEmpty() )
-        {
-            _lastChar = _bufferedChar.remove();
-            return true;
-        }
-        return false;
+            if( !_bufferedChar.isEmpty() )
+            {
+                _lastChar = _bufferedChar.remove();
+                return true;
+            }
+            return false;
         }
     }
 
@@ -156,9 +153,9 @@ public class MyroListener
      */
     public static char whichKey()
     {
-        synchronized (keyLock)
+        synchronized (_keyLock)
         {
-        return _lastChar;
+            return _lastChar;
         }
     }
 
@@ -168,19 +165,20 @@ public class MyroListener
      */
     public static void flushKeys()
     {
-        synchronized( keyLock )
+        synchronized( _keyLock )
         {
             _bufferedChar.clear();
         }
     }
-    private class simpleMouseListener extends MouseAdapter
+    
+    private static class simpleMouseListener extends MouseAdapter
     {
         public void mousePressed( MouseEvent e )
         {
-            synchronized (mouseLock)
+            synchronized (_mouseLock)
             {
-            _mousePressed = true;
-            _bufferedButton = e.getButton();
+                _mousePressed = true;
+                _bufferedButton = e.getButton();
             }
         }
     }
@@ -192,16 +190,16 @@ public class MyroListener
      */
     public static boolean isMousePressed()
     {
-        synchronized (mouseLock)
+        synchronized (_mouseLock)
         {
-        if( _mousePressed )
-        {
-            _mousePressed = false;
-            _lastButton = _bufferedButton;
-            return true;
-        }
-        else
-            return false;
+            if( _mousePressed )
+            {
+                _mousePressed = false;
+                _lastButton = _bufferedButton;
+                return true;
+            }
+            else
+                return false;
         }
     }
 
@@ -215,9 +213,9 @@ public class MyroListener
      */
     public static int whichButton()
     {
-        synchronized( mouseLock )
+        synchronized( _mouseLock )
         {
-        return _lastButton;
+            return _lastButton;
         }
     }
 

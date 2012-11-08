@@ -1,5 +1,40 @@
 Myro/Java RELEASE NOTES
 
+Version 1.1.5 - 7 November 2012
+Bug Fixes:
+ * MyroCanvas wasn't activated properly when created on Windows systems
+ * MyroShapes did Bad Things(tm) when visible() invoked on a shape that was
+   already visible, or invisible() invoked on a shape that was already invisible
+
+Other Changes:
+ * MyroListener redeisigned slightly
+ * getInfo() redefined so it can be called regardless of whether a robot is
+   connected.  If a robot is not connected getInfo() returns only the Myro/Java version.
+
+
+Version 1.1.4 - 27 October 2012
+ * Added methods setS2Volume and getMicEnvelope
+ * Volume is turned on when the connection is made to the scribbler
+
+
+Version 1.1.3 - 24 October 2012
+
+ * Include support for Fluke2
+ * Defined takePicture() to take a COLOR_IMAGE picture
+ * Various minor bug fixes
+
+Version 1.1.2 - 25 September 2012
+
+   (This version only changed the svn repo files to include the entire project)
+
+Version 1.1.1 - 8 March 2012
+ * Modified class Scribbler to support the Scribbler2 robot.  This included changing
+   the definition of getLight so that high return values indicate bright light levels.
+ * boolean method scribbler2Connected added that returns true iff a Scribbler2 is connected.
+ * boolean method scribblerConnected returns true if either a Scribbler or Scribbler2 is connected.
+ * Modified getLight to be compatible with S2 firmware 1.1.2 (where getLight
+   returns a 16 bit value)
+
 Version 1.1.0
 
  * Classes for graphics (MycoCanvas, MyroShape, MyroCircle, MyroRectangle, etc.) added to

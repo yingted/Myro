@@ -48,13 +48,13 @@ import net.java.games.input.*;  // JInput for gamepad
  * (see www.roboteducation.org )
  * 
  * @author Douglas Harms
- * @version 1.1.4
+ * @version 1.1.5
  * 
  */
 public class Scribbler  {
 
     // define this constant here at the beginning rather than later where other private constants are defined.
-    private static final String MYRO_JAVA_VERSION   = "1.1.4";
+    private static final String MYRO_JAVA_VERSION   = "1.1.5";
 
     // public constants
 
@@ -760,30 +760,35 @@ public class Scribbler  {
      * Returns the info string provided by the Scribbler.  The specific information contains such things as the 
      * firmware version, the type of robot (i.e., Scribbler) and the communication mode (e.g., Serial).
      * 
-     * @pre portOpened
-     * 
      * @return A String containing information about the connected robot, such as robot type (e.g., Scribbler),
-     * firmware version number, and communication mode (e.g., Serial).
+     * firmware version number, communication mode (e.g., Serial), and Myro/Java version.
      */
     public String getInfo()
     {
-        assert portOpened() : "The port is not opened";
+        String retVal = new String();
 
-        int[] info = _getLine( GET_INFO );
+        // get robot info if the port has been opened
+        if( portOpened() )
+        {
+            int[] info = _getLine( GET_INFO );
 
-        // create String from the data, using a temp byte array
-        byte[] temp = new byte[ info.length ];
-        for( int i=0;i<info.length; i++ )
-            temp[i] = (byte)info[i];
-        String retVal = new String(temp);
+            // create String from the data, using a temp byte array
+            byte[] temp = new byte[ info.length ];
+            for( int i=0;i<info.length; i++ )
+                temp[i] = (byte)info[i];
+            retVal += new String(temp);
 
-        // if the first character is the GET_INFO char and the second char is nul then we assume the command
-        // was echoed, and we'll remove the echo
-        if( retVal.charAt(0) == GET_INFO && retVal.charAt(1) == 0 )
-            retVal = retVal.substring( 9 ) ;
+            // if the first character is the GET_INFO char and the second char is nul then we assume the command
+            // was echoed, and we'll remove the echo
+            if( retVal.charAt(0) == GET_INFO && retVal.charAt(1) == 0 )
+                retVal = retVal.substring( 9 ) ;
+        }
 
         // add the Myro/Java version to the info string
-        retVal += ",Myro-Java-Version:" + MYRO_JAVA_VERSION;
+        if( retVal.length() != 0 )
+            retVal += ",";
+        retVal += "Myro-Java-Version:" + MYRO_JAVA_VERSION;
+
         return retVal;
     }
 
@@ -3849,7 +3854,6 @@ public class Scribbler  {
             portName = _portName;
             robotName = _robotName;
 
-            MyroListener listener;
             BufferedImage image = null;
 
             // Image file depends on which type of robot is connected
@@ -3913,9 +3917,9 @@ public class Scribbler  {
             setVisible( true );
 
             // set up the MyroListener so the user program can detect and handle keyboard and mouse events
-            listener = new MyroListener();
-            addKeyListener( listener.getKeyListener() );
-            addMouseListener( listener.getMouseListener() );
+            addKeyListener( MyroListener.getKeyListener() );
+            addMouseListener( MyroListener.getMouseListener() );
+            MyroListener.flushKeys();
         }
 
         public void setRobotName( String newRobotName )

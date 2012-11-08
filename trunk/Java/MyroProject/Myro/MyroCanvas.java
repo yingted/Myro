@@ -46,6 +46,14 @@ public class MyroCanvas
      */
     public MyroCanvas( String title, int width, int height )
     {
+        // It seems that Windows has problems making the first JFrame the active frame.
+        // A solution I found is to create a dummy JFrame first, make it visible, create
+        // the "real" MyroCanvas frame, make it visible, then hide the dummy.  Also, we
+        // need to yield the thread.  It's dark magic, but it seems to work.  Wish I
+        // understood why, though.
+        JFrame dummy = new JFrame();
+        dummy.setVisible( true );
+
         // create frame and all necessary components
         frame = new JFrame( title );
         canvas = new CanvasPane();
@@ -60,18 +68,23 @@ public class MyroCanvas
         graphic.setColor( Color.white );
         graphic.fillRect( 0, 0, actualSize.width, actualSize.height );
 
-        // make the new frame visible
-        frame.setVisible( true );
-
         // initialize other structures
         shapes = new LinkedList<ShapeDescription>();
         backgroundColor = Color.white;
         autoRepaint = true;
 
         // User can detect key/mouse events
-        MyroListener listener = new MyroListener();
-        frame.addKeyListener( listener.getKeyListener() );
-        frame.addMouseListener( listener.getMouseListener() );
+        frame.addKeyListener( MyroListener.getKeyListener() );
+        frame.addMouseListener( MyroListener.getMouseListener() );
+        MyroListener.flushKeys();
+
+        // make the new frame visible
+        frame.setVisible( true );
+
+        // now yield the thread, then hide the dummy JFrame.  All part of
+        // dark magic.
+        Thread.yield();
+        dummy.setVisible( false );
     }
 
     /**

@@ -49,8 +49,11 @@ abstract public class MyroShape
      */
     public void visible()
     {
-        isVisible = true;
-        canvasObject = canvas.addShape( shape, isFilled, fillColor, outlineColor, width );
+        if( !isVisible() )
+        {
+            isVisible = true;
+            canvasObject = canvas.addShape( shape, isFilled, fillColor, outlineColor, width );
+        }
     }
 
     /**
@@ -58,11 +61,14 @@ abstract public class MyroShape
      */
     public void invisible()
     {
-        isVisible = false;
-        canvas.removeShape( canvasObject );
-        canvasObject = null;
+        if( isVisible() )
+        {
+            isVisible = false;
+            canvas.removeShape( canvasObject );
+            canvasObject = null;
+        }
     }
-    
+
     /**
      * Returns whether this shape is currently visible or not.
      * 
@@ -72,7 +78,7 @@ abstract public class MyroShape
     {
         return isVisible;
     }
-    
+
     /**
      * Make this shape an outline shape
      */
@@ -81,7 +87,7 @@ abstract public class MyroShape
         isFilled = false;
         redrawShape();
     }
-    
+
     /**
      * Make this shape a filled shape
      */
@@ -90,7 +96,7 @@ abstract public class MyroShape
         isFilled = true;
         redrawShape();
     }
-    
+
     /**
      * Returns whether this shape is filled or not (i.e., whether it is a filled or outline shape)
      * 
@@ -100,7 +106,7 @@ abstract public class MyroShape
     {
         return isFilled;
     }
-    
+
     /**
      * Sets the fill color of this shape
      */
@@ -109,7 +115,7 @@ abstract public class MyroShape
         fillColor = newColor;
         redrawShape();
     }
-    
+
     /**
      * Sets the outline color of this shape
      */
@@ -118,7 +124,7 @@ abstract public class MyroShape
         outlineColor = newColor;
         redrawShape();
     }
-    
+
     /**
      * Sets the width of the outline
      */
@@ -127,7 +133,7 @@ abstract public class MyroShape
         width = newWidth;
         redrawShape();
     }
-    
+
     /**
      * Returns the current fill color of this shape
      * 
@@ -137,7 +143,7 @@ abstract public class MyroShape
     {
         return fillColor;
     }
-    
+
     /**
      * Returns the current outline color of this shape.
      * 
@@ -147,7 +153,7 @@ abstract public class MyroShape
     {
         return outlineColor;
     }
-    
+
     /**
      * Returns the current outline width of this shape
      * 
@@ -157,7 +163,7 @@ abstract public class MyroShape
     {
         return width;
     }
-    
+
     /**
      * Returns the left edge of the bounding rectangle of this object
      * 
@@ -166,10 +172,10 @@ abstract public class MyroShape
     public int getLeft()
     {
         Rectangle rect = shape.getBounds();
-        
+
         return rect.x;
     }
-    
+
     /**
      * Returns the right edge of the bounding rectangle of this object
      * 
@@ -178,10 +184,10 @@ abstract public class MyroShape
     public int getRight()
     {
         Rectangle rect = shape.getBounds();
-        
+
         return rect.x + rect.width;
     }
-    
+
     /**
      * Returns the top edge of the bounding rectangle of this object
      * 
@@ -190,10 +196,10 @@ abstract public class MyroShape
     public int getTop()
     {
         Rectangle rect = shape.getBounds();
-        
+
         return rect.y;
     }
-    
+
     /**
      * Returns the bottom edge of the bounding rectangle of this object
      * 
@@ -202,10 +208,10 @@ abstract public class MyroShape
     public int getBottom()
     {
         Rectangle rect = shape.getBounds();
-        
+
         return rect.y + rect.height;
     }
-    
+
     /**
      * Returns the height of the bounding rectangle of this object
      * 
@@ -214,10 +220,10 @@ abstract public class MyroShape
     public int getHeight()
     {
         Rectangle rect = shape.getBounds();
-        
+
         return rect.height;
     }
-    
+
     /**
      * Returns the widthe of the bounding rectangle of this object
      * 
@@ -226,25 +232,25 @@ abstract public class MyroShape
     public int getWidth()
     {
         Rectangle rect = shape.getBounds();
-        
+
         return rect.width;
     }
-    
+
     /**
      * Move the shape by (deltaX, deltaY)
      */
     abstract public void move( int deltaX, int deltaY );
-    
+
     /**
      * Returns the x-coordinate of the point at the center of this object
      */
     abstract public int getCenterX();
-    
+
     /**
      * Returns the y-coordinate of the point at the center of this object
      */
     abstract public int getCenterY();
-    
+
     /**
      * replace the shape on the canvas.  This method should not be invoked by users.  Derived classes should
      * invoke this anytime the shape changes.

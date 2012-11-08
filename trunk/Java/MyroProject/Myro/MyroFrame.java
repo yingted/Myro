@@ -80,9 +80,9 @@ public class MyroFrame extends JFrame
         definingBlob = false;
 
         // User can detect key/mouse events
-        MyroListener listener = new MyroListener();
-        addKeyListener( listener.getKeyListener() );
-        addMouseListener( listener.getMouseListener() );
+        addKeyListener( MyroListener.getKeyListener() );
+        addMouseListener( MyroListener.getMouseListener() );
+        MyroListener.flushKeys();
     }
 
     /**

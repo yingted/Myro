@@ -17,7 +17,7 @@ To install Myro/Java for all users, copy all jar files and voices.txt to /Librar
 To install Myro/Java for one user, copy all jar files and voices.txt to ~/Library/Java/Extensions
 
 Linux:
-Copy RXTXScribblerComm.jar tp (javahome)/jre/lib/ext
+Copy RXTXScribblerComm.jar to (javahome)/jre/lib/ext
 If you're using BlueJ, copy the remaining jar files and voices.txt to (BlueJ_home)/lib/userlib
 If you're not using BlueJ, copy the remaining jar files and voices.txt to (javahome)/jre/lib/ext
 
