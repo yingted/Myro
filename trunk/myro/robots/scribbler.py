@@ -175,6 +175,10 @@ class Scribbler(Robot):
     GET_LINE_EX        = 173 #Format 173 side type thres
     GET_DISTANCE        = 175 #Format 175 side
 
+    GET_ERRORS          = 10    # Fluke2 only
+    SET_PIC_SIZE        = 11    # Fluke2 only
+    SET_SERVO           = 12    # Fluke2 only
+    ENABLE_PAN          = 13    # Fluke2 only
     
     PACKET_LENGTH     =  9
     BEGIN_PATH          = 0  #Used with SET_PATH to say beginning of a path
@@ -258,8 +262,9 @@ class Scribbler(Robot):
         if self.dongle != None:
             self.dongle_version = map(int, self.dongle.split("."))
             if self.dongle_version >= [3, 0, 0]:
-                self.imagewidth = 1280
-                self.imageheight = 800
+                self.setPicSize("large")
+                # self.imagewidth = 1280
+                # self.imageheight = 800
             else:
                 self.imagewidth = 256
                 self.imageheight = 192
@@ -592,13 +597,13 @@ class Scribbler(Robot):
 
         self.ser.write(chr(Scribbler.GET_INFO) + (' ' * 8))
         retval = self.ser.readline()
-        #print "Got", retval
+        # print "Got", retval
 
         time.sleep(.1)
 
         self.ser.write(chr(Scribbler.GET_INFO) + (' ' * 8))
         retval = self.ser.readline()
-        #print "Got", retval
+        # print "Got", retval
 
         # remove echoes
         if retval == None or len(retval) == 0:
@@ -791,8 +796,9 @@ class Scribbler(Robot):
             self.lock.release()
 
     def read_uint32(self):
-        buf = self.ser.read(4)
-        return ord(buf[0]) + ord(buf[1]) * 256 + ord(buf[2]) * 65536 + ord(buf[3]) * 16777216
+        # buf = self.ser.read(4)
+        # return ord(buf[0]) + ord(buf[1]) * 256 + ord(buf[2]) * 65536 + ord(buf[3]) * 16777216
+        return ord(self.ser.read(1)) + ord(self.ser.read(1)) * 256 + ord(self.ser.read(1)) * 65536 + ord(self.ser.read(1)) * 16777216
 
     def read_jpeg_scan(self):
         bytes = ''
@@ -820,8 +826,14 @@ class Scribbler(Robot):
 
     def read_jpeg_header(self):
         buf = self.ser.read(2)
-        len = ord(buf[0]) + ord(buf[1]) * 256
-        return self.ser.read(len)
+        headerlen = ord(buf[0]) + ord(buf[1]) * 256
+        bytes = ''
+        while (len(bytes) < headerlen):
+            bytes+=self.ser.read(headerlen-len(bytes))
+
+        return bytes
+        # BUG - ser.read not guaranteed to return len bytes if timeout is set
+        # return self.ser.read(len)
 
     color_header = None
     def grab_jpeg_color(self, reliable):
@@ -1410,43 +1422,117 @@ class Scribbler(Robot):
 
         if self.dongle_version >= [3, 0, 0]:
             level += 128
-            
-        self.set_cam_param(self.CAM_COMA, self.CAM_COMA_WHITE_BALANCE_OFF)
-        self.set_cam_param(self.CAM_COMB,
-                           (self.CAM_COMB_GAIN_CONTROL_OFF & self.CAM_COMB_EXPOSURE_CONTROL_OFF))
-        self.set_cam_param(0, level)
-        self.set_cam_param(1, 0)
-        self.set_cam_param(2, 0)
-        self.set_cam_param(6, 0)    
-        self.set_cam_param(0x10, 0)
+            self.set_cam_param(0, level)
+        else:
+            self.set_cam_param(self.CAM_COMA, self.CAM_COMA_WHITE_BALANCE_OFF)
+            self.set_cam_param(self.CAM_COMB,
+                               (self.CAM_COMB_GAIN_CONTROL_OFF & self.CAM_COMB_EXPOSURE_CONTROL_OFF))
+            self.set_cam_param(0, level)
+            self.set_cam_param(1, 0)
+            self.set_cam_param(2, 0)
+            self.set_cam_param(6, 0)
+            self.set_cam_param(0x10, 0)
 
     def manualCamera(self, gain=0x00, brightness=0x80, exposure=0x41):
         if self.debug:
             print "Turning off White Balance, Gain Control, and Exposure Control", level            
 
         if self.dongle_version >= [3, 0, 0]:
-            gain += 128
-
-        self.set_cam_param(self.CAM_COMA, self.CAM_COMA_WHITE_BALANCE_OFF)
-        self.set_cam_param(self.CAM_COMB,
-                           (self.CAM_COMB_GAIN_CONTROL_OFF & self.CAM_COMB_EXPOSURE_CONTROL_OFF))
-        self.set_cam_param(0x00, gain)
-        self.set_cam_param(0x06, brightness)
-        self.set_cam_param(0x10, exposure)
+            self.set_cam_param(0x0D, 0x41)
+        else:
+            self.set_cam_param(self.CAM_COMA, self.CAM_COMA_WHITE_BALANCE_OFF)
+            self.set_cam_param(self.CAM_COMB,
+                               (self.CAM_COMB_GAIN_CONTROL_OFF & self.CAM_COMB_EXPOSURE_CONTROL_OFF))
+            self.set_cam_param(0x00, gain)
+            self.set_cam_param(0x06, brightness)
+            self.set_cam_param(0x10, exposure)
 
     def autoCamera(self):
 
         if self.debug:
             print "Turning on White Balance, Gain Control, and Exposure Control"
 
-        self.set_cam_param(0, 0)
-        self.set_cam_param(1, 0x80)
-        self.set_cam_param(2, 0x80)
-        self.set_cam_param(6, 0x80)
-        self.set_cam_param(0x10, 0x41)
-        self.set_cam_param(self.CAM_COMA, self.CAM_COMA_DEFAULT)
-        self.set_cam_param(self.CAM_COMB, self.CAM_COMB_DEFAULT)
+        if self.dongle_version >= [3, 0, 0]:
+            self.set_cam_param(0x0D, 0x01)
+        else:
+            self.set_cam_param(0, 0)
+            self.set_cam_param(1, 0x80)
+            self.set_cam_param(2, 0x80)
+            self.set_cam_param(6, 0x80)
+            self.set_cam_param(0x10, 0x41)
+            self.set_cam_param(self.CAM_COMA, self.CAM_COMA_DEFAULT)
+            self.set_cam_param(self.CAM_COMB, self.CAM_COMB_DEFAULT)
 
+    #################### New Fluke2 Commands #########################
+
+    def setPicSize(self, size):
+        if self.dongle_version < [3, 0, 0]:
+            print "This command requires a Fluke2."
+            return
+
+        if size == "small":
+            self.imagewidth = 427
+            self.imageheight = 266
+            sizecode = 71
+            self.color_header = None
+            self.gray_header = None
+        elif size == "large":
+            self.imagewidth = 1280
+            self.imageheight = 800
+            sizecode = 213
+            self.color_header = None
+            self.gray_header = None
+        else:
+            print "Unrecognized parameter. Valid parameters are 'small' and 'large'."
+            return
+
+        try:
+            self.lock.acquire()
+            self.ser.write(chr(Scribbler.SET_PIC_SIZE))
+            self.ser.write(chr(sizecode))
+        finally:
+            self.lock.release()
+
+    def servo(self, id, position):
+        if self.dongle_version < [3, 0, 0]:
+            print "This command requires a Fluke2."
+            return
+
+        try:
+            self.lock.acquire()
+            self.ser.write(chr(Scribbler.SET_SERVO))
+            self.ser.write(chr(id))
+            self.ser.write(chr(position))
+        finally:
+            self.lock.release()
+
+    def getFlukeLog(self):
+        if self.dongle_version < [3, 0, 0]:
+            print "This command requires a Fluke2."
+            return None
+
+        try:
+            self.lock.acquire()
+            self.ser.write(chr(Scribbler.GET_ERRORS))
+            size = read_2byte(self.ser)
+            line = ''
+            while (len(line) < size):
+                line += self.ser.read(size-len(line))
+        finally:
+            self.lock.release()
+        print line
+
+    def enablePanNetworking(self):
+        if self.dongle_version < [3, 0, 0]:
+            print "This command requires a Fluke2."
+            return
+
+        try:
+            self.lock.acquire()
+            self.ser.write(chr(Scribbler.ENABLE_PAN))
+            write_2byte(self.ser, 0x0123)
+        finally:
+            self.lock.release()
 
     ########################################################## End Dongle Commands
 

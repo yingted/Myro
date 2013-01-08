@@ -6,7 +6,7 @@ Distributed under a Shared Source License
 """
 
 __REVISION__ = "$Revision$"
-__VERSION__  = "2.9.5"
+__VERSION__  = "2.9.9"
 __AUTHOR__   = "Doug Blank <dblank@cs.brynmawr.edu>"
 
 import sys, atexit, time, random, pickle, threading, os, types, copy
@@ -1276,6 +1276,36 @@ def setLEDBack(value):
     """ Set the Light Emitting Diode on the robot's back. """
     if myro.globvars.robot:
         return myro.globvars.robot.setLEDBack(value)
+    else:
+        raise AttributeError, "need to initialize robot"
+
+################ New Fluke2 functions ###############
+
+def setPicSize(value):
+    """ Set the picture size """
+    if myro.globvars.robot:
+        return myro.globvars.robot.setPicSize(value)
+    else:
+        raise AttributeError, "need to initialize robot"
+
+def servo(id, position):
+    """ Commands servo number id to position position """
+    if myro.globvars.robot:
+        return myro.globvars.robot.servo(id, position)
+    else:
+        raise AttributeError, "need to initialize robot"
+
+def getFlukeLog():
+    """ Downloads and prints the fluke2 error log """
+    if myro.globvars.robot:
+        return myro.globvars.robot.getFlukeLog()
+    else:
+        raise AttributeError, "need to initialize robot"
+
+def enablePanNetworking():
+    """ Enables bluetooth PAN TCP/IP over bluetooth networking """
+    if myro.globvars.robot:
+        return myro.globvars.robot.enablePanNetworking()
     else:
         raise AttributeError, "need to initialize robot"
 

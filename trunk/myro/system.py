@@ -582,7 +582,7 @@ def upgrade_fluke(url=None):
 
     if url == None:
         #url = "http://myro.roboteducation.org/upgrade/fluke/"
-        url = "http://www.betterbots.com/upgrade/fluke2"
+        url = "http://www.betterbots.com/upgrade/fluke/"
     install_count = 0
     filename = None
     if url.startswith("http://"):
@@ -655,13 +655,23 @@ def upgrade_fluke(url=None):
         s.write(chr((size >> 8) & 0xFF))
         s.write(chr((size) & 0xFF))
 
-        for byte in bytes:
-            s.write(byte)
 
-        print "Waiting for reboot..."
-        for i in range(0,10):
+        while True:
+            ns = s.write(bytes)
+            if ns == 0 or ns == None:
+                break
+            size -= ns
+            if size <= 0:
+                break
+            bytes = bytes[ns:]
+            sys.stdout.write('.')
+
+        print "Installing update. Do not turn off the Fluke2 while the red CPU activity LED is flashing brightly."
+        for i in range(21):
             time.sleep(3)
-            print "."
+            sys.stdout.write('.')
+        print ""
+        print "Finalizing installation. Please exit and restart Python and Myro."
 
     else:
         from intelhex import IntelHex
@@ -691,6 +701,6 @@ def upgrade_fluke(url=None):
         uf_storeinEEPROM(s, arlen, binarray)
         print "Waiting for reboot..."
         time.sleep(2)
+        print "Done upgrading! Please turn your robot off and then back on, and exit and restart Python and Myro."
 
-    print "Done upgrading! Please turn your robot off and then back on, and exit and restart Python and Myro."
     s.close()
