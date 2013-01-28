@@ -100,6 +100,7 @@ con
   _BY                 = 4
   _TO                 = 2
   _DEG                = 1
+  _MM                 = 1
 
   _BEGIN              = 1
   _END                = 0
@@ -112,7 +113,6 @@ con
   _GET_IR_EX          = 172 'Format 172 side type thres
   _GET_LINE_EX        = 173 'Format 173 side type thres
   _DISTANCE_EX        = 175 'Format 175 side
-
 
   _NOW                = 8
 
@@ -142,7 +142,7 @@ obj
 
 dat
 
-roboData      byte      "Robot-Version:1.1.3,Robot:Scribbler2,Mode:Serial", 10, 0
+roboData      byte      "Robot-Version:1.1.4,Robot:Scribbler2,Mode:Serial", 10, 0
 
 nameData      byte      "Scribby         ", 0           'null terminate string
 ipreData      byte      127, 127, 127, 127, 0, 0, 0, 0
@@ -163,7 +163,9 @@ pub go | i
   s2.get_wheel_calibration                'Read calibration data and inform the motor process    
 
   s2.start_mic_env                        '2.0 start the Mic cog          
-  
+
+  s2.heading_is(0)
+  s2.here_is(0, 0)
   cognew(reset_button, @reset_stack)      'Start the reset button monitor cog
   cognew(FaultMonitor, @FMStack)          'Start the fault monitoring cog
   
@@ -531,17 +533,26 @@ pub Move | x_coord, y_coord
     _BY:
       s2.move_by(x_coord, y_coord)
 
+    _BY + _MM:
+      s2.move_by(x_coord<<1, y_coord<<1)
+
     _BY + _NOW:
       s2.move_now(x_coord, y_coord, 0, 15, 1)
 
+    _BY + _NOW + _MM:
+      s2.move_now(x_coord<<1, y_coord<<1, 0, 15, 1)
+
     _TO:
       s2.move_to(x_coord, y_coord)
+
+    _TO + _MM:
+      s2.move_to(x_coord<<1, y_coord<<1)
 
   Get_All
 
 pub Arc  | x_coord, y_coord, radius
 '        0    1    2      3      4      5        6        7 
-'Format 163 type hXByte lXByte hYByte lYByte hRadByte lRadByte
+'Format 163 type hXByt e lXByte hYByte lYByte hRadByte lRadByte
 '  type    := indata[1]
   x_coord := (indata[2] << 8) + (indata[3])
   y_coord := (indata[4] << 8) + (indata[5])
@@ -559,6 +570,15 @@ pub Arc  | x_coord, y_coord, radius
 
     _BY + _NOW:
       s2.arc_now(x_coord, radius)
+
+    _BY + _MM:
+      s2.arc_by(x_coord<<1, y_coord<<1, radius)
+
+    _TO + _MM:
+      s2.arc_to(x_coord<<1, y_coord<<1, radius)
+
+    _BY + _NOW + _MM:
+      s2.arc_now(x_coord<<1, radius)
 
   Get_All
 
@@ -593,12 +613,14 @@ pub Turn | angle
 
 
 pub Get_Posn | coord
-  coord := s2.get_current_x
+  coord := s2.get_current_x >> 1 ' divide by .5
+
   enqueue((coord >> 24) & $FF)
   enqueue((coord >> 16) & $FF)
   enqueue((coord >>  8) & $FF)
   enqueue((coord      ) & $FF)
-  coord := s2.get_current_y
+
+  coord := s2.get_current_y >> 1 ' divide by .5
   enqueue((coord >> 24) & $FF)
   enqueue((coord >> 16) & $FF)
   enqueue((coord >>  8) & $FF)
@@ -607,12 +629,14 @@ pub Get_Posn | coord
 pub Set_Posn | x, y
   x := (((((indata[1] << 8) | indata[2]) << 8) | indata[3]) << 8) | indata[4]
   y := (((((indata[5] << 8) | indata[6]) << 8) | indata[7]) << 8) | indata[8]
+  x := x << 1   ' multiply by .5
+  y := y << 1   ' multiply by .5
   s2.here_is(x, y)
 
   Get_All
 
 pub Get_Angle | coord
-  coord := s2.get_current_w
+  coord := s2.get_current_w_in_deg
   enqueue((coord >> 24) & $FF)
   enqueue((coord >> 16) & $FF)
   enqueue((coord >>  8) & $FF)
@@ -620,7 +644,7 @@ pub Get_Angle | coord
 
 pub Set_Angle | angle
   angle := (((((indata[1] << 8) | indata[2]) << 8) | indata[3]) << 8) | indata[4]
-  s2.heading_is(angle)
+  s2.heading_is_deg(angle)
 
   Get_All
 
