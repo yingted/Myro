@@ -534,19 +534,19 @@ pub Move | x_coord, y_coord
       s2.move_by(x_coord, y_coord)
 
     _BY + _MM:
-      s2.move_by(x_coord<<1, y_coord<<1)
+      s2.move_by(x_coord*2, y_coord*2)
 
     _BY + _NOW:
       s2.move_now(x_coord, y_coord, 0, 15, 1)
 
     _BY + _NOW + _MM:
-      s2.move_now(x_coord<<1, y_coord<<1, 0, 15, 1)
+      s2.move_now(x_coord*2, y_coord*2, 0, 15, 1)
 
     _TO:
       s2.move_to(x_coord, y_coord)
 
     _TO + _MM:
-      s2.move_to(x_coord<<1, y_coord<<1)
+      s2.move_to(x_coord*2, y_coord*2)
 
   Get_All
 
@@ -572,13 +572,13 @@ pub Arc  | x_coord, y_coord, radius
       s2.arc_now(x_coord, radius)
 
     _BY + _MM:
-      s2.arc_by(x_coord<<1, y_coord<<1, radius)
+      s2.arc_by(x_coord*2, y_coord*2, radius*2)
 
     _TO + _MM:
-      s2.arc_to(x_coord<<1, y_coord<<1, radius)
+      s2.arc_to(x_coord*2, y_coord*2, radius*2)
 
     _BY + _NOW + _MM:
-      s2.arc_now(x_coord<<1, radius)
+      s2.arc_now(x_coord*2, radius*2)
 
   Get_All
 
@@ -613,14 +613,14 @@ pub Turn | angle
 
 
 pub Get_Posn | coord
-  coord := s2.get_current_x >> 1 ' divide by .5
+  coord := s2.get_current_x / 2 'multiply by .5
 
   enqueue((coord >> 24) & $FF)
   enqueue((coord >> 16) & $FF)
   enqueue((coord >>  8) & $FF)
   enqueue((coord      ) & $FF)
 
-  coord := s2.get_current_y >> 1 ' divide by .5
+  coord := s2.get_current_y / 2 'mulitply by .5
   enqueue((coord >> 24) & $FF)
   enqueue((coord >> 16) & $FF)
   enqueue((coord >>  8) & $FF)
@@ -629,8 +629,8 @@ pub Get_Posn | coord
 pub Set_Posn | x, y
   x := (((((indata[1] << 8) | indata[2]) << 8) | indata[3]) << 8) | indata[4]
   y := (((((indata[5] << 8) | indata[6]) << 8) | indata[7]) << 8) | indata[8]
-  x := x << 1   ' multiply by .5
-  y := y << 1   ' multiply by .5
+  x := x * 2   'divide by .5
+  y := y * 2   'divide by .5
   s2.here_is(x, y)
 
   Get_All
