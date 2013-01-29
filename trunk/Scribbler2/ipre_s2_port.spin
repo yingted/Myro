@@ -115,7 +115,7 @@ con
   _DISTANCE_EX        = 175 'Format 175 side
 
   _NOW                = 8
-
+  _REL                = 8
 
 
 '2.1 Extensions for S2 End
@@ -536,11 +536,11 @@ pub Move | x_coord, y_coord
     _BY + _MM:
       s2.move_by(x_coord*2, y_coord*2)
 
-    _BY + _NOW:
-      s2.move_now(x_coord, y_coord, 0, 15, 1)
+    _BY + _REL:
+      s2.move(x_coord, y_coord, 0, 15, 1)
 
-    _BY + _NOW + _MM:
-      s2.move_now(x_coord*2, y_coord*2, 0, 15, 1)
+    _BY + _REL + _MM:
+      s2.move(x_coord*2, y_coord*2, 0, 15, 1)
 
     _TO:
       s2.move_to(x_coord, y_coord)
@@ -562,23 +562,26 @@ pub Arc  | x_coord, y_coord, radius
   ~~radius
 
   case(indata[1])
-    _BY:
-      s2.arc_by(x_coord, y_coord, radius)
 
     _TO:
       s2.arc_to(x_coord, y_coord, radius)
 
-    _BY + _NOW:
-      s2.arc_now(x_coord, radius)
+    _TO + _MM:
+      s2.arc_to(x_coord*2, y_coord*2, radius*2)
+
+    _BY:
+      s2.arc_by(x_coord, y_coord, radius)
+
+    _BY + _REL:
+     ' interpreting x_coord as degrees here
+      s2.arc_deg(x_coord, radius)
 
     _BY + _MM:
       s2.arc_by(x_coord*2, y_coord*2, radius*2)
 
-    _TO + _MM:
-      s2.arc_to(x_coord*2, y_coord*2, radius*2)
-
-    _BY + _NOW + _MM:
-      s2.arc_now(x_coord*2, radius*2)
+    _BY + _REL + _MM:
+      ' interpreting x_coord as degrees here
+      s2.arc_deg(x_coord, radius*2)
 
   Get_All
 
