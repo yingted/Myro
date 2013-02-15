@@ -142,7 +142,7 @@ obj
 
 dat
 
-roboData      byte      "Robot-Version:1.1.4,Robot:Scribbler2,Mode:Serial", 10, 0
+roboData      byte      "Robot-Version:1.1.5,Robot:Scribbler2,Mode:Serial", 10, 0
 
 nameData      byte      "Scribby         ", 0           'null terminate string
 ipreData      byte      127, 127, 127, 127, 0, 0, 0, 0
@@ -442,17 +442,20 @@ pub Get_IR_Left
 pub Get_IR_Right
   enqueue(!s2.obstacle(s2#RIGHT, 0) & 1)
       
-pub Get_Light_Right
-  enqueue((s2.light_sensor_raw_inv(s2#RIGHT)>>8) & $FF)     'enqueue high byte
-  enqueue(s2.light_sensor_raw_inv(s2#RIGHT) & $FF)          'enqueue low byte
+pub Get_Light_Right | temp
+  temp := s2.light_sensor_raw_inv(s2#RIGHT) 
+  enqueue((temp>>8) & $FF)     'enqueue high byte
+  enqueue((temp) & $FF)        'enqueue low byte
       
-pub Get_Light_Center
-  enqueue((s2.light_sensor_raw_inv(s2#CENTER)>>8) & $FF)    'enqueue high byte
-  enqueue(s2.light_sensor_raw_inv(s2#CENTER) & $FF)         'enqueue low byte
+pub Get_Light_Center | temp
+  temp := s2.light_sensor_raw_inv(s2#CENTER)
+  enqueue((temp>>8) & $FF)    'enqueue high byte
+  enqueue((temp) & $FF)       'enqueue low byte
 
-pub Get_Light_Left
-  enqueue((s2.light_sensor_raw_inv(s2#LEFT)>>8) & $FF)      'enqueue high byte
-  enqueue(s2.light_sensor_raw_inv(s2#LEFT) & $FF)           'enqueue low byte
+pub Get_Light_Left | temp
+  temp := s2.light_sensor_raw_inv(s2#LEFT)
+  enqueue((temp>>8) & $FF)      'enqueue high byte
+  enqueue((temp) & $FF)         'enqueue low byte
 
 pub Set_LED_All
 
@@ -713,10 +716,10 @@ pub Get_Line_Ex | side, type, thres, temp
 
   case (side)
     0:
-      temp := s2.line_sensor(s2#LEFT, thres)
+      temp := !s2.line_sensor(s2#LEFT, thres)
 
     1:
-      temp := s2.line_sensor(s2#RIGHT, thres)
+      temp := !s2.line_sensor(s2#RIGHT, thres)
 
   enqueue(temp & 1)
 
