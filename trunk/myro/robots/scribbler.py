@@ -1829,7 +1829,7 @@ class Scribbler(Robot):
     
         if(self._IsScribbler2()):
             rawMotorStats = self._get(Scribbler.GET_MOTOR_STATS, 5, "byte")
-            return {"wheel":[rawMotorStats[3], rawMotorStats[2]], "IdlerTimer":[rawMotorStats[1]],"IdlerSpeed":[rawMotorStats[0]>>2], "Mov":[bool(rawMotorStats[0] & 0x03)], "Ready":[bool(rawMotorStats[4])]}
+            return {"wheel":[rawMotorStats[0], rawMotorStats[1]], "IdlerTimer":[rawMotorStats[2]],"IdlerSpeed":[rawMotorStats[3]>>2], "Mov":[bool(rawMotorStats[3] & 0x03)], "Ready":[bool(rawMotorStats[4])]}
         
     def getEncoders(self, zeroEncoders=False):
         '''Gets the values for the left and right encoder wheels.  Negative value means they have moved
@@ -1860,7 +1860,10 @@ class Scribbler(Robot):
             return False
 
     def _IsInTransit(self):
-        return not bool(self._get(Scribbler.GET_MOTOR_STATS, 5, "byte")[4])
+        rawMotorStats = self._get(Scribbler.GET_MOTOR_STATS, 5, "byte")
+        return  bool(rawMotorStats[3] & 0x03)
+        #return print self._get(Scribbler.GET_MOTOR_STATS, 5, "byte")
+        #return not bool(self._get(Scribbler.GET_MOTOR_STATS, 5, "byte")[4])
 
     def _adjustSpeed(self):
         left  = min(max(self._lastTranslate - self._lastRotate, -1), 1)
