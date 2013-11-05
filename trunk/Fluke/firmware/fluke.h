@@ -169,6 +169,7 @@ void emit_on(uint8_t emitters);
 void emit_off(uint8_t emitters);
 
 int check_ir_bounce(uint8_t emitters);
+int check_ir_bounce_2(uint8_t emitters, int latency);
 
 /* 
  * Simple printing utilties rather than full-on stdio.h 

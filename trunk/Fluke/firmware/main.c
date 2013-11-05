@@ -195,6 +195,7 @@ int main (void)
 	      else if (ch == GET_DONGLE_R_IR)	   serve_ir(0x1);
 	      else if (ch == GET_DONGLE_L_IR)	   serve_ir(0x2);
 	      else if (ch == GET_DONGLE_C_IR)	   serve_ir(0x4);
+	      else if (ch == GET_DONGLE_IR)	   serve_any_ir();
 	      else if (ch == SET_SCRIB_PROGRAM)	   serve_set_scrib_program();
 	      else if (ch == SET_SCRIB_BATCH)	   serve_set_scrib_program_batch();
 	      else if (ch == GET_SCRIB_PROGRAM)	   serve_get_scrib_program();
@@ -355,4 +356,9 @@ void FIQ_Routine (void)
 {
   //set_led(200);
   //putstr("\r\nFIQ_Routine");
+}
+
+int raise (int sig)
+{//SIGFPE==8
+  return 1;//failure to send signal
 }

@@ -123,3 +123,5 @@
 #define SET_RESET_SCRIBBLER2  154
 #define SET_SCRIB_BATCH       155
 #define GET_ROBOT_ID          156
+
+#define GET_DONGLE_IR         157

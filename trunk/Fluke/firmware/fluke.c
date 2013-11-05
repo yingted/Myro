@@ -792,3 +792,37 @@ int check_ir_bounce(uint8_t emitters)
 
   return pulses;
 }
+
+int check_ir_bounce_2(uint8_t emitters, int latency)
+{
+  int i, j, pulses;
+
+  ir_rx_disable();
+
+  TIMER1_PR =  0x22;     // Load Prescalar
+  TIMER1_MR1 = 0x14;     // set MR1 to 40Khz
+  TIMER1_MCR = (1 << 4); // On match (MR1) reset the counter
+
+  pulses = 0;
+  for (j = 0; j < 4; j++)
+    {
+      emit_on(emitters);
+      // we received some IR - as expected
+      for (i = 0; i < 2000; ++i)
+          if (!(IOPIN & IRIN) && i >= latency)
+              ++ pulses;
+
+      emit_off(emitters);
+      // we received some IR - but we shouldn't have
+      for (i = 0; i < 2000; ++i)
+          if (!(IOPIN & IRIN) && i >= latency)
+              -- pulses;
+    }
+
+  TIMER1_MCR &= ~(1 << 4); // DISABLE On match (MR1) reset the counter
+
+  // turn this back on
+  ir_rx_init();
+
+  return pulses;
+}

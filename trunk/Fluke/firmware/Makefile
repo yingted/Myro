@@ -1,4 +1,4 @@
-CROSS   = /usr/local/arm-elf/bin/arm-elf-
+CROSS   = /usr/bin/arm-gp2x-linux-
 #arm-elf-
 CC      = $(CROSS)gcc
 LD      = $(CROSS)ld
@@ -12,7 +12,7 @@ LDFLAGS = -Map main.map -Tldscript.cmd
 CPFLAGS = -O ihex
 ODFLAGS	= -x --syms
 
-LIBGCC=-L/usr/local/arm-elf/lib/gcc/arm-elf/4.1.1/ -lgcc
+LIBGCC=-L/usr/lib/gcc/arm-gp2x-linux/4.1.2/ -lgcc
 #LIBGCC = -L/usr/local/arm/lib/gcc/arm-elf/4.1.1/ -lgcc
 
 MYROROBOT?=/dev/tty.scribbler

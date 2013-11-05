@@ -386,6 +386,14 @@ void serve_ir(uint8_t emitters)
   putch2b(pulses);		  
 }
 
+void serve_any_ir()
+{
+  int pulses, latency = (uint8_t)getchblock();
+  latency = latency * 256 + (uint8_t)getchblock();
+  pulses = check_ir_bounce_2(getchblock(), latency);
+  putch2b(pulses);
+}
+
 /*
  * Begin filling the scribbler program buffer. (Also the image buffer)
  */
