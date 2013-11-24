@@ -150,6 +150,7 @@ void serve_erase_serial_mem();
  * This can definitely be improved.
  */
 void serve_ir(uint8_t emitters);
+void serve_any_ir();
 
 /*
  * Begin filling the scribbler program buffer. (Also the image buffer)
@@ -219,6 +220,10 @@ void serve_send_byte();
  */
 void serve_set_passthrough();
 
+void serve_set_pass_n_bytes();
+void serve_get_pass_n_bytes();
+void serve_get_pass_bytes_until();
+void serve_version();
 
 /*
  * Set the orientation of the scribbler
